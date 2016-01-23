@@ -1,0 +1,19 @@
+*.class
+
+# Package Files #
+*/output
+/bin
+tmp/
+/eclipse/
+*.pyc
+/.project
+/.settings
+*.bak
+/.classpath
+/.metadata
+/data/
+/.gradle/
+*.iml
+*.iws
+*.ipr
+.DS_Store

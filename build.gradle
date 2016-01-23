@@ -1,0 +1,40 @@
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+}
+
+subprojects {
+   buildDir = file('output')
+   project.ext.fixedLibDir = file('lib')
+   project.ext.stagingDir = file('staging')
+   project.ext.toStagingDir = file(new File(buildDir, project.name))
+   project.ext.toStagingLibsDir = file(new File(toStagingDir, 'lib'))
+
+   repositories {
+      mavenCentral()
+   }
+   dependencies {
+        testCompile 'junit:junit:4.11'
+
+        compile 'org.slf4j:slf4j-api:1.7.5'
+        compile 'ch.qos.logback:logback-classic:1.0.13'
+
+        //This line includes any jars a developer drops into {project}/lib directory
+        compile fileTree(dir: 'lib', include: '*.jar')
+   }
+
+    //let's at least copy all jars to a single directory to use in creating an application...
+    task syncJars(type: Sync) {
+        from(configurations.compile) {}
+        from(fixedLibDir) {}
+        into toStagingLibsDir
+    }
+
+    assemble.dependsOn('syncJars')
+}
+
+project(':channelmanager') {
+
+}
+
