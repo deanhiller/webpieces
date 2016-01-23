@@ -6,10 +6,10 @@
 tmp/
 /eclipse/
 *.pyc
-/.project
-/.settings
+*/.project
+*/.settings
 *.bak
-/.classpath
+*/.classpath
 /.metadata
 /data/
 /.gradle/

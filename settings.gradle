@@ -1,1 +1,6 @@
-include 'channelmanager','httpparser'
+include 'channelmanager'
+include 'httpparser'
+include 'router'
+include 'templatingapi'
+include 'embeddablewebserver'
+include 'fullwebserver'

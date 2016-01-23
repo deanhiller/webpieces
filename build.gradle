@@ -1,10 +1,11 @@
 allprojects {
-    apply plugin: 'java'
-    apply plugin: 'eclipse'
-    apply plugin: 'idea'
 }
 
 subprojects {
+   apply plugin: 'java'
+   apply plugin: 'eclipse'
+   apply plugin: 'idea'
+
    buildDir = file('output')
    project.ext.fixedLibDir = file('lib')
    project.ext.stagingDir = file('staging')
@@ -19,6 +20,7 @@ subprojects {
 
         compile 'org.slf4j:slf4j-api:1.7.5'
         compile 'ch.qos.logback:logback-classic:1.0.13'
+        compile 'org.codehaus.groovy:groovy-all:2.1.9' //we use groovy in logback.xml
 
         //This line includes any jars a developer drops into {project}/lib directory
         compile fileTree(dir: 'lib', include: '*.jar')
