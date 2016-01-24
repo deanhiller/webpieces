@@ -1,10 +1,9 @@
 package com.webyoso.httpparser.api;
 
-public class HttpParser {
+public interface HttpParser {
 
-	public byte[] marshal(HttpRequest request) {
-		
-		return null;
-	}
+	public byte[] marshalToBytes(HttpRequest request);
+	
+	public String marshalToString(HttpRequest request);
 
 }
