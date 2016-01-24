@@ -1,8 +1,8 @@
 package com.webpieces.httpparser.impl;
 
 import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.HttpRequest;
-import com.webpieces.httpparser.api.RequestLine;
+import com.webpieces.httpparser.api.dto.HttpRequest;
+import com.webpieces.httpparser.api.dto.RequestLine;
 
 public class HttpParserImpl implements HttpParser {
 

@@ -1,4 +1,4 @@
-package com.webpieces.httpparser.api;
+package com.webpieces.httpparser.api.dto;
 
 public class HttpUri {
 

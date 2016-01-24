@@ -1,4 +1,4 @@
-package com.webpieces.httpparser.api;
+package com.webpieces.httpparser.api.dto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
