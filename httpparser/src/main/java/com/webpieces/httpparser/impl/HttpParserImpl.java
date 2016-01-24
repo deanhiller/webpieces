@@ -1,8 +1,8 @@
-package com.webyoso.httpparser.impl;
+package com.webpieces.httpparser.impl;
 
-import com.webyoso.httpparser.api.HttpParser;
-import com.webyoso.httpparser.api.HttpRequest;
-import com.webyoso.httpparser.api.RequestLine;
+import com.webpieces.httpparser.api.HttpParser;
+import com.webpieces.httpparser.api.HttpRequest;
+import com.webpieces.httpparser.api.RequestLine;
 
 public class HttpParserImpl implements HttpParser {
 

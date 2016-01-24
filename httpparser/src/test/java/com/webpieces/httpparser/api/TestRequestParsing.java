@@ -1,7 +1,14 @@
-package com.webyoso.httpparser.api;
+package com.webpieces.httpparser.api;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.webpieces.httpparser.api.HttpMethod;
+import com.webpieces.httpparser.api.HttpParser;
+import com.webpieces.httpparser.api.HttpParserFactory;
+import com.webpieces.httpparser.api.HttpRequest;
+import com.webpieces.httpparser.api.HttpUri;
+import com.webpieces.httpparser.api.RequestLine;
 
 public class TestRequestParsing {
 	

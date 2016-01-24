@@ -1,4 +1,4 @@
-package com.webyoso.httpparser.api;
+package com.webpieces.httpparser.api;
 
 public class RequestLine {
 	private HttpUri uri;

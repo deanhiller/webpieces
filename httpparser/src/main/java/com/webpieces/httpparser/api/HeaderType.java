@@ -1,4 +1,4 @@
-package com.webyoso.httpparser.api;
+package com.webpieces.httpparser.api;
 
 public enum HeaderType {
 

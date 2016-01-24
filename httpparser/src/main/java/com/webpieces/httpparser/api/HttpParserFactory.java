@@ -1,6 +1,6 @@
-package com.webyoso.httpparser.api;
+package com.webpieces.httpparser.api;
 
-import com.webyoso.httpparser.impl.HttpParserImpl;
+import com.webpieces.httpparser.impl.HttpParserImpl;
 
 public class HttpParserFactory {
 
