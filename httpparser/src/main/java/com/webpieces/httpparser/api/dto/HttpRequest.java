@@ -1,46 +1,17 @@
 package com.webpieces.httpparser.api.dto;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.webpieces.httpparser.api.common.Header;
 
-public class HttpRequest {
+public class HttpRequest extends HttpMessage {
 
-	private RequestLine requestLine;
+	private HttpRequestLine requestLine;
 	
-	private List<Header> headers = new ArrayList<>();
-	//Convenience structure that further morphs the headers into a Map that can
-	//be looked up by key.
-	private transient Headers headersStruct;
-
-	public RequestLine getRequestLine() {
+	public HttpRequestLine getRequestLine() {
 		return requestLine;
 	}
 
-	public void setRequestLine(RequestLine requestLine) {
+	public void setRequestLine(HttpRequestLine requestLine) {
 		this.requestLine = requestLine;
-	}
-	
-	/**
-	 * Order of HTTP Headers matters for Headers with the same key
-	 * 
-	 * @param headers
-	 */
-	public List<Header> getHeaders() {
-		return Collections.unmodifiableList(headers);
-	}
-
-	public void addHeader(Header header) {
-		headers.add(header);
-		headersStruct.addHeader(header);
-	}
-
-	/** 
-	 * 
-	 * @return
-	 */
-	public Headers getHeaderLookupStruct() {
-		return headersStruct;
 	}
 	
 	@Override
@@ -76,7 +47,12 @@ public class HttpRequest {
 
 	@Override
 	public String toString() {
-		return "" + requestLine;
+		String request = "" + requestLine;
+		for(Header header : headers) {
+			request += header;
+		}
+		//The final \r\n at the end of the message
+		return request + "\r\n";
 	}
 
 }

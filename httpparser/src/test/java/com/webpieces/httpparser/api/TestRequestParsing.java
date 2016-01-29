@@ -5,10 +5,12 @@ import org.junit.Test;
 
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.HttpParserFactory;
-import com.webpieces.httpparser.api.dto.HttpMethod;
+import com.webpieces.httpparser.api.common.Header;
+import com.webpieces.httpparser.api.common.KnownHeaderName;
+import com.webpieces.httpparser.api.dto.HttpRequestMethod;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpUri;
-import com.webpieces.httpparser.api.dto.RequestLine;
+import com.webpieces.httpparser.api.dto.HttpRequestLine;
 
 public class TestRequestParsing {
 	
@@ -16,21 +18,51 @@ public class TestRequestParsing {
 	public void testBasic() {
 		HttpParser parser = HttpParserFactory.createParser();
 
-		RequestLine requestLine = new RequestLine();
-		requestLine.setMethod(HttpMethod.POST);
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(HttpRequestMethod.POST);
 		requestLine.setUri(new HttpUri("http://myhost.com"));
 		
 		HttpRequest request = new HttpRequest();
 		request.setRequestLine(requestLine);
 		
-		System.out.println("request="+request);
-
 		String result1 = request.toString();
 		String result2 = parser.marshalToString(request);
 		
-		Assert.assertEquals("POST http://myhost.com HTTP/1.1\r\n", result1);
-		Assert.assertEquals("POST http://myhost.com HTTP/1.1\r\n", result2);
-		
+		String msg = "POST http://myhost.com HTTP/1.1\r\n\r\n";
+		Assert.assertEquals(msg, result1);
+		Assert.assertEquals(msg, result2);
 	}
 
+	@Test
+	public void testWithHeaders() {
+		HttpParser parser = HttpParserFactory.createParser();
+
+		Header header1 = new Header();
+		header1.setName(KnownHeaderName.ACCEPT);
+		header1.setValue("CooolValue");
+		Header header2 = new Header();
+		//let's keep the case even though name is case-insensitive..
+		header2.setName("CustomerHEADER");
+		header2.setValue("betterValue");
+		
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(HttpRequestMethod.POST);
+		requestLine.setUri(new HttpUri("http://myhost.com"));
+		
+		HttpRequest request = new HttpRequest();
+		request.setRequestLine(requestLine);
+		request.addHeader(header1);
+		request.addHeader(header2);
+		
+		String result1 = request.toString();
+		String result2 = parser.marshalToString(request);
+		
+		String msg = "POST http://myhost.com HTTP/1.1\r\n"
+				+ "Accept : CooolValue\r\n"
+				+ "CustomerHEADER : betterValue\r\n"
+				+ "\r\n";
+		
+		Assert.assertEquals(msg, result1);
+		Assert.assertEquals(msg, result2);
+	}
 }

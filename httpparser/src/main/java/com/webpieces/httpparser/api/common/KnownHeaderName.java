@@ -1,4 +1,4 @@
-package com.webpieces.httpparser.api.dto;
+package com.webpieces.httpparser.api.common;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +45,18 @@ public enum KnownHeaderName {
 	RETRY_AFTER("Retry-After", HeaderType.RESPONSE),
 	SERVER("Server", HeaderType.RESPONSE),
 	VARY("Vary", HeaderType.RESPONSE),
-	WWW_AUTHENTICATE("WWW-Authenticate", HeaderType.RESPONSE)
+	WWW_AUTHENTICATE("WWW-Authenticate", HeaderType.RESPONSE),
+	
+	ALLOW("Allow", HeaderType.ENTITY),         
+	CONTENT_ENCODING("Content-Encoding", HeaderType.ENTITY),     
+	CONTENT_LANGUAGE("Content-Language", HeaderType.ENTITY),      
+	CONTENT_LENGTH("Content-Length", HeaderType.ENTITY),          
+	CONTENT_LOCATION("Content-Location", HeaderType.ENTITY),      
+	CONTENT_MD5("Content-MD5", HeaderType.ENTITY),             
+	CONTENT_RANGE("Content-Range", HeaderType.ENTITY),  
+	CONTENT_TYPE("Content-Type", HeaderType.ENTITY),  
+	EXPIRES("Expires", HeaderType.ENTITY),       
+	LAST_MODIFIED("Last-Modified", HeaderType.ENTITY),  
 	;
 
 	private static Map<String, KnownHeaderName> lookup = new HashMap<>();

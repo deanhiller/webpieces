@@ -1,4 +1,4 @@
-package com.webpieces.httpparser.api.dto;
+package com.webpieces.httpparser.api.common;
 
 public class Header {
 

@@ -1,8 +1,8 @@
 package com.webpieces.httpparser.api.dto;
 
-public class RequestLine {
+public class HttpRequestLine {
 	private HttpUri uri;
-	private HttpMethod method;
+	private HttpRequestMethod method;
 	private HttpVersion version = new HttpVersion();
 	
 	public HttpUri getUri() {
@@ -13,11 +13,11 @@ public class RequestLine {
 		this.uri = httpUri;
 	}
 
-	public HttpMethod getMethod() {
+	public HttpRequestMethod getMethod() {
 		return method;
 	}
 
-	public void setMethod(HttpMethod method) {
+	public void setMethod(HttpRequestMethod method) {
 		this.method = method;
 	}
 
@@ -47,7 +47,7 @@ public class RequestLine {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RequestLine other = (RequestLine) obj;
+		HttpRequestLine other = (HttpRequestLine) obj;
 		if (method != other.method)
 			return false;
 		if (uri == null) {
