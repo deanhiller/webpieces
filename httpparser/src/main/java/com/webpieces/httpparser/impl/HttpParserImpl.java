@@ -1,5 +1,8 @@
 package com.webpieces.httpparser.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.ParsedData;
 import com.webpieces.httpparser.api.ParsedStatus;
@@ -13,6 +16,9 @@ import com.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 
 public class HttpParserImpl implements HttpParser {
 
+	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
+	private ConvertAscii conversion = new ConvertAscii();
+	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {
 		throw new UnsupportedOperationException("not supported yet");
@@ -63,7 +69,23 @@ public class HttpParserImpl implements HttpParser {
 
 	@Override
 	public ParsedData unmarshalAsync(byte[] msg) {
+		if(log.isDebugEnabled()) {
+			printBytes(msg);
+		}
+		
 		return null;
+	}
+
+	private void printBytes(byte[] msg) {
+		//let's walk two at a time so
+		String result = "";
+		for(int i = 0; i < msg.length-1; i++) {
+			String character = conversion.convert(msg[i]);
+			boolean firstIsCarriageReturn = conversion.isCarriageReturn(msg[i]);
+			boolean secondIsLineFeed = conversion.isLineFeed(msg[i]);
+			
+			
+		}
 	}
 
 	@Override

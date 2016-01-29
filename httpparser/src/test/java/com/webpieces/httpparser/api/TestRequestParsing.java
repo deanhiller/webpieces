@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
+import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpRequestLine;
 import com.webpieces.httpparser.api.dto.HttpRequestMethod;
@@ -30,11 +32,11 @@ public class TestRequestParsing {
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
 		
-//		HttpMessage req = parser.unmarshal(msg.getBytes());
-//		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
-//		HttpRequest httpReq = req.getHttpRequest();
-//		
-//		Assert.assertEquals(request, httpReq);
+		HttpMessage req = parser.unmarshal(msg.getBytes());
+		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
+		HttpRequest httpReq = req.getHttpRequest();
+		
+		Assert.assertEquals(request, httpReq);
 	}
 
 	@Test
@@ -69,11 +71,11 @@ public class TestRequestParsing {
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
 		
-//		HttpMessage req = parser.unmarshal(msg.getBytes());
-//		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
-//		HttpRequest httpReq = req.getHttpRequest();
-//		
-//		Assert.assertEquals(request, httpReq);
+		HttpMessage req = parser.unmarshal(msg.getBytes());
+		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
+		HttpRequest httpReq = req.getHttpRequest();
+		
+		Assert.assertEquals(request, httpReq);
 	}
 	
 }
