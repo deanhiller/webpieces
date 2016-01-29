@@ -55,4 +55,9 @@ public class HttpRequest extends HttpMessage {
 		return request + "\r\n";
 	}
 
+	@Override
+	public HttpMessageType getMessageType() {
+		return HttpMessageType.REQUEST;
+	}
+
 }

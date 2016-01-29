@@ -54,5 +54,10 @@ public class HttpResponse extends HttpMessage {
 		//The final \r\n at the end of the message
 		return response + "\r\n";
 	}
+
+	@Override
+	public HttpMessageType getMessageType() {
+		return HttpMessageType.REQUEST;
+	}
 	
 }

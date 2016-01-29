@@ -2,7 +2,7 @@ package com.webpieces.httpparser.api.dto;
 
 public class HttpResponseStatus {
 
-	private int code;
+	private Integer code;
 	private String reason;
 	
 	public void setKnownStatus(KnownStatusCode status) {
@@ -14,11 +14,11 @@ public class HttpResponseStatus {
 		return KnownStatusCode.lookup(code); 
 	}
 
-	public int getCode() {
+	public Integer getCode() {
 		return code;
 	}
 
-	public void setCode(int code) {
+	public void setCode(Integer code) {
 		this.code = code;
 	}
 

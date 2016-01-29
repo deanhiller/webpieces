@@ -3,14 +3,12 @@ package com.webpieces.httpparser.api;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.HttpParserFactory;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
-import com.webpieces.httpparser.api.dto.HttpRequestMethod;
 import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpUri;
 import com.webpieces.httpparser.api.dto.HttpRequestLine;
+import com.webpieces.httpparser.api.dto.HttpRequestMethod;
+import com.webpieces.httpparser.api.dto.HttpUri;
 
 public class TestRequestParsing {
 	
@@ -31,6 +29,12 @@ public class TestRequestParsing {
 		String msg = "POST http://myhost.com HTTP/1.1\r\n\r\n";
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
+		
+//		HttpMessage req = parser.unmarshal(msg.getBytes());
+//		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
+//		HttpRequest httpReq = req.getHttpRequest();
+//		
+//		Assert.assertEquals(request, httpReq);
 	}
 
 	@Test
@@ -64,5 +68,12 @@ public class TestRequestParsing {
 		
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
+		
+//		HttpMessage req = parser.unmarshal(msg.getBytes());
+//		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
+//		HttpRequest httpReq = req.getHttpRequest();
+//		
+//		Assert.assertEquals(request, httpReq);
 	}
+	
 }

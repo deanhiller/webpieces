@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.webpieces.httpparser.api.common.Header;
 
-public class HttpMessage {
+public abstract class HttpMessage {
 
 	protected List<Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can
@@ -33,5 +33,18 @@ public class HttpMessage {
 	 */
 	public Headers getHeaderLookupStruct() {
 		return headersStruct;
+	}
+	
+	public abstract HttpMessageType getMessageType();
+	
+	public HttpRequest getHttpRequest() {
+		if(getMessageType() == HttpMessageType.REQUEST)
+			return (HttpRequest)this;
+		return null;
+	}
+	public HttpResponse getHttpResponse() {
+		if(getMessageType() == HttpMessageType.RESPONSE)
+			return (HttpResponse)this;
+		return null;
 	}
 }
