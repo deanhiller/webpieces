@@ -27,10 +27,14 @@ public class ConvertAscii {
 		return false;
 	}
 	
-	public void printBytes(byte[] msg) {
+	public String convertToReadableForm(byte[] msg) {
+		return convertToReadableForm(msg, 0, msg.length);
+	}
+	
+	public String convertToReadableForm(byte[] msg, int offset, int length) {
 		//let's walk two at a time so
 		StringBuilder builder = new StringBuilder();
-		for(int i = 0; i < msg.length-1; i++) {
+		for(int i = offset; i < length-1; i++) {
 			byte firstByte = msg[i];
 			byte secondByte = msg[i+1];
 			int asciiInt = firstByte & 0xFF;
@@ -46,9 +50,13 @@ public class ConvertAscii {
 				i++; //move to skip the line feed we just processed
 			} else {
 				String printableForm = lookupTable.get(asciiInt);
+				if(printableForm == null)
+					throw new UnsupportedOperationException("not supported ascii yet int="+asciiInt);
 				builder.append(printableForm);
 			}
 		}
+		
+		return builder.toString();
 	}
 
 	private void appendDisplayableByte(StringBuilder builder, byte firstByte) {
