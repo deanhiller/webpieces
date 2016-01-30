@@ -5,8 +5,6 @@ import org.junit.Test;
 
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
-import com.webpieces.httpparser.api.dto.HttpMessage;
-import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpRequestLine;
 import com.webpieces.httpparser.api.dto.HttpRequestMethod;

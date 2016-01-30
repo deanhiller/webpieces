@@ -7,7 +7,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webpieces.httpparser.api.DataWrapper;
+import com.webpieces.httpparser.api.DataWrapperGenerator;
 import com.webpieces.httpparser.api.HttpParser;
+import com.webpieces.httpparser.api.HttpParserFactory;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.dto.HttpMessage;
@@ -22,6 +25,7 @@ public class HttpParserImpl implements HttpParser {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
 	private ConvertAscii conversion = new ConvertAscii();
+	private DataWrapperGenerator dataGen = HttpParserFactory.createDataWrapperGenerator();
 	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {
@@ -77,7 +81,7 @@ public class HttpParserImpl implements HttpParser {
 	}
 	
 	@Override
-	public Memento parse(Memento state, byte[] moreData) {
+	public Memento parse(Memento state, DataWrapper moreData) {
 		if(!(state instanceof MementoImpl)) {
 			throw new IllegalArgumentException("You must always pass in the "
 					+ "memento created in prepareToParse which we always hand back"
@@ -85,11 +89,20 @@ public class HttpParserImpl implements HttpParser {
 		}
 		
 		if(log.isDebugEnabled()) {
-			String readable = conversion.convertToReadableForm(moreData);
+			byte[] someData = moreData.createByteArray();
+			String readable = conversion.convertToReadableForm(someData);
 			log.info("about to parse=\n\n'"+readable+"'\n\n");
 		}
 
 		MementoImpl memento = (MementoImpl) state;
+		DataWrapper leftOverData = memento.getData();
+		DataWrapper allData;
+		if(leftOverData == null) {
+			allData = moreData;
+		} else {
+			allData = dataGen.chainDataWrappers(leftOverData, moreData);
+		}
+		
 		boolean hasMore = true;
 		while(hasMore) {
 			//hasMore = findMessageDemarcation(memento, moreData);
@@ -135,7 +148,8 @@ public class HttpParserImpl implements HttpParser {
 	@Override
 	public HttpMessage unmarshal(byte[] msg) {
 		Memento memento = prepareToParse();
-		Memento parsedData = parse(memento, msg);
+		DataWrapper dataWrapper = dataGen.wrapByteArray(msg);
+		Memento parsedData = parse(memento, dataWrapper);
 		if(parsedData.getStatus() == ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA)
 			throw new IllegalArgumentException("There is more data than one http message.  Use unmarshalAsync instead");
 		else if(parsedData.getStatus() == ParsedStatus.NEED_MORE_DATA)

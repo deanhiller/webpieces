@@ -6,7 +6,7 @@ public class ParsedData {
 
 	private ParsedStatus status;
 	private HttpMessage msg;
-	private byte[] leftOverData;
+	private DataWrapper leftOverData;
 	
 	public ParsedStatus getStatus() {
 		return status;
@@ -20,10 +20,11 @@ public class ParsedData {
 	public void setMsg(HttpMessage msg) {
 		this.msg = msg;
 	}
-	public byte[] getLeftOverData() {
+	
+	public DataWrapper getLeftOverData() {
 		return leftOverData;
 	}
-	public void setLeftOverData(byte[] leftOverData) {
+	public void setLeftOverData(DataWrapper leftOverData) {
 		this.leftOverData = leftOverData;
 	}
 

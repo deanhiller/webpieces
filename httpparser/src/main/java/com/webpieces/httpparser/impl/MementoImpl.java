@@ -1,17 +1,17 @@
 package com.webpieces.httpparser.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.webpieces.httpparser.api.DataWrapper;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 
 public class MementoImpl implements Memento {
 
-	private List<CachedData> data = new ArrayList<>();
+	private DataWrapper data;
 	private ParsedStatus status;
-	private List<HttpMessage> parsedMessage;
+	private List<HttpMessage> parsedMessages;
 
 	public void setStatus(ParsedStatus status) {
 		this.status = status;
@@ -24,15 +24,19 @@ public class MementoImpl implements Memento {
 
 	@Override
 	public List<HttpMessage> getParsedMessages() {
-		return parsedMessage;
+		return parsedMessages;
 	}
 
-	public List<HttpMessage> getParsedMessage() {
-		return parsedMessage;
+	public void setParsedMessages(List<HttpMessage> parsedMessages) {
+		this.parsedMessages = parsedMessages;
 	}
 
-	public void setParsedMessage(List<HttpMessage> parsedMessage) {
-		this.parsedMessage = parsedMessage;
+	public DataWrapper getData() {
+		return data;
+	}
+
+	public void setData(DataWrapper data) {
+		this.data = data;
 	}
 
 }

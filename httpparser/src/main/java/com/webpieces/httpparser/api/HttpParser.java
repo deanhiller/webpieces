@@ -32,7 +32,7 @@ public interface HttpParser {
 	 * @param msg
 	 * @return
 	 */	
-	public Memento parse(Memento state, byte[] moreData);
+	public Memento parse(Memento state, DataWrapper moreData);
 	
 	/**
 	 * When you know you have the complete http message, then you can simply
@@ -41,5 +41,6 @@ public interface HttpParser {
 	 * @param msg
 	 * @return
 	 */
+	//TODO: convert api to DataWrapper?
 	public HttpMessage unmarshal(byte[] msg);
 }
