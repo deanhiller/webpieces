@@ -30,6 +30,9 @@ public interface DataWrapper {
 	 */
 	public byte[] createByteArray();
 	
+	//We should maybe add this for efficiency for marshalling http request...
+	//public void copyInto(byte[] buffer);
+	
 	//Later, we may want this as well...
 	//public InputStream createInputStreamFrom();
 	

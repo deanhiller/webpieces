@@ -1,5 +1,10 @@
 package com.webpieces.httpparser.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +20,7 @@ import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;
 import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.common.Header;
+import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpRequest;
@@ -36,12 +42,64 @@ public class HttpParserImpl implements HttpParser {
 	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {
-		String result = marshalToString(request);
-		return result.getBytes(iso8859_1);
+		String result = marshalHeaders(request);
+		
+		DataWrapper body = request.getBody();
+		Header header = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+		if(header == null && body != null) {
+			throw new IllegalArgumentException("Body provided but no header for KnownHeaderName.CONTENT_LENGTH found");
+		} else if(header != null && body == null) {
+			throw new IllegalArgumentException("Header KnownHeaderName.CONTENT_LENGTH found but no body was set.  set a body");
+		}
+		
+		int length = 0;
+		if(header != null) {
+			String value = header.getValue();
+			length = toLong(value, header);
+			int bodySize = body.getReadableSize();
+			if(length != bodySize) {
+				throw new IllegalArgumentException("body size and KnownHeaderName.CONTENT_LENGTH"
+						+ " must match.  bodySize="+bodySize+" header len="+length);
+			}
+		}
+		
+		ByteArrayOutputStream str = new ByteArrayOutputStream(result.length()+length);
+		OutputStreamWriter writer = new OutputStreamWriter(str, iso8859_1);
+		try {
+			writer.write(result);
+			writer.flush();
+		} catch (IOException e) {
+			throw new RuntimeException("bug, should not occur", e);
+		}
+
+		int offset = result.length();
+		byte[] data = str.toByteArray();
+		for(int i = 0; i < length; i++) {
+			//TODO: Think about using System.arrayCopy here(what is faster?)
+			data[offset + i] = body.readByteAt(i);
+		}
+		
+		return data;
+	}
+
+	private Integer toLong(String value, Header header) {
+		try {
+			return Integer.valueOf(value);
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException("HttpMessage contains illegal header="+header);
+		}
 	}
 
 	@Override
 	public String marshalToString(HttpMessage httpMsg) {
+		//TODO: We could check Content-Type header and if text type, we could marshall it still?
+		if(httpMsg.getBody() != null)
+			throw new IllegalArgumentException("Cannot marshal http message with a body to a string");
+		
+		return marshalHeaders(httpMsg);
+	}
+
+	private String marshalHeaders(HttpMessage httpMsg) {
 		if(httpMsg.getMessageType() == HttpMessageType.REQUEST)
 			validate(httpMsg.getHttpRequest());
 		else if(httpMsg.getMessageType() == HttpMessageType.RESPONSE)

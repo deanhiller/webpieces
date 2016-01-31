@@ -1,5 +1,6 @@
 package com.webpieces.httpparser.api.dto;
 
+import com.webpieces.httpparser.api.DataWrapper;
 import com.webpieces.httpparser.api.common.Header;
 
 public class HttpRequest extends HttpMessage {

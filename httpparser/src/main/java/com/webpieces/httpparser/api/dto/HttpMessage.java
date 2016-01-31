@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.webpieces.httpparser.api.DataWrapper;
 import com.webpieces.httpparser.api.common.Header;
 
 public abstract class HttpMessage {
@@ -12,6 +13,8 @@ public abstract class HttpMessage {
 	//Convenience structure that further morphs the headers into a Map that can
 	//be looked up by key.
 	private transient Headers headersStruct = new Headers();
+	
+	private DataWrapper body;
 	
 	/**
 	 * Order of HTTP Headers matters for Headers with the same key
@@ -46,5 +49,13 @@ public abstract class HttpMessage {
 		if(getMessageType() == HttpMessageType.RESPONSE)
 			return (HttpResponse)this;
 		return null;
+	}
+	
+	public void addBody(DataWrapper data) {
+		this.body = data;
+	}
+	
+	public DataWrapper getBody() {
+		return body;
 	}
 }

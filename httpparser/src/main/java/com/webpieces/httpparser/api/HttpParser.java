@@ -4,6 +4,9 @@ import com.webpieces.httpparser.api.dto.HttpMessage;
 
 public interface HttpParser {
 
+	//TODO: This needs to change!!!  We need to pass in a data structure that 
+	//we can write to so it could be a byte[] or it could be a ByteBuffer
+	//or anything else but we also need to know the size ahead of time or?
 	public byte[] marshalToBytes(HttpMessage request);
 	
 	public String marshalToString(HttpMessage request);

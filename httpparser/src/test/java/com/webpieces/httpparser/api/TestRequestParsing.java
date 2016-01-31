@@ -32,17 +32,11 @@ public class TestRequestParsing {
 		String msg = "POST http://myhost.com HTTP/1.1\r\n\r\n";
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
-		
-//		HttpMessage req = parser.unmarshal(msg.getBytes());
-//		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
-//		HttpRequest httpReq = req.getHttpRequest();
-//		
-//		Assert.assertEquals(request, httpReq);
 	}
 
 	@Test
 	public void testAsciiConverter() {
-		HttpRequest request = createRequest();
+		HttpRequest request = createPostRequest();
 		byte[] payload = parser.marshalToBytes(request);
 		ConvertAscii converter = new ConvertAscii();
 		String readableForm = converter.convertToReadableForm(payload);
@@ -55,8 +49,8 @@ public class TestRequestParsing {
 	}
 	
 	@Test
-	public void testWithHeaders() {
-		HttpRequest request = createRequest();
+	public void testWithHeadersAndBody() {
+		HttpRequest request = createPostRequest();
 		
 		String result1 = request.toString();
 		String result2 = parser.marshalToString(request);
@@ -68,17 +62,18 @@ public class TestRequestParsing {
 		
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
-		
-//		HttpMessage req = parser.unmarshal(msg.getBytes());
-//		Assert.assertEquals(HttpMessageType.REQUEST, req.getMessageType());
-//		HttpRequest httpReq = req.getHttpRequest();
-//		
-//		Assert.assertEquals(request, httpReq);
 	}
 
 	@Test
+	public void testPostWithBody() {
+		HttpRequest request = createPostRequest();
+		
+		parser.marshalToBytes(request);
+	}
+	
+	@Test
 	public void testPartialHttpMessage() {
-		HttpRequest request = createRequest();
+		HttpRequest request = createPostRequest();
 		byte[] payload = parser.marshalToBytes(request);
 		
 		byte[] firstPart = new byte[10];
@@ -103,6 +98,12 @@ public class TestRequestParsing {
 		
 		HttpMessage httpMessage = memento.getParsedMessages().get(0);
 		Assert.assertEquals(request,  httpMessage);
+		
+//		DataWrapper body = httpMessage.getBody();
+//		Assert.assertEquals(10, body.getReadableSize());
+//		for(int i = 0; i < 10; i++) {
+//			Assert.assertEquals((byte)i, body.readByteAt(i));
+//		}
 	}
 	
 	@Test
@@ -125,7 +126,7 @@ public class TestRequestParsing {
 		
 	}
 	
-	private HttpRequest createRequest() {
+	private HttpRequest createPostRequest() {
 		Header header1 = new Header();
 		header1.setName(KnownHeaderName.ACCEPT);
 		header1.setValue("CooolValue");
@@ -145,4 +146,19 @@ public class TestRequestParsing {
 		return request;
 	}
 	
+	private HttpRequest createPostRequestWithBody() {
+		byte[] payload = new byte[10];
+		for(int i = 0; i < payload.length; i++) {
+			payload[i] = (byte) i;
+		}
+		HttpRequest request = createPostRequest();
+		Header length = new Header();
+		length.setName(KnownHeaderName.CONTENT_LENGTH);
+		length.setValue(""+payload.length);
+		
+		DataWrapper data = dataGen.wrapByteArray(payload);
+		request.addBody(data);
+		
+		return request;
+	}
 }

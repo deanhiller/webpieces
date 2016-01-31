@@ -21,7 +21,9 @@ public class Headers {
 	
 	public Header getHeader(String key) {
 		List<Header> list = headers.get(key.toLowerCase());
-		if(list.size() > 1)
+		if(list == null)
+			return null;
+		else if(list.size() > 1)
 			throw new IllegalStateException("There are two headers in this http request with key="+key+". use getHeaders method instead");
 		else if(list.size() == 0)
 			return null;
