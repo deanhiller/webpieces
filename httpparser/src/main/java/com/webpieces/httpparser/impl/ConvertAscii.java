@@ -9,8 +9,12 @@ public class ConvertAscii {
 	
 	public ConvertAscii() {
 		lookupTable.put(9, "\\t\t");
+		lookupTable.put(10, "\\n\n");
 		lookupTable.put(11, "\\vt    ");
+		lookupTable.put(13, "\\r\r");
 		lookupTable.put(32, "\\s ");
+
+		
 	}
 
 	public boolean isCarriageReturn(byte byteVal) {
@@ -31,10 +35,14 @@ public class ConvertAscii {
 		return convertToReadableForm(msg, 0, msg.length);
 	}
 	
+	//TODO: I think this is wrong for characters where byte is negative?  
+	//Basically values between 128 to 255 part of an unsigned byte
 	public String convertToReadableForm(byte[] msg, int offset, int length) {
 		//let's walk two at a time so
 		StringBuilder builder = new StringBuilder();
-		for(int i = offset; i < length-1; i++) {
+		int i = offset;
+		int highMark = offset+length;
+		for(; i < highMark-1; i++) {
 			byte firstByte = msg[i];
 			byte secondByte = msg[i+1];
 			int asciiInt = firstByte & 0xFF;
@@ -49,14 +57,27 @@ public class ConvertAscii {
 				builder.append("\\r\\n\r\n");
 				i++; //move to skip the line feed we just processed
 			} else {
-				String printableForm = lookupTable.get(asciiInt);
-				if(printableForm == null)
-					throw new UnsupportedOperationException("not supported ascii yet int="+asciiInt);
-				builder.append(printableForm);
+				appendInvisibleByte(builder, asciiInt);
 			}
 		}
 		
+		if(i < highMark) {
+			byte lastByte = msg[i];
+			int unsignedByte = lastByte & 0xFF;
+			if(unsignedByte >= 33)
+				appendDisplayableByte(builder, lastByte);
+			else
+				appendInvisibleByte(builder, unsignedByte);
+		}
+		
 		return builder.toString();
+	}
+
+	private void appendInvisibleByte(StringBuilder builder, int asciiInt) {
+		String printableForm = lookupTable.get(asciiInt);
+		if(printableForm == null)
+			throw new UnsupportedOperationException("not supported ascii yet int="+asciiInt);
+		builder.append(printableForm);
 	}
 
 	private void appendDisplayableByte(StringBuilder builder, byte firstByte) {

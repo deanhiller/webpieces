@@ -1,5 +1,6 @@
 package com.webpieces.httpparser.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.webpieces.httpparser.api.DataWrapper;
@@ -9,9 +10,10 @@ import com.webpieces.httpparser.api.dto.HttpMessage;
 
 public class MementoImpl implements Memento {
 
-	private DataWrapper data;
-	private ParsedStatus status;
-	private List<HttpMessage> parsedMessages;
+	private List<Integer> leftOverMarkedPositions = new ArrayList<>();
+	private DataWrapper leftOverData;
+	private ParsedStatus status = ParsedStatus.NEED_MORE_DATA;
+	private List<HttpMessage> parsedMessages = new ArrayList<>();
 
 	public void setStatus(ParsedStatus status) {
 		this.status = status;
@@ -31,12 +33,24 @@ public class MementoImpl implements Memento {
 		this.parsedMessages = parsedMessages;
 	}
 
-	public DataWrapper getData() {
-		return data;
+	public DataWrapper getLeftOverData() {
+		return leftOverData;
 	}
 
-	public void setData(DataWrapper data) {
-		this.data = data;
+	public void setLeftOverData(DataWrapper data) {
+		this.leftOverData = data;
 	}
 
+	public void addDemarcation(int i) {
+		leftOverMarkedPositions.add(i);
+	}
+
+	public List<Integer> getLeftOverMarkedPositions() {
+		return leftOverMarkedPositions;
+	}
+
+	public void setLeftOverMarkedPositions(List<Integer> leftOverMarkedPositions) {
+		this.leftOverMarkedPositions = leftOverMarkedPositions;
+	}
+	
 }

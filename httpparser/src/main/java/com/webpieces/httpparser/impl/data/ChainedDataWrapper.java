@@ -1,63 +1,83 @@
 package com.webpieces.httpparser.impl.data;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.webpieces.httpparser.api.DataWrapper;
 
 public class ChainedDataWrapper implements DataWrapper {
 
-	private DataWrapper wrapper1;
-	private DataWrapper wrapper2;
-	private int wrapper1Size;
+	private List<DataWrapper> wrappers = new ArrayList<>();
 
 	public ChainedDataWrapper(DataWrapper wrapper1, DataWrapper wrapper2) {
-		this.wrapper1 = wrapper1;
-		this.wrapper2 = wrapper2;
-		this.wrapper1Size = wrapper1.getReadableSize();
+		wrappers.add(wrapper1);
+		wrappers.add(wrapper2);
 	}
 	
 	@Override
 	public int getReadableSize() {
-		return wrapper1Size + wrapper2.getReadableSize();
+		int size = 0;
+		for(DataWrapper wrapper : wrappers) {
+			size += wrapper.getReadableSize();
+		}
+		return size;
 	}
 
 	@Override
 	public byte readByteAt(int i) {
-		if(i < wrapper1Size) {
-			return wrapper1.readByteAt(i);
+		for(DataWrapper wrapper : wrappers) {
+			int size = wrapper.getReadableSize();
+			if(i < size) {
+				return wrapper.readByteAt(i);
+			}
+			i = i - size;
 		}
 		
-		return wrapper2.readByteAt(i - wrapper1Size);
+		throw new IndexOutOfBoundsException("i="+i+" is out of bounds of size="+getReadableSize());
 	}
 
 	@Override
-	public String createStringFrom(int offset, int length, Charset charSet) {
-		//need to implement if offset + length is only in wrapper1, use wrapper1
-		//if offset + length is only in wrapper2, use wrapper2
-		//if offset + length spans both wrappers, use both
-		if(offset + length <= wrapper1Size) {
-			return wrapper1.createStringFrom(offset, length, charSet);
-		} else if(offset >= wrapper1Size) {
-			return wrapper2.createStringFrom(offset - wrapper1Size, length, charSet);
+	public String createStringFrom(int initialOffset, int length, Charset charSet) {
+		String result = "";
+		int lengthLeftToRead = length;
+		int offset = initialOffset;
+		for(DataWrapper wrapper : wrappers) {
+			int size = wrapper.getReadableSize();
+			if(offset < size) {
+				if(offset + lengthLeftToRead <= size) {
+					result += wrapper.createStringFrom(offset, lengthLeftToRead, charSet);
+					return result;
+				}
+				int leftInBuffer = size - offset;
+				result += wrapper.createStringFrom(offset, leftInBuffer, charSet);
+				offset = 0; //since we read in this data, offset for next datawrapper is 0
+				lengthLeftToRead -= leftInBuffer;
+			} else {
+				offset -= size;
+			}
 		}
-
-		int lengthOfPart1 = wrapper1Size - offset;
-		String part1 = wrapper1.createStringFrom(offset, lengthOfPart1, charSet);
-		int lengthOfPart2 = length - lengthOfPart1;
-		String part2 = wrapper2.createStringFrom(0, lengthOfPart2, charSet);
-		return part1 + part2;
+		
+		throw new IndexOutOfBoundsException("offset="+offset+" length="+length+" is larger than size="+getReadableSize());
 	}
 
 	@Override
 	public byte[] createByteArray() {
-		byte[] part1 = wrapper1.createByteArray();
-		byte[] part2 = wrapper2.createByteArray();
+		byte[] copy = new byte[getReadableSize()];
 		
-		byte[] copy = new byte[part1.length+part2.length];
+		int offset = 0;
+		for(DataWrapper wrapper : wrappers) {
+			byte[] data = wrapper.createByteArray();
+			int size = wrapper.getReadableSize();
+			System.arraycopy(data, 0, copy, offset, size);
+			offset += size;
+		}
 		
-		System.arraycopy(part1, 0, copy, 0, part1.length);
-		System.arraycopy(part2, 0, copy, part1.length, part2.length);
 		return copy;
+	}
+
+	public void addMoreData(DataWrapper secondData) {
+		wrappers.add(secondData);
 	}
 
 }

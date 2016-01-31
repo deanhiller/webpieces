@@ -16,7 +16,7 @@ public class HttpVersion {
 			throw new IllegalStateException("Missing the '.' in the version number.  ie. 1.1.");
 		
 		String first = version.substring(0, index);
-		String last = version.substring(index);
+		String last = version.substring(index+1);
 		major = convertToInteger(first);
 		minor = convertToInteger(last);
 	}
