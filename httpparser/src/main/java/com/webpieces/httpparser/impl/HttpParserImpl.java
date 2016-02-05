@@ -2,9 +2,12 @@ package com.webpieces.httpparser.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,29 +55,27 @@ public class HttpParserImpl implements HttpParser {
 			throw new IllegalArgumentException("Header KnownHeaderName.CONTENT_LENGTH found but no body was set.  set a body");
 		}
 		
-		int length = 0;
+		int lengthOfBodyFromHeader = 0;
 		if(header != null) {
 			String value = header.getValue();
-			length = toLong(value, header);
-			int bodySize = body.getReadableSize();
-			if(length != bodySize) {
+			lengthOfBodyFromHeader = toInteger(value, header);
+			int actualBodyLength = body.getReadableSize();
+			if(lengthOfBodyFromHeader != actualBodyLength) {
 				throw new IllegalArgumentException("body size and KnownHeaderName.CONTENT_LENGTH"
-						+ " must match.  bodySize="+bodySize+" header len="+length);
+						+ " must match.  bodySize="+actualBodyLength+" header len="+lengthOfBodyFromHeader);
 			}
 		}
 		
-		ByteArrayOutputStream str = new ByteArrayOutputStream(result.length()+length);
-		OutputStreamWriter writer = new OutputStreamWriter(str, iso8859_1);
-		try {
-			writer.write(result);
-			writer.flush();
-		} catch (IOException e) {
-			throw new RuntimeException("bug, should not occur", e);
-		}
+
+		//TODO: Is there a way to write a String to first part of byte[] rather than having to copy
+		//the byte array from the string into the full byte array
+		byte[] stringPiece = result.getBytes(iso8859_1);
+		byte[] data = new byte[result.length()+lengthOfBodyFromHeader];
+		
+		System.arraycopy(stringPiece, 0, data, 0, stringPiece.length);
 
 		int offset = result.length();
-		byte[] data = str.toByteArray();
-		for(int i = 0; i < length; i++) {
+		for(int i = 0; i < lengthOfBodyFromHeader; i++) {
 			//TODO: Think about using System.arrayCopy here(what is faster?)
 			data[offset + i] = body.readByteAt(i);
 		}
@@ -82,7 +83,7 @@ public class HttpParserImpl implements HttpParser {
 		return data;
 	}
 
-	private Integer toLong(String value, Header header) {
+	private Integer toInteger(String value, Header header) {
 		try {
 			return Integer.valueOf(value);
 		} catch(NumberFormatException e) {
@@ -167,54 +168,112 @@ public class HttpParserImpl implements HttpParser {
 		
 		DataWrapper leftOverData = memento.getLeftOverData();
 		DataWrapper	allData = dataGen.chainDataWrappers(leftOverData, moreData);
+		memento.setLeftOverData(allData);
 		
-		return findCrLnCrLnAndParseMessage(memento, allData);
+		if(memento.getHalfParsedMessage() != null)
+			throw new UnsupportedOperationException("not complete yet");
+		
+		return findCrLnCrLnAndParseMessage(memento);
 	}
 
-	private MementoImpl findCrLnCrLnAndParseMessage(
-			MementoImpl memento, DataWrapper payload) {
-		DataWrapper dataToRead = payload;
-		
+	private MementoImpl findCrLnCrLnAndParseMessage(MementoImpl memento) {
 		//We are looking for the \r\n\r\n  (or \n\n from bad systems) to
 		//discover entire payload
-		for(int i = 0; i < dataToRead.getReadableSize() - 3; i++) {
-			byte firstByte = dataToRead.readByteAt(i);
-			byte secondByte = dataToRead.readByteAt(i+1);
-			byte thirdByte = dataToRead.readByteAt(i+2);
-			byte fourthByte = dataToRead.readByteAt(i+3);
-			
-			//For debugging to see the 4 bytes that we are processing easier
-			byte[] data = dataToRead.createByteArray();
-			String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
-			
-			boolean isFirstCr = conversion.isCarriageReturn(firstByte);
-			boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
-			boolean isThirdCr = conversion.isCarriageReturn(thirdByte);
-			boolean isFourthLineField = conversion.isLineFeed(fourthByte);
-			
-			if(isFirstCr && isSecondLineFeed && isThirdCr && isFourthLineField) {
-				List<Integer> markedPositions = memento.getLeftOverMarkedPositions();
-				memento.setLeftOverMarkedPositions(new ArrayList<Integer>());
-				List<DataWrapper> tuple = dataGen.split(dataToRead, i+4);
-				DataWrapper toBeParsed = tuple.get(0);
-				dataToRead = tuple.get(1);
-				HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
-				memento.getParsedMessages().add(message);
-				//parse message and continue here
-				continue;
-			}
-			
-			//mark any positions for \r\n
-			if(isFirstCr && isSecondLineFeed) {
-				memento.addDemarcation(i);
+		for(int i = 0; i < memento.getLeftOverData().getReadableSize() - 3; i++) {
+			processUntilRead(memento, i);
+			//do not continue if we are reading the body...
+			if(memento.getHalfParsedMessage() != null) {
+				break;
 			}
 		}
 		
-		memento.setLeftOverData(dataToRead);
-		if(dataToRead instanceof EmptyWrapper) {
+		DataWrapper leftOverData = memento.getLeftOverData();
+		if(leftOverData instanceof EmptyWrapper) {
 			memento.setStatus(ParsedStatus.ALL_DATA_PARSED);
 		}
 		return memento;
+	}
+
+	private void processUntilRead(MementoImpl memento, int i) {
+		DataWrapper dataToRead = memento.getLeftOverData();
+		byte firstByte = dataToRead.readByteAt(i);
+		byte secondByte = dataToRead.readByteAt(i+1);
+		byte thirdByte = dataToRead.readByteAt(i+2);
+		byte fourthByte = dataToRead.readByteAt(i+3);
+		
+		//For debugging to see the 4 bytes that we are processing easier
+//		byte[] data = dataToRead.createByteArray();
+//		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
+		
+		boolean isFirstCr = conversion.isCarriageReturn(firstByte);
+		boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
+		boolean isThirdCr = conversion.isCarriageReturn(thirdByte);
+		boolean isFourthLineField = conversion.isLineFeed(fourthByte);
+		
+		if(isFirstCr && isSecondLineFeed && isThirdCr && isFourthLineField) {
+			//Found end of http headers...
+			processHttpMessageAndMaybeBody(memento, dataToRead, i);
+			return;
+		}
+		
+		//mark any positions for \r\n
+		if(isFirstCr && isSecondLineFeed) {
+			memento.addDemarcation(i);
+		}		
+	}
+
+	private void processHttpMessageAndMaybeBody(MementoImpl memento, DataWrapper dataToRead, int i) {
+		//A FEW ways to go here with http body....  I could 
+		//1. pass back an http message while body is being filled in
+		//    a. have client call getBody and block until filled or
+		//    b. have client call getInputStream and block on inputStream.read
+		//    c. have client call addBodyCallback(callback) such that client would unblock and
+		//           we call into client with bytes, more bytes, more bytes
+		//2. only pass back http message once full body is in place
+		// 
+		//NOTE: because of http body content and encodings, only the full body is zipped so
+		//need full body anyways to unzip.  (ie. chunking is used instead of body for streaming
+		//so for now, just read in entire body before returning it to the client
+		
+		List<Integer> markedPositions = memento.getLeftOverMarkedPositions();
+		memento.setLeftOverMarkedPositions(new ArrayList<Integer>());
+		List<DataWrapper> tuple = dataGen.split(dataToRead, i+4);
+		DataWrapper toBeParsed = tuple.get(0);
+		memento.setLeftOverData(tuple.get(1));
+		HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
+		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+		if(header == null) {
+			//no body in the bytestream so add the message to list of parsed messages
+			memento.getParsedMessages().add(message);
+			return;
+		}
+
+		boolean readEntireBody = readInBody(message, memento, header);
+		if (readEntireBody) {
+			memento.getParsedMessages().add(message);
+			return;
+		}
+		
+		memento.setHalfParsedMessage(message);
+	}
+
+	private boolean readInBody(HttpMessage message, MementoImpl memento, Header header) {
+		DataWrapper dataToRead = memento.getLeftOverData();
+		String value = header.getValue();
+		int length = toInteger(value, header);
+		int readableSize = dataToRead.getReadableSize();
+		
+		if(length <= readableSize) {
+			List<DataWrapper> split = dataGen.split(dataToRead, length);
+			message.setBody(split.get(0));
+			memento.setLeftOverData(split.get(1));
+			memento.setNumBytesLeftToRead(0);
+			return true;
+		}
+
+		//we didn't read anything yet since there is no data
+		memento.setNumBytesLeftToRead(length);
+		return false;
 	}
 
 	private HttpMessage parseHttpMessage(DataWrapper toBeParsed, List<Integer> markedPositions) {

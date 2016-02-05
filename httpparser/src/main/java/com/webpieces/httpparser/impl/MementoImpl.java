@@ -10,8 +10,13 @@ import com.webpieces.httpparser.api.dto.HttpMessage;
 
 public class MementoImpl implements Memento {
 
+	//State held to keep parsing messages
 	private List<Integer> leftOverMarkedPositions = new ArrayList<>();
 	private DataWrapper leftOverData;
+	private Integer numBytesLeftToRead;
+	private HttpMessage halfParsedMessage;
+	
+	//Return state for client to access
 	private ParsedStatus status = ParsedStatus.NEED_MORE_DATA;
 	private List<HttpMessage> parsedMessages = new ArrayList<>();
 
@@ -51,6 +56,18 @@ public class MementoImpl implements Memento {
 
 	public void setLeftOverMarkedPositions(List<Integer> leftOverMarkedPositions) {
 		this.leftOverMarkedPositions = leftOverMarkedPositions;
+	}
+
+	public void setNumBytesLeftToRead(int length) {
+		numBytesLeftToRead = length;
+	}
+
+	public void setHalfParsedMessage(HttpMessage message) {
+		this.halfParsedMessage = message;
+	}
+
+	public HttpMessage getHalfParsedMessage() {
+		return halfParsedMessage;
 	}
 	
 }

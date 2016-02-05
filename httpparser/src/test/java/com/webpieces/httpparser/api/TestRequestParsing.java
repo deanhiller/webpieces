@@ -65,10 +65,29 @@ public class TestRequestParsing {
 	}
 
 	@Test
-	public void testPostWithBody() {
-		HttpRequest request = createPostRequest();
+	public void testBody() {
+		HttpRequest request = createPostRequestWithBody();
+		byte[] expected = request.getBody().createByteArray();
 		
-		parser.marshalToBytes(request);
+		byte[] data = parser.marshalToBytes(request);
+		DataWrapper wrap1 = dataGen.wrapByteArray(data);
+		
+		Memento memento = parser.prepareToParse();
+		memento = parser.parse(memento, wrap1);
+		
+		Assert.assertEquals(1, memento.getParsedMessages().size());
+		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
+
+		HttpMessage msg = memento.getParsedMessages().get(0);
+		DataWrapper body = msg.getBody();
+		byte[] bodyBytesActual = body.createByteArray();
+		Assert.assertArrayEquals(expected, bodyBytesActual);
+	}
+
+	//Add test where only part of body comes in and next part comes
+	//in next packet so we fully test full set
+	@Test
+	public void testPartialBody() {
 	}
 	
 	@Test
@@ -97,6 +116,11 @@ public class TestRequestParsing {
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 		
 		HttpMessage httpMessage = memento.getParsedMessages().get(0);
+		HttpRequest req = (HttpRequest) httpMessage;
+		
+		Assert.assertEquals(request.getRequestLine(), req.getRequestLine());
+		Assert.assertEquals(request.getHeaders(),  req.getHeaders());
+		
 		Assert.assertEquals(request,  httpMessage);
 		
 //		DataWrapper body = httpMessage.getBody();
@@ -152,12 +176,14 @@ public class TestRequestParsing {
 			payload[i] = (byte) i;
 		}
 		HttpRequest request = createPostRequest();
-		Header length = new Header();
-		length.setName(KnownHeaderName.CONTENT_LENGTH);
-		length.setValue(""+payload.length);
+		Header header = new Header();
+		header.setName(KnownHeaderName.CONTENT_LENGTH);
+		header.setValue(""+payload.length);
 		
 		DataWrapper data = dataGen.wrapByteArray(payload);
-		request.addBody(data);
+		
+		request.addHeader(header);
+		request.setBody(data);
 		
 		return request;
 	}
