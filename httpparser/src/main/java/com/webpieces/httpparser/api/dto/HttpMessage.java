@@ -51,7 +51,7 @@ public abstract class HttpMessage {
 		return null;
 	}
 	
-	public void addBody(DataWrapper data) {
+	public void setBody(DataWrapper data) {
 		this.body = data;
 	}
 	

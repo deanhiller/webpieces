@@ -8,6 +8,15 @@ public class ConvertAscii {
 	private Map<Integer, String> lookupTable = new HashMap<>();
 	
 	public ConvertAscii() {
+		lookupTable.put(0, "[NUL]");
+		lookupTable.put(1, "[SOH]");
+		lookupTable.put(2, "[STX]");
+		lookupTable.put(3, "[ETX]");
+		lookupTable.put(4, "[EOT]");
+		lookupTable.put(5, "[ENQ]");
+		lookupTable.put(6, "[ACK]");
+		lookupTable.put(7, "[BEL]");
+		lookupTable.put(8, "[BS]");
 		lookupTable.put(9, "\\t\t");
 		lookupTable.put(10, "\\n\n");
 		lookupTable.put(11, "\\vt    ");

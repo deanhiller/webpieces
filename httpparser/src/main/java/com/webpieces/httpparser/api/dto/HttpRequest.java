@@ -1,6 +1,5 @@
 package com.webpieces.httpparser.api.dto;
 
-import com.webpieces.httpparser.api.DataWrapper;
 import com.webpieces.httpparser.api.common.Header;
 
 public class HttpRequest extends HttpMessage {
@@ -14,7 +13,7 @@ public class HttpRequest extends HttpMessage {
 	public void setRequestLine(HttpRequestLine requestLine) {
 		this.requestLine = requestLine;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -61,4 +60,5 @@ public class HttpRequest extends HttpMessage {
 		return HttpMessageType.REQUEST;
 	}
 
+	
 }
