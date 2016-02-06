@@ -209,8 +209,8 @@ public class HttpParserImpl implements HttpParser {
 		byte fourthByte = dataToRead.readByteAt(i+3);
 		
 		//For debugging to see the 4 bytes that we are processing easier
-		byte[] data = dataToRead.createByteArray();
-		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
+//		byte[] data = dataToRead.createByteArray();
+//		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
 		
 		boolean isFirstCr = conversion.isCarriageReturn(firstByte);
 		boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
