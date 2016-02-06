@@ -18,6 +18,8 @@ public class EmptyWrapper implements DataWrapper {
 
 	@Override
 	public String createStringFrom(int offset, int length, Charset charSet) {
+		if(length > 0)
+			throw new IllegalArgumentException("There is no data left to read.  offset="+offset+" len="+length);
 		return "";
 	}
 
