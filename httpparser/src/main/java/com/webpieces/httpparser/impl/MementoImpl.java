@@ -19,6 +19,7 @@ public class MementoImpl implements Memento {
 	//Return state for client to access
 	private ParsedStatus status = ParsedStatus.NEED_MORE_DATA;
 	private List<HttpMessage> parsedMessages = new ArrayList<>();
+	private int indexBytePointer;
 
 	public void setStatus(ParsedStatus status) {
 		this.status = status;
@@ -73,5 +74,15 @@ public class MementoImpl implements Memento {
 	public HttpMessage getHalfParsedMessage() {
 		return halfParsedMessage;
 	}
+
+	public void setReadingHttpMessagePointer(int indexBytePointer) {
+		this.indexBytePointer = indexBytePointer;
+	}
+
+	public int getReadingHttpMessagePointer() {
+		return indexBytePointer;
+	}
+	
+	
 	
 }

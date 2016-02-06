@@ -173,7 +173,8 @@ public class HttpParserImpl implements HttpParser {
 	private MementoImpl findCrLnCrLnAndParseMessage(MementoImpl memento) {
 		//We are looking for the \r\n\r\n  (or \n\n from bad systems) to
 		//discover entire payload
-		for(int i = 0; i < memento.getLeftOverData().getReadableSize() - 3; i++) {
+		int i = memento.getReadingHttpMessagePointer();
+		for(; i < memento.getLeftOverData().getReadableSize() - 3; i++) {
 			boolean parsedAndSplitBuffer = processUntilRead(memento, i);
 			if(parsedAndSplitBuffer) {
 				//reset the index for reading
@@ -186,6 +187,7 @@ public class HttpParserImpl implements HttpParser {
 				break;
 			}
 		}
+		memento.setReadingHttpMessagePointer(i);
 		
 		DataWrapper leftOverData = memento.getLeftOverData();
 		if(leftOverData instanceof EmptyWrapper) {
@@ -207,8 +209,8 @@ public class HttpParserImpl implements HttpParser {
 		byte fourthByte = dataToRead.readByteAt(i+3);
 		
 		//For debugging to see the 4 bytes that we are processing easier
-//		byte[] data = dataToRead.createByteArray();
-//		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
+		byte[] data = dataToRead.createByteArray();
+		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
 		
 		boolean isFirstCr = conversion.isCarriageReturn(firstByte);
 		boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
@@ -218,6 +220,7 @@ public class HttpParserImpl implements HttpParser {
 		if(isFirstCr && isSecondLineFeed && isThirdCr && isFourthLineField) {
 			//Found end of http headers...
 			processHttpMessageAndMaybeBody(memento, dataToRead, i);
+			memento.setReadingHttpMessagePointer(0);
 			return true;
 		}
 		
@@ -355,6 +358,8 @@ public class HttpParserImpl implements HttpParser {
 	private Header parseHeader(String line) {
 		//can't use split in case there are two ':' ...one in the value and one as the delimeter
 		int indexOf = line.indexOf(":");
+		if(indexOf < 0)
+			throw new IllegalArgumentException("bad header line="+ line);
 		String value = line.substring(indexOf+1).trim();
 		String name = line.substring(0, indexOf);
 		Header header = new Header();
