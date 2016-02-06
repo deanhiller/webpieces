@@ -84,10 +84,40 @@ public class TestRequestParsing {
 		Assert.assertArrayEquals(expected, bodyBytesActual);
 	}
 
-	//Add test where only part of body comes in and next part comes
-	//in next packet so we fully test full set
 	@Test
 	public void testPartialBody() {
+		HttpRequest request = createPostRequestWithBody();
+		byte[] expected = request.getBody().createByteArray();
+		
+		byte[] data = parser.marshalToBytes(request);
+		
+		byte[] first = new byte[data.length - 20];
+		byte[] second = new byte[data.length - first.length];
+		System.arraycopy(data, 0, first, 0, first.length);
+		System.arraycopy(data, first.length, second, 0, second.length);
+		DataWrapper wrap1 = dataGen.wrapByteArray(first);
+		DataWrapper wrap2 = dataGen.wrapByteArray(second);
+		
+		Memento memento = parser.prepareToParse();
+		memento = parser.parse(memento, wrap1);
+		
+		Assert.assertEquals(0, memento.getParsedMessages().size());
+		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
+		
+		memento = parser.parse(memento, wrap2);
+		
+		Assert.assertEquals(1, memento.getParsedMessages().size());
+		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
+
+		HttpMessage msg = memento.getParsedMessages().get(0);
+		DataWrapper body = msg.getBody();
+		byte[] bodyBytesActual = body.createByteArray();
+		Assert.assertArrayEquals(expected, bodyBytesActual);
+	}
+	
+	@Test
+	public void testPartialBodyThenHalfBodyWithNextHttpMsg() {
+		
 	}
 	
 	@Test
@@ -171,7 +201,7 @@ public class TestRequestParsing {
 	}
 	
 	private HttpRequest createPostRequestWithBody() {
-		byte[] payload = new byte[10];
+		byte[] payload = new byte[30];
 		for(int i = 0; i < payload.length; i++) {
 			payload[i] = (byte) i;
 		}
