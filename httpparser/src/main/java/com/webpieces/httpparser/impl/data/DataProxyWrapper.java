@@ -45,7 +45,7 @@ public class DataProxyWrapper implements DataWrapper {
 	@Override
 	public byte[] createByteArray() {
 		byte[] copy = new byte[length];
-		for(int i = offset; i < copy.length; i++) {
+		for(int i = 0; i < copy.length; i++) {
 			copy[i] = readByteAt(i);
 		}
 		return copy;

@@ -13,7 +13,7 @@ public class MementoImpl implements Memento {
 	//State held to keep parsing messages
 	private List<Integer> leftOverMarkedPositions = new ArrayList<>();
 	private DataWrapper leftOverData;
-	private Integer numBytesLeftToRead;
+	private int numBytesLeftToRead;
 	private HttpMessage halfParsedMessage;
 	
 	//Return state for client to access
@@ -56,6 +56,10 @@ public class MementoImpl implements Memento {
 
 	public void setLeftOverMarkedPositions(List<Integer> leftOverMarkedPositions) {
 		this.leftOverMarkedPositions = leftOverMarkedPositions;
+	}
+
+	public int getNumBytesLeftToRead() {
+		return numBytesLeftToRead;
 	}
 
 	public void setNumBytesLeftToRead(int length) {

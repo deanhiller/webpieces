@@ -63,62 +63,6 @@ public class TestRequestParsing {
 		Assert.assertEquals(msg, result1);
 		Assert.assertEquals(msg, result2);
 	}
-
-	@Test
-	public void testBody() {
-		HttpRequest request = createPostRequestWithBody();
-		byte[] expected = request.getBody().createByteArray();
-		
-		byte[] data = parser.marshalToBytes(request);
-		DataWrapper wrap1 = dataGen.wrapByteArray(data);
-		
-		Memento memento = parser.prepareToParse();
-		memento = parser.parse(memento, wrap1);
-		
-		Assert.assertEquals(1, memento.getParsedMessages().size());
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
-
-		HttpMessage msg = memento.getParsedMessages().get(0);
-		DataWrapper body = msg.getBody();
-		byte[] bodyBytesActual = body.createByteArray();
-		Assert.assertArrayEquals(expected, bodyBytesActual);
-	}
-
-	@Test
-	public void testPartialBody() {
-		HttpRequest request = createPostRequestWithBody();
-		byte[] expected = request.getBody().createByteArray();
-		
-		byte[] data = parser.marshalToBytes(request);
-		
-		byte[] first = new byte[data.length - 20];
-		byte[] second = new byte[data.length - first.length];
-		System.arraycopy(data, 0, first, 0, first.length);
-		System.arraycopy(data, first.length, second, 0, second.length);
-		DataWrapper wrap1 = dataGen.wrapByteArray(first);
-		DataWrapper wrap2 = dataGen.wrapByteArray(second);
-		
-		Memento memento = parser.prepareToParse();
-		memento = parser.parse(memento, wrap1);
-		
-		Assert.assertEquals(0, memento.getParsedMessages().size());
-		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
-		
-		memento = parser.parse(memento, wrap2);
-		
-		Assert.assertEquals(1, memento.getParsedMessages().size());
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
-
-		HttpMessage msg = memento.getParsedMessages().get(0);
-		DataWrapper body = msg.getBody();
-		byte[] bodyBytesActual = body.createByteArray();
-		Assert.assertArrayEquals(expected, bodyBytesActual);
-	}
-	
-	@Test
-	public void testPartialBodyThenHalfBodyWithNextHttpMsg() {
-		
-	}
 	
 	@Test
 	public void testPartialHttpMessage() {
@@ -152,16 +96,33 @@ public class TestRequestParsing {
 		Assert.assertEquals(request.getHeaders(),  req.getHeaders());
 		
 		Assert.assertEquals(request,  httpMessage);
-		
-//		DataWrapper body = httpMessage.getBody();
-//		Assert.assertEquals(10, body.getReadableSize());
-//		for(int i = 0; i < 10; i++) {
-//			Assert.assertEquals((byte)i, body.readByteAt(i));
-//		}
 	}
 	
 	@Test
 	public void test2AndHalfHttpMessages() {
+		HttpRequest request = createPostRequest();
+		byte[] payload = parser.marshalToBytes(request);
+		
+		byte[] first = new byte[2*payload.length + 20];
+		byte[] second = new byte[payload.length - 20];
+		System.arraycopy(payload, 0, first, 0, payload.length);
+		System.arraycopy(payload, 0, first, payload.length, payload.length);
+		System.arraycopy(payload, 0, first, 2*payload.length, 20);
+		System.arraycopy(payload, 20, second, 0, second.length);
+		
+		DataWrapper data1 = dataGen.wrapByteArray(first);
+		DataWrapper data2 = dataGen.wrapByteArray(second);
+		
+		Memento memento = parser.prepareToParse();
+		memento = parser.parse(memento, data1);
+		
+		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
+		Assert.assertEquals(2, memento.getParsedMessages().size());
+		
+		memento = parser.parse(memento, data2);
+		
+		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
+		Assert.assertEquals(1, memento.getParsedMessages().size());
 	}
 	
 	/**
@@ -172,15 +133,39 @@ public class TestRequestParsing {
 	 */
 	@Test
 	public void testHalfThenTwoHalvesNext() {
+		HttpRequest request = createPostRequest();
+		byte[] payload = parser.marshalToBytes(request);
 		
+		byte[] first = new byte[20];
+		byte[] second = new byte[payload.length];
+		byte[] third = new byte[payload.length - first.length];
+		System.arraycopy(payload, 0, first, 0, first.length);
+		System.arraycopy(payload, first.length, second, 0, payload.length-first.length);
+		System.arraycopy(payload, 0, second, payload.length-first.length, first.length);
+		System.arraycopy(payload, first.length, third, 0, third.length);
+		
+		DataWrapper data1 = dataGen.wrapByteArray(first);
+		DataWrapper data2 = dataGen.wrapByteArray(second);
+		DataWrapper data3 = dataGen.wrapByteArray(third);
+		
+		Memento memento = parser.prepareToParse();
+		memento = parser.parse(memento, data1);
+		
+		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
+		Assert.assertEquals(0, memento.getParsedMessages().size());
+		
+		memento = parser.parse(memento, data2);
+		
+		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
+		Assert.assertEquals(1, memento.getParsedMessages().size());
+		
+		memento = parser.parse(memento, data3);
+		
+		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
+		Assert.assertEquals(1, memento.getParsedMessages().size());		
 	}
 	
-	@Test
-	public void testExactlyOneHttpMessage() {
-		
-	}
-	
-	private HttpRequest createPostRequest() {
+	static HttpRequest createPostRequest() {
 		Header header1 = new Header();
 		header1.setName(KnownHeaderName.ACCEPT);
 		header1.setValue("CooolValue");
@@ -200,21 +185,5 @@ public class TestRequestParsing {
 		return request;
 	}
 	
-	private HttpRequest createPostRequestWithBody() {
-		byte[] payload = new byte[30];
-		for(int i = 0; i < payload.length; i++) {
-			payload[i] = (byte) i;
-		}
-		HttpRequest request = createPostRequest();
-		Header header = new Header();
-		header.setName(KnownHeaderName.CONTENT_LENGTH);
-		header.setValue(""+payload.length);
-		
-		DataWrapper data = dataGen.wrapByteArray(payload);
-		
-		request.addHeader(header);
-		request.setBody(data);
-		
-		return request;
-	}
+
 }
