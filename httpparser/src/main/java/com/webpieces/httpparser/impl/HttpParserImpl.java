@@ -147,11 +147,11 @@ public class HttpParserImpl implements HttpParser {
 					+ "to you from this method.  It contains state of leftover data");
 		}
 		
-		if(log.isDebugEnabled()) {
-			byte[] someData = moreData.createByteArray();
-			String readable = conversion.convertToReadableForm(someData);
-			log.info("about to parse=\n\n'"+readable+"'\n\n");
-		}
+//		if(log.isDebugEnabled()) {
+//			byte[] someData = moreData.createByteArray();
+//			String readable = conversion.convertToReadableForm(someData);
+//			log.info("about to parse=\n\n'"+readable+"'\n\n");
+//		}
 
 		MementoImpl memento = (MementoImpl) state;
 		//initialize state to need more data
@@ -207,8 +207,8 @@ public class HttpParserImpl implements HttpParser {
 		byte fourthByte = dataToRead.readByteAt(i+3);
 		
 		//For debugging to see the 4 bytes that we are processing easier
-		byte[] data = dataToRead.createByteArray();
-		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
+//		byte[] data = dataToRead.createByteArray();
+//		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
 		
 		boolean isFirstCr = conversion.isCarriageReturn(firstByte);
 		boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
