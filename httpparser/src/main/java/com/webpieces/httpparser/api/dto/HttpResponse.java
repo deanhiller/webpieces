@@ -57,7 +57,7 @@ public class HttpResponse extends HttpMessage {
 
 	@Override
 	public HttpMessageType getMessageType() {
-		return HttpMessageType.REQUEST;
+		return HttpMessageType.RESPONSE;
 	}
 	
 }

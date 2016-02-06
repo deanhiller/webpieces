@@ -50,7 +50,7 @@ public class HttpParserImpl implements HttpParser {
 		int lengthOfBodyFromHeader = 0;
 		if(header != null) {
 			String value = header.getValue();
-			lengthOfBodyFromHeader = toInteger(value, header);
+			lengthOfBodyFromHeader = toInteger(value, ""+header);
 			int actualBodyLength = body.getReadableSize();
 			if(lengthOfBodyFromHeader != actualBodyLength) {
 				throw new IllegalArgumentException("body size and KnownHeaderName.CONTENT_LENGTH"
@@ -75,11 +75,11 @@ public class HttpParserImpl implements HttpParser {
 		return data;
 	}
 
-	private Integer toInteger(String value, Header header) {
+	private Integer toInteger(String value, String line) {
 		try {
 			return Integer.valueOf(value);
 		} catch(NumberFormatException e) {
-			throw new IllegalArgumentException("HttpMessage contains illegal header="+header);
+			throw new IllegalArgumentException("HttpMessage contains illegal line(could not convert value to Integer)="+line);
 		}
 	}
 
@@ -255,7 +255,7 @@ public class HttpParserImpl implements HttpParser {
 		}
 
 		String value = header.getValue();
-		int length = toInteger(value, header);
+		int length = toInteger(value, ""+header);
 		readInBody(message, memento, length);
 	}
 
@@ -294,19 +294,19 @@ public class HttpParserImpl implements HttpParser {
 		}
 		markedPositions.clear();
 
-		String firstLine = lines.get(0);
-		String[] pieces = firstLine.split("\\s+");
+		String firstLine = lines.get(0).trim();
 		
-		if(pieces[0].startsWith("HTTP/")) {
-			return parseResponse(lines, pieces);
+		if(firstLine.startsWith("HTTP/")) {
+			return parseResponse(lines);
 		} else {
-			return parseRequest(lines, pieces);
+			return parseRequest(lines);
 		}
 	}
 
-	private HttpMessage parseRequest(List<String> lines, String[] firstLinePieces) {
+	private HttpMessage parseRequest(List<String> lines) {
 		//remove first line...
 		String firstLine = lines.remove(0);
+		String[] firstLinePieces = firstLine.split("\\s+");
 		if(firstLinePieces.length != 3) {
 			throw new ParseException("Unable to parse invalid http request due to first line being invalid=" + firstLine);
 		}
@@ -318,13 +318,7 @@ public class HttpParserImpl implements HttpParser {
 		
 		HttpUri uri = new HttpUri(firstLinePieces[1]);
 		
-		if(!firstLinePieces[2].startsWith("HTTP/")) {
-			throw new ParseException("Invalid version in http request first line not prefixed with HTTP/.  line="+firstLine);
-		}
-		
-		String ver = firstLinePieces[2].substring(5, firstLinePieces[2].length());
-		HttpVersion version = new HttpVersion();
-		version.setVersion(ver);
+		HttpVersion version = parseVersion(firstLinePieces[2], firstLine);
 		
 		HttpRequestLine httpRequestLine = new HttpRequestLine();
 		httpRequestLine.setMethod(method);
@@ -334,13 +328,28 @@ public class HttpParserImpl implements HttpParser {
 		HttpRequest request = new HttpRequest();
 		request.setRequestLine(httpRequestLine);
 		
+		parseHeaders(lines, request);
+		
+		return request;
+	}
+
+	private HttpVersion parseVersion(String versionString, String firstLine) {
+		if(!versionString.startsWith("HTTP/")) {
+			throw new ParseException("Invalid version in http request first line not prefixed with HTTP/.  line="+firstLine);
+		}
+		
+		String ver = versionString.substring(5, versionString.length());
+		HttpVersion version = new HttpVersion();
+		version.setVersion(ver);
+		return version;
+	}
+
+	private void parseHeaders(List<String> lines, HttpMessage httpMessage) {
 		//TODO: one header can be multiline and we need to fix this code for that
 		for(String line : lines) {
 			Header header = parseHeader(line);
-			request.addHeader(header);
+			httpMessage.addHeader(header);
 		}
-		
-		return request;
 	}
 
 	private Header parseHeader(String line) {
@@ -354,8 +363,42 @@ public class HttpParserImpl implements HttpParser {
 		return header;
 	}
 
-	private HttpMessage parseResponse(List<String> lines, String[] pieces) {
-		throw new UnsupportedOperationException("not supported");
+	private HttpMessage parseResponse(List<String> lines) {
+		//remove first line...
+		String firstLine = lines.remove(0);
+		//In the case of response, a reason may contain spaces so we must split on first and second
+		//whitespace only
+		int indexOf = firstLine.indexOf(" ");
+		if(indexOf < 0)
+			throw new IllegalArgumentException("The first line of http request is invalid="+ firstLine);
+		String versionStr = firstLine.substring(0, indexOf).trim();
+		String tail = firstLine.substring(indexOf).trim();
+		
+		int indexOf2 = tail.indexOf(" ");
+		if(indexOf2 < 0)
+			throw new IllegalArgumentException("The first line of http request is invalid="+ firstLine);
+		String codeStr = tail.substring(0, indexOf2).trim();
+		String reason = tail.substring(indexOf2).trim();
+		
+		HttpVersion version2 = parseVersion(versionStr, firstLine);
+
+		HttpResponseStatus status = new HttpResponseStatus();
+		Integer codeVal = toInteger(codeStr, firstLine);
+		if(codeVal <= 0 || codeVal >= 1000)
+			throw new IllegalArgumentException("invalid status code.  response line="+firstLine);
+		status.setCode(codeVal);
+		status.setReason(reason);
+		
+		HttpResponseStatusLine httpRequestLine = new HttpResponseStatusLine();
+		httpRequestLine.setStatus(status);
+		httpRequestLine.setVersion(version2);
+		
+		HttpResponse response = new HttpResponse();
+		response.setStatusLine(httpRequestLine);
+
+		parseHeaders(lines, response);
+
+		return response;
 	}
 
 	@Override

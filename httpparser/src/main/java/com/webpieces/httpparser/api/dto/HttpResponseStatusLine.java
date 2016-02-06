@@ -2,7 +2,7 @@ package com.webpieces.httpparser.api.dto;
 
 public class HttpResponseStatusLine {
 
-	private HttpVersion version;
+	private HttpVersion version = new HttpVersion();
 	private HttpResponseStatus status;
 	
 	public HttpVersion getVersion() {

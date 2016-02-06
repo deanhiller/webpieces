@@ -34,10 +34,11 @@ public class HttpResponseStatus {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + code;
+		result = prime * result + ((code == null) ? 0 : code.hashCode());
 		result = prime * result + ((reason == null) ? 0 : reason.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -47,7 +48,10 @@ public class HttpResponseStatus {
 		if (getClass() != obj.getClass())
 			return false;
 		HttpResponseStatus other = (HttpResponseStatus) obj;
-		if (code != other.code)
+		if (code == null) {
+			if (other.code != null)
+				return false;
+		} else if (!code.equals(other.code))
 			return false;
 		if (reason == null) {
 			if (other.reason != null)
