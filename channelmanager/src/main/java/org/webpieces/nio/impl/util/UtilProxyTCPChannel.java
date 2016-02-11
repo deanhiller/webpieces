@@ -1,0 +1,28 @@
+package org.webpieces.nio.impl.util;
+
+import java.net.SocketAddress;
+
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.deprecated.ConnectionCallback;
+import org.webpieces.nio.api.handlers.DataListener;
+
+
+public class UtilProxyTCPChannel extends UtilTCPChannel implements TCPChannel {
+
+	public UtilProxyTCPChannel(Channel realChannel) {
+		super(realChannel);
+	}
+
+	protected TCPChannel getRealChannel() {
+		return (TCPChannel)super.getRealChannel();
+	}
+	
+	public void registerForReads(DataListener listener) {
+		getRealChannel().registerForReads(new UtilReaderProxy(this, listener));
+	}
+
+	public void oldConnect(SocketAddress addr, ConnectionCallback c) {
+		getRealChannel().oldConnect(addr, new UtilProxyConnectCb(this, c));
+	}
+}
