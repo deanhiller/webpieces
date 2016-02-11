@@ -13,27 +13,33 @@ subprojects {
    project.ext.toStagingLibsDir = file(new File(toStagingDir, 'lib'))
 
    repositories {
-      mavenCentral()
+       mavenCentral()
    }
    dependencies {
-        testCompile 'junit:junit:4.11'
+       testCompile 'junit:junit:4.11'
 
-        compile 'org.slf4j:slf4j-api:1.7.5'
-        compile 'ch.qos.logback:logback-classic:1.0.13'
-        compile 'org.codehaus.groovy:groovy-all:2.1.9' //we use groovy in logback.xml
+       compile 'org.slf4j:slf4j-api:1.7.5'
+       compile 'ch.qos.logback:logback-classic:1.0.13'
+       compile 'org.codehaus.groovy:groovy-all:2.1.9' //we use groovy in logback.xml
 
-        //This line includes any jars a developer drops into {project}/lib directory
-        compile fileTree(dir: 'lib', include: '*.jar')
+       //This line includes any jars a developer drops into {project}/lib directory
+       compile fileTree(dir: 'lib', include: '*.jar')
    }
 
-    //let's at least copy all jars to a single directory to use in creating an application...
-    task syncJars(type: Sync) {
-        from(configurations.compile) {}
-        from(fixedLibDir) {}
-        into toStagingLibsDir
-    }
+   //let's at least copy all jars to a single directory to use in creating an application...
+   task syncJars(type: Sync) {
+       from(configurations.compile) {}
+       from(fixedLibDir) {}
+       into toStagingLibsDir
+   }
 
-    assemble.dependsOn('syncJars')
+   assemble.dependsOn('syncJars')
+
+   test{
+      beforeTest{ descr ->
+        logger.warn("Starting Test ${descr.className} : ${descr.name}")
+      }
+   }
 }
 
 project(':channelmanager') {
