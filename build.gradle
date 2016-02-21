@@ -42,7 +42,15 @@ subprojects {
    }
 }
 
-project(':channelmanager') {
+project(':httpproxy') {
+    dependencies {
+        compile project(':channelmanager'), project(':httpparser')
+    }
+}
 
+project(':httpclient') {
+    dependencies {
+        compile project(':channelmanager'), project(':httpparser')
+    }
 }
 

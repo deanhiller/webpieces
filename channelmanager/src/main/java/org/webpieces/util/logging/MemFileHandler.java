@@ -1,4 +1,4 @@
-package org.playorm.util.logging;
+package org.webpieces.util.logging;
 
 import java.io.IOException;
 import java.util.logging.FileHandler;

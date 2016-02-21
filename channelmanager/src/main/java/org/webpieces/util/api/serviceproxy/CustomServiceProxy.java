@@ -1,4 +1,4 @@
-package org.playorm.util.api.serviceproxy;
+package org.webpieces.util.api.serviceproxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;

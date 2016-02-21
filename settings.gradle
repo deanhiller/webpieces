@@ -1,5 +1,7 @@
 include 'channelmanager'
 include 'httpparser'
+include 'httpproxy'
+include 'httpclient'
 include 'router'
 include 'templatingapi'
 include 'embeddablewebserver'
