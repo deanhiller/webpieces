@@ -4,9 +4,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webpieces.httpparser.api.DataWrapper;
 import com.webpieces.httpparser.api.DataWrapperGenerator;
 import com.webpieces.httpparser.api.HttpParser;
@@ -30,7 +27,7 @@ import com.webpieces.httpparser.impl.data.EmptyWrapper;
 
 public class HttpParserImpl implements HttpParser {
 
-	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
+	//private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
 	private static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
 	private ConvertAscii conversion = new ConvertAscii();
 	private DataWrapperGenerator dataGen = HttpParserFactory.createDataWrapperGenerator();
