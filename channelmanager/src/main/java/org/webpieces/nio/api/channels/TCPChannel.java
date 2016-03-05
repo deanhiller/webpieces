@@ -37,9 +37,20 @@ public interface TCPChannel extends Channel {
 	 * @param engine
 	 * @return
 	 */
+	@Deprecated
 	public FutureOperation openSSL(SSLEngine engine);
 	
+	/**
+	 * Going away....simplifying the stack.  This library won't do SSL but will just do raw tcp to 
+	 * keep it simple
+	 */
+	@Deprecated
 	public FutureOperation closeSSL();
-	
+
+	/**
+	 * Going away....simplifying the stack.  This library won't do SSL but will just do raw tcp to 
+	 * keep it simple
+	 */
+	@Deprecated
 	public boolean isInSslMode();
 }
