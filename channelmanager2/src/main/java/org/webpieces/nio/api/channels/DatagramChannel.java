@@ -19,8 +19,4 @@ public interface DatagramChannel extends RegisterableChannel
     
     public void write(SocketAddress addr, ByteBuffer b);
     
-	/**
-	 * Closes and unregisters the channel if registered from the ChannelManager
-	 */
-	public void close();
 }

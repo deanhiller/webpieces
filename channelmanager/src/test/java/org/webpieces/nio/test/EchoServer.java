@@ -55,7 +55,7 @@ public class EchoServer implements DataListener, ConnectionListener {
 	}
 	
 	public void stop() throws IOException, InterruptedException {		
-		srvrChannel.oldClose();
+		srvrChannel.closeServerChannel();
 		for(int i = 0; i < sockets.size(); i++) {
 			Channel channel = sockets.get(i);
 			channel.oldClose();

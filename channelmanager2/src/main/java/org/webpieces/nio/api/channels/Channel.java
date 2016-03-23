@@ -17,7 +17,6 @@ public interface Channel extends RegisterableChannel {
 
 	public FutureOperation connect(SocketAddress addr);
 	public FutureOperation write(ByteBuffer b);
-	public FutureOperation close();
 	
     /**
      * Registers a DataListener that will be notified of all incoming data.  If the threadpool layer setup,

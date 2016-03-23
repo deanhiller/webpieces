@@ -18,8 +18,8 @@ public class UtilProxyTCPServerChannel extends UtilRegisterable implements TCPSe
 	public void registerServerSocketChannel(ConnectionListener cb) {
 		getRealChannel().registerServerSocketChannel(new UtilProxyAcceptCb(this, cb));
 	}
-	public void oldClose() {
-		getRealChannel().oldClose();
+	public void closeServerChannel() {
+		getRealChannel().closeServerChannel();
 	}
 
 }

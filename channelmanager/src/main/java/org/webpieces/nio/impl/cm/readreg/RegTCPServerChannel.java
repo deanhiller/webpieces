@@ -18,8 +18,8 @@ class RegTCPServerChannel extends UtilRegisterable implements TCPServerChannel {
 		return realChannel;
 	}
 	
-	public void oldClose() {
-		realChannel.oldClose();
+	public void closeServerChannel() {
+		realChannel.closeServerChannel();
 	}
 	
 	public void registerServerSocketChannel(ConnectionListener cb) {

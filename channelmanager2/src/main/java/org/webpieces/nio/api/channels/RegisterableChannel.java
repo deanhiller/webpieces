@@ -66,5 +66,7 @@ public interface RegisterableChannel {
 	/**
 	 * @return the local InetSocketAddress
 	 */
-	public InetSocketAddress getLocalAddress();		
+	public InetSocketAddress getLocalAddress();	
+	
+	public void close();
 }

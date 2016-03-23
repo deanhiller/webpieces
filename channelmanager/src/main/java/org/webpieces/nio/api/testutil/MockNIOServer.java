@@ -76,7 +76,7 @@ public class MockNIOServer extends MockDataHandler implements ConnectionListener
 		udp.close();
 		
 		log.info("close srvrChannel");
-		srvrChannel.oldClose();
+		srvrChannel.closeServerChannel();
 		log.info("oldClose channels");
 		for(int i = 0; i < sockets.size(); i++) {
 			Channel channel = sockets.get(i);

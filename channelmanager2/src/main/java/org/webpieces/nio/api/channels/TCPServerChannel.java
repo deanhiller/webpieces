@@ -20,10 +20,4 @@ public interface TCPServerChannel extends RegisterableChannel {
      */
 	public void registerServerSocketChannel(final ConnectionListener listener);
 	
-    /**
-     * This is a synchronous close (just like all of the other close() methods on other channels).
-     * The reason that this is the only one offered is that closing a server channel does not
-     * require any network activity, so happens immediately.
-     */
-    public void close();
 }

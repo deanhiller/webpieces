@@ -25,5 +25,5 @@ public interface TCPServerChannel extends RegisterableChannel {
      * The reason that this is the only one offered is that closing a server channel does not
      * require any network activity, so happens immediately.
      */
-    public void oldClose();
+    public void closeServerChannel();
 }

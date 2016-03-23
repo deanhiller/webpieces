@@ -70,7 +70,7 @@ public class DelayServer {
 	}
 	
 	public void stop() throws IOException, InterruptedException {		
-		srvrChannel.oldClose();
+		srvrChannel.closeServerChannel();
 		acceptor.closeAllSockets();
 		
 		serverSideChanMgr.stop();		
