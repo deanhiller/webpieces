@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.libs.ChannelSession;
@@ -24,6 +26,8 @@ import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class Layer3Parser {
 
+	private static final Logger log = LoggerFactory.getLogger(LayerZSendBadResponse.class);
+	
 	@Inject
 	private HttpParser parser;
 	@Inject
@@ -39,7 +43,10 @@ public class Layer3Parser {
 		
 			processor.processHttpRequests(channel, parsedRequests);
 		} catch(ParseException e) {
-			badResponse.sendBadClientResponse(channel, e, KnownStatusCode.HTTP4XX);
+			//move down to debug level later on..
+			//for now, this could actually be we screwed up until we are stable
+			log.info("Client screwed up", e);
+			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP400);
 		}
 	}
 

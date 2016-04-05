@@ -4,9 +4,9 @@ import javax.inject.Inject;
 
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer1ConnectionListener;
+import org.webpieces.httpproxy.impl.chain.SSLLayer1ConnectionListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.handlers.ConnectionListener;
 
 public class HttpProxyImpl implements HttpProxy {
 
@@ -14,6 +14,8 @@ public class HttpProxyImpl implements HttpProxy {
 	private ChannelManager channelManager;
 	@Inject
 	private Layer1ConnectionListener serverListener;
+	@Inject
+	private SSLLayer1ConnectionListener sslServerListener;
 	
 	private TCPServerChannel serverChannel;
 	private TCPServerChannel sslServerChannel;
@@ -24,7 +26,7 @@ public class HttpProxyImpl implements HttpProxy {
 		serverChannel.registerServerSocketChannel(serverListener);
 
 		sslServerChannel = channelManager.createTCPServerChannel("httpsProxy");
-		sslServerChannel.registerServerSocketChannel();
+		sslServerChannel.registerServerSocketChannel(sslServerListener);
 	}
 
 	@Override
