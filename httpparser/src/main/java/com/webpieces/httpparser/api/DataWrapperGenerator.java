@@ -17,11 +17,11 @@ public interface DataWrapperGenerator {
 	 * uses the references already created from the socket whether they are ByteBuffers
 	 * or byte[] arrays
 	 * 
-	 * @param firstData
-	 * @param secondData
+	 * @param begin to be put at the front
+	 * @param end to be put at the end
 	 * @return
 	 */
-	public DataWrapper chainDataWrappers(DataWrapper firstData, DataWrapper secondData);
+	public DataWrapper chainDataWrappers(DataWrapper begin, DataWrapper end);
 
 	/**
 	 * In some cases, we may have a DataWrapper containing the end of the message 

@@ -48,14 +48,14 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 			throw new IllegalArgumentException("splitPosition="+splitAtPosition+" is greater than size of data="+dataToRead.getReadableSize());
 		}
 		
-		DataProxyWrapper wrapper1 = new DataProxyWrapper(dataToRead, 0, splitAtPosition);
+		SplitProxyWrapper wrapper1 = new SplitProxyWrapper(dataToRead, 0, splitAtPosition);
 		
 		DataWrapper wrapper2;
 		if(dataToRead.getReadableSize() - splitAtPosition == 0) {
 			wrapper2 = new EmptyWrapper();
 		} else {
 			wrapper2 = 
-				new DataProxyWrapper(dataToRead, splitAtPosition, dataToRead.getReadableSize() - splitAtPosition);
+				new SplitProxyWrapper(dataToRead, splitAtPosition, dataToRead.getReadableSize() - splitAtPosition);
 		}
 		
 		tuple.add(wrapper1);

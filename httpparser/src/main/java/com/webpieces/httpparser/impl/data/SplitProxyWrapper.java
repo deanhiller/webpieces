@@ -4,13 +4,13 @@ import java.nio.charset.Charset;
 
 import com.webpieces.httpparser.api.DataWrapper;
 
-public class DataProxyWrapper implements DataWrapper {
+public class SplitProxyWrapper extends AbstractDataWrapper  {
 
 	private DataWrapper wrapper;
 	private int offset;
 	private int length;
 
-	public DataProxyWrapper(DataWrapper wrapper, int offset, int length) {
+	public SplitProxyWrapper(DataWrapper wrapper, int offset, int length) {
 		this.wrapper = wrapper;
 		this.offset = offset;
 		this.length = length;
@@ -50,4 +50,11 @@ public class DataProxyWrapper implements DataWrapper {
 		}
 		return copy;
 	}
+
+	@Override
+	public int getNumLayers() {
+		return wrapper.getNumLayers()+1;
+	}
+	
+	
 }

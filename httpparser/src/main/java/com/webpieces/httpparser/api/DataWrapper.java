@@ -36,4 +36,6 @@ public interface DataWrapper {
 	//Later, we may want this as well...
 	//public InputStream createInputStreamFrom();
 	
+	public int getNumLayers();
+
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.webpieces.httpparser.api.DataWrapper;
 
-public class ChainedDataWrapper implements DataWrapper {
+public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	private List<DataWrapper> wrappers = new ArrayList<>();
 
@@ -78,6 +78,17 @@ public class ChainedDataWrapper implements DataWrapper {
 
 	public void addMoreData(DataWrapper secondData) {
 		wrappers.add(secondData);
+	}
+
+	@Override
+	public int getNumLayers() {
+		int max = 0;
+		for(DataWrapper wrapper: wrappers) {
+			int num = wrapper.getNumLayers();
+			if(num > max) 
+				max = num;
+		}
+		return max+1;
 	}
 
 }

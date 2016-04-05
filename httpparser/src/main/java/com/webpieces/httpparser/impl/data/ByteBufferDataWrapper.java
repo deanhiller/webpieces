@@ -3,9 +3,7 @@ package com.webpieces.httpparser.impl.data;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import com.webpieces.httpparser.api.DataWrapper;
-
-public class ByteBufferDataWrapper implements DataWrapper {
+public class ByteBufferDataWrapper extends AbstractDataWrapper {
 	private ByteBuffer buffer;
 	
 	public ByteBufferDataWrapper(ByteBuffer buffer) {

@@ -2,9 +2,7 @@ package com.webpieces.httpparser.impl.data;
 
 import java.nio.charset.Charset;
 
-import com.webpieces.httpparser.api.DataWrapper;
-
-public class EmptyWrapper implements DataWrapper {
+public class EmptyWrapper extends AbstractDataWrapper  {
 
 	@Override
 	public int getReadableSize() {
