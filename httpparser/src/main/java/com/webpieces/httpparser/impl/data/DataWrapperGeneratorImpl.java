@@ -23,12 +23,18 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 	public DataWrapper chainDataWrappers(DataWrapper firstData, DataWrapper secondData) {
 		if(firstData instanceof EmptyWrapper) {
 			return secondData;
+		} else if(secondData instanceof EmptyWrapper) {
+			return firstData;
 		} else if(firstData instanceof ChainedDataWrapper) {
 			ChainedDataWrapper chained = (ChainedDataWrapper) firstData;
 			chained.addMoreData(secondData);
 			return chained;
+		} else if(secondData instanceof ChainedDataWrapper) {
+			ChainedDataWrapper chained = (ChainedDataWrapper) secondData;
+			chained.addMoreData(firstData);
+			return chained;
 		}
-		return new ChainedDataWrapper(firstData, secondData);
+		return new ChainedDataWrapper(firstData, secondData, this);
 	}
 
 	@Override
@@ -38,11 +44,14 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 
 	@Override
 	public List<DataWrapper> split(DataWrapper dataToRead, int splitAtPosition) {
-		//let's just split on top of a split for now and not worry about unwinding...
-		//We need to check if ChainedDataWrapper and drop certain segments if already read in...
-//		if(dataToRead instanceof ChainedDataWrapper) {
-//			throw new UnsupportedOperationException("need to add support by unwinding the chain first and making new ones");
-//		}
+		if(dataToRead instanceof ChainedDataWrapper) {
+			//A split proxy should never have a reference to a chained one or there is the potential for
+			//a memory leak in that as you grow, the right side is not releasing data from ChainedDataWrapper and you end
+			//up with  byteWrapper <-chained <- split <-chained <-split <- chained.... and it keeps going as data
+			//comes in never releasing the first set of data
+			return splitChainedWrapper((ChainedDataWrapper) dataToRead, splitAtPosition);
+		}
+		
 		List<DataWrapper> tuple = new ArrayList<>();
 		if(splitAtPosition > dataToRead.getReadableSize()) {
 			throw new IllegalArgumentException("splitPosition="+splitAtPosition+" is greater than size of data="+dataToRead.getReadableSize());
@@ -62,5 +71,9 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 		tuple.add(wrapper2);
 		
 		return tuple;
+	}
+
+	private List<DataWrapper> splitChainedWrapper(ChainedDataWrapper dataToRead, int splitAtPosition) {
+		return dataToRead.split(splitAtPosition);
 	}
 }

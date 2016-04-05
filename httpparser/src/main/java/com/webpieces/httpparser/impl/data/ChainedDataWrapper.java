@@ -5,14 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.webpieces.httpparser.api.DataWrapper;
+import com.webpieces.httpparser.api.DataWrapperGenerator;
 
 public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	private List<DataWrapper> wrappers = new ArrayList<>();
+	private DataWrapperGenerator generator;
 
-	public ChainedDataWrapper(DataWrapper wrapper1, DataWrapper wrapper2) {
+	public ChainedDataWrapper(DataWrapper wrapper1, DataWrapper wrapper2, DataWrapperGenerator generator) {
 		wrappers.add(wrapper1);
 		wrappers.add(wrapper2);
+		this.generator = generator;
+	}
+
+	public ChainedDataWrapper(List<DataWrapper> wrappers, DataWrapperGenerator generator) {
+		this.wrappers = wrappers;
+		this.generator = generator;
 	}
 	
 	@Override
@@ -39,6 +47,9 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	@Override
 	public String createStringFrom(int initialOffset, int length, Charset charSet) {
+		if(length == 0)
+			return "";
+		
 		String result = "";
 		int lengthLeftToRead = length;
 		int offset = initialOffset;
@@ -89,6 +100,43 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 				max = num;
 		}
 		return max+1;
+	}
+
+	public List<DataWrapper> split(int splitAtPosition) {
+		List<DataWrapper> wrappersInBegin = new ArrayList<>();
+		List<DataWrapper> wrappersInEnd = new ArrayList<>();
+		
+		boolean foundSplit = false;
+		List<DataWrapper> splitBuffers = null;
+		for(DataWrapper wrapper : wrappers) {
+			if (!foundSplit) {
+				if(splitAtPosition == wrapper.getReadableSize()) {
+					wrappersInBegin.add(wrapper);
+					foundSplit = true;
+				} else if(splitAtPosition < wrapper.getReadableSize()) {
+					splitBuffers = generator.split(wrapper, splitAtPosition);
+					foundSplit = true;
+				} else {
+					wrappersInBegin.add(wrapper);
+					splitAtPosition = splitAtPosition - wrapper.getReadableSize();	
+				}
+			} else {
+				wrappersInEnd.add(wrapper);
+			}
+		}
+
+		if(splitBuffers != null) {
+			wrappersInBegin.add(splitBuffers.get(0));
+			wrappersInEnd.add(0, splitBuffers.get(1));
+		}
+
+		ChainedDataWrapper wrapper1 = new ChainedDataWrapper(wrappersInBegin, generator);
+		ChainedDataWrapper wrapper2 = new ChainedDataWrapper(wrappersInEnd, generator);
+		
+		List<DataWrapper> finalTwo = new ArrayList<>();
+		finalTwo.add(wrapper1);
+		finalTwo.add(wrapper2);
+		return finalTwo;
 	}
 
 }
