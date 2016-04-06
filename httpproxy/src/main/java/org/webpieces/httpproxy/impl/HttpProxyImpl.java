@@ -1,7 +1,11 @@
 package org.webpieces.httpproxy.impl;
 
+import java.net.InetSocketAddress;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer1ConnectionListener;
 import org.webpieces.httpproxy.impl.chain.SSLLayer1ConnectionListener;
@@ -10,6 +14,8 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public class HttpProxyImpl implements HttpProxy {
 
+	private static final Logger log = LoggerFactory.getLogger(HttpProxyImpl.class);
+	
 	@Inject
 	private ChannelManager channelManager;
 	@Inject
@@ -22,11 +28,13 @@ public class HttpProxyImpl implements HttpProxy {
 	
 	@Override
 	public void start() {
-		serverChannel = channelManager.createTCPServerChannel("httpProxy");
-		serverChannel.registerServerSocketChannel(serverListener);
+		log.info("starting server");
+		InetSocketAddress addr = new InetSocketAddress(8080);
+		serverChannel = channelManager.createTCPServerChannel("httpProxy", addr, serverListener);
 
-		sslServerChannel = channelManager.createTCPServerChannel("httpsProxy");
-		sslServerChannel.registerServerSocketChannel(sslServerListener);
+		InetSocketAddress sslAddr = new InetSocketAddress(8443);
+		sslServerChannel = channelManager.createTCPServerChannel("httpsProxy", sslAddr, sslServerListener);
+		log.info("now listening for incoming connections");
 	}
 
 	@Override

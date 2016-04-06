@@ -1,5 +1,6 @@
 package org.webpieces.httpproxy.api;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class HttpProxyFactory {
@@ -12,6 +13,9 @@ public abstract class HttpProxyFactory {
     protected HttpProxyFactory() {}
 	
 	public static HttpProxy createHttpProxy(String id, Map<String, Object> props) {
+		if(props == null)
+			props = new HashMap<>();
+		
 		String implClazz = (String) props.get(IMPL_CLASS_KEY);
 		if(implClazz == null) {
 			implClazz = DEFAULT_IMPL;

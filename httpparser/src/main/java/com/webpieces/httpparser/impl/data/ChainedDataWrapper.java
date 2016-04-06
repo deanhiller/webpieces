@@ -130,8 +130,17 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 			wrappersInEnd.add(0, splitBuffers.get(1));
 		}
 
-		ChainedDataWrapper wrapper1 = new ChainedDataWrapper(wrappersInBegin, generator);
-		ChainedDataWrapper wrapper2 = new ChainedDataWrapper(wrappersInEnd, generator);
+		DataWrapper wrapper1;
+		if(wrappersInBegin.size() > 0) 
+			wrapper1 = new ChainedDataWrapper(wrappersInBegin, generator);
+		else 
+			wrapper1 = new EmptyWrapper();
+		
+		DataWrapper wrapper2;
+		if(wrappersInEnd.size() > 0) 
+			wrapper2 = new ChainedDataWrapper(wrappersInEnd, generator);
+		else
+			wrapper2 = new EmptyWrapper();
 		
 		List<DataWrapper> finalTwo = new ArrayList<>();
 		finalTwo.add(wrapper1);

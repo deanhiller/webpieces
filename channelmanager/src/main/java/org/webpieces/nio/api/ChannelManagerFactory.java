@@ -1,6 +1,7 @@
 package org.webpieces.nio.api;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.Map;
 
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -10,6 +11,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
+import org.webpieces.nio.api.handlers.ConnectionListener;
 
 
 public class ChannelManagerFactory {
@@ -43,6 +45,18 @@ public class ChannelManagerFactory {
 			}
 		}
 
+		@Override
+		public TCPServerChannel createTCPServerChannel(String id, SocketAddress addr, ConnectionListener serverListener) {
+			try {
+				TCPServerChannel channel = svc.createTCPServerChannel(id, null);
+				channel.bind(addr);
+				channel.registerServerSocketChannel(serverListener);
+				return channel;
+			} catch (IOException e) {
+				throw new NioException(e);
+			}
+		}
+		
 		@Override
 		public TCPChannel createTCPChannel(String id) {
 			try {

@@ -7,6 +7,7 @@ import org.webpieces.httpproxy.api.HttpProxyFactory;
 import org.webpieces.httpproxy.api.HttpProxyService;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
@@ -19,8 +20,8 @@ public class HttpProxyFactoryImpl extends HttpProxyFactory {
 		Module allModules = getModules();
 		if(testModule != null) 
 			allModules = Modules.override(allModules).with(testModule);
-		Guice.createInjector(allModules);
-		return null;
+		Injector injector = Guice.createInjector(allModules);
+		return injector.getInstance(HttpProxy.class);
 	}
 
 	private Module getModules() {
