@@ -1,13 +1,11 @@
 package org.webpieces.nio.api;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
-import org.webpieces.nio.api.handlers.ConnectionListener;
 
 
 public interface ChannelManager {
@@ -22,8 +20,6 @@ public interface ChannelManager {
      */
     public TCPServerChannel createTCPServerChannel(String id);   
 
-	public TCPServerChannel createTCPServerChannel(String string, SocketAddress addr, ConnectionListener serverListener);
-	
     /**
      * Returns a non-blocking TCPChannel.
      * @param id (Should not be null)Used for logging purposes. 

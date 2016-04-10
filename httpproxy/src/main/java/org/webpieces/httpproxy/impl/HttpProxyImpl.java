@@ -6,9 +6,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer1ConnectionListener;
+import org.webpieces.httpproxy.impl.chain.Layer1DataListener;
 import org.webpieces.httpproxy.impl.chain.SSLLayer1ConnectionListener;
+import org.webpieces.httpproxy.impl.chain.SSLLayer1DataListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
@@ -17,11 +20,11 @@ public class HttpProxyImpl implements HttpProxy {
 	private static final Logger log = LoggerFactory.getLogger(HttpProxyImpl.class);
 	
 	@Inject
-	private ChannelManager channelManager;
+	private AsyncServerManager channelManager;
 	@Inject
-	private Layer1ConnectionListener serverListener;
+	private Layer1DataListener serverListener;
 	@Inject
-	private SSLLayer1ConnectionListener sslServerListener;
+	private SSLLayer1DataListener sslServerListener;
 	
 	private TCPServerChannel serverChannel;
 	private TCPServerChannel sslServerChannel;
@@ -30,10 +33,10 @@ public class HttpProxyImpl implements HttpProxy {
 	public void start() {
 		log.info("starting server");
 		InetSocketAddress addr = new InetSocketAddress(8080);
-		serverChannel = channelManager.createTCPServerChannel("httpProxy", addr, serverListener);
+		serverChannel = channelManager.createTcpServer("httpProxy", addr, serverListener);
 
 		InetSocketAddress sslAddr = new InetSocketAddress(8443);
-		sslServerChannel = channelManager.createTCPServerChannel("httpsProxy", sslAddr, sslServerListener);
+		sslServerChannel = channelManager.createTcpServer("httpsProxy", sslAddr, sslServerListener);
 		log.info("now listening for incoming connections");
 	}
 
