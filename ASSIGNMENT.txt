@@ -1,0 +1,14 @@
+This assignment is to use the ChannelManager project but wrap it in an interface so users can just add a DataListener and receive Data from any sockets that connect in to the server.  To do this, you need to understand a little of the channelmanager api like so
+
+TCPServerChannel channel = channelManager.createTCPServerChannel();
+channel.registerConnectionListener(connectionListener);
+
+in your connectionListener you will receive a Channel that you need to cast to TCPChannel
+TCPChannel tcp = (TCPChannel)channel;
+
+and then register a DataListener
+
+tcp.registerDataListener(dataListener)
+
+Now, the harder part is how will you keep track of all connections such that when someone calls TCPServerChannel.close(), your code should close the TCPServerChannel and all the TCPChannels that are currently open (and do realize those channels do come and go)
+
