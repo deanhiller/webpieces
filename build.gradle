@@ -43,10 +43,16 @@ subprojects {
    }
 }
 
+project(':asyncserver') {
+    dependencies {
+        compile project(':channelmanager')
+    }
+}
+
 project(':httpproxy') {
     dependencies {
         compile 'com.google.inject:guice:3.0'
-        compile project(':channelmanager'), project(':httpparser')
+        compile project(':asyncserver'), project(':httpparser')
     }
 }
 
