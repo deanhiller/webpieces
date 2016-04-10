@@ -44,18 +44,6 @@ public class ChannelManagerFactory {
 				throw new NioException(e);
 			}
 		}
-
-		@Override
-		public TCPServerChannel createTCPServerChannel(String id, SocketAddress addr, ConnectionListener serverListener) {
-			try {
-				TCPServerChannel channel = svc.createTCPServerChannel(id, null);
-				channel.bind(addr);
-				channel.registerServerSocketChannel(serverListener);
-				return channel;
-			} catch (IOException e) {
-				throw new NioException(e);
-			}
-		}
 		
 		@Override
 		public TCPChannel createTCPChannel(String id) {
