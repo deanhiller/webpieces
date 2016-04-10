@@ -6,6 +6,9 @@ import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
+import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.handlers.DatagramListener;
 
 
 public interface ChannelManager {
@@ -22,17 +25,14 @@ public interface ChannelManager {
      *                   PacketProcessorFactory down to the ssl and packet layers.  
      * @return a TCPServerChannel
      */
-    public TCPServerChannel createTCPServerChannel(String id);   
+    public TCPServerChannel createTCPServerChannel(String id, ConnectionListener listener);   
 
     /**
      * Returns a non-blocking TCPChannel.
      * @param id (Should not be null)Used for logging purposes. 
-     * @param h (Can be null)The Settings holds factories that turn on security or packetizing.  If
-     *          h is null, or the factory is null, that feature will not be turned on.  The layer for that
-     *          feature must be in the ChannelManager stack also to be turned on.
      * @return a non-blocking TCPChannel.
      */
-    public TCPChannel createTCPChannel(String id);
+    public TCPChannel createTCPChannel(String id, DataListener listener);
 
     /**
      * Creates a UDPChannel that can connect to a peer and receive/send data from/to
@@ -44,11 +44,11 @@ public interface ChannelManager {
      * @return a UDPChannel
      * @throws IOException
      */
-    public UDPChannel createUDPChannel(String id);   
+    public UDPChannel createUDPChannel(String id, DataListener listener);   
 	
 	/*
 	 * Creates a UDPServerChannel that can send/receive data from multiple peers.
 	 */
-	public DatagramChannel createDatagramChannel(String id, int bufferSize);
+	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener listener);
     
 }

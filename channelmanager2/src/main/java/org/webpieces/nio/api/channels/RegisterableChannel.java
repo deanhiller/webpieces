@@ -11,7 +11,7 @@ import java.net.SocketAddress;
  * 2. isBound
  * 
  * TCPChannel and UDPChannel have similar functions like
- * 1. registerForRead
+ * 1. 
  * 2. connect (in java, udp has a connect for better point to point performance)
  * 3. bind
  * 4. isBound
