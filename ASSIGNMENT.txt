@@ -1,5 +1,9 @@
-The assignment here is that the DataWrapperGenerator has an issue.  If you chain, then split, then chain, then split
+ASSIGNMENT #1 - The assignment here is that the DataWrapperGenerator has an issue.  If you chain, then split, then chain, then split
 and you keep doing that, you end up never releasing memory for the first byte array that comes in.  This is what we
 call a memory leak in that memory is not released like we would like.  
 
 We need to fix that.  
+
+ASSIGNMENT #2 - implement ByteBufferDataWrapper with tests
+
+ASSIGNMENT #3 - implement HttpProxy Server
