@@ -22,8 +22,8 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(listener, connectedChannels); 
 		
-		serverChannel.registerServerSocketChannel(connectionListener);
 		serverChannel.bind(addr);
+		serverChannel.registerServerSocketChannel(connectionListener);
 		
 		return new ProxyTcpServerChannel(serverChannel, connectedChannels);
 	}

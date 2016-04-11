@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.api.HttpProxyFactory;
-import org.webpieces.httpproxy.api.HttpProxyService;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -28,11 +27,6 @@ public class HttpProxyFactoryImpl extends HttpProxyFactory {
 		return Modules.combine(
 			new HttpProxyModule()
 		);
-	}
-
-	@Override
-	protected HttpProxyService createHttpProxyService() {
-		return null;
 	}
 
 }

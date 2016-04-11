@@ -33,5 +33,4 @@ public abstract class HttpProxyFactory {
 
 	protected abstract HttpProxy createHttpProxyImpl(String id, Map<String, Object> props);
 	
-	protected abstract HttpProxyService createHttpProxyService();
 }

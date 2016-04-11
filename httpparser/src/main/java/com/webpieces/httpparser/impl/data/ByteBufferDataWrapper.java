@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 public class ByteBufferDataWrapper extends AbstractDataWrapper {
+	
 	private ByteBuffer buffer;
 	
 	public ByteBufferDataWrapper(ByteBuffer buffer) {
@@ -17,16 +18,24 @@ public class ByteBufferDataWrapper extends AbstractDataWrapper {
 
 	@Override
 	public byte readByteAt(int i) {
-		throw new UnsupportedOperationException("not done yet");
+		return buffer.get(i);
 	}
 
 	@Override
 	public String createStringFrom(int offset, int length, Charset charSet) {
-		throw new UnsupportedOperationException("not done yet");
+		//wanted to go from piece of ByteBuffer to String directly but can't find a good way...
+		byte[] data = new byte[length];
+		for(int i = 0; i < length; i++) {
+			data[i] = readByteAt(i+offset);
+		}
+		
+		return new String(data, charSet);
 	}
 
 	@Override
 	public byte[] createByteArray() {
-		throw new UnsupportedOperationException("not done yet");
+		byte[] data = new byte[buffer.remaining()];
+		buffer.get(data);
+		return data;
 	}
 }
