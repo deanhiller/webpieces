@@ -2,6 +2,8 @@ package org.webpieces.httpproxy.impl;
 
 import javax.inject.Singleton;
 
+import org.webpieces.asyncserver.api.AsyncServerManager;
+import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -22,17 +24,18 @@ public class HttpProxyModule implements Module {
 
 		binder.bind(HttpParser.class).toInstance(HttpParserFactory.createParser());
 		binder.bind(DataWrapperGenerator.class).toInstance(HttpParserFactory.createDataWrapperGenerator());
-		
 	}
 
 	@Provides
 	@Singleton
 	public ChannelManager providesChannelManager() {
-		return ChannelManagerFactory.createChannelManager("chanMgr", null);
+		return ChannelManagerFactory.createChannelManager("chanMgr1", null);
 	}
 	
 	@Provides
-	public TCPServerChannel provideServerChannel(ChannelManager manager) {
-		return manager.createTCPServerChannel("httpServerChannel");
+	@Singleton
+	public AsyncServerManager providesAsyncServerMgr(ChannelManager mgr) {
+		return AsyncServerMgrFactory.createChannelManager(mgr);
 	}
+	
 }

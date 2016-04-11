@@ -8,10 +8,6 @@ import javax.net.ssl.SSLEngine;
 import org.webpieces.nio.api.deprecated.ConnectionCallback;
 import org.webpieces.nio.api.handlers.FutureOperation;
 
-
-
-
-
 /**
  * @author Dean Hiller
  */

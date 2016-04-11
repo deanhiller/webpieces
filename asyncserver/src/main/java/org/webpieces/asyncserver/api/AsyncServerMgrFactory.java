@@ -5,7 +5,7 @@ import org.webpieces.nio.api.ChannelManager;
 
 public class AsyncServerMgrFactory {
 
-	public static AsyncServerManager createChannelManager(String id, ChannelManager props) {
-		return new AsyncServerManagerImpl();
+	public static AsyncServerManager createChannelManager(ChannelManager channelManager) {
+		return new AsyncServerManagerImpl(channelManager);
 	}
 }

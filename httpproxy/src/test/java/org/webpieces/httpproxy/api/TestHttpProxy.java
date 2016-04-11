@@ -17,6 +17,9 @@ import com.google.inject.Module;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.HttpParserFactory;
 import com.webpieces.httpparser.api.dto.HttpRequest;
+import com.webpieces.httpparser.api.dto.HttpRequestLine;
+import com.webpieces.httpparser.api.dto.HttpRequestMethod;
+import com.webpieces.httpparser.api.dto.HttpUri;
 
 public class TestHttpProxy {
 	
@@ -38,11 +41,11 @@ public class TestHttpProxy {
 	
 	@Test
 	public void testBasicProxy() throws IOException {
-		//do this for now until we fix everything...
-		if(true)
-			return;
-		
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(HttpRequestMethod.GET);
+		requestLine.setUri(new HttpUri("http://www.deano.com"));
 		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine);
 		byte[] array = parser.marshalToBytes(req);
 		
 		ByteBuffer buffer = ByteBuffer.wrap(array);

@@ -8,11 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.httpproxy.api.HttpProxy;
-import org.webpieces.httpproxy.impl.chain.Layer1ConnectionListener;
 import org.webpieces.httpproxy.impl.chain.Layer1DataListener;
-import org.webpieces.httpproxy.impl.chain.SSLLayer1ConnectionListener;
 import org.webpieces.httpproxy.impl.chain.SSLLayer1DataListener;
-import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public class HttpProxyImpl implements HttpProxy {
@@ -44,8 +41,6 @@ public class HttpProxyImpl implements HttpProxy {
 	public void stop() {
 		serverChannel.closeServerChannel();
 		sslServerChannel.closeServerChannel();
-		
-		throw new UnsupportedOperationException("close all tcp channels too");
 	}
 
 }
