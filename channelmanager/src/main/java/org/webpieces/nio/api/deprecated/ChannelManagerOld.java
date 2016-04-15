@@ -8,8 +8,8 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 
 
-public interface ChannelManager {
-
+public interface ChannelManagerOld {
+	
 	/**
 	 * Key specific to the Basic Channel Manager and only needs to be set on the
 	 * basic channel manager.  Since basic is always the last child, every other

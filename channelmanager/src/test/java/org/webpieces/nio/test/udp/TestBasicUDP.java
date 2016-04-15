@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 import org.webpieces.nio.api.channels.UDPChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.Settings;
@@ -193,8 +193,8 @@ public class TestBasicUDP extends TestCase {
 
 	private ChannelService getServerChanMgr() {
 		Map<String, Object> p = new HashMap<String, Object>();
-		p.put(ChannelManager.KEY_ID, "[server]");
-		p.put(ChannelManager.KEY_BUFFER_FACTORY, bufFactory);		
+		p.put(ChannelManagerOld.KEY_ID, "[server]");
+		p.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufFactory);		
 		return basic.createChannelManager(p);
 	}
 

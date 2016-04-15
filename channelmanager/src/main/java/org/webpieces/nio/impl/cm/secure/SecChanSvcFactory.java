@@ -2,7 +2,7 @@ package org.webpieces.nio.impl.cm.secure;
 
 import java.util.Map;
 
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 
@@ -33,7 +33,7 @@ public class SecChanSvcFactory extends ChannelServiceFactory {
 	public ChannelService createChannelManager(Map<String, Object> map) {
 		if(map == null)
 			throw new IllegalArgumentException("map cannot be null");
-		Object theId = map.get(ChannelManager.KEY_ID);
+		Object theId = map.get(ChannelManagerOld.KEY_ID);
 		if(theId == null)
 			throw new IllegalArgumentException("map must contain a value for property key=ChannelManager.KEY_ID");
 		String id = theId+"";

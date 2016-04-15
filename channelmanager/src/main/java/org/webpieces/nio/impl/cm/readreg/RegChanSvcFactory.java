@@ -2,7 +2,7 @@ package org.webpieces.nio.impl.cm.readreg;
 
 import java.util.Map;
 
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 
@@ -24,7 +24,7 @@ public class RegChanSvcFactory extends ChannelServiceFactory {
 	public ChannelService createChannelManager(Map<String, Object> p) {
 		if(p == null)
 			throw new IllegalArgumentException("Properties cannot be null");
-		Object id = p.get(ChannelManager.KEY_ID);
+		Object id = p.get(ChannelManagerOld.KEY_ID);
 		if(id == null)
 			throw new IllegalArgumentException("Properties must contain a value for property key=ChannelManagerFactory.KEY_ID");
 

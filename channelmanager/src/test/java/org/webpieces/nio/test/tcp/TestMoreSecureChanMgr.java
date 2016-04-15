@@ -12,7 +12,7 @@ import javax.net.ssl.SSLEngine;
 import junit.framework.TestCase;
 
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.ConnectionCallback;
@@ -70,16 +70,16 @@ public class TestMoreSecureChanMgr extends TestCase {
 		ChannelServiceFactory secureFactory = ChannelServiceFactory.createFactory(factoryName);
 		
 		Map<String, Object> p = new HashMap<String, Object>();
-		p.put(ChannelManager.KEY_ID, "client");		
-		p.put(ChannelManager.KEY_BUFFER_FACTORY, bufFactory);
+		p.put(ChannelManagerOld.KEY_ID, "client");		
+		p.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufFactory);
 		ChannelService chanMgr = secureFactory.createChannelManager(p);		
 		return chanMgr;
 	}
 
 	protected ChannelService getServerChanMgr() {
 		Map<String, Object> p = new HashMap<String, Object>();
-		p.put(ChannelManager.KEY_ID, "server");
-		p.put(ChannelManager.KEY_BUFFER_FACTORY, bufFactory);
+		p.put(ChannelManagerOld.KEY_ID, "server");
+		p.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufFactory);
 		ChannelService svcChanMgr = basicFactory.createChannelManager(p);
 		
 		return svcChanMgr;

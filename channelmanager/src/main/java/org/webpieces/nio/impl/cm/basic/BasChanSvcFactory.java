@@ -2,7 +2,7 @@ package org.webpieces.nio.impl.cm.basic;
 
 import java.util.Map;
 
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.libs.BufferFactory;
@@ -30,11 +30,11 @@ public class BasChanSvcFactory extends ChannelServiceFactory {
 	public ChannelService createChannelManager(Map<String, Object> map) {
 		if(map == null)
 			throw new IllegalArgumentException("map cannot be null");
-		Object theId = map.get(ChannelManager.KEY_ID);
+		Object theId = map.get(ChannelManagerOld.KEY_ID);
 		if(theId == null)
 			throw new IllegalArgumentException("map must contain a value for property key=ChannelManager.KEY_ID");
 		String id = theId+"";
-		Object o = map.get(ChannelManager.KEY_BUFFER_FACTORY);
+		Object o = map.get(ChannelManagerOld.KEY_BUFFER_FACTORY);
 		if(o == null || !(o instanceof BufferFactory))
 			throw new IllegalArgumentException("Key=ChannelManager.KEY_BUFFER_FACTORY must " +
 					"not be null and must contain an instance of ByteBufferFactory");

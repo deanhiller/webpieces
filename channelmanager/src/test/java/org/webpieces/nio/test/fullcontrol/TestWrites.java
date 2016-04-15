@@ -11,7 +11,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -95,8 +95,8 @@ public class TestWrites extends TestCase {
         factory = ChannelServiceFactory.createFactory(props2);   
         
 		Map<String, Object> p = new HashMap<String, Object>();
-        p.put(ChannelManager.KEY_ID, "[client]");
-        p.put(ChannelManager.KEY_BUFFER_FACTORY, bufFactory);
+        p.put(ChannelManagerOld.KEY_ID, "[client]");
+        p.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufFactory);
         p.put("mock.channelsFactory", mockChannels);
         p.put("mock.selectorProvider", mockSelectorProv);            
         chanMgr = factory.createChannelManager(p);

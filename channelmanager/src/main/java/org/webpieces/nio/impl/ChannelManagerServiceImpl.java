@@ -12,7 +12,7 @@ import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.Settings;
@@ -106,9 +106,9 @@ public class ChannelManagerServiceImpl implements ChannelService, ChannelMgrSvcM
 		ChannelServiceFactory factory = ChannelServiceFactory.createDefaultStack();
 		
 		Map<String, Object> props = new HashMap<String, Object>();
-		props.put(ChannelManager.KEY_ID, "ChanMgr");
-		props.put(ChannelManager.KEY_EXECUTORSVC_FACTORY, execSvcFactory);
-		props.put(ChannelManager.KEY_BUFFER_FACTORY, bufferFactory);
+		props.put(ChannelManagerOld.KEY_ID, "ChanMgr");
+		props.put(ChannelManagerOld.KEY_EXECUTORSVC_FACTORY, execSvcFactory);
+		props.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufferFactory);
 		ChannelService mgr = factory.createChannelManager(props);
 		return mgr;
 	}

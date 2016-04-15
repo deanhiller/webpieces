@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.DatagramChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.handlers.DatagramListener;
@@ -61,8 +61,8 @@ public class TestDatagramChannel extends MockTestCase
         ChannelServiceFactory factory = ChannelServiceFactory.createFactory(props2);        
         
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(ChannelManager.KEY_BUFFER_FACTORY, bufFactory);
-        map.put(ChannelManager.KEY_ID, "server+client");
+        map.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufFactory);
+        map.put(ChannelManagerOld.KEY_ID, "server+client");
         svc = factory.createChannelManager(map);
         
         svc.start();

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.ConnectionCallback;
@@ -48,7 +48,7 @@ public class TryRealConnection {
 			//ChannelManagerFactory secureFactory = ChannelManagerFactory.createFactory(null);
 			
 			Map<String, Object> p = new HashMap<String, Object>();
-			p.put(ChannelManager.KEY_ID, "[client]");		
+			p.put(ChannelManagerOld.KEY_ID, "[client]");		
 			chanMgr = secureFactory.createChannelManager(p);
 			chanMgr.start();
 		}

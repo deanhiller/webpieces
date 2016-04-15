@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 
 
 
@@ -18,7 +18,7 @@ public abstract class FactoryCreator {
 	public static final String KEY_IS_DIRECT = "key.is.direct";
 	public static final String KEY_PACKET_SEPARATOR = "key.packet.separator";
 	public static final String KEY_NUM_THREADS = "key.num.threads";
-	public static final String KEY_ID = ChannelManager.KEY_ID;
+	public static final String KEY_ID = ChannelManagerOld.KEY_ID;
 	public static final String KEY_SSL_ENGINE = "key.ssl.engine";
 	
 	public static FactoryCreator createFactory(Map<String, Object> map) {

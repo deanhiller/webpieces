@@ -76,10 +76,10 @@ public abstract class ChannelServiceFactory {
 		ChannelServiceFactory factory = createDefaultStack();
 		
 		Map<String, Object> props = new HashMap<String, Object>();
-		props.put(ChannelManager.KEY_ID, id);
-		props.put(ChannelManager.KEY_EXECUTORSVC_FACTORY, execSvcFactory);
-		props.put(ChannelManager.KEY_ROUTINGEXECUTORSVC_FACTORY, executorSvc);
-		props.put(ChannelManager.KEY_BUFFER_FACTORY, bufferFactory);
+		props.put(ChannelManagerOld.KEY_ID, id);
+		props.put(ChannelManagerOld.KEY_EXECUTORSVC_FACTORY, execSvcFactory);
+		props.put(ChannelManagerOld.KEY_ROUTINGEXECUTORSVC_FACTORY, executorSvc);
+		props.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufferFactory);
 		ChannelService mgr = factory.createChannelManager(props);
 		
 		return mgr;
@@ -96,9 +96,9 @@ public abstract class ChannelServiceFactory {
 		
 		ChannelServiceFactory factory = createNewStack();
 		Map<String, Object> props = new HashMap<String, Object>();
-		props.put(ChannelManager.KEY_ID, id);
-		props.put(ChannelManager.KEY_BUFFER_FACTORY, bufferFactory);
-		props.put(ChannelManager.KEY_EXECUTORSVC_FACTORY, executorSvc);
+		props.put(ChannelManagerOld.KEY_ID, id);
+		props.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufferFactory);
+		props.put(ChannelManagerOld.KEY_EXECUTORSVC_FACTORY, executorSvc);
 		return factory.createChannelManager(props);
 	}
 	
@@ -117,9 +117,9 @@ public abstract class ChannelServiceFactory {
 		
 		ChannelServiceFactory factory = createRawStack();
 		Map<String, Object> props = new HashMap<String, Object>();
-		props.put(ChannelManager.KEY_ID, id);
-		props.put(ChannelManager.KEY_BUFFER_FACTORY, bufferFactory);
-		props.put(ChannelManager.KEY_ROUTINGEXECUTORSVC_FACTORY, executorSvc);
+		props.put(ChannelManagerOld.KEY_ID, id);
+		props.put(ChannelManagerOld.KEY_BUFFER_FACTORY, bufferFactory);
+		props.put(ChannelManagerOld.KEY_ROUTINGEXECUTORSVC_FACTORY, executorSvc);
 		return factory.createChannelManager(props);
 	}
 

@@ -2,7 +2,7 @@ package org.webpieces.nio.impl.cm.threaded;
 
 import java.util.Map;
 
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.libs.BufferFactory;
@@ -26,9 +26,9 @@ public class ThdChanSvcFactory extends ChannelServiceFactory {
 	public ChannelService createChannelManager(Map<String, Object> map) {
 		if(map == null)
 			throw new IllegalArgumentException("Properties cannot be null");
-		Object id = map.get(ChannelManager.KEY_ID);
-		Object o = map.get(ChannelManager.KEY_EXECUTORSVC_FACTORY);
-		Object b = map.get(ChannelManager.KEY_BUFFER_FACTORY);
+		Object id = map.get(ChannelManagerOld.KEY_ID);
+		Object o = map.get(ChannelManagerOld.KEY_EXECUTORSVC_FACTORY);
+		Object b = map.get(ChannelManagerOld.KEY_BUFFER_FACTORY);
 		if(id == null)
 			throw new IllegalArgumentException("Properties must contain a value for property key=ChannelManagerFactory.KEY_ID");
 		else if(o == null)

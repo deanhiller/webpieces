@@ -3,7 +3,7 @@ package org.webpieces.nio.test.tcp;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.webpieces.nio.api.deprecated.ChannelManager;
+import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.Settings;
@@ -52,18 +52,18 @@ public class PerfTestZThreaded extends ZPerformanceSuper {
 	@Override
 	protected ChannelService getClientChanMgr() {
 		Map<String, Object> p = new HashMap<String, Object>();
-		p.put(ChannelManager.KEY_ID, "client");
-		p.put(ChannelManager.KEY_BUFFER_FACTORY, getBufFactory());
-        p.put(ChannelManager.KEY_EXECUTORSVC_FACTORY, clientExecFactory);
+		p.put(ChannelManagerOld.KEY_ID, "client");
+		p.put(ChannelManagerOld.KEY_BUFFER_FACTORY, getBufFactory());
+        p.put(ChannelManagerOld.KEY_EXECUTORSVC_FACTORY, clientExecFactory);
 		return factory.createChannelManager(p);
 	}
 
 	@Override
 	protected ChannelService getServerChanMgr() {		
 		Map<String, Object> p = new HashMap<String, Object>();
-		p.put(ChannelManager.KEY_ID, "server");
-		p.put(ChannelManager.KEY_BUFFER_FACTORY, getBufFactory());		
-        p.put(ChannelManager.KEY_EXECUTORSVC_FACTORY, serverExecFactory);
+		p.put(ChannelManagerOld.KEY_ID, "server");
+		p.put(ChannelManagerOld.KEY_BUFFER_FACTORY, getBufFactory());		
+        p.put(ChannelManagerOld.KEY_EXECUTORSVC_FACTORY, serverExecFactory);
 		return factory.createChannelManager(p);
 	}
 
