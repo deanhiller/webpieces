@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer1DataListener;
@@ -23,8 +24,8 @@ public class HttpProxyImpl implements HttpProxy {
 	@Inject
 	private SSLLayer1DataListener sslServerListener;
 	
-	private TCPServerChannel serverChannel;
-	private TCPServerChannel sslServerChannel;
+	private AsyncServer serverChannel;
+	private AsyncServer sslServerChannel;
 	
 	@Override
 	public void start() {
