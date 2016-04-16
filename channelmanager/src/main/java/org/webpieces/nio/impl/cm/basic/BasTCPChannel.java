@@ -16,7 +16,6 @@ import org.webpieces.nio.api.channels.NioException;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.deprecated.ConnectionCallback;
 import org.webpieces.nio.api.handlers.FutureOperation;
-import org.webpieces.nio.api.libs.BufferFactory;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
 import org.webpieces.nio.impl.util.UtilWaitForConnect;
@@ -32,9 +31,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = Logger.getLogger(BasTCPChannel.class.getName());
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, BufferFactory bufFactory, 
-                          SelectorManager2 selMgr) throws IOException {
-		super(id, bufFactory, selMgr); 
+	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr) throws IOException {
+		super(id, selMgr); 
 		channel = factory.open();
 		channel.configureBlocking(false);
 	}
@@ -44,9 +42,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * Only used from TCPServerChannel.accept().  please keep it that way. thanks.
 	 * @param newChan
 	 */
-	public BasTCPChannel(IdObject id, BufferFactory bufFactory, 
-                          SocketChannel newChan, SelectorManager2 selMgr) {
-		super(id, bufFactory, selMgr);
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr) {
+		super(id, selMgr);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;

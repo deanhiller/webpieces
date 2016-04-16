@@ -9,7 +9,6 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -25,7 +24,7 @@ public class Layer1DataListener implements DataListener {
 	private LayerZSendBadResponse badResponse;
 	
 	@Override
-	public void incomingData(Channel channel, DataChunk b) throws IOException {
+	public void incomingData(Channel channel, ByteBuffer b) throws IOException {
 		try {
 			processor.deserialize(channel, b);
 		} catch(Throwable e) {

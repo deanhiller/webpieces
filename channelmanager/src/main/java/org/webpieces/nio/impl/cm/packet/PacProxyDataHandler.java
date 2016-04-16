@@ -6,12 +6,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.PacketListener;
 import org.webpieces.nio.api.libs.PacketProcessor;
-import org.webpieces.nio.impl.util.DataChunkWithBuffer;
-import org.webpieces.nio.impl.util.PacketChunk;
 
 
 class PacProxyDataHandler implements DataListener, PacketListener {
@@ -28,19 +25,12 @@ class PacProxyDataHandler implements DataListener, PacketListener {
 		//this.realChannel = (TCPChannel)channel.getRealChannel();
 	}
 	
-	public void incomingData(Channel realChannel, DataChunk chunk) throws IOException {
-		ByteBuffer b = chunk.getData();
+	public void incomingData(Channel realChannel, ByteBuffer chunk) throws IOException {
 		try {
-			boolean notified = packetProcessor.incomingData(b, chunk);
-			
-			DataChunkWithBuffer c = (DataChunkWithBuffer) chunk;
-			c.releaseBuffer(" handler that didn't consume="+handler);
-			
-			if(!notified)
-				chunk.setProcessed("PacProxyDataHandler");
+			boolean notified = packetProcessor.incomingData(chunk, null);
 		} catch(Exception e) {
 			log.log(Level.WARNING, "exception", e);
-			handler.failure(channel, b, e);
+			handler.failure(channel, chunk, e);
 		}
 	}
 	
@@ -51,9 +41,7 @@ class PacProxyDataHandler implements DataListener, PacketListener {
 	public void incomingPacket(ByteBuffer b, Object passthrough) throws IOException {
 		//MUST create a new packet here as the same DataChunk is sometimes used
 		//since one ByteBuffer can contain multiple packets!!!!
-		DataChunkWithBuffer chunk = (DataChunkWithBuffer) passthrough;
-		PacketChunk c = new PacketChunk(b, chunk);
-		handler.incomingData(channel, c);
+		handler.incomingData(channel, b);
 	}
 
 	public void failure(Channel realChannel, ByteBuffer data, Exception e) {

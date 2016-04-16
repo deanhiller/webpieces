@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 
 
@@ -21,8 +20,7 @@ public class UtilReaderProxy implements DataListener {
 		this.handler = h;
 	}
 
-	public void incomingData(Channel realChannel, DataChunk chunk) throws IOException {
-		//ByteBuffer b = chunk.getData();
+	public void incomingData(Channel realChannel, ByteBuffer chunk) throws IOException {
 		handler.incomingData(channel, chunk);
         
 //        if(b.remaining() > 0) {

@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.BufferFactory;
 import org.webpieces.nio.api.libs.BufferHelper;
@@ -37,11 +36,9 @@ public class Delayer implements DataListener {
 			bufFactory = creator.createBufferFactory(map);			
 		}		
 	}
-	public void incomingData(Channel channel, DataChunk chunk) throws IOException {
-		ByteBuffer b = chunk.getData();
-		
-		final ByteBuffer newBuffer = bufFactory.createBuffer(channel, b.remaining());
-		newBuffer.put(b);
+	public void incomingData(Channel channel, ByteBuffer chunk) throws IOException {
+		final ByteBuffer newBuffer = bufFactory.createBuffer(channel, chunk.remaining());
+		newBuffer.put(chunk);
 		TimerTask t = new TimerTask() {
 			@Override
 			public void run() {
@@ -55,8 +52,6 @@ public class Delayer implements DataListener {
 			
 		};
 		timer.schedule(t, 1000);
-		
-		chunk.setProcessed("Delayer");
 	}
 
 	public void farEndClosed(Channel channel) {

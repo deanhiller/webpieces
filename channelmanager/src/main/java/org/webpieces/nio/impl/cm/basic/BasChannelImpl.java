@@ -45,7 +45,7 @@ public abstract class BasChannelImpl
 	private boolean isClosed = false;
     private boolean registered;
     
-	public BasChannelImpl(IdObject id, BufferFactory factory, SelectorManager2 selMgr) {
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr) {
 		super(id, selMgr);
 		session = CREATOR.createSession(this);  
 	}

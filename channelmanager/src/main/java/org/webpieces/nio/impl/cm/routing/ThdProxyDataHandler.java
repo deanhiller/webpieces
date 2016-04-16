@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.BufferFactory;
 import org.webpieces.nio.api.libs.ChannelsRunnable;
@@ -26,7 +25,7 @@ class ThdProxyDataHandler implements DataListener {
 		this.svc = svc2;
 	}
 	
-	public void incomingData(Channel realChannel, final DataChunk chunk) throws IOException {
+	public void incomingData(Channel realChannel, final ByteBuffer chunk) throws IOException {
 		//copy ByteBuffer here....
         ChannelsRunnable r = new ChannelsRunnable() {
 			public void run() {

@@ -6,26 +6,21 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.webpieces.nio.impl.util.BufferListener;
-import org.webpieces.nio.impl.util.DataChunkImpl;
-import org.webpieces.nio.impl.util.ProcessedListener;
-
 
 public class BufferPool implements BufferListener {
 
 	public Set<ByteBuffer> freePackets = new HashSet<ByteBuffer>();
 	
-	public synchronized DataChunkImpl nextBuffer(Object id, ProcessedListener l) {
+	public synchronized ByteBuffer nextBuffer() {
 		ByteBuffer b = null;
 		Iterator<ByteBuffer> iter = freePackets.iterator();
 		if(iter.hasNext()) {
 			b = iter.next();
 			iter.remove();
-		} else 
+		} else
 			b = ByteBuffer.allocateDirect(1000);
 		
-		DataChunkImpl impl = new DataChunkImpl(id, b, this);
-		impl.setListener(l);
-		return impl;
+		return b;
 	}
 
 	public synchronized void releaseBuffer(ByteBuffer buffer) {

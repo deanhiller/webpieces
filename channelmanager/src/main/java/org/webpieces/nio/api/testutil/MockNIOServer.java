@@ -19,7 +19,6 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.Settings;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 
 
@@ -145,16 +144,7 @@ public class MockNIOServer extends MockDataHandler implements ConnectionListener
 					buffer.clear();
 					udp.receive(buffer);
 					buffer.flip();
-					DataChunk c = new DataChunk() {
-						@Override
-						public void setProcessed(String name) {
-						}
-						@Override
-						public ByteBuffer getData() {
-							return buffer;
-						}
-					};
-					handler.incomingData(null, c);
+					handler.incomingData(null, buffer);
 				} catch(ClosedByInterruptException e) {
 					//occurs when thread is interrupted
 				} catch(Exception e) {

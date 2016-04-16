@@ -62,13 +62,16 @@ public class SelectorManager2 implements SelectorListener {
 
 	private boolean stopped;
 
+	private BufferPool pool;
+
 //--------------------------------------------------------------------
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(SelectorProviderFactory factory, Object id) {
+	public SelectorManager2(SelectorProviderFactory factory, Object id, BufferPool pool) {
 	  	this.id = id;
         this.factory = factory;
+        this.pool = pool;
 	}
 //--------------------------------------------------------------------
 //	BUSINESS METHODS
@@ -260,7 +263,7 @@ public class SelectorManager2 implements SelectorListener {
         			+" needCloseOrRegister="+needCloseOrRegister+" wantShutdown="+selector.isWantShutdown());
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
-        	Helper.processKeys(id, keySet, this);
+        	Helper.processKeys(id, keySet, this, pool);
         }
     }
 	

@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.libs.BufferHelper;
 
 import biz.xsoftware.mock.CloningBehavior;
@@ -54,13 +53,11 @@ public class CloneByteBuffer implements CloningBehavior {
 		return new Object[] { clone(b), obj};
 	}
 	
-	public void incomingData(Channel channel, DataChunk chunk) {	
+	public void incomingData(Channel channel, ByteBuffer chunk) {	
 		//log.info("b.rem="+b.remaining());
-		chunk.setProcessed("CloneByteBuffer");
 	}
 	
-	public Object[] incomingDataCloner(Channel channel, DataChunk chunk) {
-		ByteBuffer b = chunk.getData();
+	public Object[] incomingDataCloner(Channel channel, ByteBuffer b) {
 		return new Object[] { channel, clone(b) };
 	}
 //	private static final Logger log = Logger.getLogger(CloneByteBuffer.class.getName());

@@ -31,13 +31,11 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	private ServerSocketChannel channel;
 	
 	private int i = 0;
-	private BufferFactory bufFactory;
     private ChannelsFactory channelFactory;
 	
-	public BasTCPServerChannel(IdObject id, ChannelsFactory c, BufferFactory bufFactory, SelectorManager2 selMgr) throws IOException {
+	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr) throws IOException {
 		super(id, selMgr);
 
-		this.bufFactory = bufFactory;
         this.channelFactory = c;
 		channel = ServerSocketChannel.open();
 		channel.configureBlocking(false);
@@ -66,7 +64,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketId);
-			TCPChannel tcpChan = new BasTCPChannel(obj, bufFactory, proxyChan, getSelectorManager());
+			TCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager());
 			if(log.isLoggable(Level.FINER))
 				log.finer(tcpChan+"Accepted new incoming connection");
 			cb.connected(tcpChan);

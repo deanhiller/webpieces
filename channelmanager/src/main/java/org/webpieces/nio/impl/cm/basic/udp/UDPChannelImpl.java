@@ -31,8 +31,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	private boolean isConnected = false;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, BufferFactory factory, SelectorManager2 selMgr) throws IOException {
-		super(id, factory, selMgr);
+	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr) throws IOException {
+		super(id, selMgr);
 		channel = DatagramChannel.open();
 		channel.configureBlocking(false);
         channel.socket().setReuseAddress(true);

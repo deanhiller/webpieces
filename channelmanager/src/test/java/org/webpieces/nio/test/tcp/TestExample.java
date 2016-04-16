@@ -8,8 +8,6 @@ import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -17,9 +15,10 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.BufferHelper;
+
+import junit.framework.TestCase;
 
 /**
  */
@@ -134,12 +133,10 @@ public class TestExample extends TestCase
         /**
          * @see org.webpieces.nio.api.handlers.DataListener#incomingData(Channel, java.nio.ByteBuffer)
          */
-        public void incomingData(Channel channel, DataChunk chunk) throws IOException
+        public void incomingData(Channel channel, ByteBuffer chunk) throws IOException
         {
-        	ByteBuffer b = chunk.getData();
-            String msg = HELPER.readString(b, b.remaining());            
+            String msg = HELPER.readString(chunk, chunk.remaining());            
             log.info(name+" says '"+msg+"'");
-            chunk.setProcessed("TestExample.MyDataListner");
         }
 
         /**

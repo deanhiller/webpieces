@@ -14,7 +14,6 @@ import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.ConnectionCallback;
 import org.webpieces.nio.api.deprecated.Settings;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.BufferHelper;
 import org.webpieces.nio.api.libs.SSLEngineFactory;
@@ -67,10 +66,8 @@ public class EventClient implements ConnectionCallback, DataListener {
 		log.log(Level.WARNING, channel+"Exception", e);
 	}
 
-	public void incomingData(Channel channel, DataChunk chunk) throws IOException {
-		ByteBuffer b = chunk.getData();
-		String s = HELPER.readString(b, b.remaining());
-		chunk.setProcessed("EventClient");
+	public void incomingData(Channel channel, ByteBuffer chunk) throws IOException {
+		String s = HELPER.readString(chunk, chunk.remaining());
 		log.info(channel+"Received event="+s);
 	}
 

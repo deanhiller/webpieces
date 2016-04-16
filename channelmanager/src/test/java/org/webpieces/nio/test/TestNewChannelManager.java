@@ -6,8 +6,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import junit.framework.TestCase;
-
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
@@ -15,7 +13,6 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.FutureOperation;
 import org.webpieces.nio.api.handlers.OperationCallback;
@@ -27,6 +24,7 @@ import org.webpieces.nio.api.testutil.MockNIOServer;
 import biz.xsoftware.mock.CalledMethod;
 import biz.xsoftware.mock.MockObject;
 import biz.xsoftware.mock.MockObjectFactory;
+import junit.framework.TestCase;
 
 public class TestNewChannelManager extends TestCase {
 
@@ -105,19 +103,16 @@ public class TestNewChannelManager extends TestCase {
 		
 		CalledMethod m = serverHandler.expect("incomingData");
 		TCPChannel actualChannel = (TCPChannel)m.getAllParams()[0];
-		DataChunk chunk = (DataChunk)m.getAllParams()[1];
-		ByteBuffer actualBuf = chunk.getData();
+		ByteBuffer actualBuf = (ByteBuffer)m.getAllParams()[1];
 		String result = helper.readString(actualBuf, actualBuf.remaining());
 		assertEquals("de", result);
-		chunk.setProcessed("TestNewChannelManagerA");
 		
 		b.rewind();
 		FutureOperation future = actualChannel.write(b);
 		future.waitForOperation(5000); //synchronously wait for write to happen
 		
 		m = clientHandler.expect(MockDataHandler.INCOMING_DATA);
-		DataChunk c = (DataChunk) m.getAllParams()[1];
-		actualBuf = c.getData();
+		actualBuf = (ByteBuffer) m.getAllParams()[1];
 		result = helper.readString(actualBuf, actualBuf.remaining());
 		assertEquals("de", result);	
 
@@ -125,18 +120,10 @@ public class TestNewChannelManager extends TestCase {
 		FutureOperation future2 = actualChannel.write(b);
 		future2.waitForOperation(5000); //synchronously wait for write to happen
 
-		Thread.sleep(1000);
-		
-		clientHandler.expect(MockObject.NONE);
-		
-		c.setProcessed("TestNewChannelManager");
-		
 		m = clientHandler.expect(MockDataHandler.INCOMING_DATA);
-		c = (DataChunk) m.getAllParams()[1];
-		actualBuf = c.getData();
+		actualBuf = (ByteBuffer) m.getAllParams()[1];
 		result = helper.readString(actualBuf, actualBuf.remaining());
 		assertEquals("de", result);	
-		c.setProcessed("testnewChannelMgr2");
 		
 		return b;
 	}

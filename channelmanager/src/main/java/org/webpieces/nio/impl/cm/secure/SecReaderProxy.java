@@ -5,11 +5,9 @@ import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.AsyncSSLEngine;
 import org.webpieces.nio.api.libs.PacketAction;
-import org.webpieces.nio.impl.util.DataChunkWithBuffer;
 
 
 class SecReaderProxy implements DataListener {
@@ -28,21 +26,12 @@ class SecReaderProxy implements DataListener {
 		return data;
 	}
 
-	public void incomingData(Channel c, DataChunk chunk) throws IOException {
-		ByteBuffer b = chunk.getData();
+	public void incomingData(Channel c, ByteBuffer chunk) throws IOException {
 		if(!isClosed) {
-			PacketAction action = handler.feedEncryptedPacket(b, chunk);
-			if(action == PacketAction.NOT_ENOUGH_BYTES_YET) {
-				chunk.setProcessed("SecReaderProxy"); //trigger another read from socket
-			}
-			
+			PacketAction action = handler.feedEncryptedPacket(chunk, null);
 		} else {
-			b.position(b.limit()); //if closed, read the data so we don't get warnings
-			chunk.setProcessed("SecReaderProxy");
+			chunk.position(chunk.limit()); //if closed, read the data so we don't get warnings
 		}
-
-		DataChunkWithBuffer cb = (DataChunkWithBuffer) chunk;
-		cb.releaseBuffer(" hander that did not consume all data="+handler);
 	}
 	
 	public void farEndClosed(Channel c) {

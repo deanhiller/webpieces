@@ -10,8 +10,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.NullWriteCallback;
 import org.webpieces.nio.api.handlers.OperationCallback;
 import org.webpieces.nio.api.libs.SSLListener;
-import org.webpieces.nio.impl.util.DataChunkWithBuffer;
-import org.webpieces.nio.impl.util.PacketChunk;
 
 
 class SecSSLListener implements SSLListener {
@@ -52,9 +50,7 @@ class SecSSLListener implements SSLListener {
 	}
 	
 	public void packetUnencrypted(ByteBuffer out, Object passThrough) throws IOException {
-		DataChunkWithBuffer c = (DataChunkWithBuffer) passThrough;
-		PacketChunk packet = new PacketChunk(out, c);
-		client.incomingData(channel, packet);
+		client.incomingData(channel, out);
 	}
 	
 	public void setClientHandler(DataListener client) {

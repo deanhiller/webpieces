@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import javax.inject.Inject;
 
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 
 public class SSLLayer1DataListener implements DataListener {
@@ -15,7 +14,7 @@ public class SSLLayer1DataListener implements DataListener {
 	private SSLLayer2Encryption processor;
 	
 	@Override
-	public void incomingData(Channel channel, DataChunk b) throws IOException {
+	public void incomingData(Channel channel, ByteBuffer b) throws IOException {
 		
 	}
 

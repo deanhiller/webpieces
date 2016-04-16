@@ -14,7 +14,6 @@ import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.ConnectionCallback;
 import org.webpieces.nio.api.deprecated.Settings;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.BufferFactory;
 import org.webpieces.nio.api.libs.BufferHelper;
@@ -148,12 +147,11 @@ public abstract class ZNioFailureSuperclass extends MockTestCase {
 	}
 	
 	private static class ThrowAndClone implements CloningBehavior {
-		public void incomingData(Channel channel, DataChunk b) {	
+		public void incomingData(Channel channel, ByteBuffer b) {	
 			throw new RuntimeException("testing");
 		}
-		public Object[] incomingDataCloner(Channel channel, DataChunk chunk) {
-			ByteBuffer b = chunk.getData();
-			return new Object[] { channel, CloneByteBuffer.clone(b) };
+		public Object[] incomingDataCloner(Channel channel, ByteBuffer chunk) {
+			return new Object[] { channel, CloneByteBuffer.clone(chunk) };
 		}		
 		
 	}

@@ -9,7 +9,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.asyncserver.api.AsyncServerManager;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.google.inject.Binder;
@@ -49,8 +48,7 @@ public class TestHttpProxy {
 		byte[] array = parser.marshalToBytes(req);
 		
 		ByteBuffer buffer = ByteBuffer.wrap(array);
-		DataChunk chunk = new MyDataChunk(buffer); 
-		dataListener.incomingData(mockTcpChannel, chunk);
+		dataListener.incomingData(mockTcpChannel, buffer);
 	}
 	
 	private class TestModule implements Module {

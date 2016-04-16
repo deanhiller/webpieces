@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.libs.ChannelSession;
 
 import com.webpieces.httpparser.api.DataWrapper;
@@ -17,11 +16,9 @@ import com.webpieces.httpparser.api.DataWrapperGenerator;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;
-import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpStatusType;
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class Layer3Parser {
@@ -37,7 +34,7 @@ public class Layer3Parser {
 	@Inject
 	private LayerZSendBadResponse badResponse;
 	
-	public void deserialize(Channel channel, DataChunk chunk) {
+	public void deserialize(Channel channel, ByteBuffer chunk) {
 		try {
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
@@ -50,7 +47,7 @@ public class Layer3Parser {
 		}
 	}
 
-	private List<HttpRequest> doTheWork(Channel channel, DataChunk chunk) {
+	private List<HttpRequest> doTheWork(Channel channel, ByteBuffer chunk) {
 		ChannelSession session = channel.getSession();		
 		Memento memento = (Memento) session.get("memento");
 		
@@ -59,8 +56,7 @@ public class Layer3Parser {
 			session.put("memento", memento);
 		}
 
-		ByteBuffer data = chunk.getData();
-		DataWrapper dataWrapper = generator.wrapByteBuffer(data);
+		DataWrapper dataWrapper = generator.wrapByteBuffer(chunk);
 		
 		Memento resultMemento = parse(memento, dataWrapper);
 

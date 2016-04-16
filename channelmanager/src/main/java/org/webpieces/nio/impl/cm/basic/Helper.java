@@ -14,8 +14,6 @@ import java.util.logging.Logger;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
-import org.webpieces.nio.impl.util.DataChunkImpl;
-import org.webpieces.nio.impl.util.ProcessedListener;
 
 
 final class Helper {
@@ -25,8 +23,6 @@ final class Helper {
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
 
-	private static BufferPool pool = new BufferPool();
-	
 	private Helper() {}
 	
 	public static String opType(int ops) {
@@ -43,7 +39,7 @@ final class Helper {
 		return retVal;
 	}
 	
-	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr) {
+	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr, BufferPool pool) {
 		Iterator<SelectionKey> iter = keySet.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
@@ -52,7 +48,7 @@ final class Helper {
 				if(log.isLoggable(Level.FINE))
 					log.fine(key.attachment()+" ops="+Helper.opType(key.readyOps())
 							+" acc="+key.isAcceptable()+" read="+key.isReadable()+" write"+key.isWritable());
-				processKey(id, key, mgr);
+				processKey(id, key, mgr, pool);
 //			} catch(CancelledKeyException e) {
 //				log.log(Level.INFO, "Cancelled key may be normal", e);
 			} catch(IOException e) {
@@ -83,7 +79,7 @@ final class Helper {
 		keySet.clear();
 	}
 	
-	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr) throws IOException, InterruptedException {
+	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException, InterruptedException {
 		if(log.isLoggable(Level.FINEST))
 			log.finest(id+""+key.attachment()+"proccessing");
 
@@ -106,7 +102,7 @@ final class Helper {
 		//The read MUST be after the write as a call to key.isWriteable is invalid if the
 		//read resulted in the far end closing the socket.
 		if(key.isReadable()) {
-			Helper.read(id, key, mgr);
+			Helper.read(id, key, mgr, pool);
 		}                   
 	}
 	
@@ -147,7 +143,7 @@ final class Helper {
 		}
 	}
 
-	private static void read(Object id, SelectionKey key, SelectorManager2 mgr) throws IOException {
+	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException {
 		if(log.isLoggable(Level.FINEST))
 			log.finest(id+""+key.attachment()+"reading data");
 		
@@ -155,17 +151,15 @@ final class Helper {
 		DataListener in = struct.getDataHandler();
 		BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
 		
-		ProcessedListenerImpl l = new ProcessedListenerImpl(channel, in, mgr);
-		DataChunkImpl chunk = pool.nextBuffer(id, l);
-		ByteBuffer b = chunk.getData();
+		ByteBuffer chunk = pool.nextBuffer();
 		
 		try {
             if(logBufferNextRead)
-            	log.info(channel+"buffer="+b);
-            int bytes = channel.readImpl(b);
+            	log.info(channel+"buffer="+chunk);
+            int bytes = channel.readImpl(chunk);
             if(logBufferNextRead) {
             	logBufferNextRead = false;
-            	log.info(channel+"buffer2="+b);                	
+            	log.info(channel+"buffer2="+chunk);                	
             }
 
             processBytes(id, key, chunk, bytes, mgr);
@@ -245,13 +239,13 @@ final class Helper {
      * @param mgr 
      * @throws IOException
      */
-    private static void processBytes(Object id, SelectionKey key, DataChunkImpl chunk, int bytes, SelectorManager2 mgr) throws IOException
+    private static void processBytes(Object id, SelectionKey key, ByteBuffer data, int bytes, SelectorManager2 mgr) throws IOException
     {
         WrapperAndListener struct = (WrapperAndListener)key.attachment();
         DataListener in = struct.getDataHandler();
         BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
         
-        ByteBuffer b = chunk.getData();
+        ByteBuffer b = data;
         //in 1.5.0_08, was getting a nullpointer on helper...
         b.flip(); //helper.doneFillingBuffer(b);
         
@@ -261,12 +255,9 @@ final class Helper {
 			channel.closeOnSelectorThread();
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
-			//let's DEregister for read until this packet is processed and re-register when they set the chunk to processed(true)
-			unregisterChannelForReads(mgr, channel);
-			
 			if(apiLog.isLoggable(Level.FINER))
 				apiLog.finer(channel+"READ bytes="+bytes);
-			in.incomingData(channel, chunk);
+			in.incomingData(channel, b);
 		}
     }
 
@@ -280,30 +271,6 @@ final class Helper {
 			log.log(Level.WARNING, "exception on unregsiter", e);
 		}
 	}
-    
-    private static class ProcessedListenerImpl implements ProcessedListener {
-
-		private SelectorManager2 mgr;
-		private BasChannelImpl channel;
-		private DataListener in;
-
-		public ProcessedListenerImpl(BasChannelImpl channel, DataListener in, SelectorManager2 mgr) {
-			this.mgr = mgr;
-			this.channel = channel;
-			this.in = in;
-		}
-
-		@Override
-		public void processed(DataChunkImpl chunk) {
-			try {
-				mgr.registerSelectableChannel(channel, SelectionKey.OP_READ, in, false);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		}
-    }
     
 	private static void write(Object id, SelectionKey key) throws IOException, InterruptedException {
 		if(log.isLoggable(Level.FINEST))

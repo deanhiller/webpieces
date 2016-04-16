@@ -24,25 +24,23 @@ class BasChannelService implements ChannelService {
 	private SelectorManager2 selMgr;
 	private String objectId;
 	private String cmId;
-	private BufferFactory bufFactory;
     private ChannelsFactory channelFactory;
 	private boolean started;
 	
-	BasChannelService(String id, ChannelsFactory c, SelectorProviderFactory mgr, BufferFactory bufFactory) {
+	BasChannelService(String id, ChannelsFactory c, SelectorProviderFactory mgr, BufferPool pool) {
 		if(id == null || id.length() == 0)
 			throw new IllegalArgumentException("id cannot be null");
 		this.cmId = "["+id+"] ";
 		
-		selMgr = new SelectorManager2(mgr, cmId);
+		selMgr = new SelectorManager2(mgr, cmId, pool);
 		this.objectId = id;
-		this.bufFactory = bufFactory;
         this.channelFactory = c;
 	}
 	
     public TCPServerChannel createTCPServerChannel(String id, Settings h) throws IOException {
         preconditionChecks(id);
         IdObject obj = new IdObject(objectId, id);
-        return new BasTCPServerChannel(obj, channelFactory, bufFactory, selMgr);
+        return new BasTCPServerChannel(obj, channelFactory, selMgr);
     }
 
 	private void preconditionChecks(String id) {
@@ -55,13 +53,13 @@ class BasChannelService implements ChannelService {
     public TCPChannel createTCPChannel(String id, Settings h) throws IOException {
         preconditionChecks(id);        
         IdObject obj = new IdObject(objectId, id);      
-        return new BasTCPChannel(obj, channelFactory, bufFactory, selMgr);
+        return new BasTCPChannel(obj, channelFactory, selMgr);
     } 
 
     public UDPChannel createUDPChannel(String id, Settings h) throws IOException {
         preconditionChecks(id);
         IdObject obj = new IdObject(objectId, id);
-        return new UDPChannelImpl(obj, bufFactory, selMgr);
+        return new UDPChannelImpl(obj, selMgr);
     }
     
 	public DatagramChannel createDatagramChannel(String id, int bufferSize) throws IOException {

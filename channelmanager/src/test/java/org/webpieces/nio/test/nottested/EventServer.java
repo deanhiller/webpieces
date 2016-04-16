@@ -18,7 +18,6 @@ import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.Settings;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.libs.SSLEngineFactory;
 import org.webpieces.nio.api.testutil.MockSSLEngineFactory;
@@ -76,17 +75,15 @@ public class EventServer implements ConnectionListener, DataListener {
 	/**
 	 * 
 	 */
-	public void incomingData(Channel channel, DataChunk chunk) throws IOException {
-		ByteBuffer b = chunk.getData();
+	public void incomingData(Channel channel, ByteBuffer chunk) throws IOException {
 		log.info(channel+"incoming data");
-		ByteBuffer buf = ByteBuffer.allocate(b.remaining());
+		ByteBuffer buf = ByteBuffer.allocate(chunk.remaining());
 		buf.clear();
-		buf.put(b);
+		buf.put(chunk);
 		buf.flip();
 		SendBytesTask task = new SendBytesTask(buf, channel);
 		channelToTask.put(channel, task);
 		TIMER.schedule(task, 0, 3000);
-		chunk.setProcessed("EventServer");
 	}
 
 	public void farEndClosed(Channel channel) {

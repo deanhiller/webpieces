@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 
 public class ProxyDataListener implements DataListener {
@@ -19,7 +18,7 @@ public class ProxyDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, DataChunk b) throws IOException {
+	public void incomingData(Channel channel, ByteBuffer b) throws IOException {
 		TCPChannel proxy = new ProxyTCPChannel((TCPChannel) channel, connectedChannels);
 		dataListener.incomingData(proxy, b);
 	}

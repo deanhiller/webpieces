@@ -52,7 +52,8 @@ public class BasChanSvcFactory extends ChannelServiceFactory {
             mgr = (SelectorProviderFactory)map.get("mock.selectorProvider");
         }
 
-		return new BasChannelService(id, factory, mgr, (BufferFactory)o);
+        BufferPool pool = new BufferPool();
+		return new BasChannelService(id, factory, mgr, pool);
 	}
 
 

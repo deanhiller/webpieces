@@ -16,7 +16,6 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.deprecated.Settings;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataChunk;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.NullWriteCallback;
 import org.webpieces.nio.api.testutil.MockNIOServer;
@@ -78,10 +77,8 @@ public class EchoServer implements DataListener, ConnectionListener {
 	}
 
 	private int id = 0;
-	public void incomingData(Channel channel, DataChunk chunk) throws IOException {		
-		ByteBuffer b = chunk.getData();
-		channel.oldWrite(b, NullWriteCallback.singleton());
-		chunk.setProcessed("EchoServer");
+	public void incomingData(Channel channel, ByteBuffer chunk) throws IOException {		
+		channel.oldWrite(chunk, NullWriteCallback.singleton());
 	}
 
 	public void farEndClosed(Channel channel) {
