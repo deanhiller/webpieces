@@ -49,6 +49,12 @@ project(':core-asyncserver') {
     }
 }
 
+project(':http-parser') {
+    dependencies {
+        compile project(':core-datawrapper')
+    }
+}
+
 project(':embeddable-httpproxy') {
     dependencies {
         compile 'com.google.inject:guice:3.0'

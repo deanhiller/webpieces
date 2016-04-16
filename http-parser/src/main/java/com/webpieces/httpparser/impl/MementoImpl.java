@@ -3,7 +3,7 @@ package com.webpieces.httpparser.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webpieces.httpparser.api.DataWrapper;
+import com.webpieces.data.api.DataWrapper;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.dto.HttpMessage;

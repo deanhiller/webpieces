@@ -1,8 +1,8 @@
-package com.webpieces.httpparser.impl.data;
+package com.webpieces.data.impl;
 
 import java.nio.charset.Charset;
 
-import com.webpieces.httpparser.api.DataWrapper;
+import com.webpieces.data.api.DataWrapper;
 
 public class SplitProxyWrapper extends AbstractDataWrapper  {
 

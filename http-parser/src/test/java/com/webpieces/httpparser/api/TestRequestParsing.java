@@ -3,6 +3,9 @@ package com.webpieces.httpparser.api;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.webpieces.data.api.DataWrapper;
+import com.webpieces.data.api.DataWrapperGenerator;
+import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpMessage;
@@ -15,7 +18,7 @@ import com.webpieces.httpparser.impl.ConvertAscii;
 public class TestRequestParsing {
 	
 	private HttpParser parser = HttpParserFactory.createParser();
-	private DataWrapperGenerator dataGen = HttpParserFactory.createDataWrapperGenerator();
+	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Test
 	public void testBasic() {

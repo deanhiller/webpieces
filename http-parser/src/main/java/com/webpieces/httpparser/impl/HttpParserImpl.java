@@ -4,10 +4,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webpieces.httpparser.api.DataWrapper;
-import com.webpieces.httpparser.api.DataWrapperGenerator;
+import com.webpieces.data.api.DataWrapper;
+import com.webpieces.data.api.DataWrapperGenerator;
+import com.webpieces.data.api.DataWrapperGeneratorFactory;
+import com.webpieces.data.impl.EmptyWrapper;
 import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.HttpParserFactory;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;
 import com.webpieces.httpparser.api.ParsedStatus;
@@ -23,14 +24,13 @@ import com.webpieces.httpparser.api.dto.HttpResponseStatus;
 import com.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import com.webpieces.httpparser.api.dto.HttpUri;
 import com.webpieces.httpparser.api.dto.HttpVersion;
-import com.webpieces.httpparser.impl.data.EmptyWrapper;
 
 public class HttpParserImpl implements HttpParser {
 
 	//private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
 	private static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
 	private ConvertAscii conversion = new ConvertAscii();
-	private DataWrapperGenerator dataGen = HttpParserFactory.createDataWrapperGenerator();
+	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {

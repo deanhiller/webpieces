@@ -1,4 +1,4 @@
-package com.webpieces.httpparser.impl.data;
+package com.webpieces.data.impl;
 
 import java.nio.charset.Charset;
 

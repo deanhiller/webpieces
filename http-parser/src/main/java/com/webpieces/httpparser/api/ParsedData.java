@@ -1,5 +1,6 @@
 package com.webpieces.httpparser.api;
 
+import com.webpieces.data.api.DataWrapper;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 
 public class ParsedData {

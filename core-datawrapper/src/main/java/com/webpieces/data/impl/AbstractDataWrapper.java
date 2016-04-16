@@ -1,6 +1,6 @@
-package com.webpieces.httpparser.impl.data;
+package com.webpieces.data.impl;
 
-import com.webpieces.httpparser.api.DataWrapper;
+import com.webpieces.data.api.DataWrapper;
 
 public abstract class AbstractDataWrapper implements DataWrapper {
 

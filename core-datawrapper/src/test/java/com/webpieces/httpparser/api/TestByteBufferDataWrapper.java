@@ -6,9 +6,13 @@ import java.nio.charset.Charset;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.webpieces.data.api.DataWrapper;
+import com.webpieces.data.api.DataWrapperGenerator;
+import com.webpieces.data.api.DataWrapperGeneratorFactory;
+
 public class TestByteBufferDataWrapper {
 
-	private DataWrapperGenerator dataGen = HttpParserFactory.createDataWrapperGenerator();
+	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Test
 	public void testBasicByteBuffer() {
