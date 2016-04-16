@@ -2,8 +2,6 @@ package com.webpieces.httpparser.impl.data;
 
 import java.nio.charset.Charset;
 
-import com.webpieces.httpparser.api.DataWrapper;
-
 public class ByteArrayDataWrapper extends AbstractDataWrapper {
 
 	private byte[] data;

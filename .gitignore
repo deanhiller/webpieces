@@ -3,6 +3,9 @@
 # Package Files #
 */output
 /bin
+*/bin
+.project
+.settings
 tmp/
 /eclipse/
 *.pyc

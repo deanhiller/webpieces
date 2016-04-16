@@ -7,7 +7,6 @@ import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.nio.api.channels.TCPServerChannel;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -29,7 +28,8 @@ public class HttpProxyModule implements Module {
 	@Provides
 	@Singleton
 	public ChannelManager providesChannelManager() {
-		return ChannelManagerFactory.createChannelManager("chanMgr1", null);
+		return ChannelManagerFactory.createChannelManager("id", null);
+		//ChannelManagerFactory.createBasicChannelManager("proxyChanMgr");
 	}
 	
 	@Provides

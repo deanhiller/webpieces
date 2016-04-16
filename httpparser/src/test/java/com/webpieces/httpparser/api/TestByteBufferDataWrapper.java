@@ -32,5 +32,4 @@ public class TestByteBufferDataWrapper {
 		Assert.assertEquals("0123456789", str1);
 	}
 	
-	
 }

@@ -35,7 +35,9 @@ public class ByteBufferDataWrapper extends AbstractDataWrapper {
 	@Override
 	public byte[] createByteArray() {
 		byte[] data = new byte[buffer.remaining()];
+		buffer.mark();
 		buffer.get(data);
+		buffer.reset();
 		return data;
 	}
 }
