@@ -10,11 +10,11 @@ import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DatagramListener;
-import org.webpieces.nio.api.libs.ChannelSession;
-import org.webpieces.nio.api.libs.FactoryCreator;
+import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
 
 /**
@@ -22,10 +22,9 @@ import org.webpieces.nio.api.libs.FactoryCreator;
 public class DatagramChannelImpl implements DatagramChannel
 {
     private static final Logger log = Logger.getLogger(DatagramChannelImpl.class.getName());
-    private static final FactoryCreator CREATOR = FactoryCreator.createFactory(null);
     private static final DatagramListener NULL_LISTENER = new NullDatagramListener();
     
-    private ChannelSession session;
+    private ChannelSession session = new ChannelSessionImpl();
     private DatagramSocket socket;
     private String id;
     private DatagramListener listener = NULL_LISTENER;
@@ -36,7 +35,6 @@ public class DatagramChannelImpl implements DatagramChannel
 
     public DatagramChannelImpl(String id, int bufferSize) {
         this.id = "["+id+"] ";
-        session = CREATOR.createSession(this);
         buffer = ByteBuffer.allocate(bufferSize);
     }
 
@@ -248,14 +246,6 @@ public class DatagramChannelImpl implements DatagramChannel
             doThreadWork();
         }
 
-        /**
-         * 
-         */
-        public void stopRunning()
-        {
-            shutDownThread = true;
-            
-        }
     }
     
     private static class NullDatagramListener implements DatagramListener {

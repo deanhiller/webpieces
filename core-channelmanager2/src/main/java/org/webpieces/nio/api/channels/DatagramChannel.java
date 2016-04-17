@@ -4,7 +4,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import org.webpieces.nio.api.handlers.DatagramListener;
-import org.webpieces.nio.api.libs.ChannelSession;
 
 
 /**

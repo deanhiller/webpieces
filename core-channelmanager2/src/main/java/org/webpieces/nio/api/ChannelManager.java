@@ -10,7 +10,7 @@ import org.webpieces.nio.api.channels.UDPChannel;
 /**
  * @author Dean Hiller
  */
-public interface ChannelService {
+public interface ChannelManager {
 
 	/**
 	 * Key specific to the Basic Channel Manager and only needs to be set on the

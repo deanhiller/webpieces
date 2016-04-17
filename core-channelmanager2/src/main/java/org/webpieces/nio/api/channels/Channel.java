@@ -7,10 +7,36 @@ import java.nio.ByteBuffer;
 
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.FutureOperation;
-import org.webpieces.nio.api.libs.ChannelSession;
 
 
 /**
+ * 
+ * TCPServerChannel ->       RegisterableChannel
+ * TCPChannel -> Channel ->  RegisterableChannel
+ * UDPChannel -> Channel ->  RegisterableChannel
+ * DatagramChannel  ->       RegisterableChannel
+ * 
+ * This is the superclass for UDPChannel and TCPChannel 
+ * <pre>
+ * TCPServerChannel and TCPChannel have similar functions like 
+ * 1. bind
+ * 2. isBound
+ * 
+ * TCPChannel and UDPChannel have similar functions like
+ * 1. registerForRead
+ * 2. connect (in java, udp has a connect for better point to point performance)
+ * 3. bind
+ * 4. isBound
+ * 
+ * This implies the superinterface of UDPChannel and TCPChannel share the
+ * same superinterface as TCPServerChannel
+ * 
+ * TCPServerChannel ->       RegisterableChannel
+ * TCPChannel -> Channel ->  RegisterableChannel
+ * UDPChannel -> Channel ->  RegisterableChannel
+ * DatagramChannel  ->       RegisterableChannel
+ * </pre>
+ * 
  * @author Dean Hiller
  */
 public interface Channel extends RegisterableChannel {

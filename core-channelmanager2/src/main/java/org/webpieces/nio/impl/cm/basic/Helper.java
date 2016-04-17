@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
@@ -39,7 +40,7 @@ final class Helper {
 		return retVal;
 	}
 	
-	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr, BufferPool pool) {
+	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr, BufferCreationPool pool) {
 		Iterator<SelectionKey> iter = keySet.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
@@ -81,7 +82,7 @@ final class Helper {
 		keySet.clear();
 	}
 	
-	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException, InterruptedException {
+	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferCreationPool pool) throws IOException, InterruptedException {
 		if(log.isLoggable(Level.FINEST))
 			log.finest(id+""+key.attachment()+"proccessing");
 
@@ -145,7 +146,7 @@ final class Helper {
 		}
 	}
 
-	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException {
+	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferCreationPool pool) throws IOException {
 		if(log.isLoggable(Level.FINEST))
 			log.finest(id+""+key.attachment()+"reading data");
 		
@@ -263,16 +264,16 @@ final class Helper {
 		}
     }
 
-	private static void unregisterChannelForReads(SelectorManager2 mgr,
-			BasChannelImpl channel) {
-		try {
-			mgr.unregisterChannelForRead(channel);
-		} catch (IOException e) {
-			log.log(Level.WARNING, "Exception on unregister for read", e);
-		} catch (InterruptedException e) {
-			log.log(Level.WARNING, "exception on unregsiter", e);
-		}
-	}
+//	private static void unregisterChannelForReads(SelectorManager2 mgr,
+//			BasChannelImpl channel) {
+//		try {
+//			mgr.unregisterChannelForRead(channel);
+//		} catch (IOException e) {
+//			log.log(Level.WARNING, "Exception on unregister for read", e);
+//		} catch (InterruptedException e) {
+//			log.log(Level.WARNING, "exception on unregsiter", e);
+//		}
+//	}
     
 	private static void write(Object id, SelectionKey key) throws IOException, InterruptedException {
 		if(log.isLoggable(Level.FINEST))

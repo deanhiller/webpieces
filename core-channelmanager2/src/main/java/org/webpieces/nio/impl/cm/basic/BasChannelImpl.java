@@ -16,12 +16,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.FutureOperation;
 import org.webpieces.nio.api.handlers.OperationCallback;
-import org.webpieces.nio.api.libs.ChannelSession;
-import org.webpieces.nio.api.libs.FactoryCreator;
+import org.webpieces.nio.impl.util.ChannelSessionImpl;
 import org.webpieces.nio.impl.util.FutureOperationImpl;
 import org.webpieces.nio.impl.util.UtilWaitForCompletion;
 
@@ -36,9 +36,8 @@ public abstract class BasChannelImpl
 
 	private static final Logger apiLog = Logger.getLogger(Channel.class.getName());
     private static final Logger log = Logger.getLogger(BasChannelImpl.class.getName());
-    private static final FactoryCreator CREATOR = FactoryCreator.createFactory(null);
     
-    private ChannelSession session;
+    private ChannelSession session = new ChannelSessionImpl();
 	private LinkedBlockingQueue<DelayedWritesCloses> waitingWriters = new LinkedBlockingQueue<DelayedWritesCloses>(1000);
 	private boolean isConnecting = false;
 	private boolean isClosed = false;
@@ -46,7 +45,6 @@ public abstract class BasChannelImpl
     
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr) {
 		super(id, selMgr);
-		session = CREATOR.createSession(this);  
 	}
 	
 	/* (non-Javadoc)

@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 
 import javax.swing.event.EventListenerList;
 
+import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
@@ -62,13 +63,13 @@ public class SelectorManager2 implements SelectorListener {
 
 	private boolean stopped;
 
-	private BufferPool pool;
+	private BufferCreationPool pool;
 
 //--------------------------------------------------------------------
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(SelectorProviderFactory factory, Object id, BufferPool pool) {
+	public SelectorManager2(SelectorProviderFactory factory, Object id, BufferCreationPool pool) {
 	  	this.id = id;
         this.factory = factory;
         this.pool = pool;

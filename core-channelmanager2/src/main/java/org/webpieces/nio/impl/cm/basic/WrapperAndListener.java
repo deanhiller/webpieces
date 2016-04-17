@@ -4,7 +4,6 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.nio.channels.SelectionKey;
-import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -13,7 +12,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 public class WrapperAndListener {
 
-	private static final Logger log = Logger.getLogger(WrapperAndListener.class.getName());
+	//private static final Logger log = Logger.getLogger(WrapperAndListener.class.getName());
 	private String channelName;
 	private RegisterableChannel channel;
 	private DataListener dataHandler;
