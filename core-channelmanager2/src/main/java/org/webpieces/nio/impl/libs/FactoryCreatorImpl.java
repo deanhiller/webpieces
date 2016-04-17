@@ -2,10 +2,7 @@ package org.webpieces.nio.impl.libs;
 
 import java.util.Map;
 
-import javax.net.ssl.SSLEngine;
-
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.libs.AsyncSSLEngine;
 import org.webpieces.nio.api.libs.BufferFactory;
 import org.webpieces.nio.api.libs.ChannelSession;
 import org.webpieces.nio.api.libs.FactoryCreator;
@@ -14,8 +11,6 @@ import org.webpieces.nio.api.libs.StartableRouterExecutor;
 
 
 public class FactoryCreatorImpl extends FactoryCreator {
-
-	private static final byte[] DEFAULT_SEPARATOR = new byte[] { Byte.MAX_VALUE, Byte.MIN_VALUE, Byte.MAX_VALUE, Byte.MIN_VALUE, Byte.MAX_VALUE };
 
 	@Override
 	public void configure(Map<String, Object> map) {
@@ -67,11 +62,6 @@ public class FactoryCreatorImpl extends FactoryCreator {
         }
         return new AdvancedExecutorService(numThreads);
     }
-    
-	@Override
-	public AsyncSSLEngine createSSLEngine(Object id, SSLEngine engine, Map<String, Object> map) {
-		return new AsynchSSLEngineImpl(id+"", engine);
-	}
 
 	@Override
 	public ChannelSession createSession(RegisterableChannel channel) {

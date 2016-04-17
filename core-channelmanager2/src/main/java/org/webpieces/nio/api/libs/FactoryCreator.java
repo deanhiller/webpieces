@@ -2,8 +2,6 @@ package org.webpieces.nio.api.libs;
 
 import java.util.Map;
 
-import javax.net.ssl.SSLEngine;
-
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 
@@ -58,7 +56,5 @@ public abstract class FactoryCreator {
     
     public abstract StartableRouterExecutor createRoutingExecutor(String id, int numThreads);
     
-	public abstract AsyncSSLEngine createSSLEngine(Object id, SSLEngine engine, Map<String, Object> newParam);
-	
 	public abstract ChannelSession createSession(RegisterableChannel channel);
 }

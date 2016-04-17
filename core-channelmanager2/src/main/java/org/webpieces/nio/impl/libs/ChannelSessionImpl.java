@@ -9,10 +9,6 @@ import org.webpieces.nio.api.libs.ChannelSession;
 
 public class ChannelSessionImpl implements ChannelSession {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private RegisterableChannel channel;
 	private Map<Object, Object> map = new HashMap<Object, Object>();
 	
