@@ -1,6 +1,8 @@
 package com.webpieces.data.api;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  * This data structure is designed to not need to copy tons of payloads from bytes
@@ -30,4 +32,13 @@ public interface DataWrapper {
 	@Deprecated
 	public int getNumLayers();
 
+	/**
+	 * This is so you can feed into 3rd party libraries that then should tell you how many
+	 * bytes were read(much like SSLEngine) and after they tell you how much was read, you 
+	 * should then proceed to call DataWrapperGenerator.split(dataWrapper, sizeRead) and most
+	 * likely can discard the read buffer.
+	 * 
+	 * @return
+	 */
+	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers);
 }

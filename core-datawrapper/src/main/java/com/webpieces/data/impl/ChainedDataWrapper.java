@@ -1,7 +1,9 @@
 package com.webpieces.data.impl;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.webpieces.data.api.DataWrapper;
@@ -9,16 +11,16 @@ import com.webpieces.data.api.DataWrapperGenerator;
 
 public class ChainedDataWrapper extends AbstractDataWrapper {
 
-	private List<DataWrapper> wrappers = new ArrayList<>();
-	private DataWrapperGenerator generator;
+	private List<SliceableDataWrapper> wrappers = new ArrayList<>();
+	private DataWrapperGeneratorImpl generator;
 
-	public ChainedDataWrapper(DataWrapper wrapper1, DataWrapper wrapper2, DataWrapperGenerator generator) {
+	public ChainedDataWrapper(SliceableDataWrapper wrapper1, SliceableDataWrapper wrapper2, DataWrapperGeneratorImpl generator) {
 		wrappers.add(wrapper1);
 		wrappers.add(wrapper2);
 		this.generator = generator;
 	}
 
-	public ChainedDataWrapper(List<DataWrapper> wrappers, DataWrapperGenerator generator) {
+	public ChainedDataWrapper(List<SliceableDataWrapper> wrappers, DataWrapperGeneratorImpl generator) {
 		this.wrappers = wrappers;
 		this.generator = generator;
 	}
@@ -88,7 +90,20 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 	}
 
 	public void addMoreData(DataWrapper secondData) {
-		wrappers.add(secondData);
+		if(secondData instanceof ChainedDataWrapper) {
+			ChainedDataWrapper wrap = (ChainedDataWrapper) secondData;
+			wrappers.addAll(wrap.getAllWrappers());
+			return;
+		} else if(!(secondData instanceof SliceableDataWrapper)) {
+			throw new IllegalArgumentException("Only SliceableDataWrappers or ChainedDataWrappers are allowed to be chained");
+		}
+		
+		SliceableDataWrapper wrap = (SliceableDataWrapper) secondData;
+		wrappers.add(wrap);
+	}
+
+	private List<SliceableDataWrapper> getAllWrappers() {
+		return wrappers;
 	}
 
 	@Override
@@ -103,18 +118,18 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 	}
 
 	public List<DataWrapper> split(int splitAtPosition) {
-		List<DataWrapper> wrappersInBegin = new ArrayList<>();
-		List<DataWrapper> wrappersInEnd = new ArrayList<>();
+		List<SliceableDataWrapper> wrappersInBegin = new ArrayList<>();
+		List<SliceableDataWrapper> wrappersInEnd = new ArrayList<>();
 		
 		boolean foundSplit = false;
-		List<DataWrapper> splitBuffers = null;
-		for(DataWrapper wrapper : wrappers) {
+		List<SliceableDataWrapper> splitBuffers = null;
+		for(SliceableDataWrapper wrapper : wrappers) {
 			if (!foundSplit) {
 				if(splitAtPosition == wrapper.getReadableSize()) {
 					wrappersInBegin.add(wrapper);
 					foundSplit = true;
 				} else if(splitAtPosition < wrapper.getReadableSize()) {
-					splitBuffers = generator.split(wrapper, splitAtPosition);
+					splitBuffers = generator.splitSliceableWrapper(wrapper, splitAtPosition);
 					foundSplit = true;
 				} else {
 					wrappersInBegin.add(wrapper);
@@ -146,6 +161,13 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		finalTwo.add(wrapper1);
 		finalTwo.add(wrapper2);
 		return finalTwo;
+	}
+
+	@Override
+	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers) {
+		for(SliceableDataWrapper wrapper : wrappers) {
+			wrapper.addUnderlyingBuffersToList(buffers);
+		}
 	}
 
 }

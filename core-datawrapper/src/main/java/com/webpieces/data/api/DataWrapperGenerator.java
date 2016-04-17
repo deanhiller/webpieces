@@ -34,6 +34,6 @@ public interface DataWrapperGenerator {
 	 * @param splitAtPosition
 	 * @return
 	 */
-	public List<DataWrapper> split(DataWrapper dataToRead, int splitAtPosition);
+	public List<? extends DataWrapper> split(DataWrapper dataToRead, int splitAtPosition);
 	
 }

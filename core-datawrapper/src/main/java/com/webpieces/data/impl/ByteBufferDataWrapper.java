@@ -2,8 +2,9 @@ package com.webpieces.data.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
 
-public class ByteBufferDataWrapper extends AbstractDataWrapper {
+public class ByteBufferDataWrapper extends SliceableDataWrapper {
 	
 	private ByteBuffer buffer;
 	
@@ -39,5 +40,22 @@ public class ByteBufferDataWrapper extends AbstractDataWrapper {
 		buffer.get(data);
 		buffer.reset();
 		return data;
+	}
+
+	@Override
+	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers) {
+		buffers.add(buffer);
+	}
+
+	@Override
+	public ByteBuffer getSlicedBuffer(int offset, int length) {
+		int position = buffer.position();
+		int limit = buffer.limit();
+		buffer.position(offset);
+		buffer.limit(offset+length);
+		ByteBuffer theView = buffer.slice();
+		buffer.position(position);
+		buffer.limit(limit);
+		return theView;
 	}
 }

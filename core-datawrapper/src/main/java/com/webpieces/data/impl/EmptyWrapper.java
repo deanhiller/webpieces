@@ -1,8 +1,12 @@
 package com.webpieces.data.impl;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
 
-public class EmptyWrapper extends AbstractDataWrapper  {
+public class EmptyWrapper extends SliceableDataWrapper  {
+	private static final byte[] EMPTY = new byte[0];
+	private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.wrap(EMPTY);
 
 	@Override
 	public int getReadableSize() {
@@ -23,7 +27,16 @@ public class EmptyWrapper extends AbstractDataWrapper  {
 
 	@Override
 	public byte[] createByteArray() {
-		return new byte[0];
+		return EMPTY;
+	}
+
+	@Override
+	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers) {
+	}
+
+	@Override
+	public ByteBuffer getSlicedBuffer(int offset, int length) {
+		return EMPTY_BUFFER;
 	}
 
 }

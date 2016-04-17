@@ -1,6 +1,8 @@
-package com.webpieces.httpparser.api;
+package com.webpieces.data.api;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -23,7 +25,7 @@ public class TestDataWrappers {
 		
 		DataWrapper chainDataWrappers = dataGen.chainDataWrappers(wrapper1, wrapper2);
 
-		List<DataWrapper> split = dataGen.split(chainDataWrappers, 0);
+		List<? extends DataWrapper> split = dataGen.split(chainDataWrappers, 0);
 		DataWrapper split1 = split.get(0);
 		DataWrapper split2 = split.get(1);
 		
@@ -41,7 +43,7 @@ public class TestDataWrappers {
 		
 		DataWrapper chainDataWrappers = dataGen.chainDataWrappers(wrapper1, wrapper2);
 
-		List<DataWrapper> split = dataGen.split(chainDataWrappers, chainDataWrappers.getReadableSize());
+		List<? extends DataWrapper> split = dataGen.split(chainDataWrappers, chainDataWrappers.getReadableSize());
 		DataWrapper split1 = split.get(0);
 		DataWrapper split2 = split.get(1);
 		
@@ -59,7 +61,7 @@ public class TestDataWrappers {
 		
 		DataWrapper chainDataWrappers = dataGen.chainDataWrappers(wrapper1, wrapper2);
 
-		List<DataWrapper> split = dataGen.split(chainDataWrappers, 10);
+		List<? extends DataWrapper> split = dataGen.split(chainDataWrappers, 10);
 		DataWrapper split1 = split.get(0);
 		DataWrapper split2 = split.get(1);
 		
@@ -78,7 +80,7 @@ public class TestDataWrappers {
 		
 		DataWrapper chainDataWrappers = dataGen.chainDataWrappers(wrapper1, wrapper2);
 
-		List<DataWrapper> split = dataGen.split(chainDataWrappers, 12);
+		List<? extends DataWrapper> split = dataGen.split(chainDataWrappers, 12);
 		DataWrapper split1 = split.get(0);
 		DataWrapper split2 = split.get(1);
 		
@@ -89,7 +91,7 @@ public class TestDataWrappers {
 		
 		DataWrapper parent = dataGen.chainDataWrappers(split2, wrapper3);
 		
-		List<DataWrapper> splitList2 = dataGen.split(parent, 12);
+		List<? extends DataWrapper> splitList2 = dataGen.split(parent, 12);
 		DataWrapper firstPart = splitList2.get(0);
 		AbstractDataWrapper rightSide = (AbstractDataWrapper) splitList2.get(1);
 	
@@ -100,6 +102,22 @@ public class TestDataWrappers {
 		String str3 = rightSide.createStringFrom(0, rightSide.getReadableSize(), Charset.defaultCharset());
 		
 		Assert.assertEquals("01234567899876543210abcdefghij", str1+str2+str3);
+		
+		List<ByteBuffer> buffers = new ArrayList<>();
+		split1.addUnderlyingBuffersToList(buffers);
+		
+		Assert.assertEquals(2, buffers.size());
+		ByteBuffer buffer1 = buffers.get(0);
+		ByteBuffer buffer2 = buffers.get(1);
+		
+		byte[] data = new byte[split1.getReadableSize()];
+		int length = buffer1.remaining();
+		buffer1.get(data, 0, length);
+		buffer2.get(data, length, buffer2.remaining());
+		
+		String result = new String(data);
+		
+		Assert.assertEquals("012345678998", result);
 	}
 
 }

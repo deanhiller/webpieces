@@ -210,8 +210,8 @@ public class HttpParserImpl implements HttpParser {
 		byte fourthByte = dataToRead.readByteAt(i+3);
 		
 		//For debugging to see the 4 bytes that we are processing easier
-		byte[] data = dataToRead.createByteArray();
-		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
+//		byte[] data = dataToRead.createByteArray();
+//		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
 		
 		boolean isFirstCr = conversion.isCarriageReturn(firstByte);
 		boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
@@ -247,7 +247,7 @@ public class HttpParserImpl implements HttpParser {
 		
 		List<Integer> markedPositions = memento.getLeftOverMarkedPositions();
 		memento.setLeftOverMarkedPositions(new ArrayList<Integer>());
-		List<DataWrapper> tuple = dataGen.split(dataToRead, i+4);
+		List<? extends DataWrapper> tuple = dataGen.split(dataToRead, i+4);
 		DataWrapper toBeParsed = tuple.get(0);
 		memento.setLeftOverData(tuple.get(1));
 		HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
@@ -268,7 +268,7 @@ public class HttpParserImpl implements HttpParser {
 		int readableSize = dataToRead.getReadableSize();
 		
 		if(numBytesNeeded <= readableSize) {
-			List<DataWrapper> split = dataGen.split(dataToRead, numBytesNeeded);
+			List<? extends DataWrapper> split = dataGen.split(dataToRead, numBytesNeeded);
 			message.setBody(split.get(0));
 			memento.setLeftOverData(split.get(1));
 			memento.setNumBytesLeftToRead(0);

@@ -1,16 +1,16 @@
 package com.webpieces.data.impl;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.List;
 
-import com.webpieces.data.api.DataWrapper;
+public class SplitProxyWrapper extends SliceableDataWrapper  {
 
-public class SplitProxyWrapper extends AbstractDataWrapper  {
-
-	private DataWrapper wrapper;
+	private SliceableDataWrapper wrapper;
 	private int offset;
 	private int length;
 
-	public SplitProxyWrapper(DataWrapper wrapper, int offset, int length) {
+	public SplitProxyWrapper(SliceableDataWrapper wrapper, int offset, int length) {
 		this.wrapper = wrapper;
 		this.offset = offset;
 		this.length = length;
@@ -55,6 +55,26 @@ public class SplitProxyWrapper extends AbstractDataWrapper  {
 	public int getNumLayers() {
 		return wrapper.getNumLayers()+1;
 	}
-	
+
+	@Override
+	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers) {
+		ByteBuffer buffer = wrapper.getSlicedBuffer(offset, length);
+		buffers.add(buffer);
+	}
+
+	@Override
+	public ByteBuffer getSlicedBuffer(int offset, int length) {
+		//slice the slice so we have a view on top of a view...
+		ByteBuffer buffer = wrapper.getSlicedBuffer(this.offset, this.length);
+		
+		int position = buffer.position();
+		int limit = buffer.limit();
+		buffer.position(offset);
+		buffer.limit(offset+length);
+		ByteBuffer theView = buffer.slice();
+		buffer.position(position);
+		buffer.limit(limit);
+		return theView;
+	}
 	
 }
