@@ -1,10 +1,10 @@
 package org.webpieces.nio.impl.cm.basic;
 
+import org.webpieces.nio.api.ChannelService;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
-import org.webpieces.nio.api.deprecated.ChannelService;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
 import org.webpieces.nio.impl.cm.basic.udp.DatagramChannelImpl;
@@ -31,6 +31,7 @@ class BasChannelService implements ChannelService {
 		selMgr = new SelectorManager2(mgr, cmId, pool);
 		this.objectId = id;
         this.channelFactory = c;
+        start();
 	}
 	
     public TCPServerChannel createTCPServerChannel(String id) {
@@ -71,6 +72,7 @@ class BasChannelService implements ChannelService {
 	 * @see api.biz.xsoftware.nio.ChannelManager#shutdown()
 	 */
 	public void stop() {
+		started = false;
 		selMgr.stop();
 	}
 	

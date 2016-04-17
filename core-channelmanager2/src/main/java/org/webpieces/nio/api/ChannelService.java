@@ -7,9 +7,22 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 
+/**
+ * @author Dean Hiller
+ */
+public interface ChannelService {
 
-public interface ChannelManager {
-
+	/**
+	 * Key specific to the Basic Channel Manager and only needs to be set on the
+	 * basic channel manager.  Since basic is always the last child, every other
+	 * channelmanager will use the value of KEY_ID through the basic channelmanager
+	 */
+	public static final String KEY_ID = "channelmanager.id";
+	/**
+	 * Key specific to Basic and Threaded ChannelManager
+	 */
+	public static final String KEY_BUFFER_FACTORY = "key.bytebuffer.factory";
+	
     /**
      * Returns a TCPServerChannel that can listen for incoming TCPChannels
      * 

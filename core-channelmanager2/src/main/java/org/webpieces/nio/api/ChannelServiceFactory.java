@@ -1,4 +1,4 @@
-package org.webpieces.nio.api.deprecated;
+package org.webpieces.nio.api;
 
 import java.util.Map;
 import java.util.Properties;
@@ -33,37 +33,9 @@ public abstract class ChannelServiceFactory {
 	 * as the constants in ChannelManaagerFactory
 	 * @param map
 	 */
-	public static ChannelServiceFactory createFactory(Map<String, Object> map) {
+	public static ChannelServiceFactory createFactory() {
 		return new BasChanSvcFactory();
 	}
-
-	public static BufferHelper bufferHelper(Properties p) {
-		String className = VAL_DEFAULT_HELPER;
-		if(p != null) {
-			String temp = p.getProperty(KEY_BUFFER_IMPL);
-			if(temp != null)
-				className = temp;
-		}
-		
-		return (BufferHelper)newInstance(className); 
-	}	
-
-	private static Object newInstance(String className) {
-		Object retVal = null;
-		try {
-			Class theClass = Class.forName(className);
-			retVal = theClass.newInstance();
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("bug", e);
-		} catch (InstantiationException e) {
-			throw new RuntimeException("bug", e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException("bug", e);
-		}
-		return retVal;
-	}
-	
-	public abstract void configure(Map<String, Object> map);
 	
 	/**
 	 * All Keys(and some values) to put in the map variable can be found 

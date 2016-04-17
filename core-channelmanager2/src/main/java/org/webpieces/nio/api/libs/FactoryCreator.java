@@ -2,8 +2,8 @@ package org.webpieces.nio.api.libs;
 
 import java.util.Map;
 
+import org.webpieces.nio.api.ChannelService;
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 
 
 
@@ -16,7 +16,7 @@ public abstract class FactoryCreator {
 	public static final String KEY_IS_DIRECT = "key.is.direct";
 	public static final String KEY_PACKET_SEPARATOR = "key.packet.separator";
 	public static final String KEY_NUM_THREADS = "key.num.threads";
-	public static final String KEY_ID = ChannelManagerOld.KEY_ID;
+	public static final String KEY_ID = ChannelService.KEY_ID;
 	public static final String KEY_SSL_ENGINE = "key.ssl.engine";
 	
 	public static FactoryCreator createFactory(Map<String, Object> map) {
