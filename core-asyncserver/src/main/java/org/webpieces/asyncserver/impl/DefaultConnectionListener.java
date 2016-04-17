@@ -1,6 +1,5 @@
 package org.webpieces.asyncserver.impl;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
@@ -24,7 +23,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public void connected(Channel channel) throws IOException {
+	public void connected(Channel channel) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
 		if(overloadResponse != null) {
 			//This is annoying.....

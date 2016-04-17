@@ -11,7 +11,6 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer1DataListener;
 import org.webpieces.httpproxy.impl.chain.SSLLayer1DataListener;
-import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public class HttpProxyImpl implements HttpProxy {
 

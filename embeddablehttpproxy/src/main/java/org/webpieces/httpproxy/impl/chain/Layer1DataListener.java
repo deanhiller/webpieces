@@ -1,6 +1,5 @@
 package org.webpieces.httpproxy.impl.chain;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.inject.Inject;
@@ -24,7 +23,7 @@ public class Layer1DataListener implements DataListener {
 	private LayerZSendBadResponse badResponse;
 	
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) throws IOException {
+	public void incomingData(Channel channel, ByteBuffer b){
 		try {
 			processor.deserialize(channel, b);
 		} catch(Throwable e) {

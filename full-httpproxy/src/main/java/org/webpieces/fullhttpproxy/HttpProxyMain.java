@@ -1,4 +1,4 @@
-package org.webpieces.httpproxy;
+package org.webpieces.fullhttpproxy;
 
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.api.HttpProxyFactory;

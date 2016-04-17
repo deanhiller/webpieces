@@ -9,10 +9,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.libs.ChannelSession;
+import org.webpieces.nio.api.channels.ChannelSession;
 
-import com.webpieces.httpparser.api.DataWrapper;
-import com.webpieces.httpparser.api.DataWrapperGenerator;
+import com.webpieces.data.api.DataWrapper;
+import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;

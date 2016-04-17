@@ -45,7 +45,7 @@ subprojects {
 
 project(':core-asyncserver') {
     dependencies {
-        compile project(':core-channelmanager')
+        compile project(':core-channelmanager2')
     }
 }
 
@@ -55,16 +55,21 @@ project(':http-parser') {
     }
 }
 
-project(':embeddable-httpproxy') {
-    dependencies {
-        compile 'com.google.inject:guice:3.0'
-        compile project(':core-asyncserver'), project(':http-parser')
-    }
-}
-
 project(':http-client') {
     dependencies {
-        compile project(':core-channelmanager'), project(':http-parser')
+        compile project(':core-channelmanager2'), project(':http-parser')
     }
 }
 
+project(':embeddablehttpproxy') {
+    dependencies {
+        compile 'com.google.inject:guice:3.0'
+        compile project(':core-asyncserver'), project(':http-parser'), project(':http-client')
+    }
+}
+
+project(':full-httpproxy') {
+    dependencies {
+        compile project(':embeddablehttpproxy')
+    }
+}

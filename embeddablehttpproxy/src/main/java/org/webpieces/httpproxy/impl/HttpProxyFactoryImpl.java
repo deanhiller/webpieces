@@ -1,7 +1,5 @@
 package org.webpieces.httpproxy.impl;
 
-import java.util.Map;
-
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.api.HttpProxyFactory;
 
@@ -13,8 +11,8 @@ import com.google.inject.util.Modules;
 public class HttpProxyFactoryImpl extends HttpProxyFactory {
 
 	@Override
-	protected HttpProxy createHttpProxyImpl(String id, Map<String, Object> props) {
-		Module testModule = (Module) props.get(OVERRIDE_MODULE);
+	protected HttpProxy createHttpProxyImpl(String id, Module overrideModule) {
+		Module testModule = overrideModule;
 		
 		Module allModules = getModules();
 		if(testModule != null) 

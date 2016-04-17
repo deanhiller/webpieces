@@ -4,14 +4,10 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import javax.net.ssl.SSLEngine;
-
+import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.deprecated.ConnectionCallback;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.FutureOperation;
-import org.webpieces.nio.api.handlers.OperationCallback;
-import org.webpieces.nio.api.libs.ChannelSession;
 
 public class ProxyTCPChannel implements TCPChannel {
 
@@ -21,10 +17,6 @@ public class ProxyTCPChannel implements TCPChannel {
 	public ProxyTCPChannel(TCPChannel channel, ConnectedChannels connectedChannels) {
 		this.channel = channel;
 		this.connectedChannels = connectedChannels;
-	}
-
-	public void oldConnect(SocketAddress remoteAddr, ConnectionCallback cb) {
-		channel.oldConnect(remoteAddr, cb);
 	}
 
 	public FutureOperation connect(SocketAddress addr) {
@@ -62,10 +54,6 @@ public class ProxyTCPChannel implements TCPChannel {
 		channel.setKeepAlive(b);
 	}
 
-	public FutureOperation openSSL(SSLEngine engine) {
-		return channel.openSSL(engine);
-	}
-
 	public void setName(String string) {
 		channel.setName(string);
 	}
@@ -74,20 +62,8 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getRemoteAddress();
 	}
 
-	public FutureOperation closeSSL() {
-		return channel.closeSSL();
-	}
-
 	public boolean isConnected() {
 		return channel.isConnected();
-	}
-
-	public boolean isInSslMode() {
-		return channel.isInSslMode();
-	}
-
-	public ChannelSession getSession() {
-		return channel.getSession();
 	}
 
 	public String getName() {
@@ -114,26 +90,9 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getLocalAddress();
 	}
 
-	public int oldWrite(ByteBuffer b) {
-		return channel.oldWrite(b);
+	@Override
+	public ChannelSession getSession() {
+		return channel.getSession();
 	}
-
-	public void oldWrite(ByteBuffer b, OperationCallback h) {
-		channel.oldWrite(b, h);
-	}
-
-	public void oldConnect(SocketAddress addr) {
-		channel.oldConnect(addr);
-	}
-
-	public void oldClose(OperationCallback cb) {
-		channel.oldClose(cb);
-	}
-
-	public void oldClose() {
-		channel.oldClose();
-	}
-	
-	
 
 }

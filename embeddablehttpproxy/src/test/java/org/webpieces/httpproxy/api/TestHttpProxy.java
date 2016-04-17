@@ -2,9 +2,7 @@ package org.webpieces.httpproxy.api;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,9 +27,7 @@ public class TestHttpProxy {
 	
 	@Before
 	public void setUp() throws IOException {
-		Map<String, Object> props = new HashMap<>();
-		props.put(HttpProxyFactory.OVERRIDE_MODULE, new TestModule());
-		HttpProxy proxy = HttpProxyFactory.createHttpProxy("myproxy", props );
+		HttpProxy proxy = HttpProxyFactory.createHttpProxy("myproxy", new TestModule() );
 		proxy.start();
 
 		List<DataListener> serverListeners = mockChannelMgr.getServerListeners();

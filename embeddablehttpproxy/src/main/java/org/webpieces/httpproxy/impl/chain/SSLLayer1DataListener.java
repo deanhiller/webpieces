@@ -1,6 +1,5 @@
 package org.webpieces.httpproxy.impl.chain;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.inject.Inject;
@@ -14,7 +13,7 @@ public class SSLLayer1DataListener implements DataListener {
 	private SSLLayer2Encryption processor;
 	
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) throws IOException {
+	public void incomingData(Channel channel, ByteBuffer b) {
 		
 	}
 
