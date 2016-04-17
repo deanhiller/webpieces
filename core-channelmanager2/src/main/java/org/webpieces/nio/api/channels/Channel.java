@@ -5,8 +5,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import org.webpieces.nio.api.handlers.ChannelSession;
+import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.FutureOperation;
+import org.webpieces.nio.api.libs.ChannelSession;
 
 
 /**
@@ -16,21 +17,22 @@ public interface Channel extends RegisterableChannel {
 
 	public FutureOperation connect(SocketAddress addr);
 	public FutureOperation write(ByteBuffer b);
+	public FutureOperation close();
 	
     /**
-     * This method only needs to be called if you call stopReadingData and need to start reading data
-     * again.
+     * Registers a DataListener that will be notified of all incoming data.  If the threadpool layer setup,
+     * requests from clients may come out of order unless you install your own executorService.
+     * 
      */
-    public void startReadingData();
+    public void registerForReads(DataListener listener);
 
     /**
-     * This notifies us to stop reading data which would result in throttling the other end as the local
-     * nic buffer fills up, then the remote nic buffer so that client writes would start becoming blocked
+     * Unregister the previously registered DataListener so incoming data is not fired to the client.
      * 
      * @throws IOException
      * @throws InterruptedException
      */
-    public void stopReadingData();
+    public void unregisterForReads();
     
     /**
      * Gets the remote address the channel is communicating with.
@@ -53,5 +55,5 @@ public interface Channel extends RegisterableChannel {
      * @return client's Session object
      */
     public ChannelSession getSession();
-    
+   
 }

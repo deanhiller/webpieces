@@ -11,7 +11,7 @@ import java.net.SocketAddress;
  * 2. isBound
  * 
  * TCPChannel and UDPChannel have similar functions like
- * 1. 
+ * 1. registerForRead
  * 2. connect (in java, udp has a connect for better point to point performance)
  * 3. bind
  * 4. isBound
@@ -66,7 +66,5 @@ public interface RegisterableChannel {
 	/**
 	 * @return the local InetSocketAddress
 	 */
-	public InetSocketAddress getLocalAddress();	
-	
-	public void close();
+	public InetSocketAddress getLocalAddress();		
 }

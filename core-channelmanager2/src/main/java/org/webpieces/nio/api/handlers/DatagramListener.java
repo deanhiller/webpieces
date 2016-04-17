@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 package org.webpieces.nio.api.handlers;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
@@ -45,7 +44,7 @@ public interface DatagramListener {
 	 * @param channel
 	 * @param b
 	 */
-	public void incomingData(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer b) throws IOException;
+	public void incomingData(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer b);
 
 	/**
 	 * This is called in the case of udp when the packet was not read by other
