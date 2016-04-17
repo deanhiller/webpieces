@@ -3,11 +3,9 @@ package com.webpieces.data.impl;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.webpieces.data.api.DataWrapper;
-import com.webpieces.data.api.DataWrapperGenerator;
 
 public class ChainedDataWrapper extends AbstractDataWrapper {
 
@@ -74,12 +72,14 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		throw new IndexOutOfBoundsException("offset="+offset+" length="+length+" is larger than size="+getReadableSize());
 	}
 
+	
 	@Override
 	public byte[] createByteArray() {
 		byte[] copy = new byte[getReadableSize()];
 		
 		int offset = 0;
 		for(DataWrapper wrapper : wrappers) {
+			@SuppressWarnings("deprecation")
 			byte[] data = wrapper.createByteArray();
 			int size = wrapper.getReadableSize();
 			System.arraycopy(data, 0, copy, offset, size);
@@ -110,6 +110,7 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 	public int getNumLayers() {
 		int max = 0;
 		for(DataWrapper wrapper: wrappers) {
+			@SuppressWarnings("deprecation")
 			int num = wrapper.getNumLayers();
 			if(num > max) 
 				max = num;

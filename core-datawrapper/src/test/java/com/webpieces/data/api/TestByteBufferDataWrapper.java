@@ -46,7 +46,6 @@ public class TestByteBufferDataWrapper {
 		
 		List<? extends DataWrapper> split = dataGen.split(wrapper, 10);
 		DataWrapper first = split.get(0);
-		DataWrapper second = split.get(1);
 		
 		List<? extends DataWrapper> split2 = dataGen.split(first, 5);
 		DataWrapper veryFirst = split2.get(0);

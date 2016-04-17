@@ -36,7 +36,8 @@ public interface DataWrapper {
 	 * This is so you can feed into 3rd party libraries that then should tell you how many
 	 * bytes were read(much like SSLEngine) and after they tell you how much was read, you 
 	 * should then proceed to call DataWrapperGenerator.split(dataWrapper, sizeRead) and most
-	 * likely can discard the read buffer.
+	 * likely can discard the one of the DataWrappers resulting in that one and the ByteBuffers
+	 * it holds to be garbage collected
 	 * 
 	 * @return
 	 */
