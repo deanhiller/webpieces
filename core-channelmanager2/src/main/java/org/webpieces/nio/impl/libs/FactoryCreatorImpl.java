@@ -9,7 +9,6 @@ import org.webpieces.nio.api.libs.AsyncSSLEngine;
 import org.webpieces.nio.api.libs.BufferFactory;
 import org.webpieces.nio.api.libs.ChannelSession;
 import org.webpieces.nio.api.libs.FactoryCreator;
-import org.webpieces.nio.api.libs.PacketProcessorFactory;
 import org.webpieces.nio.api.libs.StartableExecutorService;
 import org.webpieces.nio.api.libs.StartableRouterExecutor;
 
@@ -35,27 +34,6 @@ public class FactoryCreatorImpl extends FactoryCreator {
 		DefaultByteBufferFactory bufFactory = new DefaultByteBufferFactory();
 		bufFactory.setDirect(isDirect);
 		return bufFactory;
-	}
-
-	@Override
-	public PacketProcessorFactory createPacketProcFactory(Map<String, Object> map) {
-		byte[] separator;
-		if(map == null) {
-			separator = DEFAULT_SEPARATOR;
-		} else {
-			Object sep = map.get(FactoryCreator.KEY_PACKET_SEPARATOR);
-			
-			if(sep == null)
-				separator = DEFAULT_SEPARATOR;
-			else if(!(sep instanceof byte[]))
-				throw new IllegalArgumentException("key=FactoryCreator.KEY_PACKET_SEPARATOR must contain a byte array");
-			else
-				separator = (byte[])sep;
-		}
-		
-		DefaultPackProcessorFactory factory = new DefaultPackProcessorFactory();
-		factory.setSeparator(separator);
-		return factory;
 	}
 
 	@Override

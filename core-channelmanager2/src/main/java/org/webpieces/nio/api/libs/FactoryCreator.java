@@ -52,8 +52,6 @@ public abstract class FactoryCreator {
 	
 	public abstract BufferFactory createBufferFactory(Map<String, Object> map);
 	
-	public abstract PacketProcessorFactory createPacketProcFactory(Map<String, Object> map);
-	
 	public abstract StartableExecutorService createExecSvcFactory(Map<String, Object> map);
 	
     public abstract StartableExecutorService createAdvancedExecSvc(Map<String, Object> map);

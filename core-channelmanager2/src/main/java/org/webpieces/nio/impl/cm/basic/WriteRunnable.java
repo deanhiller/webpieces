@@ -1,6 +1,5 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import java.io.IOException;
 import java.net.PortUnreachableException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;

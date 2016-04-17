@@ -1,16 +1,14 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import java.io.IOException;
-
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.deprecated.ConnectionCallback;
+import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
+import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.FutureOperation;
-import org.webpieces.nio.api.handlers.NioInterruptException;
 import org.webpieces.nio.api.handlers.OperationCallback;
 
 
-public class FutureConnectImpl implements FutureOperation, ConnectionCallback {
+public class FutureConnectImpl implements FutureOperation, ConnectionListener {
 
 	private RegisterableChannel channel;
 	private Throwable e;
@@ -47,7 +45,7 @@ public class FutureConnectImpl implements FutureOperation, ConnectionCallback {
 			} else
 				this.wait();
 		} catch(InterruptedException e) {
-			throw new NioInterruptException(e);
+			throw new RuntimeInterruptedException(e);
 		}
 	}
 

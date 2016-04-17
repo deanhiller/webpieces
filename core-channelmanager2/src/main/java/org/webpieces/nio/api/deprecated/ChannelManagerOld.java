@@ -20,11 +20,6 @@ public interface ChannelManagerOld {
 	 * Key specific to Basic and Threaded ChannelManager
 	 */
 	public static final String KEY_BUFFER_FACTORY = "key.bytebuffer.factory";
-	/**
-	 * Key specific to Threaded ChannelManager
-	 */
-	public static final String KEY_EXECUTORSVC_FACTORY = "key.executorsvc.factory";
-	public static final String KEY_ROUTINGEXECUTORSVC_FACTORY = "key.routing.executorsvc.factory";
 	
     /**
      * Returns a TCPServerChannel that can listen for incoming TCPChannels

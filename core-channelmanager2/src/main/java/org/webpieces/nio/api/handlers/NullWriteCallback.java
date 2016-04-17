@@ -1,6 +1,5 @@
 package org.webpieces.nio.api.handlers;
 
-import java.io.IOException;
 import java.net.PortUnreachableException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

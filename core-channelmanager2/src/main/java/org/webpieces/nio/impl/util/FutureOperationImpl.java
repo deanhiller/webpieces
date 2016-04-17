@@ -1,13 +1,11 @@
 package org.webpieces.nio.impl.util;
 
-import java.io.IOException;
-
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
+import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
+import org.webpieces.nio.api.exceptions.TimeoutException;
 import org.webpieces.nio.api.handlers.FutureOperation;
-import org.webpieces.nio.api.handlers.NioInterruptException;
 import org.webpieces.nio.api.handlers.OperationCallback;
-import org.webpieces.nio.api.handlers.TimeoutException;
 
 
 public class FutureOperationImpl implements FutureOperation, OperationCallback {
@@ -47,7 +45,7 @@ public class FutureOperationImpl implements FutureOperation, OperationCallback {
 			} else
 				this.wait();
 		} catch(InterruptedException e) {
-			throw new NioInterruptException(e);
+			throw new RuntimeInterruptedException(e);
 		}
 		
 		if(channel == null)

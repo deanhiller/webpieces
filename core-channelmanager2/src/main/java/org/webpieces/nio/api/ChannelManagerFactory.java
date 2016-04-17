@@ -15,7 +15,8 @@ public class ChannelManagerFactory {
 	private ChannelManagerFactory() {}
 	
 	public static ChannelManager createChannelManager(String id, Map<String, Object> props) {
-		ChannelService svc = ChannelServiceFactory.createNewChannelManager(id);
+		ChannelServiceFactory factory = ChannelServiceFactory.createFactory(null);
+		ChannelService svc = factory.createChannelManager(null);
 		svc.start();
 		return new ChannelMgrProxy(svc);
 	}
