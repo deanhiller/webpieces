@@ -12,14 +12,15 @@ import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
+import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.handlers.FutureOperation;
-import org.webpieces.nio.api.handlers.OperationCallback;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
-import org.webpieces.nio.impl.cm.basic.FutureConnectImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
+import org.webpieces.util.futures.Future;
+import org.webpieces.util.futures.PromiseImpl;
 
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
@@ -46,18 +47,13 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 
 	@Override
-	public FutureOperation connect(SocketAddress addr) {
-		try {
-			return connectImpl(addr);
-		} catch (IOException e) {
-			throw new NioException(e);
-		} catch (InterruptedException e) {
-			throw new NioException(e);
-		}
+	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
+		return connectImpl(addr);
 	}
 	
-	private synchronized FutureOperation connectImpl(SocketAddress addr) throws IOException, InterruptedException {
-        FutureConnectImpl future = new FutureConnectImpl();
+	private synchronized Future<Channel, FailureInfo> connectImpl(SocketAddress addr) {
+		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>();
+		
 		try {
 			if(apiLog.isLoggable(Level.FINE))
 				apiLog.fine(this+"Basic.connect called-addr="+addr);
@@ -65,24 +61,12 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 			channel.connect(addr);
 			
 	        isConnected = true;
-	        future.connected(this);
+	        promise.setResult(this);
 		} catch(Exception e) {
-			future.failed(this, e);
+			promise.setFailure(new FailureInfo(this, e));
 		}
 		
-        return future;
-	}
-	
-	public synchronized void oldConnect(SocketAddress addr) {
-		if(apiLog.isLoggable(Level.FINE))
-			apiLog.fine(this+"Basic.connect called-addr="+addr);
-		
-		try {
-			channel.connect(addr);
-			isConnected = true;
-		} catch(IOException e) {
-			throw new NioException(e);
-		}
+        return promise;
 	}
     
     public synchronized void disconnect() {
@@ -163,25 +147,5 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	protected int writeImpl(ByteBuffer b) throws IOException {
 		return channel.write(b);
 	}
-
-	/**
-     * @see org.webpieces.nio.impl.cm.basic.BasChannelImpl#oldWrite(java.nio.ByteBuffer, org.webpieces.nio.api.handlers.OperationCallback)
-     */
-    @Override
-    public void oldWrite(ByteBuffer b, OperationCallback h) {
-        if(!isConnected)
-            throw new IllegalStateException(this+"Channel is not currently connected");        
-        super.oldWrite(b, h);
-    }
-
-    /**
-     * @see org.webpieces.nio.impl.cm.basic.BasChannelImpl#oldWrite(java.nio.ByteBuffer)
-     */
-    @Override
-    public int oldWrite(ByteBuffer b) {
-        if(!isConnected)
-            throw new IllegalStateException(this+"Channel is not currently connected");        
-        return super.oldWrite(b);
-    }
 
 }

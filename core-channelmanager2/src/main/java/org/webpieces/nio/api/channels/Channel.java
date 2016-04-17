@@ -5,8 +5,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
+import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.handlers.FutureOperation;
+import org.webpieces.util.futures.Future;
 
 
 /**
@@ -41,9 +42,9 @@ import org.webpieces.nio.api.handlers.FutureOperation;
  */
 public interface Channel extends RegisterableChannel {
 
-	public FutureOperation connect(SocketAddress addr);
-	public FutureOperation write(ByteBuffer b);
-	public FutureOperation close();
+	public Future<Channel, FailureInfo> connect(SocketAddress addr);
+	public Future<Channel, FailureInfo> write(ByteBuffer b);
+	public Future<Channel, FailureInfo> close();
 	
     /**
      * Registers a DataListener that will be notified of all incoming data.  If the threadpool layer setup,

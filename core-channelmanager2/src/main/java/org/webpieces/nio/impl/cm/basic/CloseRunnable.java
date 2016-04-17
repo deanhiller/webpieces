@@ -3,16 +3,18 @@ package org.webpieces.nio.impl.cm.basic;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.webpieces.nio.api.handlers.OperationCallback;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.exceptions.FailureInfo;
+import org.webpieces.util.futures.Promise;
 
 
 public class CloseRunnable implements DelayedWritesCloses {
 
 	private static final Logger log = Logger.getLogger(CloseRunnable.class.getName());
 	private BasChannelImpl channel;
-	private OperationCallback handler;
+	private Promise<Channel, FailureInfo> handler;
     
-	public CloseRunnable(BasChannelImpl c, OperationCallback h) {
+	public CloseRunnable(BasChannelImpl c, Promise<Channel, FailureInfo> h) {
 		channel = c;
 		handler = h;
 	}
@@ -29,10 +31,10 @@ public class CloseRunnable implements DelayedWritesCloses {
             //The above only happens on the client thread...on selector thread, close works fine.
             channel.wakeupSelector();
             
-			handler.finished(channel);
+            handler.setResult(channel);
 		} catch(Exception e) {
 			log.log(Level.WARNING, channel+"Exception occurred", e);
-			handler.failed(channel, e);
+			handler.setFailure(new FailureInfo(channel, e));
 		}
 		return true;
 	}

@@ -6,10 +6,12 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.handlers.FutureOperation;
+import org.webpieces.util.futures.Future;
 
 public class MockTcpChannel implements TCPChannel {
 
@@ -17,17 +19,17 @@ public class MockTcpChannel implements TCPChannel {
 	private ChannelSession session = new MyChanSession();
 
 	@Override
-	public FutureOperation connect(SocketAddress addr) {
+	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
 		return null;
 	}
 
 	@Override
-	public FutureOperation write(ByteBuffer b) {
+	public Future<Channel, FailureInfo> write(ByteBuffer b) {
 		return null;
 	}
 
 	@Override
-	public FutureOperation close() {
+	public Future<Channel, FailureInfo> close() {
 		return null;
 	}
 

@@ -4,10 +4,12 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.handlers.FutureOperation;
+import org.webpieces.util.futures.Future;
 
 public class ProxyTCPChannel implements TCPChannel {
 
@@ -19,15 +21,15 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
-	public FutureOperation connect(SocketAddress addr) {
+	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
 		return channel.connect(addr);
 	}
 
-	public FutureOperation write(ByteBuffer b) {
+	public Future<Channel, FailureInfo> write(ByteBuffer b) {
 		return channel.write(b);
 	}
 
-	public FutureOperation close() {
+	public Future<Channel, FailureInfo> close() {
 		//technically we are not closed until FutureOperation does it's callback, but remove because we also
 		//do not need to call close a second time...
 		connectedChannels.removeChannel(channel);

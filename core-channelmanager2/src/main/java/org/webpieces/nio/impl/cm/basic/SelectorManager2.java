@@ -37,13 +37,17 @@ import java.util.logging.Logger;
 import javax.swing.event.EventListenerList;
 
 import org.webpieces.nio.api.BufferCreationPool;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.exceptions.FailureInfo;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
+import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
-import org.webpieces.nio.api.testutil.nioapi.SelectorRunnable;
+import org.webpieces.util.futures.Promise;
 
 
 public class SelectorManager2 implements SelectorListener {
@@ -107,8 +111,9 @@ public class SelectorManager2 implements SelectorListener {
 					throws IOException, InterruptedException {
 		waitForRegister(s, SelectionKey.OP_ACCEPT, listener, true);
 	}
-	public void registerChannelForConnect(final RegisterableChannelImpl s, final ConnectionListener listener)
+	public void registerChannelForConnect(final RegisterableChannelImpl s, Promise<Channel, FailureInfo> promise)
 					throws IOException, InterruptedException {
+		final ConnectionListener listener = new FutureConnectImpl(promise);
 		registerSelectableChannel(s, SelectionKey.OP_CONNECT, listener, true);
 	}
 	public void registerChannelForRead(final RegisterableChannelImpl s, final DataListener listener)
@@ -132,8 +137,7 @@ public class SelectorManager2 implements SelectorListener {
 			asynchUnregister(channel, ops);			
 	}
 	
-	void registerSelectableChannel(final RegisterableChannelImpl s, final int validOps, final Object listener, boolean needWait) 
-	throws IOException, InterruptedException {	
+	void registerSelectableChannel(final RegisterableChannelImpl s, final int validOps, final Object listener, boolean needWait) {	
 		if(stopped) 
 			return; //do nothing if stopped
 		if(!isRunning())
@@ -141,12 +145,11 @@ public class SelectorManager2 implements SelectorListener {
 		else if(Thread.currentThread().equals(selector.getThread()))
 			registerChannelOnThisThread(s, validOps, listener);
 		else
-			waitForRegister(s, validOps, listener, needWait);	
+			waitForRegister(s, validOps, listener, needWait);
 	}
-	
+
 	private void registerChannelOnThisThread(
-			RegisterableChannelImpl channel, int validOps, Object listener) 
-												throws ClosedChannelException {
+			RegisterableChannelImpl channel, int validOps, Object listener) {
 		if(channel == null)
 			throw new IllegalArgumentException("cannot register a null channel");
 		else if(!Thread.currentThread().equals(selector.getThread()))
@@ -192,8 +195,8 @@ public class SelectorManager2 implements SelectorListener {
 		// lock, so we need to wakeup the select method here and have it do
 		// the processing of this request so it can release the lock so
 		// the register can grab the lock.
-		SelectorRunnable r = new SelectorRunnable() {
-			public void run() throws ClosedChannelException {
+		Runnable r = new Runnable() {
+			public void run() {
 				Helper.unregisterSelectableChannel(s, validOps);
 			}
 
@@ -209,8 +212,7 @@ public class SelectorManager2 implements SelectorListener {
 		regRequest.waitForFinish(true);
 	}
 	
-	private void waitForRegister(final RegisterableChannelImpl s, final int validOps, final Object listener, boolean needWait) 
-					throws IOException, InterruptedException {
+	private void waitForRegister(final RegisterableChannelImpl s, final int validOps, final Object listener, boolean needWait) {
 		if(s.isBlocking()) 
 			throw new IllegalArgumentException(s+"Only non-blocking selectable channels can be used.  " +
 					"please call SelectableChannel.configureBlocking before passing in the channel");
@@ -220,13 +222,9 @@ public class SelectorManager2 implements SelectorListener {
 		//lock, so we need to wakeup the select method here and have it do
 		//the processing of this request so it can release the lock so
 		//the register can grab the lock.
-		SelectorRunnable r = new SelectorRunnable() {
-			public void run() throws ClosedChannelException {
-                try {
-                    registerChannelOnThisThread(s, validOps, listener);
-                } catch (Exception e) {
-                    throw new RuntimeException(s+"Exception", e);
-                }
+		Runnable r = new Runnable() {
+			public void run() {
+				registerChannelOnThisThread(s, validOps, listener);
 			}
 			public String toString() {
 				return Helper.opType(validOps);
@@ -236,7 +234,13 @@ public class SelectorManager2 implements SelectorListener {
 		
 		listenerList.add(ChannelRegistrationListener.class, regRequest);
 		
-		regRequest.waitForFinish(needWait);
+		try {
+			regRequest.waitForFinish(needWait);
+		} catch (ClosedChannelException e) {
+			throw new NioClosedChannelException(e.getMessage(), e);
+		} catch (InterruptedException e) {
+			throw new RuntimeInterruptedException(e.getMessage(), e);
+		}
 	}
     
     public void selectorFired()

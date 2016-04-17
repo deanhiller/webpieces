@@ -55,7 +55,7 @@ public interface Select
      * @param r
      * @param selector
      */
-    ChannelRegistrationListener createRegistrationListener(Object id, SelectorRunnable r, Object selector);
+    ChannelRegistrationListener createRegistrationListener(Object id, Runnable r, Object selector);
 
     /**
      * @param realChannel

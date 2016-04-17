@@ -10,11 +10,14 @@ import java.nio.channels.SelectableChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.handlers.FutureOperation;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
+import org.webpieces.util.futures.Future;
+import org.webpieces.util.futures.PromiseImpl;
 
 
 
@@ -94,7 +97,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	}
 
 	@Override
-	public FutureOperation connect(SocketAddress addr) {
+	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
 		try {
 			return connectImpl(addr);
 		} catch (IOException e) {
@@ -104,8 +107,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		}
 	}
 
-	private FutureOperation connectImpl(SocketAddress addr) throws IOException, InterruptedException {
-		FutureConnectImpl future = new FutureConnectImpl();
+	private Future<Channel, FailureInfo> connectImpl(SocketAddress addr) throws IOException, InterruptedException {
+		PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>();
 
 		if(apiLog.isLoggable(Level.FINE))
 			apiLog.fine(this+"Basic.connect-addr="+addr);
@@ -117,7 +120,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		setConnecting(true);
 		if(connected) {
 			try {
-				future.connected(this);
+				future.setResult(this);
 			} catch(Throwable e) {
 				log.log(Level.WARNING, this+"Exception occurred", e);
 			}

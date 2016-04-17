@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
-import org.webpieces.nio.api.testutil.nioapi.SelectorRunnable;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
 
 
@@ -16,13 +15,13 @@ class RegistrationListenerImpl implements ChannelRegistrationListener {
 	//public IOException ioExc = null;
 	private RuntimeException runtime = null;
 	private boolean processed = false;
-	private SelectorRunnable r;
+	private Runnable runnable;
 	private SelectorManager2 s;
 	private Object id;
 
-	public RegistrationListenerImpl(Object id, SelectorRunnable r, SelectorManager2 s) {
+	public RegistrationListenerImpl(Object id, Runnable r, SelectorManager2 s) {
 		this.id = id;
-		this.r = r;
+		this.runnable = r;
 		this.s = s;
 	}
 	
@@ -30,10 +29,7 @@ class RegistrationListenerImpl implements ChannelRegistrationListener {
 			
 		if(!processed) {
 			try {
-				r.run();
-			} catch(ClosedChannelException e) {
-                log.log(Level.WARNING, "Exception occurred.  Will be rethrown on client thread.  Look for that exc also", e);
-				exc = e;
+				runnable.run();
 			} catch(RuntimeException e) {
                 log.log(Level.WARNING, "Exception occurred.  Will be rethrown on client thread.  Look for that exc also", e);
 				runtime = e;
@@ -51,7 +47,7 @@ class RegistrationListenerImpl implements ChannelRegistrationListener {
 
 			if(!processed) {
 				if(log.isLoggable(Level.FINE))
-					log.fine(id+"call wakeup on selector to register for="+r);
+					log.fine(id+"call wakeup on selector to register for="+runnable);
 				s.wakeUpSelector();
 				//selector.wakeup();
 				if(waitForWakeup)

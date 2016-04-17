@@ -17,7 +17,6 @@ import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
-import org.webpieces.nio.api.testutil.nioapi.SelectorRunnable;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
 
 
@@ -191,8 +190,8 @@ public class SelectorImpl implements Select
      * @see org.webpieces.nio.api.testutil.nioapi.Select#createRegistrationListener
      * (java.lang.Object, org.webpieces.nio.api.testutil.nioapi.SelectorRunnable, org.webpieces.nio.impl.cm.basic.SelectorManager2)
      */
-    public ChannelRegistrationListener createRegistrationListener(Object id, SelectorRunnable r, Object s) {
-        return new RegistrationListenerImpl(id, r, (SelectorManager2)s);
+    public ChannelRegistrationListener createRegistrationListener(Object id, Runnable runnableForSelectorThread, Object s) {
+        return new RegistrationListenerImpl(id, runnableForSelectorThread, (SelectorManager2)s);
     }
 
     /**
