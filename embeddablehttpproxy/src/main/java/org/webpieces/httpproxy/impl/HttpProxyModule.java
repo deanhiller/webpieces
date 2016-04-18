@@ -55,7 +55,7 @@ public class HttpProxyModule implements Module {
 	@Provides
 	@Singleton
 	public AsyncServerManager providesAsyncServerMgr(ChannelManager mgr) {
-		return AsyncServerMgrFactory.createChannelManager(mgr);
+		return AsyncServerMgrFactory.createAsyncServer(mgr);
 	}
 	
 }

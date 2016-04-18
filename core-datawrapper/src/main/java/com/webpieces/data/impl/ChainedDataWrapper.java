@@ -10,17 +10,14 @@ import com.webpieces.data.api.DataWrapper;
 public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	private List<SliceableDataWrapper> wrappers = new ArrayList<>();
-	private DataWrapperGeneratorImpl generator;
 
-	public ChainedDataWrapper(SliceableDataWrapper wrapper1, SliceableDataWrapper wrapper2, DataWrapperGeneratorImpl generator) {
+	public ChainedDataWrapper(SliceableDataWrapper wrapper1, SliceableDataWrapper wrapper2) {
 		wrappers.add(wrapper1);
 		wrappers.add(wrapper2);
-		this.generator = generator;
 	}
 
-	public ChainedDataWrapper(List<SliceableDataWrapper> wrappers, DataWrapperGeneratorImpl generator) {
+	public ChainedDataWrapper(List<SliceableDataWrapper> wrappers) {
 		this.wrappers = wrappers;
-		this.generator = generator;
 	}
 	
 	@Override
@@ -118,57 +115,15 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		return max+1;
 	}
 
-	public List<DataWrapper> split(int splitAtPosition) {
-		List<SliceableDataWrapper> wrappersInBegin = new ArrayList<>();
-		List<SliceableDataWrapper> wrappersInEnd = new ArrayList<>();
-		
-		boolean foundSplit = false;
-		List<SliceableDataWrapper> splitBuffers = null;
-		for(SliceableDataWrapper wrapper : wrappers) {
-			if (!foundSplit) {
-				if(splitAtPosition == wrapper.getReadableSize()) {
-					wrappersInBegin.add(wrapper);
-					foundSplit = true;
-				} else if(splitAtPosition < wrapper.getReadableSize()) {
-					splitBuffers = generator.splitSliceableWrapper(wrapper, splitAtPosition);
-					foundSplit = true;
-				} else {
-					wrappersInBegin.add(wrapper);
-					splitAtPosition = splitAtPosition - wrapper.getReadableSize();	
-				}
-			} else {
-				wrappersInEnd.add(wrapper);
-			}
-		}
-
-		if(splitBuffers != null) {
-			wrappersInBegin.add(splitBuffers.get(0));
-			wrappersInEnd.add(0, splitBuffers.get(1));
-		}
-
-		DataWrapper wrapper1;
-		if(wrappersInBegin.size() > 0) 
-			wrapper1 = new ChainedDataWrapper(wrappersInBegin, generator);
-		else 
-			wrapper1 = new EmptyWrapper();
-		
-		DataWrapper wrapper2;
-		if(wrappersInEnd.size() > 0) 
-			wrapper2 = new ChainedDataWrapper(wrappersInEnd, generator);
-		else
-			wrapper2 = new EmptyWrapper();
-		
-		List<DataWrapper> finalTwo = new ArrayList<>();
-		finalTwo.add(wrapper1);
-		finalTwo.add(wrapper2);
-		return finalTwo;
-	}
-
 	@Override
 	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers) {
 		for(SliceableDataWrapper wrapper : wrappers) {
 			wrapper.addUnderlyingBuffersToList(buffers);
 		}
+	}
+
+	public List<SliceableDataWrapper> getWrappers() {
+		return wrappers;
 	}
 
 }

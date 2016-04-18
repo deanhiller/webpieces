@@ -48,7 +48,7 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 		SliceableDataWrapper first = (SliceableDataWrapper) firstData;
 		SliceableDataWrapper second = (SliceableDataWrapper) secondData;
 
-		return new ChainedDataWrapper(first, second, this);
+		return new ChainedDataWrapper(first, second);
 	}
 
 	@Override
@@ -99,6 +99,45 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 	}
 
 	private List<DataWrapper> splitChainedWrapper(ChainedDataWrapper dataToRead, int splitAtPosition) {
-		return dataToRead.split(splitAtPosition);
+		List<SliceableDataWrapper> wrappersInBegin = new ArrayList<>();
+		List<SliceableDataWrapper> wrappersInEnd = new ArrayList<>();
+		
+		boolean foundSplit = false;
+		List<SliceableDataWrapper> splitBuffers = null;
+		for(SliceableDataWrapper wrapper : dataToRead.getWrappers()) {
+			if (!foundSplit) {
+				if(splitAtPosition == wrapper.getReadableSize()) {
+					wrappersInBegin.add(wrapper);
+					foundSplit = true;
+				} else if(splitAtPosition < wrapper.getReadableSize()) {
+					splitBuffers = splitSliceableWrapper(wrapper, splitAtPosition);
+					wrappersInBegin.add(splitBuffers.get(0));
+					wrappersInEnd.add(splitBuffers.get(1));
+					foundSplit = true;
+				} else {
+					wrappersInBegin.add(wrapper);
+					splitAtPosition = splitAtPosition - wrapper.getReadableSize();	
+				}
+			} else {
+				wrappersInEnd.add(wrapper);
+			}
+		}
+
+		DataWrapper wrapper1;
+		if(wrappersInBegin.size() > 0) 
+			wrapper1 = new ChainedDataWrapper(wrappersInBegin);
+		else 
+			wrapper1 = new EmptyWrapper();
+		
+		DataWrapper wrapper2;
+		if(wrappersInEnd.size() > 0) 
+			wrapper2 = new ChainedDataWrapper(wrappersInEnd);
+		else
+			wrapper2 = new EmptyWrapper();
+		
+		List<DataWrapper> finalTwo = new ArrayList<>();
+		finalTwo.add(wrapper1);
+		finalTwo.add(wrapper2);
+		return finalTwo;
 	}
 }
