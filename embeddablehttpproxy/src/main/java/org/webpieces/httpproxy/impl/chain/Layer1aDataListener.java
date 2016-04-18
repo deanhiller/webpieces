@@ -8,10 +8,10 @@ import javax.inject.Inject;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-public class SSLLayer1DataListener implements DataListener {
+public class Layer1aDataListener implements DataListener {
 
 	@Inject
-	private SSLLayer2Encryption processor;
+	private Layer2DataListener listener;
 	@Inject
 	private Executor executor;
 	
@@ -20,7 +20,7 @@ public class SSLLayer1DataListener implements DataListener {
 		executor.execute(new Runnable() {
 			@Override
 			public void run() {
-				processor.incomingData(channel, b);
+				listener.incomingData(channel, b);
 			}
 		});
 	}
@@ -30,7 +30,7 @@ public class SSLLayer1DataListener implements DataListener {
 		executor.execute(new Runnable() {
 			@Override
 			public void run() {
-				processor.farEndClosed(channel);
+				listener.farEndClosed(channel);
 			}
 		});
 	}
@@ -40,7 +40,7 @@ public class SSLLayer1DataListener implements DataListener {
 		executor.execute(new Runnable() {
 			@Override
 			public void run() {
-				processor.failure(channel, data, e);
+				listener.failure(channel, data, e);
 			}
 		});
 	}

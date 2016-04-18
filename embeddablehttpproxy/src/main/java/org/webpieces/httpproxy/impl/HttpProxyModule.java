@@ -1,5 +1,9 @@
 package org.webpieces.httpproxy.impl;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import javax.inject.Singleton;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
@@ -8,6 +12,7 @@ import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -27,6 +32,13 @@ public class HttpProxyModule implements Module {
 		binder.bind(DataWrapperGenerator.class).toInstance(DataWrapperGeneratorFactory.createDataWrapperGenerator());
 	}
 
+	@Provides
+	@Singleton
+	public Executor createExecutorPool() {
+		ExecutorService pool = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
+		return pool;
+	}
+	
 	@Provides
 	@Singleton
 	public BufferCreationPool providesBufferPool() {

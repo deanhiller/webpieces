@@ -1,6 +1,9 @@
 package org.webpieces.httpclient.api;
 
+import org.webpieces.util.futures.Future;
+
 import com.webpieces.httpparser.api.dto.HttpRequest;
+import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpClient {
 
@@ -11,7 +14,8 @@ public interface HttpClient {
 	 * @param request
 	 * @param cb
 	 */
-	public void sendSingleRequest(HttpRequest request, HttpCallback cb);
+	public Future<HttpResponse, Throwable> sendSingleRequest(HttpRequest request);
+	
 	
 
 }

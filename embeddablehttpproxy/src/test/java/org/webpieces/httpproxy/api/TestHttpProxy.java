@@ -3,11 +3,13 @@ package org.webpieces.httpproxy.api;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.threading.DirectExecutor;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -48,10 +50,10 @@ public class TestHttpProxy {
 	}
 	
 	private class TestModule implements Module {
-
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(AsyncServerManager.class).toInstance(mockChannelMgr);
+			binder.bind(Executor.class).toInstance(new DirectExecutor());
 		}
 	}
 }

@@ -13,9 +13,9 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
 @Singleton
-public class Layer1DataListener implements DataListener {
+public class Layer2DataListener implements DataListener {
 
-	private static final Logger log = LoggerFactory.getLogger(Layer1DataListener.class);
+	private static final Logger log = LoggerFactory.getLogger(Layer2DataListener.class);
 	
 	@Inject
 	private Layer3Parser processor;
