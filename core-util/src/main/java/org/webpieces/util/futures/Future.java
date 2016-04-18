@@ -4,6 +4,8 @@ import java.util.function.Consumer;
 
 public interface Future<T, F> {
 
+	public boolean isComplete();
+	
 	public Future<T,F> setResultFunction(Consumer<T> resultFunction);
 	
 	public Future<T,F> setFailureFunction(Consumer<F> failureFunction);

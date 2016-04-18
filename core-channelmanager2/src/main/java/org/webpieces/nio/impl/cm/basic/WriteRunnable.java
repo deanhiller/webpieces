@@ -1,12 +1,12 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import java.net.PortUnreachableException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.exceptions.FailureInfo;
+import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
 import org.webpieces.util.futures.Promise;
 
 
@@ -25,12 +25,17 @@ public class WriteRunnable implements DelayedWritesCloses {
 
 	public boolean runDelayedAction(boolean isSelectorThread) {
 		try {
-
-			channel.writeImpl(buffer);
+			if(!buffer.hasRemaining())
+				throw new IllegalStateException("Trying to write out empty buffer");
+			
+			int wroteOut = channel.writeImpl(buffer);
+			
+			if(log.isLoggable(Level.FINEST))
+				log.log(Level.FINEST, "wrote out bytes="+wroteOut+" still remaining="+buffer.remaining());
 
             //log.info("count="+count+++"  remain="+buffer.remaining()+" wasRemain="+remain);
 //			log.info(channel+"CCwriter thread id="+id);
-        } catch(PortUnreachableException e) {
+        } catch(NioPortUnreachableException e) {
             //if a client sends a stream of udp, we fire a failure for each one, but only log it
             //at the finest level as these are not really devastating sometimes.  They are really just
             //telling someone that you are sending to a bad port or bad host or unreachable host

@@ -73,5 +73,10 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 		//done outside synchronization block..
 		consumer.accept(result);
 	}
+
+	@Override
+	public synchronized boolean isComplete() {
+		return complete;
+	}
 	
 }

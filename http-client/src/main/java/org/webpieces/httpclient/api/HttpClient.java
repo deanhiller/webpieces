@@ -16,6 +16,5 @@ public interface HttpClient {
 	 */
 	public Future<HttpResponse, Throwable> sendSingleRequest(HttpRequest request);
 	
-	
 
 }

@@ -16,6 +16,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioException;
+import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
@@ -121,7 +122,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 	
 	@Override
-	public int readImpl(ByteBuffer b) throws IOException {
+	public int readImpl(ByteBuffer b) {
 		if(b == null)
 			throw new IllegalArgumentException("Cannot use a null ByteBuffer");
 		else if(!isConnected)
@@ -139,13 +140,19 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 			expires = Calendar.getInstance();
 			expires.add(Calendar.SECOND, 10);
 			log.warning("PortUnreachable.  NOTICE NOTICE:  We will ignore this exc again on this channel for 10 seconds");
-			throw e;
+			throw new NioPortUnreachableException(e);
+		} catch (IOException e) {
+			throw new NioException(e);
 		}
 	}
 
 	@Override
-	protected int writeImpl(ByteBuffer b) throws IOException {
-		return channel.write(b);
+	protected int writeImpl(ByteBuffer b) {
+		try {
+			return channel.write(b);
+		} catch (IOException e) {
+			throw new NioException(e);
+		}
 	}
 
 }

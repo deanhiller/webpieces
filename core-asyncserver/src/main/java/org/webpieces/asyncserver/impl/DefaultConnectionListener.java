@@ -59,7 +59,6 @@ public class DefaultConnectionListener implements ConnectionListener {
 
 	private void close(TCPChannel tcpChannel) {
 		try {
-
 			tcpChannel.close();
 		} catch (Exception e) {
 			//normal behavior in cases where people connect and disconnect before response so

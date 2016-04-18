@@ -35,8 +35,8 @@ public abstract class BasChannelImpl
 	implements Channel {
 
 	private static final Logger apiLog = Logger.getLogger(Channel.class.getName());
-    private static final Logger log = Logger.getLogger(BasChannelImpl.class.getName());
-    
+	private static final Logger log = Logger.getLogger(BasChannelImpl.class.getName());
+	
     private ChannelSession session = new ChannelSessionImpl();
 	private LinkedBlockingQueue<DelayedWritesCloses> waitingWriters = new LinkedBlockingQueue<DelayedWritesCloses>(1000);
 	private boolean isConnecting = false;
@@ -57,8 +57,8 @@ public abstract class BasChannelImpl
 	 */
 	public abstract boolean isBlocking();
 
-	public abstract int readImpl(ByteBuffer b) throws IOException;
-	protected abstract int writeImpl(ByteBuffer b) throws IOException;
+	public abstract int readImpl(ByteBuffer b);
+	protected abstract int writeImpl(ByteBuffer b);
    
     /**
      * This is the method where writes are added to the queue to be written later when the selector
@@ -211,17 +211,22 @@ public abstract class BasChannelImpl
 		if(apiLog.isLoggable(Level.FINER))
 			apiLog.finer(this+"Basic.write");
 		
-        //copy the buffer here
-        ByteBuffer newOne = ByteBuffer.allocate(b.remaining());
-        newOne.put(b);
-        newOne.flip();
-        WriteRunnable holder = new WriteRunnable(this, newOne, impl);
-        
-		tryWriteOrClose(holder);
-        
-        if(log.isLoggable(Level.FINER)) {
-        	log.finest(this+"sent write to queue");
-       	}
+		int totalToWriteOut = b.remaining();
+		int written = writeImpl(b);
+		if(written != totalToWriteOut) {
+			if(b.remaining() + written != totalToWriteOut) {
+				throw new IllegalStateException("Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
+			}
+			WriteRunnable holder = new WriteRunnable(this, b, impl);
+			tryWriteOrClose(holder);
+	        if(log.isLoggable(Level.FINER)) {
+	        	log.finest(this+"sent write to queue");
+	       	}
+		} else if(log.isLoggable(Level.FINER)) {
+			impl.setResult(this);
+			log.finest(this+" wrote bytes on client thread");
+		}
+
         return impl;
 	}
            

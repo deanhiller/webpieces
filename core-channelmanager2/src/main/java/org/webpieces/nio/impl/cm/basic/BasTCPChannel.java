@@ -64,18 +64,27 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		return channel.isBound();
 	}
 	
-	protected int writeImpl(ByteBuffer b) throws IOException {
-		return channel.write(b);
+	protected int writeImpl(ByteBuffer b) {
+		try {
+			return channel.write(b);
+		} catch (IOException e) {
+			throw new NioException(e);
+		}
 	}
 	
-	public int readImpl(ByteBuffer b) throws IOException {
+	public int readImpl(ByteBuffer b) {
 		if(b == null)
 			throw new IllegalArgumentException(this+"Cannot use a null ByteBuffer");
 
 		//special code, read information in close() method
 		if(isClosed())
 			return -1;
-		return channel.read(b);
+		
+		try {
+			return channel.read(b);
+		} catch (IOException e) {
+			throw new NioException(e);
+		}
 	}
 
     
