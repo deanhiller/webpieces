@@ -10,7 +10,7 @@ public class TestFutures {
 
 	@Test
 	public void testSetResultBeforeFunction() {
-		PromiseImpl<Integer, Throwable> op = new PromiseImpl<>();
+		PromiseImpl<Integer, Throwable> op = new PromiseImpl<>(null);
 		op.setResult(5);
 		
 		final List<Integer> values = new ArrayList<>();
@@ -26,7 +26,7 @@ public class TestFutures {
 
 	@Test
 	public void testSetResultAfterFunction() {
-		PromiseImpl<Integer, Throwable> op = new PromiseImpl<>();
+		PromiseImpl<Integer, Throwable> op = new PromiseImpl<>(null);
 		
 		final List<Integer> values = new ArrayList<>();
 		Future<Integer, Throwable> future = op;

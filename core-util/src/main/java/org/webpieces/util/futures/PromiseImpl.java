@@ -1,5 +1,6 @@
 package org.webpieces.util.futures;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
@@ -11,6 +12,12 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 	private F failure;
 	private Consumer<String> cancelFunc;
 	private String cancelReason;
+	private Executor executor;
+	private static ThreadLocal<Integer> counterThreadLocal = new ThreadLocal<>();
+	
+	public PromiseImpl(Executor executor) {
+		this.executor = executor;
+	}
 
 	public void setResult(T result) {
 		if(result == null)
@@ -69,9 +76,37 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 			
 			complete = true;
 		}
+		//the rest done outside synchronization block..especially notifying consumer
 		
-		//done outside synchronization block..
-		consumer.accept(result);
+		//This is a special trick to keep this thread going but eventually we could get stackoverflow
+		//so at the point of 100 times recursion, we offload to another thread
+		int count = incrementThreadLocalCounterAndFetch();
+		
+		if(count >= 100) {
+			executor.execute(new Runnable() {
+				@Override
+				public void run() {
+					consumer.accept(result);
+				}
+			});
+		} else {
+			consumer.accept(result);
+		}
+		
+		//now we can reset the counter since we are no longer in the stack
+		counterThreadLocal.set(null);
+	}
+
+	private int incrementThreadLocalCounterAndFetch() {
+		Integer count = counterThreadLocal.get();
+		if(count == null) {
+			counterThreadLocal.set(1);
+			return 1;
+		}
+		
+		int newCount = count+1;
+		counterThreadLocal.set(newCount);
+		return newCount;
 	}
 
 	@Override

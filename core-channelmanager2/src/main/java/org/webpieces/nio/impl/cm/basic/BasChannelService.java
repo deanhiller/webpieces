@@ -1,5 +1,7 @@
 package org.webpieces.nio.impl.cm.basic;
 
+import java.util.concurrent.Executor;
+
 import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -23,8 +25,10 @@ class BasChannelService implements ChannelManager {
 	private String cmId;
     private ChannelsFactory channelFactory;
 	private boolean started;
+	private Executor executor;
 	
-	BasChannelService(String id, ChannelsFactory c, SelectorProviderFactory mgr, BufferCreationPool pool) {
+	BasChannelService(String id, ChannelsFactory c, 
+			SelectorProviderFactory mgr, BufferCreationPool pool, Executor executor) {
 		if(id == null || id.length() == 0)
 			throw new IllegalArgumentException("id cannot be null");
 		this.cmId = "["+id+"] ";
@@ -32,13 +36,14 @@ class BasChannelService implements ChannelManager {
 		selMgr = new SelectorManager2(mgr, cmId, pool);
 		this.objectId = id;
         this.channelFactory = c;
+        this.executor = executor;
         start();
 	}
 	
     public TCPServerChannel createTCPServerChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(objectId, id);
-        return new BasTCPServerChannel(obj, channelFactory, selMgr);
+        return new BasTCPServerChannel(obj, channelFactory, selMgr, executor);
     }
 
 	private void preconditionChecks(String id) {
@@ -51,13 +56,13 @@ class BasChannelService implements ChannelManager {
     public TCPChannel createTCPChannel(String id) {
         preconditionChecks(id);        
         IdObject obj = new IdObject(objectId, id);      
-        return new BasTCPChannel(obj, channelFactory, selMgr);
+        return new BasTCPChannel(obj, channelFactory, selMgr, executor);
     } 
 
     public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(objectId, id);
-        return new UDPChannelImpl(obj, selMgr);
+        return new UDPChannelImpl(obj, selMgr, executor);
     }
     
 	public DatagramChannel createDatagramChannel(String id, int bufferSize) {

@@ -10,8 +10,8 @@ import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,6 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 import org.webpieces.util.futures.Future;
@@ -38,13 +37,13 @@ public abstract class BasChannelImpl
 	private static final Logger log = LoggerFactory.getLogger(BasChannelImpl.class);
 	
     private ChannelSession session = new ChannelSessionImpl();
-	private LinkedBlockingQueue<DelayedWritesCloses> waitingWriters = new LinkedBlockingQueue<DelayedWritesCloses>(1000);
+	private ConcurrentLinkedQueue<DelayedWritesCloses> waitingWriters = new ConcurrentLinkedQueue<DelayedWritesCloses>();
 	private boolean isConnecting = false;
 	private boolean isClosed = false;
     private boolean registered;
     
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, Executor executor) {
+		super(id, selMgr, executor);
 	}
 	
 	/* (non-Javadoc)
@@ -70,28 +69,21 @@ public abstract class BasChannelImpl
      * @throws InterruptedException
      */
     private synchronized void tryWriteOrClose(DelayedWritesCloses action) {
-    	try {
-	        //TODO: make 30 seconds configurable in milliseoncds maybe
-	        boolean accepted = waitingWriters.offer(action, 30, TimeUnit.SECONDS);
-	        if(!accepted) {
-	        	throw new RuntimeException(this+"registered="+registered+" Dropping data, the upstream must be full as our queue is full of writes" +
-	        			" that are stuck and can't go out(you should NOT call dataChunk.setProcessed in this case so the" +
-	        			" downstream will slowdown and will not flood you as tcp flow control automatically kicks" +
-	        			" in which means you will not flood the upstream like you are doing!!!!");
-	        }
-	        
-	        //if not already registered, then register for writes.....
-	        //NOTE: we must do this after waitingWriters.offer so there is something on the queue to read
-	        //otherwise, that could be bad.
-	        if(!registered) {
-	            registered = true;
-	            if(log.isTraceEnabled())
-	                log.trace(this+"registering channel for write msg cb="+action+" size="+waitingWriters.size());
-	            getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null, false);
-	        }
-    	} catch(InterruptedException e) {
-    		throw new RuntimeInterruptedException(e);
-    	}
+        //TODO: make 30 seconds configurable in milliseoncds maybe
+		boolean accepted = waitingWriters.add(action);
+        if(!accepted) {
+        	throw new RuntimeException(this+"registered="+registered+" This should never occur");
+        }
+        
+        //if not already registered, then register for writes.....
+        //NOTE: we must do this after waitingWriters.offer so there is something on the queue to read
+        //otherwise, that could be bad.
+        if(!registered) {
+            registered = true;
+            if(log.isTraceEnabled())
+                log.trace(this+"registering channel for write msg cb="+action+" size="+waitingWriters.size());
+            getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null, false);
+        }
     }
        
     /**
@@ -206,7 +198,7 @@ public abstract class BasChannelImpl
 			AsynchronousCloseException exc = new AsynchronousCloseException();
 			throw new NioException(this+"Client cannot write after the client closed the socket", exc);
 		}
-		PromiseImpl<Channel, FailureInfo> impl = new PromiseImpl<>();
+		PromiseImpl<Channel, FailureInfo> impl = new PromiseImpl<>(executor);
 		
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.write");
@@ -222,9 +214,10 @@ public abstract class BasChannelImpl
 	        if(log.isTraceEnabled()) {
 	        	log.trace(this+"sent write to queue");
 	       	}
-		} else if(log.isTraceEnabled()) {
+		} else {
 			impl.setResult(this);
-			log.trace(this+" wrote bytes on client thread");
+			if(log.isTraceEnabled())
+				log.trace(this+" wrote bytes on client thread");
 		}
 
         return impl;
@@ -264,7 +257,7 @@ public abstract class BasChannelImpl
         //  at biz.xsoftware.impl.nio.cm.basic.Helper.processKeys(Helper.java:47)
         //  at biz.xsoftware.impl.nio.cm.basic.SelectorManager2.runLoop(SelectorManager2.java:305)
         //  at biz.xsoftware.impl.nio.cm.basic.SelectorManager2$PollingThread.run(SelectorManager2.java:267)
-    	PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>();
+    	PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>(executor);
     	try {
     		if(apiLog.isTraceEnabled())
     			apiLog.trace(this+"Basic.close called");

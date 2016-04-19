@@ -25,6 +25,9 @@ public class DefaultConnectionListener implements ConnectionListener {
 	@Override
 	public void connected(Channel channel) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
+		
+		log.info("keep alive="+tcpChannel.getKeepAlive()+ " sotimeout="+tcpChannel.getSoTimeout());
+		
 		if(overloadResponse != null) {
 			//This is annoying.....
 			//1. we canNOT do synchronous write as it could block forever (if hacker simulates full nic)

@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +32,10 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	
 	private int i = 0;
     private ChannelsFactory channelFactory;
+	private Executor executor;
 	
-	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr, Executor executor) {
+		super(id, selMgr, executor);
         this.channelFactory = c;
         try {
         	channel = ServerSocketChannel.open();
@@ -66,7 +68,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketId);
-			TCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager());
+			TCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), executor);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
 			cb.connected(tcpChan);

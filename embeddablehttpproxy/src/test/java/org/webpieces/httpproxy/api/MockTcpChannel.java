@@ -137,4 +137,9 @@ public class MockTcpChannel implements TCPChannel {
 		
 	}
 
+	@Override
+	public int getSoTimeout() {
+		return 0;
+	}
+
 }

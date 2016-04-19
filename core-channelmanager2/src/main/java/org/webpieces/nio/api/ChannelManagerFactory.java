@@ -1,5 +1,7 @@
 package org.webpieces.nio.api;
 
+import java.util.concurrent.Executor;
+
 import org.webpieces.nio.impl.cm.basic.BasChanSvcFactory;
 
 
@@ -17,5 +19,5 @@ public abstract class ChannelManagerFactory {
 		return new BasChanSvcFactory();
 	}
 	
-	public abstract ChannelManager createChannelManager(String id, BufferCreationPool pool);
+	public abstract ChannelManager createChannelManager(String id, BufferCreationPool pool, Executor executor);
 }

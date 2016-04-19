@@ -11,8 +11,6 @@ import org.webpieces.nio.impl.cm.basic.SelectorManager2;
 class RegistrationListenerImpl implements ChannelRegistrationListener {
 
 	private static final Logger log = LoggerFactory.getLogger(RegistrationListenerImpl.class);
-	private ClosedChannelException exc = null;
-	//public IOException ioExc = null;
 	private RuntimeException runtime = null;
 	private boolean processed = false;
 	private Runnable runnable;
@@ -54,10 +52,8 @@ class RegistrationListenerImpl implements ChannelRegistrationListener {
 					this.wait();
 			}
 		}
-		if(exc != null) {
-            exc.fillInStackTrace();
-			throw exc;
-        } else if(runtime != null) {
+
+        if(runtime != null) {
             runtime.fillInStackTrace();
 			throw runtime;		
         }

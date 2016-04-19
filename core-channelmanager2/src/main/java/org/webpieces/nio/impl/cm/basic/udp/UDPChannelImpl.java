@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectableChannel;
 import java.util.Calendar;
+import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +33,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	private boolean isConnected = false;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr, Executor executor) {
+		super(id, selMgr, executor);
 		try {
 			channel = DatagramChannel.open();
 			channel.configureBlocking(false);
@@ -53,7 +54,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 	
 	private synchronized Future<Channel, FailureInfo> connectImpl(SocketAddress addr) {
-		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>();
+		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>(executor);
 		
 		try {
 			if(apiLog.isTraceEnabled())

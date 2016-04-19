@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
+import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, Executor executor) {
+		super(id, selMgr, executor);
 		try {
 			channel = factory.open();
 			channel.configureBlocking(false);
@@ -44,9 +45,10 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	/**
 	 * Only used from TCPServerChannel.accept().  please keep it that way. thanks.
 	 * @param newChan
+	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, Executor executor) {
+		super(id, selMgr, executor);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
@@ -117,7 +119,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	}
 
 	private Future<Channel, FailureInfo> connectImpl(SocketAddress addr) throws IOException, InterruptedException {
-		PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>();
+		PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>(executor);
 
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.connect-addr="+addr);
@@ -197,6 +199,14 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	public boolean getKeepAlive() {
 		try {
 			return channel.getKeepAlive();
+		} catch (SocketException e) {
+			throw new NioException(e);
+		}
+	}
+	
+	public int getSoTimeout() {
+		try {
+			return channel.getSoTimeout();
 		} catch (SocketException e) {
 			throw new NioException(e);
 		}

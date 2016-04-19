@@ -97,4 +97,9 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getSession();
 	}
 
+	@Override
+	public int getSoTimeout() {
+		return channel.getSoTimeout();
+	}
+
 }

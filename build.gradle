@@ -1,4 +1,5 @@
 allprojects {
+
 }
 
 subprojects {
@@ -41,6 +42,18 @@ subprojects {
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
    }
+
+    task checkJavaVersion << {
+       if (!JavaVersion.current().isJava8()) {
+        String message = "ERROR: Java 1.8 required but " +
+                         JavaVersion.current() + 
+                         " found. Change your JAVA_HOME environment variable.";
+        throw new IllegalStateException(message);
+       }
+    }
+
+    compileJava.dependsOn checkJavaVersion
+
 }
 
 project(':core-channelmanager2') {

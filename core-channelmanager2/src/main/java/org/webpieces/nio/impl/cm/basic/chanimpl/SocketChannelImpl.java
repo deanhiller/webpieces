@@ -159,4 +159,9 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 		channel.socket().setKeepAlive(b);
 	}
 
+	@Override
+	public int getSoTimeout() throws SocketException {
+		return channel.socket().getSoTimeout();
+	}
+
 }

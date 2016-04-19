@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.Executor;
 
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.testutil.nioapi.Select;
@@ -18,12 +19,14 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
 	private IdObject id;
 	private SelectorManager2 selMgr;
 	private SelectionKey key;
+	protected Executor executor;
 
-	public RegisterableChannelImpl(IdObject id, SelectorManager2 selMgr) {
+	public RegisterableChannelImpl(IdObject id, SelectorManager2 selMgr, Executor executor) {
 		if(id == null)
 			throw new IllegalArgumentException("id cannot be null");		
 		this.id = id;
 		this.selMgr = selMgr;
+		this.executor = executor;
 	}
 	
     /**

@@ -112,8 +112,6 @@ public interface SocketChannel
 
 	boolean getKeepAlive() throws SocketException;
 
-
-
-    
+	int getSoTimeout() throws SocketException;
 
 }
