@@ -2,7 +2,7 @@ package org.webpieces.nio.test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import javax.net.ssl.SSLEngine;
 
@@ -31,7 +31,7 @@ import biz.xsoftware.mock.MockObject;
  */
 public class TestNewAsynchSSLEngine extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestNewAsynchSSLEngine.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestNewAsynchSSLEngine.class);
 	
 	private BufferHelper helper = ChannelServiceFactory.bufferHelper(null);
 	private MockSslListener serverList = new MockSslListener();
@@ -61,7 +61,7 @@ public class TestNewAsynchSSLEngine extends TestCase {
 	}
 		
 	public void testBasic() throws Exception {
-		log.fine("B*******************************************");
+		log.trace("B*******************************************");
 		clientEngine.beginHandshake();
 		ByteBuffer b = clientList.getPacketEncrypted();
 		
@@ -232,7 +232,7 @@ public class TestNewAsynchSSLEngine extends TestCase {
 		testBasic();
 		feedData(clientEngine, clientList, serverEngine, serverList);				
 		
-		log.fine("B*******************************************");
+		log.trace("B*******************************************");
 		clientEngine.beginHandshake();
 		String expected = "abcasdfaasdfsdfsfsfdsfs";
 		ByteBuffer data = ByteBuffer.allocate(100);
@@ -282,7 +282,7 @@ public class TestNewAsynchSSLEngine extends TestCase {
 		testBasic();
 		feedData(clientEngine, clientList, serverEngine, serverList);				
 		
-		log.fine("B*******************************************");
+		log.trace("B*******************************************");
 		clientEngine.beginHandshake();
 		String expected = "abc";
 		ByteBuffer data = ByteBuffer.allocate(10);

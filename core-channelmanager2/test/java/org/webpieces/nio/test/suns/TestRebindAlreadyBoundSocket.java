@@ -18,7 +18,7 @@ import junit.framework.TestCase;
  */
 public class TestRebindAlreadyBoundSocket extends TestCase {
 
-	//private static final Logger log = Logger.getLogger(TestBindError.class.getName());
+	//private static final Logger log = LoggerFactory.getLogger(TestBindError.class);
 	
 	
 	/**

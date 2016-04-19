@@ -9,7 +9,7 @@ import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -27,7 +27,7 @@ import biz.xsoftware.mock.ExpectFailedException;
  */
 public class TestXEvaluateNIOBehavior extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestXEvaluateNIOBehavior.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestXEvaluateNIOBehavior.class);
 	
 	private MockNIOServer mockServer;
 	private InetSocketAddress svrAddr;

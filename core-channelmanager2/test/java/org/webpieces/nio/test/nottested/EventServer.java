@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -30,7 +30,7 @@ import org.webpieces.nio.api.testutil.MockSSLEngineFactory;
  */
 public class EventServer implements ConnectionListener, DataListener {
 
-	private static final Logger log = Logger.getLogger(EventServer.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(EventServer.class);
 	private static final Timer TIMER = new Timer();
 	private Map<Channel, TimerTask> channelToTask = new HashMap<Channel, TimerTask>();
 	
@@ -69,7 +69,7 @@ public class EventServer implements ConnectionListener, DataListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.log(Level.WARNING, channel+"Exception", e);
+		log.warn(channel+"Exception", e);
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class EventServer implements ConnectionListener, DataListener {
 				c.oldWrite(b);
 				b.rewind();
 			} catch(Exception e) {
-				log.log(Level.WARNING, c+"TimerTaskException", e);
+				log.warn(c+"TimerTaskException", e);
 			}
 		}
 		

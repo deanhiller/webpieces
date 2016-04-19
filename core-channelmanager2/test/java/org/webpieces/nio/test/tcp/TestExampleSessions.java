@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  */
 public class TestExampleSessions extends TestCase
 {
-    private static final Logger log = Logger.getLogger(TestExampleSessions.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(TestExampleSessions.class);
     private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
     
     private ChannelService svc;
@@ -123,7 +123,7 @@ public class TestExampleSessions extends TestCase
          */
         public void failed(RegisterableChannel channel, Throwable e)
         {
-            log.log(Level.WARNING, "", e);
+            log.warn("", e);
         }
         
     }

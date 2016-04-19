@@ -9,9 +9,9 @@ import java.net.SocketException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.exceptions.NioException;
@@ -26,7 +26,7 @@ import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
  */
 class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerChannel {
 
-	private static final Logger log = Logger.getLogger(BasTCPServerChannel.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(BasTCPServerChannel.class);
 	private ServerSocketChannel channel;
 	
 	private int i = 0;
@@ -67,11 +67,11 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketId);
 			TCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager());
-			if(log.isLoggable(Level.FINER))
-				log.finer(tcpChan+"Accepted new incoming connection");
+			if(log.isTraceEnabled())
+				log.trace(tcpChan+"Accepted new incoming connection");
 			cb.connected(tcpChan);
 		} catch(Throwable e) {
-			log.log(Level.WARNING, this+"Failed to connect", e);
+			log.warn(this+"Failed to connect", e);
 			cb.failed(this, e);
 		}
 	}
@@ -139,7 +139,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			channel.close();
 			super.wakeupSelector();			
         } catch(Exception e) {
-            log.log(Level.WARNING, this+"Exception closing channel", e);
+            log.warn(this+"Exception closing channel", e);
         }
 	}
 	

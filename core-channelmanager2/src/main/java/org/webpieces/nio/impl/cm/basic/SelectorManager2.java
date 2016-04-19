@@ -31,11 +31,11 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.event.EventListenerList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.exceptions.FailureInfo;
@@ -54,7 +54,7 @@ public class SelectorManager2 implements SelectorListener {
 //--------------------------------------------------------------------
 //	FIELDS/MEMBERS
 //--------------------------------------------------------------------
-	private static final Logger log = Logger.getLogger(SelectorManager2.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(SelectorManager2.class);
 	
     private Select selector;
     private SelectorProviderFactory factory;
@@ -99,7 +99,7 @@ public class SelectorManager2 implements SelectorListener {
             selector.stopPollingThread();
         } catch(Throwable e) {
             //there is nothing a client can do to a recover from this so swallow it for them
-            log.log(Level.WARNING, "Exception stopping selector", e);
+            log.warn("Exception stopping selector", e);
         }
 	}
 	
@@ -163,8 +163,8 @@ public class SelectorManager2 implements SelectorListener {
 		SelectableChannel s = channel.getRealChannel();
 		
 		int previousOps = 0;
-		if (log.isLoggable(Level.FINEST))
-			log.log(Level.FINEST, channel+"registering2="+s+" ops="+Helper.opType(validOps));
+		if (log.isTraceEnabled())
+			log.trace(channel+"registering2="+s+" ops="+Helper.opType(validOps));
         
 		SelectionKey previous = channel.keyFor(selector);
 		if(previous == null) {
@@ -180,8 +180,8 @@ public class SelectorManager2 implements SelectorListener {
 		int allOps = previousOps | validOps;
 		SelectionKey key = channel.register(selector, allOps, struct);
 		channel.setKey(key);
-		if (log.isLoggable(Level.FINER))
-			log.log(Level.FINER, channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
+		if (log.isTraceEnabled())
+			log.trace(channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
 	}
 
 	private void asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
@@ -260,8 +260,8 @@ public class SelectorManager2 implements SelectorListener {
         //he will be served with all the others in an equal priority round robin
         //fashion.
         Set<SelectionKey> keySet = selector.selectedKeys();
-        if(log.isLoggable(Level.FINER))
-        	log.finer(id+"keySetCnt="+keySet.size()+" registerCnt="+listenerList.getListenerCount()
+        if(log.isTraceEnabled())
+        	log.trace(id+"keySetCnt="+keySet.size()+" registerCnt="+listenerList.getListenerCount()
         			+" needCloseOrRegister="+needCloseOrRegister+" wantShutdown="+selector.isWantShutdown());
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
@@ -271,13 +271,13 @@ public class SelectorManager2 implements SelectorListener {
 	
 	protected int waitOnSelector() {
 		int numNewKeys = 0;
-		if(log.isLoggable(Level.FINER))
-			log.finer(id+"coming into select");
+		if(log.isTraceEnabled())
+			log.trace(id+"coming into select");
 		numNewKeys = selector.select();
 //should assert we are not stopping, have listeners, or have keys to process...
 
-		if(log.isLoggable(Level.FINER))
-			log.finer(id+"coming out of select with newkeys="+numNewKeys+
+		if(log.isTraceEnabled())
+			log.trace(id+"coming out of select with newkeys="+numNewKeys+
 					" regCnt="+listenerList.getListenerCount()+" needCloseOrRegister="+needCloseOrRegister+
 					" wantShutdown="+selector.isWantShutdown());
 
@@ -304,8 +304,8 @@ public class SelectorManager2 implements SelectorListener {
 	 * Also, this is used to wakeup the selector to process registrations!!!
 	 */
 	public void wakeUpSelector() {
-		if(log.isLoggable(Level.FINE))
-			log.fine(id+"Wakeup selector to enable close or registers");
+		if(log.isTraceEnabled())
+			log.trace(id+"Wakeup selector to enable close or registers");
 		needCloseOrRegister = true;
 		selector.wakeup();
 	}

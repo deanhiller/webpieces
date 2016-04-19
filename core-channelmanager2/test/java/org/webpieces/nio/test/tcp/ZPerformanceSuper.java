@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -31,7 +31,7 @@ import biz.xsoftware.mock.MockObjectFactory;
 
 public abstract class ZPerformanceSuper extends TestCase {
 
-	private static final Logger log = Logger.getLogger(ZPerformanceSuper.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(ZPerformanceSuper.class);
 	
 	private BufferFactory bufFactory;
 	
@@ -65,7 +65,7 @@ public abstract class ZPerformanceSuper extends TestCase {
 	
 	protected void setUp() throws Exception {
 		HandlerForTests.setupLogging();
-		Logger.getLogger("").setLevel(Level.INFO);
+		LoggerFactory.getLogger("").setLevel(Level.INFO);
 		//here I keep using the same channel manager on purpose, just
 		//so we get testing between tests that the channel manager shutdown
 		//and started back up cleanly.....
@@ -82,7 +82,7 @@ public abstract class ZPerformanceSuper extends TestCase {
 //		InetAddress tmp = InetAddress.getByName("192.168.1.102");
 //		svrAddr = new InetSocketAddress(tmp, 501);
 		
-		log.fine("server port ="+svrAddr);
+		log.trace("server port ="+svrAddr);
 		
 		//loopBack = InetAddress.getByName("127.0.0.1");	
 		//loopBackAnyPort = new InetSocketAddress(loopBack, 0);
@@ -100,7 +100,7 @@ public abstract class ZPerformanceSuper extends TestCase {
 		
 		HandlerForTests.checkForWarnings();
         Thread.sleep(1000);
-		Logger.getLogger("").setLevel(Level.FINEST);
+		LoggerFactory.getLogger("").setLevel(Level.FINEST);
 	}
 
 	protected abstract int getBasicConnectTimeLimit();
@@ -202,7 +202,7 @@ public abstract class ZPerformanceSuper extends TestCase {
 				}
 			}
 		} catch(Exception e) {
-			log.log(Level.WARNING, "the exception", e);
+			log.warn("the exception", e);
 		} finally {
 			log.warning("test ending*********************");
 		}

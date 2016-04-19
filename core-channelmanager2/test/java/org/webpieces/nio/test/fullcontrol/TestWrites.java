@@ -35,7 +35,7 @@ import biz.xsoftware.mock.MockObjectFactory;
 
 public class TestWrites extends TestCase {
 
-    //private static final Logger log = Logger.getLogger(TestWrites.class.getName());
+    //private static final Logger log = LoggerFactory.getLogger(TestWrites.class);
     private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);    
     
 	private BufferFactory bufFactory;

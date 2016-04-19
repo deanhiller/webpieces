@@ -29,7 +29,7 @@ package org.webpieces.nio.test.nottested;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.CorruptPacketException;
@@ -44,7 +44,7 @@ public class SequenceProcessor implements PacketProcessor {
 //--------------------------------------------------------------------
 //	FIELDS/MEMBERS
 //--------------------------------------------------------------------
-	private static final Logger log = Logger.getLogger(SequenceProcessor.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(SequenceProcessor.class);
 	private static final int HEADER_SIZE = Integer.SIZE/8*2;
 	private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
 	
@@ -137,8 +137,8 @@ public class SequenceProcessor implements PacketProcessor {
 
 		int seq = getSequence();
 
-		if(log.isLoggable(Level.FINER))
-			log.finer(id+"packetized-> #"+seq+" buf="+b);
+		if(log.isTraceEnabled())
+			log.trace(id+"packetized-> #"+seq+" buf="+b);
 		
 		ByteBuffer packet = ByteBuffer.allocate(b.remaining()+readOnlyTail.remaining()+HEADER_SIZE);
 		int size = b.remaining();
@@ -157,7 +157,7 @@ public class SequenceProcessor implements PacketProcessor {
 		try {
 			return notifyImpl(b, passthrough);
 		} catch(CorruptPacketException e) {
-			log.log(Level.WARNING, "Corrupt packet received", e);
+			log.warn("Corrupt packet received", e);
 			clearState();
 			throw e;
 		}
@@ -170,14 +170,14 @@ public class SequenceProcessor implements PacketProcessor {
 //			//state = RECOVERING;
 //			//notifyImpl(b);
 //		} catch(RuntimeException e) {
-//			log.log(Level.WARNING, "Ignoring exception as it happened after another\n"
+//			log.warn("Ignoring exception as it happened after another\n"
 //					+"exception that we will throw back.  This exception may be\n"
 //					+"a result of the first exception", e);
 //		}
 //	}
 
 	public boolean notifyImpl(ByteBuffer b, Object passthrough) throws IOException {
-		if (log.isLoggable(Level.FINEST))
+		if (log.isTraceEnabled())
 			log.log(Level.FINEST, "processing stream");
 		if(b == null)
 			throw new IllegalArgumentException("evt cannot be null");
@@ -291,8 +291,8 @@ public class SequenceProcessor implements PacketProcessor {
 	private void firePacket(Object passthrough) throws IOException {
 		HELPER.doneFillingBuffer(body.getCache());
 
-		if(log.isLoggable(Level.FINER))
-			log.finer(id+"unpacketize<- #"+body.getSequence()+" b="+body.getCache());
+		if(log.isTraceEnabled())
+			log.trace(id+"unpacketize<- #"+body.getSequence()+" b="+body.getCache());
 
 		listener.incomingPacket(body.getCache(), passthrough);
 	}

@@ -34,7 +34,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.deprecated.ChannelServiceFactory;
 import org.webpieces.nio.api.deprecated.CorruptPacketException;
@@ -53,7 +53,7 @@ public class TestUnpacketizer extends MockTestCase {
 //--------------------------------------------------------------------
 //	FIELDS/MEMBERS
 //--------------------------------------------------------------------
-	private static final Logger log = Logger.getLogger(TestUnpacketizer.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestUnpacketizer.class);
 	private static final String PACKET_METHOD = "incomingPacket";
 	private static final String HALF1 = "01234";
 	private static final String HALF2 = "56789";
@@ -118,7 +118,7 @@ public class TestUnpacketizer extends MockTestCase {
 	}
 
 	public void testHalfAPacket() throws IOException {
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "started");
 				
 		ByteBuffer b = ByteBuffer.allocate(30);
@@ -138,7 +138,7 @@ public class TestUnpacketizer extends MockTestCase {
 		b.put(PACKET_SEPARATOR);
 		helper.doneFillingBuffer(b);
 
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "FEED NEXT BUFFER********************");
 		
 		unpacketizer.incomingData(b, null);
@@ -146,7 +146,7 @@ public class TestUnpacketizer extends MockTestCase {
 			
 		verifyBuffer(method, fullString, size);
 
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "ended");
 	}
 	/**
@@ -157,7 +157,7 @@ public class TestUnpacketizer extends MockTestCase {
 	 *
 	 */
 	public void testTwoAndHalfPackets() throws IOException {
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "started");
 			
 		ByteBuffer b = ByteBuffer.allocate(200);
@@ -192,7 +192,7 @@ public class TestUnpacketizer extends MockTestCase {
 		helper.putString(b, HALF1);
 		helper.doneFillingBuffer(b);
 		
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "FEED NEXT BUFFER********************");
 			
 		unpacketizer.incomingData(b, null);
@@ -211,12 +211,12 @@ public class TestUnpacketizer extends MockTestCase {
 		
 		verifyBuffer(method, fullString, size);
 				
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "ended");		
 	}
 	
 	public void testSplitInVeryFirstHeader() throws IOException {
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "started");		
 
 		String test = "";
@@ -248,12 +248,12 @@ public class TestUnpacketizer extends MockTestCase {
 		
 		doLastPartOfSplitHeaderVerification(b, b1, test);
 
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "ended");		
 	}
 
 	public void testSplitInSecondHeader() throws IOException {
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "started");		
 
 		String test = "";
@@ -293,7 +293,7 @@ public class TestUnpacketizer extends MockTestCase {
 	public void testExceptions() throws IOException {
 		setNumberOfExpectedWarnings(2);
 		
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "started");
 			
 		ByteBuffer b = ByteBuffer.allocate(200);
@@ -314,7 +314,7 @@ public class TestUnpacketizer extends MockTestCase {
 		
 		listener.expect(MockObject.NONE);
 		
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "FEEDING NEXT BAD PACKET************");
 		helper.eraseBuffer(b);
 		b.putInt(100000000); //2*10 because chars are 2 bytes.
@@ -331,7 +331,7 @@ public class TestUnpacketizer extends MockTestCase {
 		}		
 		listener.expect(MockObject.NONE);		
 
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "FEEDING NULL************");
 		try {
 			unpacketizer.incomingData(null, null);
@@ -341,7 +341,7 @@ public class TestUnpacketizer extends MockTestCase {
 		}		
 		listener.expect(MockObject.NONE);	
 
-		if (log.isLoggable(Level.FINE))
+		if (log.isTraceEnabled())
 			log.log(Level.FINE, "ended");
 	}
 	
@@ -392,8 +392,8 @@ public class TestUnpacketizer extends MockTestCase {
 		
 		assertEquals("remaining incorrect", expectedSize, b.remaining());
 		
-		if (log.isLoggable(Level.FINEST)) {
-			log.finest("10byteBuf pos="+b.position()+"  lim="+b.limit()+"  remain="+b.remaining());
+		if (log.isTraceEnabled()) {
+			log.trace("10byteBuf pos="+b.position()+"  lim="+b.limit()+"  remain="+b.remaining());
 		}		
 		String s = helper.readString(b, expectedSize);
 

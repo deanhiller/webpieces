@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -22,7 +22,7 @@ import org.webpieces.nio.api.testutil.MockSSLEngineFactory;
 
 public class EventClient implements ConnectionCallback, DataListener {
 
-	private static final Logger log = Logger.getLogger(EventClient.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(EventClient.class);
 	private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
 	
 	/**
@@ -63,7 +63,7 @@ public class EventClient implements ConnectionCallback, DataListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.log(Level.WARNING, channel+"Exception", e);
+		log.warn(channel+"Exception", e);
 	}
 
 	public void incomingData(Channel channel, ByteBuffer chunk) throws IOException {

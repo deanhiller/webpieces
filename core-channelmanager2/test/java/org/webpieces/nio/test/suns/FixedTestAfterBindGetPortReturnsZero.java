@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  */
 public class FixedTestAfterBindGetPortReturnsZero extends TestCase {
 
-	private static final Logger log = Logger.getLogger(FixedTestAfterBindGetPortReturnsZero.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(FixedTestAfterBindGetPortReturnsZero.class);
 	
 	
 	/**

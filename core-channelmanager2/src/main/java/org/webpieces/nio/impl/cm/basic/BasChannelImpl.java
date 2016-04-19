@@ -12,9 +12,9 @@ import java.nio.channels.SelectionKey;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.FailureInfo;
@@ -34,8 +34,8 @@ public abstract class BasChannelImpl
 	extends RegisterableChannelImpl
 	implements Channel {
 
-	private static final Logger apiLog = Logger.getLogger(Channel.class.getName());
-	private static final Logger log = Logger.getLogger(BasChannelImpl.class.getName());
+	private static final Logger apiLog = LoggerFactory.getLogger(Channel.class);
+	private static final Logger log = LoggerFactory.getLogger(BasChannelImpl.class);
 	
     private ChannelSession session = new ChannelSessionImpl();
 	private LinkedBlockingQueue<DelayedWritesCloses> waitingWriters = new LinkedBlockingQueue<DelayedWritesCloses>(1000);
@@ -85,8 +85,8 @@ public abstract class BasChannelImpl
 	        //otherwise, that could be bad.
 	        if(!registered) {
 	            registered = true;
-	            if(log.isLoggable(Level.FINER))
-	                log.finer(this+"registering channel for write msg cb="+action+" size="+waitingWriters.size());
+	            if(log.isTraceEnabled())
+	                log.trace(this+"registering channel for write msg cb="+action+" size="+waitingWriters.size());
 	            getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null, false);
 	        }
     	} catch(InterruptedException e) {
@@ -109,8 +109,8 @@ public abstract class BasChannelImpl
             DelayedWritesCloses writer = writers.peek();
             boolean finished = writer.runDelayedAction(true);
             if(!finished) {
-                if(log.isLoggable(Level.FINER))
-                    log.finer(this+"Did not write all of id="+writer);
+                if(log.isTraceEnabled())
+                    log.trace(this+"Did not write all of id="+writer);
                 break;
             }
             //if it finished, remove the item from the queue.  It
@@ -119,8 +119,8 @@ public abstract class BasChannelImpl
         }
         
         if(writers.isEmpty()) {
-            if(log.isLoggable(Level.FINER))
-                log.fine(this+"unregister writes");
+        	if(log.isTraceEnabled())
+        		log.trace(this+"unregister writes");
             registered = false;
             Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE); 
         }
@@ -129,8 +129,8 @@ public abstract class BasChannelImpl
     public void bind(SocketAddress addr) {
         if(!(addr instanceof InetSocketAddress))
             throw new IllegalArgumentException(this+"Can only bind to InetSocketAddress addressses");
-        if(apiLog.isLoggable(Level.FINE))
-        	apiLog.fine(this+"Basic.bind called addr="+addr);
+        if(apiLog.isTraceEnabled())
+        	apiLog.trace(this+"Basic.bind called addr="+addr);
         
         try {
 			bindImpl(addr);
@@ -170,8 +170,8 @@ public abstract class BasChannelImpl
 			throw new IllegalStateException(this+"Must call one of the connect methods first(ie. connect THEN register for reads)");
 		}
 
-		if(apiLog.isLoggable(Level.FINE))
-			apiLog.fine(this+"Basic.registerForReads called");
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.registerForReads called");
 		
         try {
 			getSelectorManager().registerChannelForRead(this, listener);
@@ -183,8 +183,8 @@ public abstract class BasChannelImpl
 	}
 	
 	public void unregisterForReads() {
-		if(apiLog.isLoggable(Level.FINE))
-			apiLog.fine(this+"Basic.unregisterForReads called");		
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.unregisterForReads called");		
 		try {
 			getSelectorManager().unregisterChannelForRead(this);
 		} catch (IOException e) {
@@ -208,8 +208,8 @@ public abstract class BasChannelImpl
 		}
 		PromiseImpl<Channel, FailureInfo> impl = new PromiseImpl<>();
 		
-		if(apiLog.isLoggable(Level.FINER))
-			apiLog.finer(this+"Basic.write");
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.write");
 		
 		int totalToWriteOut = b.remaining();
 		int written = writeImpl(b);
@@ -219,12 +219,12 @@ public abstract class BasChannelImpl
 			}
 			WriteRunnable holder = new WriteRunnable(this, b, impl);
 			tryWriteOrClose(holder);
-	        if(log.isLoggable(Level.FINER)) {
-	        	log.finest(this+"sent write to queue");
+	        if(log.isTraceEnabled()) {
+	        	log.trace(this+"sent write to queue");
 	       	}
-		} else if(log.isLoggable(Level.FINER)) {
+		} else if(log.isTraceEnabled()) {
 			impl.setResult(this);
-			log.finest(this+" wrote bytes on client thread");
+			log.trace(this+" wrote bytes on client thread");
 		}
 
         return impl;
@@ -266,8 +266,8 @@ public abstract class BasChannelImpl
         //  at biz.xsoftware.impl.nio.cm.basic.SelectorManager2$PollingThread.run(SelectorManager2.java:267)
     	PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>();
     	try {
-    		if(apiLog.isLoggable(Level.FINE))
-    			apiLog.fine(this+"Basic.close called");
+    		if(apiLog.isTraceEnabled())
+    			apiLog.trace(this+"Basic.close called");
     		
 	        if(!getRealChannel().isOpen())
 	        	future.setResult(this);
@@ -276,7 +276,7 @@ public abstract class BasChannelImpl
 	        CloseRunnable runnable = new CloseRunnable(this, future);
 	        tryWriteOrClose(runnable);
         } catch(Exception e) {
-            log.log(Level.WARNING, this+"Exception closing channel", e);
+            log.warn(this+"Exception closing channel", e);
             future.setFailure(new FailureInfo(this, e));
         }
     	return future;

@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -17,7 +17,7 @@ import org.webpieces.nio.api.handlers.ConnectionListener;
 
 public class DelayServerAcceptor implements ConnectionListener {
 
-	private static final Logger log = Logger.getLogger(DelayServerAcceptor.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(DelayServerAcceptor.class);
 	private InetSocketAddress realSvr;
 	private ChannelService clientSideChanMgr;
 	
@@ -34,18 +34,18 @@ public class DelayServerAcceptor implements ConnectionListener {
 	}
 		
 	public void connected(Channel channel) throws IOException {
-		if(log.isLoggable(Level.FINE))
-			log.fine(channel+"about to accept");
+		if(log.isTraceEnabled())
+			log.trace(channel+"about to accept");
 		currentChannel = clientSideChanMgr.createTCPChannel("xxx", null);
         currentChannel.setName("<not known yet>");
 		InetSocketAddress addr = new InetSocketAddress(delaySvrAddr, 0);
 		currentChannel.bind(addr);
 		currentChannel.oldConnect(realSvr);
-		if(log.isLoggable(Level.FINE))
-			log.fine(channel+"connected to real server");
+		if(log.isTraceEnabled())
+			log.trace(channel+"connected to real server");
 		
-		if(log.isLoggable(Level.FINE))
-			log.fine(channel+":"+currentChannel+"connected all links");
+		if(log.isTraceEnabled())
+			log.trace(channel+":"+currentChannel+"connected all links");
 		sockets.add((TCPChannel) channel);
 		sockets.add(currentChannel);
 
@@ -54,7 +54,7 @@ public class DelayServerAcceptor implements ConnectionListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.log(Level.WARNING, "exception", e);
+		log.warn("exception", e);
 	}
 
 	public void closeAllSockets() throws IOException {

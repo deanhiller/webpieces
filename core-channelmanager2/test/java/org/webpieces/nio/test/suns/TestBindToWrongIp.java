@@ -4,7 +4,7 @@ import java.net.BindException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -21,7 +21,7 @@ import junit.framework.TestCase;
  */
 public class TestBindToWrongIp extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestBindToWrongIp.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestBindToWrongIp.class);
 	private boolean isWindows;
 	private boolean isLinux;
 	

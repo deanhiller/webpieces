@@ -2,7 +2,7 @@ package org.webpieces.nio.test.tcp;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;
@@ -42,7 +42,7 @@ public class TestZFailureThreadedCM extends ZNioFailureSuperclass {
 		factoryHolder = new Settings(null, procFactory);		
 	}
 	
-	private static final Logger log = Logger.getLogger(TestZFailureThreadedCM.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestZFailureThreadedCM.class);
 	@Override
 	protected void setUpImpl() throws Exception {
 		super.setUpImpl();

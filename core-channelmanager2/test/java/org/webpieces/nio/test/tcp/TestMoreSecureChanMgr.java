@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import javax.net.ssl.SSLEngine;
 
@@ -33,7 +33,7 @@ import biz.xsoftware.mock.MockObjectFactory;
 
 public class TestMoreSecureChanMgr extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestMoreSecureChanMgr.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestMoreSecureChanMgr.class);
 	
 	private InetSocketAddress svrAddr;
 	private ChannelService chanMgr;
@@ -110,7 +110,7 @@ public class TestMoreSecureChanMgr extends TestCase {
 		}
 		chanMgr.start();		
 		svrAddr = mockServer.start();
-		log.fine("server port ="+svrAddr);
+		log.trace("server port ="+svrAddr);
 		
 		loopBack = InetAddress.getByName("127.0.0.1");
 		loopBackAnyPort = new InetSocketAddress(loopBack, 0);

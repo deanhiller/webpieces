@@ -18,7 +18,7 @@ import junit.framework.TestCase;
 
 public class TestSSLEngine extends TestCase {
 
-	//private static final Logger log = Logger.getLogger(TestSSLEngine.class.getName());
+	//private static final Logger log = LoggerFactory.getLogger(TestSSLEngine.class);
 	
 	/**
 	 * Sunny day scenaior of normal two normal SSLEngines...no split packets,
@@ -82,9 +82,9 @@ public class TestSSLEngine extends TestCase {
 //		ByteBuffer data = ByteBuffer.allocate(10);
 //		putString(data, expected);
 //		data.flip();
-//		log.fine("data1="+data+" encData="+encData);		
+//		log.trace("data1="+data+" encData="+encData);		
 //		result = client.wrap(data, encData);           //CLIENT WRAP DATA
-//		log.fine("data2="+data+" encData="+encData);
+//		log.trace("data2="+data+" encData="+encData);
 //		assertEquals(HandshakeStatus.NEED_UNWRAP, result.getHandshakeStatus());
 //		assertEquals(Status.OK, result.getStatus());
 //		
@@ -106,9 +106,9 @@ public class TestSSLEngine extends TestCase {
 //		ByteBuffer dataOut = ByteBuffer.allocate(server.getSession().getApplicationBufferSize());
 //		dataOut.clear();
 //		encData.flip();
-//		log.fine("datain1="+encData+" out="+dataOut);
+//		log.trace("datain1="+encData+" out="+dataOut);
 //		result = server.unwrap(encData, dataOut);        //SERVER UNWRAP DATA
-//		log.fine("datain2="+encData+" out="+dataOut);
+//		log.trace("datain2="+encData+" out="+dataOut);
 //		assertEquals(HandshakeStatus.NEED_TASK, result.getHandshakeStatus());
 //		assertEquals(Status.OK, result.getStatus());
 //		

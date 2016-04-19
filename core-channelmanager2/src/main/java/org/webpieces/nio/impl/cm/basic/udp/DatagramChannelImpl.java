@@ -7,9 +7,9 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.exceptions.NioException;
@@ -21,7 +21,7 @@ import org.webpieces.nio.impl.util.ChannelSessionImpl;
  */
 public class DatagramChannelImpl implements DatagramChannel
 {
-    private static final Logger log = Logger.getLogger(DatagramChannelImpl.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(DatagramChannelImpl.class);
     private static final DatagramListener NULL_LISTENER = new NullDatagramListener();
     
     private ChannelSession session = new ChannelSessionImpl();
@@ -149,7 +149,7 @@ public class DatagramChannelImpl implements DatagramChannel
     public InetSocketAddress getLocalAddress() {
         if(!socket.isBound())
             throw new IllegalStateException(id+"Must bind socket before any operations can be called");
-        log.fine("get local="+socket.getLocalPort());
+        log.trace("get local="+socket.getLocalPort());
         return new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort());
     }
 
@@ -169,8 +169,8 @@ public class DatagramChannelImpl implements DatagramChannel
             throw new IllegalStateException(id+"Must bind socket before any operations can be called");
         DatagramPacket packet = new DatagramPacket(b.array(), b.position(), b.limit()-b.position(), addr);
         
-        if(log.isLoggable(Level.FINER))
-            log.finer("size="+(b.limit()-b.position())+" addr="+addr);
+        if(log.isTraceEnabled())
+            log.trace("size="+(b.limit()-b.position())+" addr="+addr);
         
         
         socket.send(packet);
@@ -180,8 +180,8 @@ public class DatagramChannelImpl implements DatagramChannel
         while(!shutDownThread) {
             readPackets();
         }
-        if(log.isLoggable(Level.FINER))
-            log.finer(id+"reader thread ending");
+        if(log.isTraceEnabled())
+            log.trace(id+"reader thread ending");
     }
     
     private void readPackets() {
@@ -203,7 +203,7 @@ public class DatagramChannelImpl implements DatagramChannel
             if(e instanceof SocketException && shutDownThread)
                 return;
             
-            log.log(Level.WARNING, id+"Exception processing packet", e);
+            log.warn(id+"Exception processing packet", e);
             fireFailure(fromAddr, buffer, e);
         }
     }
@@ -216,10 +216,10 @@ public class DatagramChannelImpl implements DatagramChannel
             listener.incomingData(c, fromAddr, b);
             
             if(b.remaining() > 0) {
-                log.warning(id+"Client="+listener+" did not read all the data from the buffer");
+                log.warn(id+"Client="+listener+" did not read all the data from the buffer");
             }
         } catch(Throwable e) {
-            log.log(Level.WARNING, id+"Exception in client's listener", e);
+            log.warn(id+"Exception in client's listener", e);
         }
     }
 
@@ -231,7 +231,7 @@ public class DatagramChannelImpl implements DatagramChannel
         try {
             listener.failure(this, fromAddr, data, e);
         } catch(Throwable ee) {
-            log.log(Level.WARNING, id+"Exception notifying client of exception", ee);
+            log.warn(id+"Exception notifying client of exception", ee);
         }
     }
 
@@ -261,7 +261,7 @@ public class DatagramChannelImpl implements DatagramChannel
          * #failure(org.webpieces.nio.api.channels.DatagramChannel, java.net.InetSocketAddress, java.nio.ByteBuffer, java.lang.Exception)
          */
         public void failure(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer data, Throwable e) {
-            log.log(Level.WARNING, "Exception", e);
+            log.warn("Exception", e);
         }   
     }
 

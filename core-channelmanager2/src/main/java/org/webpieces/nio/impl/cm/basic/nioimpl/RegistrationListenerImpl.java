@@ -1,16 +1,16 @@
 package org.webpieces.nio.impl.cm.basic.nioimpl;
 
 import java.nio.channels.ClosedChannelException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
 
 
 class RegistrationListenerImpl implements ChannelRegistrationListener {
 
-	private static final Logger log = Logger.getLogger(RegistrationListenerImpl.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(RegistrationListenerImpl.class);
 	private ClosedChannelException exc = null;
 	//public IOException ioExc = null;
 	private RuntimeException runtime = null;
@@ -31,7 +31,7 @@ class RegistrationListenerImpl implements ChannelRegistrationListener {
 			try {
 				runnable.run();
 			} catch(RuntimeException e) {
-                log.log(Level.WARNING, "Exception occurred.  Will be rethrown on client thread.  Look for that exc also", e);
+                log.warn("Exception occurred.  Will be rethrown on client thread.  Look for that exc also", e);
 				runtime = e;
 			}
 			synchronized(this) {
@@ -46,8 +46,8 @@ class RegistrationListenerImpl implements ChannelRegistrationListener {
 		synchronized(this) {
 
 			if(!processed) {
-				if(log.isLoggable(Level.FINE))
-					log.fine(id+"call wakeup on selector to register for="+runnable);
+				if(log.isTraceEnabled())
+					log.trace(id+"call wakeup on selector to register for="+runnable);
 				s.wakeUpSelector();
 				//selector.wakeup();
 				if(waitForWakeup)

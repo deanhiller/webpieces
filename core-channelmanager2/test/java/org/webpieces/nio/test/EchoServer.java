@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
@@ -27,7 +27,7 @@ public class EchoServer implements DataListener, ConnectionListener {
 	public static final String CONNECTED = "connected";
 	public static final String CONN_FAILED = "failed";
 	
-	private static final Logger log = Logger.getLogger(MockNIOServer.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(MockNIOServer.class);
 	private ChannelService chanMgr;
 	private TCPServerChannel srvrChannel;
 	private List<TCPChannel> sockets = new LinkedList<TCPChannel>();
@@ -63,13 +63,13 @@ public class EchoServer implements DataListener, ConnectionListener {
 	}
 
 	public void connected(Channel channel) throws IOException {
-		log.fine(channel+"mockserver accepted connection");
+		log.trace(channel+"mockserver accepted connection");
 		sockets.add((TCPChannel) channel);
 		channel.registerForReads(this);
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.log(Level.WARNING, "exception", e);
+		log.warn("exception", e);
 	}
 	
 	public String toString() {

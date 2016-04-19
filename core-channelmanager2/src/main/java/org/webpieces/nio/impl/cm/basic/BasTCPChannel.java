@@ -7,9 +7,9 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.FailureInfo;
@@ -26,8 +26,8 @@ import org.webpieces.util.futures.PromiseImpl;
  */
 class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 
-	private static final Logger apiLog = Logger.getLogger(TCPChannel.class.getName());
-	private static final Logger log = Logger.getLogger(BasTCPChannel.class.getName());
+	private static final Logger apiLog = LoggerFactory.getLogger(TCPChannel.class);
+	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
 	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr) {
@@ -119,19 +119,19 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private Future<Channel, FailureInfo> connectImpl(SocketAddress addr) throws IOException, InterruptedException {
 		PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>();
 
-		if(apiLog.isLoggable(Level.FINE))
-			apiLog.fine(this+"Basic.connect-addr="+addr);
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.connect-addr="+addr);
 		
 		boolean connected = channel.connect(addr);
-		if(log.isLoggable(Level.FINER))
-			log.finer(this+"connected status="+connected);
+		if(log.isTraceEnabled())
+			log.trace(this+"connected status="+connected);
 
 		setConnecting(true);
 		if(connected) {
 			try {
 				future.setResult(this);
 			} catch(Throwable e) {
-				log.log(Level.WARNING, this+"Exception occurred", e);
+				log.warn(this+"Exception occurred", e);
 			}
 		} else {
 			getSelectorManager().registerChannelForConnect(this, future);

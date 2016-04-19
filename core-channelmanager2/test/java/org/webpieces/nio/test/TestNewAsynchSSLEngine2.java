@@ -2,7 +2,7 @@ package org.webpieces.nio.test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import javax.net.ssl.SSLEngine;
 
@@ -32,7 +32,7 @@ import biz.xsoftware.mock.MockObjectFactory;
  */
 public class TestNewAsynchSSLEngine2 extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestNewAsynchSSLEngine2.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestNewAsynchSSLEngine2.class);
 	
 	private BufferHelper helper = ChannelServiceFactory.bufferHelper(null);
 	private MockObject serverList = MockObjectFactory.createMock(SSLListener.class);
@@ -86,7 +86,7 @@ public class TestNewAsynchSSLEngine2 extends TestCase {
 	 * run before all packets are in.
 	 */
 	public void testDelayedRunTask() throws Exception {
-		log.fine("B*******************************************");
+		log.trace("B*******************************************");
 		clientEngine.beginHandshake();
 		CalledMethod m = clientList.expect("packetEncrypted");
 		ByteBuffer b = (ByteBuffer)m.getAllParams()[0];
@@ -136,7 +136,7 @@ public class TestNewAsynchSSLEngine2 extends TestCase {
 		clientEngine.feedEncryptedPacket(b11, null);
 		
 		clientList.expect("encryptedLinkEstablished");
-		log.fine("E*******************************************");
+		log.trace("E*******************************************");
 	}
 	
 	/**
@@ -144,7 +144,7 @@ public class TestNewAsynchSSLEngine2 extends TestCase {
 	 * to reprocess the buffer itself.
 	 */
 	public void testReallyDelayedRunTask() throws Exception {
-		log.fine("B*******************************************");
+		log.trace("B*******************************************");
 		clientEngine.beginHandshake();
 		CalledMethod m = clientList.expect("packetEncrypted");
 		ByteBuffer b = (ByteBuffer)m.getAllParams()[0];
@@ -196,7 +196,7 @@ public class TestNewAsynchSSLEngine2 extends TestCase {
 		clientEngine.feedEncryptedPacket(b11, null);
 		
 		clientList.expect("encryptedLinkEstablished");
-		log.fine("E*******************************************");
+		log.trace("E*******************************************");
 	}
 	
 	public void testHalfPackets() throws Exception {
@@ -213,7 +213,7 @@ public class TestNewAsynchSSLEngine2 extends TestCase {
 		
 		m = serverList.expect("packetEncrypted");
 		b = (ByteBuffer)m.getAllParams()[0];
-		log.fine("remain1="+b.remaining());
+		log.trace("remain1="+b.remaining());
 		
 		feedPacket(clientEngine, b);
 		
@@ -389,7 +389,7 @@ public class TestNewAsynchSSLEngine2 extends TestCase {
 	}
 	
 	public void testRunInMiddleOfPacket() throws Exception {
-		log.fine("B*******************************************");
+		log.trace("B*******************************************");
 		clientEngine.beginHandshake();
 		CalledMethod m = clientList.expect("packetEncrypted");
 		ByteBuffer b = (ByteBuffer)m.getAllParams()[0];

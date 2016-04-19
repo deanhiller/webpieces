@@ -27,7 +27,7 @@ public class DelayServer {
 	
 	private static final Logger log = LoggerFactory.getLogger(DelayServer.class);
 
-//	private static final Logger log = Logger.getLogger(MockNIOServer.class.getName());
+//	private static final Logger log = LoggerFactory.getLogger(MockNIOServer.class);
 	private ChannelService serverSideChanMgr;
 	private ChannelService clientSideChanMgr;	
 	private TCPServerChannel srvrChannel;

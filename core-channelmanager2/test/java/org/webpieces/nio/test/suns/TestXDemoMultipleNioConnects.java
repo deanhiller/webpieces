@@ -11,7 +11,7 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -31,7 +31,7 @@ import junit.framework.TestCase;
  */
 public class TestXDemoMultipleNioConnects extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestXDemoMultipleNioConnects.class
+	private static final Logger log = LoggerFactory.getLogger(TestXDemoMultipleNioConnects.class
 			.getName());
 	private SelectorProvider provider;
 	private AbstractSelector selector;
@@ -101,7 +101,7 @@ public class TestXDemoMultipleNioConnects extends TestCase {
 						break;
 				}
 			} catch (Exception e) {
-				log.log(Level.WARNING, "test failure", e);
+				log.warn("test failure", e);
 				t = e;
 			}
 		}

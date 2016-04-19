@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -29,7 +29,7 @@ import biz.xsoftware.mock.MockObjectFactory;
  */
 public class TryRealConnection {
 
-	private static final Logger log = Logger.getLogger(TryRealConnection.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TryRealConnection.class);
 	private ChannelService chanMgr;
 	private InetAddress loopBack;
 	private InetSocketAddress loopBackAddr;
@@ -68,7 +68,7 @@ public class TryRealConnection {
 		channel.bind(loopBackAddr);
 
 		
-		log.fine("aaaaa");
+		log.trace("aaaaa");
 		MockObject handler = new MockDataHandler();
 		channel.registerForReads((DataListener)handler);
 		
@@ -106,7 +106,7 @@ public class TryRealConnection {
 		
 		for(int i = 0; i < 10; i++) {
 			boolean b = channel.finishConnect();
-			log.fine("finishConnect["+i+"]="+b);
+			log.trace("finishConnect["+i+"]="+b);
 			Thread.sleep(5000);
 		}
 	}

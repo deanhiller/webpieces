@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -31,7 +31,7 @@ import biz.xsoftware.mock.MockObjectFactory;
 
 public class TestBasicUDP extends TestCase {
 	
-	private static final Logger log = Logger.getLogger(TestBasicUDP.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestBasicUDP.class);
 	
 	private InetSocketAddress svrAddr;
 	private ChannelService chanMgr;
@@ -158,7 +158,7 @@ public class TestBasicUDP extends TestCase {
 	private ByteBuffer verifyDataPassing(DatagramChannel svrChan) throws Exception {
 		ByteBuffer b = createBuffer();
 		int expectedWrote = b.remaining();
-		log.fine("***********************************************");
+		log.trace("***********************************************");
 		int actualWrite = client1.oldWrite(b);
 		assertEquals(expectedWrote, actualWrite);
 	

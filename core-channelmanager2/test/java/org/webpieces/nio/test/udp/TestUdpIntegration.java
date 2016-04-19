@@ -11,7 +11,7 @@ import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;
@@ -32,7 +32,7 @@ import biz.xsoftware.mock.testcase.MockTestCase;
 public class TestUdpIntegration extends MockTestCase
 {
     private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
-    private static final Logger log = Logger.getLogger(TestUdpIntegration.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(TestUdpIntegration.class);
     
     private ChannelService svc;
     private UDPChannel client;

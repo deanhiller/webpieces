@@ -3,7 +3,7 @@ package org.webpieces.nio.test.tcp;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -19,7 +19,7 @@ import org.webpieces.nio.api.testutil.MockNIOServer;
 
 public class TestAsynchWrites extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestAsynchWrites.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestAsynchWrites.class);
 	
 	private ChannelServiceFactory factory;
 	private PacketProcessorFactory procFactory;
@@ -82,7 +82,7 @@ public class TestAsynchWrites extends TestCase {
 		}
 		chanMgr.start();		
 		svrAddr = mockServer.start();
-		log.fine("server port ="+svrAddr);
+		log.trace("server port ="+svrAddr);
 		
 //		loopBack = InetAddress.getByName("127.0.0.1");	
 //		loopBackAnyPort = new InetSocketAddress(loopBack, 0);

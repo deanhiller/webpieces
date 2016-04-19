@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -31,7 +31,7 @@ import biz.xsoftware.mock.MockObjectFactory;
 
 public abstract class ZNioSuperclassTest extends TestCase {
 
-	private static final Logger log = Logger.getLogger(ZNioSuperclassTest.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(ZNioSuperclassTest.class);
 	
 	private BufferFactory bufFactory;
 	private InetSocketAddress svrAddr;
@@ -74,7 +74,7 @@ public abstract class ZNioSuperclassTest extends TestCase {
 		}
 		chanMgr.start();		
 		svrAddr = mockServer.start();
-		log.fine("server port ="+svrAddr);
+		log.trace("server port ="+svrAddr);
 		
 		loopBack = InetAddress.getByName("127.0.0.1");	
 		loopBackAnyPort = new InetSocketAddress(loopBack, 0);
@@ -332,7 +332,7 @@ public abstract class ZNioSuperclassTest extends TestCase {
 		helper.putString(b, "de");
 		helper.doneFillingBuffer(b);
 		int expectedWrote = b.remaining();
-		log.fine("***********************************************");
+		log.trace("***********************************************");
 		int actualWrite = client1.oldWrite(b);
 		assertEquals(expectedWrote, actualWrite);
 		

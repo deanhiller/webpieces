@@ -8,9 +8,9 @@ import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -19,8 +19,8 @@ import org.webpieces.nio.api.testutil.nioapi.Select;
 
 final class Helper {
 
-	private static final Logger apiLog = Logger.getLogger(DataListener.class.getName());
-	private static final Logger log = Logger.getLogger(Helper.class.getName());
+	private static final Logger apiLog = LoggerFactory.getLogger(DataListener.class);
+	private static final Logger log = LoggerFactory.getLogger(Helper.class);
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
 
@@ -46,26 +46,26 @@ final class Helper {
 			SelectionKey key = null;
 			try {
 				key = iter.next();
-				if(log.isLoggable(Level.FINE))
-					log.fine(key.attachment()+" ops="+Helper.opType(key.readyOps())
+				if(log.isTraceEnabled())
+					log.trace(key.attachment()+" ops="+Helper.opType(key.readyOps())
 							+" acc="+key.isAcceptable()+" read="+key.isReadable()+" write"+key.isWritable());
 				processKey(id, key, mgr, pool);
 //			} catch(CancelledKeyException e) {
 //				log.log(Level.INFO, "Cancelled key may be normal", e);
 			} catch(IOException e) {
-				log.log(Level.WARNING, id+""+key.attachment()+"Processing of key failed, closing channel", e);
+				log.warn(id+""+key.attachment()+"Processing of key failed, closing channel", e);
 				try {
 					if(key != null) 
 						key.channel().close();
 				} catch(Throwable ee) {
-					log.log(Level.WARNING, id+""+key.attachment()+"Close of channel failed", ee);
+					log.warn(id+""+key.attachment()+"Close of channel failed", ee);
 				}
 			} catch(CancelledKeyException e) {
 				//TODO: get rid of this if...else statement by fixing
 				//CancelledKeyException on linux so the tests don't fail				
-				log.log(Level.FINE, id+""+key.attachment()+"Processing of key failed, but continuing channel manager loop", e);				
+				log.trace(id+""+key.attachment()+"Processing of key failed, but continuing channel manager loop", e);				
 			} catch(Throwable e) {
-				log.log(Level.WARNING, id+""+key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
+				log.warn(id+""+key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
 				try {
 					key.cancel();
 				} catch(Throwable ee) {
@@ -83,8 +83,8 @@ final class Helper {
 	}
 	
 	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferCreationPool pool) throws IOException, InterruptedException {
-		if(log.isLoggable(Level.FINEST))
-			log.finest(id+""+key.attachment()+"proccessing");
+		if(log.isTraceEnabled())
+			log.trace(id+""+key.attachment()+"proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions
 		if(!key.channel().isOpen() || !key.isValid())
@@ -114,8 +114,8 @@ final class Helper {
 	// and we pass key and the Channel.  We can cast to the proper one.
 	private static void acceptSocket(Object id, SelectionKey key) throws IOException {
 //		SelectableChannel s = key.channel();		
-		if(log.isLoggable(Level.FINER))
-			log.finer(id+""+key.attachment()+"Incoming Connection="+key);
+		if(log.isTraceEnabled())
+			log.trace(id+""+key.attachment()+"Incoming Connection="+key);
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		ConnectionListener cb = struct.getAcceptCallback();
@@ -124,8 +124,8 @@ final class Helper {
 	}
 	
 	private static void connect(Object id, SelectionKey key) throws IOException {
-		if(log.isLoggable(Level.FINEST))
-			log.finest(id+""+key.attachment()+"finishing connect process");
+		if(log.isTraceEnabled())
+			log.trace(id+""+key.attachment()+"finishing connect process");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		ConnectionListener callback = struct.getConnectCallback();
@@ -141,14 +141,14 @@ final class Helper {
 			channel.finishConnect();
 			callback.connected(channel);
 		} catch(Exception e) {
-            log.log(Level.WARNING, id+""+key.attachment()+"Could not open connection", e);
+            log.warn(id+""+key.attachment()+"Could not open connection", e);
 			callback.failed(channel, e);
 		}
 	}
 
 	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferCreationPool pool) throws IOException {
-		if(log.isLoggable(Level.FINEST))
-			log.finest(id+""+key.attachment()+"reading data");
+		if(log.isTraceEnabled())
+			log.trace(id+""+key.attachment()+"reading data");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		DataListener in = struct.getDataHandler();
@@ -170,13 +170,13 @@ final class Helper {
 		} catch(PortUnreachableException e) {
             //this is a normal occurence when some writes out udp to a port that is not
             //listening for udp!!!  log as finer and fire to client to deal with it.
-			log.log(Level.FINEST,  id+"Client sent data to a host or port that is not listening " +
+			log.trace(id+"Client sent data to a host or port that is not listening " +
                     "to udp, or udp can't get through to that machine", e);
 			in.failure(channel, null, e);
         } catch(NotYetConnectedException e) {
             //this happens in udp when I disconnect after someone had already been streaming me
             //data.  It is supposed to stop listening but selector keeps firing.
-            log.log(Level.WARNING, id+"Can't read until UDPChannel is connected", e);
+            log.warn(id+"Can't read until UDPChannel is connected", e);
             in.failure(channel, null, e);
 		} catch(IOException e) {
             //kept getting the following exception so I added this as protection
@@ -226,10 +226,10 @@ final class Helper {
 				(msg.startsWith("An existing connection was forcibly closed")
 					|| msg.startsWith("Connection reset by peer")
 					|| msg.startsWith("An established connection was aborted by the software in your host machine"))) {
-		            log.log(Level.FINE, id+"Exception 2", e);
+		            log.trace(id+"Exception 2", e);
 		            processBytes(id, key, chunk, -1, mgr);
 			} else {
-				log.log(Level.WARNING, id+"IO Exception unexpected", e);
+				log.warn(id+"IO Exception unexpected", e);
 				in.failure(channel, null, e);
 			}
 		}
@@ -253,13 +253,13 @@ final class Helper {
         b.flip(); //helper.doneFillingBuffer(b);
         
 		if(bytes < 0) {
-			if(apiLog.isLoggable(Level.FINE))
-				apiLog.fine(channel+"far end closed, cancel key, close socket");
+			if(apiLog.isTraceEnabled())
+				apiLog.trace(channel+"far end closed, cancel key, close socket");
 			channel.closeOnSelectorThread();
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
-			if(apiLog.isLoggable(Level.FINER))
-				apiLog.finer(channel+"READ bytes="+bytes);
+			if(apiLog.isTraceEnabled())
+				apiLog.trace(channel+"READ bytes="+bytes);
 			in.incomingData(channel, b);
 		}
     }
@@ -269,21 +269,21 @@ final class Helper {
 //		try {
 //			mgr.unregisterChannelForRead(channel);
 //		} catch (IOException e) {
-//			log.log(Level.WARNING, "Exception on unregister for read", e);
+//			log.warn("Exception on unregister for read", e);
 //		} catch (InterruptedException e) {
-//			log.log(Level.WARNING, "exception on unregsiter", e);
+//			log.warn("exception on unregsiter", e);
 //		}
 //	}
     
 	private static void write(Object id, SelectionKey key) throws IOException, InterruptedException {
-		if(log.isLoggable(Level.FINEST))
-			log.finest(key.attachment()+"writing data");
+		if(log.isTraceEnabled())
+			log.trace(key.attachment()+"writing data");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		BasChannelImpl channel = (BasChannelImpl)struct.getChannel();		
 		
-		if(log.isLoggable(Level.FINER))
-			log.finer(channel+"notifying channel of write");
+		if(log.isTraceEnabled())
+			log.trace(channel+"notifying channel of write");
 
         channel.writeAll();  
 	}

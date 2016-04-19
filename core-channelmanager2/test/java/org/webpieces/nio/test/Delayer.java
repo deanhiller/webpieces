@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -20,7 +20,7 @@ import org.webpieces.nio.api.libs.FactoryCreator;
 
 public class Delayer implements DataListener {
 
-	private static final Logger log = Logger.getLogger(Delayer.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(Delayer.class);
 	private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
 	private BufferFactory bufFactory;
 	private static Timer timer = new Timer();
@@ -46,7 +46,7 @@ public class Delayer implements DataListener {
 					HELPER.doneFillingBuffer(newBuffer);
 					to.oldWrite(newBuffer);
 				} catch (Exception e) {
-					log.log(Level.WARNING, "exception", e);
+					log.warn("exception", e);
 				}
 			}
 			
@@ -61,7 +61,7 @@ public class Delayer implements DataListener {
 				try {
 					to.oldClose();
 				} catch (Exception e) {
-					log.log(Level.WARNING, "exception", e);
+					log.warn("exception", e);
 				}
 			}
 			

@@ -8,9 +8,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
@@ -25,7 +25,7 @@ import org.webpieces.nio.impl.cm.basic.SelectorManager2;
  */
 public class SelectorImpl implements Select
 {
-    private static final Logger log = Logger.getLogger(SelectorImpl.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(SelectorImpl.class);
     private PollingThread thread;
     private AbstractSelector selector;
     private String id;
@@ -103,7 +103,7 @@ public class SelectorImpl implements Select
             	}
             }
             if(running)
-                log.severe(id+"Tried to shutdown channelmanager, but it took longer " +
+                log.error(id+"Tried to shutdown channelmanager, but it took longer " +
                         "than 20 seconds.  It may be hung now");
         }        
     }
@@ -117,8 +117,8 @@ public class SelectorImpl implements Select
             try {           
                 running = true;
                 runLoop();
-                if(log.isLoggable(Level.FINE))
-                    log.fine("shutting down the PollingThread");
+                if(log.isTraceEnabled())
+                    log.trace("shutting down the PollingThread");
                 selector.close();
                 selector = null;
                 thread = null;                
@@ -128,7 +128,7 @@ public class SelectorImpl implements Select
                     SelectorImpl.this.notifyAll();
                 }
             } catch (Exception e) {
-                log.log(Level.WARNING, id+"Exception on ConnectionManager thread", e);
+                log.warn(id+"Exception on ConnectionManager thread", e);
             }
         }
     }

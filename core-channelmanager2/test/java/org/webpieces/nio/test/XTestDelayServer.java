@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -29,7 +29,7 @@ import biz.xsoftware.mock.MockObjectFactory;
 
 public class XTestDelayServer extends TestCase {
 
-	private static final Logger log = Logger.getLogger(XTestDelayServer.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(XTestDelayServer.class);
 	private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
 	private ChannelServiceFactory factory;
 	private BufferFactory bufFactory;
@@ -71,7 +71,7 @@ public class XTestDelayServer extends TestCase {
 		factoryHolder = new Settings(null, procFactory);
 		
 		HandlerForTests.setupLogging();
-		Logger.getLogger("").setLevel(Level.INFO);
+		LoggerFactory.getLogger("").setLevel(Level.INFO);
 		//here I keep using the same channel manager on purpose, just
 		//so we get testing between tests that the channel manager shutdown
 		//and started back up cleanly.....		
@@ -87,9 +87,9 @@ public class XTestDelayServer extends TestCase {
 		}
 		chanMgr.start();
 		InetSocketAddress echoSvrAddr = echoServer.start();
-		log.fine("echo server port ="+echoSvrAddr);
+		log.trace("echo server port ="+echoSvrAddr);
 		delaySvrAddr = delayServer.start(echoSvrAddr);
-		log.fine("delay server port ="+delaySvrAddr);
+		log.trace("delay server port ="+delaySvrAddr);
 		
 		mockHandler = MockObjectFactory.createMock(DataListener.class);
 		mockHandler.setDefaultBehavior("incomingData", new CloneByteBuffer());
@@ -102,7 +102,7 @@ public class XTestDelayServer extends TestCase {
 		delayServer.stop();
 		echoServer.stop();
 		HandlerForTests.checkForWarnings();
-		Logger.getLogger("").setLevel(Level.FINEST);
+		LoggerFactory.getLogger("").setLevel(Level.FINEST);
 	}
 	
 	protected ChannelService createClientChanMgr(String name) {		
@@ -132,7 +132,7 @@ public class XTestDelayServer extends TestCase {
 		TCPChannel[] clients = new TCPChannel[size];	
 		for(int i = 0; i < size; i++) {
 			clients[i] = chanMgr.createTCPChannel("Client["+i+"]", factoryHolder);			
-			log.fine("starting connect");
+			log.trace("starting connect");
 			Thread.sleep(100);
 			clients[i].oldConnect(delaySvrAddr, (ConnectionCallback)mockConnect);
 		}

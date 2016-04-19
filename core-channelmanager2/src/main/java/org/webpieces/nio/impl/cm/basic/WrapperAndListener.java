@@ -12,7 +12,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 public class WrapperAndListener {
 
-	//private static final Logger log = Logger.getLogger(WrapperAndListener.class.getName());
+	//private static final Logger log = LoggerFactory.getLogger(WrapperAndListener.class);
 	private String channelName;
 	private RegisterableChannel channel;
 	private DataListener dataHandler;

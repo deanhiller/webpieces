@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -28,7 +28,7 @@ import junit.framework.TestCase;
 
 public class TestNewChannelManager extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestNewChannelManager.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestNewChannelManager.class);
 	
 	private ChannelManager server;
 	private ChannelManager client;
@@ -97,7 +97,7 @@ public class TestNewChannelManager extends TestCase {
 		ByteBuffer b = ByteBuffer.allocate(10);
 		helper.putString(b, "de");
 		helper.doneFillingBuffer(b);
-		log.fine("***********************************************");
+		log.trace("***********************************************");
 		FutureOperation write = client1.write(b);
 		write.waitForOperation(5000);
 		

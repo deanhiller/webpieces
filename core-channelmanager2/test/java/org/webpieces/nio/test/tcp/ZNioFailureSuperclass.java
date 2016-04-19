@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -30,7 +30,7 @@ import biz.xsoftware.mock.testcase.MockTestCase;
 
 public abstract class ZNioFailureSuperclass extends MockTestCase {
 
-	private static final Logger log = Logger.getLogger(ZNioFailureSuperclass.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(ZNioFailureSuperclass.class);
 	
 	private BufferFactory bufFactory;
 	private InetSocketAddress svrAddr;
@@ -74,7 +74,7 @@ public abstract class ZNioFailureSuperclass extends MockTestCase {
 		}
 		chanMgr.start();		
 		svrAddr = mockServer.start();
-		log.fine("server port ="+svrAddr);
+		log.trace("server port ="+svrAddr);
 		
 		loopBack = InetAddress.getByName("127.0.0.1");	
 		loopBackAnyPort = new InetSocketAddress(loopBack, 0);

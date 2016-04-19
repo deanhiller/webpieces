@@ -13,7 +13,7 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -29,7 +29,7 @@ import junit.framework.TestCase;
  */
 public class TestXPassDisconnectAfterRead extends TestCase {
 
-	private static final Logger log = Logger.getLogger(TestXPassDisconnectAfterRead.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(TestXPassDisconnectAfterRead.class);
 	private SelectorProvider provider;
 	private AbstractSelector selector;
 	private ServerSocketChannel server;
@@ -144,7 +144,7 @@ public class TestXPassDisconnectAfterRead extends TestCase {
 			numKeys = selector.select();
 			log.info("coming out with keys="+numKeys);
 		} catch (IOException e) {
-			log.log(Level.WARNING, "Having trouble with a channel", e);
+			log.warn("Having trouble with a channel", e);
 		}
 		Set<SelectionKey> keySet = selector.selectedKeys();
 		Iterator<SelectionKey> iter = keySet.iterator();	
@@ -183,7 +183,7 @@ public class TestXPassDisconnectAfterRead extends TestCase {
 					log.info("done waiting for close, it happened");
 				}
 			} catch(Throwable e) {
-				log.log(Level.WARNING, "Processing of key failed, but continuing channel manager loop", e);
+				log.warn("Processing of key failed, but continuing channel manager loop", e);
 			}
 		}
 		keySet.clear();

@@ -12,7 +12,7 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import junit.framework.TestCase;
 
@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 public class TestCloseWhenInSelector extends TestCase {
 
 	private static final Logger log = Logger
-			.getLogger(TestCloseWhenInSelector.class.getName());
+			.getLogger(TestCloseWhenInSelector.class);
 	private static final int CLIENT_PORT = 8023;
 //	private static final int CLIENT_PORT2 = 8002;	
 	private static final int SERVER_PORT = 8020;	
@@ -138,7 +138,7 @@ public class TestCloseWhenInSelector extends TestCase {
 				}
 			} catch (Exception e) {
 				t = e;
-				log.log(Level.WARNING, "Test failure", e);
+				log.warn("Test failure", e);
 			}			
 		}
 		/**

@@ -9,9 +9,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectableChannel;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.exceptions.FailureInfo;
@@ -26,8 +26,8 @@ import org.webpieces.util.futures.PromiseImpl;
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 
-	private static final Logger log = Logger.getLogger(UDPChannel.class.getName());
-	private static final Logger apiLog = Logger.getLogger(UDPChannel.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(UDPChannel.class);
+	private static final Logger apiLog = LoggerFactory.getLogger(UDPChannel.class);
 	private DatagramChannel channel;
 	private boolean isConnected = false;
     private Calendar expires;
@@ -56,8 +56,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>();
 		
 		try {
-			if(apiLog.isLoggable(Level.FINE))
-				apiLog.fine(this+"Basic.connect called-addr="+addr);
+			if(apiLog.isTraceEnabled())
+				apiLog.trace(this+"Basic.connect called-addr="+addr);
 			
 			channel.connect(addr);
 			
@@ -71,8 +71,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
     
     public synchronized void disconnect() {
-		if(apiLog.isLoggable(Level.FINE))
-			apiLog.fine(this+"Basic.disconnect called");
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.disconnect called");
 		
 		try {
 			isConnected = false;        
@@ -139,7 +139,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 
 			expires = Calendar.getInstance();
 			expires.add(Calendar.SECOND, 10);
-			log.warning("PortUnreachable.  NOTICE NOTICE:  We will ignore this exc again on this channel for 10 seconds");
+			log.warn("PortUnreachable.  NOTICE NOTICE:  We will ignore this exc again on this channel for 10 seconds");
 			throw new NioPortUnreachableException(e);
 		} catch (IOException e) {
 			throw new NioException(e);

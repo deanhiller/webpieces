@@ -6,7 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
 
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;
@@ -27,7 +27,7 @@ import biz.xsoftware.mock.testcase.MockTestCase;
 public class TestDatagramChannel extends MockTestCase
 {
     private static final BufferHelper HELPER = ChannelServiceFactory.bufferHelper(null);
-    private static final Logger log = Logger.getLogger(TestDatagramChannel.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(TestDatagramChannel.class);
     
     private ChannelService svc;
     private DatagramChannel client;
