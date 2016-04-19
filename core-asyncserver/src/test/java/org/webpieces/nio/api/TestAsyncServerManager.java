@@ -29,7 +29,7 @@ public class TestAsyncServerManager {
 	 * so this test ensures we fix that scenario
 	 * @throws InterruptedException 
 	 */
-	//@Test
+	@Test
 	public void testSoTimeoutOnSocket() throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool(false, 2000);
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer("server", pool);
@@ -52,10 +52,19 @@ public class TestAsyncServerManager {
 	private void runWriting(Channel channel) {
 		log.info("register for reads");
 
+		long timeMillis = System.currentTimeMillis();
 		DataListener listener = new DataListener() {
-			
+			private long count = 0;
 			@Override
 			public void incomingData(Channel channel, ByteBuffer b) {
+				count+=b.remaining();
+				if(count % 100000 == 0) {
+					long totalTime = System.currentTimeMillis() - timeMillis;
+					long bytesPerMs = count / totalTime; 
+					log.info("time for bytes="+count+". time="+totalTime+" rate="+bytesPerMs +" Bytes/Ms");
+				}
+				if(b.remaining() != 2000)
+					log.info("size of buffer="+b.remaining());
 			}
 			
 			@Override
@@ -71,23 +80,14 @@ public class TestAsyncServerManager {
 		channel.registerForReads(listener );
 		
 		log.info("starting writing");
-		long timeMillis = System.currentTimeMillis();
-		int count = 0;
-		write(channel, null, timeMillis, count);
+		write(channel, null);
 	}
 
-	private void write(Channel channel, String reason, long timeMillis, int count) {
-		if(count != 0 && count % 100000 == 0) {
-			long totalTime = System.currentTimeMillis() - timeMillis;
-			long timePer = totalTime / count;
-			log.info("time for count="+count+" rounds. time="+totalTime+" perEach2000="+timePer);
-		}
-		
-		int newCount = count+1;
+	private void write(Channel channel, String reason) {
 		byte[] data = new byte[2000];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		Future<Channel, FailureInfo> write = channel.write(buffer);
-		write.setResultFunction(p -> write(channel, "wrote data from client", timeMillis, newCount))
+		write.setResultFunction(p -> write(channel, "wrote data from client"))
 			.setFailureFunction(p -> finished(channel, "failed from client"))
 			.setCancelFunction(p -> finished(channel, "cancelled from client"));
 	}

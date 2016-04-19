@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Feel free to completely override this class but basically as ChannelManager feeds
@@ -18,7 +19,7 @@ import java.util.Set;
  */
 public class BufferCreationPool {
 
-	public Set<ByteBuffer> freePackets = new HashSet<ByteBuffer>();
+	public ConcurrentLinkedQueue<ByteBuffer> freePackets = new ConcurrentLinkedQueue<ByteBuffer>();
 	private boolean isDirect;
 	private int size;
 	
@@ -27,22 +28,27 @@ public class BufferCreationPool {
 		this.size = size;
 	}
 	
-	public synchronized ByteBuffer nextBuffer() {
-		ByteBuffer b = null;
-		Iterator<ByteBuffer> iter = freePackets.iterator();
-		if(iter.hasNext()) {
-			b = iter.next();
-			iter.remove();
-		} else if(isDirect) {
-			b = ByteBuffer.allocateDirect(size);
-		} else 
-			b = ByteBuffer.allocate(size);
-		return b;
+	public ByteBuffer nextBuffer() {
+		ByteBuffer buffer = freePackets.poll();
+
+		if(buffer == null) {
+			if(isDirect)
+				buffer = ByteBuffer.allocateDirect(size);
+			else 
+				buffer = ByteBuffer.allocate(size);
+		}
+		return buffer;
 	}
 
-	public synchronized void releaseBuffer(ByteBuffer buffer) {
-		if(freePackets.size() > 300)
+	public void releaseBuffer(ByteBuffer buffer) {
+		if(buffer.remaining() != 0) {
+			throw new IllegalArgumentException("You need to consume all data from your buffer (or "
+					+ "call buffer.position(buffer.limit)) to simulate consuming it though this is ill advised as you"
+					+ "should be reading all your data from your buffer before releasing it");
+		} if(freePackets.size() > 300)
 			return; //we discard more than 300 buffers as we don't want to take up too much memory
+
+		buffer.clear();
 		freePackets.add(buffer);
 	}
 
