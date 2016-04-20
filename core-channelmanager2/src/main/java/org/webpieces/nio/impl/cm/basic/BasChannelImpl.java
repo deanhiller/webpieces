@@ -133,7 +133,6 @@ public abstract class BasChannelImpl
 			return;
 		}
 		
-		log.info("add it");
 		boolean accepted = waitingWriters.add(action);
 		if(!accepted) {
 			throw new RuntimeException(this+"registered="+registered+" This should never occur");
@@ -294,13 +293,11 @@ public abstract class BasChannelImpl
 		
 		int totalToWriteOut = b.remaining();
 		int written = writeImpl(b);
-		log.info("written="+written+" toWrite="+totalToWriteOut);
 		if(written != totalToWriteOut) {
 			if(b.remaining() + written != totalToWriteOut) {
 				throw new IllegalStateException("Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
 			}
 			WriteRunnable holder = new WriteRunnable(this, b, impl, System.currentTimeMillis());
-			log.info("queue it");
 			queueTheWrite(holder);
 	        if(log.isTraceEnabled()) {
 	        	log.trace(this+"sent write to queue");
