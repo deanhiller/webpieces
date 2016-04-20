@@ -9,11 +9,11 @@ import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.futures.Future;
 
-public class ServerListener implements DataListener {
-	private static final Logger log = LoggerFactory.getLogger(ServerListener.class);
+public class IntegTestClientNotReadListener implements DataListener {
+	private static final Logger log = LoggerFactory.getLogger(IntegTestClientNotReadListener.class);
 	private BufferCreationPool pool;
 
-	public ServerListener(BufferCreationPool pool) {
+	public IntegTestClientNotReadListener(BufferCreationPool pool) {
 		this.pool = pool;
 	}
 
@@ -23,10 +23,17 @@ public class ServerListener implements DataListener {
 		
 		future.setCancelFunction(p -> finished("cancelled", null, b))
 			.setResultFunction(p -> finished("data written", null, b))
-			.setFailureFunction(p -> finished("failure", p, b));
+			.setFailureFunction(p -> fail(channel, "failure", p, b));
+	}
+
+	private void fail(Channel channel, String string, FailureInfo p, ByteBuffer b) {
+		log.info("finished exception="+string, p.getException());
+		pool.releaseBuffer(b);
+		channel.close();
 	}
 
 	private void finished(String string, FailureInfo p, ByteBuffer buffer) {
+		log.info("finished reason="+string);
 		pool.releaseBuffer(buffer);
 	}
 

@@ -98,8 +98,14 @@ public class ProxyTCPChannel implements TCPChannel {
 	}
 
 	@Override
-	public int getSoTimeout() {
-		return channel.getSoTimeout();
+	public void setWriteTimeoutMs(int timeout) {
+		channel.setWriteTimeoutMs(timeout);
 	}
+
+	@Override
+	public int getWriteTimeoutMs() {
+		return channel.getWriteTimeoutMs();
+	}
+
 
 }

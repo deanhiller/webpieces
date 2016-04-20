@@ -26,7 +26,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 	public void connected(Channel channel) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
 		
-		log.info("keep alive="+tcpChannel.getKeepAlive()+ " sotimeout="+tcpChannel.getSoTimeout());
+		log.info("keep alive="+tcpChannel.getKeepAlive());
 		
 		if(overloadResponse != null) {
 			//This is annoying.....

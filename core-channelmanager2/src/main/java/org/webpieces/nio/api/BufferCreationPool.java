@@ -1,9 +1,6 @@
 package org.webpieces.nio.api;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**

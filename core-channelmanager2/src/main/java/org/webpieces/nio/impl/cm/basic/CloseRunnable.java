@@ -7,7 +7,7 @@ import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.util.futures.Promise;
 
 
-public class CloseRunnable implements DelayedWritesCloses {
+public class CloseRunnable {
 
 	private static final Logger log = LoggerFactory.getLogger(CloseRunnable.class);
 	private BasChannelImpl channel;
@@ -18,10 +18,10 @@ public class CloseRunnable implements DelayedWritesCloses {
 		handler = h;
 	}
 
-	public boolean runDelayedAction(boolean isSelectorThread) {
+	public boolean runDelayedAction() {
 
         if(log.isTraceEnabled())
-            log.trace(channel+"Closing channel.  isOnSelectThread="+isSelectorThread);
+            log.trace(channel+"Closing channel.");
         
 		try {
 			channel.closeImpl();

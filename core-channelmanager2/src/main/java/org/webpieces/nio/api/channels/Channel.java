@@ -83,4 +83,17 @@ public interface Channel extends RegisterableChannel {
      */
     public ChannelSession getSession();
    
+    /**
+     * It is important if far end stops reading that we timeout so you don't blow your RAM and keep
+     * trying to write.  The default will be set to 5 seconds.  This is the time it takes to write
+     * to the nic buffer on your computer(ie. should be very very fast), but in cases where the 
+     * downstream backs up, this will timeout.  If this ever does timeout, then you probably need 
+     * to throttle rather than change this timeout
+     * 
+     * @param timeout
+     */
+	public void setWriteTimeoutMs(int timeout);
+	
+	public int getWriteTimeoutMs();
+	
 }
