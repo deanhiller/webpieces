@@ -117,8 +117,8 @@ public abstract class BasChannelImpl
 
 		//MUST be outside the synchronization block to notify clients so we don't deadlock
 		if(promisesToFail != null) {
+			log.info("FAILING this write in the queue due to timeout. sending client the exception to his failure function");
 			for(Promise<Channel, FailureInfo> promise : promisesToFail) {
-				log.info("FAILING this write in the queue due to timeout. sending client the exception to his failure function");
 	    		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
 	    		//(it's called in the Throwable constructor) so we don't do this on every close channel
 				NioTimeoutException exc = new NioTimeoutException("The write at the beginning of the\n"

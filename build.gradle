@@ -62,9 +62,16 @@ project(':core-channelmanager2') {
     }
 }
 
+project(':core-netty') {
+    dependencies {
+        compile 'io.netty:netty-all:4.1.0.CR7'
+        compile project(':core-channelmanager2')
+    }
+}
+
 project(':core-asyncserver') {
     dependencies {
-        compile project(':core-channelmanager2')
+        compile project(':core-channelmanager2'), project(':core-netty')
     }
 }
 

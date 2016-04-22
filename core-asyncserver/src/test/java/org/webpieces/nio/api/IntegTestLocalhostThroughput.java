@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
+import org.webpieces.netty.api.BufferPool;
+import org.webpieces.netty.api.NettyChannelMgrFactory;
+import org.webpieces.netty.impl.NettyChannelMgrFactoryImpl;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.FailureInfo;
@@ -42,14 +45,9 @@ public class IntegTestLocalhostThroughput {
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer("server", pool);
 		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestLocalhostServerListener(pool));
 		
-		BufferCreationPool pool2 = new BufferCreationPool(false, 2000);
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		Executor executor = Executors.newFixedThreadPool(1);
-		ChannelManager mgr = factory.createChannelManager("client", pool2, executor);
-		TCPChannel channel = mgr.createTCPChannel("clientChan");
+		TCPChannel channel = createClientChannel();
+		//TCPChannel channel = createNettyChannel();
 		
-		log.info("client keep alive="+channel.getKeepAlive());
-
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -57,11 +55,30 @@ public class IntegTestLocalhostThroughput {
 			}
 		}, 1000, 5000);
 		
-		
 		Future<Channel, FailureInfo> connect = channel.connect(new InetSocketAddress(8080));
 		connect.setResultFunction(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
+	}
+
+	private TCPChannel createNettyChannel() {
+		Executor executor = Executors.newFixedThreadPool(1);
+		BufferPool pool = new BufferPool();
+		
+		NettyChannelMgrFactory factory = NettyChannelMgrFactory.createFactory();
+		ChannelManager mgr = factory.createChannelManager(executor, pool);
+		TCPChannel channel = mgr.createTCPChannel("clientChan");
+		return channel;		
+	}
+
+	private TCPChannel createClientChannel() {
+		BufferCreationPool pool2 = new BufferCreationPool(false, 2000);
+		Executor executor = Executors.newFixedThreadPool(1);
+		
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManager mgr = factory.createChannelManager("client", pool2, executor);
+		TCPChannel channel = mgr.createTCPChannel("clientChan");
+		return channel;
 	}
 
 	private void logBytesTxfrd() {

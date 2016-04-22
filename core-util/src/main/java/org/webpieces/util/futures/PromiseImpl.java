@@ -81,17 +81,24 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 		//This is a special trick to keep this thread going but eventually we could get stackoverflow
 		//so at the point of 100 times recursion, we offload to another thread
 		int count = incrementThreadLocalCounterAndFetch();
-		
+		final E resultToUse = result;
 		if(count >= 100) {
 			executor.execute(new Runnable() {
 				@Override
 				public void run() {
-					consumer.accept(result);
+					consumer.accept(resultToUse);
 				}
 			});
 		} else {
 			consumer.accept(result);
 		}
+		
+		//This is very important.  The result must be nulled out.  If an Promise makes it to old gen
+		//we dont' want it dragging a result that just occurred into old gen.
+		//This is when a result comes in > 10 to 30 seconds after the promise was created but
+		//the result is hopefully short lived while the promise lived until old gen.  The garbage
+		//collector doesn't know the objects in old gen are not live until a stop the world gc
+		result = null;
 		
 		//now we can reset the counter since we are no longer in the stack
 		counterThreadLocal.set(null);
