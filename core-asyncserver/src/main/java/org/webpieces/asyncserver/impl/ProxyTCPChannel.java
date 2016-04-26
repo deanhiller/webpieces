@@ -3,13 +3,12 @@ package org.webpieces.asyncserver.impl;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.futures.Future;
 
 public class ProxyTCPChannel implements TCPChannel {
 
@@ -21,15 +20,15 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
-	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		return channel.connect(addr);
 	}
 
-	public Future<Channel, FailureInfo> write(ByteBuffer b) {
+	public CompletableFuture<Channel> write(ByteBuffer b) {
 		return channel.write(b);
 	}
 
-	public Future<Channel, FailureInfo> close() {
+	public CompletableFuture<Channel> close() {
 		//technically we are not closed until FutureOperation does it's callback, but remove because we also
 		//do not need to call close a second time...
 		connectedChannels.removeChannel(channel);

@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.futures.Future;
 
 
 /**
@@ -42,14 +41,24 @@ import org.webpieces.util.futures.Future;
  */
 public interface Channel extends RegisterableChannel {
 
-	public Future<Channel, FailureInfo> connect(SocketAddress addr);
-	public Future<Channel, FailureInfo> write(ByteBuffer b);
-	public Future<Channel, FailureInfo> close();
+	public CompletableFuture<Channel> connect(SocketAddress addr);
+	public CompletableFuture<Channel> write(ByteBuffer b);
+	public CompletableFuture<Channel> close();
 	
     /**
      * Registers a DataListener that will be notified of all incoming data.  If the threadpool layer setup,
      * requests from clients may come out of order unless you install your own executorService.
      * 
+     * NOTE: We do not have a CompletableFuture read() as that can cause result in new gen objects that should
+     * never end up in old gen being pulled to old gen.
+     * 
+     * ie. the Following scenario
+     * 1. you read() and then add your listener.  The Future has been created
+     * 2. no data comes in for a bit for this read
+     * 3. the Future moves to old gen
+     * 4. Finally, data comes in and invokes the Future so Future.complete(xxx) is called
+     * 5. Now, since the Future is in old gen, it will pull xxx and everything else into old gen along with
+     *    it which you should not do causing a very hard to figure out memory issue
      */
     public void registerForReads(DataListener listener);
 

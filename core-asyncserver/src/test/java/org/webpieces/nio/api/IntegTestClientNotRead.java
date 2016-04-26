@@ -4,8 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +12,6 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
-import org.webpieces.util.futures.Future;
-import org.webpieces.util.threading.NamedThreadFactory;
 
 public class IntegTestClientNotRead {
 
@@ -44,8 +40,7 @@ public class IntegTestClientNotRead {
 		
 		BufferCreationPool pool2 = new BufferCreationPool(false, 2000);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		Executor executor = Executors.newFixedThreadPool(1, new NamedThreadFactory("clientPromiseThread"));
-		ChannelManager mgr = factory.createChannelManager("client", pool2, executor);
+		ChannelManager mgr = factory.createChannelManager("client", pool2);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		
 		log.info("client keep alive="+channel.getKeepAlive()+" timeout="+channel.getWriteTimeoutMs());
@@ -58,8 +53,8 @@ public class IntegTestClientNotRead {
 		}, 1000, 5000);
 		
 		
-		Future<Channel, FailureInfo> connect = channel.connect(new InetSocketAddress(8080));
-		connect.setResultFunction(p -> runWriting(channel));
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
+		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
 	}
@@ -91,14 +86,16 @@ public class IntegTestClientNotRead {
 		log.info("write from client. reason="+ reason);
 		byte[] data = new byte[2000];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		Future<Channel, FailureInfo> write = channel.write(buffer);
-		write.setResultFunction(p -> write(channel, "wrote data from client"))
-			.setFailureFunction(p -> finished(channel, "failed from client"))
-			.setCancelFunction(p -> finished(channel, "cancelled from client"));
+		CompletableFuture<Channel> write = channel.write(buffer);
+		
+		write
+			.thenAccept(p -> write(channel, "wrote data from client"))
+			.whenComplete((r, e) -> finished(r, e));
 	}
 
-	private void finished(Channel channel, String string) {
-		log.info("failed due to reason="+string);
+	private void finished(Void r, Throwable e) {
+		if(e != null) 
+			log.info("failed due to reason="+e.getMessage());
 	}
 
 }

@@ -3,18 +3,16 @@ package org.webpieces.netty.impl;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import org.webpieces.netty.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
-import org.webpieces.util.futures.Future;
-import org.webpieces.util.futures.PromiseImpl;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -31,14 +29,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class NettyTCPChannel implements TCPChannel {
 	private Bootstrap bootstrap = new Bootstrap();
-	private Executor executor;
 	private io.netty.channel.Channel channel;
 	private DataListener listener;
 	private BufferPool pool;
 	private ChannelSession session = new ChannelSessionImpl();
 
-	public NettyTCPChannel(Executor executor, BufferPool pool) {
-		this.executor = executor;
+	public NettyTCPChannel(BufferPool pool) {
 		this.pool = pool;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		bootstrap.group(workerGroup);
@@ -70,9 +66,9 @@ public class NettyTCPChannel implements TCPChannel {
 	}
 	
 	@Override
-	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		try {
-			PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>(executor);
+			CompletableFuture<Channel> promise = new CompletableFuture<>();
 			ChannelFuture f = bootstrap.connect(addr).sync();
 			channel = f.channel();
 			f.addListener(new MyFutureAdaptor(promise, this));
@@ -84,21 +80,21 @@ public class NettyTCPChannel implements TCPChannel {
 	}
 
 	@Override
-	public Future<Channel, FailureInfo> write(ByteBuffer b) {
+	public CompletableFuture<Channel> write(ByteBuffer b) {
 		ByteBufAllocator alloc = channel.config().getAllocator();
 		//couldn't find a way just to wrap ByteBuffer in ByteBuf
 		final ByteBuf time = alloc.buffer(b.remaining()); 
 		time.writeBytes(b);
 		ChannelFuture writeFuture = channel.writeAndFlush(time);
-		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>(executor);
+		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		writeFuture.addListener(new MyFutureAdaptor(promise, this));
 		return promise;
 	}
 
 	@Override
-	public Future<Channel, FailureInfo> close() {
+	public CompletableFuture<Channel> close() {
 		ChannelFuture future = channel.close();
-		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>(executor);
+		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		future.addListener(new MyFutureAdaptor(promise, this));
 		return promise;
 	}

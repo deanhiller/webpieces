@@ -7,18 +7,15 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
-import org.webpieces.util.futures.Future;
-import org.webpieces.util.futures.PromiseImpl;
 
 
 
@@ -31,8 +28,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, Executor executor) {
-		super(id, selMgr, executor);
+	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr) {
+		super(id, selMgr);
 		try {
 			channel = factory.open();
 			channel.configureBlocking(false);
@@ -47,8 +44,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param newChan
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, Executor executor) {
-		super(id, selMgr, executor);
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr) {
+		super(id, selMgr);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
@@ -108,7 +105,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	}
 
 	@Override
-	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		try {
 			return connectImpl(addr);
 		} catch (IOException e) {
@@ -118,8 +115,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		}
 	}
 
-	private Future<Channel, FailureInfo> connectImpl(SocketAddress addr) throws IOException, InterruptedException {
-		PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>(executor);
+	private CompletableFuture<Channel> connectImpl(SocketAddress addr) throws IOException, InterruptedException {
+		CompletableFuture<Channel> future = new CompletableFuture<>();
 
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.connect-addr="+addr);
@@ -131,7 +128,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		setConnecting(true);
 		if(connected) {
 			try {
-				future.setResult(this);
+				future.complete(this);
 			} catch(Throwable e) {
 				log.warn(this+"Exception occurred", e);
 			}

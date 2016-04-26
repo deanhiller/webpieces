@@ -2,14 +2,15 @@ package org.webpieces.util.futures;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
+public class PromiseImpl<T> implements Future<T>, Promise<T> {
 
 	private boolean complete = false;
 	private Consumer<T> resultFunc;
-	private Consumer<F> failureFunc;
+	private Consumer<Failure> failureFunc;
 	private T result;
-	private F failure;
+	private Failure failure;
 	private Consumer<String> cancelFunc;
 	private String cancelReason;
 	private Executor executor;
@@ -26,7 +27,7 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 		fire(resultFunc, result);
 	}
 	
-	public void setFailure(F failure) {
+	public void setFailure(Failure failure) {
 		if(failure == null)
 			throw new IllegalArgumentException("param cannot be null(this operates off null checks)");
 		this.failure = failure;
@@ -41,7 +42,7 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 		fire(cancelFunc, cancelReason);
 	}
 	
-	public PromiseImpl<T,F> setResultFunction(Consumer<T> resultFunction) {
+	public PromiseImpl<T> setResultFunction(Consumer<T> resultFunction) {
 		if(resultFunction == null)
 			throw new IllegalArgumentException("param cannot be null(this operates off null checks)");
 		this.resultFunc = resultFunction;
@@ -49,7 +50,7 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 		return this;
 	}
 	
-	public PromiseImpl<T,F> setFailureFunction(Consumer<F> failureFunction) {
+	public PromiseImpl<T> setFailureFunction(Consumer<Failure> failureFunction) {
 		if(failureFunction == null)
 			throw new IllegalArgumentException("param cannot be null(this operates off null checks)");
 		this.failureFunc = failureFunction;
@@ -58,7 +59,7 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 	}
 
 	@Override
-	public Future<T, F> setCancelFunction(Consumer<String> cancelFunction) {
+	public Future<T> setCancelFunction(Consumer<String> cancelFunction) {
 		if(cancelFunction == null)
 			throw new IllegalArgumentException("param cannot be null(this operates off null checks)");
 		this.cancelFunc = cancelFunction;
@@ -119,6 +120,34 @@ public class PromiseImpl<T, F> implements Future<T, F>, Promise<T, F> {
 	@Override
 	public synchronized boolean isComplete() {
 		return complete;
+	}
+
+	@Override
+	public <R> void chain(PromiseImpl<R> promise, Function<T, R> translate) {
+		resultFunc = new Consumer<T>() {
+			@Override
+			public void accept(T t) {
+				R r = translate.apply(t);
+				promise.setResult(r);
+			}
+		};
+		fire(resultFunc, result);
+		
+		Consumer<Failure> failureFunc = new Consumer<Failure>() {
+			@Override
+			public void accept(Failure failure) {
+				promise.setFailure(failure);
+			}
+		};
+		fire(failureFunc, failure);		
+		
+		Consumer<String> cancelFunc = new Consumer<String>() {
+			@Override
+			public void accept(String t) {
+				promise.cancel(t);
+			}
+		};
+		fire(cancelFunc, cancelReason);
 	}
 	
 }

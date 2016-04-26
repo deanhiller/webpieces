@@ -11,22 +11,18 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.NioTimeoutException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
-import org.webpieces.util.futures.Future;
-import org.webpieces.util.futures.Promise;
-import org.webpieces.util.futures.PromiseImpl;
 
 /**
  * @author Dean Hiller
@@ -45,10 +41,9 @@ public abstract class BasChannelImpl
     private boolean registered;
 	private boolean doNotAllowWrites;
 	private int writeTimeoutMs = 3_000;
-	private int count;
 	
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, Executor executor) {
-		super(id, selMgr, executor);
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr) {
+		super(id, selMgr);
 	}
 	
 	/* (non-Javadoc)
@@ -65,7 +60,7 @@ public abstract class BasChannelImpl
 	protected abstract int writeImpl(ByteBuffer b);
    
     private void unqueueAndFailWritesThenClose(CloseRunnable action) {
-    	List<Promise<Channel, FailureInfo>> promises;
+    	List<CompletableFuture<Channel>> promises;
     	synchronized(this) { //put here for emphasis that we are synchronizing here but not below
 			promises = failAllWritesInQueue();
     	}
@@ -78,14 +73,14 @@ public abstract class BasChannelImpl
     	//registerForWritesOrClose();
     	
     	//notify clients outside the synchronization block!!!
-		for(Promise<Channel, FailureInfo> promise : promises) {
+		for(CompletableFuture<Channel> promise : promises) {
     		log.info("WRITES outstanding while close was called, notifying client through his failure method of the exception");
     		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
     		//(it's called in the Throwable constructor) so we don't do this on every close channel
         	NioClosedChannelException closeExc = new NioClosedChannelException("There are "+promises.size()
         			+" writes that are not complete yet(you called write but "
         			+ "they did not call success back to the client).");
-        	promise.setFailure(new FailureInfo(this, closeExc));
+        	promise.completeExceptionally(closeExc);
 		}
     }
     
@@ -99,10 +94,9 @@ public abstract class BasChannelImpl
      * @throws InterruptedException
      */
 	private void queueTheWrite(WriteRunnable action) {
-		List<Promise<Channel, FailureInfo>> promisesToFail = null;
+		List<CompletableFuture<Channel>> promisesToFail = null;
 		String msg = null;
 		synchronized (this) {
-			count++;
 			WriteRunnable lastVal = waitingWriters.peek();
 			if(lastVal != null) {
 				long currentTime = System.currentTimeMillis();
@@ -118,7 +112,7 @@ public abstract class BasChannelImpl
 		//MUST be outside the synchronization block to notify clients so we don't deadlock
 		if(promisesToFail != null) {
 			log.info("FAILING this write in the queue due to timeout. sending client the exception to his failure function");
-			for(Promise<Channel, FailureInfo> promise : promisesToFail) {
+			for(CompletableFuture<Channel> promise : promisesToFail) {
 	    		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
 	    		//(it's called in the Throwable constructor) so we don't do this on every close channel
 				NioTimeoutException exc = new NioTimeoutException("The write at the beginning of the\n"
@@ -128,7 +122,7 @@ public abstract class BasChannelImpl
 				+ "that writing to your computers nic outgoing buffer should be in <1ms so generally 3 secs is\n"
 				+ "a fine timeout.  The timeout is not remote but local writing to outoing nic buffer which\n"
 				+ "must be full at this point if you are seeing a timeout");
-	        	promise.setFailure(new FailureInfo(this, exc));
+				promise.completeExceptionally(exc);
 			}
 			return;
 		}
@@ -143,9 +137,9 @@ public abstract class BasChannelImpl
 	
 	//synchronized with writeAll as both try to go through every element in the queue
 	//while most of the time there will be no contention(only on the close do we hit this)
-	private synchronized List<Promise<Channel, FailureInfo>> failAllWritesInQueue() {
+	private synchronized List<CompletableFuture<Channel>> failAllWritesInQueue() {
 		doNotAllowWrites = true;
-		List<Promise<Channel, FailureInfo>> copy = new ArrayList<>();
+		List<CompletableFuture<Channel>> copy = new ArrayList<>();
 		while(!waitingWriters.isEmpty()) {
 			WriteRunnable runnable = waitingWriters.remove();
 			runnable.markBufferRead(); //in case clients releaseBuffer
@@ -172,7 +166,7 @@ public abstract class BasChannelImpl
      *
      */
 	 void writeAll() {
-		List<Promise<Channel, FailureInfo>> finishedPromises = new ArrayList<>();
+		List<CompletableFuture<Channel>> finishedPromises = new ArrayList<>();
 		synchronized(this) {
 	        if(waitingWriters.isEmpty())
 	            return;
@@ -193,8 +187,8 @@ public abstract class BasChannelImpl
 		}
 		
         //MAKE SURE to notify clients outside of synchronization block so no deadlocks with their locks
-        for(Promise<Channel, FailureInfo> promise : finishedPromises) {
-        	promise.setResult(this);
+        for(CompletableFuture<Channel> promise : finishedPromises) {
+        	promise.complete(this);
         }
         
         if(waitingWriters.isEmpty()) {
@@ -274,14 +268,14 @@ public abstract class BasChannelImpl
 	}	
 
 	@Override
-	public Future<Channel, FailureInfo> write(ByteBuffer b) {
+	public CompletableFuture<Channel> write(ByteBuffer b) {
 		if(!getSelectorManager().isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
 		else if(isClosed) {
 			AsynchronousCloseException exc = new AsynchronousCloseException();
 			throw new NioException(this+"Client cannot write after the client closed the socket", exc);
 		}
-		PromiseImpl<Channel, FailureInfo> impl = new PromiseImpl<>(executor);
+		CompletableFuture<Channel> impl = new CompletableFuture<Channel>();
 		
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.write");
@@ -303,7 +297,7 @@ public abstract class BasChannelImpl
 	        	log.trace(this+"sent write to queue");
 	       	}
 		} else {
-			impl.setResult(this);
+			impl.complete(this);
 			if(log.isTraceEnabled())
 				log.trace(this+" wrote bytes on client thread");
 		}
@@ -322,24 +316,24 @@ public abstract class BasChannelImpl
 	}
     
     @Override
-    public Future<Channel, FailureInfo> close() {
+    public CompletableFuture<Channel> close() {
         //To prevent the following exception, in the readImpl method, we
         //check if the socket is already closed, and if it is we don't read
         //and just return -1 to indicate socket closed.
-    	PromiseImpl<Channel, FailureInfo> future = new PromiseImpl<>(executor);
+    	CompletableFuture<Channel> future = new CompletableFuture<>();
     	try {
     		if(apiLog.isTraceEnabled())
     			apiLog.trace(this+"Basic.close called");
     		
 	        if(!getRealChannel().isOpen())
-	        	future.setResult(this);
+	        	future.complete(this);
 	        
 	        setClosed(true);
 	        CloseRunnable runnable = new CloseRunnable(this, future);
 	        unqueueAndFailWritesThenClose(runnable);
         } catch(Exception e) {
             log.warn(this+"Exception closing channel", e);
-            future.setFailure(new FailureInfo(this, e));
+            future.completeExceptionally(e);
         }
     	return future;
     }

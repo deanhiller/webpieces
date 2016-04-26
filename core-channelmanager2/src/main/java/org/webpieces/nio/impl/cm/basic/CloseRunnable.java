@@ -1,21 +1,21 @@
 package org.webpieces.nio.impl.cm.basic;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
-import org.webpieces.util.futures.Promise;
 
 
 public class CloseRunnable {
 
 	private static final Logger log = LoggerFactory.getLogger(CloseRunnable.class);
 	private BasChannelImpl channel;
-	private Promise<Channel, FailureInfo> handler;
+	private CompletableFuture<Channel> handler;
     
-	public CloseRunnable(BasChannelImpl c, Promise<Channel, FailureInfo> h) {
+	public CloseRunnable(BasChannelImpl c, CompletableFuture<Channel> future) {
 		channel = c;
-		handler = h;
+		handler = future;
 	}
 
 	public boolean runDelayedAction() {
@@ -30,10 +30,10 @@ public class CloseRunnable {
             //The above only happens on the client thread...on selector thread, close works fine.
             channel.wakeupSelector();
             
-            handler.setResult(channel);
+            handler.complete(channel);
 		} catch(Exception e) {
 			log.warn(channel+"Exception occurred", e);
-			handler.setFailure(new FailureInfo(channel, e));
+			handler.completeExceptionally(e);
 		}
 		return true;
 	}

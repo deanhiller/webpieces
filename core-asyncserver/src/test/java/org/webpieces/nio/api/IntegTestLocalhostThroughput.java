@@ -4,8 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +12,9 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.netty.api.BufferPool;
 import org.webpieces.netty.api.NettyChannelMgrFactory;
-import org.webpieces.netty.impl.NettyChannelMgrFactoryImpl;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.futures.Future;
 
 public class IntegTestLocalhostThroughput {
 
@@ -55,28 +51,26 @@ public class IntegTestLocalhostThroughput {
 			}
 		}, 1000, 5000);
 		
-		Future<Channel, FailureInfo> connect = channel.connect(new InetSocketAddress(8080));
-		connect.setResultFunction(p -> runWriting(channel));
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
+		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
 	}
 
 	private TCPChannel createNettyChannel() {
-		Executor executor = Executors.newFixedThreadPool(1);
 		BufferPool pool = new BufferPool();
 		
 		NettyChannelMgrFactory factory = NettyChannelMgrFactory.createFactory();
-		ChannelManager mgr = factory.createChannelManager(executor, pool);
+		ChannelManager mgr = factory.createChannelManager(pool);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;		
 	}
 
 	private TCPChannel createClientChannel() {
 		BufferCreationPool pool2 = new BufferCreationPool(false, 2000);
-		Executor executor = Executors.newFixedThreadPool(1);
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createChannelManager("client", pool2, executor);
+		ChannelManager mgr = factory.createChannelManager("client", pool2);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;
 	}
@@ -127,14 +121,16 @@ public class IntegTestLocalhostThroughput {
 	private void write(Channel channel, String reason) {
 		byte[] data = new byte[2000];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		Future<Channel, FailureInfo> write = channel.write(buffer);
-		write.setResultFunction(p -> write(channel, "wrote data from client"))
-			.setFailureFunction(p -> finished(channel, "failed from client"))
-			.setCancelFunction(p -> finished(channel, "cancelled from client"));
+		CompletableFuture<Channel> write = channel.write(buffer);
+		
+		write
+			.thenAccept(p -> write(channel, "wrote data from client"))
+			.whenComplete((r, e) -> finished(r, e));
 	}
 
-	private void finished(Channel channel, String string) {
-		log.info("failed due to reason="+string);
+	private void finished(Void r, Throwable e) {
+		if(e != null) 
+			log.info("failed due to reason="+e.getMessage());
 	}
-
+	
 }

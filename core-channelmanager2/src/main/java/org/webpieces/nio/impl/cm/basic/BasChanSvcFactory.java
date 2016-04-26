@@ -1,7 +1,5 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import java.util.concurrent.Executor;
-
 import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -21,12 +19,12 @@ public class BasChanSvcFactory extends ChannelManagerFactory {
 	 * @see api.biz.xsoftware.nio.ChannelManagerFactory#createChannelManager(java.util.Properties)
 	 */
 	@Override
-	public ChannelManager createChannelManager(String id, BufferCreationPool pool, Executor executor) {
-		return new BasChannelService(id, new ChannelsFactoryImpl(), new SelectorProvFactoryImpl(), pool, executor);
+	public ChannelManager createChannelManager(String id, BufferCreationPool pool) {
+		return new BasChannelService(id, new ChannelsFactoryImpl(), new SelectorProvFactoryImpl(), pool);
 	}
 
 	public ChannelManager createChannelManager(
-			String id, BufferCreationPool pool, ChannelsFactory factory, SelectorProviderFactory selectorProvider, Executor executor) {
-		return new BasChannelService(id, factory, selectorProvider, pool, executor);
+			String id, BufferCreationPool pool, ChannelsFactory factory, SelectorProviderFactory selectorProvider) {
+		return new BasChannelService(id, factory, selectorProvider, pool);
 	}
 }

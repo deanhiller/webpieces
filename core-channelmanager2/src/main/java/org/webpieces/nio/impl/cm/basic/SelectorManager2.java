@@ -31,6 +31,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.swing.event.EventListenerList;
 
@@ -38,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -47,7 +47,6 @@ import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
-import org.webpieces.util.futures.Promise;
 
 
 public class SelectorManager2 implements SelectorListener {
@@ -111,7 +110,7 @@ public class SelectorManager2 implements SelectorListener {
 					throws IOException, InterruptedException {
 		waitForRegister(s, SelectionKey.OP_ACCEPT, listener, true);
 	}
-	public void registerChannelForConnect(final RegisterableChannelImpl s, Promise<Channel, FailureInfo> promise)
+	public void registerChannelForConnect(final RegisterableChannelImpl s, CompletableFuture<Channel> promise)
 					throws IOException, InterruptedException {
 		final ConnectionListener listener = new FutureConnectImpl(promise);
 		registerSelectableChannel(s, SelectionKey.OP_CONNECT, listener, true);

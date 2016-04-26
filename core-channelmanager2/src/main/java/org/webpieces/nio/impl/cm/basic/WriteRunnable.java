@@ -1,26 +1,25 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
-import org.webpieces.util.futures.Promise;
 
 
 public class WriteRunnable {
 
 	private static final Logger log = LoggerFactory.getLogger(WriteRunnable.class);
 	private ByteBuffer buffer;
-	private Promise<Channel, FailureInfo> handler;
+	private CompletableFuture<Channel> handler;
 	private BasChannelImpl channel;
 	private long creationTimestamp;
 
-	public WriteRunnable(BasChannelImpl c, ByteBuffer b, Promise<Channel, FailureInfo> h, long creationTimestamp) {
+	public WriteRunnable(BasChannelImpl c, ByteBuffer b, CompletableFuture<Channel> impl, long creationTimestamp) {
 		channel = c;
 		buffer = b;
-		handler = h;
+		handler = impl;
 		this.creationTimestamp = creationTimestamp;
 	}
 
@@ -43,7 +42,7 @@ public class WriteRunnable {
 		return creationTimestamp;
 	}
 
-	public Promise<Channel, FailureInfo> getPromise() {
+	public CompletableFuture<Channel> getPromise() {
 		return handler;
 	}
 

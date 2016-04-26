@@ -9,20 +9,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectableChannel;
 import java.util.Calendar;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
-import org.webpieces.nio.api.exceptions.FailureInfo;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
-import org.webpieces.util.futures.Future;
-import org.webpieces.util.futures.PromiseImpl;
 
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
@@ -33,8 +30,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	private boolean isConnected = false;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr, Executor executor) {
-		super(id, selMgr, executor);
+	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr) {
+		super(id, selMgr);
 		try {
 			channel = DatagramChannel.open();
 			channel.configureBlocking(false);
@@ -49,12 +46,12 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 
 	@Override
-	public Future<Channel, FailureInfo> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		return connectImpl(addr);
 	}
 	
-	private synchronized Future<Channel, FailureInfo> connectImpl(SocketAddress addr) {
-		PromiseImpl<Channel, FailureInfo> promise = new PromiseImpl<>(executor);
+	private synchronized CompletableFuture<Channel> connectImpl(SocketAddress addr) {
+		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		
 		try {
 			if(apiLog.isTraceEnabled())
@@ -63,9 +60,9 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 			channel.connect(addr);
 			
 	        isConnected = true;
-	        promise.setResult(this);
+	        promise.complete(this);
 		} catch(Exception e) {
-			promise.setFailure(new FailureInfo(this, e));
+			promise.completeExceptionally(e);
 		}
 		
         return promise;

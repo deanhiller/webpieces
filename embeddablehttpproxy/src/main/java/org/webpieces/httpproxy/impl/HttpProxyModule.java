@@ -4,7 +4,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
@@ -25,7 +24,7 @@ import com.webpieces.httpparser.api.HttpParserFactory;
 
 public class HttpProxyModule implements Module {
 
-	private static final String PROMISE_EXECUTOR = "promiseExecutor";
+//	private static final String PROMISE_EXECUTOR = "promiseExecutor";
 
 	@Override
 	public void configure(Binder binder) {
@@ -42,12 +41,12 @@ public class HttpProxyModule implements Module {
 		return pool;
 	}
 	
-	@Provides
-	@Singleton
-	@Named(PROMISE_EXECUTOR)
-	public Executor provideExecutor() {
-		return Executors.newFixedThreadPool(1, new NamedThreadFactory("promiseExecutor"));
-	}
+//	@Provides
+//	@Singleton
+//	@Named(PROMISE_EXECUTOR)
+//	public Executor provideExecutor() {
+//		return Executors.newFixedThreadPool(1, new NamedThreadFactory("promiseExecutor"));
+//	}
 	
 	@Provides
 	@Singleton
@@ -57,9 +56,9 @@ public class HttpProxyModule implements Module {
 	
 	@Provides
 	@Singleton
-	public ChannelManager providesChannelManager(BufferCreationPool pool, @Named(PROMISE_EXECUTOR) Executor executor) {
+	public ChannelManager providesChannelManager(BufferCreationPool pool) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		return factory.createChannelManager("httpProxyMgr", pool, executor);
+		return factory.createChannelManager("httpProxyMgr", pool);
 	}
 	
 	@Provides

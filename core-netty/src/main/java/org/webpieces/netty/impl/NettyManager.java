@@ -1,7 +1,5 @@
 package org.webpieces.netty.impl;
 
-import java.util.concurrent.Executor;
-
 import org.webpieces.netty.api.BufferPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -11,11 +9,9 @@ import org.webpieces.nio.api.channels.UDPChannel;
 
 public class NettyManager implements ChannelManager {
 
-	private Executor executor;
 	private BufferPool pool;
 
-	public NettyManager(Executor executor, BufferPool pool) {
-		this.executor = executor;
+	public NettyManager(BufferPool pool) {
 		this.pool = pool;
 	}
 	
@@ -26,7 +22,7 @@ public class NettyManager implements ChannelManager {
 
 	@Override
 	public TCPChannel createTCPChannel(String id) {
-		return new NettyTCPChannel(executor, pool);
+		return new NettyTCPChannel(pool);
 	}
 
 	@Override
