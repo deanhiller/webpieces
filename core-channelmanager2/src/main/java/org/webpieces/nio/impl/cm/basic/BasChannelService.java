@@ -1,6 +1,5 @@
 package org.webpieces.nio.impl.cm.basic;
 
-import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -10,6 +9,8 @@ import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
 import org.webpieces.nio.impl.cm.basic.udp.DatagramChannelImpl;
 import org.webpieces.nio.impl.cm.basic.udp.UDPChannelImpl;
+
+import com.webpieces.data.api.BufferPool;
 
 
 
@@ -25,7 +26,7 @@ class BasChannelService implements ChannelManager {
 	private boolean started;
 	
 	BasChannelService(String id, ChannelsFactory c, 
-			SelectorProviderFactory mgr, BufferCreationPool pool) {
+			SelectorProviderFactory mgr, BufferPool pool) {
 		if(id == null || id.length() == 0)
 			throw new IllegalArgumentException("id cannot be null");
 		this.cmId = "["+id+"] ";

@@ -4,10 +4,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webpieces.data.api.BufferPool;
 import com.webpieces.data.api.DataWrapper;
 import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.data.api.DataWrapperGeneratorFactory;
-import com.webpieces.data.impl.EmptyWrapper;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;
@@ -31,6 +31,11 @@ public class HttpParserImpl implements HttpParser {
 	private static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
 	private ConvertAscii conversion = new ConvertAscii();
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private BufferPool pool;
+	
+	public HttpParserImpl(BufferPool pool) {
+		this.pool = pool;
+	}
 	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {
@@ -191,7 +196,7 @@ public class HttpParserImpl implements HttpParser {
 		memento.setReadingHttpMessagePointer(i);
 		
 		DataWrapper leftOverData = memento.getLeftOverData();
-		if(leftOverData instanceof EmptyWrapper) {
+		if(leftOverData.getReadableSize() == 0) {
 			memento.setStatus(ParsedStatus.ALL_DATA_PARSED);
 		} else if(memento.getParsedMessages().size() > 0) {
 			memento.setStatus(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA);
@@ -251,6 +256,7 @@ public class HttpParserImpl implements HttpParser {
 		DataWrapper toBeParsed = tuple.get(0);
 		memento.setLeftOverData(tuple.get(1));
 		HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
+		
 		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		if(header == null) {
 			//no body in the bytestream so add the message to list of parsed messages
@@ -298,6 +304,9 @@ public class HttpParserImpl implements HttpParser {
 		}
 		markedPositions.clear();
 
+		//buffer processed...release to be re-used now..
+		toBeParsed.releaseUnderlyingBuffers(pool);
+		
 		String firstLine = lines.get(0).trim();
 		
 		if(firstLine.startsWith("HTTP/")) {

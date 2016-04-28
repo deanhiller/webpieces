@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webpieces.data.api.BufferPool;
 import com.webpieces.data.api.DataWrapper;
 
 public class ChainedDataWrapper extends AbstractDataWrapper {
@@ -124,6 +125,13 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	public List<SliceableDataWrapper> getWrappers() {
 		return wrappers;
+	}
+
+	@Override
+	public void releaseUnderlyingBuffers(BufferPool pool) {
+		for(DataWrapper wrapper : wrappers) {
+			wrapper.releaseUnderlyingBuffers(pool);
+		}
 	}
 
 }

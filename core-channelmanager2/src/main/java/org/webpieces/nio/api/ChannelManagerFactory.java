@@ -2,6 +2,8 @@ package org.webpieces.nio.api;
 
 import org.webpieces.nio.impl.cm.basic.BasChanSvcFactory;
 
+import com.webpieces.data.api.BufferPool;
+
 
 /**
  * @author Dean Hiller
@@ -17,5 +19,5 @@ public abstract class ChannelManagerFactory {
 		return new BasChanSvcFactory();
 	}
 	
-	public abstract ChannelManager createChannelManager(String id, BufferCreationPool pool);
+	public abstract ChannelManager createChannelManager(String id, BufferPool pool);
 }

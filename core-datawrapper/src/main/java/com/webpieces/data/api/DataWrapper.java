@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * This data structure is designed to not need to copy tons of payloads from bytes
  * to bytes such that two byte[] or two ByteBuffer can be read from like they are
- * just one entity.   
+ * just one entity. 
  * 
  * @author dhiller
  *
@@ -42,4 +42,6 @@ public interface DataWrapper {
 	 * @return
 	 */
 	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers);
+	
+	public void releaseUnderlyingBuffers(BufferPool pool);
 }

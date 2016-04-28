@@ -51,10 +51,21 @@ public abstract class HttpMessage {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @param data
+	 */
 	public void setBody(DataWrapper data) {
 		this.body = data;
 	}
 	
+	/**
+	 * This is not final.  We need consider very large bodies along with bytes streaming in 
+	 * off the socket.  (we do have the ability to unregisterForReads to slow down the far
+	 * end if needed)....This is sort of where we need an adapter layer between 
+	 * channelmanager and the http parser.
+	 * @return
+	 */
 	public DataWrapper getBody() {
 		return body;
 	}

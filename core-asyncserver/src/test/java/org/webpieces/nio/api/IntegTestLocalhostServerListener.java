@@ -9,11 +9,13 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.futures.Failure;
 
+import com.webpieces.data.api.BufferPool;
+
 public class IntegTestLocalhostServerListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostServerListener.class);
-	private BufferCreationPool pool;
+	private BufferPool pool;
 
-	public IntegTestLocalhostServerListener(BufferCreationPool pool) {
+	public IntegTestLocalhostServerListener(BufferPool pool) {
 		this.pool = pool;
 	}
 

@@ -11,10 +11,11 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
+
+import com.webpieces.data.api.BufferPool;
 
 
 final class Helper {
@@ -40,7 +41,7 @@ final class Helper {
 		return retVal;
 	}
 	
-	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr, BufferCreationPool pool) {
+	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr, BufferPool pool) {
 		Iterator<SelectionKey> iter = keySet.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
@@ -82,7 +83,7 @@ final class Helper {
 		keySet.clear();
 	}
 	
-	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferCreationPool pool) throws IOException, InterruptedException {
+	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
 			log.trace(id+""+key.attachment()+"proccessing");
 
@@ -146,7 +147,7 @@ final class Helper {
 		}
 	}
 
-	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferCreationPool pool) throws IOException {
+	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException {
 		if(log.isTraceEnabled())
 			log.trace(id+""+key.attachment()+"reading data");
 		

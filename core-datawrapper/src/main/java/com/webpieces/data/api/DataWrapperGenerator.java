@@ -22,7 +22,9 @@ public interface DataWrapperGenerator {
 	 * @return
 	 */
 	public DataWrapper chainDataWrappers(DataWrapper begin, DataWrapper end);
-
+	
+	public DataWrapper chainDataWrappers(DataWrapper begin, ByteBuffer...end);
+	
 	/**
 	 * In some cases, we may have a DataWrapper containing the end of the message 
 	 * so we need a DataWrapper with the 1st complete message and a 2nd wrapper with

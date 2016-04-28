@@ -58,7 +58,7 @@ subprojects {
 
 project(':core-channelmanager2') {
     dependencies {
-        compile project(':core-util')
+        compile project(':core-util'), project(':core-datawrapper')
     }
 }
 

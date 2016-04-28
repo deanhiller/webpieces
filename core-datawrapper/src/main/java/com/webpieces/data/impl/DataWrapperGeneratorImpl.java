@@ -9,9 +9,11 @@ import com.webpieces.data.api.DataWrapperGenerator;
 
 public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 
+	private static final ByteBufferDataWrapper EMPTY_WRAPPER = new ByteBufferDataWrapper(ByteBuffer.allocate(0));
+
 	@Override
 	public DataWrapper wrapByteArray(byte[] data) {
-		return new ByteArrayDataWrapper(data);
+		return new ByteBufferDataWrapper(ByteBuffer.wrap(data));
 	}
 
 	@Override
@@ -25,10 +27,20 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 	}
 
 	@Override
+	public DataWrapper chainDataWrappers(DataWrapper firstData, ByteBuffer...secondData) {
+		DataWrapper wrapper = firstData;
+		for(ByteBuffer buffer : secondData) {
+			DataWrapper second = wrapByteBuffer(buffer);
+			wrapper = chainDataWrappers(wrapper, second);
+		}
+		return wrapper;
+	}
+	
+	@Override
 	public DataWrapper chainDataWrappers(DataWrapper firstData, DataWrapper secondData) {
-		if(firstData instanceof EmptyWrapper) {
+		if(firstData.getReadableSize() == 0) {
 			return secondData;
-		} else if(secondData instanceof EmptyWrapper) {
+		} else if(secondData.getReadableSize() == 0) {
 			return firstData;
 		} else if(firstData instanceof ChainedDataWrapper) {
 			ChainedDataWrapper chained = (ChainedDataWrapper) firstData;
@@ -53,7 +65,7 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 
 	@Override
 	public DataWrapper emptyWrapper() {
-		return new EmptyWrapper();
+		return EMPTY_WRAPPER;
 	}
 
 	@Override
@@ -77,8 +89,8 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 		if(splitAtPosition > dataToRead.getReadableSize()) {
 			throw new IllegalArgumentException("splitPosition="+splitAtPosition+" is greater than size of data="+dataToRead.getReadableSize());
 		} else if(dataToRead.getReadableSize() == 0) {
-			tuple.add(new EmptyWrapper());
-			tuple.add(new EmptyWrapper());
+			tuple.add(EMPTY_WRAPPER);
+			tuple.add(EMPTY_WRAPPER);
 			return tuple;
 		}
 		
@@ -86,8 +98,9 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 		
 		SliceableDataWrapper wrapper2;
 		if(dataToRead.getReadableSize() == splitAtPosition) {
-			wrapper2 = new EmptyWrapper();
+			wrapper2 = EMPTY_WRAPPER;
 		} else {
+			dataToRead.increaseRefCount();
 			wrapper2 = 
 				new SplitProxyWrapper(dataToRead, splitAtPosition, dataToRead.getReadableSize() - splitAtPosition);
 		}
@@ -127,13 +140,13 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 		if(wrappersInBegin.size() > 0) 
 			wrapper1 = new ChainedDataWrapper(wrappersInBegin);
 		else 
-			wrapper1 = new EmptyWrapper();
+			wrapper1 = EMPTY_WRAPPER;
 		
 		DataWrapper wrapper2;
 		if(wrappersInEnd.size() > 0) 
 			wrapper2 = new ChainedDataWrapper(wrappersInEnd);
 		else
-			wrapper2 = new EmptyWrapper();
+			wrapper2 = EMPTY_WRAPPER;
 		
 		List<DataWrapper> finalTwo = new ArrayList<>();
 		finalTwo.add(wrapper1);

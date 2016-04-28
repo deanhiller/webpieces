@@ -3,6 +3,7 @@ package com.webpieces.httpparser.api;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.data.api.DataWrapper;
 import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -13,7 +14,8 @@ import com.webpieces.httpparser.api.dto.HttpRequest;
 
 public class TestRequestBody {
 
-	private HttpParser parser = HttpParserFactory.createParser();
+	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Test

@@ -1,9 +1,10 @@
 package org.webpieces.asyncserver.api;
 
 import org.webpieces.asyncserver.impl.AsyncServerManagerImpl;
-import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+
+import com.webpieces.data.api.BufferPool;
 
 public class AsyncServerMgrFactory {
 
@@ -13,7 +14,7 @@ public class AsyncServerMgrFactory {
 		return counter++;
 	}
 	
-	public static AsyncServerManager createAsyncServer(String id, BufferCreationPool pool) {
+	public static AsyncServerManager createAsyncServer(String id, BufferPool pool) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager(id, pool);
 		return createAsyncServer(mgr);

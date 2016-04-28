@@ -40,7 +40,6 @@ public class TestFutures {
 		Assert.assertEquals(1, values.size());
 	}
 	
-	@Test
 	public void testBlowTheStack() throws InterruptedException {
 		recurse(0);
 		
@@ -51,7 +50,7 @@ public class TestFutures {
 
 	private void recurse(int counter) {
 		CompletableFuture<Integer> future = writeData(counter);
-		future.thenAccept(p -> recurse(p+1));		
+		future.thenAccept(p -> recurse(p+1)).join();		
 	}
 	
 	private CompletableFuture<Integer> writeData(int counter) {

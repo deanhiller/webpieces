@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.webpieces.data.api.BufferPool;
+
 public class SplitProxyWrapper extends SliceableDataWrapper  {
 
 	private SliceableDataWrapper wrapper;
@@ -75,6 +77,11 @@ public class SplitProxyWrapper extends SliceableDataWrapper  {
 		buffer.position(position);
 		buffer.limit(limit);
 		return theView;
+	}
+
+	@Override
+	protected void releaseImpl(BufferPool pool) {
+		wrapper.releaseUnderlyingBuffers(pool);
 	}
 	
 }

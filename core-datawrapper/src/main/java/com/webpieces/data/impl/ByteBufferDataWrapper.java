@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.webpieces.data.api.BufferPool;
+
 public class ByteBufferDataWrapper extends SliceableDataWrapper {
 	
 	private ByteBuffer buffer;
@@ -58,4 +60,11 @@ public class ByteBufferDataWrapper extends SliceableDataWrapper {
 		buffer.limit(limit);
 		return theView;
 	}
+
+	@Override
+	protected void releaseImpl(BufferPool pool) {
+		buffer.position(buffer.limit());
+		pool.releaseBuffer(buffer);
+	}
+
 }

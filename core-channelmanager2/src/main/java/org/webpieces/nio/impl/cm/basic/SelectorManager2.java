@@ -37,7 +37,6 @@ import javax.swing.event.EventListenerList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
@@ -47,6 +46,8 @@ import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
+
+import com.webpieces.data.api.BufferPool;
 
 
 public class SelectorManager2 implements SelectorListener {
@@ -66,13 +67,13 @@ public class SelectorManager2 implements SelectorListener {
 
 	private boolean stopped;
 
-	private BufferCreationPool pool;
+	private BufferPool pool;
 
 //--------------------------------------------------------------------
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(SelectorProviderFactory factory, Object id, BufferCreationPool pool) {
+	public SelectorManager2(SelectorProviderFactory factory, Object id, BufferPool pool) {
 	  	this.id = id;
         this.factory = factory;
         this.pool = pool;

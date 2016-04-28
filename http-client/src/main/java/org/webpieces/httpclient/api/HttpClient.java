@@ -1,6 +1,5 @@
 package org.webpieces.httpclient.api;
 
-import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.httpparser.api.dto.HttpRequest;
@@ -10,7 +9,7 @@ public interface HttpClient {
 
 	/**
 	 * Opens and closes a single socket connection to send a request and receive a
-	 * response (therefore it is not very efficient)
+	 * response (therefore it is not very efficient, so you could use openHttpSocket instead)
 	 * 
 	 * @param request
 	 * @param cb
@@ -23,6 +22,6 @@ public interface HttpClient {
 	 * 
 	 * @return
 	 */
-	public HttpSocket openHttpSocket(SocketAddress addr);
+	public HttpSocket openHttpSocket(String idForLogging);
 	
 }

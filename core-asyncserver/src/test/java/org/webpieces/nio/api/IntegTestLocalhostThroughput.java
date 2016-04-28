@@ -10,11 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.netty.api.BufferPool;
 import org.webpieces.netty.api.NettyChannelMgrFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+
+import com.webpieces.data.api.BufferCreationPool;
+import com.webpieces.data.api.BufferPool;
 
 public class IntegTestLocalhostThroughput {
 
@@ -37,7 +39,7 @@ public class IntegTestLocalhostThroughput {
 	}
 	
 	public void testSoTimeoutOnSocket() throws InterruptedException {
-		BufferCreationPool pool = new BufferCreationPool(false, 2000);
+		BufferPool pool = new BufferCreationPool();
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer("server", pool);
 		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestLocalhostServerListener(pool));
 		
@@ -58,7 +60,7 @@ public class IntegTestLocalhostThroughput {
 	}
 
 	private TCPChannel createNettyChannel() {
-		BufferPool pool = new BufferPool();
+		org.webpieces.netty.api.BufferPool pool = new org.webpieces.netty.api.BufferPool();
 		
 		NettyChannelMgrFactory factory = NettyChannelMgrFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager(pool);
@@ -67,7 +69,7 @@ public class IntegTestLocalhostThroughput {
 	}
 
 	private TCPChannel createClientChannel() {
-		BufferCreationPool pool2 = new BufferCreationPool(false, 2000);
+		BufferCreationPool pool2 = new BufferCreationPool();
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager("client", pool2);
