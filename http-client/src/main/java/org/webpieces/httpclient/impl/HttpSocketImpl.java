@@ -34,6 +34,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private boolean isClosed;
 	private Memento memento;
 	private ConcurrentLinkedQueue<CompletableFuture<HttpResponse>> futuresToComplete = new ConcurrentLinkedQueue<>();
+	private MyDataListener dataListener = new MyDataListener();
 	
 	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
 		this.channel = channel;
@@ -43,12 +44,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	@Override
 	public CompletableFuture<HttpSocket> connect(SocketAddress addr) {
-		return channel.connect(addr).thenApply(channel -> this);
+		return channel.connect(addr, dataListener).thenApply(channel -> this);
 	}
 	
 	@Override
 	public CompletableFuture<HttpResponse> send(HttpRequest request) {
-		channel.registerForReads(new MyDataListener());
 		byte[] bytes = parser.marshalToBytes(request);
 		ByteBuffer wrap = ByteBuffer.wrap(bytes);
 		

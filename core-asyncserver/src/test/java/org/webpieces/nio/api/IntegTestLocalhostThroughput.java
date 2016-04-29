@@ -43,7 +43,8 @@ public class IntegTestLocalhostThroughput {
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer("server", pool);
 		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestLocalhostServerListener(pool));
 		
-		TCPChannel channel = createClientChannel();
+		BufferPool pool2 = new BufferCreationPool();
+		TCPChannel channel = createClientChannel(pool2);
 		//TCPChannel channel = createNettyChannel();
 		
 		timer.schedule(new TimerTask() {
@@ -53,7 +54,29 @@ public class IntegTestLocalhostThroughput {
 			}
 		}, 1000, 5000);
 		
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
+		DataListener listener = new DataListener() {
+			@Override
+			public void incomingData(Channel channel, ByteBuffer b) {
+				recordBytes(b.remaining());
+				
+				if(b.remaining() != 2000)
+					log.info("size of buffer="+b.remaining());
+				b.position(b.limit());
+				pool2.releaseBuffer(b);
+			}
+			
+			@Override
+			public void farEndClosed(Channel channel) {
+				log.info("far end closed");
+			}
+			
+			@Override
+			public void failure(Channel channel, ByteBuffer data, Exception e) {
+				log.info("failure", e);
+			}
+		};
+		
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
@@ -68,9 +91,7 @@ public class IntegTestLocalhostThroughput {
 		return channel;		
 	}
 
-	private TCPChannel createClientChannel() {
-		BufferCreationPool pool2 = new BufferCreationPool();
-		
+	private TCPChannel createClientChannel(BufferPool pool2) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager("client", pool2);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
@@ -85,30 +106,8 @@ public class IntegTestLocalhostThroughput {
 	}
 	
 	private void runWriting(Channel channel) {
-		log.info("register for reads");
-
 		timeMillis = System.currentTimeMillis();
-		DataListener listener = new DataListener() {
-			@Override
-			public void incomingData(Channel channel, ByteBuffer b) {
-				recordBytes(b.remaining());
-				
-				if(b.remaining() != 2000)
-					log.info("size of buffer="+b.remaining());	
-			}
-			
-			@Override
-			public void farEndClosed(Channel channel) {
-				log.info("far end closed");
-			}
-			
-			@Override
-			public void failure(Channel channel, ByteBuffer data, Exception e) {
-				log.info("failure", e);
-			}
-		};
-		channel.registerForReads(listener );
-		
+
 		log.info("starting writing");
 		write(channel, null);
 	}

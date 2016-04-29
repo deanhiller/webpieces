@@ -1,21 +1,19 @@
 package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncServer;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public class AsyncServerImpl implements AsyncServer {
 
 	private TCPServerChannel serverChannel;
-	private ConnectedChannels connectedChannels;
 	private DefaultConnectionListener connectionListener;
-	
+
 	public AsyncServerImpl(TCPServerChannel serverChannel2, DefaultConnectionListener connectionListener,
-			ConnectedChannels connectedChannels2) {
+			ProxyDataListener proxyListener) {
 		this.serverChannel = serverChannel2;
-		this.connectedChannels = connectedChannels2;
 		this.connectionListener = connectionListener;
 	}
 
@@ -30,12 +28,10 @@ public class AsyncServerImpl implements AsyncServer {
 	}
 
 	@Override
-	public void closeServerChannel() {
+	public CompletableFuture<Void> closeServerChannel() {
 		serverChannel.closeServerChannel();
 		
-		for(TCPChannel channel : connectedChannels.getAllChannels()) {
-			channel.close();
-		}
+		return connectionListener.closeChannels();
 	}
 
 }

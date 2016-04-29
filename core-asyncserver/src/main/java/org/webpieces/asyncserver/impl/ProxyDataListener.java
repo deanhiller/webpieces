@@ -50,6 +50,8 @@ public class ProxyDataListener implements DataListener {
 	 */
 	private TCPChannel lookupExistingOrCreateNew(Channel channel) {
 		ChannelSession session = channel.getSession();
+		//This is garbage collected when the TCPChannel and it's ChannelSession are garbage
+		//collected...
 		ProxyTCPChannel existingProxy = (ProxyTCPChannel) session.get(EXISTING_PROXY_CHANNEL);
 		if(existingProxy == null) {
 			existingProxy = new ProxyTCPChannel((TCPChannel) channel, connectedChannels);

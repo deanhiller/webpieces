@@ -44,13 +44,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	public void bindImpl2(SocketAddress addr) throws IOException {
         channel.socket().bind(addr);
 	}
-
-	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
-		return connectImpl(addr);
-	}
 	
-	private synchronized CompletableFuture<Channel> connectImpl(SocketAddress addr) {
+	protected synchronized CompletableFuture<Channel> connectImpl(SocketAddress addr) {
 		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		
 		try {

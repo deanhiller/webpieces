@@ -48,7 +48,6 @@ public class BufferCreationPool implements BufferPool {
 			else 
 				buffer = ByteBuffer.allocate(size);
 		} else {
-			log.info("using buffer from pool");
 			counter.decrementAndGet();
 		}
 		
@@ -64,7 +63,6 @@ public class BufferCreationPool implements BufferPool {
 		} if(counter.incrementAndGet() > poolSize)
 			return; //we discard more than 300 buffers as we don't want to take up too much memory
 
-		log.info("adding buffer back to pool");
 		buffer.clear();
 		freePackets.add(buffer);
 	}

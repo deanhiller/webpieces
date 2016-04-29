@@ -41,16 +41,13 @@ import org.webpieces.nio.api.handlers.DataListener;
  */
 public interface Channel extends RegisterableChannel {
 
-	public CompletableFuture<Channel> connect(SocketAddress addr);
-	public CompletableFuture<Channel> write(ByteBuffer b);
-	public CompletableFuture<Channel> close();
-	
-    /**
-     * Registers a DataListener that will be notified of all incoming data.  If the threadpool layer setup,
-     * requests from clients may come out of order unless you install your own executorService.
+	/**
+	 * Connects and registers a DataListener that will be notified of all incoming data. 
      * 
      * NOTE: We do not have a CompletableFuture read() as that can cause result in new gen objects that should
-     * never end up in old gen being pulled to old gen.
+     * never end up in old gen being pulled to old gen.  You can backpressure incoming data using unregisterForReads()
+     * and registerForReads() such that data is not read from the socket anymore if you desire on that specific 
+     * channel
      * 
      * ie. the Following scenario
      * 1. you read() and then add your listener.  The Future has been created
@@ -59,8 +56,19 @@ public interface Channel extends RegisterableChannel {
      * 4. Finally, data comes in and invokes the Future so Future.complete(xxx) is called
      * 5. Now, since the Future is in old gen, it will pull xxx and everything else into old gen along with
      *    it which you should not do causing a very hard to figure out memory issue
+     *     
+	 * @param addr The address to connect to
+	 * @param listener Once connected, this is the listener that will start receiving data
+	 * @return
+	 */
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener);
+	public CompletableFuture<Channel> write(ByteBuffer b);
+	public CompletableFuture<Channel> close();
+	
+    /**
+
      */
-    public void registerForReads(DataListener listener);
+    public void registerForReads();
 
     /**
      * Unregister the previously registered DataListener so incoming data is not fired to the client.

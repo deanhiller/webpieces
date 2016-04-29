@@ -12,6 +12,7 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.data.api.BufferCreationPool;
 
@@ -54,8 +55,27 @@ public class IntegTestClientNotRead {
 			}
 		}, 1000, 5000);
 		
+		DataListener listener = new DataListener() {
+			@Override
+			public void incomingData(Channel channel, ByteBuffer b) {
+				recordBytes(b.remaining());
+				
+				if(b.remaining() != 2000)
+					log.info("size of buffer="+b.remaining());	
+			}
+			
+			@Override
+			public void farEndClosed(Channel channel) {
+				log.info("far end closed");
+			}
+			
+			@Override
+			public void failure(Channel channel, ByteBuffer data, Exception e) {
+				log.info("failure", e);
+			}
+		};
 		
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
@@ -69,8 +89,9 @@ public class IntegTestClientNotRead {
 	}
 	
 	private void runWriting(Channel channel) {
-		log.info("register for reads");
+		log.info("unregister for reads");
 
+		channel.unregisterForReads(); //ensures we don't read from the channel
 		timeMillis = System.currentTimeMillis();
 		
 		log.info("starting writing");

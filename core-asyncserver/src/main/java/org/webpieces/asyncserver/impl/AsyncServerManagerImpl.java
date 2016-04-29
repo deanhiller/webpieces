@@ -22,13 +22,14 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		TCPServerChannel serverChannel = channelManager.createTCPServerChannel(id);
 		
 		ConnectedChannels connectedChannels = new ConnectedChannels();
-		DefaultConnectionListener connectionListener = new DefaultConnectionListener(listener, connectedChannels); 
+		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
+		DefaultConnectionListener connectionListener = new DefaultConnectionListener(proxyListener, connectedChannels); 
 		
 		serverChannel.bind(addr);
 		serverChannel.setReuseAddress(true);
 		serverChannel.registerServerSocketChannel(connectionListener);
 		
-		return new AsyncServerImpl(serverChannel, connectionListener, connectedChannels);
+		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener);
 	}
 
 }

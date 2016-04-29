@@ -20,8 +20,8 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
-		return channel.connect(addr);
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		return channel.connect(addr, listener);
 	}
 
 	public CompletableFuture<Channel> write(ByteBuffer b) {
@@ -35,8 +35,8 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.close();
 	}
 
-	public void registerForReads(DataListener listener) {
-		channel.registerForReads(listener);
+	public void registerForReads() {
+		channel.registerForReads();
 	}
 
 	public void setReuseAddress(boolean b) {
@@ -105,6 +105,5 @@ public class ProxyTCPChannel implements TCPChannel {
 	public int getWriteTimeoutMs() {
 		return channel.getWriteTimeoutMs();
 	}
-
 
 }

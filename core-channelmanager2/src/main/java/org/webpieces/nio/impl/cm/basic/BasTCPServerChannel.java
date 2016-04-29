@@ -12,7 +12,6 @@ import java.nio.channels.SocketChannel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -66,10 +65,13 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketId);
-			TCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager());
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager());
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
-			cb.connected(tcpChan);
+			DataListener listener = cb.connected(tcpChan);
+			
+			tcpChan.registerForReads(listener);
+			
 		} catch(Throwable e) {
 			log.warn(this+"Failed to connect", e);
 			cb.failed(this, e);

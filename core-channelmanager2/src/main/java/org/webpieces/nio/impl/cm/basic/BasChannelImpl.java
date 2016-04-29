@@ -41,6 +41,7 @@ public abstract class BasChannelImpl
     private boolean registered;
 	private boolean doNotAllowWrites;
 	private int writeTimeoutMs = 3_000;
+	protected DataListener listener;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr) {
 		super(id, selMgr);
@@ -59,7 +60,15 @@ public abstract class BasChannelImpl
 	public abstract int readImpl(ByteBuffer b);
 	protected abstract int writeImpl(ByteBuffer b);
    
-    private void unqueueAndFailWritesThenClose(CloseRunnable action) {
+	@Override
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		this.listener = listener;
+		return connectImpl(addr);
+	}
+	
+    protected abstract CompletableFuture<Channel> connectImpl(SocketAddress addr);
+
+	private void unqueueAndFailWritesThenClose(CloseRunnable action) {
     	List<CompletableFuture<Channel>> promises;
     	synchronized(this) { //put here for emphasis that we are synchronizing here but not below
 			promises = failAllWritesInQueue();
@@ -236,7 +245,7 @@ public abstract class BasChannelImpl
      */
     protected abstract void bindImpl2(SocketAddress addr) throws IOException;
     
-	public void registerForReads(DataListener listener) {
+	public void registerForReads() {
 		if(listener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(!isConnecting && !isConnected()) {
@@ -317,6 +326,7 @@ public abstract class BasChannelImpl
     
     @Override
     public CompletableFuture<Channel> close() {
+    	listener = null;
         //To prevent the following exception, in the readImpl method, we
         //check if the socket is already closed, and if it is we don't read
         //and just return -1 to indicate socket closed.

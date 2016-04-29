@@ -140,7 +140,8 @@ final class Helper {
 		
 		try {
 			channel.finishConnect();
-			callback.connected(channel);
+			DataListener listener = callback.connected(channel);
+			channel.registerForReads(listener);
 		} catch(Exception e) {
             log.warn(id+""+key.attachment()+"Could not open connection", e);
 			callback.failed(channel, e);

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioException;
+import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
 
@@ -95,7 +96,6 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
         channel.close();
     }
 
-
     public boolean isClosed() {
 		return channel.isClosed();
 	}
@@ -104,18 +104,17 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		return channel.isConnected();
 	}
 
-	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
+	protected CompletableFuture<Channel> connectImpl(SocketAddress addr) {
 		try {
-			return connectImpl(addr);
+			return connectImpl2(addr);
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
 			throw new NioException(e);
 		}
 	}
-
-	private CompletableFuture<Channel> connectImpl(SocketAddress addr) throws IOException, InterruptedException {
+	
+	private CompletableFuture<Channel> connectImpl2(SocketAddress addr) throws IOException, InterruptedException {
 		CompletableFuture<Channel> future = new CompletableFuture<>();
 
 		if(apiLog.isTraceEnabled())
@@ -129,11 +128,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		if(connected) {
 			try {
 				future.complete(this);
+				registerForReads();
 			} catch(Throwable e) {
 				log.warn(this+"Exception occurred", e);
 			}
 		} else {
-			getSelectorManager().registerChannelForConnect(this, future);
+			getSelectorManager().registerChannelForConnect(this, listener, future);
 		}
 		return future;
 	}
@@ -207,6 +207,15 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		} catch (SocketException e) {
 			throw new NioException(e);
 		}
+	}
+
+
+	public void registerForReads(DataListener listener) {
+		if(isClosed())
+			return;
+		
+		this.listener = listener;
+		registerForReads();
 	}
     
 }

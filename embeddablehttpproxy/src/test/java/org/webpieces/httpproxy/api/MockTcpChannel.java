@@ -18,7 +18,8 @@ public class MockTcpChannel implements TCPChannel {
 	private ChannelSession session = new MyChanSession();
 
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		this.dataListener = listener;
 		return null;
 	}
 
@@ -33,8 +34,7 @@ public class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public void registerForReads(DataListener listener) {
-		this.dataListener = listener;
+	public void registerForReads() {
 	}
 
 	@Override

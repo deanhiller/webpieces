@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import org.webpieces.netty.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
@@ -66,7 +65,7 @@ public class NettyTCPChannel implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
 		try {
 			CompletableFuture<Channel> promise = new CompletableFuture<>();
 			ChannelFuture f = bootstrap.connect(addr).sync();
@@ -100,13 +99,13 @@ public class NettyTCPChannel implements TCPChannel {
 	}
 
 	@Override
-	public void registerForReads(DataListener listener) {
-		this.listener = listener;
+	public void registerForReads() {
+		throw new UnsupportedOperationException("not sure how to deregister from selector with netty yet");
 	}
 
 	@Override
 	public void unregisterForReads() {
-		this.listener = null;
+		throw new UnsupportedOperationException("not sure how to deregister from selector with netty yet");
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,20 +14,20 @@ import org.webpieces.nio.api.handlers.DataListener;
 public class DefaultConnectionListener implements ConnectionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultConnectionListener.class);
-	private DataListener dataListener;
+	private ProxyDataListener dataListener;
 	private ConnectedChannels connectedChannels;
 	private ByteBuffer overloadResponse;
 
-	public DefaultConnectionListener(DataListener listener, ConnectedChannels channels) {
-		this.dataListener = listener;
+	public DefaultConnectionListener(ProxyDataListener proxyListener, ConnectedChannels channels) {
+		this.dataListener = proxyListener;
 		this.connectedChannels = channels;
 	}
 
 	@Override
-	public void connected(Channel channel) {
+	public DataListener connected(Channel channel) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
 		
-		log.info("keep alive="+tcpChannel.getKeepAlive());
+		log.info("channel connected="+channel);
 		
 		if(overloadResponse != null) {
 			//This is annoying.....
@@ -35,11 +36,11 @@ public class DefaultConnectionListener implements ConnectionListener {
 			//3. soooo...we must do both async and close on complete with timer to timeout and close on write regardless of success
 			//4. lastly, these all could throw exceptions and we don't really care about them at all
 			handleOverload(tcpChannel);
-			return;
+			return dataListener;
 		}
 		connectedChannels.addChannel(tcpChannel);
 		
-		tcpChannel.registerForReads(new ProxyDataListener(connectedChannels, dataListener));
+		return dataListener;
 	}
 
 	private void handleOverload(TCPChannel tcpChannel) {
@@ -83,6 +84,10 @@ public class DefaultConnectionListener implements ConnectionListener {
 
 	public void disableOverloadMode() {
 		this.overloadResponse = null;
+	}
+
+	public CompletableFuture<Void> closeChannels() {
+		return connectedChannels.closeChannels();
 	}
 
 }
