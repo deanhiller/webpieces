@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.nio.api.ChannelManager;
-import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.dto.HttpRequest;
@@ -51,8 +50,7 @@ public class HttpClientImpl implements HttpClient {
 
 	@Override
 	public HttpSocket openHttpSocket(String idForLogging) {
-		TCPChannel channel = mgr.createTCPChannel(idForLogging);
-		return new HttpSocketImpl(channel, parser);
+		return new HttpSocketImpl(mgr, idForLogging, parser);
 	}
 
 }

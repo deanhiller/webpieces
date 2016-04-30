@@ -26,13 +26,18 @@ import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerChannel {
 
 	private static final Logger log = LoggerFactory.getLogger(BasTCPServerChannel.class);
-	private ServerSocketChannel channel;
+	private final ServerSocketChannel channel;
+    private final ChannelsFactory channelFactory;
+	private final ConnectionListener connectionListener;
+	private final DataListener dataListener;
 	
 	private int i = 0;
-    private ChannelsFactory channelFactory;
+
 	
-	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr) {
+	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr, ConnectionListener listener, DataListener dataListener) {
 		super(id, selMgr);
+		this.connectionListener = listener;
+		this.dataListener = dataListener;
         this.channelFactory = c;
         try {
         	channel = ServerSocketChannel.open();
@@ -49,9 +54,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	/* (non-Javadoc)
 	 * @see api.biz.xsoftware.nio.TCPServerChannel#accept()
 	 */
-	public void accept(String newSocketId, ConnectionListener cb) throws IOException {
-		if(cb == null)
-			throw new IllegalArgumentException("cb is not allowed to be null");
+	public void accept(String newSocketId) throws IOException {
 		try {
 			//special code...see information in close() method
 			if(isClosed())
@@ -65,16 +68,16 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketId);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager());
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), dataListener);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
-			DataListener listener = cb.connected(tcpChan);
+			connectionListener.connected(tcpChan);
 			
-			tcpChan.registerForReads(listener);
+			tcpChan.registerForReads();
 			
 		} catch(Throwable e) {
 			log.warn(this+"Failed to connect", e);
-			cb.failed(this, e);
+			connectionListener.failed(this, e);
 		}
 	}
 	
@@ -98,6 +101,8 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	public void bind(SocketAddress srvrAddr) {
 		try {
 			bindImpl(srvrAddr);
+			
+			registerServerSocketChannel(connectionListener);
 		} catch (IOException e) {
 			throw new NioException(e);
 		}

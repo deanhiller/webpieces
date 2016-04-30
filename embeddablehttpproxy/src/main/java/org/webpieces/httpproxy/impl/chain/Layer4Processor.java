@@ -15,7 +15,7 @@ public class Layer4Processor {
 	private ChannelManager channelManager;
 	
 	public void processHttpRequests(Channel channel, List<HttpRequest> parsedRequests) {
-		channelManager.createTCPChannel("outbound");
+		channelManager.createTCPChannel("outbound", null);
 	}
 
 }

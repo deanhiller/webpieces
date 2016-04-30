@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.handlers.ConnectionListener;
 
 public class NettyServerChannel implements TCPServerChannel {
 
@@ -54,12 +53,6 @@ public class NettyServerChannel implements TCPServerChannel {
 	public InetSocketAddress getLocalAddress() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void registerServerSocketChannel(ConnectionListener listener) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

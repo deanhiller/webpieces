@@ -6,8 +6,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.handlers.DataListener;
-
 
 /**
  * 
@@ -61,7 +59,7 @@ public interface Channel extends RegisterableChannel {
 	 * @param listener Once connected, this is the listener that will start receiving data
 	 * @return
 	 */
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener);
+	public CompletableFuture<Channel> connect(SocketAddress addr);
 	public CompletableFuture<Channel> write(ByteBuffer b);
 	public CompletableFuture<Channel> close();
 	
@@ -112,5 +110,16 @@ public interface Channel extends RegisterableChannel {
 	public void setWriteTimeoutMs(int timeout);
 	
 	public int getWriteTimeoutMs();
+
+	/**
+     * It is important if far end stops reading that we only backup writes to a certain point and then
+     * fail so you don't blow your RAM and keep trying to write.  The default will be set to 10 writes.  
+     * 	 
+	 * @param maxQueueSize The number of backed up writes in the queue.  The queue only backs up
+     * if things are not being written to local nic buffer to be sent out.
+	 */
+	public void setMaxBytesWriteBackupSize(int maxBytesBackup);
+	
+	public int getMaxBytesBackupSize();
 	
 }

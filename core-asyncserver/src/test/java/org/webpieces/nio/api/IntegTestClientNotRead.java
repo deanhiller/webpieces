@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,8 @@ public class IntegTestClientNotRead {
 	private Timer timer = new Timer();
 	private long timeMillis;
 	private long totalBytes = 0;
-	
+	private Executor executor = Executors.newFixedThreadPool(1);
+
 	/**
 	 * Here, we will simulate a bad hacker client that sets his side so_timeout to infinite
 	 * and then refuses to read response data back in but keeps writing into our server to
@@ -44,9 +47,9 @@ public class IntegTestClientNotRead {
 		BufferCreationPool pool2 = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager("client", pool2);
-		TCPChannel channel = mgr.createTCPChannel("clientChan");
-		
-		log.info("client keep alive="+channel.getKeepAlive()+" timeout="+channel.getWriteTimeoutMs());
+		TCPChannel channel = mgr.createTCPChannel("clientChan", new ClientDataListener());
+
+		log.info("client");
 
 		timer.schedule(new TimerTask() {
 			@Override
@@ -55,27 +58,7 @@ public class IntegTestClientNotRead {
 			}
 		}, 1000, 5000);
 		
-		DataListener listener = new DataListener() {
-			@Override
-			public void incomingData(Channel channel, ByteBuffer b) {
-				recordBytes(b.remaining());
-				
-				if(b.remaining() != 2000)
-					log.info("size of buffer="+b.remaining());	
-			}
-			
-			@Override
-			public void farEndClosed(Channel channel) {
-				log.info("far end closed");
-			}
-			
-			@Override
-			public void failure(Channel channel, ByteBuffer data, Exception e) {
-				log.info("failure", e);
-			}
-		};
-		
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
@@ -84,7 +67,7 @@ public class IntegTestClientNotRead {
 	private void logBytesTxfrd() {
 		long bytesTxfrd = getBytes();
 		long totalTime = System.currentTimeMillis() - timeMillis;
-		long bytesPerMs = bytesTxfrd / totalTime; 
+		long bytesPerMs = bytesTxfrd / totalTime;
 		log.info("time for bytes="+bytesTxfrd+". time="+totalTime+" rate="+bytesPerMs +" Bytes/Ms");
 	}
 	
@@ -95,7 +78,7 @@ public class IntegTestClientNotRead {
 		timeMillis = System.currentTimeMillis();
 		
 		log.info("starting writing");
-		write(channel, null);
+		write(channel, null, 0);
 	}
 
 	private synchronized long getBytes() {
@@ -105,20 +88,45 @@ public class IntegTestClientNotRead {
 		totalBytes += remaining;
 	}
 
-	private void write(Channel channel, String reason) {
+	private void write(Channel channel, String reason, final int counter) {
 		log.info("write from client. reason="+ reason);
 		byte[] data = new byte[2000];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		CompletableFuture<Channel> write = channel.write(buffer);
-		
-		write
-			.thenAccept(p -> write(channel, "wrote data from client"))
-			.whenComplete((r, e) -> finished(r, e));
+		final int count = counter+1;
+
+		if(counter >= 100) {
+			write
+				.thenAccept(p -> write(channel, "wrote data from client", count))
+				.whenComplete((r, e) -> finished(r, e));
+		} else {
+			write.thenAcceptAsync(p -> write(channel, "wrote data async", 0), executor)
+				.whenComplete((r, e) -> finished(r, e));
+		}
 	}
 
 	private void finished(Void r, Throwable e) {
 		if(e != null) 
-			log.info("failed due to reason="+e.getMessage());
+			log.info("failed due to reason="+e.getMessage(), e);
 	}
 
+	private class ClientDataListener implements DataListener {
+		@Override
+		public void incomingData(Channel channel, ByteBuffer b) {
+			recordBytes(b.remaining());
+			
+			if(b.remaining() != 2000)
+				log.info("size of buffer="+b.remaining());	
+		}
+		
+		@Override
+		public void farEndClosed(Channel channel) {
+			log.info("far end closed");
+		}
+		
+		@Override
+		public void failure(Channel channel, ByteBuffer data, Exception e) {
+			log.info("failure", e);
+		}
+	};
 }

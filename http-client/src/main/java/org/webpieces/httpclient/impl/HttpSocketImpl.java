@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
@@ -36,15 +37,15 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private ConcurrentLinkedQueue<CompletableFuture<HttpResponse>> futuresToComplete = new ConcurrentLinkedQueue<>();
 	private MyDataListener dataListener = new MyDataListener();
 	
-	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
-		this.channel = channel;
+	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser) {
+		channel = mgr.createTCPChannel(idForLogging, dataListener);
 		this.parser = parser;
 		memento = parser.prepareToParse();
 	}
 
 	@Override
 	public CompletableFuture<HttpSocket> connect(SocketAddress addr) {
-		return channel.connect(addr, dataListener).thenApply(channel -> this);
+		return channel.connect(addr).thenApply(channel -> this);
 	}
 	
 	@Override

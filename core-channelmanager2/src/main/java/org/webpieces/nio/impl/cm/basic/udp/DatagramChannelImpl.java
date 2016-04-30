@@ -22,34 +22,32 @@ import org.webpieces.nio.impl.util.ChannelSessionImpl;
 public class DatagramChannelImpl implements DatagramChannel
 {
     private static final Logger log = LoggerFactory.getLogger(DatagramChannelImpl.class);
-    private static final DatagramListener NULL_LISTENER = new NullDatagramListener();
     
     private ChannelSession session = new ChannelSessionImpl();
     private DatagramSocket socket;
     private String id;
-    private DatagramListener listener = NULL_LISTENER;
+    private final DatagramListener listener;
     private ByteBuffer buffer;
     private ReaderThread readerThread;
     private boolean shutDownThread = false;
     private String name;
 
-    public DatagramChannelImpl(String id, int bufferSize) {
+    public DatagramChannelImpl(String id, int bufferSize, DatagramListener dataListener) {
         this.id = "["+id+"] ";
         buffer = ByteBuffer.allocate(bufferSize);
+        this.listener = dataListener;
     }
 
     /**
      * @see org.webpieces.nio.api.channels.Channel#registerForReads(org.webpieces.nio.api.handlers.DataListener)
      */
-    public void registerForReads(DatagramListener listener) {
-        this.listener  = listener;
+    public void registerForReads() {
     }
 
     /**
      * @see org.webpieces.nio.api.channels.Channel#unregisterForReads()
      */
     public void unregisterForReads() {
-        listener = NULL_LISTENER;
     }
 
 
@@ -246,23 +244,6 @@ public class DatagramChannelImpl implements DatagramChannel
             doThreadWork();
         }
 
-    }
-    
-    private static class NullDatagramListener implements DatagramListener {
-        /**
-         * @see org.webpieces.nio.api.handlers.DatagramListener
-         * #incomingData(org.webpieces.nio.api.channels.DatagramChannel, java.net.InetSocketAddress, java.nio.ByteBuffer)
-         */
-        public void incomingData(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer b) {
-        }
-
-        /**
-         * @see org.webpieces.nio.api.handlers.DatagramListener
-         * #failure(org.webpieces.nio.api.channels.DatagramChannel, java.net.InetSocketAddress, java.nio.ByteBuffer, java.lang.Exception)
-         */
-        public void failure(DatagramChannel channel, InetSocketAddress fromAddr, ByteBuffer data, Throwable e) {
-            log.warn("Exception", e);
-        }   
     }
 
     /**

@@ -19,15 +19,14 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	@Override
 	public AsyncServer createTcpServer(
 			String id, SocketAddress addr, DataListener listener) {
-		TCPServerChannel serverChannel = channelManager.createTCPServerChannel(id);
-		
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
-		DefaultConnectionListener connectionListener = new DefaultConnectionListener(proxyListener, connectedChannels); 
+		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels); 
+		
+		TCPServerChannel serverChannel = channelManager.createTCPServerChannel(id, connectionListener, proxyListener);
 		
 		serverChannel.bind(addr);
 		serverChannel.setReuseAddress(true);
-		serverChannel.registerServerSocketChannel(connectionListener);
 		
 		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener);
 	}

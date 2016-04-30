@@ -17,7 +17,6 @@ public class WrapperAndListener {
 	private RegisterableChannel channel;
 	private DataListener dataHandler;
 	private ConnectionListener connectCallback;
-	private ConnectionListener acceptCallback;
 	
 	public WrapperAndListener(RegisterableChannelImpl r) {
 		if(r == null)
@@ -35,9 +34,6 @@ public class WrapperAndListener {
 		//could be set wrong or twice.....ie. we can't tell.  instead use validOps
 		switch(validOps) {
 		case SelectionKey.OP_ACCEPT:
-			if(acceptCallback != null)
-				throw new RuntimeException(channel+"ConnectionListener is already set, cannot be set again");
-			acceptCallback = (ConnectionListener)l;
 			break;
 		case SelectionKey.OP_CONNECT:
 			if(connectCallback != null)
@@ -68,10 +64,6 @@ public class WrapperAndListener {
 			dataHandler = null;
 	}
 	
-	public ConnectionListener getAcceptCallback() {
-		return acceptCallback;
-	}
-
 	public RegisterableChannel getChannel() {
 		return channel;
 	}

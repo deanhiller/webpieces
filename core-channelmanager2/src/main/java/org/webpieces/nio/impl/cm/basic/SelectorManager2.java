@@ -111,9 +111,9 @@ public class SelectorManager2 implements SelectorListener {
 					throws IOException, InterruptedException {
 		waitForRegister(s, SelectionKey.OP_ACCEPT, listener, true);
 	}
-	public void registerChannelForConnect(final RegisterableChannelImpl s, DataListener dataListener, CompletableFuture<Channel> promise)
+	public void registerChannelForConnect(final RegisterableChannelImpl s, CompletableFuture<Channel> promise)
 					throws IOException, InterruptedException {
-		final ConnectionListener listener = new FutureConnectImpl(promise, dataListener);
+		final ConnectionListener listener = new FutureConnectImpl(promise);
 		registerSelectableChannel(s, SelectionKey.OP_CONNECT, listener, true);
 	}
 	public void registerChannelForRead(final RegisterableChannelImpl s, final DataListener listener)

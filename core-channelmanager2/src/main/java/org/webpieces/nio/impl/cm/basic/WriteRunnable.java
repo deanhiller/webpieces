@@ -50,4 +50,8 @@ public class WriteRunnable {
 		buffer.position(buffer.limit());
 	}
 
+	public int getBufferSize() {
+		return buffer.remaining();
+	}
+
 }

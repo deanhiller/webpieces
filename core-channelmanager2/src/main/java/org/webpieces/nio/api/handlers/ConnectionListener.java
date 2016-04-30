@@ -17,7 +17,7 @@ public interface ConnectionListener {
 	 * @param channel
 	 * @return
 	 */
-	public DataListener connected(Channel channel);
+	public void connected(Channel channel);
 	
 	/**
 	 * Unfortunately, channel may be the TCPServerChannel if accepting and failed or

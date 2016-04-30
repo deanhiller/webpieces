@@ -21,21 +21,27 @@ public class IntegTestClientNotReadListener implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
+		log.info("receiving data server..writing now");
 		CompletableFuture<Channel> future = channel.write(b);
-		
+
 		future
 			.thenAccept(p -> finished("data written", null, b))
-			.whenComplete((r, e) -> fail(channel, b, r, e));
+			.exceptionally(e -> fail(channel, e));
 	}
 
-	private void fail(Channel channel, ByteBuffer b, Void r, Throwable e) {
+	private Void fail(Channel channel, Throwable e) {
 		log.info("finished exception="+e, e);
-		pool.releaseBuffer(b);
-		channel.close();
+		if(!channel.isClosed()) {
+			CompletableFuture<Channel> close = channel.close();
+			close.thenAccept(p -> {
+				log.info("Channel closed");
+			});
+		}
+		return null;
 	}
 
 	private void finished(String string, Failure p, ByteBuffer buffer) {
-		log.info("finished reason="+string);
+		log.info("writing finished reason="+string);
 		pool.releaseBuffer(buffer);
 	}
 

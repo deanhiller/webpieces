@@ -20,6 +20,35 @@ import com.webpieces.data.api.BufferPool;
 
 public class IntegTestLocalhostThroughput {
 
+	private final class ClientDataListener implements DataListener {
+		private BufferPool pool2;
+		
+		public ClientDataListener(BufferPool pool2) {
+			this.pool2 = pool2;
+		}
+		
+		@Override
+		public void incomingData(Channel channel, ByteBuffer b) {
+			log.info("client incoming bytes="+b.remaining());
+			recordBytes(b.remaining());
+			
+			if(b.remaining() != 2000)
+				log.info("size of buffer="+b.remaining());
+			b.position(b.limit());
+			pool2.releaseBuffer(b);
+		}
+
+		@Override
+		public void farEndClosed(Channel channel) {
+			log.info("far end closed");
+		}
+
+		@Override
+		public void failure(Channel channel, ByteBuffer data, Exception e) {
+			log.info("failure", e);
+		}
+	}
+
 	private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
 	private Timer timer = new Timer();
 	private long timeMillis;
@@ -44,7 +73,8 @@ public class IntegTestLocalhostThroughput {
 		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestLocalhostServerListener(pool));
 		
 		BufferPool pool2 = new BufferCreationPool();
-		TCPChannel channel = createClientChannel(pool2);
+		DataListener listener = new ClientDataListener(pool2);
+		TCPChannel channel = createClientChannel(pool2, listener);
 		//TCPChannel channel = createNettyChannel();
 		
 		timer.schedule(new TimerTask() {
@@ -53,48 +83,27 @@ public class IntegTestLocalhostThroughput {
 				logBytesTxfrd();
 			}
 		}, 1000, 5000);
+	
 		
-		DataListener listener = new DataListener() {
-			@Override
-			public void incomingData(Channel channel, ByteBuffer b) {
-				recordBytes(b.remaining());
-				
-				if(b.remaining() != 2000)
-					log.info("size of buffer="+b.remaining());
-				b.position(b.limit());
-				pool2.releaseBuffer(b);
-			}
-			
-			@Override
-			public void farEndClosed(Channel channel) {
-				log.info("far end closed");
-			}
-			
-			@Override
-			public void failure(Channel channel, ByteBuffer data, Exception e) {
-				log.info("failure", e);
-			}
-		};
-		
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
 	}
 
-	private TCPChannel createNettyChannel() {
+	private TCPChannel createNettyChannel(DataListener listener) {
 		org.webpieces.netty.api.BufferPool pool = new org.webpieces.netty.api.BufferPool();
 		
 		NettyChannelMgrFactory factory = NettyChannelMgrFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager(pool);
-		TCPChannel channel = mgr.createTCPChannel("clientChan");
+		TCPChannel channel = mgr.createTCPChannel("clientChan", listener);
 		return channel;		
 	}
 
-	private TCPChannel createClientChannel(BufferPool pool2) {
+	private TCPChannel createClientChannel(BufferPool pool2, DataListener listener) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager("client", pool2);
-		TCPChannel channel = mgr.createTCPChannel("clientChan");
+		TCPChannel channel = mgr.createTCPChannel("clientChan", listener);
 		return channel;
 	}
 

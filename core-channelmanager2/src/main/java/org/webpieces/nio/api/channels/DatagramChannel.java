@@ -3,14 +3,12 @@ package org.webpieces.nio.api.channels;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-import org.webpieces.nio.api.handlers.DatagramListener;
-
 
 /**
  */
 public interface DatagramChannel extends RegisterableChannel
 {
-    public void registerForReads(DatagramListener listener);
+    public void registerForReads();
     
     public void unregisterForReads();
     

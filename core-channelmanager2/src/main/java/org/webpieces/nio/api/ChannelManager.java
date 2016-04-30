@@ -6,6 +6,9 @@ import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
+import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.handlers.DatagramListener;
 
 /**
  * @author Dean Hiller
@@ -27,38 +30,39 @@ public interface ChannelManager {
      * Returns a TCPServerChannel that can listen for incoming TCPChannels
      * 
      * @param id (Should not be null)Used for logging purposes. 
-     *  @param settings Can be null.  This is used when you want to pass a SSLEngineFactory or 
-     *                   PacketProcessorFactory down to the ssl and packet layers.  
+     * @param connectionListener The listener that is notified every time a Channel connects in
+     * @param DataListener This listener is notified of any data that comes in and what Channel that data came from
+     * 
      * @return a TCPServerChannel
      */
-    public TCPServerChannel createTCPServerChannel(String id);   
+    public TCPServerChannel createTCPServerChannel(
+    		String id, ConnectionListener connectionListener, DataListener dataListener);
 
     /**
      * Returns a non-blocking TCPChannel.
-     * @param id (Should not be null)Used for logging purposes. 
-     * @param h (Can be null)The Settings holds factories that turn on security or packetizing.  If
-     *          h is null, or the factory is null, that feature will not be turned on.  The layer for that
-     *          feature must be in the ChannelManager stack also to be turned on.
+     * @param id (Should not be null)Used for logging purposes.
+     * @param listener The listener that is notified of Data that comes in
+     *  
      * @return a non-blocking TCPChannel.
      */
-    public TCPChannel createTCPChannel(String id);
+    public TCPChannel createTCPChannel(String id, DataListener listener);
 
     /**
      * Creates a UDPChannel that can connect to a peer and receive/send data from/to
      * that peer.  We will have to test this, but I hear this is more
      * performance than using the UDPServerChannel
      * 
-     * @param id 
-     * @param settings (Can be null)Not used at this time
+     * @param id
+     *  
      * @return a UDPChannel
      * @throws IOException
      */
-    public UDPChannel createUDPChannel(String id);   
+    public UDPChannel createUDPChannel(String id, DataListener listener);
 	
 	/*
 	 * Creates a UDPServerChannel that can send/receive data from multiple peers.
 	 */
-	public DatagramChannel createDatagramChannel(String id, int bufferSize);
+	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener listener);
     
 	public void stop();
 

@@ -9,22 +9,19 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataListener;
 
 public class DefaultConnectionListener implements ConnectionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultConnectionListener.class);
-	private ProxyDataListener dataListener;
 	private ConnectedChannels connectedChannels;
 	private ByteBuffer overloadResponse;
 
-	public DefaultConnectionListener(ProxyDataListener proxyListener, ConnectedChannels channels) {
-		this.dataListener = proxyListener;
+	public DefaultConnectionListener(ConnectedChannels channels) {
 		this.connectedChannels = channels;
 	}
 
 	@Override
-	public DataListener connected(Channel channel) {
+	public void connected(Channel channel) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
 		
 		log.info("channel connected="+channel);
@@ -36,11 +33,9 @@ public class DefaultConnectionListener implements ConnectionListener {
 			//3. soooo...we must do both async and close on complete with timer to timeout and close on write regardless of success
 			//4. lastly, these all could throw exceptions and we don't really care about them at all
 			handleOverload(tcpChannel);
-			return dataListener;
+			return;
 		}
 		connectedChannels.addChannel(tcpChannel);
-		
-		return dataListener;
 	}
 
 	private void handleOverload(TCPChannel tcpChannel) {

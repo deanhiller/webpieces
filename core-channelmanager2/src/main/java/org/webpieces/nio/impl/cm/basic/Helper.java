@@ -119,9 +119,8 @@ final class Helper {
 			log.trace(id+""+key.attachment()+"Incoming Connection="+key);
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
-		ConnectionListener cb = struct.getAcceptCallback();
 		BasTCPServerChannel channel = (BasTCPServerChannel)struct.getChannel();
-		channel.accept("session "+channel.getSession(), cb);
+		channel.accept("session "+channel.getSession());
 	}
 	
 	private static void connect(Object id, SelectionKey key) throws IOException {
@@ -140,8 +139,8 @@ final class Helper {
 		
 		try {
 			channel.finishConnect();
-			DataListener listener = callback.connected(channel);
-			channel.registerForReads(listener);
+			callback.connected(channel);
+			channel.registerForReads();
 		} catch(Exception e) {
             log.warn(id+""+key.attachment()+"Could not open connection", e);
 			callback.failed(channel, e);

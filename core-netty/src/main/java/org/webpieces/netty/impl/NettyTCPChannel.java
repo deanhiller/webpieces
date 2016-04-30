@@ -29,12 +29,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 public class NettyTCPChannel implements TCPChannel {
 	private Bootstrap bootstrap = new Bootstrap();
 	private io.netty.channel.Channel channel;
-	private DataListener listener;
+	private final DataListener listener;
 	private BufferPool pool;
 	private ChannelSession session = new ChannelSessionImpl();
 
-	public NettyTCPChannel(BufferPool pool) {
+	public NettyTCPChannel(BufferPool pool, DataListener listener) {
 		this.pool = pool;
+		this.listener = listener;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		bootstrap.group(workerGroup);
 		bootstrap.channel(NioSocketChannel.class);
@@ -65,7 +66,7 @@ public class NettyTCPChannel implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		try {
 			CompletableFuture<Channel> promise = new CompletableFuture<>();
 			ChannelFuture f = bootstrap.connect(addr).sync();
@@ -186,6 +187,15 @@ public class NettyTCPChannel implements TCPChannel {
 
 	public void setChannelImpl(io.netty.channel.Channel channel2) {
 		this.channel = channel2;
+	}
+
+	@Override
+	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
+	}
+
+	@Override
+	public int getMaxBytesBackupSize() {
+		return 0;
 	}
 
 }

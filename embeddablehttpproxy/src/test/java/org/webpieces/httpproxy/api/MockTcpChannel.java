@@ -18,8 +18,7 @@ public class MockTcpChannel implements TCPChannel {
 	private ChannelSession session = new MyChanSession();
 
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
-		this.dataListener = listener;
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		return null;
 	}
 
@@ -142,6 +141,18 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public int getWriteTimeoutMs() {
+		return 0;
+	}
+
+	@Override
+	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getMaxBytesBackupSize() {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 

@@ -21,6 +21,7 @@ public class IntegTestLocalhostServerListener implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
+		log.info("server incoming bytes="+b);
 		CompletableFuture<Channel> future = channel.write(b);
 		
 		future

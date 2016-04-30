@@ -29,8 +29,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, DataListener dataListener) {
+		super(id, selMgr, dataListener);
 		try {
 			channel = factory.open();
 			channel.configureBlocking(false);
@@ -45,8 +45,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param newChan
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr) {
-		super(id, selMgr);
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, DataListener listener) {
+		super(id, selMgr, listener);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
@@ -133,7 +133,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 				log.warn(this+"Exception occurred", e);
 			}
 		} else {
-			getSelectorManager().registerChannelForConnect(this, listener, future);
+			getSelectorManager().registerChannelForConnect(this, future);
 		}
 		return future;
 	}
@@ -209,13 +209,4 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		}
 	}
 
-
-	public void registerForReads(DataListener listener) {
-		if(isClosed())
-			return;
-		
-		this.listener = listener;
-		registerForReads();
-	}
-    
 }

@@ -33,18 +33,21 @@ public abstract class BasChannelImpl
 
 	private static final Logger apiLog = LoggerFactory.getLogger(Channel.class);
 	private static final Logger log = LoggerFactory.getLogger(BasChannelImpl.class);
-	
+
     private ChannelSession session = new ChannelSessionImpl();
+    private long waitingBytesCounter = 0;
 	private ConcurrentLinkedQueue<WriteRunnable> waitingWriters = new ConcurrentLinkedQueue<WriteRunnable>();
 	private boolean isConnecting = false;
 	private boolean isClosed = false;
     private boolean registered;
 	private boolean doNotAllowWrites;
-	private int writeTimeoutMs = 3_000;
-	protected DataListener listener;
+	private int writeTimeoutMs = 5_000;
+	protected final DataListener listener;
+	private int maxBytesWaitingSize = 250000;
 	
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr) {
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener) {
 		super(id, selMgr);
+		this.listener = dataListener;
 	}
 	
 	/* (non-Javadoc)
@@ -61,8 +64,7 @@ public abstract class BasChannelImpl
 	protected abstract int writeImpl(ByteBuffer b);
    
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
-		this.listener = listener;
+	public CompletableFuture<Channel> connect(SocketAddress addr) {
 		return connectImpl(addr);
 	}
 	
@@ -105,41 +107,52 @@ public abstract class BasChannelImpl
 	private void queueTheWrite(WriteRunnable action) {
 		List<CompletableFuture<Channel>> promisesToFail = null;
 		String msg = null;
+		boolean accepted = waitingWriters.add(action);
+		if(!accepted) {
+			throw new RuntimeException(this+"registered="+registered+" This should never occur");
+		}
+		
+		long numBytesWaitingToBeWritten = 0;
 		synchronized (this) {
+			waitingBytesCounter += action.getBufferSize();
+			numBytesWaitingToBeWritten = waitingBytesCounter;
+			log.info("num bytes waiting="+numBytesWaitingToBeWritten);
 			WriteRunnable lastVal = waitingWriters.peek();
 			if(lastVal != null) {
 				long currentTime = System.currentTimeMillis();
 				long delay = currentTime - lastVal.getCreationTime();
 				if(delay > writeTimeoutMs) {
-					msg = "delay="+delay+" timeout="+writeTimeoutMs;
+					msg = delay+"ms(write delay) >"+writeTimeoutMs+"ms(writeTimeout)";
 					log.info("FAILING all writes in the queue due to timeout. "+msg);
 					promisesToFail = failAllWritesInQueue();
+				} else if(numBytesWaitingToBeWritten > maxBytesWaitingSize) {
+					msg = numBytesWaitingToBeWritten+"(numBytesWaitingToBeWritten) > "
+							+maxBytesWaitingSize+"(maxBytesWaitingSize)";
+					log.info("FAILING all writes in the queue due to maxQueueSize. "+msg);
+					promisesToFail = failAllWritesInQueue();					
 				}
-			}			
+			}
 		}
 
 		//MUST be outside the synchronization block to notify clients so we don't deadlock
 		if(promisesToFail != null) {
-			log.info("FAILING this write in the queue due to timeout. sending client the exception to his failure function");
+			log.info("FAILING all writes in the queue due to writes backing up. sending clients the exception");
 			for(CompletableFuture<Channel> promise : promisesToFail) {
 	    		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
 	    		//(it's called in the Throwable constructor) so we don't do this on every close channel
-				NioTimeoutException exc = new NioTimeoutException("The write at the beginning of the\n"
-				+ "queue has timed out (which fails all writes behind it).  You probably need\n"
-				+ " to throttle your app from writing downstream too\n fast. write queue size="
-				+ promisesToFail.size()+" "+msg+"\nThe reason it is probably you need throttling is\n"
-				+ "that writing to your computers nic outgoing buffer should be in <1ms so generally 3 secs is\n"
-				+ "a fine timeout.  The timeout is not remote but local writing to outoing nic buffer which\n"
-				+ "must be full at this point if you are seeing a timeout");
+				NioTimeoutException exc = new NioTimeoutException(
+				"Writes are backing up meaning the\n"
+				+ "client or server you are writing to is not keeping up(this fails all outstanding writes).  You\n"
+				+ "probably need to throttle your app from writing downstream too fast. write queue size="
+				+ promisesToFail.size()+"\nfailure reason="+msg+" To counter this, you should probably do a\n"
+				+ "channel.unregisterForReads() on the channel that gives you data and throttle that side\n"
+				+ "to not overload the client/server you are writing out to");
 				promise.completeExceptionally(exc);
 			}
 			return;
 		}
 		
-		boolean accepted = waitingWriters.add(action);
-		if(!accepted) {
-			throw new RuntimeException(this+"registered="+registered+" This should never occur");
-		}
+
 		
 		registerForWritesOrClose();
 	}
@@ -154,6 +167,8 @@ public abstract class BasChannelImpl
 			runnable.markBufferRead(); //in case clients releaseBuffer
 			copy.add(runnable.getPromise());
 		}
+		
+		waitingBytesCounter = 0;
 		return copy;
 	}
 
@@ -182,15 +197,20 @@ public abstract class BasChannelImpl
 	
 	        while(!waitingWriters.isEmpty()) {
 	            WriteRunnable writer = waitingWriters.peek();
+	            int size = writer.getBufferSize();
 	            boolean finished = writer.runDelayedAction();
 	            if(!finished) {
 	                if(log.isTraceEnabled())
 	                    log.trace(this+"Did not write all of id="+writer);
+	                int left = writer.getBufferSize();
+	                int writtenOut = size - left;
+	                waitingBytesCounter -= writtenOut;
 	                break;
 	            }
 	            //if it finished, remove the item from the queue.  It
 	            //does not need to be run again.
 	            waitingWriters.poll();
+	            waitingBytesCounter -= size;
 	            finishedPromises.add(writer.getPromise());
 	        }
 		}
@@ -250,7 +270,8 @@ public abstract class BasChannelImpl
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(!isConnecting && !isConnected()) {
 			throw new IllegalStateException(this+"Must call one of the connect methods first(ie. connect THEN register for reads)");
-		}
+		} else if(isClosed())
+			throw new IllegalStateException("Channel is closed");
 
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.registerForReads called");
@@ -317,16 +338,17 @@ public abstract class BasChannelImpl
 	protected void setConnecting(boolean b) {
 		isConnecting = b;
 	}
+
 	protected boolean isConnecting() {
 		return isConnecting;
 	}
+
 	protected void setClosed(boolean b) {
-		isClosed = b;    
+		isClosed = b;
 	}
     
     @Override
     public CompletableFuture<Channel> close() {
-    	listener = null;
         //To prevent the following exception, in the readImpl method, we
         //check if the socket is already closed, and if it is we don't read
         //and just return -1 to indicate socket closed.
@@ -335,8 +357,10 @@ public abstract class BasChannelImpl
     		if(apiLog.isTraceEnabled())
     			apiLog.trace(this+"Basic.close called");
     		
-	        if(!getRealChannel().isOpen())
+	        if(!getRealChannel().isOpen()) {
 	        	future.complete(this);
+	        	return future;
+	        }
 	        
 	        setClosed(true);
 	        CloseRunnable runnable = new CloseRunnable(this, future);
@@ -368,5 +392,13 @@ public abstract class BasChannelImpl
 		return writeTimeoutMs;
 	}   
     
-    
+	@Override
+	public void setMaxBytesWriteBackupSize(int maxQueueSize) {
+		this.maxBytesWaitingSize = maxQueueSize;
+	}
+	
+	@Override
+	public int getMaxBytesBackupSize() {
+		return maxBytesWaitingSize;
+	}
 }
