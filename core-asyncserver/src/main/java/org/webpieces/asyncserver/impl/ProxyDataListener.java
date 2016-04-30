@@ -61,4 +61,16 @@ public class ProxyDataListener implements DataListener {
 		return existingProxy;
 	}
 
+	@Override
+	public void applyBackPressure(Channel channel) {
+		TCPChannel proxy = lookupExistingOrCreateNew(channel);
+		dataListener.applyBackPressure(proxy);
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
+		TCPChannel proxy = lookupExistingOrCreateNew(channel);
+		dataListener.releaseBackPressure(proxy);
+	}
+
 }

@@ -120,6 +120,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.warn("Failure on channel="+channel, e);
 		}
+
+		@Override
+		public void applyBackPressure(Channel channel) {
+		}
+
+		@Override
+		public void releaseBackPressure(Channel channel) {
+		}
 	}
 	
 }

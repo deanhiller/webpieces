@@ -44,6 +44,9 @@ public abstract class BasChannelImpl
 	private int writeTimeoutMs = 5_000;
 	protected final DataListener listener;
 	private int maxBytesWaitingSize = 250000;
+	private boolean applyingBackpressure;
+	private boolean isRegisterdForReads;
+	private boolean failOnNoBackPressure;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener) {
 		super(id, selMgr);
@@ -116,27 +119,37 @@ public abstract class BasChannelImpl
 		synchronized (this) {
 			waitingBytesCounter += action.getBufferSize();
 			numBytesWaitingToBeWritten = waitingBytesCounter;
-			log.info("num bytes waiting="+numBytesWaitingToBeWritten);
-			WriteRunnable lastVal = waitingWriters.peek();
-			if(lastVal != null) {
-				long currentTime = System.currentTimeMillis();
-				long delay = currentTime - lastVal.getCreationTime();
-				if(delay > writeTimeoutMs) {
-					msg = delay+"ms(write delay) >"+writeTimeoutMs+"ms(writeTimeout)";
-					log.info("FAILING all writes in the queue due to timeout. "+msg);
-					promisesToFail = failAllWritesInQueue();
-				} else if(numBytesWaitingToBeWritten > maxBytesWaitingSize) {
-					msg = numBytesWaitingToBeWritten+"(numBytesWaitingToBeWritten) > "
-							+maxBytesWaitingSize+"(maxBytesWaitingSize)";
-					log.info("FAILING all writes in the queue due to maxQueueSize. "+msg);
-					promisesToFail = failAllWritesInQueue();					
-				}
+			if(numBytesWaitingToBeWritten > maxBytesWaitingSize && !applyingBackpressure) {
+				applyingBackpressure = true;
+				listener.applyBackPressure(this);
+			} else if(numBytesWaitingToBeWritten > 2*maxBytesWaitingSize && failOnNoBackPressure) {
+				msg = numBytesWaitingToBeWritten + "(numBytesWaitingToBeWritten) > " 
+						+ (4*maxBytesWaitingSize) + "(4*maxBytesWaitingSize)";
+				log.info("FAILING all writes in the queue due to client not backpressuring. " + msg);
+				promisesToFail = failAllWritesInQueue();			
 			}
+
+//			WriteRunnable lastVal = waitingWriters.peek();
+//			if(lastVal != null) {
+//				long currentTime = System.currentTimeMillis();
+//				long delay = currentTime - lastVal.getCreationTime();
+//				if(delay > writeTimeoutMs) {
+//					msg = delay+"ms(write delay) >"+writeTimeoutMs+"ms(writeTimeout)";
+//					log.info("FAILING all writes in the queue due to timeout. "+msg);
+//					promisesToFail = failAllWritesInQueue();
+//				} else if(numBytesWaitingToBeWritten > maxBytesWaitingSize) {
+//					msg = numBytesWaitingToBeWritten+"(numBytesWaitingToBeWritten) > "
+//							+maxBytesWaitingSize+"(maxBytesWaitingSize)";
+//					log.info("FAILING all writes in the queue due to maxQueueSize. "+msg);
+//					promisesToFail = failAllWritesInQueue();					
+//				}
+//			}
 		}
 
 		//MUST be outside the synchronization block to notify clients so we don't deadlock
 		if(promisesToFail != null) {
-			log.info("FAILING all writes in the queue due to writes backing up. sending clients the exception");
+			log.warn("FAILING all writes in the queue due to writes backing up(client is not backpressuring). "
+					+ "sending clients the exception", new RuntimeException("clients not backpressuring"));
 			for(CompletableFuture<Channel> promise : promisesToFail) {
 	    		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
 	    		//(it's called in the Throwable constructor) so we don't do this on every close channel
@@ -151,8 +164,6 @@ public abstract class BasChannelImpl
 			}
 			return;
 		}
-		
-
 		
 		registerForWritesOrClose();
 	}
@@ -212,6 +223,11 @@ public abstract class BasChannelImpl
 	            waitingWriters.poll();
 	            waitingBytesCounter -= size;
 	            finishedPromises.add(writer.getPromise());
+	        }
+	        
+	        if(waitingWriters.isEmpty() && applyingBackpressure) {
+	        	listener.releaseBackPressure(this);
+	        	applyingBackpressure = false;
 	        }
 		}
 		
@@ -278,6 +294,7 @@ public abstract class BasChannelImpl
 		
         try {
 			getSelectorManager().registerChannelForRead(this, listener);
+			isRegisterdForReads = true;
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -289,6 +306,7 @@ public abstract class BasChannelImpl
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.unregisterForReads called");		
 		try {
+			isRegisterdForReads = false;
 			getSelectorManager().unregisterChannelForRead(this);
 		} catch (IOException e) {
 			throw new NioException(e);
@@ -401,4 +419,17 @@ public abstract class BasChannelImpl
 	public int getMaxBytesBackupSize() {
 		return maxBytesWaitingSize;
 	}
+
+	public boolean isFailOnNoBackPressure() {
+		return failOnNoBackPressure;
+	}
+
+	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
+		this.failOnNoBackPressure = failOnNoBackPressure;
+	}
+
+	public boolean isRegisteredForReads() {
+		return isRegisterdForReads;
+	}
+	
 }

@@ -198,4 +198,18 @@ public class NettyTCPChannel implements TCPChannel {
 		return 0;
 	}
 
+	@Override
+	public boolean isRegisteredForReads() {
+		return false;
+	}
+
+	@Override
+	public boolean isFailOnNoBackPressure() {
+		return false;
+	}
+
+	@Override
+	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
+	}
+
 }

@@ -155,6 +155,11 @@ final class Helper {
 		DataListener in = struct.getDataHandler();
 		BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
 		
+		if(!channel.isRegisteredForReads()) {
+			log.info("not registered for reads so skipping");
+			return; //do not process reads if we were unregistered
+		}
+		
 		ByteBuffer chunk = pool.nextBuffer();
 		
 		try {

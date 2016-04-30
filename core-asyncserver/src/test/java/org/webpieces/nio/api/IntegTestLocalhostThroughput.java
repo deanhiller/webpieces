@@ -29,11 +29,8 @@ public class IntegTestLocalhostThroughput {
 		
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
-			log.info("client incoming bytes="+b.remaining());
 			recordBytes(b.remaining());
 			
-			if(b.remaining() != 2000)
-				log.info("size of buffer="+b.remaining());
 			b.position(b.limit());
 			pool2.releaseBuffer(b);
 		}
@@ -46,6 +43,18 @@ public class IntegTestLocalhostThroughput {
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.info("failure", e);
+		}
+		
+		@Override
+		public void applyBackPressure(Channel channel) {
+			log.info("client unregistering for reads");
+			channel.unregisterForReads();
+		}
+
+		@Override
+		public void releaseBackPressure(Channel channel) {
+			log.info("client registring for reads");
+			channel.registerForReads();
 		}
 	}
 
@@ -76,15 +85,14 @@ public class IntegTestLocalhostThroughput {
 		DataListener listener = new ClientDataListener(pool2);
 		TCPChannel channel = createClientChannel(pool2, listener);
 		//TCPChannel channel = createNettyChannel();
-		
+
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				logBytesTxfrd();
 			}
 		}, 1000, 5000);
-	
-		
+
 		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
 		connect.thenAccept(p -> runWriting(channel));
 		
@@ -129,7 +137,7 @@ public class IntegTestLocalhostThroughput {
 	}
 
 	private void write(Channel channel, String reason) {
-		byte[] data = new byte[2000];
+		byte[] data = new byte[10240];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		CompletableFuture<Channel> write = channel.write(buffer);
 		

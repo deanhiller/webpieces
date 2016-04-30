@@ -60,5 +60,20 @@ public interface DataListener {
 	 * @param e
 	 */
 	public void failure(Channel channel, ByteBuffer data, Exception e);
+	
+	/**
+	 * There is limits on writing out asynchronously in any nio client.  You can only back
+	 * up so much before you blow your RAM.  Therefore, there is a setting 
+	 * TCPChannel.setMaxBytesWriteBackupSize which if reached will call applyBackPressure
+	 * 
+	 * Once 'all' backed up writes are written, releaseBackpressure will be called.  This
+	 * is to avoid 'jitter' which can be a big performance penalty where we apply/release
+	 * apply/release
+	 * 
+	 * @param channel
+	 */
+	public void applyBackPressure(Channel channel);
+	
+	public void releaseBackPressure(Channel channel);
 
 }

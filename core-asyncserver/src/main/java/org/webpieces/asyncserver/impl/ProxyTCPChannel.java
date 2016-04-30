@@ -113,4 +113,16 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getMaxBytesBackupSize();
 	}
 
+	public boolean isRegisteredForReads() {
+		return channel.isRegisteredForReads();
+	}
+
+	public boolean isFailOnNoBackPressure() {
+		return channel.isFailOnNoBackPressure();
+	}
+
+	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
+		channel.setFailOnNoBackPressure(failOnNoBackPressure);
+	}
+
 }

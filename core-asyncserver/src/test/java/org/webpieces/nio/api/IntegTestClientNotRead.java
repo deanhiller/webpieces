@@ -128,5 +128,17 @@ public class IntegTestClientNotRead {
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.info("failure", e);
 		}
+
+		@Override
+		public void applyBackPressure(Channel channel) {
+			log.info("client unregistering for reads");
+			channel.unregisterForReads();
+		}
+
+		@Override
+		public void releaseBackPressure(Channel channel) {
+			log.info("client registring for reads");
+			channel.registerForReads();
+		}
 	};
 }

@@ -48,4 +48,12 @@ public class Layer2DataListener implements DataListener {
 		log.info("Failure on channel="+channel, e);
 	}
 
+	@Override
+	public void applyBackPressure(Channel channel) {
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
+	}
+
 }

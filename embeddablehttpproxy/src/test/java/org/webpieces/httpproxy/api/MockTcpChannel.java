@@ -146,14 +146,25 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public int getMaxBytesBackupSize() {
-		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean isRegisteredForReads() {
+		return false;
+	}
+
+	@Override
+	public boolean isFailOnNoBackPressure() {
+		return false;
+	}
+
+	@Override
+	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
 	}
 
 }

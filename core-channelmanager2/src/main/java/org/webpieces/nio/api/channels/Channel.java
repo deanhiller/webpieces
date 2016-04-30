@@ -64,17 +64,24 @@ public interface Channel extends RegisterableChannel {
 	public CompletableFuture<Channel> close();
 	
     /**
-
+     * After you are connected, you are automatically registered for reads but if you want
+     * to apply back pressure down the channel to the client/server that is sending you data,
+     * you can call unregisterForReads and reads stop until you call unregisterForReads
      */
     public void registerForReads();
 
     /**
-     * Unregister the previously registered DataListener so incoming data is not fired to the client.
+     * Stop reading from the nic buffer for this channel such that the downstream client/server
+     * process will eventually block on sending you data.  It is a way to backpressure a specific
+     * channel safely to not overload your server when needed and when systems you are talking
+     * to take too long to respond
      * 
      * @throws IOException
      * @throws InterruptedException
      */
     public void unregisterForReads();
+    
+    public boolean isRegisteredForReads();
     
     /**
      * Gets the remote address the channel is communicating with.
@@ -99,11 +106,7 @@ public interface Channel extends RegisterableChannel {
     public ChannelSession getSession();
    
     /**
-     * It is important if far end stops reading that we timeout so you don't blow your RAM and keep
-     * trying to write.  The default will be set to 5 seconds.  This is the time it takes to write
-     * to the nic buffer on your computer(ie. should be very very fast), but in cases where the 
-     * downstream backs up, this will timeout.  If this ever does timeout, then you probably need 
-     * to throttle rather than change this timeout
+     * It is important if far end stops reading that we timeout such that you don't wait forever.
      * 
      * @param timeout
      */
@@ -121,5 +124,17 @@ public interface Channel extends RegisterableChannel {
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup);
 	
 	public int getMaxBytesBackupSize();
+	
+	/**
+	 * By default, this is true such that if you end up with maxBytesWriteBackupSize bytes waiting
+	 * to be written and applyBackpressure is called, if you keep calling write, it eventually fails
+	 * throwing an exception telling you the code forgot to backpressure.  RAM would have most likely
+	 * kept growing without this exception anyways
+	 * 
+	 * @return
+	 */
+	public boolean isFailOnNoBackPressure();
+
+	public void setFailOnNoBackPressure(boolean failOnNoBackPressure);
 	
 }

@@ -55,4 +55,15 @@ public class IntegTestClientNotReadListener implements DataListener {
 		log.info("failure on processing", e);
 	}
 
+	@Override
+	public void applyBackPressure(Channel channel) {
+		log.info("server unregistering for reads");
+		channel.unregisterForReads();
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
+		log.info("server registring for reads");
+		channel.registerForReads();
+	}
 }

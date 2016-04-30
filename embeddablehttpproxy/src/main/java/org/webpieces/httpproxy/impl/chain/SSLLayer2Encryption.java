@@ -22,4 +22,12 @@ public class SSLLayer2Encryption implements DataListener {
 		
 	}
 
+	@Override
+	public void applyBackPressure(Channel channel) {
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
+	}
+
 }

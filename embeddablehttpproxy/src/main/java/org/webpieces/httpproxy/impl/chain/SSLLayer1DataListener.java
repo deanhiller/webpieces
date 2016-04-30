@@ -45,4 +45,12 @@ public class SSLLayer1DataListener implements DataListener {
 		});
 	}
 
+	@Override
+	public void applyBackPressure(Channel channel) {
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
+	}
+
 }

@@ -30,7 +30,7 @@ public class BufferCreationPool implements BufferPool {
 	private int poolSize;
 	
 	public BufferCreationPool() {
-		this(false, 2000, 1000);
+		this(false, 10240, 1000);
 	}
 	
 	public BufferCreationPool(boolean isDirect, int bufferSize, int poolSize) {

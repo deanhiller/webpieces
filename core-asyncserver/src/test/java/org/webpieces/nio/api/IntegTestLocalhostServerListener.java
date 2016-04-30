@@ -21,7 +21,6 @@ public class IntegTestLocalhostServerListener implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
-		log.info("server incoming bytes="+b);
 		CompletableFuture<Channel> future = channel.write(b);
 		
 		future
@@ -51,4 +50,13 @@ public class IntegTestLocalhostServerListener implements DataListener {
 		log.info("failure on processing", e);
 	}
 
+	@Override
+	public void applyBackPressure(Channel channel) {
+		channel.unregisterForReads();
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
+		channel.registerForReads();
+	}
 }
