@@ -5,11 +5,52 @@ public class HttpUri {
 	private String uri;
 
 	public HttpUri(String uri) {
+	    if(uri == null || uri.length() == 0)
+	        throw new IllegalStateException("url is not valid");
 		this.uri = uri;
 	}
 
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+	
 	public String getUri() {
 		return uri;
+	}
+
+	public UrlInfo getHostPortAndType() {
+	    int doubleslashIndex = uri.indexOf("://");
+	    if(doubleslashIndex == -1)
+	    	throw new UnsupportedOperationException("not supported yet");
+	    
+	    int domainStartIndex = doubleslashIndex+3;
+	    String prefix = uri.substring(0, doubleslashIndex);
+	    Integer port  = null;
+	    
+	    int firstSlashIndex = uri.indexOf('/', domainStartIndex);
+	    if(firstSlashIndex < 0)
+	    	firstSlashIndex = uri.length();
+
+	    int domainEndIndex = firstSlashIndex;
+	    int portIndex = uri.indexOf(':', domainStartIndex);
+	    if(portIndex > 0 && portIndex < firstSlashIndex) {
+	    	domainEndIndex = portIndex;
+	    	String portStr = uri.substring(portIndex, firstSlashIndex);
+	    	port = convert(portStr, uri);
+	    }
+	    	
+	    String host = uri.substring(domainStartIndex, domainEndIndex);
+
+	    return new UrlInfo(prefix, host, port);	    
+	    
+	}
+	
+	private Integer convert(String portStr, String uri2) {
+		try {
+			return Integer.parseInt(portStr);
+		} catch(NumberFormatException e) {
+			throw new IllegalStateException("port in uri="+uri2+" is not an integer", e);
+		}
 	}
 
 	@Override

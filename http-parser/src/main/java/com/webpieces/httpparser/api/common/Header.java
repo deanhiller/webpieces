@@ -5,6 +5,13 @@ public class Header {
 	private String name;
 	private String value;
 	
+	public Header() {
+	}
+	public Header(KnownHeaderName name, String value) {
+		this.name = name.getHeaderName();
+		this.value = value;
+	}
+	
 	public void setName(KnownHeaderName name) {
 		this.name = name.getHeaderName();
 	}
@@ -64,7 +71,7 @@ public class Header {
 	
 	@Override
 	public String toString() {
-		return name + " : " + value + "\r\n";
+		return name + ": " + value + "\r\n";
 	}
 	
 	

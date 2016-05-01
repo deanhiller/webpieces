@@ -125,4 +125,9 @@ public class ProxyTCPChannel implements TCPChannel {
 		channel.setFailOnNoBackPressure(failOnNoBackPressure);
 	}
 
+	@Override
+	public String toString() {
+		return "" + channel;
+	}
+
 }

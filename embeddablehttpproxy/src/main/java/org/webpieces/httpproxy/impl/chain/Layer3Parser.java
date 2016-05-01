@@ -38,7 +38,9 @@ public class Layer3Parser {
 		try {
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
-			processor.processHttpRequests(channel, parsedRequests);
+			for(HttpRequest req : parsedRequests) {
+				processor.processHttpRequests(channel, req);
+			}
 		} catch(ParseException e) {
 			//move down to debug level later on..
 			//for now, this could actually be we screwed up until we are stable
@@ -81,6 +83,10 @@ public class Layer3Parser {
 		} catch(Throwable e) {
 			throw new ParseException("Parser could not parse", e);
 		}
+	}
+
+	public void farEndClosed(Channel channel) {
+		processor.farEndClosed(channel);
 	}
 	
 }

@@ -1,17 +1,21 @@
 package org.webpieces.httpproxy.impl;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
+import org.webpieces.httpclient.api.HttpClient;
+import org.webpieces.httpclient.api.HttpClientFactory;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
+import org.webpieces.util.threading.SessionExecutor;
+import org.webpieces.util.threading.SessionExecutorImpl;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -40,9 +44,10 @@ public class HttpProxyModule implements Module {
 
 	@Provides
 	@Singleton
-	public Executor createExecutorPool() {
+	public SessionExecutor createExecutorPool() {
 		ExecutorService pool = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
-		return pool;
+		SessionExecutor exec = new SessionExecutorImpl(pool);
+		return exec;
 	}
 	
 //	@Provides
@@ -51,7 +56,8 @@ public class HttpProxyModule implements Module {
 //	public Executor provideExecutor() {
 //		return Executors.newFixedThreadPool(1, new NamedThreadFactory("promiseExecutor"));
 //	}
-	
+
+	@Named("chanMgr")
 	@Provides
 	@Singleton
 	public ChannelManager providesChannelManager(BufferPool pool) {
@@ -61,8 +67,14 @@ public class HttpProxyModule implements Module {
 	
 	@Provides
 	@Singleton
-	public AsyncServerManager providesAsyncServerMgr(ChannelManager mgr) {
+	public AsyncServerManager providesAsyncServerMgr(@Named("chanMgr") ChannelManager mgr) {
 		return AsyncServerMgrFactory.createAsyncServer(mgr);
 	}
 	
+	@Provides
+	@Singleton
+	public HttpClient provideHttpClient() {
+		HttpClientFactory factory = HttpClientFactory.createFactory();
+		return factory.createHttpClient();
+	}
 }

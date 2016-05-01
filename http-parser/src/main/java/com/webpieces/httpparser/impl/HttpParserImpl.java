@@ -173,9 +173,9 @@ public class HttpParserImpl implements HttpParser {
 	}
 
 	private MementoImpl findCrLnCrLnAndParseMessage(MementoImpl memento) {
-		DataWrapper leftOverData2 = memento.getLeftOverData();
-		String msg = leftOverData2.createStringFrom(0, leftOverData2.getReadableSize(), Charset.defaultCharset());
-		System.out.println("msg="+msg);
+//		DataWrapper leftOverData2 = memento.getLeftOverData();
+//		String msg = leftOverData2.createStringFrom(0, leftOverData2.getReadableSize(), Charset.defaultCharset());
+//		System.out.println("msg="+msg);
 		
 		//We are looking for the \r\n\r\n  (or \n\n from bad systems) to
 		//discover entire payload
