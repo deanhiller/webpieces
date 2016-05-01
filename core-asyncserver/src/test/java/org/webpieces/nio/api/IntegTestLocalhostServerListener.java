@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.futures.Failure;
 
 import com.webpieces.data.api.BufferPool;
 
@@ -24,11 +23,11 @@ public class IntegTestLocalhostServerListener implements DataListener {
 		CompletableFuture<Channel> future = channel.write(b);
 		
 		future
-			.thenAccept(p -> finished("data written", null, b))
+			.thenAccept(p -> finished("data written", b))
 			.whenComplete((r, e) -> fail(channel, b, r, e));
 	}
 
-	private void finished(String string, Failure p, ByteBuffer buffer) {
+	private void finished(String string, ByteBuffer buffer) {
 		pool.releaseBuffer(buffer);
 	}
 

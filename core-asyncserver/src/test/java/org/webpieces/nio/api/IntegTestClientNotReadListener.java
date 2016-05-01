@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.futures.Failure;
 
 import com.webpieces.data.api.BufferPool;
 
@@ -25,7 +24,7 @@ public class IntegTestClientNotReadListener implements DataListener {
 		CompletableFuture<Channel> future = channel.write(b);
 
 		future
-			.thenAccept(p -> finished("data written", null, b))
+			.thenAccept(p -> finished("data written", b))
 			.exceptionally(e -> fail(channel, e));
 	}
 
@@ -40,7 +39,7 @@ public class IntegTestClientNotReadListener implements DataListener {
 		return null;
 	}
 
-	private void finished(String string, Failure p, ByteBuffer buffer) {
+	private void finished(String string, ByteBuffer buffer) {
 		log.info("writing finished reason="+string);
 		pool.releaseBuffer(buffer);
 	}

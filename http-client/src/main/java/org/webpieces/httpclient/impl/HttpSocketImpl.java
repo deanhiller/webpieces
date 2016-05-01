@@ -123,6 +123,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void applyBackPressure(Channel channel) {
+			
 		}
 
 		@Override
