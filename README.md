@@ -1,5 +1,13 @@
 # webpieces
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server)
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and actual http proxy and http client).
+
+This project is in process of implementing HTTP 2.0 as well.  Most projects like netty, grizzly, mina don't have a clean separation of an async http parser which is needed for nio so that was a priority for this project.  This project is essentially pieces that can be used to build any http related software and full stacks as well.  The http proxy will be very minimable but is for testing purposes of the http parser such that we can put it in the middle of chrome and firefox for integration testing.
+
+Some HTTP/2 features
+ * better pipelining of requests fixing head of line blocking problem
+ * Server push - sending responses before requests even come based on the first page requests (pre-emptively send what you know they will need)
+ * Data compression of HTTP headers
+ * Multiplexing multiple requests over TCP connection
 
 "Composition over inheritance" is a well documented ideal.  Generally speaking, after years of development a developer comes to understand why composition is preferred over inheritance.  It is generally more flexible to changing requirements.  In this regard, I also believe "libraries over frameworks" is much of the same and there are many frameworks like netty, http servers, etc. that I believe you could actually do as a library that would be more composable.  Basically, webpieces is trying to follow the 'libraries over frameworks' idiom.  Creating a main method is easy, and with webpieces, you have so much more control
 
