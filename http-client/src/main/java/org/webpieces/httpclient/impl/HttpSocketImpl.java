@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -49,17 +50,21 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 	
 	@Override
-	public CompletableFuture<HttpResponse> send(HttpRequest request) {
-		byte[] bytes = parser.marshalToBytes(request);
-		ByteBuffer wrap = ByteBuffer.wrap(bytes);
-		
-		//put this on the queue before the write to be completed from the listener below
-		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
-		futuresToComplete.offer(future);
-		
-		CompletableFuture<Channel> write = channel.write(wrap);
-		return write.thenCompose(p -> future);
+	public void send(HttpRequest request, ResponseListener l) {
 	}
+	
+//	@Override
+//	public CompletableFuture<HttpResponse> send(HttpRequest request) {
+//		byte[] bytes = parser.marshalToBytes(request);
+//		ByteBuffer wrap = ByteBuffer.wrap(bytes);
+//		
+//		//put this on the queue before the write to be completed from the listener below
+//		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
+//		futuresToComplete.offer(future);
+//		
+//		CompletableFuture<Channel> write = channel.write(wrap);
+//		return write.thenCompose(p -> future);
+//	}
 	
 	@Override
 	public void close() throws IOException {

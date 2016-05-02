@@ -2,7 +2,7 @@ package com.webpieces.httpparser.api.dto;
 
 public class HttpRequestLine {
 	private HttpUri uri;
-	private HttpRequestMethod method;
+	private HttpRequestMethod method = new HttpRequestMethod();
 	private HttpVersion version = new HttpVersion();
 	
 	public HttpUri getUri() {
@@ -13,6 +13,10 @@ public class HttpRequestLine {
 		this.uri = httpUri;
 	}
 
+	public void setMethod(KnownHttpMethod knownMethod) {
+		method.setKnownStatus(knownMethod);
+	}
+	
 	public HttpRequestMethod getMethod() {
 		return method;
 	}
@@ -29,6 +33,7 @@ public class HttpRequestLine {
 		this.version = version;
 	}
 
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -48,7 +53,10 @@ public class HttpRequestLine {
 		if (getClass() != obj.getClass())
 			return false;
 		HttpRequestLine other = (HttpRequestLine) obj;
-		if (method != other.method)
+		if (method == null) {
+			if (other.method != null)
+				return false;
+		} else if (!method.equals(other.method))
 			return false;
 		if (uri == null) {
 			if (other.uri != null)
@@ -67,4 +75,5 @@ public class HttpRequestLine {
 	public String toString() {
 		return method + " " +  uri + " " + version + "\r\n";
 	}
+
 }

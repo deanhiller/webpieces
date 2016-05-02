@@ -29,9 +29,7 @@ public class HttpClientImpl implements HttpClient {
 		SocketAddress addr = figureOutSocket(request);
 		HttpSocket socket = openHttpSocket(request.getRequestLine()+"");
 
-		return socket.connect(addr)
-			.thenCompose(c -> socket.send(request))
-			.thenCompose(r -> closeSocket(r, socket));
+		throw new UnsupportedOperationException("not supported yet");
 	}
 
 	private CompletableFuture<HttpResponse> closeSocket(HttpResponse response, HttpSocket socket) {

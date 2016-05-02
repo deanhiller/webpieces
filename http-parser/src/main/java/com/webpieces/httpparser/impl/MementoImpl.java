@@ -14,7 +14,11 @@ public class MementoImpl implements Memento {
 	private List<Integer> leftOverMarkedPositions = new ArrayList<>();
 	private DataWrapper leftOverData;
 	private int numBytesLeftToRead;
+	//The parsed message that did not get the data for it's body just yet
+	//This is only for the case where a message has a body
 	private HttpMessage halfParsedMessage;
+	//If the stream is expecting chunks of data
+	private boolean inChunkParsingMode;
 	
 	//Return state for client to access
 	private ParsedStatus status = ParsedStatus.NEED_MORE_DATA;
@@ -82,7 +86,13 @@ public class MementoImpl implements Memento {
 	public int getReadingHttpMessagePointer() {
 		return indexBytePointer;
 	}
-	
-	
+
+	public void setInChunkParsingMode(boolean inChunkParsingMode) {
+		this.inChunkParsingMode = inChunkParsingMode;
+	}
+
+	public boolean isInChunkParsingMode() {
+		return inChunkParsingMode;
+	}
 	
 }

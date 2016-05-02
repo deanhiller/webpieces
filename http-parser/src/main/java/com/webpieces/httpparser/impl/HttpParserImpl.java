@@ -14,8 +14,10 @@ import com.webpieces.httpparser.api.ParseException;
 import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
+import com.webpieces.httpparser.api.dto.HttpChunk;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
+import com.webpieces.httpparser.api.dto.HttpMsg2;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpRequestLine;
 import com.webpieces.httpparser.api.dto.HttpRequestMethod;
@@ -29,9 +31,14 @@ public class HttpParserImpl implements HttpParser {
 
 	//private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
 	private static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
+	private static final String TRAILER_STR = "\r\n";
+	private static final byte[] end = TRAILER_STR.getBytes(iso8859_1);
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private static final DataWrapper EMPTY_WRAPPER = dataGen.emptyWrapper();
+	
 	private ConvertAscii conversion = new ConvertAscii();
-	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private BufferPool pool;
+
 	
 	public HttpParserImpl(BufferPool pool) {
 		this.pool = pool;
@@ -39,40 +46,64 @@ public class HttpParserImpl implements HttpParser {
 	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {
+		if(request.getMessageType() == HttpMessageType.CHUNK) {
+			return chunkedBytes((HttpChunk)request);
+		}
+		
+		HttpMsg2 msg = (HttpMsg2) request;
 		String result = marshalHeaders(request);
 		
 		DataWrapper body = request.getBody();
-		Header header = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
-		if(header == null && body != null) {
-			throw new IllegalArgumentException("Body provided but no header for KnownHeaderName.CONTENT_LENGTH found");
-		} else if(header != null && body == null) {
-			throw new IllegalArgumentException("Header KnownHeaderName.CONTENT_LENGTH found but no body was set.  set a body");
-		}
-		
-		int lengthOfBodyFromHeader = 0;
+		Header header = msg.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		if(header != null) {
+			if(body == null)
+				throw new IllegalArgumentException("Header KnownHeaderName.CONTENT_LENGTH found but no body was set.  set a body");
 			String value = header.getValue();
-			lengthOfBodyFromHeader = toInteger(value, ""+header);
+			int lengthOfBodyFromHeader = toInteger(value, ""+header);
 			int actualBodyLength = body.getReadableSize();
 			if(lengthOfBodyFromHeader != actualBodyLength) {
 				throw new IllegalArgumentException("body size and KnownHeaderName.CONTENT_LENGTH"
 						+ " must match.  bodySize="+actualBodyLength+" header len="+lengthOfBodyFromHeader);
 			}
-		}
-		
+		} else if(body != null) {
+			throw new IllegalArgumentException("Body provided but no header for KnownHeaderName.CONTENT_LENGTH found");
+		} else 
+			body = EMPTY_WRAPPER;
 
+		byte[] data = new byte[result.length()+body.getReadableSize()];
+		
 		//TODO: Is there a way to write a String to first part of byte[] rather than having to copy
 		//the byte array from the string into the full byte array
 		byte[] stringPiece = result.getBytes(iso8859_1);
-		byte[] data = new byte[result.length()+lengthOfBodyFromHeader];
-		
 		System.arraycopy(stringPiece, 0, data, 0, stringPiece.length);
+		
+		copyData(body, data, stringPiece.length);
+		
+		return data;
+	}
 
-		int offset = result.length();
-		for(int i = 0; i < lengthOfBodyFromHeader; i++) {
+	private void copyData(DataWrapper body, byte[] data, int offset) {
+		for(int i = 0; i < body.getReadableSize(); i++) {
 			//TODO: Think about using System.arrayCopy here(what is faster?)
 			data[offset + i] = body.readByteAt(i);
 		}
+	}
+
+	private byte[] chunkedBytes(HttpChunk request) {
+		DataWrapper dataWrapper = request.getBody();
+		int size = dataWrapper.getReadableSize();
+		
+		byte[] hex = (Integer.toHexString(size) + "/r/n").getBytes(iso8859_1);
+
+		byte[] data = new byte[size+hex.length+end.length];
+
+		//copy chunk header of <size>/r/n
+		System.arraycopy(hex, 0, data, 0, hex.length);
+		
+		copyData(dataWrapper, data, hex.length);
+
+		//copy closing /r/n
+		System.arraycopy(end, 0, data, data.length-1-end.length, end.length);
 		
 		return data;
 	}
@@ -164,15 +195,21 @@ public class HttpParserImpl implements HttpParser {
 		DataWrapper	allData = dataGen.chainDataWrappers(leftOverData, moreData);
 		memento.setLeftOverData(allData);
 		
-		if(memento.getHalfParsedMessage() != null) {
-			int numBytesLeftToRead = memento.getNumBytesLeftToRead();
-			readInBody(memento.getHalfParsedMessage(), memento, numBytesLeftToRead);
+		if(memento.isInChunkParsingMode()) {
+			processChunks(memento);
+		} else if(memento.getHalfParsedMessage() != null) {
+			readInBody(memento, false);
 		}
-		
-		return findCrLnCrLnAndParseMessage(memento);
+
+		//This is a bit tricky but memento.getReadingHttpMessagePoint will cause this method to 
+		//return immediately if we are in the middle of processChunks or readInBody
+		//BUT this is here because AFTER processChunks is complete, it should process the next
+		//response as well
+		findCrLnCrLnAndParseMessage(memento);
+		return memento;
 	}
 
-	private MementoImpl findCrLnCrLnAndParseMessage(MementoImpl memento) {
+	private void findCrLnCrLnAndParseMessage(MementoImpl memento) {
 //		DataWrapper leftOverData2 = memento.getLeftOverData();
 //		String msg = leftOverData2.createStringFrom(0, leftOverData2.getReadableSize(), Charset.defaultCharset());
 //		System.out.println("msg="+msg);
@@ -201,7 +238,6 @@ public class HttpParserImpl implements HttpParser {
 		} else if(memento.getParsedMessages().size() > 0) {
 			memento.setStatus(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA);
 		}
-		return memento;
 	}
 
 	/**
@@ -255,27 +291,108 @@ public class HttpParserImpl implements HttpParser {
 		List<? extends DataWrapper> tuple = dataGen.split(dataToRead, i+4);
 		DataWrapper toBeParsed = tuple.get(0);
 		memento.setLeftOverData(tuple.get(1));
-		HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
+		HttpMsg2 message = parseHttpMessage(toBeParsed, markedPositions);
 		
 		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
-		if(header == null) {
-			//no body in the bytestream so add the message to list of parsed messages
+		Header transferHeader = message.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
+		if(header != null) {
+			String value = header.getValue();
+			int length = toInteger(value, ""+header);
+			memento.setNumBytesLeftToRead(length);
+			memento.setHalfParsedMessage(message);
+			readInBody(memento, false);
+			return;
+		} else if(transferHeader != null && "chunked".equals(transferHeader.getValue())) {
 			memento.getParsedMessages().add(message);
+			memento.setInChunkParsingMode(true);
+			processChunks(memento);
 			return;
 		}
-
-		String value = header.getValue();
-		int length = toInteger(value, ""+header);
-		readInBody(message, memento, length);
+		
+		//no body in the bytestream so add the message to list of parsed messages
+		memento.getParsedMessages().add(message);
 	}
 
-	private void readInBody(HttpMessage message, MementoImpl memento, int numBytesNeeded) {
+	private void processChunks(MementoImpl memento) {
+		if(memento.getHalfParsedMessage() != null) {
+			readInBody(memento, true);
+		}
+		
+		DataWrapper dataToRead = memento.getLeftOverData();
+		int i = memento.getReadingHttpMessagePointer();
+		for(;i < memento.getLeftOverData().getReadableSize() - 1; i++) 
+		{
+			byte firstByte = dataToRead.readByteAt(i);
+			byte secondByte = dataToRead.readByteAt(i+1);
+
+			boolean isFirstCr = conversion.isCarriageReturn(firstByte);
+			boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
+			
+			if(isFirstCr && isSecondLineFeed) {
+				readChunk(memento, i);
+				//since we swapped out memento.getLeftOverData to be 
+				//what's left, we can read from 0 again
+				i = 0;
+			}
+		}
+		memento.setReadingHttpMessagePointer(i);
+		
+	}
+
+	private void readChunk(MementoImpl memento, int i) {
+		HttpChunk chunk = createHttpChunk(memento, i);
+		memento.setHalfParsedMessage(chunk);
+		readInBody(memento, true);
+		
+		if(chunk.getBody() != null && chunk.getBody().getReadableSize() == 0) {
+			//this is the last chunk as it is 0 size
+			memento.setInChunkParsingMode(false);
+		}
+	}
+
+	private HttpChunk createHttpChunk(MementoImpl memento, int i) {
+		DataWrapper dataToRead = memento.getLeftOverData();
+		List<? extends DataWrapper> split = dataGen.split(dataToRead, i+2);
+		DataWrapper chunkMetaData = split.get(0);
+		memento.setLeftOverData(split.get(1));
+		
+		HttpChunk chunk = new HttpChunk();
+		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), iso8859_1);
+		String hexSize = chunkMetaStr.trim();
+		if(chunkMetaStr.contains(";")) {
+			String[] split2 = chunkMetaStr.split(";");
+			hexSize = split2[0];
+			for(int n = 1; n < split2.length; n++) {
+				chunk.addExtension(split2[n]);
+			}
+		}
+
+		//must read in all the data of the chunk AND /r/n
+		int size = 2 + Integer.parseInt(hexSize, 16);
+		memento.setNumBytesLeftToRead(size);
+		
+		return chunk;
+	}
+
+	private void readInBody(MementoImpl memento, boolean stripAndCompareLastTwo) {
+		HttpMessage message = memento.getHalfParsedMessage();
 		DataWrapper dataToRead = memento.getLeftOverData();
 		int readableSize = dataToRead.getReadableSize();
+		int numBytesNeeded = memento.getNumBytesLeftToRead();
 		
 		if(numBytesNeeded <= readableSize) {
 			List<? extends DataWrapper> split = dataGen.split(dataToRead, numBytesNeeded);
-			message.setBody(split.get(0));
+			DataWrapper data = split.get(0);
+			if(stripAndCompareLastTwo) {
+				List<? extends DataWrapper> splitPieces = dataGen.split(data, data.getReadableSize()-2);
+				data = splitPieces.get(0);
+				DataWrapper trailer = splitPieces.get(1);
+				String trailerStr = trailer.createStringFrom(0, trailer.getReadableSize(), iso8859_1);
+				if(!TRAILER_STR.equals(trailerStr))
+					throw new IllegalStateException("The chunk did not end with \\r\\n .  The format is invalid");
+			}
+			
+			message.setBody(data);
 			memento.setLeftOverData(split.get(1));
 			memento.setNumBytesLeftToRead(0);
 			memento.getParsedMessages().add(message);
@@ -284,13 +401,9 @@ public class HttpParserImpl implements HttpParser {
 			memento.setHalfParsedMessage(null);
 			return;
 		}
-
-		//we didn't read anything yet since there is no data
-		memento.setNumBytesLeftToRead(numBytesNeeded);
-		memento.setHalfParsedMessage(message);
 	}
 
-	private HttpMessage parseHttpMessage(DataWrapper toBeParsed, List<Integer> markedPositions) {
+	private HttpMsg2 parseHttpMessage(DataWrapper toBeParsed, List<Integer> markedPositions) {
 		List<String> lines = new ArrayList<>();
 		
 		//Add the last line..
@@ -316,7 +429,7 @@ public class HttpParserImpl implements HttpParser {
 		}
 	}
 
-	private HttpMessage parseRequest(List<String> lines) {
+	private HttpMsg2 parseRequest(List<String> lines) {
 		//remove first line...
 		String firstLine = lines.remove(0);
 		String[] firstLinePieces = firstLine.split("\\s+");
@@ -324,11 +437,7 @@ public class HttpParserImpl implements HttpParser {
 			throw new ParseException("Unable to parse invalid http request due to first line being invalid=" + firstLine);
 		}
 		
-		HttpRequestMethod method = HttpRequestMethod.valueOf(firstLinePieces[0]);
-		if(method == null) {
-			throw new ParseException("Invalid method in request line of http request.  method="+firstLinePieces[0]);
-		}
-		
+		HttpRequestMethod method = new HttpRequestMethod(firstLinePieces[0]);
 		HttpUri uri = new HttpUri(firstLinePieces[1]);
 		
 		HttpVersion version = parseVersion(firstLinePieces[2], firstLine);
@@ -357,8 +466,9 @@ public class HttpParserImpl implements HttpParser {
 		return version;
 	}
 
-	private void parseHeaders(List<String> lines, HttpMessage httpMessage) {
+	private void parseHeaders(List<String> lines, HttpMsg2 httpMessage) {
 		//TODO: one header can be multiline and we need to fix this code for that
+		//ie. the spec says you can split a head in multiple lines(ick!!!)
 		for(String line : lines) {
 			Header header = parseHeader(line);
 			httpMessage.addHeader(header);
@@ -378,7 +488,7 @@ public class HttpParserImpl implements HttpParser {
 		return header;
 	}
 
-	private HttpMessage parseResponse(List<String> lines) {
+	private HttpMsg2 parseResponse(List<String> lines) {
 		//remove first line...
 		String firstLine = lines.remove(0);
 		//In the case of response, a reason may contain spaces so we must split on first and second

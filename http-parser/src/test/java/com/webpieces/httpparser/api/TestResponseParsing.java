@@ -48,8 +48,8 @@ public class TestResponseParsing {
 		String readableForm = converter.convertToReadableForm(payload);
 		Assert.assertEquals(
 				"HTTP/1.1\\s 200\\s OK\\r\\n\r\n"
-				+ "Accept\\s :\\s CooolValue\\r\\n\r\n"
-				+ "CustomerHEADER\\s :\\s betterValue\\r\\n\r\n"
+				+ "Accept:\\s CooolValue\\r\\n\r\n"
+				+ "CustomerHEADER:\\s betterValue\\r\\n\r\n"
 				+ "\\r\\n\r\n", 
 				readableForm);
 	}
@@ -62,8 +62,8 @@ public class TestResponseParsing {
 		String result2 = parser.marshalToString(response);
 		
 		String msg = "HTTP/1.1 200 OK\r\n"
-				+ "Accept : CooolValue\r\n"
-				+ "CustomerHEADER : betterValue\r\n"
+				+ "Accept: CooolValue\r\n"
+				+ "CustomerHEADER: betterValue\r\n"
 				+ "\r\n";
 		
 		Assert.assertEquals(msg, result1);
@@ -181,11 +181,11 @@ public class TestResponseParsing {
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		
-		HttpResponse request = new HttpResponse();
-		request.setStatusLine(statusLine);
-		request.addHeader(header1);
-		request.addHeader(header2);
-		return request;
+		HttpResponse resp = new HttpResponse();
+		resp.setStatusLine(statusLine);
+		resp.addHeader(header1);
+		resp.addHeader(header2);
+		return resp;
 	}
 
 }

@@ -2,7 +2,7 @@ package com.webpieces.httpparser.api.dto;
 
 import com.webpieces.httpparser.api.common.Header;
 
-public class HttpRequest extends HttpMessage {
+public class HttpRequest extends HttpMsg2 {
 
 	private HttpRequestLine requestLine;
 	

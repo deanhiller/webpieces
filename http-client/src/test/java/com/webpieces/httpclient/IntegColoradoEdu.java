@@ -15,6 +15,7 @@ import com.webpieces.httpparser.api.dto.HttpRequestLine;
 import com.webpieces.httpparser.api.dto.HttpRequestMethod;
 import com.webpieces.httpparser.api.dto.HttpResponse;
 import com.webpieces.httpparser.api.dto.HttpUri;
+import com.webpieces.httpparser.api.dto.KnownHttpMethod;
 
 public class IntegColoradoEdu {
 
@@ -30,8 +31,7 @@ public class IntegColoradoEdu {
 		int port = 80;
 
 		HttpRequestLine requestLine = new HttpRequestLine();
-		HttpRequestMethod method = HttpRequestMethod.GET;
-		requestLine.setMethod(method );
+		requestLine.setMethod(KnownHttpMethod.GET);
 		requestLine.setUri(new HttpUri("/"));
 		
 		HttpRequest req = new HttpRequest();
@@ -45,9 +45,13 @@ public class IntegColoradoEdu {
 		HttpSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))
-			.thenCompose(p -> socket.send(req))
-			.thenAccept(resp -> processResp(socket, resp))
+			.thenAccept(p -> sendRequest(socket, req))
 			.exceptionally(e -> reportException(socket, e));
+//			.thenAccept(resp -> processResp(socket, resp))
+	}
+
+	private static void sendRequest(HttpSocket socket, HttpRequest req) {
+		socket.send(req, null);
 	}
 
 	private static Void reportException(HttpSocket socket, Throwable e) {

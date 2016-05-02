@@ -58,7 +58,7 @@ public class Layer4Processor {
 
 	private CompletableFuture<HttpResponse> send(HttpSocket socket, HttpRequest req) {
 		log.info("sending request=\n"+req);
-		return socket.send(req);
+		return null;
 	}
 
 	public void farEndClosed(Channel channel) {

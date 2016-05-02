@@ -2,7 +2,7 @@ package com.webpieces.httpparser.api.dto;
 
 import com.webpieces.httpparser.api.common.Header;
 
-public class HttpResponse extends HttpMessage {
+public class HttpResponse extends HttpMsg2 {
 
 	private HttpResponseStatusLine statusLine;
 
