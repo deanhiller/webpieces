@@ -9,7 +9,12 @@ Some HTTP/2 features
  * Data compression of HTTP headers
  * Multiplexing multiple requests over TCP connection
 
-"Composition over inheritance" is a well documented ideal.  Generally speaking, after years of development a developer comes to understand why composition is preferred over inheritance.  It is generally more flexible to changing requirements.  In this regard, I also believe "libraries over frameworks" is much of the same and there are many frameworks like netty, http servers, etc. that I believe you could actually do as a library that would be more composable.  Basically, webpieces is trying to follow the 'libraries over frameworks' idiom.  Creating a main method is easy, and with webpieces, you have so much more control
+Pieces with HTTP/2 support
+ * async-http parser - feel free to use with any nio library that you like
+ * embeddablehttpproxy - a proxy with http 2 support
+ * embeddablewebserver - a webserver with http 2 support
+
+"Composition over inheritance" is a well documented ideal.  Generally speaking, after years of development a developer comes to understand why composition is preferred over inheritance.  It is generally more flexible to changing requirements.  In this regard, I also believe "libraries over frameworks" is much of the same and there are many frameworks like netty, http servers, etc. that I believe you could actually do as a library that would be more composable(ie. embeddablewebserver and embeddablehttpproxy are BOTH libraries not frameworks!!!!!).  Basically, webpieces is trying to follow the 'libraries over frameworks' idiom.  Creating a main method is easy, and with webpieces, you have so much more control.....lastly, you can swap ANY piece in these libraries by just bindingin a different piece via one line of java code.  ie. These are very hackable libraries to support many different needs
 
 channelmanager - a very thin layer on nio for speed
 asyncserver - a thin wrapper on channelmanager to create a one call tcp server
