@@ -66,5 +66,8 @@ public class HttpChunk extends HttpMessage {
 		return TRAILER_STR;
 	}
 
-	
+	@Override
+	public boolean isHasChunkedTransferHeader() {
+		return false;
+	}
 }

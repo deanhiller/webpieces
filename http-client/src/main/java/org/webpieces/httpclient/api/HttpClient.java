@@ -1,9 +1,8 @@
 package org.webpieces.httpclient.api;
 
-import java.util.concurrent.CompletableFuture;
+import java.net.SocketAddress;
 
 import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpClient {
 
@@ -14,7 +13,7 @@ public interface HttpClient {
 	 * @param request
 	 * @param cb
 	 */
-	public CompletableFuture<HttpResponse> sendSingleRequest(HttpRequest request);
+	public void sendSingleRequest(SocketAddress addr, HttpRequest request, ResponseListener l);
 	
 	/**
 	 * HttpSocket is so you can send multiple requests or if you expect server to stream

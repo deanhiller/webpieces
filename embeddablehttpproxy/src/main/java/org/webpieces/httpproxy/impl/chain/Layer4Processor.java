@@ -42,9 +42,6 @@ public class Layer4Processor {
 		String host = urlInfo.getHost();
 		int port = urlInfo.getResolvedPort();
 		
-		//override for right now...
-		req.getRequestLine().getUri().setUri("/");
-		
 		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.HOST);
 		String value = header.getValue();
 

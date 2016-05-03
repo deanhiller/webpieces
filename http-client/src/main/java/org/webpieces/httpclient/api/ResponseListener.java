@@ -36,4 +36,6 @@ public interface ResponseListener {
 	 */
 	public void incomingChunk(HttpChunk chunk, boolean isLastChunk);
 	
+	public void failure(Throwable e);
+	
 }

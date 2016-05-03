@@ -43,4 +43,12 @@ public abstract class HttpMessage {
 	public DataWrapper getBody() {
 		return body;
 	}
+	
+	/**
+	 * This is true only if this is a response OR request with a
+	 * Transfer-encoding header of chunked so the client will know if there are
+	 * incoming HttpChunks after the initial message
+	 * @return
+	 */
+	public abstract boolean isHasChunkedTransferHeader();
 }

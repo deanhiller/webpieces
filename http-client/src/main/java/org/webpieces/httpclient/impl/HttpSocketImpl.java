@@ -23,6 +23,7 @@ import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
+import com.webpieces.httpparser.api.dto.HttpChunk;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpResponse;
@@ -35,7 +36,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private boolean isClosed;
 	private Memento memento;
-	private ConcurrentLinkedQueue<CompletableFuture<HttpResponse>> futuresToComplete = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private MyDataListener dataListener = new MyDataListener();
 	
 	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser) {
@@ -50,22 +51,23 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 	
 	@Override
-	public void send(HttpRequest request, ResponseListener l) {
+	public void send(HttpRequest request, ResponseListener listener) {
+		ResponseListener l = new CatchResponseListener(listener);
+		byte[] bytes = parser.marshalToBytes(request);
+		ByteBuffer wrap = ByteBuffer.wrap(bytes);
+		
+		//put this on the queue before the write to be completed from the listener below
+		responsesToComplete.offer(l);
+		
+		CompletableFuture<Channel> write = channel.write(wrap);
+		write.exceptionally(e -> fail(l, e));
 	}
 	
-//	@Override
-//	public CompletableFuture<HttpResponse> send(HttpRequest request) {
-//		byte[] bytes = parser.marshalToBytes(request);
-//		ByteBuffer wrap = ByteBuffer.wrap(bytes);
-//		
-//		//put this on the queue before the write to be completed from the listener below
-//		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
-//		futuresToComplete.offer(future);
-//		
-//		CompletableFuture<Channel> write = channel.write(wrap);
-//		return write.thenCompose(p -> future);
-//	}
-	
+	private Channel fail(ResponseListener l, Throwable e) {
+		l.failure(e);
+		return null;
+	}
+
 	@Override
 	public void close() throws IOException {
 		if(isClosed)
@@ -95,6 +97,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 	
 	private class MyDataListener implements DataListener {
+		private boolean processingChunked = false;
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
@@ -103,18 +106,33 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 			List<HttpMessage> parsedMessages = memento.getParsedMessages();
 			for(HttpMessage msg : parsedMessages) {
-				HttpResponse resp = (HttpResponse) msg;
-				CompletableFuture<HttpResponse> future = futuresToComplete.remove();
-				future.complete(resp);
+				if(processingChunked) {
+					HttpChunk chunk = (HttpChunk) msg;
+					ResponseListener listener = responsesToComplete.peek();
+					if(chunk.isLastChunk()) {
+						responsesToComplete.poll();
+					}
+					
+					listener.incomingChunk(chunk, chunk.isLastChunk());
+				} else if(!msg.isHasChunkedTransferHeader()) {
+					HttpResponse resp = (HttpResponse) msg;
+					ResponseListener listener = responsesToComplete.poll();
+					listener.incomingResponse(resp, true);
+				} else {
+					processingChunked = true;
+					HttpResponse resp = (HttpResponse) msg;
+					ResponseListener listener = responsesToComplete.peek();
+					listener.incomingResponse(resp, false);
+				}
 			}
 		}
 
 		@Override
 		public void farEndClosed(Channel channel) {
-			while(!futuresToComplete.isEmpty()) {
-				CompletableFuture<HttpResponse> future = futuresToComplete.poll();
-				if(future != null) {
-					future.completeExceptionally(new NioClosedChannelException("Remote end closed before responses were received"));
+			while(!responsesToComplete.isEmpty()) {
+				ResponseListener listener = responsesToComplete.poll();
+				if(listener != null) {
+					listener.failure(new NioClosedChannelException("Remote end closed before responses were received"));
 				}
 			}
 			
@@ -124,6 +142,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.warn("Failure on channel="+channel, e);
+			while(!responsesToComplete.isEmpty()) {
+				ResponseListener listener = responsesToComplete.poll();
+				if(listener != null) {
+					listener.failure(e);
+				}
+			}			
 		}
 
 		@Override

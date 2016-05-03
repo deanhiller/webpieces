@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
 
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public class HttpClientImpl implements HttpClient {
 
@@ -25,25 +25,22 @@ public class HttpClientImpl implements HttpClient {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponse> sendSingleRequest(HttpRequest request) {
-		SocketAddress addr = figureOutSocket(request);
+	public void sendSingleRequest(SocketAddress addr, HttpRequest request, ResponseListener listener) {
 		HttpSocket socket = openHttpSocket(request.getRequestLine()+"");
 
-		throw new UnsupportedOperationException("not supported yet");
+		CompletableFuture<HttpSocket> connect = socket.connect(addr);
+		connect.thenAccept(p -> p.send(request, listener))
+			.exceptionally(e -> fail(socket, listener, e));
 	}
 
-	private CompletableFuture<HttpResponse> closeSocket(HttpResponse response, HttpSocket socket) {
-		return socket.closeSocket()
-				.exceptionally(e -> {
-					//log close exception and close normally...
-					log.info("Exception closing socket after response", e);
-					return socket;
-				})
-				.thenApply(s -> response);
-	}
-	
-	private SocketAddress figureOutSocket(HttpRequest request) {
-		throw new UnsupportedOperationException("not supported yet");
+	private Void fail(HttpSocket socket, ResponseListener listener, Throwable e) {
+		CompletableFuture<HttpSocket> closeSocket = socket.closeSocket();
+		closeSocket.exceptionally(ee -> {
+			log.warn("could not close socket due to exception");
+			return socket;
+		});
+		listener.failure(e);
+		return null;
 	}
 
 	@Override

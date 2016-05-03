@@ -13,6 +13,7 @@ Pieces with HTTP/2 support
  * async-http parser - feel free to use with any nio library that you like
  * embeddablehttpproxy - a proxy with http 2 support
  * embeddablewebserver - a webserver with http 2 support
+ * httpclient - An http client with http 2 support
 
 "Composition over inheritance" is a well documented ideal.  Generally speaking, after years of development a developer comes to understand why composition is preferred over inheritance.  It is generally more flexible to changing requirements.  In this regard, I also believe "libraries over frameworks" is much of the same and there are many frameworks like netty, http servers, etc. that I believe you could actually do as a library that would be more composable(ie. embeddablewebserver and embeddablehttpproxy are BOTH libraries not frameworks!!!!!).  Basically, webpieces is trying to follow the 'libraries over frameworks' idiom.  Creating a main method is easy, and with webpieces, you have so much more control.....lastly, you can swap ANY piece in these libraries by just bindingin a different piece via one line of java code.  ie. These are very hackable libraries to support many different needs
 
@@ -31,3 +32,6 @@ TODO:
 * ChannelManager should offer up a timeout on the writes, the connection is closed (or a wrapper of some sort) so we don't all have to implement this - this is half done....a write() now checks the write at the begin of queue and if hasn't written, it will timeout (The other half is a timer checking all queues every 'timeout' seconds or something like that or the selector could fire and check itself)
 * httpproxy - AsyncServer has an overload mode that we should use when we are at a certain amount of outstanding requests that we should use
 * httpproxy - keep-alive connections should be timed out at some point
+* httpclient - we probably should use the SessionExecutor so that all response payloads are single threaded and come in order and we would then have multiple threads still(ordering is necessary or we can't unmarshal misordered data).  Currently, like most, we single thread the responses coming back(but this is an easy change)
+* httpclient - timeout the request/response cycle
+

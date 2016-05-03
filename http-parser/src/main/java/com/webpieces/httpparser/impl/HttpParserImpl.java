@@ -298,7 +298,7 @@ public class HttpParserImpl implements HttpParser {
 		HttpMsg2 message = parseHttpMessage(toBeParsed, markedPositions);
 		
 		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
-		Header transferHeader = message.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
+		Header transferHeader = message.getHeaderLookupStruct().getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
 		if(header != null) {
 			String value = header.getValue();
 			int length = toInteger(value, ""+header);

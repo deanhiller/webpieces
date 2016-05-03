@@ -21,7 +21,7 @@ public class HttpUri {
 	public UrlInfo getHostPortAndType() {
 	    int doubleslashIndex = uri.indexOf("://");
 	    if(doubleslashIndex == -1)
-	    	throw new UnsupportedOperationException("not supported yet");
+	    	return new UrlInfo();
 	    
 	    int domainStartIndex = doubleslashIndex+3;
 	    String prefix = uri.substring(0, doubleslashIndex);
@@ -35,7 +35,7 @@ public class HttpUri {
 	    int portIndex = uri.indexOf(':', domainStartIndex);
 	    if(portIndex > 0 && portIndex < firstSlashIndex) {
 	    	domainEndIndex = portIndex;
-	    	String portStr = uri.substring(portIndex, firstSlashIndex);
+	    	String portStr = uri.substring(portIndex+1, firstSlashIndex);
 	    	port = convert(portStr, uri);
 	    }
 	    	

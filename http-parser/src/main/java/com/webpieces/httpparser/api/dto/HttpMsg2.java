@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.httpparser.api.common.Header;
+import com.webpieces.httpparser.api.common.KnownHeaderName;
 
 public abstract class HttpMsg2 extends HttpMessage {
 
@@ -33,5 +34,13 @@ public abstract class HttpMsg2 extends HttpMessage {
 	 */
 	public Headers getHeaderLookupStruct() {
 		return headersStruct;
+	}
+	
+	public boolean isHasChunkedTransferHeader() {
+		//need to account for a few Transfer Encoding headers
+		Header header = headersStruct.getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
+		if("chunked".equals(header.getValue()))
+			return true;
+		return false;
 	}
 }

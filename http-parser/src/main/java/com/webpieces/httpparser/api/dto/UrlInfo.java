@@ -6,6 +6,8 @@ public class UrlInfo {
 	private String host;
 	private Integer port;
 
+	public UrlInfo() {}
+	
 	public UrlInfo(String prefix, String host, Integer port) {
 		this.prefix = prefix;
 		this.host = host;
@@ -28,14 +30,14 @@ public class UrlInfo {
 		this.host = host;
 	}
 
-	public int getResolvedPort() {
+	public Integer getResolvedPort() {
 		if(port == null) {
 			if("https".equals(prefix))
 				return 443;
 			else if("http".equals(prefix))
 				return 80;
 			else
-				throw new UnsupportedOperationException("not supported yet");
+				return null;
 		}
 		return port;
 	}

@@ -18,6 +18,14 @@ public class Headers {
 	public List<Header> getHeaders(KnownHeaderName name) {
 		return getHeaders(name.getHeaderName().toLowerCase());
 	}
+	public Header getLastInstanceOfHeader(KnownHeaderName name) {
+		List<Header> headers = getHeaders(name.getHeaderName().toLowerCase());
+		if(headers == null)
+			return null;
+		else if(headers.size() == 0)
+			return null;
+		return headers.get(headers.size()-1);
+	}
 	
 	public Header getHeader(String key) {
 		List<Header> list = headers.get(key.toLowerCase());
