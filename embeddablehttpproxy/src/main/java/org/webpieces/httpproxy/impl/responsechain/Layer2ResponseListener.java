@@ -10,17 +10,17 @@ import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.nio.api.channels.Channel;
 
 import com.webpieces.httpparser.api.HttpParser;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
 
-public class Layer1ResponseListener {
+public class Layer2ResponseListener {
 
-	private static final Logger log = LoggerFactory.getLogger(Layer1ResponseListener.class);
+	private static final Logger log = LoggerFactory.getLogger(Layer2ResponseListener.class);
 
 	@Inject
 	private HttpParser parser;
 	
-	public void processResponse(Channel channel, HttpRequest req, HttpResponse resp) {
+	public void processResponse(Channel channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
 		log.info("received response=\n"+resp);
 
 		byte[] respBytes = parser.marshalToBytes(resp);
@@ -28,7 +28,6 @@ public class Layer1ResponseListener {
 		channel.write(buffer)
 			.thenAccept(p -> wroteBytes(channel))
 			.exceptionally(e -> failedWrite(channel, e));
-		
 	}
 
 	private Void failedWrite(Channel channel, Throwable e) {
@@ -41,8 +40,10 @@ public class Layer1ResponseListener {
 		channel.close();
 	}
 
-	public Void processError(HttpSocket socket, Channel channel, HttpRequest req, Throwable e) {
+	public Void processError(Channel channel, HttpRequest req, Throwable e) {
 		log.warn("could not process req="+req+" from channel="+channel+" due to exception", e);
+		
+		HttpSocket socket = (HttpSocket) channel.getSession().get("socket");
 		
 		channel.close();
 		socket.closeSocket();

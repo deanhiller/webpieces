@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.httpproxy.api.HttpProxy;
-import org.webpieces.httpproxy.impl.chain.Layer1DataListener;
+import org.webpieces.httpproxy.impl.chain.Layer1ExecutorLayer;
 import org.webpieces.httpproxy.impl.chain.SSLLayer1DataListener;
 
 public class HttpProxyImpl implements HttpProxy {
@@ -19,7 +19,7 @@ public class HttpProxyImpl implements HttpProxy {
 	@Inject
 	private AsyncServerManager serverMgr;
 	@Inject
-	private Layer1DataListener serverListener;
+	private Layer1ExecutorLayer serverListener;
 	@Inject
 	private SSLLayer1DataListener sslServerListener;
 	

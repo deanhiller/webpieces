@@ -1,6 +1,5 @@
 package org.webpieces.httpproxy.impl.chain;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
 
@@ -10,15 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpproxy.impl.responsechain.Layer1ResponseListener;
+import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
+import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 
-import com.webpieces.httpparser.api.common.Header;
-import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpResponse;
-import com.webpieces.httpparser.api.dto.UrlInfo;
 
 public class Layer4Processor {
 
@@ -27,7 +24,7 @@ public class Layer4Processor {
 	@Inject
 	private HttpClient httpClient;
 	@Inject
-	private Layer1ResponseListener responseListener;
+	private Layer2ResponseListener responseListener;
 	
 	public void processHttpRequests(Channel channel, HttpRequest req) {
 		ChannelSession session = channel.getSession();
@@ -37,24 +34,17 @@ public class Layer4Processor {
 		HttpSocket socket = httpClient.openHttpSocket(""+channel);
 		channel.getSession().put("socket", socket);
 		
-		UrlInfo urlInfo = req.getRequestLine().getUri().getHostPortAndType();
+		SocketAddress addr = req.getServerToConnectTo(null);
 		
-		String host = urlInfo.getHost();
-		int port = urlInfo.getResolvedPort();
-		
-		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.HOST);
-		String value = header.getValue();
-
-		SocketAddress addr = new InetSocketAddress(value, port);
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
-			  .thenCompose(p->send(socket, req))
-			  .thenAccept(resp -> responseListener.processResponse(channel, req, resp))
-			  .exceptionally(e -> responseListener.processError(socket, channel, req, e));
+			  .thenAccept(p->send(channel, socket, req))
+			  .exceptionally(e -> responseListener.processError(channel, req, e));
 	}
 
-	private CompletableFuture<HttpResponse> send(HttpSocket socket, HttpRequest req) {
+	private CompletableFuture<HttpResponse> send(Channel channel, HttpSocket socket, HttpRequest req) {
 		log.info("sending request=\n"+req);
+		socket.send(req, new Layer1Response(responseListener, channel, req));
 		return null;
 	}
 

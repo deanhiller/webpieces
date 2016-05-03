@@ -39,7 +39,7 @@ public abstract class HttpMessage extends HttpPayload {
 	public boolean isHasChunkedTransferHeader() {
 		//need to account for a few Transfer Encoding headers
 		Header header = headersStruct.getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
-		if("chunked".equals(header.getValue()))
+		if(header != null && "chunked".equals(header.getValue()))
 			return true;
 		return false;
 	}

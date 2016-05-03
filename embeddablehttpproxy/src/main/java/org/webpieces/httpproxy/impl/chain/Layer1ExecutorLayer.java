@@ -12,9 +12,9 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.SessionExecutor;
 
 @Singleton
-public class Layer1DataListener implements DataListener {
+public class Layer1ExecutorLayer implements DataListener {
 
-	private static final Logger log = LoggerFactory.getLogger(Layer1DataListener.class);
+	private static final Logger log = LoggerFactory.getLogger(Layer1ExecutorLayer.class);
 	
 	@Inject
 	private Layer2DataListener listener;
