@@ -3,7 +3,7 @@ A project containing all the web pieces (WITH apis) to create a web server (and 
 
 This project is in process of implementing HTTP 2.0 as well.  Most projects like netty, grizzly, mina don't have a clean separation of an async http parser which is needed for nio so that was a priority for this project.  This project is essentially pieces that can be used to build any http related software and full stacks as well.  The http proxy will be very minimable but is for testing purposes of the http parser such that we can put it in the middle of chrome and firefox for integration testing.
 
-Some HTTP/2 features
+Some HTTP/2 features (we are actively working this)
  * better pipelining of requests fixing head of line blocking problem
  * Server push - sending responses before requests even come based on the first page requests (pre-emptively send what you know they will need)
  * Data compression of HTTP headers
@@ -34,4 +34,4 @@ TODO:
 * httpproxy - keep-alive connections should be timed out at some point
 * httpclient - we probably should use the SessionExecutor so that all response payloads are single threaded and come in order and we would then have multiple threads still(ordering is necessary or we can't unmarshal misordered data).  Currently, like most, we single thread the responses coming back(but this is an easy change)
 * httpclient - timeout the request/response cycle
-
+* SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?
