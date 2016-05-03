@@ -15,6 +15,7 @@ import com.webpieces.httpparser.api.ParsedStatus;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpChunk;
+import com.webpieces.httpparser.api.dto.HttpChunkExtension;
 import com.webpieces.httpparser.api.dto.HttpMessage;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpMsg2;
@@ -32,7 +33,6 @@ public class HttpParserImpl implements HttpParser {
 	//private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
 	private static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
 	private static final String TRAILER_STR = "\r\n";
-	private static final byte[] end = TRAILER_STR.getBytes(iso8859_1);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final DataWrapper EMPTY_WRAPPER = dataGen.emptyWrapper();
 	
@@ -46,7 +46,7 @@ public class HttpParserImpl implements HttpParser {
 	
 	@Override
 	public byte[] marshalToBytes(HttpMessage request) {
-		if(request.getMessageType() == HttpMessageType.CHUNK) {
+		if(request.getMessageType() == HttpMessageType.CHUNK || request.getMessageType() == HttpMessageType.LAST_CHUNK) {
 			return chunkedBytes((HttpChunk)request);
 		}
 		
@@ -92,18 +92,22 @@ public class HttpParserImpl implements HttpParser {
 	private byte[] chunkedBytes(HttpChunk request) {
 		DataWrapper dataWrapper = request.getBody();
 		int size = dataWrapper.getReadableSize();
-		
-		byte[] hex = (Integer.toHexString(size) + "/r/n").getBytes(iso8859_1);
 
-		byte[] data = new byte[size+hex.length+end.length];
+		String metaLine = request.createMetaLine();
+		String lastPart = request.createTrailer();
+		
+		byte[] hex = metaLine.getBytes(iso8859_1);
+		byte[] endData = lastPart.getBytes(iso8859_1);
+		
+		byte[] data = new byte[hex.length+size+endData.length];
 
 		//copy chunk header of <size>/r/n
 		System.arraycopy(hex, 0, data, 0, hex.length);
 		
 		copyData(dataWrapper, data, hex.length);
 
-		//copy closing /r/n
-		System.arraycopy(end, 0, data, data.length-1-end.length, end.length);
+		//copy closing /r/n (and headers if isLastChunk)
+		System.arraycopy(endData, 0, data, data.length-endData.length, endData.length);
 		
 		return data;
 	}
@@ -119,7 +123,7 @@ public class HttpParserImpl implements HttpParser {
 	@Override
 	public String marshalToString(HttpMessage httpMsg) {
 		//TODO: We could check Content-Type header and if text type, we could marshall it still?
-		if(httpMsg.getBody() != null)
+		if(httpMsg.getMessageType() != HttpMessageType.LAST_CHUNK && httpMsg.getBody() != null)
 			throw new IllegalArgumentException("Cannot marshal http message with a body to a string");
 		
 		return marshalHeaders(httpMsg);
@@ -203,8 +207,8 @@ public class HttpParserImpl implements HttpParser {
 
 		//This is a bit tricky but memento.getReadingHttpMessagePoint will cause this method to 
 		//return immediately if we are in the middle of processChunks or readInBody
-		//BUT this is here because AFTER processChunks is complete, it should process the next
-		//response as well
+		//BUT this is here because AFTER processChunks or readInBody is complete, it should process the next
+		//response as well!!!
 		findCrLnCrLnAndParseMessage(memento);
 		return memento;
 	}
@@ -333,10 +337,12 @@ public class HttpParserImpl implements HttpParser {
 				//since we swapped out memento.getLeftOverData to be 
 				//what's left, we can read from 0 again
 				i = 0;
+				if(!memento.isInChunkParsingMode() //we are done processing chunks
+					|| memento.getHalfParsedMessage() != null) //we are in the middle of processing chunk body 	
+					break; 
 			}
 		}
 		memento.setReadingHttpMessagePointer(i);
-		
 	}
 
 	private void readChunk(MementoImpl memento, int i) {
@@ -360,10 +366,11 @@ public class HttpParserImpl implements HttpParser {
 		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), iso8859_1);
 		String hexSize = chunkMetaStr.trim();
 		if(chunkMetaStr.contains(";")) {
-			String[] split2 = chunkMetaStr.split(";");
-			hexSize = split2[0];
-			for(int n = 1; n < split2.length; n++) {
-				chunk.addExtension(split2[n]);
+			String[] extensionsArray = chunkMetaStr.split(";");
+			hexSize = extensionsArray[0];
+			for(int n = 1; n < extensionsArray.length; n++) {
+				HttpChunkExtension ext = createExtension(extensionsArray[n]);
+				chunk.addExtension(ext);
 			}
 		}
 
@@ -372,6 +379,18 @@ public class HttpParserImpl implements HttpParser {
 		memento.setNumBytesLeftToRead(size);
 		
 		return chunk;
+	}
+
+	private HttpChunkExtension createExtension(String extension) {
+		if(!extension.contains("=")) {
+			return new HttpChunkExtension(extension);
+		}
+		
+		//if there are multiple '=' in the extensions, we can only split on first one
+		int indexOf = extension.indexOf('=');
+		String name = extension.substring(0, indexOf);
+		String value = extension.substring(indexOf);
+		return new HttpChunkExtension(name, value);
 	}
 
 	private void readInBody(MementoImpl memento, boolean stripAndCompareLastTwo) {

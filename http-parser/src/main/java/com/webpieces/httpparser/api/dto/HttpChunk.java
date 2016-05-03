@@ -5,15 +5,66 @@ import java.util.List;
 
 public class HttpChunk extends HttpMessage {
 
-	private List<String> extensions = new ArrayList<>();
+	public static final String TRAILER_STR = "\r\n";
+	protected List<HttpChunkExtension> extensions = new ArrayList<>();
 	
 	@Override
 	public HttpMessageType getMessageType() {
 		return HttpMessageType.CHUNK;
 	}
 
-	public void addExtension(String extension) {
+	public boolean isLastChunk() {
+		if(getMessageType() == HttpMessageType.LAST_CHUNK)
+			return true;
+		return false;
+	}
+	
+	public void addExtension(HttpChunkExtension extension) {
 		extensions.add(extension);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HttpChunk other = (HttpChunk) obj;
+		if (extensions == null) {
+			if (other.extensions != null)
+				return false;
+		} else if (!extensions.equals(other.extensions))
+			return false;
+		return true;
+	}
+
+	public List<HttpChunkExtension> getExtensions() {
+		return extensions;
+	}
+
+	public String createMetaLine() {
+		String metaLine = Integer.toHexString(getBody().getReadableSize());
+		for(HttpChunkExtension extension : getExtensions()) {
+			metaLine += ";"+extension.getName();
+			if(extension.getValue() != null)
+				metaLine += "="+extension.getValue();
+		}		
+		return metaLine+TRAILER_STR;
+	}
+
+	public String createTrailer() {
+		return TRAILER_STR;
+	}
+
+	
 }

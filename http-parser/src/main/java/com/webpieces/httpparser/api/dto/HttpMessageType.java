@@ -4,5 +4,5 @@ public enum HttpMessageType {
 
 	CHUNK,
 	REQUEST,
-	RESPONSE;
+	RESPONSE, LAST_CHUNK;
 }

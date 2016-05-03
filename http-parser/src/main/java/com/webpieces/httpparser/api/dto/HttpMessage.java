@@ -23,6 +23,12 @@ public abstract class HttpMessage {
 			return (HttpChunk)this;
 		return null;
 	}	
+	public HttpLastChunk getLastHttpChunk() {
+		if(getMessageType() == HttpMessageType.LAST_CHUNK)
+			return (HttpLastChunk)this;
+		return null;
+	}
+	
 	/**
 	 * 
 	 * @param data
