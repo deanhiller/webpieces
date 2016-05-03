@@ -24,7 +24,7 @@ import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.dto.HttpChunk;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -104,8 +104,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 			memento = parser.parse(memento, wrapper);
 
-			List<HttpMessage> parsedMessages = memento.getParsedMessages();
-			for(HttpMessage msg : parsedMessages) {
+			List<HttpPayload> parsedMessages = memento.getParsedMessages();
+			for(HttpPayload msg : parsedMessages) {
 				if(processingChunked) {
 					HttpChunk chunk = (HttpChunk) msg;
 					ResponseListener listener = responsesToComplete.peek();

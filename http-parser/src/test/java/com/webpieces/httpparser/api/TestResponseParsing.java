@@ -9,7 +9,7 @@ import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpResponse;
 import com.webpieces.httpparser.api.dto.HttpResponseStatus;
 import com.webpieces.httpparser.api.dto.HttpResponseStatusLine;
@@ -95,7 +95,7 @@ public class TestResponseParsing {
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 		
-		HttpMessage httpMessage = memento.getParsedMessages().get(0);
+		HttpPayload httpMessage = memento.getParsedMessages().get(0);
 		
 		Assert.assertEquals(response,  httpMessage);
 	}

@@ -3,7 +3,7 @@ package com.webpieces.httpparser.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpChunk extends HttpMessage {
+public class HttpChunk extends HttpPayload {
 
 	public static final String TRAILER_STR = "\r\n";
 	protected List<HttpChunkExtension> extensions = new ArrayList<>();

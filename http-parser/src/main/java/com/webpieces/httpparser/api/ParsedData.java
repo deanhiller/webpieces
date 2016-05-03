@@ -1,12 +1,12 @@
 package com.webpieces.httpparser.api;
 
 import com.webpieces.data.api.DataWrapper;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 
 public class ParsedData {
 
 	private ParsedStatus status;
-	private HttpMessage msg;
+	private HttpPayload msg;
 	private DataWrapper leftOverData;
 	
 	public ParsedStatus getStatus() {
@@ -15,10 +15,10 @@ public class ParsedData {
 	public void setStatus(ParsedStatus status) {
 		this.status = status;
 	}
-	public HttpMessage getMsg() {
+	public HttpPayload getMsg() {
 		return msg;
 	}
-	public void setMsg(HttpMessage msg) {
+	public void setMsg(HttpPayload msg) {
 		this.msg = msg;
 	}
 	

@@ -9,7 +9,7 @@ import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 
 public class TestRequestBody {
@@ -32,7 +32,7 @@ public class TestRequestBody {
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 
-		HttpMessage msg = memento.getParsedMessages().get(0);
+		HttpPayload msg = memento.getParsedMessages().get(0);
 		DataWrapper body = msg.getBody();
 		byte[] bodyBytesActual = body.createByteArray();
 		Assert.assertArrayEquals(expected, bodyBytesActual);
@@ -63,7 +63,7 @@ public class TestRequestBody {
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 
-		HttpMessage msg = memento.getParsedMessages().get(0);
+		HttpPayload msg = memento.getParsedMessages().get(0);
 		DataWrapper body = msg.getBody();
 		byte[] bodyBytesActual = body.createByteArray();
 		Assert.assertArrayEquals(expected, bodyBytesActual);
@@ -99,7 +99,7 @@ public class TestRequestBody {
 		Assert.assertEquals(2, memento.getParsedMessages().size());
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 
-		HttpMessage msg = memento.getParsedMessages().get(0);
+		HttpPayload msg = memento.getParsedMessages().get(0);
 		DataWrapper body = msg.getBody();
 		byte[] bodyBytesActual = body.createByteArray();
 		Assert.assertArrayEquals(expected, bodyBytesActual);

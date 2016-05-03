@@ -15,7 +15,7 @@ import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpChunk;
 import com.webpieces.httpparser.api.dto.HttpChunkExtension;
 import com.webpieces.httpparser.api.dto.HttpLastChunk;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpResponse;
 import com.webpieces.httpparser.api.dto.HttpResponseStatus;
 import com.webpieces.httpparser.api.dto.HttpResponseStatusLine;
@@ -55,10 +55,10 @@ public class TestChunkedParsing {
 		
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		
-		List<HttpMessage> msgs = memento.getParsedMessages();
+		List<HttpPayload> msgs = memento.getParsedMessages();
 		Assert.assertEquals(5, msgs.size());
 		
-		HttpMessage msg = msgs.get(0).getHttpResponse();
+		HttpPayload msg = msgs.get(0).getHttpResponse();
 		Assert.assertEquals(resp, msg);
 		
 		HttpChunk chunk1 = msgs.get(1).getHttpChunk();
@@ -93,10 +93,10 @@ public class TestChunkedParsing {
 		
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		
-		List<HttpMessage> msgs = memento.getParsedMessages();
+		List<HttpPayload> msgs = memento.getParsedMessages();
 		Assert.assertEquals(6, msgs.size());
 		
-		HttpMessage msg = msgs.get(0).getHttpResponse();
+		HttpPayload msg = msgs.get(0).getHttpResponse();
 		Assert.assertEquals(resp, msg);
 		
 		HttpChunk chunk1 = msgs.get(1).getHttpChunk();
@@ -107,7 +107,7 @@ public class TestChunkedParsing {
 		String third = chunk3.getBody().createStringFrom(0, chunk3.getBody().getReadableSize(), Charset.defaultCharset());
 		Assert.assertEquals(" in\r\n\r\nchunks.", third);
 		
-		HttpMessage tailMsg = msgs.get(5);
+		HttpPayload tailMsg = msgs.get(5);
 		Assert.assertEquals(resp400, tailMsg);
 	}
 	
@@ -142,13 +142,13 @@ public class TestChunkedParsing {
 		
 		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
 		
-		List<HttpMessage> msgs = memento.getParsedMessages();
+		List<HttpPayload> msgs = memento.getParsedMessages();
 		Assert.assertEquals(1, msgs.size());
 		Assert.assertEquals(resp, msgs.get(0));
 		
 		memento = parser.parse(memento, second);
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
-		List<HttpMessage> parsedMessages = memento.getParsedMessages();
+		List<HttpPayload> parsedMessages = memento.getParsedMessages();
 		Assert.assertEquals(4, parsedMessages.size());
 
 		Assert.assertEquals(resp400, parsedMessages.get(3));

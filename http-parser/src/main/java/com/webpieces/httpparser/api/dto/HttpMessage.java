@@ -1,54 +1,46 @@
 package com.webpieces.httpparser.api.dto;
 
-import com.webpieces.data.api.DataWrapper;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public abstract class HttpMessage {
-	
-	private DataWrapper body;
+import com.webpieces.httpparser.api.common.Header;
+import com.webpieces.httpparser.api.common.KnownHeaderName;
 
-	public abstract HttpMessageType getMessageType();
-	
-	public HttpRequest getHttpRequest() {
-		if(getMessageType() == HttpMessageType.REQUEST)
-			return (HttpRequest)this;
-		return null;
-	}
-	public HttpResponse getHttpResponse() {
-		if(getMessageType() == HttpMessageType.RESPONSE)
-			return (HttpResponse)this;
-		return null;
-	}
-	public HttpChunk getHttpChunk() {
-		if(getMessageType() == HttpMessageType.CHUNK)
-			return (HttpChunk)this;
-		return null;
-	}	
-	public HttpLastChunk getLastHttpChunk() {
-		if(getMessageType() == HttpMessageType.LAST_CHUNK)
-			return (HttpLastChunk)this;
-		return null;
-	}
+public abstract class HttpMessage extends HttpPayload {
+
+	protected List<Header> headers = new ArrayList<>();
+	//Convenience structure that further morphs the headers into a Map that can
+	//be looked up by key.
+	private transient Headers headersStruct = new Headers();
 	
 	/**
+	 * Order of HTTP Headers matters for Headers with the same key
 	 * 
-	 * @param data
+	 * @param headers
 	 */
-	public void setBody(DataWrapper data) {
-		this.body = data;
+	public List<Header> getHeaders() {
+		return Collections.unmodifiableList(headers);
+	}
+
+	public void addHeader(Header header) {
+		headers.add(header);
+		headersStruct.addHeader(header);
 	}
 	
-	/**
+	/** 
+	 * 
 	 * @return
 	 */
-	public DataWrapper getBody() {
-		return body;
+	public Headers getHeaderLookupStruct() {
+		return headersStruct;
 	}
 	
-	/**
-	 * This is true only if this is a response OR request with a
-	 * Transfer-encoding header of chunked so the client will know if there are
-	 * incoming HttpChunks after the initial message
-	 * @return
-	 */
-	public abstract boolean isHasChunkedTransferHeader();
+	public boolean isHasChunkedTransferHeader() {
+		//need to account for a few Transfer Encoding headers
+		Header header = headersStruct.getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
+		if("chunked".equals(header.getValue()))
+			return true;
+		return false;
+	}
 }

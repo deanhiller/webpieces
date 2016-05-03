@@ -6,7 +6,7 @@ import java.util.List;
 import com.webpieces.data.api.DataWrapper;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParsedStatus;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 
 public class MementoImpl implements Memento {
 
@@ -16,13 +16,13 @@ public class MementoImpl implements Memento {
 	private int numBytesLeftToRead;
 	//The parsed message that did not get the data for it's body just yet
 	//This is only for the case where a message has a body
-	private HttpMessage halfParsedMessage;
+	private HttpPayload halfParsedMessage;
 	//If the stream is expecting chunks of data
 	private boolean inChunkParsingMode;
 	
 	//Return state for client to access
 	private ParsedStatus status = ParsedStatus.NEED_MORE_DATA;
-	private List<HttpMessage> parsedMessages = new ArrayList<>();
+	private List<HttpPayload> parsedMessages = new ArrayList<>();
 	private int indexBytePointer;
 
 	public void setStatus(ParsedStatus status) {
@@ -35,11 +35,11 @@ public class MementoImpl implements Memento {
 	}
 
 	@Override
-	public List<HttpMessage> getParsedMessages() {
+	public List<HttpPayload> getParsedMessages() {
 		return parsedMessages;
 	}
 
-	public void setParsedMessages(List<HttpMessage> parsedMessages) {
+	public void setParsedMessages(List<HttpPayload> parsedMessages) {
 		this.parsedMessages = parsedMessages;
 	}
 
@@ -71,11 +71,11 @@ public class MementoImpl implements Memento {
 		numBytesLeftToRead = length;
 	}
 
-	public void setHalfParsedMessage(HttpMessage message) {
+	public void setHalfParsedMessage(HttpPayload message) {
 		this.halfParsedMessage = message;
 	}
 
-	public HttpMessage getHalfParsedMessage() {
+	public HttpPayload getHalfParsedMessage() {
 		return halfParsedMessage;
 	}
 

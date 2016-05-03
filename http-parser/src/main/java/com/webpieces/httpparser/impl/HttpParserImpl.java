@@ -16,9 +16,9 @@ import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpChunk;
 import com.webpieces.httpparser.api.dto.HttpChunkExtension;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
-import com.webpieces.httpparser.api.dto.HttpMsg2;
+import com.webpieces.httpparser.api.dto.HttpMessage;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpRequestLine;
 import com.webpieces.httpparser.api.dto.HttpRequestMethod;
@@ -45,12 +45,12 @@ public class HttpParserImpl implements HttpParser {
 	}
 	
 	@Override
-	public byte[] marshalToBytes(HttpMessage request) {
+	public byte[] marshalToBytes(HttpPayload request) {
 		if(request.getMessageType() == HttpMessageType.CHUNK || request.getMessageType() == HttpMessageType.LAST_CHUNK) {
 			return chunkedBytes((HttpChunk)request);
 		}
 		
-		HttpMsg2 msg = (HttpMsg2) request;
+		HttpMessage msg = (HttpMessage) request;
 		String result = marshalHeaders(request);
 		
 		DataWrapper body = request.getBody();
@@ -121,7 +121,7 @@ public class HttpParserImpl implements HttpParser {
 	}
 
 	@Override
-	public String marshalToString(HttpMessage httpMsg) {
+	public String marshalToString(HttpPayload httpMsg) {
 		//TODO: We could check Content-Type header and if text type, we could marshall it still?
 		if(httpMsg.getMessageType() != HttpMessageType.LAST_CHUNK && httpMsg.getBody() != null)
 			throw new IllegalArgumentException("Cannot marshal http message with a body to a string");
@@ -129,7 +129,7 @@ public class HttpParserImpl implements HttpParser {
 		return marshalHeaders(httpMsg);
 	}
 
-	private String marshalHeaders(HttpMessage httpMsg) {
+	private String marshalHeaders(HttpPayload httpMsg) {
 		if(httpMsg.getMessageType() == HttpMessageType.REQUEST)
 			validate(httpMsg.getHttpRequest());
 		else if(httpMsg.getMessageType() == HttpMessageType.RESPONSE)
@@ -295,7 +295,7 @@ public class HttpParserImpl implements HttpParser {
 		List<? extends DataWrapper> tuple = dataGen.split(dataToRead, i+4);
 		DataWrapper toBeParsed = tuple.get(0);
 		memento.setLeftOverData(tuple.get(1));
-		HttpMsg2 message = parseHttpMessage(toBeParsed, markedPositions);
+		HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
 		
 		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		Header transferHeader = message.getHeaderLookupStruct().getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
@@ -394,7 +394,7 @@ public class HttpParserImpl implements HttpParser {
 	}
 
 	private void readInBody(MementoImpl memento, boolean stripAndCompareLastTwo) {
-		HttpMessage message = memento.getHalfParsedMessage();
+		HttpPayload message = memento.getHalfParsedMessage();
 		DataWrapper dataToRead = memento.getLeftOverData();
 		int readableSize = dataToRead.getReadableSize();
 		int numBytesNeeded = memento.getNumBytesLeftToRead();
@@ -422,7 +422,7 @@ public class HttpParserImpl implements HttpParser {
 		}
 	}
 
-	private HttpMsg2 parseHttpMessage(DataWrapper toBeParsed, List<Integer> markedPositions) {
+	private HttpMessage parseHttpMessage(DataWrapper toBeParsed, List<Integer> markedPositions) {
 		List<String> lines = new ArrayList<>();
 		
 		//Add the last line..
@@ -448,7 +448,7 @@ public class HttpParserImpl implements HttpParser {
 		}
 	}
 
-	private HttpMsg2 parseRequest(List<String> lines) {
+	private HttpMessage parseRequest(List<String> lines) {
 		//remove first line...
 		String firstLine = lines.remove(0);
 		String[] firstLinePieces = firstLine.split("\\s+");
@@ -485,7 +485,7 @@ public class HttpParserImpl implements HttpParser {
 		return version;
 	}
 
-	private void parseHeaders(List<String> lines, HttpMsg2 httpMessage) {
+	private void parseHeaders(List<String> lines, HttpMessage httpMessage) {
 		//TODO: one header can be multiline and we need to fix this code for that
 		//ie. the spec says you can split a head in multiple lines(ick!!!)
 		for(String line : lines) {
@@ -507,7 +507,7 @@ public class HttpParserImpl implements HttpParser {
 		return header;
 	}
 
-	private HttpMsg2 parseResponse(List<String> lines) {
+	private HttpMessage parseResponse(List<String> lines) {
 		//remove first line...
 		String firstLine = lines.remove(0);
 		//In the case of response, a reason may contain spaces so we must split on first and second
@@ -546,7 +546,7 @@ public class HttpParserImpl implements HttpParser {
 	}
 
 	@Override
-	public HttpMessage unmarshal(byte[] msg) {
+	public HttpPayload unmarshal(byte[] msg) {
 		Memento memento = prepareToParse();
 		DataWrapper dataWrapper = dataGen.wrapByteArray(msg);
 		Memento parsedData = parse(memento, dataWrapper);
@@ -556,7 +556,7 @@ public class HttpParserImpl implements HttpParser {
 			throw new IllegalArgumentException("This http message is not complete.  Use unmarshalAsynch instead or "
 					+ "fix client code to pass in complete http message(or report a bug if it is this libraries fault)");
 		
-		List<HttpMessage> messages = parsedData.getParsedMessages();
+		List<HttpPayload> messages = parsedData.getParsedMessages();
 		if(messages.size() != 1)
 			throw new IllegalArgumentException("You passed in data for more than one http messages.  number of http messages="+messages.size());
 		return messages.get(0);

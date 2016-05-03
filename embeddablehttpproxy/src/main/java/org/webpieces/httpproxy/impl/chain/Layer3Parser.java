@@ -16,7 +16,7 @@ import com.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -66,9 +66,9 @@ public class Layer3Parser {
 //			return;
 //		}
 		
-		List<HttpMessage> parsedMsgs = resultMemento.getParsedMessages();
+		List<HttpPayload> parsedMsgs = resultMemento.getParsedMessages();
 		List<HttpRequest> parsedRequests = new ArrayList<>();
-		for(HttpMessage msg : parsedMsgs) {
+		for(HttpPayload msg : parsedMsgs) {
 			if(msg.getMessageType() != HttpMessageType.REQUEST)
 				throw new ParseException("Wrong message type="+msg.getMessageType()+" should be="+HttpMessageType.REQUEST);
 			parsedRequests.add(msg.getHttpRequest());

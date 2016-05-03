@@ -2,7 +2,7 @@ package com.webpieces.httpparser.api;
 
 import java.util.List;
 
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 
 public interface Memento {
 
@@ -13,6 +13,6 @@ public interface Memento {
 	 * give you back all the parsed messages so far
 	 * @return
 	 */
-	List<HttpMessage> getParsedMessages();
+	List<HttpPayload> getParsedMessages();
 	
 }

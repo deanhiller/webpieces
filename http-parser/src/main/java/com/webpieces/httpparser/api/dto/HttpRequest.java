@@ -6,7 +6,7 @@ import java.net.SocketAddress;
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
 
-public class HttpRequest extends HttpMsg2 {
+public class HttpRequest extends HttpMessage {
 
 	private HttpRequestLine requestLine;
 	

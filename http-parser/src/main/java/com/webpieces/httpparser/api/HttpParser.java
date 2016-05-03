@@ -1,16 +1,16 @@
 package com.webpieces.httpparser.api;
 
 import com.webpieces.data.api.DataWrapper;
-import com.webpieces.httpparser.api.dto.HttpMessage;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 
 public interface HttpParser {
 
 	//TODO: This needs to change!!!  We need to pass in a data structure that 
 	//we can write to so it could be a byte[] or it could be a ByteBuffer
 	//or anything else but we also need to know the size ahead of time or?
-	public byte[] marshalToBytes(HttpMessage request);
+	public byte[] marshalToBytes(HttpPayload request);
 	
-	public String marshalToString(HttpMessage request);
+	public String marshalToString(HttpPayload request);
 	
 	/**
 	 * This must be called for each stream of data you plan to parse
@@ -46,5 +46,5 @@ public interface HttpParser {
 	 * @return
 	 */
 	//TODO: convert api to DataWrapper?
-	public HttpMessage unmarshal(byte[] msg);
+	public HttpPayload unmarshal(byte[] msg);
 }
