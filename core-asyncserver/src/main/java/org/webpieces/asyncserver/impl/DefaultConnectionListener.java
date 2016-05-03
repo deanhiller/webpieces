@@ -24,8 +24,6 @@ public class DefaultConnectionListener implements ConnectionListener {
 	public void connected(Channel channel) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
 		
-		log.info("channel connected="+channel);
-		
 		if(overloadResponse != null) {
 			//This is annoying.....
 			//1. we canNOT do synchronous write as it could block forever (if hacker simulates full nic)

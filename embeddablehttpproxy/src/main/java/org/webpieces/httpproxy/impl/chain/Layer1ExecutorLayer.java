@@ -23,7 +23,6 @@ public class Layer1ExecutorLayer implements DataListener {
 	
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
-		log.info("incoming data="+b.remaining());
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {

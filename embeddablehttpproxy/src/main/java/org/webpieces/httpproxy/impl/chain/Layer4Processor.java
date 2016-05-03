@@ -27,6 +27,8 @@ public class Layer4Processor {
 	private Layer2ResponseListener responseListener;
 	
 	public void processHttpRequests(Channel channel, HttpRequest req) {
+		log.info("processing request="+req);
+		
 		ChannelSession session = channel.getSession();
 		if(session.get("socket") != null)
 			throw new UnsupportedOperationException("not supported yet");
@@ -43,7 +45,7 @@ public class Layer4Processor {
 	}
 
 	private CompletableFuture<HttpResponse> send(Channel channel, HttpSocket socket, HttpRequest req) {
-		log.info("sending request=\n"+req);
+		log.info("sending request(channel="+channel+"(=\n"+req);
 		socket.send(req, new Layer1Response(responseListener, channel, req));
 		return null;
 	}

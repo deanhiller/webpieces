@@ -21,7 +21,7 @@ public class Layer2ResponseListener {
 	private HttpParser parser;
 	
 	public void processResponse(Channel channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
-		log.info("received response=\n"+resp);
+		log.info("received response(channel="+channel+")=\n"+resp);
 
 		byte[] respBytes = parser.marshalToBytes(resp);
 		ByteBuffer buffer = ByteBuffer.wrap(respBytes);

@@ -119,21 +119,25 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.connect-addr="+addr);
-		
-		boolean connected = channel.connect(addr);
-		if(log.isTraceEnabled())
-			log.trace(this+"connected status="+connected);
-
-		setConnecting(true);
-		if(connected) {
-			try {
-				future.complete(this);
-				registerForReads();
-			} catch(Throwable e) {
-				log.warn(this+"Exception occurred", e);
+		try {
+			boolean connected = channel.connect(addr);
+			if(log.isTraceEnabled())
+				log.trace(this+"connected status="+connected);
+	
+			setConnecting(true);
+			if(connected) {
+				try {
+					future.complete(this);
+					registerForReads();
+				} catch(Throwable e) {
+					log.warn(this+"Exception occurred", e);
+				}
+			} else {
+				getSelectorManager().registerChannelForConnect(this, future);
 			}
-		} else {
-			getSelectorManager().registerChannelForConnect(this, future);
+		} catch(Throwable t) {
+			log.warn("connecting failed");
+			future.completeExceptionally(t);
 		}
 		return future;
 	}
