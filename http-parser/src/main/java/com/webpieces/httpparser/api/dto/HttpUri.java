@@ -18,19 +18,26 @@ public class HttpUri {
 		return uri;
 	}
 
-	public UrlInfo getHostPortAndType() {
+	public UrlInfo getUriBreakdown() {
 	    int doubleslashIndex = uri.indexOf("://");
 	    if(doubleslashIndex == -1)
-	    	return new UrlInfo();
+	    	return new UrlInfo(uri);
 	    
 	    int domainStartIndex = doubleslashIndex+3;
 	    String prefix = uri.substring(0, doubleslashIndex);
 	    Integer port  = null;
 	    
+	    String path = "";
 	    int firstSlashIndex = uri.indexOf('/', domainStartIndex);
-	    if(firstSlashIndex < 0)
+	    if(firstSlashIndex < 0) {
 	    	firstSlashIndex = uri.length();
+	    	path = "/";
+	    } else {
+	    	path = uri.substring(firstSlashIndex);
+	    }
 
+	    
+	    
 	    int domainEndIndex = firstSlashIndex;
 	    int portIndex = uri.indexOf(':', domainStartIndex);
 	    if(portIndex > 0 && portIndex < firstSlashIndex) {
@@ -41,8 +48,7 @@ public class HttpUri {
 	    	
 	    String host = uri.substring(domainStartIndex, domainEndIndex);
 
-	    return new UrlInfo(prefix, host, port);	    
-	    
+	    return new UrlInfo(prefix, host, port, path);
 	}
 	
 	private Integer convert(String portStr, String uri2) {

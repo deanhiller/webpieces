@@ -16,6 +16,8 @@ import org.webpieces.nio.api.channels.ChannelSession;
 
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpResponse;
+import com.webpieces.httpparser.api.dto.HttpUri;
+import com.webpieces.httpparser.api.dto.UrlInfo;
 
 public class Layer4Processor {
 
@@ -33,10 +35,17 @@ public class Layer4Processor {
 		if(session.get("socket") != null)
 			throw new UnsupportedOperationException("not supported yet");
 		
+		SocketAddress addr = req.getServerToConnectTo(null);
+		
+		HttpUri uri = req.getRequestLine().getUri();
+		UrlInfo info = uri.getUriBreakdown();
+		if(info.getPrefix() != null) { 
+			//for sites like http://www.colorado.edu that won't accept full uri path
+			uri.setUri(info.getFullPath());
+		}
+		
 		HttpSocket socket = httpClient.openHttpSocket(""+channel);
 		channel.getSession().put("socket", socket);
-		
-		SocketAddress addr = req.getServerToConnectTo(null);
 		
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)

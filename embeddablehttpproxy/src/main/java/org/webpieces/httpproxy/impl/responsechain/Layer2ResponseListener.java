@@ -1,17 +1,20 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.UnresolvedAddressException;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpproxy.impl.chain.LayerZSendBadResponse;
 import org.webpieces.nio.api.channels.Channel;
 
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpRequest;
+import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class Layer2ResponseListener {
 
@@ -19,6 +22,8 @@ public class Layer2ResponseListener {
 
 	@Inject
 	private HttpParser parser;
+	@Inject
+	private LayerZSendBadResponse badResponse;
 	
 	public void processResponse(Channel channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
 		log.info("received response(channel="+channel+")=\n"+resp);
@@ -42,7 +47,10 @@ public class Layer2ResponseListener {
 
 	public Void processError(Channel channel, HttpRequest req, Throwable e) {
 		log.warn("could not process req="+req+" from channel="+channel+" due to exception", e);
-		
+
+		if(e.getCause() instanceof UnresolvedAddressException) {
+			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP404);
+		}
 		HttpSocket socket = (HttpSocket) channel.getSession().get("socket");
 		
 		channel.close();

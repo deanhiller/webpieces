@@ -12,18 +12,20 @@ public class TestUriParsing {
 	@Test
 	public void testBasicUrl() {
 		HttpUri uri = new HttpUri("http://www.google.com:8080/there/is/cool?at=this&some=that");
-		UrlInfo urlInfo = uri.getHostPortAndType();
+		UrlInfo urlInfo = uri.getUriBreakdown();
 		Assert.assertEquals("http", urlInfo.getPrefix());
 		Assert.assertEquals("www.google.com", urlInfo.getHost());
 		Assert.assertEquals(new Integer(8080), urlInfo.getPort());
+		Assert.assertEquals("/there/is/cool?at=this&some=that", urlInfo.getFullPath());
 	}
 	@Test
 	public void testSlash() {
 		HttpUri uri = new HttpUri("/");
 		
-		UrlInfo urlInfo = uri.getHostPortAndType();
+		UrlInfo urlInfo = uri.getUriBreakdown();
 		Assert.assertEquals(null, urlInfo.getPrefix());
 		Assert.assertEquals(null, urlInfo.getHost());
 		Assert.assertEquals(null, urlInfo.getPort());
+		Assert.assertEquals("/", urlInfo.getFullPath());
 	}
 }

@@ -5,13 +5,17 @@ public class UrlInfo {
 	private String prefix;
 	private String host;
 	private Integer port;
+	private String fullPath;
 
-	public UrlInfo() {}
+	public UrlInfo(String fullPath) {
+		this.fullPath = fullPath;
+	}
 	
-	public UrlInfo(String prefix, String host, Integer port) {
+	public UrlInfo(String prefix, String host, Integer port, String fullPath) {
 		this.prefix = prefix;
 		this.host = host;
 		this.port = port;
+		this.fullPath = fullPath;
 	}
 
 	public String getPrefix() {
@@ -50,4 +54,7 @@ public class UrlInfo {
 		this.port = port;
 	}
 	
+	public String getFullPath() {
+		return fullPath;
+	}
 }

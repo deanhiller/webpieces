@@ -14,9 +14,9 @@ public enum KnownStatusCode {
 
 	HTTP400(400, "Bad Request", HttpStatusType.ClientError),
 	HTTP401(401, "Unauthorized", HttpStatusType.ClientError),
+	HTTP404(404, "Not Found", HttpStatusType.ClientError),
 	
-	
-	HTTP500(500, "Internal Server Error", HttpStatusType.ServerError),
+	HTTP500(500, "Internal Server Error", HttpStatusType.ServerError) 
 	
 	//TODO: Fill the rest in..
 	;

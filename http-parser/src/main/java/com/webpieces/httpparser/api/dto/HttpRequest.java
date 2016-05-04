@@ -76,7 +76,7 @@ public class HttpRequest extends HttpMessage {
 	 * @return
 	 */
 	public SocketAddress getServerToConnectTo(Integer port) {
-		UrlInfo urlInfo = getRequestLine().getUri().getHostPortAndType();
+		UrlInfo urlInfo = getRequestLine().getUri().getUriBreakdown();
 		
 		String host = urlInfo.getHost();
 		if(host == null) {
