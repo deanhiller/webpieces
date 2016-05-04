@@ -41,6 +41,7 @@ public class Layer4Processor {
 		UrlInfo info = uri.getUriBreakdown();
 		if(info.getPrefix() != null) { 
 			//for sites like http://www.colorado.edu that won't accept full uri path
+			//without this, www.colorado.edu was returning 404 ...seems like a bug on their end to be honest
 			uri.setUri(info.getFullPath());
 		}
 		
