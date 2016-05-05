@@ -1,19 +1,26 @@
 package org.webpieces.httpproxy.impl.chain;
 
 import java.net.SocketAddress;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpproxy.impl.responsechain.Layer1CloseListener;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpUri;
 import com.webpieces.httpparser.api.dto.UrlInfo;
@@ -25,24 +32,20 @@ public class Layer4Processor {
 	@Inject
 	private HttpClient httpClient;
 	@Inject
-	private Layer2ResponseListener responseListener;
+	private Layer2ResponseListener layer2Processor;
+	private final Cache<SocketAddress, HttpSocket> cache;
+	
+	public Layer4Processor() {
+		cache = CacheBuilder.newBuilder()
+			    .concurrencyLevel(4)
+			    .maximumSize(10000)
+			    .expireAfterAccess(3, TimeUnit.MINUTES)
+			    .removalListener(new SocketExpiredListener())
+			    .build();
+	}
 	
 	public void processHttpRequests(Channel channel, HttpRequest req) {
-		ChannelSession session = channel.getSession();
-		HttpSocket socket = (HttpSocket) session.get("socket");
-		if(socket == null) {
-			openSocketAndSendData(channel, req);
-		} else {
-			sendData(channel, socket, req);
-		}
-	}
-
-	private void sendData(Channel channel, HttpSocket socket, HttpRequest req) {
-		//log.info("sending request(channel="+channel+"(=\n"+req);
-		socket.send(req, new Layer1Response(responseListener, channel, req));
-	}
-
-	private HttpSocket openSocketAndSendData(Channel channel, HttpRequest req) {
+		log.info("incoming request(channel="+channel+"(=\n"+req);
 		SocketAddress addr = req.getServerToConnectTo(null);
 
 		HttpUri uri = req.getRequestLine().getUri();
@@ -53,24 +56,55 @@ public class Layer4Processor {
 			uri.setUri(info.getFullPath());
 		}
 		
-		HttpSocket socket = httpClient.openHttpSocket(""+channel, new Layer1CloseListener(responseListener, channel));
-		channel.getSession().put("socket", socket);
+		HttpSocket socket = cache.getIfPresent(addr);
+		if(socket != null) {
+			sendData(channel, socket, req);
+		} else {
+			openAndConnectSocket(addr, req, channel);
+		}
+	}
 
+	private void sendData(Channel channel, HttpSocket socket, HttpRequest req) {
+		socket.send(req, new Layer1Response(layer2Processor, channel, req));
+	}
+
+	private HttpSocket openAndConnectSocket(SocketAddress addr, HttpRequest req, Channel channel) {
+		HttpSocket socket = httpClient.openHttpSocket(""+addr, new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
-			  .thenAccept(p->sendData(channel, socket, req))
-			  .exceptionally(e -> responseListener.processError(channel, req, e));
+				.thenAccept(s -> {
+					sendData(channel, socket, req);
+					cache.put(addr, socket);
+				})
+				.exceptionally(e -> layer2Processor.processError(channel, req, e));
 		
 		return socket;
 	}
 
 	public void clientClosedChannel(Channel channel) {
-		log.info("closing far end socket. channel="+channel);
-		ChannelSession session = channel.getSession();
-		HttpSocket socket = (HttpSocket) session.get("socket");
-		if(socket != null) {
+		log.info("client closed channel="+channel);
+	}
+
+	private class SocketExpiredListener implements RemovalListener<SocketAddress, HttpSocket> {
+		@Override
+		public void onRemoval(RemovalNotification<SocketAddress, HttpSocket> notification) {
+			log.info("closing socket="+notification.getKey()+".  cache removal cause="+notification.getCause());
+			HttpSocket socket = notification.getValue();
 			socket.closeSocket();
 		}
 	}
+	
+	private class Layer1CloseListener implements CloseListener {
+		private SocketAddress addr;
 
+		public Layer1CloseListener(SocketAddress addr) {
+			this.addr = addr;
+		}
+
+		@Override
+		public void farEndClosed(HttpSocket socket) {
+			log.info("socket addr="+addr+" closed, invalidating cache");
+			cache.invalidate(addr);
+		}
+	}
 }

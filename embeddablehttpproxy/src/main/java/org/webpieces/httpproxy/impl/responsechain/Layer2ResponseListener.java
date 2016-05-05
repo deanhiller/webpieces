@@ -49,17 +49,17 @@ public class Layer2ResponseListener {
 
 		if(e.getCause() instanceof UnresolvedAddressException) {
 			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP404);
+		} else {
+			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP500);
 		}
-		HttpSocket socket = (HttpSocket) channel.getSession().get("socket");
-		
 		channel.close();
-		socket.closeSocket();
 		
 		return null;
 	}
 
 	public void farEndClosed(HttpSocket socket, Channel channel) {
 		//since socket is closing, close the channel from the browser...
+		log.info("closing connection from browser.  channel="+channel);
 		channel.close();
 	}
 

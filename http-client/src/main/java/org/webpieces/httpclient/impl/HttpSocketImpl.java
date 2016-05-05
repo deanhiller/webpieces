@@ -105,7 +105,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
-		log.info("sending request now. req="+request);
+		log.info("sending request now. req="+request.getRequestLine().getUri());
 		CompletableFuture<Channel> write = channel.write(wrap);
 		write.exceptionally(e -> fail(l, e));
 	}
@@ -134,13 +134,30 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			return CompletableFuture.completedFuture(this);
 		}
 		
-		//do we need an isClosing state and cache that future?  (I don't think so but time will tell)
+		cleanUpPendings("You closed the socket");
 		
 		CompletableFuture<Channel> future = channel.close();
 		return future.thenApply(chan -> {
 			isClosed = true;
 			return this;
 		});
+	}
+
+	private void cleanUpPendings(String msg) {
+		//do we need an isClosing state and cache that future?  (I don't think so but time will tell)
+		while(!responsesToComplete.isEmpty()) {
+			ResponseListener listener = responsesToComplete.poll();
+			if(listener != null) {
+				listener.failure(new NioClosedChannelException(msg+" before responses were received"));
+			}
+		}
+		
+		synchronized (this) {
+			while(!pendingRequests.isEmpty()) {
+				PendingRequest pending = pendingRequests.poll();
+				pending.getListener().failure(new NioClosedChannelException(msg+" before requests were sent"));
+			}
+		}
 	}
 	
 	private class MyDataListener implements DataListener {
@@ -176,18 +193,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void farEndClosed(Channel channel) {
-			log.info("far end closed", new RuntimeException());
-			while(!responsesToComplete.isEmpty()) {
-				ResponseListener listener = responsesToComplete.poll();
-				if(listener != null) {
-					listener.failure(new NioClosedChannelException("Remote end closed before responses were received"));
-				}
-			}
+			isClosed = true;
+			log.info("far end closed. channel="+channel, new RuntimeException());
+			cleanUpPendings("Remote end closed");
 			
 			if(closeListener != null)
 				closeListener.farEndClosed(HttpSocketImpl.this);
-			
-			isClosed = true;
+		
 		}
 
 		@Override

@@ -1,5 +1,6 @@
 package org.webpieces.httpproxy.impl.chain;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import javax.inject.Inject;
@@ -24,6 +25,8 @@ public class Layer2DataListener implements DataListener {
 	
 	public void incomingData(Channel channel, ByteBuffer b){
 		try {
+			InetSocketAddress addr = channel.getRemoteAddress();
+			channel.setName(""+addr);
 			log.info("incoming data. size="+b.remaining()+" channel="+channel);
 			processor.deserialize(channel, b);
 		} catch(Throwable e) {
