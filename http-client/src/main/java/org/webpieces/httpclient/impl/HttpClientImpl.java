@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.ResponseListener;
@@ -12,6 +13,7 @@ import org.webpieces.nio.api.ChannelManager;
 
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.dto.HttpRequest;
+import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public class HttpClientImpl implements HttpClient {
 
@@ -25,11 +27,18 @@ public class HttpClientImpl implements HttpClient {
 	}
 
 	@Override
+	public CompletableFuture<HttpResponse> sendSingleRequest(SocketAddress addr, HttpRequest request) {
+		HttpSocket socket = openHttpSocket(addr+"");
+		CompletableFuture<HttpSocket> connect = socket.connect(addr);
+		return connect.thenCompose(p -> socket.send(request));
+	}
+	
+	@Override
 	public void sendSingleRequest(SocketAddress addr, HttpRequest request, ResponseListener listener) {
-		HttpSocket socket = openHttpSocket(request.getRequestLine()+"");
+		HttpSocket socket = openHttpSocket(addr+"");
 
 		CompletableFuture<HttpSocket> connect = socket.connect(addr);
-		connect.thenAccept(p -> p.send(request, listener))
+		connect.thenAccept(p -> socket.send(request, listener))
 			.exceptionally(e -> fail(socket, listener, e));
 	}
 
@@ -45,7 +54,12 @@ public class HttpClientImpl implements HttpClient {
 
 	@Override
 	public HttpSocket openHttpSocket(String idForLogging) {
-		return new HttpSocketImpl(mgr, idForLogging, parser);
+		return openHttpSocket(idForLogging, null);
+	}
+	
+	@Override
+	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener) {
+		return new HttpSocketImpl(mgr, idForLogging, parser, listener);
 	}
 
 }

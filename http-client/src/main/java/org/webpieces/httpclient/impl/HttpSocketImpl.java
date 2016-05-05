@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
@@ -38,16 +39,26 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private Memento memento;
 	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private MyDataListener dataListener = new MyDataListener();
+	private CloseListener closeListener;
 	
-	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser) {
+	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser, CloseListener listener) {
 		channel = mgr.createTCPChannel(idForLogging, dataListener);
 		this.parser = parser;
 		memento = parser.prepareToParse();
+		this.closeListener = listener;
 	}
 
 	@Override
 	public CompletableFuture<HttpSocket> connect(SocketAddress addr) {
 		return channel.connect(addr).thenApply(channel -> this);
+	}
+
+	@Override
+	public CompletableFuture<HttpResponse> send(HttpRequest request) {
+		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
+		ResponseListener l = new CompletableListener(future);
+		send(request, l);
+		return future;
 	}
 	
 	@Override
@@ -135,6 +146,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					listener.failure(new NioClosedChannelException("Remote end closed before responses were received"));
 				}
 			}
+			
+			if(closeListener != null)
+				closeListener.farEndClosed(HttpSocketImpl.this);
 			
 			isClosed = true;
 		}

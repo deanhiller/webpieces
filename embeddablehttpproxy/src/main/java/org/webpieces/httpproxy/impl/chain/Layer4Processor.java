@@ -34,9 +34,9 @@ public class Layer4Processor {
 		ChannelSession session = channel.getSession();
 		if(session.get("socket") != null)
 			throw new UnsupportedOperationException("not supported yet");
-		
+
 		SocketAddress addr = req.getServerToConnectTo(null);
-		
+
 		HttpUri uri = req.getRequestLine().getUri();
 		UrlInfo info = uri.getUriBreakdown();
 		if(info.getPrefix() != null) { 
@@ -44,8 +44,8 @@ public class Layer4Processor {
 			//without this, www.colorado.edu was returning 404 ...seems like a bug on their end to be honest
 			uri.setUri(info.getFullPath());
 		}
-		
-		HttpSocket socket = httpClient.openHttpSocket(""+channel);
+
+		HttpSocket socket = httpClient.openHttpSocket(""+channel, responseListener);
 		channel.getSession().put("socket", socket);
 		
 		log.info("connecting to addr="+addr);
