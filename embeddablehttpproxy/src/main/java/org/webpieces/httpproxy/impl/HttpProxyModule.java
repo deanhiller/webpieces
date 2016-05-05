@@ -1,5 +1,6 @@
 package org.webpieces.httpproxy.impl;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -42,27 +43,13 @@ public class HttpProxyModule implements Module {
 		binder.bind(DataWrapperGenerator.class).toInstance(DataWrapperGeneratorFactory.createDataWrapperGenerator());
 	}
 
-	@Provides
-	@Singleton
-	public SessionExecutor createExecutorPool() {
-		ExecutorService pool = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
-		SessionExecutor exec = new SessionExecutorImpl(pool);
-		return exec;
-	}
-	
-//	@Provides
-//	@Singleton
-//	@Named(PROMISE_EXECUTOR)
-//	public Executor provideExecutor() {
-//		return Executors.newFixedThreadPool(1, new NamedThreadFactory("promiseExecutor"));
-//	}
-
 	@Named("chanMgr")
 	@Provides
 	@Singleton
 	public ChannelManager providesChannelManager(BufferPool pool) {
+		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		return factory.createChannelManager("httpProxyMgr", pool);
+		return factory.createChannelManager("httpProxyMgr", pool, executor);
 	}
 	
 	@Provides
@@ -74,7 +61,13 @@ public class HttpProxyModule implements Module {
 	@Provides
 	@Singleton
 	public HttpClient provideHttpClient() {
+		BufferCreationPool pool = new BufferCreationPool();
+		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpclient-"));
+		ChannelManagerFactory cmFactory = ChannelManagerFactory.createFactory();
+		ChannelManager mgr = cmFactory.createChannelManager("httpclient", pool, executor);		
+		HttpParser parser = HttpParserFactory.createParser(pool);
+		
 		HttpClientFactory factory = HttpClientFactory.createFactory();
-		return factory.createHttpClient();
+		return factory.createHttpClient(mgr, parser);
 	}
 }

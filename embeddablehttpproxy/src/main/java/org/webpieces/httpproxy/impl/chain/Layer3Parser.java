@@ -85,8 +85,8 @@ public class Layer3Parser {
 		}
 	}
 
-	public void farEndClosed(Channel channel) {
-		processor.farEndClosed(channel);
+	public void clientClosedChannel(Channel channel) {
+		processor.clientClosedChannel(channel);
 	}
 	
 }

@@ -11,7 +11,7 @@ public abstract class HttpClientFactory {
 		return new HttpClientFactoryImpl();
 	}
 
-	public abstract HttpClient createHttpClient();
+	public abstract HttpClient createHttpClient(int numThreads);
 	
 	/**
 	 * BIG NOTE: You should pass the same BufferPool into both HttpParser and

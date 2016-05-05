@@ -8,9 +8,28 @@ public class TestFutures {
 
 
 	@Test
-	public void testBasic() {
+	public void testRegisterTwoListenersToSameFuture() {
+		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+
+		
+		future.thenAccept(f -> fire(f));
+		future.thenAccept(f -> fire2(f));
+		future.thenAccept(f -> fire(f+2));
+		future.thenAccept(f -> fire(f+3));
+
+		future.complete(5);
 	}
 	
+	private Object fire2(Integer f) {
+		System.out.println("fire2="+f);
+		return null;
+	}
+
+	private Object fire(Integer f) {
+		System.out.println("f="+f);
+		return null;
+	}
+
 	public void testBlowTheStack() throws InterruptedException {
 		recurse(0);
 		

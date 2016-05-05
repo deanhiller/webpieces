@@ -29,12 +29,22 @@ public class Layer4Processor {
 	private Layer2ResponseListener responseListener;
 	
 	public void processHttpRequests(Channel channel, HttpRequest req) {
-		log.info("processing request="+req);
-		
 		ChannelSession session = channel.getSession();
-		if(session.get("socket") != null)
-			throw new UnsupportedOperationException("not supported yet");
-		
+		HttpSocket socket = (HttpSocket) session.get("socket");
+		if(socket == null) {
+			socket = openSocketAndSendData(channel, req);
+			channel.getSession().put("socket", socket);
+		} else {
+			sendData(channel, socket, req);
+		}
+	}
+
+	private void sendData(Channel channel, HttpSocket socket, HttpRequest req) {
+		//log.info("sending request(channel="+channel+"(=\n"+req);
+		socket.send(req, new Layer1Response(responseListener, channel, req));
+	}
+
+	private HttpSocket openSocketAndSendData(Channel channel, HttpRequest req) {
 		SocketAddress addr = req.getServerToConnectTo(null);
 		
 		HttpUri uri = req.getRequestLine().getUri();
@@ -46,21 +56,15 @@ public class Layer4Processor {
 		}
 		
 		HttpSocket socket = httpClient.openHttpSocket(""+channel);
-		channel.getSession().put("socket", socket);
-		
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
-			  .thenAccept(p->send(channel, socket, req))
+			  .thenAccept(p->sendData(channel, socket, req))
 			  .exceptionally(e -> responseListener.processError(channel, req, e));
+		
+		return socket;
 	}
 
-	private CompletableFuture<HttpResponse> send(Channel channel, HttpSocket socket, HttpRequest req) {
-		log.info("sending request(channel="+channel+"(=\n"+req);
-		socket.send(req, new Layer1Response(responseListener, channel, req));
-		return null;
-	}
-
-	public void farEndClosed(Channel channel) {
+	public void clientClosedChannel(Channel channel) {
 		log.info("closing far end socket. channel="+channel);
 		ChannelSession session = channel.getSession();
 		HttpSocket socket = (HttpSocket) session.get("socket");

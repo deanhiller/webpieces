@@ -8,11 +8,12 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
 @Singleton
-public class Layer2DataListener {
+public class Layer2DataListener implements DataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer2DataListener.class);
 	
@@ -40,11 +41,20 @@ public class Layer2DataListener {
 	}
 
 	public void farEndClosed(Channel channel) {
-		processor.farEndClosed(channel);
+		processor.clientClosedChannel(channel);
 	}
 
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
 		log.info("Failure on channel="+channel, e);
+	}
+
+	@Override
+	public void applyBackPressure(Channel channel) {
+		log.warn("Need to apply backpressure", new RuntimeException());
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
 	}
 
 }

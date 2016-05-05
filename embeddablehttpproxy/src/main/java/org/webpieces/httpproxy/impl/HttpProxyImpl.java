@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.httpproxy.api.HttpProxy;
-import org.webpieces.httpproxy.impl.chain.Layer1ExecutorLayer;
-import org.webpieces.httpproxy.impl.chain.SSLLayer1DataListener;
+import org.webpieces.httpproxy.impl.chain.Layer2DataListener;
 
 public class HttpProxyImpl implements HttpProxy {
 
@@ -19,9 +18,7 @@ public class HttpProxyImpl implements HttpProxy {
 	@Inject
 	private AsyncServerManager serverMgr;
 	@Inject
-	private Layer1ExecutorLayer serverListener;
-	@Inject
-	private SSLLayer1DataListener sslServerListener;
+	private Layer2DataListener serverListener;
 	
 	private AsyncServer httpServer;
 	private AsyncServer httpsServer;
@@ -32,8 +29,8 @@ public class HttpProxyImpl implements HttpProxy {
 		InetSocketAddress addr = new InetSocketAddress(8080);
 		httpServer = serverMgr.createTcpServer("httpProxy", addr, serverListener);
 
-		InetSocketAddress sslAddr = new InetSocketAddress(8443);
-		httpsServer = serverMgr.createTcpServer("httpsProxy", sslAddr, sslServerListener);
+//		InetSocketAddress sslAddr = new InetSocketAddress(8443);
+//		httpsServer = serverMgr.createTcpServer("httpsProxy", sslAddr, sslServerListener);
 		log.info("now listening for incoming connections");
 	}
 

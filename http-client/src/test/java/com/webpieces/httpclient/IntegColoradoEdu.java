@@ -41,7 +41,7 @@ public class IntegColoradoEdu {
 		req.addHeader(new Header(KnownHeaderName.USER_AGENT, "webpieces/0.9"));
 
 		HttpClientFactory factory = HttpClientFactory.createFactory();
-		HttpClient client = factory.createHttpClient();
+		HttpClient client = factory.createHttpClient(5);
 		HttpSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))

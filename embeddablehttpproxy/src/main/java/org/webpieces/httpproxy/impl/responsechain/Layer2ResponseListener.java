@@ -26,7 +26,7 @@ public class Layer2ResponseListener {
 	private LayerZSendBadResponse badResponse;
 	
 	public void processResponse(Channel channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
-		log.info("received response(channel="+channel+")=\n"+resp);
+		log.info("received response(channel="+channel+").  type="+resp.getClass().getSimpleName()+" complete="+isComplete+" resp=\n"+resp);
 
 		byte[] respBytes = parser.marshalToBytes(resp);
 		ByteBuffer buffer = ByteBuffer.wrap(respBytes);
@@ -41,8 +41,7 @@ public class Layer2ResponseListener {
 	}
 
 	private void wroteBytes(Channel channel) {
-		log.info("wrote bytes out and closing channel="+channel);
-		channel.close();
+		log.info("wrote bytes out channel="+channel);
 	}
 
 	public Void processError(Channel channel, HttpRequest req, Throwable e) {

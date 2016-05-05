@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
@@ -31,27 +32,64 @@ import com.webpieces.httpparser.api.dto.HttpResponse;
 public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
+	private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	
 	private TCPChannel channel;
-	private HttpParser parser;
-	private DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+
+	private CompletableFuture<HttpSocket> connectFuture;
 	private boolean isClosed;
+	private boolean connected;
+	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
+	
+	private HttpParser parser;
 	private Memento memento;
 	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private MyDataListener dataListener = new MyDataListener();
+	private CloseListener closeListener;
 	
-	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser) {
+	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser, CloseListener listener) {
 		channel = mgr.createTCPChannel(idForLogging, dataListener);
 		this.parser = parser;
 		memento = parser.prepareToParse();
+		this.closeListener = listener;
 	}
 
 	@Override
 	public CompletableFuture<HttpSocket> connect(SocketAddress addr) {
-		return channel.connect(addr).thenApply(channel -> this);
+		connectFuture = channel.connect(addr).thenApply(channel -> connected());
+		return connectFuture;
 	}
 	
+	private synchronized HttpSocket connected() {
+		connected = true;
+		
+		while(!pendingRequests.isEmpty()) {
+			PendingRequest req = pendingRequests.remove();
+			actuallySendRequest(req.getRequest(), req.getListener());
+		}
+		
+		return this;
+	}
+
 	@Override
 	public void send(HttpRequest request, ResponseListener listener) {
+		if(connectFuture == null) 
+			throw new IllegalArgumentException("You must at least call httpSocket.connect first(it "
+					+ "doesn't have to complete...you just have to call it before caling send)");
+
+		boolean wasConnected = false;
+		synchronized (this) {
+			if(!connected) {
+				pendingRequests.add(new PendingRequest(request, listener));
+			} else
+				wasConnected = true;
+		}
+		
+		if(wasConnected) 
+			actuallySendRequest(request, listener);
+	}
+
+	private void actuallySendRequest(HttpRequest request, ResponseListener listener) {
 		ResponseListener l = new CatchResponseListener(listener);
 		byte[] bytes = parser.marshalToBytes(request);
 		ByteBuffer wrap = ByteBuffer.wrap(bytes);
@@ -59,6 +97,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
+		log.info("sending request now. req="+request);
 		CompletableFuture<Channel> write = channel.write(wrap);
 		write.exceptionally(e -> fail(l, e));
 	}
@@ -129,6 +168,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void farEndClosed(Channel channel) {
+			log.info("far end closed", new RuntimeException());
 			while(!responsesToComplete.isEmpty()) {
 				ResponseListener listener = responsesToComplete.poll();
 				if(listener != null) {
@@ -136,6 +176,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 			}
 			
+			closeListener.farEndClosed(HttpSocketImpl.this);
 			isClosed = true;
 		}
 
