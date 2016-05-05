@@ -7,6 +7,6 @@ public interface SelectorProviderFactory
 
     /**
      */
-    Select provider(String id);
+    Select provider();
 
 }

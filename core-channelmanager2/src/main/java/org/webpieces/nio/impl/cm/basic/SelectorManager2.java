@@ -59,7 +59,6 @@ public class SelectorManager2 implements SelectorListener {
     private Select selector;
     private SelectorProviderFactory factory;
 
-    private Object id;
 	private EventListenerList listenerList = new EventListenerList();
     //flag for logs so we know that the selector was woken up to close a socket.
     //this is needed as we want to see in the logs the reason of every selector fire clearly
@@ -69,22 +68,24 @@ public class SelectorManager2 implements SelectorListener {
 
 	private BufferPool pool;
 
+	private String threadName;
+
 //--------------------------------------------------------------------
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(SelectorProviderFactory factory, Object id, BufferPool pool) {
-	  	this.id = id;
+	public SelectorManager2(SelectorProviderFactory factory, BufferPool pool, String threadName) {
         this.factory = factory;
         this.pool = pool;
+        this.threadName = threadName;
 	}
 //--------------------------------------------------------------------
 //	BUSINESS METHODS
 //--------------------------------------------------------------------
 	public synchronized void start() {        
-        selector = factory.provider(id+"");
+        selector = factory.provider();
         
-        selector.startPollingThread(this);
+        selector.startPollingThread(this, threadName);
 
         selector.setRunning(true);
 	}
@@ -176,7 +177,7 @@ public class SelectorManager2 implements SelectorListener {
 			struct = (WrapperAndListener)previous.attachment();
 			previousOps = previous.interestOps();
 		}
-		struct.addListener(id, listener, validOps);
+		struct.addListener(listener, validOps);
 		int allOps = previousOps | validOps;
 		SelectionKey key = channel.register(selector, allOps, struct);
 		channel.setKey(key);
@@ -261,23 +262,23 @@ public class SelectorManager2 implements SelectorListener {
         //fashion.
         Set<SelectionKey> keySet = selector.selectedKeys();
         if(log.isTraceEnabled())
-        	log.trace(id+"keySetCnt="+keySet.size()+" registerCnt="+listenerList.getListenerCount()
+        	log.trace("keySetCnt="+keySet.size()+" registerCnt="+listenerList.getListenerCount()
         			+" needCloseOrRegister="+needCloseOrRegister+" wantShutdown="+selector.isWantShutdown());
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
-        	Helper.processKeys(id, keySet, this, pool);
+        	Helper.processKeys(keySet, this, pool);
         }
     }
 	
 	protected int waitOnSelector() {
 		int numNewKeys = 0;
 		if(log.isTraceEnabled())
-			log.trace(id+"coming into select");
+			log.trace("coming into select");
 		numNewKeys = selector.select();
 //should assert we are not stopping, have listeners, or have keys to process...
 
 		if(log.isTraceEnabled())
-			log.trace(id+"coming out of select with newkeys="+numNewKeys+
+			log.trace("coming out of select with newkeys="+numNewKeys+
 					" regCnt="+listenerList.getListenerCount()+" needCloseOrRegister="+needCloseOrRegister+
 					" wantShutdown="+selector.isWantShutdown());
 
@@ -305,7 +306,7 @@ public class SelectorManager2 implements SelectorListener {
 	 */
 	public void wakeUpSelector() {
 		if(log.isTraceEnabled())
-			log.trace(id+"Wakeup selector to enable close or registers");
+			log.trace("Wakeup selector to enable close or registers");
 		needCloseOrRegister = true;
 		selector.wakeup();
 	}

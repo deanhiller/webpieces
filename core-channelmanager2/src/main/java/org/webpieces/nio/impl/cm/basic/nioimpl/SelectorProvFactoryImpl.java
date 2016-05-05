@@ -13,10 +13,10 @@ public class SelectorProvFactoryImpl implements SelectorProviderFactory
 
     /**
      */
-    public Select provider(String id)
+    public Select provider()
     {
         SelectorProvider provider = SelectorProvider.provider();
-        return new SelectorImpl(id, provider);
+        return new SelectorImpl(provider);
     }
 
 }

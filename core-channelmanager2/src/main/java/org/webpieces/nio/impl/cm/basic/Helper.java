@@ -41,7 +41,7 @@ final class Helper {
 		return retVal;
 	}
 	
-	public static void processKeys(Object id, Set<SelectionKey> keySet, SelectorManager2 mgr, BufferPool pool) {
+	public static void processKeys(Set<SelectionKey> keySet, SelectorManager2 mgr, BufferPool pool) {
 		Iterator<SelectionKey> iter = keySet.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
@@ -50,23 +50,23 @@ final class Helper {
 				if(log.isTraceEnabled())
 					log.trace(key.attachment()+" ops="+Helper.opType(key.readyOps())
 							+" acc="+key.isAcceptable()+" read="+key.isReadable()+" write"+key.isWritable());
-				processKey(id, key, mgr, pool);
+				processKey(key, mgr, pool);
 //			} catch(CancelledKeyException e) {
 //				log.log(Level.INFO, "Cancelled key may be normal", e);
 			} catch(IOException e) {
-				log.warn(id+""+key.attachment()+"Processing of key failed, closing channel", e);
+				log.warn(key.attachment()+"Processing of key failed, closing channel", e);
 				try {
 					if(key != null) 
 						key.channel().close();
 				} catch(Throwable ee) {
-					log.warn(id+""+key.attachment()+"Close of channel failed", ee);
+					log.warn(key.attachment()+"Close of channel failed", ee);
 				}
 			} catch(CancelledKeyException e) {
 				//TODO: get rid of this if...else statement by fixing
 				//CancelledKeyException on linux so the tests don't fail				
-				log.trace(id+""+key.attachment()+"Processing of key failed, but continuing channel manager loop", e);				
+				log.trace(key.attachment()+"Processing of key failed, but continuing channel manager loop", e);				
 			} catch(Throwable e) {
-				log.warn(id+""+key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
+				log.warn(key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
 				try {
 					key.cancel();
 				} catch(Throwable ee) {
@@ -83,9 +83,9 @@ final class Helper {
 		keySet.clear();
 	}
 	
-	private static void processKey(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException, InterruptedException {
+	private static void processKey(SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
-			log.trace(id+""+key.attachment()+"proccessing");
+			log.trace(key.attachment()+"proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions
 		if(!key.channel().isOpen() || !key.isValid())
@@ -93,39 +93,39 @@ final class Helper {
 		
 		//if isAcceptable, than is a ServerSocketChannel
 		if(key.isAcceptable()) {
-			Helper.acceptSocket(id, key);
+			Helper.acceptSocket(key);
 		} 
 		
 		if(key.isConnectable())
-			Helper.connect(id, key);
+			Helper.connect(key);
 		
 		if(key.isWritable()) {
-			Helper.write(id, key);
+			Helper.write(key);
 		}
             
 		//The read MUST be after the write as a call to key.isWriteable is invalid if the
 		//read resulted in the far end closing the socket.
 		if(key.isReadable()) {
-			Helper.read(id, key, mgr, pool);
+			Helper.read(key, mgr, pool);
 		}                   
 	}
 	
 	//each of these functions should be a handler for a new type that we set up
 	//on the outside of this thing.  The signature is the same thing every time
 	// and we pass key and the Channel.  We can cast to the proper one.
-	private static void acceptSocket(Object id, SelectionKey key) throws IOException {
+	private static void acceptSocket(SelectionKey key) throws IOException {
 //		SelectableChannel s = key.channel();		
 		if(log.isTraceEnabled())
-			log.trace(id+""+key.attachment()+"Incoming Connection="+key);
+			log.trace(key.attachment()+"Incoming Connection="+key);
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		BasTCPServerChannel channel = (BasTCPServerChannel)struct.getChannel();
-		channel.accept("session "+channel.getSession());
+		channel.accept(channel.getSession());
 	}
 	
-	private static void connect(Object id, SelectionKey key) throws IOException {
+	private static void connect(SelectionKey key) throws IOException {
 		if(log.isTraceEnabled())
-			log.trace(id+""+key.attachment()+"finishing connect process");
+			log.trace(key.attachment()+"finishing connect process");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		ConnectionListener callback = struct.getConnectCallback();
@@ -142,14 +142,14 @@ final class Helper {
 			callback.connected(channel);
 			channel.registerForReads();
 		} catch(Exception e) {
-            log.warn(id+""+key.attachment()+"Could not open connection", e);
+            log.warn(key.attachment()+"Could not open connection", e);
 			callback.failed(channel, e);
 		}
 	}
 
-	private static void read(Object id, SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException {
+	private static void read(SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException {
 		if(log.isTraceEnabled())
-			log.trace(id+""+key.attachment()+"reading data");
+			log.trace(key.attachment()+"reading data");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		DataListener in = struct.getDataHandler();
@@ -171,18 +171,18 @@ final class Helper {
             	log.info(channel+"buffer2="+chunk);                	
             }
 
-            processBytes(id, key, chunk, bytes, mgr);
+            processBytes(key, chunk, bytes, mgr);
             
 		} catch(PortUnreachableException e) {
             //this is a normal occurence when some writes out udp to a port that is not
             //listening for udp!!!  log as finer and fire to client to deal with it.
-			log.trace(id+"Client sent data to a host or port that is not listening " +
+			log.trace("Client sent data to a host or port that is not listening " +
                     "to udp, or udp can't get through to that machine", e);
 			in.failure(channel, null, e);
         } catch(NotYetConnectedException e) {
             //this happens in udp when I disconnect after someone had already been streaming me
             //data.  It is supposed to stop listening but selector keeps firing.
-            log.warn(id+"Can't read until UDPChannel is connected", e);
+            log.warn("Can't read until UDPChannel is connected", e);
             in.failure(channel, null, e);
 		} catch(IOException e) {
             //kept getting the following exception so I added this as protection
@@ -232,10 +232,10 @@ final class Helper {
 				(msg.startsWith("An existing connection was forcibly closed")
 					|| msg.startsWith("Connection reset by peer")
 					|| msg.startsWith("An established connection was aborted by the software in your host machine"))) {
-		            log.trace(id+"Exception 2", e);
-		            processBytes(id, key, chunk, -1, mgr);
+		            log.trace("Exception 2", e);
+		            processBytes(key, chunk, -1, mgr);
 			} else {
-				log.warn(id+"IO Exception unexpected", e);
+				log.warn("IO Exception unexpected", e);
 				in.failure(channel, null, e);
 			}
 		}
@@ -248,7 +248,7 @@ final class Helper {
      * @param mgr 
      * @throws IOException
      */
-    private static void processBytes(Object id, SelectionKey key, ByteBuffer data, int bytes, SelectorManager2 mgr) throws IOException
+    private static void processBytes(SelectionKey key, ByteBuffer data, int bytes, SelectorManager2 mgr) throws IOException
     {
         WrapperAndListener struct = (WrapperAndListener)key.attachment();
         DataListener in = struct.getDataHandler();
@@ -281,7 +281,7 @@ final class Helper {
 //		}
 //	}
     
-	private static void write(Object id, SelectionKey key) throws IOException, InterruptedException {
+	private static void write(SelectionKey key) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())
 			log.trace(key.attachment()+"writing data");
 		

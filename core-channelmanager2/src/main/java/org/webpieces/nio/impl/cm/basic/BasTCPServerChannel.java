@@ -54,7 +54,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	/* (non-Javadoc)
 	 * @see api.biz.xsoftware.nio.TCPServerChannel#accept()
 	 */
-	public void accept(String newSocketId) throws IOException {
+	public void accept(int newSocketNum) throws IOException {
 		try {
 			//special code...see information in close() method
 			if(isClosed())
@@ -67,7 +67,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
-			IdObject obj = new IdObject(getIdObject(), newSocketId);
+			IdObject obj = new IdObject(getIdObject(), newSocketNum);
 			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), dataListener);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");

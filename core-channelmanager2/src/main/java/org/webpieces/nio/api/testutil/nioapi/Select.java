@@ -17,7 +17,7 @@ public interface Select
     /**
      * @param manager2
      */
-    void startPollingThread(SelectorListener manager2);
+    void startPollingThread(SelectorListener manager2, String threadName);
 
     /**
      * @throws InterruptedException 

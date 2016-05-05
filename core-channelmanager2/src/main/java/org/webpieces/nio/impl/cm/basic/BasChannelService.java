@@ -23,19 +23,12 @@ import com.webpieces.data.api.BufferPool;
 class BasChannelService implements ChannelManager {
 
 	private SelectorManager2 selMgr;
-	private String objectId;
-	private String cmId;
     private ChannelsFactory channelFactory;
 	private boolean started;
 	
-	BasChannelService(String id, ChannelsFactory c, 
+	BasChannelService(String threadName, ChannelsFactory c, 
 			SelectorProviderFactory mgr, BufferPool pool) {
-		if(id == null || id.length() == 0)
-			throw new IllegalArgumentException("id cannot be null");
-		this.cmId = "["+id+"] ";
-		
-		selMgr = new SelectorManager2(mgr, cmId, pool);
-		this.objectId = id;
+		selMgr = new SelectorManager2(mgr, pool, threadName);
         this.channelFactory = c;
         start();
 	}
@@ -46,7 +39,7 @@ class BasChannelService implements ChannelManager {
         	throw new IllegalArgumentException("dataListener cannot be null");
         else if(listener == null)
         	throw new IllegalArgumentException("connectionListener cannot be null");
-        IdObject obj = new IdObject(objectId, id);
+        IdObject obj = new IdObject(id);
         return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, dataListener);
     }
 
@@ -61,7 +54,7 @@ class BasChannelService implements ChannelManager {
         preconditionChecks(id);
         if(dataListener == null)
         	throw new IllegalArgumentException("dataListener cannot be null");
-        IdObject obj = new IdObject(objectId, id);      
+        IdObject obj = new IdObject(id);      
         return new BasTCPChannel(obj, channelFactory, selMgr, dataListener);
     } 
 
@@ -69,7 +62,7 @@ class BasChannelService implements ChannelManager {
         preconditionChecks(id);
         if(dataListener == null)
         	throw new IllegalArgumentException("dataListener cannot be null");
-        IdObject obj = new IdObject(objectId, id);
+        IdObject obj = new IdObject(id);
         return new UDPChannelImpl(obj, selMgr, dataListener);
     }
     
@@ -92,7 +85,4 @@ class BasChannelService implements ChannelManager {
 		selMgr.stop();
 	}
 	
-	public String toString() {
-		return cmId;
-	}
 }

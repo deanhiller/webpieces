@@ -28,7 +28,6 @@ public class SelectorImpl implements Select
     private static final Logger log = LoggerFactory.getLogger(SelectorImpl.class);
     private PollingThread thread;
     private AbstractSelector selector;
-    private String id;
     private boolean running = false;
     private boolean wantToShutDown = false;
     private SelectorListener listener;
@@ -38,16 +37,14 @@ public class SelectorImpl implements Select
      * Creates an instance of SelectorImpl.
      * @param selector
      */
-    public SelectorImpl(String id, AbstractSelector selector) {
-
+    public SelectorImpl(AbstractSelector selector) {
     }
 
     /**
      * Creates an instance of SelectorImpl.
      * @param provider
      */
-    public SelectorImpl(String id, SelectorProvider provider) {
-        this.id = id;
+    public SelectorImpl(SelectorProvider provider) {
         this.provider = provider;
     }
 
@@ -68,7 +65,7 @@ public class SelectorImpl implements Select
      * @throws IOException 
      * @see org.webpieces.nio.api.testutil.nioapi.Select#startPollingThread(org.webpieces.nio.impl.cm.basic.SelectorManager2)
      */
-    public void startPollingThread(SelectorListener l) {
+    public void startPollingThread(SelectorListener l, String threadName) {
         if(running)
             throw new IllegalStateException("Already running, can't start again");        
         this.listener = l;
@@ -76,7 +73,7 @@ public class SelectorImpl implements Select
 	        selector = provider.openSelector();
 	        
 	        thread = new PollingThread();
-	        thread.setName("SelMgr-"+id);
+	        thread.setName(threadName);
 	        thread.start();
         } catch(IOException e) {
         	throw new NioException(e);
@@ -103,7 +100,7 @@ public class SelectorImpl implements Select
             	}
             }
             if(running)
-                log.error(id+"Tried to shutdown channelmanager, but it took longer " +
+                log.error("Tried to shutdown channelmanager, but it took longer " +
                         "than 20 seconds.  It may be hung now");
         }        
     }
@@ -128,7 +125,7 @@ public class SelectorImpl implements Select
                     SelectorImpl.this.notifyAll();
                 }
             } catch (Exception e) {
-                log.warn(id+"Exception on ConnectionManager thread", e);
+                log.warn("Exception on ConnectionManager thread", e);
             }
         }
     }

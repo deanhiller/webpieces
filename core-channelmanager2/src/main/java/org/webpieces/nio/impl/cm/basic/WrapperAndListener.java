@@ -29,7 +29,7 @@ public class WrapperAndListener {
 		return channelName;
 	}
 
-	public void addListener(Object id, Object l, int validOps) {
+	public void addListener(Object l, int validOps) {
 		//cannot do instanceof here as clients may use one object as two instances and it
 		//could be set wrong or twice.....ie. we can't tell.  instead use validOps
 		switch(validOps) {

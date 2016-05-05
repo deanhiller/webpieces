@@ -31,7 +31,6 @@ TODO:
 * httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
 * ChannelManager should offer up a timeout on the writes, the connection is closed (or a wrapper of some sort) so we don't all have to implement this - this is half done....a write() now checks the write at the begin of queue and if hasn't written, it will timeout (The other half is a timer checking all queues every 'timeout' seconds or something like that or the selector could fire and check itself)
 * httpproxy - AsyncServer has an overload mode that we should use when we are at a certain amount of outstanding requests that we should use
-* httpproxy - keep-alive connections should be timed out at some point
-* httpclient - we probably should use the SessionExecutor so that all response payloads are single threaded and come in order and we would then have multiple threads still(ordering is necessary or we can't unmarshal misordered data).  Currently, like most, we single thread the responses coming back(but this is an easy change)
+* httpproxy - keep-alive connections should be timed out at some point albeit this is a demo anyways but we could build it into more
 * httpclient - timeout the request/response cycle
 * SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?
