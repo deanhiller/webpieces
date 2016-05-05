@@ -1,7 +1,6 @@
 package org.webpieces.httpproxy.impl.chain;
 
 import java.net.SocketAddress;
-import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -9,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpproxy.impl.responsechain.Layer1CloseListener;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 
 import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
 import com.webpieces.httpparser.api.dto.HttpUri;
 import com.webpieces.httpparser.api.dto.UrlInfo;
 
@@ -32,8 +31,7 @@ public class Layer4Processor {
 		ChannelSession session = channel.getSession();
 		HttpSocket socket = (HttpSocket) session.get("socket");
 		if(socket == null) {
-			socket = openSocketAndSendData(channel, req);
-			channel.getSession().put("socket", socket);
+			openSocketAndSendData(channel, req);
 		} else {
 			sendData(channel, socket, req);
 		}
@@ -46,7 +44,7 @@ public class Layer4Processor {
 
 	private HttpSocket openSocketAndSendData(Channel channel, HttpRequest req) {
 		SocketAddress addr = req.getServerToConnectTo(null);
-		
+
 		HttpUri uri = req.getRequestLine().getUri();
 		UrlInfo info = uri.getUriBreakdown();
 		if(info.getPrefix() != null) { 
@@ -55,7 +53,9 @@ public class Layer4Processor {
 			uri.setUri(info.getFullPath());
 		}
 		
-		HttpSocket socket = httpClient.openHttpSocket(""+channel);
+		HttpSocket socket = httpClient.openHttpSocket(""+channel, new Layer1CloseListener(responseListener, channel));
+		channel.getSession().put("socket", socket);
+
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
 			  .thenAccept(p->sendData(channel, socket, req))

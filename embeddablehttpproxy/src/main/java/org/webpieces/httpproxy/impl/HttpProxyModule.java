@@ -1,7 +1,6 @@
 package org.webpieces.httpproxy.impl;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Named;
@@ -15,8 +14,6 @@ import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
-import org.webpieces.util.threading.SessionExecutor;
-import org.webpieces.util.threading.SessionExecutorImpl;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

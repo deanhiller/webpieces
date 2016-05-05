@@ -58,4 +58,9 @@ public class Layer2ResponseListener {
 		return null;
 	}
 
+	public void farEndClosed(HttpSocket socket, Channel channel) {
+		//since socket is closing, close the channel from the browser...
+		channel.close();
+	}
+
 }

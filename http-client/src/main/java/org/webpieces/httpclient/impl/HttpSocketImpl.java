@@ -59,6 +59,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		connectFuture = channel.connect(addr).thenApply(channel -> connected());
 		return connectFuture;
 	}
+
+	@Override
+	public CompletableFuture<HttpResponse> send(HttpRequest request) {
+		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
+		ResponseListener l = new CompletableListener(future);
+		send(request, l);
+		return future;
+	}
 	
 	private synchronized HttpSocket connected() {
 		connected = true;
@@ -176,7 +184,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 			}
 			
-			closeListener.farEndClosed(HttpSocketImpl.this);
+			if(closeListener != null)
+				closeListener.farEndClosed(HttpSocketImpl.this);
+			
 			isClosed = true;
 		}
 
