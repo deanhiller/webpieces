@@ -26,7 +26,7 @@ public class HttpClientFactoryImpl extends HttpClientFactory {
 		BufferCreationPool pool = new BufferCreationPool(false, 2000, 1000);
 		HttpParser parser = HttpParserFactory.createParser(pool);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createChannelManager("httpClientChanMgr", pool, executor);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 		
 		return createHttpClient(mgr, parser);
 	}

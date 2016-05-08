@@ -46,7 +46,7 @@ public class HttpProxyModule implements Module {
 	public ChannelManager providesChannelManager(BufferPool pool) {
 		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		return factory.createChannelManager("ChanMgr-httpProxy", pool, executor);
+		return factory.createMultiThreadedChanMgr("ChanMgr-httpProxy", pool, executor);
 	}
 	
 	@Provides
@@ -61,7 +61,7 @@ public class HttpProxyModule implements Module {
 		BufferCreationPool pool = new BufferCreationPool();
 		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpclient-"));
 		ChannelManagerFactory cmFactory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = cmFactory.createChannelManager("ChanMgr-httpclient", pool, executor);		
+		ChannelManager mgr = cmFactory.createMultiThreadedChanMgr("ChanMgr-httpclient", pool, executor);		
 		HttpParser parser = HttpParserFactory.createParser(pool);
 		
 		HttpClientFactory factory = HttpClientFactory.createFactory();

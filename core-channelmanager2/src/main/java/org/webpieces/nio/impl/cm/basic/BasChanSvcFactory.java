@@ -23,13 +23,13 @@ public class BasChanSvcFactory extends ChannelManagerFactory {
 	 * @see api.biz.xsoftware.nio.ChannelManagerFactory#createChannelManager(java.util.Properties)
 	 */
 	@Override
-	public ChannelManager createChannelManager(String threadName, BufferPool pool) {
+	public ChannelManager createSingleThreadedChanMgr(String threadName, BufferPool pool) {
 		return new BasChannelService(threadName, new ChannelsFactoryImpl(), new SelectorProvFactoryImpl(), pool);
 	}
 
 	@Override
-	public ChannelManager createChannelManager(String threadName, BufferPool pool, Executor executor) {
-		ChannelManager mgr = createChannelManager(threadName, pool);
+	public ChannelManager createMultiThreadedChanMgr(String threadName, BufferPool pool, Executor executor) {
+		ChannelManager mgr = createSingleThreadedChanMgr(threadName, pool);
 		return new ThreadedChannelService(mgr, executor);
 	}
 	

@@ -62,6 +62,12 @@ project(':core-channelmanager2') {
     }
 }
 
+project(':core-stagemanager') {
+    dependencies {
+        compile project(':core-channelmanager2')
+    }
+}
+
 project(':core-netty') {
     dependencies {
         compile 'io.netty:netty-all:4.1.0.CR7'

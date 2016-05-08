@@ -46,7 +46,7 @@ public class IntegTestClientNotRead {
 		
 		BufferCreationPool pool2 = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createChannelManager("client", pool2);
+		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2);
 		TCPChannel channel = mgr.createTCPChannel("clientChan", new ClientDataListener());
 
 		log.info("client");

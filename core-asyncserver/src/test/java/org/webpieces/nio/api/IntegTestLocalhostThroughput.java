@@ -110,7 +110,7 @@ public class IntegTestLocalhostThroughput {
 
 	private TCPChannel createClientChannel(BufferPool pool2, DataListener listener) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createChannelManager("client", pool2);
+		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2);
 		TCPChannel channel = mgr.createTCPChannel("clientChan", listener);
 		return channel;
 	}

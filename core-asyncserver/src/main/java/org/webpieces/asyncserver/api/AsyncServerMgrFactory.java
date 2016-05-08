@@ -16,7 +16,7 @@ public class AsyncServerMgrFactory {
 	
 	public static AsyncServerManager createAsyncServer(String id, BufferPool pool) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createChannelManager(id, pool);
+		ChannelManager mgr = factory.createSingleThreadedChanMgr(id, pool);
 		return createAsyncServer(mgr);
 	}
 	
