@@ -34,3 +34,6 @@ TODO:
 * httpproxy - keep-alive connections should be timed out at some point albeit this is a demo anyways but we could build it into more
 * httpclient - timeout the request/response cycle
 * SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?
+* httpparser(then httpclient) - if Content-Length > X, simulate http chunking so large files can be streamed through the system...and if < X just return entire response with body where X is configurable
+* Need to go back and write more api level tests to beef up the test suite
+* httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
