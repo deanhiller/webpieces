@@ -9,7 +9,7 @@ public interface BufferPool {
 	 * 
 	 * @return
 	 */
-	public ByteBuffer nextBuffer();
+	public ByteBuffer nextBuffer(int minSize);
 		
 	/**
 	 * Allow releasing ByteBuffer's back to a pool to be re-used since copying bytes around is expensive and 

@@ -39,18 +39,29 @@ public class BufferCreationPool implements BufferPool {
 		this.poolSize = poolSize;
 	}
 	
-	public ByteBuffer nextBuffer() {
+	public ByteBuffer nextBuffer(int minSize) {
+		if(size < minSize) {
+			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+size+".  You should reconfigure this ");
+			return createBuffer(minSize);
+		}
+		
 		ByteBuffer buffer = freePackets.poll();
 
 		if(buffer == null) {
-			if(isDirect)
-				buffer = ByteBuffer.allocateDirect(size);
-			else 
-				buffer = ByteBuffer.allocate(size);
+			buffer = createBuffer(size);
 		} else {
 			counter.decrementAndGet();
 		}
 		
+		return buffer;
+	}
+
+	private ByteBuffer createBuffer(int size2) {
+		ByteBuffer buffer;
+		if(isDirect)
+			buffer = ByteBuffer.allocateDirect(size2);
+		else 
+			buffer = ByteBuffer.allocate(size2);
 		return buffer;
 	}
 
@@ -62,7 +73,9 @@ public class BufferCreationPool implements BufferPool {
 					+ "should be reading all your data from your buffer before releasing it");
 		} if(counter.incrementAndGet() > poolSize)
 			return; //we discard more than 300 buffers as we don't want to take up too much memory
-
+		else if(buffer.capacity() < size) {
+			return; //discard buffers that are released and are smaller
+		}
 		buffer.clear();
 		freePackets.add(buffer);
 	}

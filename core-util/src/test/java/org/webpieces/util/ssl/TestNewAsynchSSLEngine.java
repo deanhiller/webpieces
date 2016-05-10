@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 import javax.net.ssl.SSLEngine;
 
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import junit.framework.TestCase;
 
@@ -30,6 +32,7 @@ public class TestNewAsynchSSLEngine extends TestCase {
 	private AsyncSSLEngine clientEngine;
 	
 	@Override
+	@Before
 	protected void setUp() throws Exception {
 
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
@@ -52,6 +55,7 @@ public class TestNewAsynchSSLEngine extends TestCase {
 		//HandlerForTests.checkForWarnings();
 	}
 		
+	@Test
 	public void testBasic() throws Exception {
 		log.fine("B*******************************************");
 		clientEngine.beginHandshake();
@@ -68,22 +72,22 @@ public class TestNewAsynchSSLEngine extends TestCase {
 
 		r.run();
 		ByteBuffer b0 = clientList.getPacketEncrypted();
-
-		serverEngine.feedEncryptedPacket(b0, null);
 		ByteBuffer b1 = clientList.getPacketEncrypted();
-		r = serverList.getRunnable();
-
-		r.run();
-				
-		serverEngine.feedEncryptedPacket(b1, null);
 		ByteBuffer b2 = clientList.getPacketEncrypted();
-
-		serverEngine.feedEncryptedPacket(b2, null);		
+		
+		
+		serverEngine.feedEncryptedPacket(b0, null);
+		r = serverList.getRunnable();
+		r.run();
+		serverEngine.feedEncryptedPacket(b1, null);
+		serverEngine.feedEncryptedPacket(b2, null);
+		
 		Assert.assertTrue(serverList.isEncryptedLinkEstablished());
 		
+		
 		b0 = serverList.getPacketEncrypted();
-		clientEngine.feedEncryptedPacket(b0, null);
 		b1 = serverList.getPacketEncrypted();
+		clientEngine.feedEncryptedPacket(b0, null);
 		clientEngine.feedEncryptedPacket(b1, null);
 
 		Assert.assertTrue(clientList.isEncryptedLinkEstablished());

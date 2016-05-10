@@ -14,7 +14,7 @@ public class MockPool implements BufferPool {
 	}
 
 	@Override
-	public ByteBuffer nextBuffer() {
+	public ByteBuffer nextBuffer(int minSize) {
 		return null;
 	}
 

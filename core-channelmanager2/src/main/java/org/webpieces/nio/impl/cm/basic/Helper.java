@@ -160,7 +160,7 @@ final class Helper {
 			return; //do not process reads if we were unregistered
 		}
 		
-		ByteBuffer chunk = pool.nextBuffer();
+		ByteBuffer chunk = pool.nextBuffer(512);
 		
 		try {
             if(logBufferNextRead)

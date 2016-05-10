@@ -62,9 +62,9 @@ project(':core-channelmanager2') {
     }
 }
 
-project(':core-stagemanager') {
+project(':core-ssl') {
     dependencies {
-        compile project(':core-channelmanager2')
+        compile project(':core-datawrapper')
     }
 }
 
