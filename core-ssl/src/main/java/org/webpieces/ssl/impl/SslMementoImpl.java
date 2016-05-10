@@ -15,7 +15,7 @@ public class SslMementoImpl implements SslMemento {
 	private SSLEngine engine;
 	private String id;
 	private Action actionToTake;
-	private ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
+	private ConnectionState connectionState = ConnectionState.NOT_STARTED;
 	private ByteBuffer cachedOut;
 	private List<ByteBuffer> cacheToProcess = new ArrayList<>();
 	private ByteBuffer cachedForUnderflow;

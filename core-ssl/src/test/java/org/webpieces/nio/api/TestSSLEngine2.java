@@ -37,7 +37,7 @@ public class TestSSLEngine2 {
 		SSLEngine svr = sslEngineFactory.createEngineForServerSocket();
 		
 		clientMemento = engine.createMemento("id", client);
-		Assert.assertEquals(ConnectionState.NOT_CONNECTED, clientMemento.getConnectionState());
+		Assert.assertEquals(ConnectionState.NOT_STARTED, clientMemento.getConnectionState());
 		clientMemento = engine.beginHandshake(clientMemento);
 		Assert.assertEquals(ConnectionState.CONNECTING, clientMemento.getConnectionState());
 		
@@ -46,7 +46,7 @@ public class TestSSLEngine2 {
 		ByteBuffer buffer = action.getToSendToSocket().get(0);
 
 		svrMemento = engine.createMemento("svr", svr);
-		Assert.assertEquals(ConnectionState.NOT_CONNECTED, svrMemento.getConnectionState());
+		Assert.assertEquals(ConnectionState.NOT_STARTED, svrMemento.getConnectionState());
 		svrMemento = engine.feedEncryptedPacket(svrMemento, buffer);
 		Assert.assertEquals(ConnectionState.CONNECTING, svrMemento.getConnectionState());
 		
@@ -117,6 +117,18 @@ public class TestSSLEngine2 {
 		Assert.assertEquals(ActionState.SEND_TO_SOCKET, action.getActionState());
 		//results in two ssl packets instead of the one that was fed in..
 		Assert.assertEquals(2, action.getToSendToSocket().size());
+		
+		svrMemento = engine.feedEncryptedPacket(svrMemento, action.getToSendToSocket().get(0));
+		Action svrAction = svrMemento.getActionToTake();
+		Assert.assertEquals(ActionState.SEND_TO_CLIENT, svrAction.getActionState());
+		ByteBuffer buffer = svrAction.getToSendToClient().get(0);
+		
+		svrMemento = engine.feedEncryptedPacket(svrMemento, action.getToSendToSocket().get(1));
+		svrAction = svrMemento.getActionToTake();
+		Assert.assertEquals(ActionState.SEND_TO_CLIENT, svrAction.getActionState());
+		ByteBuffer buffer2 = svrAction.getToSendToClient().get(0);
+		
+		Assert.assertEquals(17000, buffer.remaining()+buffer2.remaining());
 	}
 
 	@Test

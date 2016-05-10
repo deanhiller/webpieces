@@ -3,6 +3,10 @@ package org.webpieces.ssl.api;
 public enum ActionState {
 
 	SEND_TO_SOCKET,
+	
+	/**
+	 * This means send to the client java code (not remote client) as opposed to sending over socket
+	 */
 	SEND_TO_CLIENT,
 	
 	/**
@@ -17,6 +21,9 @@ public enum ActionState {
 	 */
 	RUN_RUNNABLE,
 	
+	/**
+	 * This end is connected now, feel free to notify client code so that it can now write
+	 */
 	CONNECTED,
 	
 	/**
@@ -26,5 +33,12 @@ public enum ActionState {
 	CONNECTED_AND_SEND_TO_SOCKET, 
 	
 	WAITING_ON_RUNNABLE_COMPLETE_CALL,
+	
+	CLOSED,
+	
+	/**
+	 * We are now officially closed but must send final handshake message to prevent truncation attack
+	 */
+	CLOSED_AND_SEND_TO_SOCKET,
 	
 }
