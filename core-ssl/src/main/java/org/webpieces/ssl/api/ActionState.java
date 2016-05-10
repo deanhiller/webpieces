@@ -28,10 +28,12 @@ public enum ActionState {
 	
 	/**
 	 * This end is connected now and to complete the connection on the other end
-	 * ByteBuffers are returned that need to be fed to the socket
+	 * ByteBuffers are returned that need to be fed to the socket.  The best way
+	 * to acheive this is first fire the data over the socket and THEN notify
+	 * client that it is connected
 	 */
 	CONNECTED_AND_SEND_TO_SOCKET, 
-	
+
 	WAITING_ON_RUNNABLE_COMPLETE_CALL,
 	
 	CLOSED,
