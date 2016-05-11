@@ -5,6 +5,7 @@ import java.util.function.Function;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -29,14 +30,23 @@ public class SslChannelService implements ChannelManager {
 
 	@Override
 	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener) {
-		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool);
+		return mgr.createTCPServerChannel(id, connectionListener);
+	}
+	
+	@Override
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory) {
+		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory);
 		//because no methods return futures in this type of class, we do not need to proxy him....
 		return mgr.createTCPServerChannel(id, wrapperConnectionListener);
 	}
 
 	@Override
 	public TCPChannel createTCPChannel(String id) {
-		SSLEngine engine = null;		
+		return mgr.createTCPChannel(id);
+	}
+	
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
 		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.createParser(id, engine, pool, l);
 		
 		TCPChannel channel = mgr.createTCPChannel(id);

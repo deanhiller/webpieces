@@ -1,6 +1,9 @@
 package org.webpieces.nio.impl.cm.basic;
 
+import javax.net.ssl.SSLEngine;
+
 import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -41,22 +44,32 @@ class BasChannelService implements ChannelManager {
         	throw new IllegalArgumentException("connectionListener cannot be null");
         IdObject obj = new IdObject(id);
         return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, pool);
-    }
-
+	}
+	
+	@Override
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener,
+			SSLEngineFactory factory) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
+	
 	private void preconditionChecks(String id) {
 		if(id == null)
             throw new IllegalArgumentException("id cannot be null");
 		else if(!started)
 			throw new IllegalStateException("Call start() on the ChannelManagerService first");
 	}
-	
 	@Override
     public TCPChannel createTCPChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(id);      
         return new BasTCPChannel(obj, channelFactory, selMgr, pool);
-    } 
+	}
 
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
+	
 	@Override
     public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);

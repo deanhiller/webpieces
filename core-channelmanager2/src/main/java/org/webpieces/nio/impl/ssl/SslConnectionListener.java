@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import javax.net.ssl.SSLEngine;
 
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -20,10 +21,12 @@ public class SslConnectionListener implements ConnectionListener {
 
 	private ConnectionListener connectionListener;
 	private BufferPool pool;
+	private SSLEngineFactory sslFactory;
 
-	public SslConnectionListener(ConnectionListener connectionListener, BufferPool pool) {
+	public SslConnectionListener(ConnectionListener connectionListener, BufferPool pool, SSLEngineFactory sslFactory) {
 		this.connectionListener = connectionListener;
 		this.pool = pool;
+		this.sslFactory = sslFactory;
 	}
 
 	//thanks to SessionExecutor we will not start getting data to the listener until connected returns
@@ -31,7 +34,7 @@ public class SslConnectionListener implements ConnectionListener {
 	@Override
 	public CompletableFuture<DataListener> connected(Channel c, boolean s) {
 		TCPChannel realChannel = (TCPChannel) c;
-		SSLEngine engine = null;		
+		SSLEngine engine = sslFactory.createEngineForServerSocket();		
 		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.createParser(c+"", engine, pool, l);
 		SslTCPChannel sslChannel = new SslTCPChannel(function, realChannel);
 		

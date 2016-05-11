@@ -2,6 +2,8 @@ package org.webpieces.nio.api;
 
 import java.io.IOException;
 
+import javax.net.ssl.SSLEngine;
+
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -34,9 +36,11 @@ public interface ChannelManager {
      * 
      * @return a TCPServerChannel
      */
-    public TCPServerChannel createTCPServerChannel(
-    		String id, ConnectionListener connectionListener);
+    public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener);
 
+    public TCPServerChannel createTCPServerChannel(
+    		String id, ConnectionListener connectionListener, SSLEngineFactory factory);
+    
     /**
      * Returns a non-blocking TCPChannel.
      * @param id (Should not be null)Used for logging purposes.
@@ -46,6 +50,8 @@ public interface ChannelManager {
      */
     public TCPChannel createTCPChannel(String id);
 
+    public TCPChannel createTCPChannel(String id, SSLEngine engine);
+    
     /**
      * Creates a UDPChannel that can connect to a peer and receive/send data from/to
      * that peer.  We will have to test this, but I hear this is more
