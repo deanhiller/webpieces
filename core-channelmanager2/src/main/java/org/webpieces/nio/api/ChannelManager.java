@@ -7,7 +7,6 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 
 /**
@@ -36,7 +35,7 @@ public interface ChannelManager {
      * @return a TCPServerChannel
      */
     public TCPServerChannel createTCPServerChannel(
-    		String id, ConnectionListener connectionListener, DataListener dataListener);
+    		String id, ConnectionListener connectionListener);
 
     /**
      * Returns a non-blocking TCPChannel.
@@ -45,7 +44,7 @@ public interface ChannelManager {
      *  
      * @return a non-blocking TCPChannel.
      */
-    public TCPChannel createTCPChannel(String id, DataListener listener);
+    public TCPChannel createTCPChannel(String id);
 
     /**
      * Creates a UDPChannel that can connect to a peer and receive/send data from/to
@@ -57,7 +56,7 @@ public interface ChannelManager {
      * @return a UDPChannel
      * @throws IOException
      */
-    public UDPChannel createUDPChannel(String id, DataListener listener);
+    public UDPChannel createUDPChannel(String id);
 	
 	/*
 	 * Creates a UDPServerChannel that can send/receive data from multiple peers.

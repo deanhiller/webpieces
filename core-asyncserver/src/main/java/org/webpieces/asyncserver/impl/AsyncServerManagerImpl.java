@@ -21,9 +21,9 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 			String id, SocketAddress addr, DataListener listener) {
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
-		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels); 
+		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels, proxyListener); 
 		
-		TCPServerChannel serverChannel = channelManager.createTCPServerChannel(id, connectionListener, proxyListener);
+		TCPServerChannel serverChannel = channelManager.createTCPServerChannel(id, connectionListener);
 		
 		serverChannel.bind(addr);
 		serverChannel.setReuseAddress(true);

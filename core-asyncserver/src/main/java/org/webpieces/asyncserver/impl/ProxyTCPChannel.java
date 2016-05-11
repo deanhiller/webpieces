@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.handlers.DataListener;
 
 public class ProxyTCPChannel implements TCPChannel {
 
@@ -19,8 +20,8 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
-		return channel.connect(addr);
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		return channel.connect(addr, listener);
 	}
 
 	public CompletableFuture<Channel> write(ByteBuffer b) {

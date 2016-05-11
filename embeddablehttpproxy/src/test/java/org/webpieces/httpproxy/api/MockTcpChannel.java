@@ -18,7 +18,8 @@ public class MockTcpChannel implements TCPChannel {
 	private ChannelSession session = new MyChanSession();
 
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener dataListener) {
+		this.dataListener = dataListener;
 		return null;
 	}
 

@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +32,13 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	private final ServerSocketChannel channel;
     private final ChannelsFactory channelFactory;
 	private final ConnectionListener connectionListener;
-	private final DataListener dataListener;
 	private BufferPool pool;	
 	private int channelCount = 0;
 	
 	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr, 
-			ConnectionListener listener, DataListener dataListener, BufferPool pool) {
+			ConnectionListener listener, BufferPool pool) {
 		super(id, selMgr);
 		this.connectionListener = listener;
-		this.dataListener = dataListener;
         this.channelFactory = c;
         this.pool = pool;
         try {
@@ -71,10 +70,11 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketNum);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), dataListener, pool);
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), pool);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
-			connectionListener.connected(tcpChan);
+			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
+			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));
 			
 			tcpChan.registerForReads();
 			

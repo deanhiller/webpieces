@@ -6,7 +6,6 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
@@ -35,14 +34,13 @@ class BasChannelService implements ChannelManager {
         start();
 	}
 	
-    public TCPServerChannel createTCPServerChannel(String id, ConnectionListener listener, DataListener dataListener) {
+	@Override
+    public TCPServerChannel createTCPServerChannel(String id, ConnectionListener listener) {
         preconditionChecks(id);
-        if(dataListener == null)
-        	throw new IllegalArgumentException("dataListener cannot be null");
-        else if(listener == null)
+        if(listener == null)
         	throw new IllegalArgumentException("connectionListener cannot be null");
         IdObject obj = new IdObject(id);
-        return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, dataListener, pool);
+        return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, pool);
     }
 
 	private void preconditionChecks(String id) {
@@ -52,22 +50,21 @@ class BasChannelService implements ChannelManager {
 			throw new IllegalStateException("Call start() on the ChannelManagerService first");
 	}
 	
-    public TCPChannel createTCPChannel(String id, DataListener dataListener) {
+	@Override
+    public TCPChannel createTCPChannel(String id) {
         preconditionChecks(id);
-        if(dataListener == null)
-        	throw new IllegalArgumentException("dataListener cannot be null");
         IdObject obj = new IdObject(id);      
-        return new BasTCPChannel(obj, channelFactory, selMgr, dataListener, pool);
+        return new BasTCPChannel(obj, channelFactory, selMgr, pool);
     } 
 
-    public UDPChannel createUDPChannel(String id, DataListener dataListener) {
+	@Override
+    public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);
-        if(dataListener == null)
-        	throw new IllegalArgumentException("dataListener cannot be null");
         IdObject obj = new IdObject(id);
-        return new UDPChannelImpl(obj, selMgr, dataListener, pool);
+        return new UDPChannelImpl(obj, selMgr, pool);
     }
     
+	@Override
 	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener dataListener) {
         if(dataListener == null)
         	throw new IllegalArgumentException("dataListener cannot be null");

@@ -139,8 +139,7 @@ final class Helper {
 		
 		try {
 			channel.finishConnect();
-			callback.connected(channel);
-			channel.registerForReads();
+			callback.connected(channel, true);
 		} catch(Exception e) {
             log.warn(key.attachment()+"Could not open connection", e);
 			callback.failed(channel, e);

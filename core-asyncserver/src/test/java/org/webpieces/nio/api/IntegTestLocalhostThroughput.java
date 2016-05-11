@@ -83,7 +83,7 @@ public class IntegTestLocalhostThroughput {
 		
 		BufferPool pool2 = new BufferCreationPool();
 		DataListener listener = new ClientDataListener(pool2);
-		TCPChannel channel = createClientChannel(pool2, listener);
+		TCPChannel channel = createClientChannel(pool2);
 		//TCPChannel channel = createNettyChannel();
 
 		timer.schedule(new TimerTask() {
@@ -93,25 +93,25 @@ public class IntegTestLocalhostThroughput {
 			}
 		}, 1000, 5000);
 
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
 	}
 
-	private TCPChannel createNettyChannel(DataListener listener) {
+	private TCPChannel createNettyChannel() {
 		org.webpieces.netty.api.BufferPool pool = new org.webpieces.netty.api.BufferPool();
 		
 		NettyChannelMgrFactory factory = NettyChannelMgrFactory.createFactory();
 		ChannelManager mgr = factory.createChannelManager(pool);
-		TCPChannel channel = mgr.createTCPChannel("clientChan", listener);
+		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;		
 	}
 
-	private TCPChannel createClientChannel(BufferPool pool2, DataListener listener) {
+	private TCPChannel createClientChannel(BufferPool pool2) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2);
-		TCPChannel channel = mgr.createTCPChannel("clientChan", listener);
+		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;
 	}
 

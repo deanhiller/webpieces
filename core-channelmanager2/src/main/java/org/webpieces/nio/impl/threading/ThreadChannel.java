@@ -7,21 +7,25 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
+import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadChannel implements Channel {
 
 	private ProxyExecutor executor;
 	private Channel channel;
+	private SessionExecutor sessionExecutor;
 
 	public ThreadChannel(Channel channel, SessionExecutor executor2) {
 		this.channel = channel;
+		this.sessionExecutor = executor2;
 		this.executor =  new ProxyExecutor(channel, executor2);
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
-		CompletableFuture<Channel> future = channel.connect(addr);
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		DataListener threaded = new ThreadDataListener(listener, sessionExecutor);
+		CompletableFuture<Channel> future = channel.connect(addr, threaded);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> p, executor);

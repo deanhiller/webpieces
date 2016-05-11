@@ -1,8 +1,6 @@
 package org.webpieces.httpproxy.impl.chain;
 
 import java.net.SocketAddress;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -15,7 +13,6 @@ import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.ChannelSession;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

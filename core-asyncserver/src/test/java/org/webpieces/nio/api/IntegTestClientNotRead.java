@@ -47,7 +47,7 @@ public class IntegTestClientNotRead {
 		BufferCreationPool pool2 = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2);
-		TCPChannel channel = mgr.createTCPChannel("clientChan", new ClientDataListener());
+		TCPChannel channel = mgr.createTCPChannel("clientChan");
 
 		log.info("client");
 
@@ -58,7 +58,7 @@ public class IntegTestClientNotRead {
 			}
 		}, 1000, 5000);
 		
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080));
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), new ClientDataListener());
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);

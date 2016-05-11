@@ -48,7 +48,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private CloseListener closeListener;
 	
 	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser, CloseListener listener) {
-		channel = mgr.createTCPChannel(idForLogging, dataListener);
+		channel = mgr.createTCPChannel(idForLogging);
 		this.parser = parser;
 		memento = parser.prepareToParse();
 		this.closeListener = listener;
@@ -56,7 +56,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	@Override
 	public CompletableFuture<HttpSocket> connect(SocketAddress addr) {
-		connectFuture = channel.connect(addr).thenApply(channel -> connected());
+		connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected());
 		return connectFuture;
 	}
 

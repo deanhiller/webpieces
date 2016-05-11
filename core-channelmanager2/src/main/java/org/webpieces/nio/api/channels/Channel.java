@@ -6,6 +6,8 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.nio.api.handlers.DataListener;
+
 
 /**
  * 
@@ -59,7 +61,7 @@ public interface Channel extends RegisterableChannel {
 	 * @param listener Once connected, this is the listener that will start receiving data
 	 * @return
 	 */
-	public CompletableFuture<Channel> connect(SocketAddress addr);
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener);
 	public CompletableFuture<Channel> write(ByteBuffer b);
 	public CompletableFuture<Channel> close();
 	

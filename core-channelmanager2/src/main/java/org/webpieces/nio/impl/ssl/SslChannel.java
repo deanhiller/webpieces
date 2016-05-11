@@ -8,13 +8,10 @@ import org.webpieces.nio.api.channels.ChannelSession;
 
 public abstract class SslChannel implements Channel {
 
-	private Channel channel;
+	private final Channel channel;
 
-	public SslChannel() {
-	}
-	
-	public void init(Channel realChannel) {
-		this.channel = realChannel; 
+	public SslChannel(Channel realChannel) {
+		this.channel = realChannel;
 	}
 	
 	public void setReuseAddress(boolean b) {

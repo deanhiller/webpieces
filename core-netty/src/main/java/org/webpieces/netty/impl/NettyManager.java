@@ -7,7 +7,6 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 
 public class NettyManager implements ChannelManager {
@@ -19,17 +18,17 @@ public class NettyManager implements ChannelManager {
 	}
 	
 	@Override
-	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connListener, DataListener listener) {
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connListener) {
 		return new NettyServerChannel();
 	}
 
 	@Override
-	public TCPChannel createTCPChannel(String id, DataListener listener) {
-		return new NettyTCPChannel(pool, listener);
+	public TCPChannel createTCPChannel(String id) {
+		return new NettyTCPChannel(pool);
 	}
 
 	@Override
-	public UDPChannel createUDPChannel(String id, DataListener listener) {
+	public UDPChannel createUDPChannel(String id) {
 		throw new UnsupportedOperationException();
 	}
 

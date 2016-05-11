@@ -9,19 +9,22 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.handlers.DataListener;
 
 public class DefaultConnectionListener implements ConnectionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultConnectionListener.class);
 	private ConnectedChannels connectedChannels;
 	private ByteBuffer overloadResponse;
+	private DataListener listener;
 
-	public DefaultConnectionListener(ConnectedChannels channels) {
+	public DefaultConnectionListener(ConnectedChannels channels, DataListener listener) {
 		this.connectedChannels = channels;
+		this.listener = listener;
 	}
 
 	@Override
-	public void connected(Channel channel) {
+	public CompletableFuture<DataListener> connected(Channel channel, boolean s) {
 		TCPChannel tcpChannel = (TCPChannel) channel;
 		
 		if(overloadResponse != null) {
@@ -31,9 +34,10 @@ public class DefaultConnectionListener implements ConnectionListener {
 			//3. soooo...we must do both async and close on complete with timer to timeout and close on write regardless of success
 			//4. lastly, these all could throw exceptions and we don't really care about them at all
 			handleOverload(tcpChannel);
-			return;
+			return new CompletableFuture<DataListener>(); //return a future that will never resolve so we do not register for reads
 		}
 		connectedChannels.addChannel(tcpChannel);
+		return CompletableFuture.completedFuture(listener);
 	}
 
 	private void handleOverload(TCPChannel tcpChannel) {

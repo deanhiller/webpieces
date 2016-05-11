@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.handlers.DataListener;
 
 
 public class FutureConnectImpl implements ConnectionListener {
@@ -16,8 +17,9 @@ public class FutureConnectImpl implements ConnectionListener {
 	}
 	
 	@Override
-	public void connected(Channel channel) {
+	public CompletableFuture<DataListener> connected(Channel channel, boolean s) {
 		promise.complete(channel);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

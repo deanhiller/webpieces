@@ -14,29 +14,37 @@ import org.webpieces.ssl.api.SslListener;
 public class SslTCPChannel extends SslChannel implements TCPChannel {
 
 	private final AsyncSSLEngine sslEngine;
-	private final SslTryCatchListener clientDataListener;
-	private TCPChannel realChannel;
+	private SslTryCatchListener clientDataListener;
+	private final TCPChannel realChannel;
 	
 	private DataListener socketDataListener = new SocketDataListener();
 	private CompletableFuture<Channel> sslConnectfuture;
 	private CompletableFuture<Channel> closeFuture;
 	private SslListener sslListener = new OurSslListener();
 	
-	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, SslTryCatchListener wrapListener) {
+	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel) {
+		super(realChannel);
 		sslEngine = function.apply(sslListener );
-		this.clientDataListener = wrapListener;
+		this.realChannel = realChannel;
 	}
 
-	public void init(TCPChannel realChannel) {
-		this.realChannel = realChannel;
-		super.init(realChannel);
-	}
-	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
-		CompletableFuture<Channel> future = realChannel.connect(addr);
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		accept(listener);
+		CompletableFuture<Channel> future = realChannel.connect(addr, socketDataListener);
 		
 		return future.thenCompose( c -> beginHandshake());
+	}
+	
+	/**
+	 * Save the client data listener for unencrypted packets and add return our socket listener
+	 * to listen for encrypted packets
+	 * @param l
+	 * @return
+	 */
+	public DataListener accept(DataListener l) {
+		clientDataListener = new SslTryCatchListener(l);
+		return socketDataListener;
 	}
 
 	private CompletableFuture<Channel> beginHandshake() {

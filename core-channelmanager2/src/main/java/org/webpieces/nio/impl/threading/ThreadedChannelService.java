@@ -8,7 +8,6 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
-import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 import org.webpieces.util.threading.SessionExecutor;
 import org.webpieces.util.threading.SessionExecutorImpl;
@@ -24,23 +23,21 @@ public class ThreadedChannelService implements ChannelManager {
 	}
 
 	@Override
-	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener,
-			DataListener dataListener) {
-		DataListener wrapperDataListener = new ThreadDataListener(dataListener, executor);
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener) {
 		ConnectionListener wrapperConnectionListener = new ThreadConnectionListener(connectionListener, executor);
 		//because no methods return futures in this type of class, we do not need to proxy him....
-		return mgr.createTCPServerChannel(id, wrapperConnectionListener , wrapperDataListener );
+		return mgr.createTCPServerChannel(id, wrapperConnectionListener);
 	}
 
 	@Override
-	public TCPChannel createTCPChannel(String id, DataListener listener) {
-		TCPChannel channel = mgr.createTCPChannel(id, new ThreadDataListener(listener, executor));
+	public TCPChannel createTCPChannel(String id) {
+		TCPChannel channel = mgr.createTCPChannel(id);
 		return new ThreadTCPChannel(channel, executor);
 	}
 
 	@Override
-	public UDPChannel createUDPChannel(String id, DataListener listener) {
-		UDPChannel channel = mgr.createUDPChannel(id, new ThreadDataListener(listener, executor));
+	public UDPChannel createUDPChannel(String id) {
+		UDPChannel channel = mgr.createUDPChannel(id);
 		return new ThreadUDPChannel(channel, executor);
 	}
 

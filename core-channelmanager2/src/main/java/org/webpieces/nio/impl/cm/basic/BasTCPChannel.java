@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
 
@@ -31,8 +30,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, DataListener dataListener, BufferPool pool) {
-		super(id, selMgr, dataListener, pool);
+	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, BufferPool pool) {
+		super(id, selMgr, pool);
 		try {
 			channel = factory.open();
 			channel.configureBlocking(false);
@@ -48,8 +47,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param pool 
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, DataListener listener, BufferPool pool) {
-		super(id, selMgr, listener, pool);
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, BufferPool pool) {
+		super(id, selMgr, pool);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
@@ -131,7 +130,6 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			if(connected) {
 				try {
 					future.complete(this);
-					registerForReads();
 				} catch(Throwable e) {
 					log.warn(this+"Exception occurred", e);
 				}

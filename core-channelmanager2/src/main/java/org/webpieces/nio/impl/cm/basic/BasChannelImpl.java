@@ -44,16 +44,15 @@ public abstract class BasChannelImpl
     private boolean registered;
 	private boolean doNotAllowWrites;
 	private int writeTimeoutMs = 5_000;
-	protected final DataListener listener;
 	private int maxBytesWaitingSize = 250000;
 	private boolean applyingBackpressure;
 	private boolean isRegisterdForReads;
 	private boolean failOnNoBackPressure;
 	private BufferPool pool;
+	private DataListener dataListener;
 	
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener, BufferPool pool) {
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr);
-		this.listener = dataListener;
 		this.pool = pool;
 	}
 	
@@ -71,8 +70,12 @@ public abstract class BasChannelImpl
 	protected abstract int writeImpl(ByteBuffer b);
    
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr) {
-		return connectImpl(addr);
+	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		CompletableFuture<Channel> future = connectImpl(addr);
+		return future.thenApply(c -> {
+			registerForReads(listener);
+			return c;
+		});
 	}
 	
     protected abstract CompletableFuture<Channel> connectImpl(SocketAddress addr);
@@ -125,7 +128,7 @@ public abstract class BasChannelImpl
 			numBytesWaitingToBeWritten = waitingBytesCounter;
 			if(numBytesWaitingToBeWritten > maxBytesWaitingSize && !applyingBackpressure) {
 				applyingBackpressure = true;
-				listener.applyBackPressure(this);
+				dataListener.applyBackPressure(this);
 			} else if(numBytesWaitingToBeWritten > 2*maxBytesWaitingSize && failOnNoBackPressure) {
 				msg = numBytesWaitingToBeWritten + "(numBytesWaitingToBeWritten) > " 
 						+ (4*maxBytesWaitingSize) + "(4*maxBytesWaitingSize)";
@@ -233,7 +236,7 @@ public abstract class BasChannelImpl
 	        }
 	        
 	        if(waitingWriters.isEmpty() && applyingBackpressure) {
-	        	listener.releaseBackPressure(this);
+	        	dataListener.releaseBackPressure(this);
 	        	applyingBackpressure = false;
 	        }
 		}
@@ -288,8 +291,13 @@ public abstract class BasChannelImpl
      */
     protected abstract void bindImpl2(SocketAddress addr) throws IOException;
     
+    void registerForReads(DataListener l) {
+    	this.dataListener = l;
+    	registerForReads();
+    }
+    
 	public void registerForReads() {
-		if(listener == null)
+		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(!isConnecting && !isConnected()) {
 			throw new IllegalStateException(this+"Must call one of the connect methods first(ie. connect THEN register for reads)");
@@ -300,7 +308,7 @@ public abstract class BasChannelImpl
 			apiLog.trace(this+"Basic.registerForReads called");
 		
         try {
-			getSelectorManager().registerChannelForRead(this, listener);
+			getSelectorManager().registerChannelForRead(this, dataListener);
 			isRegisterdForReads = true;
 		} catch (IOException e) {
 			throw new NioException(e);
