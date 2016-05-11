@@ -22,6 +22,8 @@ import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
 
+import com.webpieces.data.api.BufferPool;
+
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 
@@ -31,8 +33,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	private boolean isConnected = false;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener) {
-		super(id, selMgr, dataListener);
+	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener, BufferPool pool) {
+		super(id, selMgr, dataListener, pool);
 		try {
 			channel = DatagramChannel.open();
 			channel.configureBlocking(false);

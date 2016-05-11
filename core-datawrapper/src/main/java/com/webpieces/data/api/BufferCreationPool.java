@@ -16,6 +16,11 @@ import org.slf4j.LoggerFactory;
  * BufferCreationPool.releaseBuffer(buffer); and ChannelManager will clear that buffer 
  * and re-use it for the next set of data coming in.
  * 
+ * We could behind the BufferPool have N BufferCreationPools as well to further reduce
+ * contention if any existed since this class is shared between async http parser,
+ * async ssl engine, clients, channelmanager writes involving all threads from
+ * SessionExecutor and all threads that call write() from the client as well...TBD
+ * 
  * @author dhiller
  */
 public class BufferCreationPool implements BufferPool {

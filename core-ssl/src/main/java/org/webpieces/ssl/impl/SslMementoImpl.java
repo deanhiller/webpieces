@@ -3,19 +3,17 @@ package org.webpieces.ssl.impl;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLEngine;
 
-import org.webpieces.ssl.api.Action;
 import org.webpieces.ssl.api.ConnectionState;
-import org.webpieces.ssl.api.SslMemento;
 
-public class SslMementoImpl implements SslMemento {
+public class SslMementoImpl {
 
 	private SSLEngine engine;
 	private String id;
-	private Action actionToTake;
-	private ConnectionState connectionState = ConnectionState.NOT_STARTED;
+	private AtomicReference<ConnectionState> connectionState = new AtomicReference<ConnectionState>(ConnectionState.NOT_STARTED);
 	private ByteBuffer cachedOut;
 	private List<ByteBuffer> cacheToProcess = new ArrayList<>();
 	private ByteBuffer cachedForUnderflow;
@@ -35,26 +33,12 @@ public class SslMementoImpl implements SslMemento {
 		return "[" + id + "]";
 	}
 
-	public void clear() {
-		actionToTake = null;
-	}
-
-	@Override
-	public Action getActionToTake() {
-		return actionToTake;
-	}
-
-	@Override
 	public ConnectionState getConnectionState() {
-		return connectionState;
+		return connectionState.get();
 	}
 	
-	public void setConnectionState(ConnectionState state) {
-		this.connectionState = state;
-	}
-
-	public void setActionToTake(Action action) {
-		this.actionToTake = action;
+	public void compareSet(ConnectionState expected, ConnectionState state) {
+		this.connectionState.compareAndSet(expected, state);
 	}
 
 	public ByteBuffer getCachedOut() {

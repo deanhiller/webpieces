@@ -1,5 +1,7 @@
 package org.webpieces.ssl.api;
 
+import javax.net.ssl.SSLEngine;
+
 import org.webpieces.ssl.impl.AsyncSSLEngine2Impl;
 
 import com.webpieces.data.api.BufferPool;
@@ -14,10 +16,10 @@ public class AsyncSSLFactory {
 	 * @param pool
 	 * @return
 	 */
-	public static AsyncSSLEngine createParser(BufferPool pool) {
+	public static AsyncSSLEngine createParser(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
 		//to get around verifydesign later AND enforce build breaks on design violations
 		//like api depending on implementation, we need reflection here to create this
 		//instance...
-		return new AsyncSSLEngine2Impl(pool);
+		return new AsyncSSLEngine2Impl(loggingId, engine, pool, listener);
 	}
 }

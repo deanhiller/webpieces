@@ -24,6 +24,8 @@ import org.webpieces.nio.api.exceptions.NioTimeoutException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
+import com.webpieces.data.api.BufferPool;
+
 /**
  * @author Dean Hiller
  */
@@ -47,10 +49,12 @@ public abstract class BasChannelImpl
 	private boolean applyingBackpressure;
 	private boolean isRegisterdForReads;
 	private boolean failOnNoBackPressure;
+	private BufferPool pool;
 	
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener) {
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, DataListener dataListener, BufferPool pool) {
 		super(id, selMgr);
 		this.listener = dataListener;
+		this.pool = pool;
 	}
 	
 	/* (non-Javadoc)
@@ -218,9 +222,12 @@ public abstract class BasChannelImpl
 	                waitingBytesCounter -= writtenOut;
 	                break;
 	            }
+	            
 	            //if it finished, remove the item from the queue.  It
 	            //does not need to be run again.
 	            waitingWriters.poll();
+	            //release bytebuffer back to pool
+	            pool.releaseBuffer(writer.getBuffer());
 	            waitingBytesCounter -= size;
 	            finishedPromises.add(writer.getPromise());
 	        }
@@ -345,6 +352,7 @@ public abstract class BasChannelImpl
 	        	log.trace(this+"sent write to queue");
 	       	}
 		} else {
+			pool.releaseBuffer(b);
 			impl.complete(this);
 			if(log.isTraceEnabled())
 				log.trace(this+" wrote bytes on client thread");

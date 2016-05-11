@@ -18,6 +18,8 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
 
+import com.webpieces.data.api.BufferPool;
+
 
 
 /**
@@ -29,8 +31,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, DataListener dataListener) {
-		super(id, selMgr, dataListener);
+	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, DataListener dataListener, BufferPool pool) {
+		super(id, selMgr, dataListener, pool);
 		try {
 			channel = factory.open();
 			channel.configureBlocking(false);
@@ -43,10 +45,11 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	/**
 	 * Only used from TCPServerChannel.accept().  please keep it that way. thanks.
 	 * @param newChan
+	 * @param pool 
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, DataListener listener) {
-		super(id, selMgr, listener);
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, DataListener listener, BufferPool pool) {
+		super(id, selMgr, listener, pool);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;

@@ -10,127 +10,131 @@ import javax.net.ssl.SSLEngine;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.ssl.api.Action;
-import org.webpieces.ssl.api.ActionState;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.ConnectionState;
-import org.webpieces.ssl.api.SslMemento;
 
 import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.data.api.BufferPool;
 
 public class TestSSLEngineClose {
 
-	private SslMemento clientMemento;
-	private SslMemento svrMemento;
-	private AsyncSSLEngine engine;
+	private AsyncSSLEngine clientEngine;
+	private AsyncSSLEngine svrEngine;
+	private MockSslListener clientListener = new MockSslListener();
+	private MockSslListener svrListener = new MockSslListener();
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException {
 		MockSSLEngineFactory sslEngineFactory = new MockSSLEngineFactory();	
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
-		engine = AsyncSSLFactory.createParser(pool);
-
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
 		SSLEngine svr = sslEngineFactory.createEngineForServerSocket();
+		clientEngine = AsyncSSLFactory.createParser("client", client, pool, clientListener);
+		svrEngine = AsyncSSLFactory.createParser("svr", svr, pool, svrListener);
 		
-		clientMemento = engine.createMemento("id", client);
-		Assert.assertEquals(ConnectionState.NOT_STARTED, clientMemento.getConnectionState());
-		clientMemento = engine.beginHandshake(clientMemento);
-		Assert.assertEquals(ConnectionState.CONNECTING, clientMemento.getConnectionState());
-		
-		Action action = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.SEND_TO_SOCKET, action.getActionState());
-		ByteBuffer buffer = action.getToSendToSocket().get(0);
+		clientEngine.beginHandshake();
+		ByteBuffer buffer = clientListener.getToSendToSocket().get(0);
 
-		svrMemento = engine.createMemento("svr", svr);
-		Assert.assertEquals(ConnectionState.NOT_STARTED, svrMemento.getConnectionState());
-		svrMemento = engine.feedEncryptedPacket(svrMemento, buffer);
-		Assert.assertEquals(ConnectionState.CONNECTING, svrMemento.getConnectionState());
+		svrEngine.feedEncryptedPacket(buffer);
+
+		svrListener.getRunnable().run();
 		
-		Action actionSvr = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.RUN_RUNNABLE, actionSvr.getActionState());
-		actionSvr.getRunnableToRun().run();
+		ByteBuffer buf = svrListener.getToSendToSocket().get(0);
+		clientEngine.feedEncryptedPacket(buf);
+		clientListener.getRunnable().run();
 		
-		svrMemento = engine.runnableComplete(svrMemento);
-		Assert.assertEquals(ConnectionState.CONNECTING, svrMemento.getConnectionState());
-		actionSvr = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.SEND_TO_SOCKET, actionSvr.getActionState());
+		List<ByteBuffer> buffers = clientListener.getToSendToSocket();
 		
-		ByteBuffer buf = actionSvr.getToSendToSocket().get(0);
-		clientMemento = engine.feedEncryptedPacket(clientMemento, buf);
+		svrEngine.feedEncryptedPacket(buffers.get(0));
+		svrListener.getRunnable().run();
 		
-		Assert.assertEquals(ConnectionState.CONNECTING, clientMemento.getConnectionState());
-		action = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.RUN_RUNNABLE, action.getActionState());
-		action.getRunnableToRun().run();
+		svrEngine.feedEncryptedPacket(buffers.get(1));
 		
-		clientMemento = engine.runnableComplete(clientMemento);
-		Assert.assertEquals(ConnectionState.CONNECTING, clientMemento.getConnectionState());
-		Assert.assertEquals(ActionState.SEND_TO_SOCKET, clientMemento.getActionToTake().getActionState());
+		svrEngine.feedEncryptedPacket(buffers.get(2));
+		Assert.assertTrue(svrListener.connected);
 		
-		List<ByteBuffer> buffers = clientMemento.getActionToTake().getToSendToSocket();
+		List<ByteBuffer> toClientBuffers = svrListener.getToSendToSocket();
 		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, buffers.get(0));
-		actionSvr = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.RUN_RUNNABLE, actionSvr.getActionState());
-		actionSvr.getRunnableToRun().run();
-		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, buffers.get(1));
-		actionSvr = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.NOT_ENOUGH_ENCRYPTED_BYTES_YET, actionSvr.getActionState());
-		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, buffers.get(2));
-		actionSvr = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CONNECTED_AND_SEND_TO_SOCKET, actionSvr.getActionState());
-		List<ByteBuffer> toClientBuffers = actionSvr.getToSendToSocket();
-		
-		clientMemento = engine.feedEncryptedPacket(clientMemento, toClientBuffers.get(0));
-		Assert.assertEquals(ConnectionState.CONNECTING, clientMemento.getConnectionState());
-		Action actionClient = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.NOT_ENOUGH_ENCRYPTED_BYTES_YET, actionClient.getActionState());
-		
-		clientMemento = engine.feedEncryptedPacket(clientMemento, toClientBuffers.get(1));
-		Assert.assertEquals(ConnectionState.CONNECTED, clientMemento.getConnectionState());
-		actionClient = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CONNECTED, actionClient.getActionState());
+		clientEngine.feedEncryptedPacket(toClientBuffers.get(0));
+		clientEngine.feedEncryptedPacket(toClientBuffers.get(1));
+
+		Assert.assertTrue(clientListener.connected);
 		
 		transferBigData();
 	}
 	
 	@Test
 	public void testBasicCloseFromServer() throws GeneralSecurityException, IOException {
-		svrMemento = engine.close(svrMemento);
-		Action action = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CLOSED_AND_SEND_TO_SOCKET, action.getActionState());
-		List<ByteBuffer> bufs = action.getToSendToSocket();
+		svrEngine.close();
+		List<ByteBuffer> bufs = svrListener.getToSendToSocket();
 		
-		clientMemento = engine.feedEncryptedPacket(clientMemento, bufs.get(0));
-		Action clientAction = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CLOSED_AND_SEND_TO_SOCKET, clientAction.getActionState());
-		ByteBuffer buf = clientAction.getToSendToSocket().get(0);
+		clientEngine.feedEncryptedPacket(bufs.get(0));
+		Assert.assertTrue(clientListener.closed);
+		Assert.assertFalse(clientListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, clientEngine.getConnectionState());
+		ByteBuffer buf = clientListener.getToSendToSocket().get(0);
 		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, buf);
-		action = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CLOSED, action.getActionState());
+		svrEngine.feedEncryptedPacket(buf);
+		Assert.assertTrue(svrListener.closed);
+		Assert.assertTrue(svrListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, svrEngine.getConnectionState());
 	}
 	
 	@Test
 	public void testBasicCloseFromClient() throws GeneralSecurityException, IOException {
-		clientMemento = engine.close(clientMemento);
-		Action action = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CLOSED_AND_SEND_TO_SOCKET, action.getActionState());
-		List<ByteBuffer> bufs = action.getToSendToSocket();
+		clientEngine.close();
+		Assert.assertFalse(clientListener.closed);
+		Assert.assertEquals(ConnectionState.DISCONNECTING, clientEngine.getConnectionState());
+		ByteBuffer bufs = clientListener.getToSendToSocket().get(0);
 		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, bufs.get(0));
-		Action clientAction = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CLOSED_AND_SEND_TO_SOCKET, clientAction.getActionState());
-		ByteBuffer buf = clientAction.getToSendToSocket().get(0);
+		svrEngine.feedEncryptedPacket(bufs);
+		Assert.assertTrue(svrListener.closed);
+		Assert.assertFalse(svrListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, svrEngine.getConnectionState());
+		ByteBuffer buf = svrListener.getToSendToSocket().get(0);
 		
-		clientMemento = engine.feedEncryptedPacket(clientMemento, buf);
-		action = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.CLOSED, action.getActionState());
+		clientEngine.feedEncryptedPacket(buf);
+		Assert.assertTrue(clientListener.closed);
+		Assert.assertTrue(clientListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, clientEngine.getConnectionState());
+		
+	}
+	
+	@Test
+	public void testBothEndsAtSameTime() {
+		clientEngine.close();
+		svrEngine.close();
+		
+		ByteBuffer clientBuf = clientListener.getToSendToSocket().get(0);
+		ByteBuffer svrBuf = svrListener.getToSendToSocket().get(0);
+		
+		clientEngine.feedEncryptedPacket(svrBuf);
+		Assert.assertTrue(clientListener.closed);
+		Assert.assertTrue(clientListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, clientEngine.getConnectionState());
+		
+		svrEngine.feedEncryptedPacket(clientBuf);
+		Assert.assertTrue(svrListener.closed);
+		Assert.assertTrue(svrListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, svrEngine.getConnectionState());
+	}
+	
+	@Test
+	public void testRaceWithCloseCall() {
+		
+		svrEngine.close();
+		ByteBuffer svrBuf = svrListener.getToSendToSocket().get(0);
+		
+		clientEngine.feedEncryptedPacket(svrBuf);
+		Assert.assertTrue(clientListener.closed);
+		Assert.assertFalse(clientListener.clientInitiated);
+		Assert.assertEquals(ConnectionState.DISCONNECTED, clientEngine.getConnectionState());
+		ByteBuffer clientBuf = clientListener.getToSendToSocket().get(0);
+		
+		clientEngine.close();
+		
+		svrEngine.feedEncryptedPacket(clientBuf);
 	}
 	
 	private void transferBigData() {
@@ -142,23 +146,19 @@ public class TestSSLEngineClose {
 		b.put((byte) 4);
 		b.flip();
 		
-		clientMemento = engine.feedPlainPacket(clientMemento, b);
-		Action action = clientMemento.getActionToTake();
-		Assert.assertEquals(ActionState.SEND_TO_SOCKET, action.getActionState());
+		clientEngine.feedPlainPacket(b);
+		List<ByteBuffer> encrypted = clientListener.getToSendToSocket();
 		//results in two ssl packets instead of the one that was fed in..
-		Assert.assertEquals(2, action.getToSendToSocket().size());
+		Assert.assertEquals(2, encrypted.size());
 		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, action.getToSendToSocket().get(0));
-		Action svrAction = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.SEND_TO_CLIENT, svrAction.getActionState());
-		ByteBuffer buffer = svrAction.getToSendToClient().get(0);
+		svrEngine.feedEncryptedPacket(encrypted.get(0));
+		ByteBuffer buffer = svrListener.getToSendToClient().get(0);
 		
-		svrMemento = engine.feedEncryptedPacket(svrMemento, action.getToSendToSocket().get(1));
-		svrAction = svrMemento.getActionToTake();
-		Assert.assertEquals(ActionState.SEND_TO_CLIENT, svrAction.getActionState());
-		ByteBuffer buffer2 = svrAction.getToSendToClient().get(0);
+		svrEngine.feedEncryptedPacket(encrypted.get(1));
+		ByteBuffer buffer2 = svrListener.getToSendToClient().get(0);
 		
 		Assert.assertEquals(17000, buffer.remaining()+buffer2.remaining());
 	}
+
 
 }

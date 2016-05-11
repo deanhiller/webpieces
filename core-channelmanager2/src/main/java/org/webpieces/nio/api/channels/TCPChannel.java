@@ -7,5 +7,5 @@ public interface TCPChannel extends Channel {
 	
 	public boolean getKeepAlive();
 	public void setKeepAlive(boolean b);
-	
+
 }

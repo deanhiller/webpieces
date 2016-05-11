@@ -1,9 +1,10 @@
 package org.webpieces.ssl.impl;
 
 import java.nio.ByteBuffer;
-import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -13,12 +14,10 @@ import javax.net.ssl.SSLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ssl.api.Action;
-import org.webpieces.ssl.api.ActionState;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
-import org.webpieces.ssl.api.SslMemento;
+import org.webpieces.ssl.api.SslListener;
 
 import com.webpieces.data.api.BufferPool;
 
@@ -28,23 +27,30 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	private static final ByteBuffer EMPTY = ByteBuffer.allocate(0);
 	
 	private BufferPool pool;
-
-	public AsyncSSLEngine2Impl(BufferPool pool) {
+	private SslMementoImpl mem;
+	private SslListener listener;
+	private Object wrapLock = new Object();
+	//unwrap would be a separate lock but it's better just to 
+	//order and not have to be thread safe...responsibility is on the client of this class.
+	//This is because you would have to lock unwrap/listener.packetUnencrypted and client would own this
+	//lock and for all we know another lock comes into the picture and deadlock occurs.  Instead we do
+	//not need to lock anyways.  Just keep ordered and not call from multiple threads AT same time.
+	//ie. use something like SessionExecutor 
+	//private Object unwrapLock = new Object(); 
+	private boolean clientInitiated;
+	private AtomicBoolean fireClosed = new AtomicBoolean(false);
+	private AtomicBoolean fireConnected = new AtomicBoolean(false);
+	
+	public AsyncSSLEngine2Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
 		this.pool = pool;
-	}
-
-	@Override
-	public SslMemento createMemento(String id, SSLEngine engine) {
+		this.listener = listener;
 		ByteBuffer cachedOutBuffer = pool.nextBuffer(engine.getSession().getApplicationBufferSize());
-		return new SslMementoImpl(id, engine, cachedOutBuffer);
+		this.mem = new SslMementoImpl(loggingId, engine, cachedOutBuffer);
 	}
 
 	@Override
-	public SslMemento beginHandshake(SslMemento memento) {
-		
-		SslMementoImpl mem = (SslMementoImpl) memento;
-		mem.clear();
-		mem.setConnectionState(ConnectionState.CONNECTING);
+	public void beginHandshake() {
+		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		SSLEngine sslEngine = mem.getEngine();
 		
 		if(log.isTraceEnabled())
@@ -54,162 +60,117 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		} catch (SSLException e) {
 			throw new AsyncSSLEngineException(e);
 		}
-		HandshakeStatus status = sslEngine.getHandshakeStatus();
-		continueHandShake(mem, status);
-		return mem;
-	}
-	
-	private void continueHandShake(SslMementoImpl mem, HandshakeStatus status) {
 		
-		switch (status) {
-		case FINISHED:
-			mem.setConnectionState(ConnectionState.CONNECTED);
-			mem.setActionToTake(new Action(ActionState.CONNECTED));
-			break;
-		case NEED_TASK:
-			createRunnable(mem);
-			break;
-		case NEED_UNWRAP:				
-			if(log.isTraceEnabled())
-				log.trace(mem+"need unwrap so wait");
-			mem.setActionToTake(new Action(ActionState.NOT_ENOUGH_ENCRYPTED_BYTES_YET));
-			break;
-		case NEED_WRAP:
-			if(log.isTraceEnabled())
-				log.trace(mem+"need wrap");
-			sendHandshakeMessage(mem);
-			break;
-		case NOT_HANDSHAKING:
-			break;
-		default:
-			throw new RuntimeException(mem+"bug, should never end up here");
-		}
+		sendHandshakeMessage();
 	}
 	
-	private void createRunnable(SslMementoImpl mem) {
+	private void createRunnable() {
 		SSLEngine sslEngine = mem.getEngine();
 		Runnable r = sslEngine.getDelegatedTask();
-		if(r == null)
-			mem.setActionToTake(new Action(ActionState.WAITING_ON_RUNNABLE_COMPLETE_CALL));
-		else
-			mem.setActionToTake(new Action(r));
+		
+		listener.runTask(new Runnable() {
+			@Override
+			public void run() {
+				r.run();
+				
+				runnableComplete();
+			}
+		});
 	}
 	
-	@Override
-	public SslMemento runnableComplete(SslMemento memento) {
-		SslMementoImpl mem = (SslMementoImpl) memento;
-		mem.clear();
-		
+	private void runnableComplete() {
 		SSLEngine sslEngine = mem.getEngine();
 		
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
-		if(hsStatus == HandshakeStatus.NEED_TASK)
-			throw new IllegalStateException("Client still did not run the Runnable returned in a previous call, yet client is calling runnableComplete");
 
 		List<ByteBuffer> toProcess = mem.getCachedToProcess();
-		if(toProcess.size() > 0) {
+		if(hsStatus == HandshakeStatus.NEED_UNWRAP) {
+			//unwrap any previously incoming data...
 			for(ByteBuffer buf : toProcess) {
 				if(log.isTraceEnabled()) {
 					log.trace(mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+buf.position()+" lim="+buf.limit());
 				}
-				feedEncryptedPacketImpl(mem, buf);
+				feedEncryptedPacketImpl(buf);
 			}
-		} else {
+		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			if(log.isTraceEnabled())
 				log.trace(mem+"[Runnable]continuing handshake");
-			continueHandShake(mem, hsStatus);
+			sendHandshakeMessage();
+		} else {
+			throw new UnsupportedOperationException("need to support state="+hsStatus);
 		}
-		return mem;
 	}
 
-	private void sendHandshakeMessage(SslMementoImpl mem) {
+	private void sendHandshakeMessage() {
 		try {
-			sendHandshakeMessageImpl(mem);
+			sendHandshakeMessageImpl();
 		} catch (SSLException e) {
 			throw new AsyncSSLEngineException(e);
 		}
 	}
 	
-	private void sendHandshakeMessageImpl(SslMementoImpl mem) throws SSLException {
+	private void sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"sending handshake message");
 		//HELPER.eraseBuffer(empty);
 
-		List<ByteBuffer> buffersToSend = new ArrayList<>();
-		HandshakeStatus hsStatus = HandshakeStatus.NEED_WRAP;
-		Status lastStatus = null;
+		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
+		if(hsStatus != HandshakeStatus.NEED_WRAP)
+			throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus="+hsStatus);
+		
 		while(hsStatus == HandshakeStatus.NEED_WRAP) {
-//			HELPER.eraseBuffer(engineToSocketData);
-//			if(log.isTraceEnabled())
-//				log.trace(id+"prepare packet pos="+engineToSocketData.position()+" lim="+engineToSocketData.limit());
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 			
-			SSLEngineResult result = sslEngine.wrap(EMPTY, engineToSocketData);
-			lastStatus = result.getStatus();
-			hsStatus = result.getHandshakeStatus();
+			Status lastStatus = null;
+			synchronized (wrapLock ) {
+				//KEEEEEP This very small.  wrap and then listener.packetEncrypted
+				SSLEngineResult result = sslEngine.wrap(EMPTY, engineToSocketData);
+				lastStatus = result.getStatus();
+				hsStatus = result.getHandshakeStatus();
+				
+				
+				if(log.isTraceEnabled())
+					log.trace(mem+"write packet pos="+engineToSocketData.position()+" lim="+
+							engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
+				if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
+					throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
+				
+				engineToSocketData.flip();
+				listener.sendEncryptedHandshakeData(engineToSocketData);
+			}
 			
-			engineToSocketData.flip();
-			if(log.isTraceEnabled())
-				log.trace(mem+"write packet pos="+engineToSocketData.position()+" lim="+
-						engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
-			if(lastStatus == Status.BUFFER_OVERFLOW || lastStatus == Status.BUFFER_UNDERFLOW)
-				throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
-			
-			if(log.isTraceEnabled())
-				log.trace(mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
-						" lim="+engineToSocketData.limit()+" status="+lastStatus+" hs="+hsStatus);
-			buffersToSend.add(engineToSocketData);
-//			fireEncryptedPacketToListener(null);
-//TODO: dhiller			
-//			fireEncryptedPacketToListener(null);
-//			if(status == Status.CLOSED) {
-//				isClosed = true;
-//				closeInbound();
-//				sslEngine.closeOutbound();
-//				sslListener.closed(clientInitiated);
-//			}
+			if(lastStatus == Status.CLOSED && !clientInitiated) {
+				fireClose();
+			}
 		}
 
 		if(hsStatus == HandshakeStatus.NEED_WRAP || hsStatus == HandshakeStatus.NEED_TASK)
 			throw new RuntimeException(mem+"BUG, need to implement more here status="+hsStatus);			
 
-		
-		
-//TODO: dhiller		
 		if(log.isTraceEnabled())
 			log.trace(mem+"status="+hsStatus+" isConn="+mem.getConnectionState());
 		if(hsStatus == HandshakeStatus.FINISHED) {
-			mem.setConnectionState(ConnectionState.CONNECTED);
-			//this is a sslserver side connect
-			//sslserver may be client side :)
-			mem.setActionToTake(new Action(ActionState.CONNECTED_AND_SEND_TO_SOCKET, buffersToSend));
-		} else if(lastStatus == Status.CLOSED) {
-			mem.setActionToTake(new Action(ActionState.CLOSED_AND_SEND_TO_SOCKET, buffersToSend));
-		} else {
-			mem.setActionToTake(new Action(buffersToSend));	
+			fireLinkEstablished();
 		}
 	}
-	
+
 	/**
 	 * This is synchronized as the socketToEngineData2 buffer is modified in this method
 	 * and modified in other methods that are called on other threads.(ie. the put is called)
 	 * 
 	 */
-	public SslMemento feedEncryptedPacket(SslMemento memento, ByteBuffer b) {
-		if(memento.getConnectionState() == ConnectionState.DISCONNECTED)
-			throw new IllegalStateException(memento+"SSLEngine is closed");
+	@Override
+	public void feedEncryptedPacket(ByteBuffer b) {
+		if(mem.getConnectionState() == ConnectionState.DISCONNECTED)
+			throw new IllegalStateException(mem+"SSLEngine is closed");
 		
-		SslMementoImpl mem = (SslMementoImpl) memento;
-		mem.clear();
-		if(mem.getConnectionState() == ConnectionState.NOT_STARTED)
-			mem.setConnectionState(ConnectionState.CONNECTING);
+		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		
-		feedEncryptedPacketImpl(mem, b);
-		return memento;
+		feedEncryptedPacketImpl(b);
 	}
 	
-	private void feedEncryptedPacketImpl(SslMementoImpl mem, ByteBuffer encryptedInData) {	
+	private void feedEncryptedPacketImpl(ByteBuffer encryptedInData) {	
 		SSLEngine sslEngine = mem.getEngine();
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
@@ -224,7 +185,6 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			mem.setCachedForUnderFlow(null);
 		}
 		
-		List<ByteBuffer> outs = new ArrayList<>();
 		int i = 0;
 		//stay in loop while we 
 		//1. need unwrap or not_handshaking or need_task AND
@@ -242,7 +202,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				throw ee;
 			} finally {
 				if(outBuffer.position() != 0) {
-					outs.add(outBuffer);
+					listener.packetUnencrypted(outBuffer);
 					
 					//frequently the out buffer is not used so we only ask the pool for buffers AFTER it has been consumed/used
 					ByteBuffer newCachedOut = pool.nextBuffer(sslEngine.getSession().getApplicationBufferSize());
@@ -254,19 +214,6 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			if(log.isTraceEnabled())
 				log.trace(mem+"[sockToEngine] unwrap done pos="+encryptedData.position()+" lim="+
 						encryptedData.limit()+" status="+status+" hs="+hsStatus);
-			
-//			if(out.position() != 0 && status != Status.CLOSED) { 
-//				//hsStatus == HandshakeStatus.NOT_HANDSHAKING && status != Status.BUFFER_UNDERFLOW) {
-//				HELPER.doneFillingBuffer(out);
-//				if(log.isTraceEnabled())
-//					log.trace(id+"packetUnencrypted pos="+out.position()+" lim="+
-//							out.limit()+" hs="+hsStatus+" status="+status);
-//				action = PacketAction.DECRYPTED_AND_FEDTOLISTENER;
-//				fireUnencryptedPackToListener(passthrough, out);
-//				if(out.hasRemaining())
-//					log.warn(id+"Discarding unread data");
-//				out.clear();
-//			}
 			
 			if(i > 1000)
 				throw new RuntimeException(this+"Bug, stuck in loop, bufIn="+encryptedData+" bufOut="+outBuffer+
@@ -282,34 +229,52 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				mem.setCachedForUnderFlow(encryptedData);
 			}
 		}
-		
+
 		if(log.isTraceEnabled())
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
-//		if(log.isTraceEnabled() && mem.isConnected() && status != Status.CLOSED) {
-//			log.trace(mem+"[out-buffer] pos="+out.position()+" lim="+out.limit());
-//		}
-		
-		if(outs.size() > 0) {
-			mem.setActionToTake(new Action(ActionState.SEND_TO_CLIENT, outs));
-			return;
-		}
+
+		if(!encryptedData.hasRemaining())
+			pool.releaseBuffer(encryptedData);
 		
 		//First if avoids case where the close handshake is still going on so we are not closed
 		//yet I think(I am writing this from memory)...
 		if(status == Status.CLOSED) {
-			mem.setConnectionState(ConnectionState.DISCONNECTED);
-			if(hsStatus == HandshakeStatus.NOT_HANDSHAKING) {
-				mem.setActionToTake(new Action(ActionState.CLOSED));
-				return;
+			if(hsStatus == HandshakeStatus.NEED_WRAP) {
+				mem.compareSet(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING);
+				sendHandshakeMessage();
+			} else {
+				fireClose();
 			}
+		} else if(hsStatus == HandshakeStatus.NEED_TASK) {
+			createRunnable();
+		} else if(hsStatus == HandshakeStatus.NEED_UNWRAP) {
+			//just need to wait for more data
+		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
+			sendHandshakeMessage();
+		} else if(hsStatus ==HandshakeStatus.FINISHED) {
+			fireLinkEstablished();
+		} else if(hsStatus == HandshakeStatus.NOT_HANDSHAKING) {
+			//nothing to do.  packet already fed
+		} else {
+			throw new UnsupportedOperationException("need to support state="+hsStatus+" status="+status);
 		}
-//		if(status == Status.CLOSED && hsStatus == HandshakeStatus.NOT_HANDSHAKING) {
-//			isClosed = true;
-//			closeInbound();
-//			sslEngine.closeOutbound();
-//			sslListener.closed(clientInitiated);			
+	}
 
-		continueHandShake(mem, hsStatus);
+	private void fireLinkEstablished() {
+		boolean shouldFire = fireConnected.compareAndSet(false, true);
+		if(shouldFire) {
+			mem.compareSet(ConnectionState.CONNECTING, ConnectionState.CONNECTED);
+			listener.encryptedLinkEstablished();
+		}
+	}
+	
+	private void fireClose() {
+		//fire only ONCE...
+		boolean shouldFire = fireClosed.compareAndSet(false, true);
+		if(shouldFire) {
+			mem.compareSet(ConnectionState.DISCONNECTING, ConnectionState.DISCONNECTED);
+			listener.closed(clientInitiated);
+		}
 	}
 
 	private ByteBuffer combine(ByteBuffer cachedForUnderFlow, ByteBuffer encryptedInData) {
@@ -325,59 +290,81 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	}
 
 	@Override
-	public SslMemento feedPlainPacket(SslMemento memento, ByteBuffer buffer) {
-		if(memento.getConnectionState() != ConnectionState.CONNECTED)
-			throw new IllegalStateException(memento+" SSLEngine is not connected right now");
+	public CompletableFuture<Void> feedPlainPacket(ByteBuffer buffer) {
+		try {
+			return feedPlainPacketImpl(buffer);
+		} catch (SSLException e) {
+			throw new AsyncSSLEngineException(e);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
+		if(mem.getConnectionState() != ConnectionState.CONNECTED)
+			throw new IllegalStateException(mem+" SSLEngine is not connected right now");
 		else if(!buffer.hasRemaining())
 			throw new IllegalArgumentException("your buffer has no readable data");
 		
-		SslMementoImpl mem = (SslMementoImpl) memento;
 		SSLEngine sslEngine = mem.getEngine();
 		if(log.isTraceEnabled())
 			log.trace(mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
 		
-		List<ByteBuffer> buffersToSend = new ArrayList<>();
+		List<CompletableFuture> futures = new ArrayList<>();
 		while(buffer.hasRemaining()) {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
-			SSLEngineResult result;
-			try {
-				result = sslEngine.wrap(buffer, engineToSocketData);
-			} catch (SSLException e) {
-				throw new AsyncSSLEngineException(e);
-			}
-			
-			Status status = result.getStatus();
-			HandshakeStatus hsStatus = result.getHandshakeStatus();
-			if(status != Status.OK)
-				throw new RuntimeException("Bug, status="+status+" instead of OK.  hsStatus="+
-						hsStatus+" Something went wrong and we could not encrypt the data");
 
-			if(log.isTraceEnabled())
-				log.trace(mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
-						" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
-			
-			engineToSocketData.flip();
-			buffersToSend.add(engineToSocketData);
+			synchronized(wrapLock) {
+				SSLEngineResult result = sslEngine.wrap(buffer, engineToSocketData);
+				
+				Status status = result.getStatus();
+				HandshakeStatus hsStatus = result.getHandshakeStatus();
+				if(status != Status.OK)
+					throw new RuntimeException("Bug, status="+status+" instead of OK.  hsStatus="+
+							hsStatus+" Something went wrong and we could not encrypt the data");
+	
+				if(log.isTraceEnabled())
+					log.trace(mem+"SSLListener.packetEncrypted pos="+engineToSocketData.position()+
+							" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
+				
+				engineToSocketData.flip();
+				CompletableFuture future = listener.packetEncrypted(engineToSocketData);
+				futures.add(future);
+			}
 		}
 
-		mem.setActionToTake(new Action(buffersToSend));
+		pool.releaseBuffer(buffer);
 		
-		return mem;
+		CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
+		return CompletableFuture.allOf(array);
 	}
 
 	@Override
-	public SslMemento close(SslMemento memento) {
-		if(memento.getConnectionState() == ConnectionState.DISCONNECTING
-				|| memento.getConnectionState() == ConnectionState.DISCONNECTED)
-			return memento;
+	public void close() {
 
-		SslMementoImpl mem = (SslMementoImpl) memento;
+		clientInitiated = true;
+		mem.compareSet(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING);
+		
 		SSLEngine engine = mem.getEngine();
 		engine.closeOutbound();
 		
 		HandshakeStatus status = engine.getHandshakeStatus();
-		continueHandShake(mem, status);
-		
-		return mem;
+		switch (status) {
+			case NEED_WRAP:
+				sendHandshakeMessage();
+				break;
+			case NOT_HANDSHAKING:
+				if(ConnectionState.DISCONNECTED != mem.getConnectionState())
+					throw new IllegalStateException("state="+mem.getConnectionState()+" hsStatus="+status+" should not be able to occur");
+				break;
+			default:
+				//we WILL hit this and need to fix if other end closes...try closing both ends!!!
+				throw new RuntimeException(mem+"bug, status not handled in close="+status);
+		}
 	}
+
+	@Override
+	public ConnectionState getConnectionState() {
+		return mem.getConnectionState();
+	}
+
 }

@@ -18,6 +18,8 @@ import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 
+import com.webpieces.data.api.BufferPool;
+
 
 
 /**
@@ -30,15 +32,16 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
     private final ChannelsFactory channelFactory;
 	private final ConnectionListener connectionListener;
 	private final DataListener dataListener;
+	private BufferPool pool;	
+	private int channelCount = 0;
 	
-	private int i = 0;
-
-	
-	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr, ConnectionListener listener, DataListener dataListener) {
+	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr, 
+			ConnectionListener listener, DataListener dataListener, BufferPool pool) {
 		super(id, selMgr);
 		this.connectionListener = listener;
 		this.dataListener = dataListener;
         this.channelFactory = c;
+        this.pool = pool;
         try {
         	channel = ServerSocketChannel.open();
         	channel.configureBlocking(false);
@@ -47,8 +50,8 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
         }
 	}
 	
-	public int getSession() {
-		return i++;
+	public int getChannelCount() {
+		return channelCount++;
 	}
 	
 	/* (non-Javadoc)
@@ -68,7 +71,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketNum);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), dataListener);
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), dataListener, pool);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
 			connectionListener.connected(tcpChan);

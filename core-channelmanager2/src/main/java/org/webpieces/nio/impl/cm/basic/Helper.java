@@ -120,7 +120,7 @@ final class Helper {
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		BasTCPServerChannel channel = (BasTCPServerChannel)struct.getChannel();
-		channel.accept(channel.getSession());
+		channel.accept(channel.getChannelCount());
 	}
 	
 	private static void connect(SelectionKey key) throws IOException {

@@ -25,9 +25,11 @@ class BasChannelService implements ChannelManager {
 	private SelectorManager2 selMgr;
     private ChannelsFactory channelFactory;
 	private boolean started;
+	private BufferPool pool;
 	
 	BasChannelService(String threadName, ChannelsFactory c, 
 			SelectorProviderFactory mgr, BufferPool pool) {
+		this.pool = pool;
 		selMgr = new SelectorManager2(mgr, pool, threadName);
         this.channelFactory = c;
         start();
@@ -40,7 +42,7 @@ class BasChannelService implements ChannelManager {
         else if(listener == null)
         	throw new IllegalArgumentException("connectionListener cannot be null");
         IdObject obj = new IdObject(id);
-        return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, dataListener);
+        return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, dataListener, pool);
     }
 
 	private void preconditionChecks(String id) {
@@ -55,7 +57,7 @@ class BasChannelService implements ChannelManager {
         if(dataListener == null)
         	throw new IllegalArgumentException("dataListener cannot be null");
         IdObject obj = new IdObject(id);      
-        return new BasTCPChannel(obj, channelFactory, selMgr, dataListener);
+        return new BasTCPChannel(obj, channelFactory, selMgr, dataListener, pool);
     } 
 
     public UDPChannel createUDPChannel(String id, DataListener dataListener) {
@@ -63,7 +65,7 @@ class BasChannelService implements ChannelManager {
         if(dataListener == null)
         	throw new IllegalArgumentException("dataListener cannot be null");
         IdObject obj = new IdObject(id);
-        return new UDPChannelImpl(obj, selMgr, dataListener);
+        return new UDPChannelImpl(obj, selMgr, dataListener, pool);
     }
     
 	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener dataListener) {

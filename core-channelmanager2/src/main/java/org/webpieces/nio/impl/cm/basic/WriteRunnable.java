@@ -54,4 +54,8 @@ public class WriteRunnable {
 		return buffer.remaining();
 	}
 
+	public ByteBuffer getBuffer() {
+		return buffer;
+	}
+
 }
