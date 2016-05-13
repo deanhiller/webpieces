@@ -101,12 +101,12 @@ public class NettyTCPChannel implements TCPChannel {
 	}
 
 	@Override
-	public void registerForReads() {
+	public CompletableFuture<Channel> registerForReads() {
 		throw new UnsupportedOperationException("not sure how to deregister from selector with netty yet");
 	}
 
 	@Override
-	public void unregisterForReads() {
+	public CompletableFuture<Channel> unregisterForReads() {
 		throw new UnsupportedOperationException("not sure how to deregister from selector with netty yet");
 	}
 
@@ -202,15 +202,6 @@ public class NettyTCPChannel implements TCPChannel {
 	@Override
 	public boolean isRegisteredForReads() {
 		return false;
-	}
-
-	@Override
-	public boolean isFailOnNoBackPressure() {
-		return false;
-	}
-
-	@Override
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
 	}
 
 }

@@ -10,8 +10,6 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.asyncserver.api.AsyncServerManager;
-import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.netty.api.NettyChannelMgrFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -21,7 +19,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.data.api.BufferPool;
 
-public class IntegTestLocalhostThroughput {
+public class IntegTestClientToEchoServer {
 
 	private final class ClientDataListener implements DataListener {
 		private BufferPool pool2;
@@ -67,6 +65,7 @@ public class IntegTestLocalhostThroughput {
 	private long totalBytes = 0;
 	private long totalBytesLastRount;
 	private int counter;
+	private long lastTime;
 	
 	/**
 	 * Here, we will simulate a bad hacker client that sets his side so_timeout to infinite
@@ -78,16 +77,27 @@ public class IntegTestLocalhostThroughput {
 	 * @throws InterruptedException 
 	 */
 	public static void main(String[] args) throws InterruptedException {
-		new IntegTestLocalhostThroughput().testSoTimeoutOnSocket();
+		log.info("STARTING");
+		new IntegTestClientToEchoServer().testSoTimeoutOnSocket();
+	}
+	
+	private void runEchoServer() throws InterruptedException {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				new EchoServer().start();
+			}
+		};
+		Thread t= new Thread(r);
+		t.start();
+		
+		log.info("started echo server");
+		Thread.sleep(2000);
+		log.info("starting client");
 	}
 	
 	public void testSoTimeoutOnSocket() throws InterruptedException {
-		Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("serverThread"));
-		BufferPool pool = new BufferCreationPool();
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, executor);
-		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer(mgr);
-		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestLocalhostServerListener(pool));
+		runEchoServer();
 		
 		BufferPool pool2 = new BufferCreationPool();
 		DataListener listener = new ClientDataListener(pool2);
@@ -100,9 +110,9 @@ public class IntegTestLocalhostThroughput {
 			public void run() {
 				logBytesTxfrd();
 			}
-		}, 1000, 10000);
+		}, 1000, 5000);
 
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
+		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(4444), listener);
 		connect.thenAccept(p -> runWriting(channel));
 		
 		synchronized(this) {
@@ -128,6 +138,7 @@ public class IntegTestLocalhostThroughput {
 
 	private void logBytesTxfrd() {
 		long bytesTxfrd = getBytes();
+		long tempLast = totalBytesLastRount;
 		long bytesThisRound = bytesTxfrd - totalBytesLastRount;
 		
 		totalBytesLastRount = bytesTxfrd;
@@ -135,11 +146,15 @@ public class IntegTestLocalhostThroughput {
 		long bytesPerMs = bytesTxfrd / totalTime; 
 		double megaBytesPerMs = ((double)bytesPerMs) / 1_000_000;
 		double megaBytesPerSec = megaBytesPerMs * 1000;
-		
-		long roundBytesPerMs = bytesThisRound / totalTime;
+
+		long now = System.currentTimeMillis();
+		long roundTime = now - lastTime;
+		lastTime = now;
+		long roundBytesPerMs = bytesThisRound / roundTime;
 		double megaRoundPerMs = ((double)roundBytesPerMs) / 1_000_000;
 		double megaRoundPerSec = megaRoundPerMs * 1000;
-		log.info("time for bytes="+bytesTxfrd+". time="+totalTime+" rate="+megaBytesPerMs+"MBytes/Ms or "+megaBytesPerSec+"MBytes/Sec  this round="+megaRoundPerSec+"MBytes/Sec");
+		log.info("time for bytes="+bytesTxfrd+". time="+totalTime+" rate="+megaBytesPerMs+"MBytes/Ms or"+megaBytesPerSec+"MBytes/Sec\n"
+				+ "  this round="+megaRoundPerSec+"MBytes/Sec.  bytes=" +bytesThisRound+" lastround="+tempLast);
 	}
 	
 	private void runWriting(Channel channel) {
@@ -157,9 +172,9 @@ public class IntegTestLocalhostThroughput {
 	}
 
 	private void write(Channel channel, String reason) {
-		counter++;
-		if(counter % 5000 == 0)
-			log.info("counter="+counter);
+//		counter++;
+//		if(counter % 100000 == 0)
+//			log.info("counter="+counter);
 		byte[] data = new byte[10240];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
 		CompletableFuture<Channel> write = channel.write(buffer);
@@ -181,5 +196,4 @@ public class IntegTestLocalhostThroughput {
 		if(e != null) 
 			log.info("failed due to reason="+e.getMessage());
 	}
-	
 }

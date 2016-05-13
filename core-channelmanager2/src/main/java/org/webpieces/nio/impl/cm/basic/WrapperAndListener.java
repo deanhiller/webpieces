@@ -4,9 +4,10 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.nio.channels.SelectionKey;
+import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 
 
@@ -16,7 +17,7 @@ public class WrapperAndListener {
 	private String channelName;
 	private RegisterableChannel channel;
 	private DataListener dataHandler;
-	private ConnectionListener connectCallback;
+	private CompletableFuture<Channel> connectCallback;
 	
 	public WrapperAndListener(RegisterableChannelImpl r) {
 		if(r == null)
@@ -29,6 +30,7 @@ public class WrapperAndListener {
 		return channelName;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addListener(Object l, int validOps) {
 		//cannot do instanceof here as clients may use one object as two instances and it
 		//could be set wrong or twice.....ie. we can't tell.  instead use validOps
@@ -38,7 +40,7 @@ public class WrapperAndListener {
 		case SelectionKey.OP_CONNECT:
 			if(connectCallback != null)
 				throw new RuntimeException(channel+"ConnectionListener is already set, cannot be set again");
-			connectCallback = (ConnectionListener)l;
+			connectCallback = (CompletableFuture<Channel>)l;
 			break;
 		case SelectionKey.OP_READ:
 			if(dataHandler != null) {
@@ -68,7 +70,7 @@ public class WrapperAndListener {
 		return channel;
 	}
 
-	public ConnectionListener getConnectCallback() {
+	public CompletableFuture<Channel> getConnectCallback() {
 		return connectCallback;
 	}
 

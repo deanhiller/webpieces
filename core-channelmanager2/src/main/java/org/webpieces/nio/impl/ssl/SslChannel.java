@@ -2,6 +2,7 @@ package org.webpieces.nio.impl.ssl;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -46,12 +47,12 @@ public abstract class SslChannel implements Channel {
 		return channel.getLocalAddress();
 	}
 
-	public void registerForReads() {
-		channel.registerForReads();
+	public CompletableFuture<Channel> registerForReads() {
+		return channel.registerForReads().thenApply(c -> this);
 	}
 
-	public void unregisterForReads() {
-		channel.unregisterForReads();
+	public CompletableFuture<Channel> unregisterForReads() {
+		return channel.unregisterForReads().thenApply(c -> this);
 	}
 
 	public boolean isRegisteredForReads() {
@@ -86,13 +87,4 @@ public abstract class SslChannel implements Channel {
 		return channel.getMaxBytesBackupSize();
 	}
 
-	public boolean isFailOnNoBackPressure() {
-		return channel.isFailOnNoBackPressure();
-	}
-
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
-		channel.setFailOnNoBackPressure(failOnNoBackPressure);
-	}
-
-	
 }

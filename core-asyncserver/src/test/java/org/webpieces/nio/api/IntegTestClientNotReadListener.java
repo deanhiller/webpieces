@@ -41,7 +41,6 @@ public class IntegTestClientNotReadListener implements DataListener {
 
 	private void finished(String string, ByteBuffer buffer) {
 		log.info("writing finished reason="+string);
-		pool.releaseBuffer(buffer);
 	}
 
 	@Override

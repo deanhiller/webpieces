@@ -194,7 +194,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		@Override
 		public void farEndClosed(Channel channel) {
 			isClosed = true;
-			log.info("far end closed. channel="+channel, new RuntimeException());
 			cleanUpPendings("Remote end closed");
 			
 			if(closeListener != null)

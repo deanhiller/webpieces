@@ -17,7 +17,7 @@ public interface ConnectionListener {
 	 * You could also return a new DataListener for each Channel if you desire that as well
 	 * 
 	 * @param channel
-	 * @return Normally, you should just return CompletableFuture.completedFuture(yourDataListenerInstance).
+	 * @return you must return CompletableFuture.completedFuture(yourDataListenerInstance).
 	 * We do this, because you are in a thread pool, we only want to register for reads on the socket 
 	 * once we have this listener.  Without it, we don't want to read data with no where to send that data 
 	 */

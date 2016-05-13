@@ -10,6 +10,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +77,6 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
 			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));
 			
-			tcpChan.registerForReads();
-			
 		} catch(Throwable e) {
 			log.warn(this+"Failed to connect", e);
 			connectionListener.failed(this, e);
@@ -93,10 +92,13 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			throw new IllegalArgumentException("Only bound sockets can be registered or selector doesn't work");
 
 		try {
-			getSelectorManager().registerServerSocketChannel(this, cb);
+			CompletableFuture<Void> future = getSelectorManager().registerServerSocketChannel(this, cb);
+			future.get();
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
+			throw new NioException(e);
+		} catch (ExecutionException e) {
 			throw new NioException(e);
 		}
 	}

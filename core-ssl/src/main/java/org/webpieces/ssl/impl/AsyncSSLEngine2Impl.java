@@ -202,6 +202,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				throw ee;
 			} finally {
 				if(outBuffer.position() != 0) {
+					outBuffer.flip();
 					listener.packetUnencrypted(outBuffer);
 					
 					//frequently the out buffer is not used so we only ask the pool for buffers AFTER it has been consumed/used

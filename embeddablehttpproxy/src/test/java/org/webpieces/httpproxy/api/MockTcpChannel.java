@@ -34,12 +34,13 @@ public class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public void registerForReads() {
+	public CompletableFuture<Channel> registerForReads() {
+		return null;
 	}
 
 	@Override
-	public void unregisterForReads() {
-		
+	public CompletableFuture<Channel> unregisterForReads() {
+		return null;
 	}
 
 	@Override
@@ -159,13 +160,5 @@ public class MockTcpChannel implements TCPChannel {
 		return false;
 	}
 
-	@Override
-	public boolean isFailOnNoBackPressure() {
-		return false;
-	}
-
-	@Override
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
-	}
 
 }

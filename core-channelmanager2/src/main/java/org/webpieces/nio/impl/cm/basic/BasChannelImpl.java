@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,6 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.exceptions.NioTimeoutException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
@@ -41,13 +41,12 @@ public abstract class BasChannelImpl
 	private ConcurrentLinkedQueue<WriteRunnable> waitingWriters = new ConcurrentLinkedQueue<WriteRunnable>();
 	private boolean isConnecting = false;
 	private boolean isClosed = false;
-    private boolean registered;
+    private AtomicBoolean registeredForWrites = new AtomicBoolean(false);
 	private boolean doNotAllowWrites;
 	private int writeTimeoutMs = 5_000;
-	private int maxBytesWaitingSize = 250000;
-	private boolean applyingBackpressure;
+	private int maxBytesWaitingSize = 500_000; //1 megabyte before telling client to backpressure the channel
+	private AtomicBoolean applyingBackpressure = new AtomicBoolean(false);
 	private boolean isRegisterdForReads;
-	private boolean failOnNoBackPressure;
 	private BufferPool pool;
 	private DataListener dataListener;
 	
@@ -115,61 +114,28 @@ public abstract class BasChannelImpl
      * @throws InterruptedException
      */
 	private void queueTheWrite(WriteRunnable action) {
-		List<CompletableFuture<Channel>> promisesToFail = null;
-		String msg = null;
 		boolean accepted = waitingWriters.add(action);
 		if(!accepted) {
-			throw new RuntimeException(this+"registered="+registered+" This should never occur");
+			throw new RuntimeException(this+"registered="+registeredForWrites+" This should never occur");
 		}
 		
+		boolean needToApplyBackpressure = false;
 		long numBytesWaitingToBeWritten = 0;
 		synchronized (this) {
 			waitingBytesCounter += action.getBufferSize();
+			if(waitingBytesCounter > 100000)
+				log.info("waiting bytes="+waitingBytesCounter);
 			numBytesWaitingToBeWritten = waitingBytesCounter;
-			if(numBytesWaitingToBeWritten > maxBytesWaitingSize && !applyingBackpressure) {
-				applyingBackpressure = true;
-				dataListener.applyBackPressure(this);
-			} else if(numBytesWaitingToBeWritten > 2*maxBytesWaitingSize && failOnNoBackPressure) {
-				msg = numBytesWaitingToBeWritten + "(numBytesWaitingToBeWritten) > " 
-						+ (4*maxBytesWaitingSize) + "(4*maxBytesWaitingSize)";
-				log.info("FAILING all writes in the queue due to client not backpressuring. " + msg);
-				promisesToFail = failAllWritesInQueue();			
+			if(numBytesWaitingToBeWritten > maxBytesWaitingSize) {
+				needToApplyBackpressure = true;
 			}
-
-//			WriteRunnable lastVal = waitingWriters.peek();
-//			if(lastVal != null) {
-//				long currentTime = System.currentTimeMillis();
-//				long delay = currentTime - lastVal.getCreationTime();
-//				if(delay > writeTimeoutMs) {
-//					msg = delay+"ms(write delay) >"+writeTimeoutMs+"ms(writeTimeout)";
-//					log.info("FAILING all writes in the queue due to timeout. "+msg);
-//					promisesToFail = failAllWritesInQueue();
-//				} else if(numBytesWaitingToBeWritten > maxBytesWaitingSize) {
-//					msg = numBytesWaitingToBeWritten+"(numBytesWaitingToBeWritten) > "
-//							+maxBytesWaitingSize+"(maxBytesWaitingSize)";
-//					log.info("FAILING all writes in the queue due to maxQueueSize. "+msg);
-//					promisesToFail = failAllWritesInQueue();					
-//				}
-//			}
 		}
-
-		//MUST be outside the synchronization block to notify clients so we don't deadlock
-		if(promisesToFail != null) {
-			log.warn("FAILING all writes in the queue due to writes backing up(client is not backpressuring). "
-					+ "sending clients the exception", new RuntimeException("clients not backpressuring"));
-			for(CompletableFuture<Channel> promise : promisesToFail) {
-	    		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
-	    		//(it's called in the Throwable constructor) so we don't do this on every close channel
-				NioTimeoutException exc = new NioTimeoutException(
-				"Writes are backing up meaning the\n"
-				+ "client or server you are writing to is not keeping up(this fails all outstanding writes).  You\n"
-				+ "probably need to throttle your app from writing downstream too fast. write queue size="
-				+ promisesToFail.size()+"\nfailure reason="+msg+" To counter this, you should probably do a\n"
-				+ "channel.unregisterForReads() on the channel that gives you data and throttle that side\n"
-				+ "to not overload the client/server you are writing out to");
-				promise.completeExceptionally(exc);
-			}
-			return;
+		
+		//fire this outside synchronization block
+		boolean changedValue = applyingBackpressure.compareAndSet(false, needToApplyBackpressure);
+		if(needToApplyBackpressure && changedValue) {
+			//we only fire when the value of applyingBackpressure changes
+			dataListener.applyBackPressure(this);
 		}
 		
 		registerForWritesOrClose();
@@ -194,11 +160,12 @@ public abstract class BasChannelImpl
 		//if not already registered, then register for writes.....
         //NOTE: we must do this after waitingWriters.offer so there is something on the queue to read
         //otherwise, that could be bad.
-        if(!registered) {
-            registered = true;
+		
+		boolean changedState = registeredForWrites.compareAndSet(false, true);
+		if(changedState) {
             if(log.isTraceEnabled())
                 log.trace(this+"registering channel for write msg. size="+waitingWriters.size());
-            getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null, false);
+            getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
         }
 	}
        
@@ -235,9 +202,11 @@ public abstract class BasChannelImpl
 	            finishedPromises.add(writer.getPromise());
 	        }
 	        
-	        if(waitingWriters.isEmpty() && applyingBackpressure) {
+	        boolean applyPressure = !waitingWriters.isEmpty();
+	        boolean changedValue = applyingBackpressure.compareAndSet(true, applyPressure);
+	        if(!applyPressure && changedValue) {
+	        	//we only fire when the value of applyingBackpressure changes
 	        	dataListener.releaseBackPressure(this);
-	        	applyingBackpressure = false;
 	        }
 		}
 		
@@ -247,10 +216,13 @@ public abstract class BasChannelImpl
         }
         
         if(waitingWriters.isEmpty()) {
-        	if(log.isTraceEnabled())
-        		log.trace(this+"unregister writes");
-            registered = false;
-            Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE); 
+        	
+        	boolean changedState = registeredForWrites.compareAndSet(true, false);
+        	if(changedState) {
+	        	if(log.isTraceEnabled())
+	        		log.trace(this+"unregister writes");
+	            Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
+        	}
         }
     }
 
@@ -296,7 +268,7 @@ public abstract class BasChannelImpl
     	registerForReads();
     }
     
-	public void registerForReads() {
+	public CompletableFuture<Channel> registerForReads() {
 		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(!isConnecting && !isConnected()) {
@@ -308,8 +280,10 @@ public abstract class BasChannelImpl
 			apiLog.trace(this+"Basic.registerForReads called");
 		
         try {
-			getSelectorManager().registerChannelForRead(this, dataListener);
-			isRegisterdForReads = true;
+			return getSelectorManager().registerChannelForRead(this, dataListener).thenApply(v -> {
+				isRegisterdForReads = true;
+				return this;
+			});
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -317,12 +291,12 @@ public abstract class BasChannelImpl
 		}
 	}
 	
-	public void unregisterForReads() {
+	public CompletableFuture<Channel> unregisterForReads() {
 		if(apiLog.isTraceEnabled())
 			apiLog.trace(this+"Basic.unregisterForReads called");		
 		try {
 			isRegisterdForReads = false;
-			getSelectorManager().unregisterChannelForRead(this);
+			return getSelectorManager().unregisterChannelForRead(this).thenApply(v -> this);
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -332,7 +306,9 @@ public abstract class BasChannelImpl
 
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {
-		if(!getSelectorManager().isRunning())
+		if(b.remaining() == 0)
+			throw new IllegalArgumentException("buffer has no data");
+		else if(!getSelectorManager().isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
 		else if(isClosed) {
 			AsynchronousCloseException exc = new AsynchronousCloseException();
@@ -434,14 +410,6 @@ public abstract class BasChannelImpl
 	@Override
 	public int getMaxBytesBackupSize() {
 		return maxBytesWaitingSize;
-	}
-
-	public boolean isFailOnNoBackPressure() {
-		return failOnNoBackPressure;
-	}
-
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
-		this.failOnNoBackPressure = failOnNoBackPressure;
 	}
 
 	public boolean isRegisteredForReads() {

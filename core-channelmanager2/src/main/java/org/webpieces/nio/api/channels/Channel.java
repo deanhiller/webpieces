@@ -70,7 +70,7 @@ public interface Channel extends RegisterableChannel {
      * to apply back pressure down the channel to the client/server that is sending you data,
      * you can call unregisterForReads and reads stop until you call unregisterForReads
      */
-    public void registerForReads();
+    public CompletableFuture<Channel> registerForReads();
 
     /**
      * Stop reading from the nic buffer for this channel such that the downstream client/server
@@ -81,7 +81,7 @@ public interface Channel extends RegisterableChannel {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void unregisterForReads();
+    public CompletableFuture<Channel> unregisterForReads();
     
     public boolean isRegisteredForReads();
     
@@ -126,17 +126,5 @@ public interface Channel extends RegisterableChannel {
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup);
 	
 	public int getMaxBytesBackupSize();
-	
-	/**
-	 * By default, this is true such that if you end up with maxBytesWriteBackupSize bytes waiting
-	 * to be written and applyBackpressure is called, if you keep calling write, it eventually fails
-	 * throwing an exception telling you the code forgot to backpressure.  RAM would have most likely
-	 * kept growing without this exception anyways
-	 * 
-	 * @return
-	 */
-	public boolean isFailOnNoBackPressure();
-
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure);
 	
 }

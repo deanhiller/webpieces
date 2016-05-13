@@ -36,10 +36,9 @@ public class SslConnectionListener implements ConnectionListener {
 		TCPChannel realChannel = (TCPChannel) c;
 		SSLEngine engine = sslFactory.createEngineForServerSocket();		
 		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.createParser(c+"", engine, pool, l);
-		SslTCPChannel sslChannel = new SslTCPChannel(function, realChannel);
+		SslTCPChannel sslChannel = new SslTCPChannel(function, realChannel, connectionListener);
 		
-		CompletableFuture<DataListener> listenerFuture = connectionListener.connected(sslChannel, true);
-		return listenerFuture.thenApply(l -> sslChannel.accept(l));
+		return CompletableFuture.completedFuture(sslChannel.getSocketDataListener());
 	}
 
 	@Override

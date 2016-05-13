@@ -14,12 +14,18 @@ public class IntegTestLocalhostServerListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostServerListener.class);
 	private BufferPool pool;
 
+	private int counter = 0;
+	
 	public IntegTestLocalhostServerListener(BufferPool pool) {
 		this.pool = pool;
 	}
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
+		counter++;
+		if(counter % 1000 == 0)
+			log.info("still receiving");
+		
 		CompletableFuture<Channel> future = channel.write(b);
 		
 		future
@@ -28,7 +34,6 @@ public class IntegTestLocalhostServerListener implements DataListener {
 	}
 
 	private void finished(String string, ByteBuffer buffer) {
-		pool.releaseBuffer(buffer);
 	}
 
 	private void fail(Channel channel, ByteBuffer b, Void r, Throwable e) {
@@ -51,11 +56,14 @@ public class IntegTestLocalhostServerListener implements DataListener {
 
 	@Override
 	public void applyBackPressure(Channel channel) {
+		log.info("server apply backpressure");
 		channel.unregisterForReads();
 	}
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
+		log.info("server releasing backpressure");
 		channel.registerForReads();
+		log.info("registered for reads");
 	}
 }

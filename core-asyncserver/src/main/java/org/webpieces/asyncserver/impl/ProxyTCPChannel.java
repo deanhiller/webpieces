@@ -35,16 +35,16 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.close();
 	}
 
-	public void registerForReads() {
-		channel.registerForReads();
+	public CompletableFuture<Channel> registerForReads() {
+		return channel.registerForReads().thenApply(c -> this);
 	}
 
 	public void setReuseAddress(boolean b) {
 		channel.setReuseAddress(b);
 	}
 
-	public void unregisterForReads() {
-		channel.unregisterForReads();
+	public CompletableFuture<Channel> unregisterForReads() {
+		return channel.unregisterForReads().thenApply(c -> this);
 	}
 
 	public boolean getKeepAlive() {
@@ -116,14 +116,6 @@ public class ProxyTCPChannel implements TCPChannel {
 
 	public boolean isRegisteredForReads() {
 		return channel.isRegisteredForReads();
-	}
-
-	public boolean isFailOnNoBackPressure() {
-		return channel.isFailOnNoBackPressure();
-	}
-
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
-		channel.setFailOnNoBackPressure(failOnNoBackPressure);
 	}
 
 	@Override

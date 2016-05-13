@@ -53,7 +53,7 @@ public class Layer2DataListener implements DataListener {
 
 	@Override
 	public void applyBackPressure(Channel channel) {
-		log.warn("Need to apply backpressure", new RuntimeException());
+		log.warn("Need to apply backpressure", new RuntimeException("demonstrates how we got here"));
 	}
 
 	@Override

@@ -8,17 +8,18 @@ import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 
 import com.webpieces.data.api.BufferPool;
 
 
-final class Helper {
+public final class Helper {
 
 	private static final Logger apiLog = LoggerFactory.getLogger(DataListener.class);
 	private static final Logger log = LoggerFactory.getLogger(Helper.class);
@@ -128,7 +129,7 @@ final class Helper {
 			log.trace(key.attachment()+"finishing connect process");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
-		ConnectionListener callback = struct.getConnectCallback();
+		CompletableFuture<Channel> callback = struct.getConnectCallback();
 		BasTCPChannel channel = (BasTCPChannel)struct.getChannel();
 		
 		//must change the interests to not interested in connect anymore
@@ -139,10 +140,10 @@ final class Helper {
 		
 		try {
 			channel.finishConnect();
-			callback.connected(channel, true);
+			callback.complete(channel);
 		} catch(Exception e) {
             log.warn(key.attachment()+"Could not open connection", e);
-			callback.failed(channel, e);
+            callback.completeExceptionally(e);
 		}
 	}
 

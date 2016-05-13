@@ -51,13 +51,6 @@ public interface Select
     void setRunning(boolean b);
 
     /**
-     * @param id
-     * @param r
-     * @param selector
-     */
-    ChannelRegistrationListener createRegistrationListener(Object id, Runnable r, Object selector);
-
-    /**
      * @param realChannel
      */
     SelectionKey getKeyFromChannel(SelectableChannel realChannel);

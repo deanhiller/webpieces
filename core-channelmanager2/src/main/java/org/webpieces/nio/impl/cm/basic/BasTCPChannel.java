@@ -134,7 +134,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 					log.warn(this+"Exception occurred", e);
 				}
 			} else {
-				getSelectorManager().registerChannelForConnect(this, future);
+				return getSelectorManager().registerChannelForConnect(this);
 			}
 		} catch(Throwable t) {
 			log.warn("connecting failed");

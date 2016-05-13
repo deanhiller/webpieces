@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.SslListener;
@@ -18,6 +19,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private final TCPChannel realChannel;
 	
 	private DataListener socketDataListener = new SocketDataListener();
+	private ConnectionListener conectionListener;
 	private CompletableFuture<Channel> sslConnectfuture;
 	private CompletableFuture<Channel> closeFuture;
 	private SslListener sslListener = new OurSslListener();
@@ -28,22 +30,23 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		this.realChannel = realChannel;
 	}
 
+	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel2,
+			ConnectionListener connectionListener) {
+		super(realChannel2);
+		sslEngine = function.apply(sslListener);
+		this.realChannel = realChannel2;
+		this.conectionListener = connectionListener;
+	}
+
 	@Override
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
-		accept(listener);
+		clientDataListener = new SslTryCatchListener(listener);
 		CompletableFuture<Channel> future = realChannel.connect(addr, socketDataListener);
 		
 		return future.thenCompose( c -> beginHandshake());
 	}
-	
-	/**
-	 * Save the client data listener for unencrypted packets and add return our socket listener
-	 * to listen for encrypted packets
-	 * @param l
-	 * @return
-	 */
-	public DataListener accept(DataListener l) {
-		clientDataListener = new SslTryCatchListener(l);
+
+	public DataListener getSocketDataListener() {
 		return socketDataListener;
 	}
 
@@ -68,7 +71,18 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private class OurSslListener implements SslListener {
 		@Override
 		public void encryptedLinkEstablished() {
-			sslConnectfuture.complete(SslTCPChannel.this);
+			if(sslConnectfuture != null)
+				sslConnectfuture.complete(SslTCPChannel.this);
+			else {
+				CompletableFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this, false);
+				if(!future.isDone())
+					conectionListener.failed(SslTCPChannel.this, new IllegalArgumentException("Client did not return a datalistener"));
+				try {
+					clientDataListener = new SslTryCatchListener(future.get());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 
 		@Override

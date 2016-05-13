@@ -28,7 +28,7 @@ public class ThreadChannel implements Channel {
 		CompletableFuture<Channel> future = channel.connect(addr, threaded);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> p, executor);
+		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class ThreadChannel implements Channel {
 		CompletableFuture<Channel> future = channel.write(b);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> p, executor);
+		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class ThreadChannel implements Channel {
 		CompletableFuture<Channel> future = channel.close();
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> p, executor);
+		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	public void setReuseAddress(boolean b) {
@@ -79,12 +79,18 @@ public class ThreadChannel implements Channel {
 		return channel.getLocalAddress();
 	}
 
-	public void registerForReads() {
-		channel.registerForReads();
+	public CompletableFuture<Channel> registerForReads() {
+		CompletableFuture<Channel> future = channel.registerForReads();
+		//transfer this to the SessionExecutor properly such that clients do
+		//not need to synchronize the ChannelSession writes/reads
+		return future.thenApplyAsync(p -> this, executor);
 	}
 
-	public void unregisterForReads() {
-		channel.unregisterForReads();
+	public CompletableFuture<Channel> unregisterForReads() {
+		CompletableFuture<Channel> future = channel.unregisterForReads();
+		//transfer this to the SessionExecutor properly such that clients do
+		//not need to synchronize the ChannelSession writes/reads
+		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	public boolean isRegisteredForReads() {
@@ -119,13 +125,4 @@ public class ThreadChannel implements Channel {
 		return channel.getMaxBytesBackupSize();
 	}
 
-	public boolean isFailOnNoBackPressure() {
-		return channel.isFailOnNoBackPressure();
-	}
-
-	public void setFailOnNoBackPressure(boolean failOnNoBackPressure) {
-		channel.setFailOnNoBackPressure(failOnNoBackPressure);
-	}
-
-	
 }

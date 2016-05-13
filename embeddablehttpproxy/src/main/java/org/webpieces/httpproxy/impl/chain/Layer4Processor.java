@@ -42,7 +42,7 @@ public class Layer4Processor {
 	}
 	
 	public void processHttpRequests(Channel channel, HttpRequest req) {
-		log.info("incoming request(channel="+channel+"(=\n"+req);
+		log.info("incoming request. channel="+channel+"=\n"+req);
 		SocketAddress addr = req.getServerToConnectTo(null);
 
 		HttpUri uri = req.getRequestLine().getUri();
@@ -79,7 +79,7 @@ public class Layer4Processor {
 	}
 
 	public void clientClosedChannel(Channel channel) {
-		log.info("client closed channel="+channel);
+		log.info("browser client closed channel="+channel);
 	}
 
 	private class SocketExpiredListener implements RemovalListener<SocketAddress, HttpSocket> {

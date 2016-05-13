@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 package org.webpieces.nio.impl.cm.basic;
 
 import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
@@ -38,14 +37,12 @@ import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
-import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.testutil.nioapi.ChannelRegistrationListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
+import org.webpieces.nio.impl.cm.basic.nioimpl.ChannelRegistrationListener;
 
 import com.webpieces.data.api.BufferPool;
 
@@ -108,45 +105,50 @@ public class SelectorManager2 implements SelectorListener {
 		return selector;
 	}
 	
-	public void registerServerSocketChannel(BasTCPServerChannel s, ConnectionListener listener) 
+	public CompletableFuture<Void> registerServerSocketChannel(BasTCPServerChannel s, ConnectionListener listener) 
 					throws IOException, InterruptedException {
-		waitForRegister(s, SelectionKey.OP_ACCEPT, listener, true);
+		return asyncRegister(s, SelectionKey.OP_ACCEPT, listener);
 	}
-	public void registerChannelForConnect(final RegisterableChannelImpl s, CompletableFuture<Channel> promise)
+	public CompletableFuture<Channel> registerChannelForConnect(final RegisterableChannelImpl s)
 					throws IOException, InterruptedException {
-		final ConnectionListener listener = new FutureConnectImpl(promise);
-		registerSelectableChannel(s, SelectionKey.OP_CONNECT, listener, true);
-	}
-	public void registerChannelForRead(final RegisterableChannelImpl s, final DataListener listener)
-					throws IOException, InterruptedException {
-		registerSelectableChannel(s, SelectionKey.OP_READ, listener, true);
-	}
-	public void unregisterChannelForRead(BasChannelImpl c) throws IOException, InterruptedException {
-		unregisterSelectableChannel(c, SelectionKey.OP_READ);
+		CompletableFuture<Channel> future = new CompletableFuture<Channel>();
+		registerSelectableChannel(s, SelectionKey.OP_CONNECT, future);
+		return future;
 	}
 	
-	private void unregisterSelectableChannel(RegisterableChannelImpl channel, int ops) 
+	public CompletableFuture<Void> registerChannelForRead(final RegisterableChannelImpl s, final DataListener listener)
+					throws IOException, InterruptedException {
+		return registerSelectableChannel(s, SelectionKey.OP_READ, listener);
+	}
+	public CompletableFuture<Void> unregisterChannelForRead(BasChannelImpl c) throws IOException, InterruptedException {
+		return unregisterSelectableChannel(c, SelectionKey.OP_READ);
+	}
+	
+	private CompletableFuture<Void> unregisterSelectableChannel(RegisterableChannelImpl channel, int ops) 
 											throws IOException, InterruptedException {
 		if(stopped) 
-			return; //do nothing if stopped
+			return CompletableFuture.completedFuture(null); //do nothing if stopped
 		else if(!isRunning())
-			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.starimport " +
-                    "biz.xsoftware.api.nio.test.nioapi.SelectKey;t first");
-		else if(Thread.currentThread().equals(selector.getThread()))
+			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.start first");
+		else if(Thread.currentThread().equals(selector.getThread())) {
 			Helper.unregisterSelectableChannel(channel, ops);
-		else
-			asynchUnregister(channel, ops);			
+			return CompletableFuture.completedFuture(null);
+		} else
+			return asynchUnregister(channel, ops);			
 	}
 	
-	void registerSelectableChannel(final RegisterableChannelImpl s, final int validOps, final Object listener, boolean needWait) {	
-		if(stopped) 
-			return; //do nothing if stopped
-		if(!isRunning())
+	CompletableFuture<Void> registerSelectableChannel(final RegisterableChannelImpl s, final int validOps, final Object listener) {	
+		if(stopped)  {
+			CompletableFuture<Void> future = new CompletableFuture<Void>();
+			future.completeExceptionally(new IllegalStateException("This chanMgr is stopped")); //do nothing if stopped
+			return future;
+		} else if(!isRunning())
 			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.start first");
-		else if(Thread.currentThread().equals(selector.getThread()))
+		else if(Thread.currentThread().equals(selector.getThread())) {
 			registerChannelOnThisThread(s, validOps, listener);
-		else
-			waitForRegister(s, validOps, listener, needWait);
+			return CompletableFuture.completedFuture(null);
+		} else
+			return asyncRegister(s, validOps, listener);
 	}
 
 	private void registerChannelOnThisThread(
@@ -181,67 +183,70 @@ public class SelectorManager2 implements SelectorListener {
 		int allOps = previousOps | validOps;
 		SelectionKey key = channel.register(selector, allOps, struct);
 		channel.setKey(key);
+		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));	
 		if (log.isTraceEnabled())
 			log.trace(channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
 	}
 
-	private void asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
+	private CompletableFuture<Void> asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
 									throws IOException, InterruptedException {
 		if (s.isBlocking())
 			throw new IllegalArgumentException(s+"Only non-blocking selectable channels can be used.  " +
 					"please call SelectableChannel.configureBlocking before passing in the channel");
 
+		log.info("asyn UNregister="+Helper.opType(validOps));
+		
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
+		//This is a 12 year old statement and maybe not true anymore...
 		// in SelctorImpl.java(check sun's SCSL code), SelectorImpl grabs
 		// a lock in select() method. This register tries to grab the same
 		// lock, so we need to wakeup the select method here and have it do
 		// the processing of this request so it can release the lock so
 		// the register can grab the lock.
-		Runnable r = new Runnable() {
+		ChannelRegistrationListener r = new ChannelRegistrationListener(future, validOps) {
 			public void run() {
 				Helper.unregisterSelectableChannel(s, validOps);
 			}
-
-			public String toString() {
-				return Helper.opType(validOps);
-			}
 		};
         
-        ChannelRegistrationListener regRequest = selector.createRegistrationListener(s, r, this);
+		listenerList.add(ChannelRegistrationListener.class, r);
 
-		listenerList.add(ChannelRegistrationListener.class, regRequest);
-
-		regRequest.waitForFinish(true);
+		if(log.isTraceEnabled())
+			log.trace(s+"call wakeup on selector to register for="+r);
+		wakeUpSelector();
+		
+		return future;
 	}
 	
-	private void waitForRegister(final RegisterableChannelImpl s, final int validOps, final Object listener, boolean needWait) {
+	private CompletableFuture<Void> asyncRegister(
+			final RegisterableChannelImpl s, final int validOps, final Object listener) {
 		if(s.isBlocking()) 
 			throw new IllegalArgumentException(s+"Only non-blocking selectable channels can be used.  " +
 					"please call SelectableChannel.configureBlocking before passing in the channel");
 
+		
+		
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
+		//This is a 12 year old statement and maybe not true anymore...
 		//in SelectorImpl.java(check sun's SCSL code), SelectorImpl grabs
 		//a lock in select() method.  This register tries to grab the same
 		//lock, so we need to wakeup the select method here and have it do
 		//the processing of this request so it can release the lock so
 		//the register can grab the lock.
-		Runnable r = new Runnable() {
+		ChannelRegistrationListener r = new ChannelRegistrationListener(future, validOps) {
+			@Override
 			public void run() {
 				registerChannelOnThisThread(s, validOps, listener);
 			}
-			public String toString() {
-				return Helper.opType(validOps);
-			}
 		};
-		ChannelRegistrationListener regRequest = selector.createRegistrationListener(s, r, this);
 		
-		listenerList.add(ChannelRegistrationListener.class, regRequest);
+		listenerList.add(ChannelRegistrationListener.class, r);
+
+		if(log.isTraceEnabled())
+			log.trace(s+"call wakeup on selector to register for="+r);
+		wakeUpSelector();
 		
-		try {
-			regRequest.waitForFinish(needWait);
-		} catch (ClosedChannelException e) {
-			throw new NioClosedChannelException(e.getMessage(), e);
-		} catch (InterruptedException e) {
-			throw new RuntimeInterruptedException(e.getMessage(), e);
-		}
+		return future;
 	}
     
     public void selectorFired()
