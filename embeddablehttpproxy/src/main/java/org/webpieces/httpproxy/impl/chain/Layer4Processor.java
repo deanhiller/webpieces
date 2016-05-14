@@ -1,5 +1,6 @@
 package org.webpieces.httpproxy.impl.chain;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +44,7 @@ public class Layer4Processor {
 	
 	public void processHttpRequests(Channel channel, HttpRequest req) {
 		log.info("incoming request. channel="+channel+"=\n"+req);
-		SocketAddress addr = req.getServerToConnectTo(null);
+		InetSocketAddress addr = req.getServerToConnectTo(null);
 
 		HttpUri uri = req.getRequestLine().getUri();
 		UrlInfo info = uri.getUriBreakdown();
@@ -65,7 +66,7 @@ public class Layer4Processor {
 		socket.send(req, new Layer1Response(layer2Processor, channel, req));
 	}
 
-	private HttpSocket openAndConnectSocket(SocketAddress addr, HttpRequest req, Channel channel) {
+	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, Channel channel) {
 		HttpSocket socket = httpClient.openHttpSocket(""+addr, new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)

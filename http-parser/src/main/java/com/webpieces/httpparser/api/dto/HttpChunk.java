@@ -70,4 +70,11 @@ public class HttpChunk extends HttpPayload {
 	public boolean isHasChunkedTransferHeader() {
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		String metaLine = createMetaLine();
+		String trailer = createTrailer();
+		return metaLine+trailer;
+	}
 }

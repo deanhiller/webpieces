@@ -2,16 +2,19 @@ package org.webpieces.httpclient.impl;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.net.ssl.SSLEngine;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
@@ -46,16 +49,29 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private MyDataListener dataListener = new MyDataListener();
 	private CloseListener closeListener;
+	private HttpsSslEngineFactory factory;
+	private ChannelManager mgr;
+	private String idForLogging;
 	
-	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser, CloseListener listener) {
-		channel = mgr.createTCPChannel(idForLogging);
-		this.parser = parser;
+	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser parser2,
+			CloseListener listener) {
+		this.factory = factory;
+		this.mgr = mgr;
+		this.idForLogging = idForLogging;
+		this.parser = parser2;
 		memento = parser.prepareToParse();
-		this.closeListener = listener;
+		this.closeListener = listener;		
 	}
 
 	@Override
-	public CompletableFuture<HttpSocket> connect(SocketAddress addr) {
+	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr) {
+		if(factory == null) {
+			channel = mgr.createTCPChannel(idForLogging);
+		} else {
+			SSLEngine engine = factory.createSslEngine(addr.getHostName(), addr.getPort());
+			channel = mgr.createTCPChannel(idForLogging, engine);
+		}
+		
 		connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected());
 		return connectFuture;
 	}

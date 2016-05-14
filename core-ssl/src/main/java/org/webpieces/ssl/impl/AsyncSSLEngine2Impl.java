@@ -90,7 +90,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				if(log.isTraceEnabled()) {
 					log.trace(mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+buf.position()+" lim="+buf.limit());
 				}
-				feedEncryptedPacketImpl(buf);
+				feedEncryptedPacketImpl(buf, true);
 			}
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			if(log.isTraceEnabled())
@@ -167,10 +167,10 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		
-		feedEncryptedPacketImpl(b);
+		feedEncryptedPacketImpl(b, false);
 	}
 	
-	private void feedEncryptedPacketImpl(ByteBuffer encryptedInData) {	
+	private void feedEncryptedPacketImpl(ByteBuffer encryptedInData, boolean alreadyAdded) {	
 		SSLEngine sslEngine = mem.getEngine();
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
@@ -220,7 +220,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				throw new RuntimeException(this+"Bug, stuck in loop, bufIn="+encryptedData+" bufOut="+outBuffer+
 						" hsStatus="+hsStatus+" status="+status);
 			else if(hsStatus == HandshakeStatus.NEED_TASK) {
-				if(encryptedData.hasRemaining()) {
+				if(encryptedData.hasRemaining() && !alreadyAdded) {
 					mem.addCachedEncryptedData(encryptedData);
 				}
 				//if status is need task, we need to break to run the task before other handshake

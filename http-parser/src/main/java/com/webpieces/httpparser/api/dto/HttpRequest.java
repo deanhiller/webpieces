@@ -1,7 +1,6 @@
 package com.webpieces.httpparser.api.dto;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
@@ -75,7 +74,7 @@ public class HttpRequest extends HttpMessage {
 	 * @param port
 	 * @return
 	 */
-	public SocketAddress getServerToConnectTo(Integer port) {
+	public InetSocketAddress getServerToConnectTo(Integer port) {
 		UrlInfo urlInfo = getRequestLine().getUri().getUriBreakdown();
 		
 		String host = urlInfo.getHost();

@@ -34,7 +34,7 @@ public class SslConnectionListener implements ConnectionListener {
 	@Override
 	public CompletableFuture<DataListener> connected(Channel c, boolean s) {
 		TCPChannel realChannel = (TCPChannel) c;
-		SSLEngine engine = sslFactory.createEngineForServerSocket();		
+		SSLEngine engine = sslFactory.createSslEngine();		
 		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.createParser(c+"", engine, pool, l);
 		SslTCPChannel sslChannel = new SslTCPChannel(function, realChannel, connectionListener);
 		

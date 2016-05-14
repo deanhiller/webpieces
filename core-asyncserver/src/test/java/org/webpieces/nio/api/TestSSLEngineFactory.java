@@ -17,7 +17,7 @@ public class TestSSLEngineFactory implements SSLEngineFactory {
 	private String serverKeystore = "src/test/resources/server.keystore";
 	private	String password = "root01";
 
-	public SSLEngine createEngineForServerSocket() {
+	public SSLEngine createSslEngine() {
 		try {
 			// Create/initialize the SSLContext with key material
 	

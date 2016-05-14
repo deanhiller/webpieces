@@ -97,12 +97,4 @@ public class HttpLastChunk extends HttpChunk {
 		return lastPart;
 	}
 
-	@Override
-	public String toString() {
-		String metaLine = createMetaLine();
-		String trailer = createTrailer();
-		return metaLine+trailer;
-	}
-	
-	
 }

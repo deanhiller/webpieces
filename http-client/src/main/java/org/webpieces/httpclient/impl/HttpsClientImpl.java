@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
 
@@ -15,15 +16,17 @@ import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpResponse;
 
-public class HttpClientImpl implements HttpClient {
+public class HttpsClientImpl implements HttpClient {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 	private ChannelManager mgr;
 	private HttpParser parser;
+	private HttpsSslEngineFactory factory;
 
-	public HttpClientImpl(ChannelManager mgr, HttpParser parser) {
+	public HttpsClientImpl(ChannelManager mgr, HttpParser parser, HttpsSslEngineFactory factory) {
 		this.mgr = mgr;
 		this.parser = parser;
+		this.factory = factory;
 	}
 
 	@Override
@@ -59,7 +62,8 @@ public class HttpClientImpl implements HttpClient {
 	
 	@Override
 	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpSocketImpl(mgr, idForLogging, null, parser, listener);
+		return new HttpSocketImpl(mgr, idForLogging, factory, parser, listener);
 	}
+
 
 }

@@ -1,6 +1,6 @@
 package org.webpieces.httpclient.api;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.httpparser.api.dto.HttpRequest;
@@ -8,7 +8,7 @@ import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpSocket {
 
-	public CompletableFuture<HttpSocket> connect(SocketAddress addr);
+	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr);
 
 	/**
 	 * This can be used ONLY if 'you' know that the far end does NOT sended a chunked download. 
@@ -24,5 +24,6 @@ public interface HttpSocket {
 	public void send(HttpRequest request, ResponseListener l);
 
 	public CompletableFuture<HttpSocket> closeSocket();
+
 	
 }

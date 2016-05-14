@@ -23,4 +23,7 @@ public abstract class HttpClientFactory {
 	 * @return
 	 */
 	public abstract HttpClient createHttpClient(ChannelManager mgr, HttpParser parser);
+	
+	public abstract HttpClient createHttpsClient(ChannelManager mgr, HttpParser parser, HttpsSslEngineFactory factory);
+	
 }

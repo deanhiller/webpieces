@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
+import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -23,7 +24,7 @@ public class HttpClientFactoryImpl extends HttpClientFactory {
 	@Override
 	public HttpClient createHttpClient(int numThreads) {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
-		BufferCreationPool pool = new BufferCreationPool(false, 2000, 1000);
+		BufferCreationPool pool = new BufferCreationPool();
 		HttpParser parser = HttpParserFactory.createParser(pool);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
@@ -31,4 +32,8 @@ public class HttpClientFactoryImpl extends HttpClientFactory {
 		return createHttpClient(mgr, parser);
 	}
 
+	@Override
+	public HttpClient createHttpsClient(ChannelManager mgr, HttpParser parser, HttpsSslEngineFactory factory) {
+		return new HttpsClientImpl(mgr, parser, factory);
+	}
 }

@@ -4,6 +4,6 @@ import javax.net.ssl.SSLEngine;
 
 public interface SSLEngineFactory {
 
-	public SSLEngine createEngineForServerSocket();
+	public SSLEngine createSslEngine();
 		
 }
