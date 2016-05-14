@@ -8,7 +8,6 @@ import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadDataListener implements DataListener {
 
-	//private static final Logger log = LoggerFactory.getLogger(ThreadDataListener.class);
 	private DataListener dataListener;
 	private SessionExecutor executor;
 
@@ -49,16 +48,22 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void applyBackPressure(Channel channel) {
-		//short circuit such that they can kill backpressure sooner
-		dataListener.applyBackPressure(channel);
+		executor.execute(channel, new Runnable() {
+			@Override
+			public void run() {
+				dataListener.applyBackPressure(channel);
+			}
+		});
 	}
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
-		//short circuit such that they can kill backpressure sooner
-		//and because applyBackpressure was short circuited, this ensures ordering
-		//between both methods
-		dataListener.releaseBackPressure(channel);
+		executor.execute(channel, new Runnable() {
+			@Override
+			public void run() {
+				dataListener.releaseBackPressure(channel);
+			}
+		});
 	}
 
 }

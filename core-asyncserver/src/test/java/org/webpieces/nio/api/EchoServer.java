@@ -24,7 +24,8 @@ public class EchoServer {
     public void startImpl() throws IOException {
         // create socket
         int port = 4444;
-        ServerSocket serverSocket = new ServerSocket(port);
+        @SuppressWarnings("resource")
+		ServerSocket serverSocket = new ServerSocket(port);
         log.info("started server on port="+port);
 
         // repeatedly wait for connections, and process

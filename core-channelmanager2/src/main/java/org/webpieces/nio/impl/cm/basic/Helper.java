@@ -155,8 +155,10 @@ public final class Helper {
 		DataListener in = struct.getDataHandler();
 		BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
 		
+		//if someone JUST unregistered for reads, then let's not read from this socket since it would put more
+		//pressure in RAM so just wait until they re-registerForReads and they will get the data then
 		if(!channel.isRegisteredForReads()) {
-			log.info("not registered for reads so skipping");
+			//log.info("not registered for reads so skipping");
 			return; //do not process reads if we were unregistered
 		}
 		
@@ -312,6 +314,8 @@ public final class Helper {
 		int opsNow = previous & ~ops; //subtract out the operation
 		
 		key.interestOps(opsNow);
+		
+		//log.info("unregistering="+Helper.opType(opsNow)+" opToSubtract="+Helper.opType(ops)+" previous="+Helper.opType(previous)+" type="+type);
 		
 		//make sure we remove the appropriate listener and clean up
 		if(key.attachment() != null) {

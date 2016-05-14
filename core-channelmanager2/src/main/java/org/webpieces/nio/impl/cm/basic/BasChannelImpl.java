@@ -6,7 +6,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
@@ -38,17 +37,18 @@ public abstract class BasChannelImpl
 
     private ChannelSession session = new ChannelSessionImpl();
     private long waitingBytesCounter = 0;
-	private ConcurrentLinkedQueue<WriteRunnable> waitingWriters = new ConcurrentLinkedQueue<WriteRunnable>();
+	private ConcurrentLinkedQueue<WriteInfo> dataToBeWritten = new ConcurrentLinkedQueue<WriteInfo>();
 	private boolean isConnecting = false;
 	private boolean isClosed = false;
-    private AtomicBoolean registeredForWrites = new AtomicBoolean(false);
 	private boolean doNotAllowWrites;
 	private int writeTimeoutMs = 5_000;
-	private int maxBytesWaitingSize = 500_000; //1 megabyte before telling client to backpressure the channel
+	private int maxBytesWaitingSize = 500_000; //0.5 megabyte before telling client to backpressure the channel
 	private AtomicBoolean applyingBackpressure = new AtomicBoolean(false);
 	private boolean isRegisterdForReads;
 	private BufferPool pool;
 	private DataListener dataListener;
+	private Object writeLock = new Object();
+	private boolean inDelayedWriteMode;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr);
@@ -103,52 +103,101 @@ public abstract class BasChannelImpl
         	promise.completeExceptionally(closeExc);
 		}
     }
-    
-    /**
-     * This is the method where writes are added to the queue to be written later when the selector
-     * fires and tells me we have room to write again.
-     * 
-     * @param id
-     * @return true if the whole ByteBuffer was written, false if only part of it or none of it was written.
-     * @throws IOException
-     * @throws InterruptedException
-     */
-	private void queueTheWrite(WriteRunnable action) {
-		boolean accepted = waitingWriters.add(action);
-		if(!accepted) {
-			throw new RuntimeException(this+"registered="+registeredForWrites+" This should never occur");
-		}
+
+	@Override
+	public CompletableFuture<Channel> write(ByteBuffer b) {
+		if(b.remaining() == 0)
+			throw new IllegalArgumentException("buffer has no data");
+		else if(!getSelectorManager().isRunning())
+			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
+		else if(isClosed)
+			throw new NioClosedChannelException(this+"Client cannot write after the client closed the socket");
+		else if(doNotAllowWrites)
+			throw new IllegalStateException("This channel is in a failed state.  "
+					+ "failure functions were called so look for exceptions from them");
 		
-		boolean needToApplyBackpressure = false;
-		long numBytesWaitingToBeWritten = 0;
-		synchronized (this) {
-			waitingBytesCounter += action.getBufferSize();
-			if(waitingBytesCounter > 100000)
-				log.info("waiting bytes="+waitingBytesCounter);
-			numBytesWaitingToBeWritten = waitingBytesCounter;
-			if(numBytesWaitingToBeWritten > maxBytesWaitingSize) {
-				needToApplyBackpressure = true;
+		if(apiLog.isTraceEnabled())
+			apiLog.trace(this+"Basic.write");
+		
+		CompletableFuture<Channel> future = new CompletableFuture<Channel>();
+		
+		boolean wroteAllData = writeSynchronized(b, future);
+
+		if(wroteAllData) {
+			//since we didn't switch and were not in this mode, complete the action outside sync block
+			pool.releaseBuffer(b);
+			future.complete(this);
+			if(log.isTraceEnabled())
+				log.trace(this+" wrote bytes on client thread");			
+		} else {
+			if(log.isTraceEnabled()) {
+				log.trace(this+"sent write to queue");
 			}
 		}
 		
-		//fire this outside synchronization block
-		boolean changedValue = applyingBackpressure.compareAndSet(false, needToApplyBackpressure);
-		if(needToApplyBackpressure && changedValue) {
-			//we only fire when the value of applyingBackpressure changes
-			dataListener.applyBackPressure(this);
-		}
-		
-		registerForWritesOrClose();
+		return future;
 	}
 	
+	private boolean writeSynchronized(ByteBuffer b, CompletableFuture<Channel> future) {
+		
+		//I feel like there is a bit too much in this sync block BUT this is also an extremely complex problem and 
+		//VERY VERY VERY easy to get wrong.  The calls I don't really like in here are registerForWrites()
+		//and dataListener.applyBackPressure but both are pretty complex AND it is very important to not have
+		//race conditions between 
+		//1. turning on and off write registration with the selector
+		//2. turning on and off back pressure with the client
+		//These operations need to get to the selector or client IN ORDER and not have race conditions to work
+		//The corresponding code to worry about is writeAll method which reads from the waitingWriters
+		synchronized (writeLock ) {
+			if(!inDelayedWriteMode) {
+				int totalToWriteOut = b.remaining();
+				int written = writeImpl(b);
+				if(written != totalToWriteOut) {
+					if(b.remaining() + written != totalToWriteOut)
+						throw new IllegalStateException("Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
+					
+					registerForWrites();
+					inDelayedWriteMode = true;
+				} else
+					return true;
+			}
+
+			WriteInfo holder = new WriteInfo(b, future);
+			dataToBeWritten.add(holder);
+			
+			boolean needToApplyBackpressure = false;
+			waitingBytesCounter += b.remaining();
+			if(waitingBytesCounter > maxBytesWaitingSize) {
+				needToApplyBackpressure = true;
+			}
+			
+			boolean changedValue = applyingBackpressure.compareAndSet(false, needToApplyBackpressure);
+			if(needToApplyBackpressure && changedValue) {
+				//we only fire when the value of applyingBackpressure changes
+				//Also, this is a real PITA since we must do this in the sync block and I don't like calling
+				//customers in a sync block though thankfully most won't use the single threaded channelmanager.
+				//The reason is that if this is outside, just before executor.execute({Runnable with call to
+				//applyBackPressure}) is called (run from the writer thread that is), the channelmanager thread
+				//can then call releaseBackPressure and that can beat applyBackPressure up the stack(and has)
+				//This results in the client permanently enabling pressure since it is the last call....when
+				//we need releaseBackPressure to always be after apply.
+				dataListener.applyBackPressure(this);
+			}
+		}
+		
+        return false;
+	}
+
 	//synchronized with writeAll as both try to go through every element in the queue
 	//while most of the time there will be no contention(only on the close do we hit this)
 	private synchronized List<CompletableFuture<Channel>> failAllWritesInQueue() {
 		doNotAllowWrites = true;
 		List<CompletableFuture<Channel>> copy = new ArrayList<>();
-		while(!waitingWriters.isEmpty()) {
-			WriteRunnable runnable = waitingWriters.remove();
-			runnable.markBufferRead(); //in case clients releaseBuffer
+		while(!dataToBeWritten.isEmpty()) {
+			WriteInfo runnable = dataToBeWritten.remove();
+			ByteBuffer buffer = runnable.getBuffer();
+			buffer.position(buffer.limit()); //mark buffer read before releasing it
+			pool.releaseBuffer(buffer);
 			copy.add(runnable.getPromise());
 		}
 		
@@ -156,17 +205,10 @@ public abstract class BasChannelImpl
 		return copy;
 	}
 
-	private void registerForWritesOrClose() {
-		//if not already registered, then register for writes.....
-        //NOTE: we must do this after waitingWriters.offer so there is something on the queue to read
-        //otherwise, that could be bad.
-		
-		boolean changedState = registeredForWrites.compareAndSet(false, true);
-		if(changedState) {
-            if(log.isTraceEnabled())
-                log.trace(this+"registering channel for write msg. size="+waitingWriters.size());
-            getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
-        }
+	private void registerForWrites() {
+        if(log.isTraceEnabled())
+            log.trace(this+"registering channel for write msg. size="+dataToBeWritten.size());
+        getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
 	}
        
     /**
@@ -176,37 +218,50 @@ public abstract class BasChannelImpl
      */
 	 void writeAll() {
 		List<CompletableFuture<Channel>> finishedPromises = new ArrayList<>();
-		synchronized(this) {
-	        if(waitingWriters.isEmpty())
-	            return;
+		synchronized(writeLock) {
+	        if(dataToBeWritten.isEmpty())
+	        	throw new IllegalStateException("bug, I am not sure this is possible..it shouldn't be...look into");
 	
-	        while(!waitingWriters.isEmpty()) {
-	            WriteRunnable writer = waitingWriters.peek();
-	            int size = writer.getBufferSize();
-	            boolean finished = writer.runDelayedAction();
-	            if(!finished) {
+	        while(!dataToBeWritten.isEmpty()) {
+	            WriteInfo writer = dataToBeWritten.peek();
+	            ByteBuffer buffer = writer.getBuffer();
+	            int initialSize = buffer.remaining();
+	    		int wroteOut = this.writeImpl(buffer);
+	            if(buffer.hasRemaining()) {
+					if(buffer.remaining() + wroteOut != initialSize)
+						throw new IllegalStateException("Something went wrong.  b.remaining()="+buffer.remaining()+" written="+wroteOut+" total="+initialSize);
+					
 	                if(log.isTraceEnabled())
-	                    log.trace(this+"Did not write all of id="+writer);
-	                int left = writer.getBufferSize();
-	                int writtenOut = size - left;
+	                    log.trace(this+"Did not write all data out");
+	                int leftOverSize = buffer.remaining();
+	                int writtenOut = initialSize - leftOverSize;
 	                waitingBytesCounter -= writtenOut;
 	                break;
 	            }
 	            
 	            //if it finished, remove the item from the queue.  It
 	            //does not need to be run again.
-	            waitingWriters.poll();
+	            dataToBeWritten.poll();
 	            //release bytebuffer back to pool
 	            pool.releaseBuffer(writer.getBuffer());
-	            waitingBytesCounter -= size;
+	            waitingBytesCounter -= initialSize;
 	            finishedPromises.add(writer.getPromise());
 	        }
 	        
-	        boolean applyPressure = !waitingWriters.isEmpty();
+	        //we are only applying backpressure when queue is too large
+	        boolean applyPressure = !dataToBeWritten.isEmpty();
 	        boolean changedValue = applyingBackpressure.compareAndSet(true, applyPressure);
 	        if(!applyPressure && changedValue) {
 	        	//we only fire when the value of applyingBackpressure changes
 	        	dataListener.releaseBackPressure(this);
+	        }
+	        
+	        //we are registered for writes with ANY size queue
+	        if(dataToBeWritten.isEmpty() && inDelayedWriteMode) {
+	        	inDelayedWriteMode = false;
+	        	if(log.isTraceEnabled())
+	        		log.trace(this+"unregister writes");
+	            Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
 	        }
 		}
 		
@@ -214,18 +269,8 @@ public abstract class BasChannelImpl
         for(CompletableFuture<Channel> promise : finishedPromises) {
         	promise.complete(this);
         }
-        
-        if(waitingWriters.isEmpty()) {
-        	
-        	boolean changedState = registeredForWrites.compareAndSet(true, false);
-        	if(changedState) {
-	        	if(log.isTraceEnabled())
-	        		log.trace(this+"unregister writes");
-	            Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
-        	}
-        }
     }
-
+		
     public void bind(SocketAddress addr) {
         if(!(addr instanceof InetSocketAddress))
             throw new IllegalArgumentException(this+"Can only bind to InetSocketAddress addressses");
@@ -303,47 +348,6 @@ public abstract class BasChannelImpl
 			throw new NioException(e);
 		}
 	}	
-
-	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
-		if(b.remaining() == 0)
-			throw new IllegalArgumentException("buffer has no data");
-		else if(!getSelectorManager().isRunning())
-			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
-		else if(isClosed) {
-			AsynchronousCloseException exc = new AsynchronousCloseException();
-			throw new NioException(this+"Client cannot write after the client closed the socket", exc);
-		}
-		CompletableFuture<Channel> impl = new CompletableFuture<Channel>();
-		
-		if(apiLog.isTraceEnabled())
-			apiLog.trace(this+"Basic.write");
-		
-		if(doNotAllowWrites) {
-			throw new IllegalStateException("This channel is in a failed state.  "
-					+ "failure functions were called so look for exceptions from them");
-		}
-		
-		int totalToWriteOut = b.remaining();
-		int written = writeImpl(b);
-		if(written != totalToWriteOut) {
-			if(b.remaining() + written != totalToWriteOut) {
-				throw new IllegalStateException("Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
-			}
-			WriteRunnable holder = new WriteRunnable(this, b, impl, System.currentTimeMillis());
-			queueTheWrite(holder);
-	        if(log.isTraceEnabled()) {
-	        	log.trace(this+"sent write to queue");
-	       	}
-		} else {
-			pool.releaseBuffer(b);
-			impl.complete(this);
-			if(log.isTraceEnabled())
-				log.trace(this+" wrote bytes on client thread");
-		}
-
-        return impl;
-	}
            
 	protected void setConnecting(boolean b) {
 		isConnecting = b;

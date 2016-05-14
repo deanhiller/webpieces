@@ -1,8 +1,6 @@
 package org.webpieces.nio.api;
 
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
 import javax.net.ssl.KeyManagerFactory;

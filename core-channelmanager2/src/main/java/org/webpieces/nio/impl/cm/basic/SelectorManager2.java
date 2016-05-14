@@ -31,8 +31,7 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
-import javax.swing.event.EventListenerList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,7 @@ public class SelectorManager2 implements SelectorListener {
     private Select selector;
     private SelectorProviderFactory factory;
 
-	private EventListenerList listenerList = new EventListenerList();
+	private ConcurrentLinkedDeque<ChannelRegistrationListener> listenerList = new ConcurrentLinkedDeque<>();
     //flag for logs so we know that the selector was woken up to close a socket.
     //this is needed as we want to see in the logs the reason of every selector fire clearly
 	private boolean needCloseOrRegister;
@@ -183,6 +182,8 @@ public class SelectorManager2 implements SelectorListener {
 		int allOps = previousOps | validOps;
 		SelectionKey key = channel.register(selector, allOps, struct);
 		channel.setKey(key);
+		
+		//log.info("registering="+Helper.opType(allOps)+" opsToAdd="+Helper.opType(validOps)+" previousOps="+Helper.opType(previousOps)+" type="+type);
 		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));	
 		if (log.isTraceEnabled())
 			log.trace(channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
@@ -194,7 +195,7 @@ public class SelectorManager2 implements SelectorListener {
 			throw new IllegalArgumentException(s+"Only non-blocking selectable channels can be used.  " +
 					"please call SelectableChannel.configureBlocking before passing in the channel");
 
-		log.info("asyn UNregister="+Helper.opType(validOps));
+		//log.info("asyn UNregister="+Helper.opType(validOps));
 		
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		//This is a 12 year old statement and maybe not true anymore...
@@ -209,7 +210,7 @@ public class SelectorManager2 implements SelectorListener {
 			}
 		};
         
-		listenerList.add(ChannelRegistrationListener.class, r);
+		listenerList.add(r);
 
 		if(log.isTraceEnabled())
 			log.trace(s+"call wakeup on selector to register for="+r);
@@ -224,8 +225,6 @@ public class SelectorManager2 implements SelectorListener {
 			throw new IllegalArgumentException(s+"Only non-blocking selectable channels can be used.  " +
 					"please call SelectableChannel.configureBlocking before passing in the channel");
 
-		
-		
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		//This is a 12 year old statement and maybe not true anymore...
 		//in SelectorImpl.java(check sun's SCSL code), SelectorImpl grabs
@@ -236,11 +235,13 @@ public class SelectorManager2 implements SelectorListener {
 		ChannelRegistrationListener r = new ChannelRegistrationListener(future, validOps) {
 			@Override
 			public void run() {
+//				if((validOps & SelectionKey.OP_READ) > 0)
+//					log.info("really registering for reads");
 				registerChannelOnThisThread(s, validOps, listener);
 			}
 		};
 		
-		listenerList.add(ChannelRegistrationListener.class, r);
+		listenerList.add(r);
 
 		if(log.isTraceEnabled())
 			log.trace(s+"call wakeup on selector to register for="+r);
@@ -267,7 +268,7 @@ public class SelectorManager2 implements SelectorListener {
         //fashion.
         Set<SelectionKey> keySet = selector.selectedKeys();
         if(log.isTraceEnabled())
-        	log.trace("keySetCnt="+keySet.size()+" registerCnt="+listenerList.getListenerCount()
+        	log.trace("keySetCnt="+keySet.size()+" registerCnt="+listenerList.size()
         			+" needCloseOrRegister="+needCloseOrRegister+" wantShutdown="+selector.isWantShutdown());
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
@@ -284,7 +285,7 @@ public class SelectorManager2 implements SelectorListener {
 
 		if(log.isTraceEnabled())
 			log.trace("coming out of select with newkeys="+numNewKeys+
-					" regCnt="+listenerList.getListenerCount()+" needCloseOrRegister="+needCloseOrRegister+
+					" regCnt="+listenerList.size()+" needCloseOrRegister="+needCloseOrRegister+
 					" wantShutdown="+selector.isWantShutdown());
 
 //			assert numNewKeys > 0 || listenerList.getListenerCount() > 0 || selector.isWantShutdown() : 
@@ -294,10 +295,15 @@ public class SelectorManager2 implements SelectorListener {
 	}
 
 	private void fireToListeners() {
-		ChannelRegistrationListener[] listeners = listenerList.getListeners(ChannelRegistrationListener.class);
-		for(int i = 0; i < listeners.length; i++) {
-			listenerList.remove(ChannelRegistrationListener.class, listeners[i]);
-			listeners[i].processRegistrations();
+//		//ChannelRegistrationListener[] listeners = listenerList.getListeners(ChannelRegistrationListener.class);
+//		for(int i = 0; i < listeners.length; i++) {
+//			listenerList.remove(ChannelRegistrationListener.class, listeners[i]);
+//			listeners[i].processRegistrations();
+//		}
+		
+		while(!listenerList.isEmpty()) {
+			ChannelRegistrationListener l = listenerList.poll();
+			l.processRegistrations();
 		}
 	}
 

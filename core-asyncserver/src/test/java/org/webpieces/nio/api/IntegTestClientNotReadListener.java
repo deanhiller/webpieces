@@ -8,14 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-import com.webpieces.data.api.BufferPool;
-
 public class IntegTestClientNotReadListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(IntegTestClientNotReadListener.class);
-	private BufferPool pool;
 
-	public IntegTestClientNotReadListener(BufferPool pool) {
-		this.pool = pool;
+	public IntegTestClientNotReadListener() {
 	}
 
 	@Override

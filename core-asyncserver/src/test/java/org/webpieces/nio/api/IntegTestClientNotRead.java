@@ -42,7 +42,7 @@ public class IntegTestClientNotRead {
 	public void testSoTimeoutOnSocket() throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool();
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer("server", pool);
-		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestClientNotReadListener(pool));
+		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestClientNotReadListener());
 		
 		BufferCreationPool pool2 = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
