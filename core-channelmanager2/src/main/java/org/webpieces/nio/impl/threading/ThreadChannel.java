@@ -13,11 +13,11 @@ import org.webpieces.util.threading.SessionExecutor;
 public class ThreadChannel implements Channel {
 
 	private ProxyExecutor executor;
-	private Channel channel;
+	private Channel tcpChannel;
 	private SessionExecutor sessionExecutor;
 
 	public ThreadChannel(Channel channel, SessionExecutor executor2) {
-		this.channel = channel;
+		this.tcpChannel = channel;
 		this.sessionExecutor = executor2;
 		this.executor =  new ProxyExecutor(channel, executor2);
 	}
@@ -25,7 +25,7 @@ public class ThreadChannel implements Channel {
 	@Override
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
 		DataListener threaded = new ThreadDataListener(listener, sessionExecutor);
-		CompletableFuture<Channel> future = channel.connect(addr, threaded);
+		CompletableFuture<Channel> future = tcpChannel.connect(addr, threaded);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> this, executor);
@@ -33,7 +33,7 @@ public class ThreadChannel implements Channel {
 
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {
-		CompletableFuture<Channel> future = channel.write(b);
+		CompletableFuture<Channel> future = tcpChannel.write(b);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> this, executor);
@@ -41,88 +41,88 @@ public class ThreadChannel implements Channel {
 
 	@Override
 	public CompletableFuture<Channel> close() {
-		CompletableFuture<Channel> future = channel.close();
+		CompletableFuture<Channel> future = tcpChannel.close();
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	public void setReuseAddress(boolean b) {
-		channel.setReuseAddress(b);
+		tcpChannel.setReuseAddress(b);
 	}
 
 	public void setName(String string) {
-		channel.setName(string);
+		tcpChannel.setName(string);
 	}
 
 	public String getName() {
-		return channel.getName();
+		return tcpChannel.getName();
 	}
 
 	public void bind(SocketAddress addr) {
-		channel.bind(addr);
+		tcpChannel.bind(addr);
 	}
 
 	public boolean isBlocking() {
-		return channel.isBlocking();
+		return tcpChannel.isBlocking();
 	}
 
 	public boolean isClosed() {
-		return channel.isClosed();
+		return tcpChannel.isClosed();
 	}
 
 	public boolean isBound() {
-		return channel.isBound();
+		return tcpChannel.isBound();
 	}
 
 	public InetSocketAddress getLocalAddress() {
-		return channel.getLocalAddress();
+		return tcpChannel.getLocalAddress();
 	}
 
 	public CompletableFuture<Channel> registerForReads() {
-		CompletableFuture<Channel> future = channel.registerForReads();
+		CompletableFuture<Channel> future = tcpChannel.registerForReads();
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	public CompletableFuture<Channel> unregisterForReads() {
-		CompletableFuture<Channel> future = channel.unregisterForReads();
+		CompletableFuture<Channel> future = tcpChannel.unregisterForReads();
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
 		return future.thenApplyAsync(p -> this, executor);
 	}
 
 	public boolean isRegisteredForReads() {
-		return channel.isRegisteredForReads();
+		return tcpChannel.isRegisteredForReads();
 	}
 
 	public InetSocketAddress getRemoteAddress() {
-		return channel.getRemoteAddress();
+		return tcpChannel.getRemoteAddress();
 	}
 
 	public boolean isConnected() {
-		return channel.isConnected();
+		return tcpChannel.isConnected();
 	}
 
 	public ChannelSession getSession() {
-		return channel.getSession();
+		return tcpChannel.getSession();
 	}
 
 	public void setWriteTimeoutMs(int timeout) {
-		channel.setWriteTimeoutMs(timeout);
+		tcpChannel.setWriteTimeoutMs(timeout);
 	}
 
 	public int getWriteTimeoutMs() {
-		return channel.getWriteTimeoutMs();
+		return tcpChannel.getWriteTimeoutMs();
 	}
 
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		channel.setMaxBytesWriteBackupSize(maxBytesBackup);
+		tcpChannel.setMaxBytesWriteBackupSize(maxBytesBackup);
 	}
 
 	public int getMaxBytesBackupSize() {
-		return channel.getMaxBytesBackupSize();
+		return tcpChannel.getMaxBytesBackupSize();
 	}
 
 }

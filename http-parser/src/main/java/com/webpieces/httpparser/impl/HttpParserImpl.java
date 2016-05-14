@@ -16,6 +16,7 @@ import com.webpieces.httpparser.api.common.Header;
 import com.webpieces.httpparser.api.common.KnownHeaderName;
 import com.webpieces.httpparser.api.dto.HttpChunk;
 import com.webpieces.httpparser.api.dto.HttpChunkExtension;
+import com.webpieces.httpparser.api.dto.HttpLastChunk;
 import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
 import com.webpieces.httpparser.api.dto.HttpMessage;
@@ -362,7 +363,8 @@ public class HttpParserImpl implements HttpParser {
 		DataWrapper chunkMetaData = split.get(0);
 		memento.setLeftOverData(split.get(1));
 		
-		HttpChunk chunk = new HttpChunk();
+		List<HttpChunkExtension> extensions = new ArrayList<>();
+		
 		String chunkMetaStr = chunkMetaData.createStringFrom(0, chunkMetaData.getReadableSize(), iso8859_1);
 		String hexSize = chunkMetaStr.trim();
 		if(chunkMetaStr.contains(";")) {
@@ -370,12 +372,18 @@ public class HttpParserImpl implements HttpParser {
 			hexSize = extensionsArray[0];
 			for(int n = 1; n < extensionsArray.length; n++) {
 				HttpChunkExtension ext = createExtension(extensionsArray[n]);
-				chunk.addExtension(ext);
+				extensions.add(ext);
+				//extensions.addExtension(ext);
 			}
 		}
 
+		int chunkSize = Integer.parseInt(hexSize, 16);
+		HttpChunk chunk = new HttpChunk();
+		if(chunkSize == 0)
+			chunk = new HttpLastChunk();
+		
 		//must read in all the data of the chunk AND /r/n
-		int size = 2 + Integer.parseInt(hexSize, 16);
+		int size = 2 + chunkSize;
 		memento.setNumBytesLeftToRead(size);
 		
 		return chunk;

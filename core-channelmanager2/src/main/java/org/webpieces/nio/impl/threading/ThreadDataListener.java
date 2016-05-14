@@ -18,6 +18,8 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
+		int val = 0;
+		int s = val;
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {

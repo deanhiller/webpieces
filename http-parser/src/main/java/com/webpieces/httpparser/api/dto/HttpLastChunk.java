@@ -45,7 +45,9 @@ public class HttpLastChunk extends HttpChunk {
 	
 	@Override
 	public void setBody(DataWrapper data) {
-		throw new IllegalArgumentException("Can't set body on HttpLastChunk according to http spec.  It must be size=0");
+		if(data.getReadableSize() != 0)
+			throw new IllegalArgumentException("Can't set body on HttpLastChunk according to http spec.  It must be size=0");
+		super.setBody(data);
 	}
 
 	@Override

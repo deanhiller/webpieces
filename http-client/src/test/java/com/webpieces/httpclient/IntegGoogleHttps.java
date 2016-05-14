@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
 import org.webpieces.httpclient.api.HttpSocket;
@@ -17,6 +18,8 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.data.api.BufferPool;
+import com.webpieces.data.api.DataWrapper;
+import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.HttpParserFactory;
 import com.webpieces.httpparser.api.common.Header;
@@ -42,9 +45,13 @@ public class IntegGoogleHttps {
 //		User-Agent: curl/7.43.0
 //		Accept: */*
 		
+		boolean isHttp = true;
+		
 		String host = "www.google.com";
 		int port = 443;
-
+		if(isHttp)
+			port = 80;
+		
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(KnownHttpMethod.GET);
 		requestLine.setUri(new HttpUri("/"));
@@ -67,9 +74,13 @@ public class IntegGoogleHttps {
 		
 		ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
 		
-		HttpClient client = httpFactory.createHttpsClient(mgr, parser, sslFactory);
+		HttpClient client;
+		if(isHttp)
+			client = httpFactory.createHttpClient(mgr, parser);
+		else
+			client = httpFactory.createHttpsClient(mgr, parser, sslFactory);
 		
-		HttpSocket socket = client.openHttpSocket("oneTimer");
+		HttpSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(p -> sendRequest(socket, req))
@@ -96,11 +107,28 @@ public class IntegGoogleHttps {
 		@Override
 		public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
 			log.info("chunk="+chunk+" last="+isLastChunk);
+			
+			DataWrapper wrapper = chunk.getBody();
+			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
+			log.info("result=\n"+result+"/////");
+			
+			if(result.length() >= 4) {
+				String last4 = result.substring(result.length()-4);
+				log.info("last4="+last4);
+			}
 		}
 
 		@Override
 		public void failure(Throwable e) {
 			log.warn("exception", e);
 		}
+	}
+	
+	private class OurCloseListener implements CloseListener {
+		@Override
+		public void farEndClosed(HttpSocket socket) {
+			log.info(socket+" far end closed");
+		}
+		
 	}
 }
