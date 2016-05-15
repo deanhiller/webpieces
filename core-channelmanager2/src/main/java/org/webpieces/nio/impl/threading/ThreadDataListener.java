@@ -21,7 +21,6 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
-		log.info("buf size="+b.remaining());
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {

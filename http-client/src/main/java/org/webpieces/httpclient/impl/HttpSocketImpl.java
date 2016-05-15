@@ -196,6 +196,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					HttpChunk chunk = (HttpChunk) msg;
 					ResponseListener listener = responsesToComplete.peek();
 					if(chunk.isLastChunk()) {
+						processingChunked = false;
 						responsesToComplete.poll();
 					}
 					

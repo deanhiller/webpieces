@@ -7,16 +7,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLEngine;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ssl.api.ConnectionState;
 
 public class SslMementoImpl {
 
+	private static final Logger log = LoggerFactory.getLogger(SslMementoImpl.class);
 	private SSLEngine engine;
 	private String id;
 	private AtomicReference<ConnectionState> connectionState = new AtomicReference<ConnectionState>(ConnectionState.NOT_STARTED);
 	private ByteBuffer cachedOut;
-	private List<ByteBuffer> cacheToProcess = new ArrayList<>();
-	private ByteBuffer cachedForUnderflow;
+	private ByteBuffer cacheToProcess;
 	
 	public SslMementoImpl(String id, SSLEngine engine, ByteBuffer cachedOut) {
 		this.id = id;
@@ -49,20 +51,12 @@ public class SslMementoImpl {
 		this.cachedOut = cachedOut;
 	}
 
-	public void addCachedEncryptedData(ByteBuffer encryptedData) {
-		this.cacheToProcess.add(encryptedData);
+	public void setCachedEncryptedData(ByteBuffer encryptedData) {
+		cacheToProcess = encryptedData;
 	}
 	
-	public List<ByteBuffer> getCachedToProcess() {
+	public ByteBuffer getCachedToProcess() {
 		return cacheToProcess;
 	}
 
-	public void setCachedForUnderFlow(ByteBuffer encryptedData) {
-		cachedForUnderflow = encryptedData;
-	}
-	
-	public ByteBuffer getCachedForUnderFlow() {
-		return cachedForUnderflow;
-	}
-	
 }

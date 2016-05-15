@@ -30,7 +30,8 @@ public class TestHttpProxy {
 	
 	@Before
 	public void setUp() throws IOException {
-		HttpProxy proxy = HttpProxyFactory.createHttpProxy("myproxy", new TestModule() );
+		ProxyConfig config = new ProxyConfig();
+		HttpProxy proxy = HttpProxyFactory.createHttpProxy("myproxy", new TestModule(), config);
 		proxy.start();
 
 		List<DataListener> serverListeners = mockChannelMgr.getServerListeners();

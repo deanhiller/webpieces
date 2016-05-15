@@ -11,16 +11,16 @@ public abstract class HttpProxyFactory {
 	
     protected HttpProxyFactory() {}
 
-    public static HttpProxy createHttpProxy(String id) {
-    	return createHttpProxy(id, null);
+    public static HttpProxy createHttpProxy(String id, ProxyConfig config) {
+    	return createHttpProxy(id, null, config);
     }
     
-	public static HttpProxy createHttpProxy(String id, Module overrideModule) {
+	public static HttpProxy createHttpProxy(String id, Module overrideModule, ProxyConfig config) {
 		HttpProxyFactory factory = new HttpProxyFactoryImpl();
-		HttpProxy proxyImpl = factory.createHttpProxyImpl(id, overrideModule);
+		HttpProxy proxyImpl = factory.createHttpProxyImpl(id, overrideModule, config);
 		return proxyImpl;	
 	}
 
-	protected abstract HttpProxy createHttpProxyImpl(String id, Module overrideModule);
+	protected abstract HttpProxy createHttpProxyImpl(String id, Module overrideModule, ProxyConfig config);
 	
 }

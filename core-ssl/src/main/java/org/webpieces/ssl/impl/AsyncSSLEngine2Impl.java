@@ -83,14 +83,15 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 
-		List<ByteBuffer> toProcess = mem.getCachedToProcess();
+		ByteBuffer cached = mem.getCachedToProcess();
 		if(hsStatus == HandshakeStatus.NEED_UNWRAP) {
 			//unwrap any previously incoming data...
-			for(ByteBuffer buf : toProcess) {
+			if(cached != null) {
+				mem.setCachedEncryptedData(null); //wipe out the data we are now procesing
 				if(log.isTraceEnabled()) {
-					log.trace(mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+buf.position()+" lim="+buf.limit());
+					log.trace(mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+cached.position()+" lim="+cached.limit());
 				}
-				feedEncryptedPacketImpl(buf, true);
+				feedEncryptedPacketImpl(cached);
 			}
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			if(log.isTraceEnabled())
@@ -167,22 +168,23 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		
-		feedEncryptedPacketImpl(b, false);
+		feedEncryptedPacketImpl(b);
 	}
 	
-	private void feedEncryptedPacketImpl(ByteBuffer encryptedInData, boolean alreadyAdded) {	
+	private void feedEncryptedPacketImpl(ByteBuffer encryptedInData) {	
 		SSLEngine sslEngine = mem.getEngine();
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
 
 		if(log.isTraceEnabled())
 			log.trace(mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
-					" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedForUnderFlow());
+					" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
 
 		ByteBuffer encryptedData = encryptedInData;
-		if(mem.getCachedForUnderFlow() != null) {
-			encryptedData = combine(mem.getCachedForUnderFlow(), encryptedInData);
-			mem.setCachedForUnderFlow(null);
+		ByteBuffer cached = mem.getCachedToProcess();
+		if(cached != null) {
+			encryptedData = combine(cached, encryptedData);
+			mem.setCachedEncryptedData(null);
 		}
 		
 		int i = 0;
@@ -196,7 +198,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			
 			ByteBuffer outBuffer = mem.getCachedOut();
 			try {
-				result = sslEngine.unwrap(encryptedData, outBuffer);				
+				result = sslEngine.unwrap(encryptedData, outBuffer);	
 			} catch(SSLException e) {
 				AsyncSSLEngineException ee = new AsyncSSLEngineException("status="+status+" hsStatus="+hsStatus+" b="+encryptedData, e);
 				throw ee;
@@ -220,17 +222,19 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 				throw new RuntimeException(this+"Bug, stuck in loop, bufIn="+encryptedData+" bufOut="+outBuffer+
 						" hsStatus="+hsStatus+" status="+status);
 			else if(hsStatus == HandshakeStatus.NEED_TASK) {
-				if(encryptedData.hasRemaining() && !alreadyAdded) {
-					mem.addCachedEncryptedData(encryptedData);
-				}
 				//if status is need task, we need to break to run the task before other handshake
 				//messages?
 				break;
 			} else if(status == Status.BUFFER_UNDERFLOW) {
-				mem.setCachedForUnderFlow(encryptedData);
+				if(log.isTraceEnabled()) 
+					log.trace("buffer underflow. data="+encryptedData.remaining());
 			}
 		}
 
+		if(encryptedData.hasRemaining()) {
+			mem.setCachedEncryptedData(encryptedData);
+		}
+		
 		if(log.isTraceEnabled())
 			log.trace(mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
 
@@ -278,15 +282,16 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		}
 	}
 
-	private ByteBuffer combine(ByteBuffer cachedForUnderFlow, ByteBuffer encryptedInData) {
-		int size = cachedForUnderFlow.remaining()+encryptedInData.remaining();
+	private ByteBuffer combine(ByteBuffer cachedToProcessLaterData, ByteBuffer encryptedData) {
+		int size = cachedToProcessLaterData.remaining()+encryptedData.remaining();
 		ByteBuffer nextBuffer = pool.nextBuffer(size);
-		nextBuffer.put(cachedForUnderFlow);
-		nextBuffer.put(encryptedInData);
+		nextBuffer.put(cachedToProcessLaterData);
+		nextBuffer.put(encryptedData);
 		nextBuffer.flip();
 		
-		pool.releaseBuffer(cachedForUnderFlow);
-		pool.releaseBuffer(encryptedInData);
+		pool.releaseBuffer(cachedToProcessLaterData);
+		pool.releaseBuffer(encryptedData);
+
 		return nextBuffer;
 	}
 
@@ -315,6 +320,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 
 			synchronized(wrapLock) {
+				int remain = buffer.remaining();
 				SSLEngineResult result = sslEngine.wrap(buffer, engineToSocketData);
 				
 				Status status = result.getStatus();

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpproxy.api.ProxyConfig;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
 import org.webpieces.nio.api.channels.Channel;
@@ -26,7 +27,9 @@ import com.webpieces.httpparser.api.dto.UrlInfo;
 public class Layer4Processor {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer4Processor.class);
-	
+
+	@Inject
+	private ProxyConfig config;
 	@Inject
 	private HttpClient httpClient;
 	@Inject
@@ -45,6 +48,9 @@ public class Layer4Processor {
 	public void processHttpRequests(Channel channel, HttpRequest req) {
 		log.info("incoming request. channel="+channel+"=\n"+req);
 		InetSocketAddress addr = req.getServerToConnectTo(null);
+		if(config.isForceAllConnectionToHttps()) {
+			addr = new InetSocketAddress(addr.getHostName(), 443);
+		}
 
 		HttpUri uri = req.getRequestLine().getUri();
 		UrlInfo info = uri.getUriBreakdown();
@@ -67,7 +73,7 @@ public class Layer4Processor {
 	}
 
 	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, Channel channel) {
-		HttpSocket socket = httpClient.openHttpSocket(""+addr, new Layer1CloseListener(addr));
+		HttpSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
 				.thenAccept(s -> {
