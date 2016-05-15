@@ -2,12 +2,15 @@ package org.webpieces.nio.impl.threading;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadDataListener implements DataListener {
 
+	private static final Logger log = LoggerFactory.getLogger(ThreadDataListener.class);
 	private DataListener dataListener;
 	private SessionExecutor executor;
 
@@ -18,8 +21,7 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
-		int val = 0;
-		int s = val;
+		log.info("buf size="+b.remaining());
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
@@ -30,6 +32,7 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
+		log.info("far end closed");
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {

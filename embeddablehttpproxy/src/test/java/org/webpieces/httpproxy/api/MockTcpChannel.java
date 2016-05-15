@@ -160,5 +160,11 @@ public class MockTcpChannel implements TCPChannel {
 		return false;
 	}
 
+	@Override
+	public String getChannelId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

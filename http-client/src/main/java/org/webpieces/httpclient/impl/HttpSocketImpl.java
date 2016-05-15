@@ -21,6 +21,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.handlers.RecordingDataListener;
 
 import com.webpieces.data.api.DataWrapper;
 import com.webpieces.data.api.DataWrapperGenerator;
@@ -47,7 +48,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private HttpParser parser;
 	private Memento memento;
 	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
-	private MyDataListener dataListener = new MyDataListener();
+	private DataListener dataListener = new MyDataListener();
 	private CloseListener closeListener;
 	private HttpsSslEngineFactory factory;
 	private ChannelManager mgr;
@@ -70,6 +71,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else {
 			SSLEngine engine = factory.createSslEngine(addr.getHostName(), addr.getPort());
 			channel = mgr.createTCPChannel(idForLogging, engine);
+		}
+		
+		if(false) {
+			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
 		
 		connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected());
@@ -181,6 +186,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
+			log.info("size="+b.remaining());
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 			memento = parser.parse(memento, wrapper);
 
@@ -209,6 +215,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void farEndClosed(Channel channel) {
+			log.info("far end closed");
 			isClosed = true;
 			cleanUpPendings("Remote end closed");
 			

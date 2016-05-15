@@ -60,4 +60,10 @@ public class NettyServerChannel implements TCPServerChannel {
 
 	}
 
+	@Override
+	public String getChannelId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -257,8 +257,7 @@ public final class Helper {
         BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
         
         ByteBuffer b = data;
-        //in 1.5.0_08, was getting a nullpointer on helper...
-        b.flip(); //helper.doneFillingBuffer(b);
+        b.flip();
         
 		if(bytes < 0) {
 			if(apiLog.isTraceEnabled())
@@ -271,17 +270,6 @@ public final class Helper {
 			in.incomingData(channel, b);
 		}
     }
-
-//	private static void unregisterChannelForReads(SelectorManager2 mgr,
-//			BasChannelImpl channel) {
-//		try {
-//			mgr.unregisterChannelForRead(channel);
-//		} catch (IOException e) {
-//			log.warn("Exception on unregister for read", e);
-//		} catch (InterruptedException e) {
-//			log.warn("exception on unregsiter", e);
-//		}
-//	}
     
 	private static void write(SelectionKey key) throws IOException, InterruptedException {
 		if(log.isTraceEnabled())

@@ -204,4 +204,10 @@ public class NettyTCPChannel implements TCPChannel {
 		return false;
 	}
 
+	@Override
+	public String getChannelId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

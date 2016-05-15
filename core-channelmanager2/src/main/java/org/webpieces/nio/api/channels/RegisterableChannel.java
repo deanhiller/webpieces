@@ -54,6 +54,8 @@ public interface RegisterableChannel {
      */
     public void setName(String string);
     
+	public String getChannelId();
+	
     public String getName();
     
 	/**

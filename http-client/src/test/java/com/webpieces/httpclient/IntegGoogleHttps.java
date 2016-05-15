@@ -13,13 +13,11 @@ import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.data.api.BufferPool;
 import com.webpieces.data.api.DataWrapper;
-import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.HttpParserFactory;
 import com.webpieces.httpparser.api.common.Header;
@@ -106,16 +104,9 @@ public class IntegGoogleHttps {
 
 		@Override
 		public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
-			log.info("chunk="+chunk+" last="+isLastChunk);
-			
 			DataWrapper wrapper = chunk.getBody();
 			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
-			log.info("result=\n"+result+"/////");
-			
-			if(result.length() >= 4) {
-				String last4 = result.substring(result.length()-4);
-				log.info("last4="+last4);
-			}
+			log.info("result=(lastChunk="+isLastChunk+"\n"+result+"/////");
 		}
 
 		@Override

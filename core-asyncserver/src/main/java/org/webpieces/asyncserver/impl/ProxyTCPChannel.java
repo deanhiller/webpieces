@@ -67,6 +67,10 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.isConnected();
 	}
 
+	public String getChannelId() {
+		return channel.getChannelId();
+	}
+	
 	public String getName() {
 		return channel.getName();
 	}

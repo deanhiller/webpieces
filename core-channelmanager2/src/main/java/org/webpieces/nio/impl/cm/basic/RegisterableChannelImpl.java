@@ -15,7 +15,7 @@ import org.webpieces.nio.api.testutil.nioapi.Select;
  */
 abstract class RegisterableChannelImpl implements RegisterableChannel {
 
-	private IdObject id;
+	protected IdObject id;
 	private SelectorManager2 selMgr;
 	private SelectionKey key;
 
@@ -42,6 +42,11 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
         return id.getName();
     }
     
+	@Override
+	public String getChannelId() {
+		return id.getChannelId();
+	}
+	
 	public IdObject getIdObject() {
 		return id;
 	}

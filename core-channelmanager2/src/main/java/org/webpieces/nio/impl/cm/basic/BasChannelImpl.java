@@ -21,6 +21,7 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
 import com.webpieces.data.api.BufferPool;
@@ -70,9 +71,15 @@ public abstract class BasChannelImpl
    
 	@Override
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+		this.dataListener = listener;
+		
+		//enable recording..
+		if(false) 
+			dataListener = new RecordingDataListener("singleThreaded-", listener);
+		
 		CompletableFuture<Channel> future = connectImpl(addr);
 		return future.thenApply(c -> {
-			registerForReads(listener);
+			registerForReads(dataListener);
 			return c;
 		});
 	}

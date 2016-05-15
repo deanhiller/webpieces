@@ -51,6 +51,11 @@ public class ThreadChannel implements Channel {
 		tcpChannel.setReuseAddress(b);
 	}
 
+	@Override
+	public String getChannelId() {
+		return tcpChannel.getChannelId();
+	}
+	
 	public void setName(String string) {
 		tcpChannel.setName(string);
 	}

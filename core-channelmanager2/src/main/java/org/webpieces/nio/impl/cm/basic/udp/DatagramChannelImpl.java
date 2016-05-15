@@ -261,4 +261,9 @@ public class DatagramChannelImpl implements DatagramChannel
     {
         return name;
     }
+
+	@Override
+	public String getChannelId() {
+		return id;
+	}
 }

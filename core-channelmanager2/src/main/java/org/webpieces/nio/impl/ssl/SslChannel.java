@@ -19,6 +19,11 @@ public abstract class SslChannel implements Channel {
 		channel.setReuseAddress(b);
 	}
 
+	@Override
+	public String getChannelId() {
+		return channel.getChannelId();
+	}
+	
 	public void setName(String string) {
 		channel.setName(string);
 	}

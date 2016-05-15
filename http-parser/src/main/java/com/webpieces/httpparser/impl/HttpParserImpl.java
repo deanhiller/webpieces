@@ -323,10 +323,11 @@ public class HttpParserImpl implements HttpParser {
 			readInBody(memento, true);
 		}
 		
-		DataWrapper dataToRead = memento.getLeftOverData();
+		
 		int i = memento.getReadingHttpMessagePointer();
 		for(;i < memento.getLeftOverData().getReadableSize() - 1; i++) 
 		{
+			DataWrapper dataToRead = memento.getLeftOverData();
 			byte firstByte = dataToRead.readByteAt(i);
 			byte secondByte = dataToRead.readByteAt(i+1);
 
@@ -359,6 +360,7 @@ public class HttpParserImpl implements HttpParser {
 
 	private HttpChunk createHttpChunk(MementoImpl memento, int i) {
 		DataWrapper dataToRead = memento.getLeftOverData();
+		//split off the header AND /r/n (ie. the +2)
 		List<? extends DataWrapper> split = dataGen.split(dataToRead, i+2);
 		DataWrapper chunkMetaData = split.get(0);
 		memento.setLeftOverData(split.get(1));
@@ -461,7 +463,7 @@ public class HttpParserImpl implements HttpParser {
 		String firstLine = lines.remove(0);
 		String[] firstLinePieces = firstLine.split("\\s+");
 		if(firstLinePieces.length != 3) {
-			throw new ParseException("Unable to parse invalid http request due to first line being invalid=" + firstLine);
+			throw new ParseException("Unable to parse invalid http request due to first line being invalid=" + firstLine+" all Lines="+lines);
 		}
 		
 		HttpRequestMethod method = new HttpRequestMethod(firstLinePieces[0]);
