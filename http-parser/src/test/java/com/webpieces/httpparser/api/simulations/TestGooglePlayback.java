@@ -43,6 +43,21 @@ public class TestGooglePlayback {
 		Assert.assertTrue(lastChunk.isLastChunk());
 	}
 
+	@Test
+	public void testHttpsGooglePlayback() {
+		List<HttpPayload> results = runPlayback("https.google.com.recording");
+
+		Assert.assertEquals(3, results.size());
+		
+		HttpResponse resp = (HttpResponse) results.get(0);
+		HttpChunk chunk = (HttpChunk) results.get(1);
+		HttpLastChunk lastChunk = (HttpLastChunk) results.get(2);
+		
+		Assert.assertEquals("chunked", resp.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING).getValue());
+		Assert.assertEquals(10396, chunk.getBody().getReadableSize());
+		Assert.assertTrue(lastChunk.isLastChunk());		
+	}
+	
 	private List<HttpPayload> runPlayback(String name) {
 		Memento mem = parser.prepareToParse();
 		

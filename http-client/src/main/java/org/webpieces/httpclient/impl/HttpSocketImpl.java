@@ -73,7 +73,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			channel = mgr.createTCPChannel(idForLogging, engine);
 		}
 		
-		if(false) {
+		if(true) {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
 		

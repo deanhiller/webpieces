@@ -38,12 +38,9 @@ public class IntegGoogleHttps {
 	}
 	
 	public void start() throws InterruptedException {
-//		GET / HTTP/1.1
-//		Host: www.colorado.edu
-//		User-Agent: curl/7.43.0
-//		Accept: */*
-		
-		boolean isHttp = true;
+		log.info("starting test to download / page from google");
+
+		boolean isHttp = false;
 		
 		String host = "www.google.com";
 		int port = 443;

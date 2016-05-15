@@ -206,6 +206,9 @@ public class HttpParserImpl implements HttpParser {
 			readInBody(memento, false);
 		}
 
+		if(memento.getHalfParsedMessage() != null)
+			return memento;  //we are still reading in the body of a chunk
+		
 		//This is a bit tricky but memento.getReadingHttpMessagePoint will cause this method to 
 		//return immediately if we are in the middle of processChunks or readInBody
 		//BUT this is here because AFTER processChunks or readInBody is complete, it should process the next
@@ -321,6 +324,8 @@ public class HttpParserImpl implements HttpParser {
 	private void processChunks(MementoImpl memento) {
 		if(memento.getHalfParsedMessage() != null) {
 			readInBody(memento, true);
+			if(memento.getHalfParsedMessage() != null)
+				return; //we are still reading in the body
 		}
 		
 		
@@ -403,6 +408,7 @@ public class HttpParserImpl implements HttpParser {
 		return new HttpChunkExtension(name, value);
 	}
 
+	//Returns true if body read in and false otherwise
 	private void readInBody(MementoImpl memento, boolean stripAndCompareLastTwo) {
 		HttpPayload message = memento.getHalfParsedMessage();
 		DataWrapper dataToRead = memento.getLeftOverData();
