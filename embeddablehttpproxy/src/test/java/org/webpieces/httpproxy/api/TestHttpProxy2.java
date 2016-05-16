@@ -7,7 +7,6 @@ import java.util.concurrent.Executor;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.DirectExecutor;
 
@@ -21,10 +20,10 @@ import com.webpieces.httpparser.api.dto.HttpRequestLine;
 import com.webpieces.httpparser.api.dto.HttpUri;
 import com.webpieces.httpparser.api.dto.KnownHttpMethod;
 
-public class TestHttpProxy {
+public class TestHttpProxy2 {
 	
 	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
-	private MockAsyncServerManager mockChannelMgr = new MockAsyncServerManager();
+	private MockAsyncServerManager mockAsyncServer = new MockAsyncServerManager();
 	private MockTcpChannel mockTcpChannel = new MockTcpChannel();
 	private DataListener dataListener;
 	
@@ -34,7 +33,7 @@ public class TestHttpProxy {
 		HttpProxy proxy = HttpProxyFactory.createHttpProxy("myproxy", new TestModule(), config);
 		proxy.start();
 
-		List<DataListener> serverListeners = mockChannelMgr.getServerListeners();
+		List<DataListener> serverListeners = mockAsyncServer.getServerListeners();
 		dataListener = serverListeners.get(0);
 	}
 	
@@ -54,7 +53,9 @@ public class TestHttpProxy {
 	private class TestModule implements Module {
 		@Override
 		public void configure(Binder binder) {
-			binder.bind(AsyncServerManager.class).toInstance(mockChannelMgr);
+
+			HttpFrontendManager frontEnd = HttpFrontendFactory.createFrontEnd(mockAsyncServer, parser);
+			binder.bind(HttpFrontendManager.class).toInstance(frontEnd);
 			binder.bind(Executor.class).toInstance(new DirectExecutor());
 		}
 	}
