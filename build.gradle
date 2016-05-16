@@ -93,11 +93,17 @@ project(':http-client') {
     }
 }
 
+project(':http-frontend') {
+    dependencies {
+        compile project(':core-asyncserver'), project(':http-parser'), project(':http-client')
+    }
+}
+
 project(':embeddablehttpproxy') {
     dependencies {
         compile 'com.google.inject:guice:3.0'
         compile 'com.google.guava:guava:19.0'
-        compile project(':core-asyncserver'), project(':http-parser'), project(':http-client')
+        compile project(':http-frontend'), project(':http-parser'), project(':http-client')
     }
 }
 

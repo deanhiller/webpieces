@@ -51,7 +51,7 @@ public class SslChannelService implements ChannelManager {
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
 		if(engine == null || id == null)
 			throw new IllegalArgumentException("no arguments can be null");
-		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.createParser(id, engine, pool, l);
+		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.create(id, engine, pool, l);
 		
 		TCPChannel channel = mgr.createTCPChannel(id);
 		SslTCPChannel sslChannel = new SslTCPChannel(function, channel);

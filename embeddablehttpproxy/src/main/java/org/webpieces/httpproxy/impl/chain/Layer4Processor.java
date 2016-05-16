@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpproxy.api.HttpRequestListener;
 import org.webpieces.httpproxy.api.ProxyConfig;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
@@ -22,9 +23,10 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.HttpUri;
+import com.webpieces.httpparser.api.dto.KnownStatusCode;
 import com.webpieces.httpparser.api.dto.UrlInfo;
 
-public class Layer4Processor {
+public class Layer4Processor implements HttpRequestListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer4Processor.class);
 
@@ -34,6 +36,9 @@ public class Layer4Processor {
 	private HttpClient httpClient;
 	@Inject
 	private Layer2ResponseListener layer2Processor;
+	@Inject
+	private LayerZSendBadResponse badResponse;
+	
 	private final Cache<SocketAddress, HttpSocket> cache;
 	
 	public Layer4Processor() {
@@ -110,5 +115,19 @@ public class Layer4Processor {
 			log.info("socket addr="+addr+" closed, invalidating cache");
 			cache.invalidate(addr);
 		}
+	}
+
+	@Override
+	public void sendServerResponse(Channel channel, Throwable exc, KnownStatusCode status) {
+		badResponse.sendServerResponse(channel, exc, status);
+	}
+
+	@Override
+	public void applyWriteBackPressure(Channel channel) {
+		log.warn("NEED APPLY BACKPRESSURE", new RuntimeException());
+	}
+
+	@Override
+	public void releaseBackPressure(Channel channel) {
 	}
 }

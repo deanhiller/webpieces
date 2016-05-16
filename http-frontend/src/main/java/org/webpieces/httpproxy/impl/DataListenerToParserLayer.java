@@ -1,28 +1,28 @@
-package org.webpieces.httpproxy.impl.chain;
+package org.webpieces.httpproxy.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpproxy.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
-@Singleton
-public class Layer2DataListener implements DataListener {
+public class DataListenerToParserLayer implements DataListener {
 
-	private static final Logger log = LoggerFactory.getLogger(Layer2DataListener.class);
+	private static final Logger log = LoggerFactory.getLogger(DataListenerToParserLayer.class);
 	
-	@Inject
-	private Layer3Parser processor;
-	@Inject
-	private LayerZSendBadResponse badResponse;
+	private ParserLayer processor;
+	private HttpRequestListener httpListener;
 	
+	public DataListenerToParserLayer(HttpRequestListener listener, ParserLayer nextStage) {
+		this.processor = nextStage;
+		this.httpListener = listener;
+	}
+
 	public void incomingData(Channel channel, ByteBuffer b){
 		try {
 			InetSocketAddress addr = channel.getRemoteAddress();
@@ -37,27 +37,30 @@ public class Layer2DataListener implements DataListener {
 
 	private void sendBadResponse(Channel channel, Throwable exc, KnownStatusCode http500) {
 		try {
-			badResponse.sendServerResponse(channel, exc, KnownStatusCode.HTTP500);
+			httpListener.sendServerResponse(channel, exc, KnownStatusCode.HTTP500);
 		} catch(Throwable e) {
 			log.info("Could not send response to client", e);
 		}
 	}
 
 	public void farEndClosed(Channel channel) {
-		processor.clientClosedChannel(channel);
+		httpListener.clientClosedChannel(channel);
 	}
 
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
 		log.info("Failure on channel="+channel, e);
+		channel.close();
 	}
 
 	@Override
 	public void applyBackPressure(Channel channel) {
 		log.warn("Need to apply backpressure", new RuntimeException("demonstrates how we got here"));
+		httpListener.applyWriteBackPressure(channel);
 	}
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
+		httpListener.releaseBackPressure(channel);
 	}
 
 }

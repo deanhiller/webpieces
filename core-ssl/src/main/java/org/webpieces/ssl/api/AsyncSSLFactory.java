@@ -16,7 +16,7 @@ public class AsyncSSLFactory {
 	 * @param pool
 	 * @return
 	 */
-	public static AsyncSSLEngine createParser(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
+	public static AsyncSSLEngine create(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
 		//to get around verifydesign later AND enforce build breaks on design violations
 		//like api depending on implementation, we need reflection here to create this
 		//instance...

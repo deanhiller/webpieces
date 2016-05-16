@@ -32,8 +32,8 @@ public class TestSSLEngine2 {
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
 		SSLEngine svr = sslEngineFactory.createEngineForServerSocket();
-		clientEngine = AsyncSSLFactory.createParser("client", client, pool, clientListener);
-		svrEngine = AsyncSSLFactory.createParser("svr", svr, pool, svrListener);
+		clientEngine = AsyncSSLFactory.create("client", client, pool, clientListener);
+		svrEngine = AsyncSSLFactory.create("svr", svr, pool, svrListener);
 		
 		Assert.assertEquals(ConnectionState.NOT_STARTED, clientEngine.getConnectionState());
 		Assert.assertEquals(ConnectionState.NOT_STARTED, svrEngine.getConnectionState());

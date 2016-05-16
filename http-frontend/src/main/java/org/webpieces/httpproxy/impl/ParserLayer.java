@@ -1,51 +1,51 @@
-package org.webpieces.httpproxy.impl.chain;
+package org.webpieces.httpproxy.impl;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpproxy.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 
 import com.webpieces.data.api.DataWrapper;
 import com.webpieces.data.api.DataWrapperGenerator;
+import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.Memento;
 import com.webpieces.httpparser.api.ParseException;
-import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpMessageType;
+import com.webpieces.httpparser.api.dto.HttpPayload;
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
-public class Layer3Parser {
+public class ParserLayer {
 
-	private static final Logger log = LoggerFactory.getLogger(LayerZSendBadResponse.class);
+	private static final Logger log = LoggerFactory.getLogger(ParserLayer.class);
 	
-	@Inject
+	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
-	@Inject
-	private DataWrapperGenerator generator;
-	@Inject
-	private Layer4Processor processor;
-	@Inject
-	private LayerZSendBadResponse badResponse;
+	private HttpRequestListener listener;
 	
+	public ParserLayer(HttpParser parser2, HttpRequestListener listener) {
+		this.parser = parser2;
+		this.listener = listener;
+	}
+
 	public void deserialize(Channel channel, ByteBuffer chunk) {
 		try {
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
 			for(HttpRequest req : parsedRequests) {
-				processor.processHttpRequests(channel, req);
+				listener.processHttpRequests(channel, req);
 			}
 		} catch(ParseException e) {
 			//move down to debug level later on..
 			//for now, this could actually be we screwed up until we are stable
 			log.info("Client screwed up", e);
-			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP400);
+			listener.sendServerResponse(channel, e, KnownStatusCode.HTTP400);
 		}
 	}
 
@@ -85,8 +85,4 @@ public class Layer3Parser {
 		}
 	}
 
-	public void clientClosedChannel(Channel channel) {
-		processor.clientClosedChannel(channel);
-	}
-	
 }

@@ -6,29 +6,28 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.asyncserver.api.AsyncServer;
-import org.webpieces.asyncserver.api.AsyncServerManager;
+import org.webpieces.httpproxy.api.HttpFrontend;
+import org.webpieces.httpproxy.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
-import org.webpieces.httpproxy.impl.chain.Layer2DataListener;
+import org.webpieces.httpproxy.impl.chain.Layer4Processor;
 
 public class HttpProxyImpl implements HttpProxy {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpProxyImpl.class);
 	
 	@Inject
-	private AsyncServerManager serverMgr;
+	private HttpFrontendManager serverMgr;
 	@Inject
-	private Layer2DataListener serverListener;
+	private Layer4Processor serverListener;
 	
-	private AsyncServer httpServer;
-	private AsyncServer httpsServer;
+	private HttpFrontend httpServer;
 	
 	@Override
 	public void start() {
 		log.info("starting server");
 		InetSocketAddress addr = new InetSocketAddress(8080);
-		httpServer = serverMgr.createTcpServer("httpProxy", addr, serverListener);
-
+		httpServer = serverMgr.createHttpServer("httpProxy", addr, serverListener);
+		
 //		InetSocketAddress sslAddr = new InetSocketAddress(8443);
 //		httpsServer = serverMgr.createTcpServer("httpsProxy", sslAddr, sslServerListener);
 		log.info("now listening for incoming connections");
@@ -36,8 +35,7 @@ public class HttpProxyImpl implements HttpProxy {
 
 	@Override
 	public void stop() {
-		httpServer.closeServerChannel();
-		httpsServer.closeServerChannel();
+		httpServer.close();
 	}
 
 }

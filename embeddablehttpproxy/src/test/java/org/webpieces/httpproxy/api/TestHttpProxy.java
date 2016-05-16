@@ -39,7 +39,7 @@ public class TestHttpProxy {
 	}
 	
 	@Test
-	public void testBasicProxy() throws IOException {
+	public void testBasicProxy() throws IOException, ClassNotFoundException {
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(KnownHttpMethod.GET);
 		requestLine.setUri(new HttpUri("http://www.deano.com"));

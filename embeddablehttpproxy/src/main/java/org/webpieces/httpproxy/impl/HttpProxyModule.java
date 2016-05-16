@@ -3,13 +3,12 @@ package org.webpieces.httpproxy.impl;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.webpieces.asyncserver.api.AsyncServerManager;
-import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
+import org.webpieces.httpproxy.api.HttpFrontendFactory;
+import org.webpieces.httpproxy.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.api.ProxyConfig;
 import org.webpieces.nio.api.ChannelManager;
@@ -45,19 +44,19 @@ public class HttpProxyModule implements Module {
 		binder.bind(DataWrapperGenerator.class).toInstance(DataWrapperGeneratorFactory.createDataWrapperGenerator());
 	}
 
-	@Named("chanMgr")
-	@Provides
-	@Singleton
-	public ChannelManager providesChannelManager(BufferPool pool) {
-		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		return factory.createMultiThreadedChanMgr("ChanMgr-httpProxy", pool, executor);
-	}
+//	@Named("chanMgr")
+//	@Provides
+//	@Singleton
+//	public ChannelManager providesChannelManager(BufferPool pool) {
+//		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
+//		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+//		return factory.createMultiThreadedChanMgr("ChanMgr-httpProxy", pool, executor);
+//	}
 	
 	@Provides
 	@Singleton
-	public AsyncServerManager providesAsyncServerMgr(@Named("chanMgr") ChannelManager mgr) {
-		return AsyncServerMgrFactory.createAsyncServer(mgr);
+	public HttpFrontendManager providesAsyncServerMgr() {
+		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", 10);
 	}
 	
 	@Provides

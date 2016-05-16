@@ -30,8 +30,8 @@ public class TestSSLEngineClose {
 		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
 		SSLEngine client = sslEngineFactory.createEngineForSocket();
 		SSLEngine svr = sslEngineFactory.createEngineForServerSocket();
-		clientEngine = AsyncSSLFactory.createParser("client", client, pool, clientListener);
-		svrEngine = AsyncSSLFactory.createParser("svr", svr, pool, svrListener);
+		clientEngine = AsyncSSLFactory.create("client", client, pool, clientListener);
+		svrEngine = AsyncSSLFactory.create("svr", svr, pool, svrListener);
 		
 		clientEngine.beginHandshake();
 		ByteBuffer buffer = clientListener.getToSendToSocket().get(0);
