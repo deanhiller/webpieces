@@ -25,7 +25,7 @@ public class TestBasicSsl {
 	@Test
 	public void testBasic() throws InterruptedException, ExecutionException {
 		ChannelManager svrMgr = createSvrChanMgr("server");
-		TestSSLEngineFactory sslFactory = new TestSSLEngineFactory();
+		SelfSignedSSLEngineFactory sslFactory = new SelfSignedSSLEngineFactory();
 		TCPServerChannel svrChannel = svrMgr.createTCPServerChannel("svrChan", mockConnListener, sslFactory);
 		svrChannel.bind(new InetSocketAddress(0));
 		

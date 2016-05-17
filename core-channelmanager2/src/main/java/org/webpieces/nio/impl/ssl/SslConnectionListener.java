@@ -1,9 +1,6 @@
 package org.webpieces.nio.impl.ssl;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-
-import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.Channel;
@@ -11,9 +8,6 @@ import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.ssl.api.AsyncSSLEngine;
-import org.webpieces.ssl.api.AsyncSSLFactory;
-import org.webpieces.ssl.api.SslListener;
 
 import com.webpieces.data.api.BufferPool;
 
@@ -34,10 +28,7 @@ public class SslConnectionListener implements ConnectionListener {
 	@Override
 	public CompletableFuture<DataListener> connected(Channel c, boolean s) {
 		TCPChannel realChannel = (TCPChannel) c;
-		SSLEngine engine = sslFactory.createSslEngine();
-		Function<SslListener, AsyncSSLEngine> function = asyncEngineListener -> AsyncSSLFactory.create(c+"", engine, pool, asyncEngineListener);
-		SslTCPChannel sslChannel = new SslTCPChannel(function, realChannel, connectionListener);
-		
+		SslTCPChannel sslChannel = new SslTCPChannel(pool, realChannel, connectionListener, sslFactory);
 		return CompletableFuture.completedFuture(sslChannel.getSocketDataListener());
 	}
 

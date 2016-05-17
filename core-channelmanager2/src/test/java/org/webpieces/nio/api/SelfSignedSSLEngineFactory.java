@@ -9,7 +9,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 
 
-public class TestSSLEngineFactory implements SSLEngineFactory {
+public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
 
 	//private static final Logger log = Logger.getLogger(MockSSLEngineFactory.class.getName());
 	

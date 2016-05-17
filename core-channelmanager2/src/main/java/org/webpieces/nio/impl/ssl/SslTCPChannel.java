@@ -5,24 +5,32 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import javax.net.ssl.SSLEngine;
+
+import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
+import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.SslListener;
+
+import com.webpieces.data.api.BufferPool;
 
 public class SslTCPChannel extends SslChannel implements TCPChannel {
 
-	private final AsyncSSLEngine sslEngine;
+	private AsyncSSLEngine sslEngine;
 	private SslTryCatchListener clientDataListener;
 	private final TCPChannel realChannel;
 	
-	private DataListener socketDataListener = new SocketDataListener();
+	private SocketDataListener socketDataListener = new SocketDataListener();
 	private ConnectionListener conectionListener;
 	private CompletableFuture<Channel> sslConnectfuture;
 	private CompletableFuture<Channel> closeFuture;
 	private SslListener sslListener = new OurSslListener();
+	private SSLEngineFactory sslFactory;
+	private BufferPool pool;
 	
 	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel) {
 		super(realChannel);
@@ -30,12 +38,12 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		this.realChannel = realChannel;
 	}
 
-	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel2,
-			ConnectionListener connectionListener) {
+	public SslTCPChannel(BufferPool pool, TCPChannel realChannel2, ConnectionListener connectionListener, SSLEngineFactory sslFactory) {
 		super(realChannel2);
-		sslEngine = function.apply(sslListener);
+		this.pool = pool;
 		this.realChannel = realChannel2;
 		this.conectionListener = connectionListener;
+		this.sslFactory = sslFactory;
 	}
 
 	@Override
@@ -46,7 +54,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		return future.thenCompose( c -> beginHandshake());
 	}
 
-	public DataListener getSocketDataListener() {
+	public SocketDataListener getSocketDataListener() {
 		return socketDataListener;
 	}
 
@@ -127,6 +135,16 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private class SocketDataListener implements DataListener {
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
+			if(sslEngine != null) {
+				//if established or establishing(handshake in process)
+				sslEngine.feedEncryptedPacket(b);
+				return;
+			}
+			
+			//host fed in here...
+			SSLEngine engine = sslFactory.createSslEngine();
+			sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
+			
 			sslEngine.feedEncryptedPacket(b);
 		}
 	
