@@ -27,12 +27,14 @@ public class TestBasicSsl {
 		ChannelManager svrMgr = createSvrChanMgr("server");
 		TestSSLEngineFactory sslFactory = new TestSSLEngineFactory();
 		TCPServerChannel svrChannel = svrMgr.createTCPServerChannel("svrChan", mockConnListener, sslFactory);
-		svrChannel.bind(new InetSocketAddress(8889));
+		svrChannel.bind(new InetSocketAddress(0));
+		
+		int port = svrChannel.getLocalAddress().getPort();
 		
 		//don't really need to use a separate chan mgr but we will here..
 		ChannelManager chanMgr = createSvrChanMgr("client");
 		TCPChannel channel = chanMgr.createTCPChannel("client", sslFactory.createEngineForClient());
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress("localhost", 8889), mockClientDataListener);
+		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress("localhost", port), mockClientDataListener);
 		future.get();
 
 		byte[] data = new byte[] {0, 2, 4, 6, 8, 10};
