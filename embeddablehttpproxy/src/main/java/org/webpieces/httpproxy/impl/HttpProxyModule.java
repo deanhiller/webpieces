@@ -29,13 +29,6 @@ public class HttpProxyModule implements Module {
 		binder.bind(HttpProxy.class).to(HttpProxyImpl.class);
 
 		binder.bind(ProxyConfig.class).toInstance(config);
-		
-		//TBD: probably delete and have HttpFrontend deliver an HttpSocket to be used with parser behind it
-		//instead of an http channel (but how to make HttpSocket re-usable as this HttpSocket would be for
-		//HttpResponses)
-		
-		BufferPool pool = new BufferCreationPool();
-		binder.bind(HttpParser.class).toInstance(HttpParserFactory.createParser(pool));
 	}
 
 	@Provides
@@ -47,10 +40,9 @@ public class HttpProxyModule implements Module {
 	@Provides
 	@Singleton
 	public HttpClient provideHttpClient(ProxyConfig config) {
-		HttpClientFactory factory = HttpClientFactory.createFactory();
 		if(config.isForceAllConnectionToHttps())
-			return factory.createHttpsClient(config.getNumHttpClientThreads(), new ForTestSslClientEngineFactory());
+			return HttpClientFactory.createHttpsClient(config.getNumHttpClientThreads(), new ForTestSslClientEngineFactory());
 		
-		return factory.createHttpClient(config.getNumHttpClientThreads());
+		return HttpClientFactory.createHttpClient(config.getNumHttpClientThreads());
 	}
 }

@@ -1,7 +1,7 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
 import org.webpieces.httpclient.api.ResponseListener;
-import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.httpproxy.api.FrontendSocket;
 
 import com.webpieces.httpparser.api.dto.HttpChunk;
 import com.webpieces.httpparser.api.dto.HttpRequest;
@@ -10,10 +10,10 @@ import com.webpieces.httpparser.api.dto.HttpResponse;
 public class Layer1Response implements ResponseListener {
 
 	private Layer2ResponseListener responseListener;
-	private Channel channel;
+	private FrontendSocket channel;
 	private HttpRequest req;
 
-	public Layer1Response(Layer2ResponseListener responseListener, Channel channel, HttpRequest req) {
+	public Layer1Response(Layer2ResponseListener responseListener, FrontendSocket channel, HttpRequest req) {
 		this.responseListener = responseListener;
 		this.channel = channel;
 		this.req = req;

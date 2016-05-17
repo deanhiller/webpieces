@@ -14,7 +14,7 @@ public interface HttpRequestListener {
 	 * @param channel
 	 * @param req
 	 */
-	void processHttpRequests(Channel channel, HttpRequest req);
+	void processHttpRequests(FrontendSocket channel, HttpRequest req);
 	
 	/**
 	 * In the event the client sends a bad request, OR your HttpRequestListener throws an exception,
@@ -25,14 +25,14 @@ public interface HttpRequestListener {
 	 * @param exc
 	 * @param http500
 	 */
-	void sendServerResponse(Channel channel, Throwable exc, KnownStatusCode status);
+	void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status);
 
 	/**
 	 * The client closed their channel.
 	 * 
 	 * @param channel
 	 */
-	void clientClosedChannel(Channel channel);
+	void clientClosedChannel(FrontendSocket channel);
 
 	/**
 	 * As you write back to the client, this is called if writes are backing up in which case 
@@ -42,8 +42,8 @@ public interface HttpRequestListener {
 	 * 
 	 * @param channel
 	 */
-	void applyWriteBackPressure(Channel channel);
+	void applyWriteBackPressure(FrontendSocket channel);
 
-	void releaseBackPressure(Channel channel);
+	void releaseBackPressure(FrontendSocket channel);
 
 }

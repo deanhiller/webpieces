@@ -1,31 +1,42 @@
 package org.webpieces.httpclient.api;
 
-import org.webpieces.httpclient.impl.HttpClientFactoryImpl;
-import org.webpieces.nio.api.ChannelManager;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+import org.webpieces.httpclient.impl.HttpClientImpl;
+import org.webpieces.httpclient.impl.HttpsClientImpl;
+import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.util.threading.NamedThreadFactory;
+
+import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.httpparser.api.HttpParser;
+import com.webpieces.httpparser.api.HttpParserFactory;
 
 public abstract class HttpClientFactory {
 
-	public static HttpClientFactory createFactory() {
-		return new HttpClientFactoryImpl();
+	public static HttpClient createHttpsClient(int numThreads, HttpsSslEngineFactory sslFactory) {
+		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
+		BufferCreationPool pool = new BufferCreationPool();
+		HttpParser parser = HttpParserFactory.createParser(pool);
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
+		
+		return createHttpsClient(mgr, parser, sslFactory);		
+	}
+	
+	public static HttpClient createHttpClient(int numThreads) {
+		return createHttpsClient(numThreads, null);
+	}
+	
+	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser parser) {
+		return createHttpsClient(mgr, parser, null);
 	}
 
-	public abstract HttpClient createHttpClient(int numThreads);
-	
-	public abstract HttpClient createHttpsClient(int numThreads, HttpsSslEngineFactory sslFactory);
-	
-	/**
-	 * BIG NOTE: You should pass the same BufferPool into both HttpParser and
-	 * ChannelManager such that they create and release BufferPools to each other
-	 * for re-use..
-	 * 
-	 * @param mgr
-	 * @param parser
-	 * @return
-	 */
-	public abstract HttpClient createHttpClient(ChannelManager mgr, HttpParser parser);
-	
-	public abstract HttpClient createHttpsClient(ChannelManager mgr, HttpParser parser, HttpsSslEngineFactory factory);
-	
+	public static HttpClient createHttpsClient(ChannelManager mgr, HttpParser parser, HttpsSslEngineFactory factory) {
+		if(factory != null)
+			return new HttpsClientImpl(mgr, parser, factory);
+		else
+			return new HttpClientImpl(mgr, parser);
+	}
 }

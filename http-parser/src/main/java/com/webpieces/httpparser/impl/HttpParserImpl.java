@@ -1,5 +1,6 @@
 package com.webpieces.httpparser.impl;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +44,14 @@ public class HttpParserImpl implements HttpParser {
 	
 	public HttpParserImpl(BufferPool pool) {
 		this.pool = pool;
+	}
+	
+	@Override
+	public ByteBuffer marshalToByteBuffer(HttpPayload request) {
+		//modify later to go from String straight to ByteBuffer instead...
+		byte[] data = marshalToBytes(request);
+		ByteBuffer buffer = ByteBuffer.wrap(data);
+		return buffer;
 	}
 	
 	@Override

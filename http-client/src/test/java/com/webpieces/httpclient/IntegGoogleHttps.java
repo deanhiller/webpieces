@@ -56,9 +56,6 @@ public class IntegGoogleHttps {
 		req.addHeader(new Header(KnownHeaderName.HOST, host));
 		req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
 		req.addHeader(new Header(KnownHeaderName.USER_AGENT, "webpieces/0.9"));
-
-		
-		HttpClientFactory httpFactory = HttpClientFactory.createFactory();
 		
 		BufferPool pool2 = new BufferCreationPool();
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
@@ -71,9 +68,9 @@ public class IntegGoogleHttps {
 		
 		HttpClient client;
 		if(isHttp)
-			client = httpFactory.createHttpClient(mgr, parser);
+			client = HttpClientFactory.createHttpClient(mgr, parser);
 		else
-			client = httpFactory.createHttpsClient(mgr, parser, sslFactory);
+			client = HttpClientFactory.createHttpsClient(mgr, parser, sslFactory);
 		
 		HttpSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
 		socket

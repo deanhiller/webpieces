@@ -1,10 +1,14 @@
 package com.webpieces.httpparser.api;
 
+import java.nio.ByteBuffer;
+
 import com.webpieces.data.api.DataWrapper;
 import com.webpieces.httpparser.api.dto.HttpPayload;
 
 public interface HttpParser {
 
+	public ByteBuffer marshalToByteBuffer(HttpPayload request);
+	
 	//TODO: This needs to change!!!  We need to pass in a data structure that 
 	//we can write to so it could be a byte[] or it could be a ByteBuffer
 	//or anything else but we also need to know the size ahead of time or?

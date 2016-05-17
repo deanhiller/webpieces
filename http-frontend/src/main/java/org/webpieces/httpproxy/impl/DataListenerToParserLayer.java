@@ -16,11 +16,9 @@ public class DataListenerToParserLayer implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(DataListenerToParserLayer.class);
 	
 	private ParserLayer processor;
-	private HttpRequestListener httpListener;
 	
-	public DataListenerToParserLayer(HttpRequestListener listener, ParserLayer nextStage) {
+	public DataListenerToParserLayer(ParserLayer nextStage) {
 		this.processor = nextStage;
-		this.httpListener = listener;
 	}
 
 	public void incomingData(Channel channel, ByteBuffer b){
@@ -37,14 +35,14 @@ public class DataListenerToParserLayer implements DataListener {
 
 	private void sendBadResponse(Channel channel, Throwable exc, KnownStatusCode http500) {
 		try {
-			httpListener.sendServerResponse(channel, exc, KnownStatusCode.HTTP500);
+			processor.sendServerResponse(channel, exc, KnownStatusCode.HTTP500);
 		} catch(Throwable e) {
 			log.info("Could not send response to client", e);
 		}
 	}
 
 	public void farEndClosed(Channel channel) {
-		httpListener.clientClosedChannel(channel);
+		processor.farEndClosed(channel);
 	}
 
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
@@ -55,12 +53,12 @@ public class DataListenerToParserLayer implements DataListener {
 	@Override
 	public void applyBackPressure(Channel channel) {
 		log.warn("Need to apply backpressure", new RuntimeException("demonstrates how we got here"));
-		httpListener.applyWriteBackPressure(channel);
+		processor.applyWriteBackPressure(channel);
 	}
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
-		httpListener.releaseBackPressure(channel);
+		processor.releaseBackPressure(channel);
 	}
 
 }

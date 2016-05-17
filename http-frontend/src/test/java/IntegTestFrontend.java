@@ -1,13 +1,12 @@
+import java.net.InetSocketAddress;
+
+import org.webpieces.httpproxy.api.FrontendSocket;
+import org.webpieces.httpproxy.api.HttpFrontendFactory;
 import org.webpieces.httpproxy.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpRequestListener;
-import org.webpieces.nio.api.channels.Channel;
 
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
-
-import java.net.InetSocketAddress;
-
-import org.webpieces.httpproxy.api.HttpFrontendFactory;
 
 public class IntegTestFrontend {
 
@@ -20,23 +19,23 @@ public class IntegTestFrontend {
 	private static class OurListener implements HttpRequestListener {
 
 		@Override
-		public void sendServerResponse(Channel channel, Throwable exc, KnownStatusCode http500) {
+		public void processHttpRequests(FrontendSocket channel, HttpRequest req) {
 		}
 
 		@Override
-		public void clientClosedChannel(Channel channel) {
+		public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
 		}
 
 		@Override
-		public void applyWriteBackPressure(Channel channel) {
+		public void clientClosedChannel(FrontendSocket channel) {
 		}
 
 		@Override
-		public void releaseBackPressure(Channel channel) {
+		public void applyWriteBackPressure(FrontendSocket channel) {
 		}
 
 		@Override
-		public void processHttpRequests(Channel channel, HttpRequest req) {
+		public void releaseBackPressure(FrontendSocket channel) {
 		}
 		
 	}

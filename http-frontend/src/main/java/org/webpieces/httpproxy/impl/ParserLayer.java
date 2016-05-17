@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpproxy.api.FrontendSocket;
 import org.webpieces.httpproxy.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -39,13 +40,13 @@ public class ParserLayer {
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
 			for(HttpRequest req : parsedRequests) {
-				listener.processHttpRequests(channel, req);
+				listener.processHttpRequests(translate(channel), req);
 			}
 		} catch(ParseException e) {
 			//move down to debug level later on..
 			//for now, this could actually be we screwed up until we are stable
 			log.info("Client screwed up", e);
-			listener.sendServerResponse(channel, e, KnownStatusCode.HTTP400);
+			listener.sendServerResponse(translate(channel), e, KnownStatusCode.HTTP400);
 		}
 	}
 
@@ -85,4 +86,29 @@ public class ParserLayer {
 		}
 	}
 
+	public void sendServerResponse(Channel channel, Throwable exc, KnownStatusCode status) {
+		listener.sendServerResponse(translate(channel), exc, status);
+	}
+
+	public void farEndClosed(Channel channel) {
+		listener.clientClosedChannel(translate(channel));		
+	}
+
+	public void applyWriteBackPressure(Channel channel) {
+		listener.applyWriteBackPressure(translate(channel));
+	}
+
+	public void releaseBackPressure(Channel channel) {
+		listener.releaseBackPressure(translate(channel));
+	}
+
+	private FrontendSocket translate(Channel channel) {
+		ChannelSession session = channel.getSession();
+		FrontendSocketImpl socket = (FrontendSocketImpl) session.get("webpieces.frontendSocket");
+		if(socket == null) {
+			socket = new FrontendSocketImpl(channel, parser);
+			session.put("webpieces.frontendSocket", socket);
+		}
+		return socket;
+	}
 }

@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpproxy.api.FrontendSocket;
 import org.webpieces.httpproxy.api.HttpRequestListener;
 import org.webpieces.httpproxy.api.ProxyConfig;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
-import org.webpieces.nio.api.channels.Channel;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -50,7 +50,7 @@ public class Layer4Processor implements HttpRequestListener {
 			    .build();
 	}
 	
-	public void processHttpRequests(Channel channel, HttpRequest req) {
+	public void processHttpRequests(FrontendSocket channel, HttpRequest req) {
 		log.info("incoming request. channel="+channel+"=\n"+req);
 		InetSocketAddress addr = req.getServerToConnectTo(null);
 		if(config.isForceAllConnectionToHttps()) {
@@ -73,11 +73,11 @@ public class Layer4Processor implements HttpRequestListener {
 		}
 	}
 
-	private void sendData(Channel channel, HttpSocket socket, HttpRequest req) {
+	private void sendData(FrontendSocket channel, HttpSocket socket, HttpRequest req) {
 		socket.send(req, new Layer1Response(layer2Processor, channel, req));
 	}
 
-	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, Channel channel) {
+	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, FrontendSocket channel) {
 		HttpSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
@@ -90,7 +90,8 @@ public class Layer4Processor implements HttpRequestListener {
 		return socket;
 	}
 
-	public void clientClosedChannel(Channel channel) {
+	@Override
+	public void clientClosedChannel(FrontendSocket channel) {
 		log.info("browser client closed channel="+channel);
 	}
 
@@ -118,16 +119,17 @@ public class Layer4Processor implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(Channel channel, Throwable exc, KnownStatusCode status) {
+	public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
 		badResponse.sendServerResponse(channel, exc, status);
 	}
 
 	@Override
-	public void applyWriteBackPressure(Channel channel) {
+	public void applyWriteBackPressure(FrontendSocket channel) {
 		log.warn("NEED APPLY BACKPRESSURE", new RuntimeException());
 	}
 
 	@Override
-	public void releaseBackPressure(Channel channel) {
+	public void releaseBackPressure(FrontendSocket channel) {
 	}
+
 }
