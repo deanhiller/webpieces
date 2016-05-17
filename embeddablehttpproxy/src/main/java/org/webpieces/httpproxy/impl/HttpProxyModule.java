@@ -1,8 +1,5 @@
 package org.webpieces.httpproxy.impl;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import javax.inject.Singleton;
 
 import org.webpieces.httpclient.api.HttpClient;
@@ -11,17 +8,12 @@ import org.webpieces.httpproxy.api.HttpFrontendFactory;
 import org.webpieces.httpproxy.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.api.ProxyConfig;
-import org.webpieces.nio.api.ChannelManager;
-import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.webpieces.data.api.BufferCreationPool;
 import com.webpieces.data.api.BufferPool;
-import com.webpieces.data.api.DataWrapperGenerator;
-import com.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.httpparser.api.HttpParser;
 import com.webpieces.httpparser.api.HttpParserFactory;
 
@@ -36,42 +28,29 @@ public class HttpProxyModule implements Module {
 	public void configure(Binder binder) {
 		binder.bind(HttpProxy.class).to(HttpProxyImpl.class);
 
-		//needs to be shared...
-		BufferCreationPool pool = new BufferCreationPool();
 		binder.bind(ProxyConfig.class).toInstance(config);
-		binder.bind(BufferPool.class).toInstance(pool);
+		
+		//TBD: probably delete and have HttpFrontend deliver an HttpSocket to be used with parser behind it
+		//instead of an http channel (but how to make HttpSocket re-usable as this HttpSocket would be for
+		//HttpResponses)
+		
+		BufferPool pool = new BufferCreationPool();
 		binder.bind(HttpParser.class).toInstance(HttpParserFactory.createParser(pool));
-		binder.bind(DataWrapperGenerator.class).toInstance(DataWrapperGeneratorFactory.createDataWrapperGenerator());
 	}
 
-//	@Named("chanMgr")
-//	@Provides
-//	@Singleton
-//	public ChannelManager providesChannelManager(BufferPool pool) {
-//		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpproxy-"));
-//		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-//		return factory.createMultiThreadedChanMgr("ChanMgr-httpProxy", pool, executor);
-//	}
-	
 	@Provides
 	@Singleton
-	public HttpFrontendManager providesAsyncServerMgr() {
-		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", 10);
+	public HttpFrontendManager providesAsyncServerMgr(ProxyConfig config) {
+		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads());
 	}
 	
 	@Provides
 	@Singleton
 	public HttpClient provideHttpClient(ProxyConfig config) {
-		BufferCreationPool pool = new BufferCreationPool();
-		Executor executor = Executors.newFixedThreadPool(25, new NamedThreadFactory("httpclient-"));
-		ChannelManagerFactory cmFactory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = cmFactory.createMultiThreadedChanMgr("ChanMgr-httpclient", pool, executor);		
-		HttpParser parser = HttpParserFactory.createParser(pool);
-		
 		HttpClientFactory factory = HttpClientFactory.createFactory();
 		if(config.isForceAllConnectionToHttps())
-			return factory.createHttpsClient(mgr, parser, new ForTestSslClientEngineFactory());
+			return factory.createHttpsClient(config.getNumHttpClientThreads(), new ForTestSslClientEngineFactory());
 		
-		return factory.createHttpClient(mgr, parser);
+		return factory.createHttpClient(config.getNumHttpClientThreads());
 	}
 }

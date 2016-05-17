@@ -31,7 +31,7 @@ public class BufferCreationPool implements BufferPool {
 	private AtomicInteger counter = new AtomicInteger();
 	private ConcurrentLinkedQueue<ByteBuffer> freePackets = new ConcurrentLinkedQueue<ByteBuffer>();
 	private boolean isDirect;
-	private int size;
+	private int bufferSize;
 	private int poolSize;
 	
 	public BufferCreationPool() {
@@ -40,20 +40,20 @@ public class BufferCreationPool implements BufferPool {
 	
 	public BufferCreationPool(boolean isDirect, int bufferSize, int poolSize) {
 		this.isDirect = isDirect;
-		this.size = bufferSize;
+		this.bufferSize = bufferSize;
 		this.poolSize = poolSize;
 	}
 	
 	public ByteBuffer nextBuffer(int minSize) {
-		if(size < minSize) {
-			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+size+".  You should reconfigure this ");
+		if(bufferSize < minSize) {
+			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this ");
 			return createBuffer(minSize);
 		}
 		
 		ByteBuffer buffer = freePackets.poll();
 
 		if(buffer == null) {
-			buffer = createBuffer(size);
+			buffer = createBuffer(bufferSize);
 		} else {
 			counter.decrementAndGet();
 		}
@@ -77,8 +77,8 @@ public class BufferCreationPool implements BufferPool {
 					+ "call buffer.position(buffer.limit)) to simulate consuming it though this is ill advised as you"
 					+ "should be reading all your data from your buffer before releasing it");
 		} if(counter.incrementAndGet() > poolSize)
-			return; //we discard more than 300 buffers as we don't want to take up too much memory
-		else if(buffer.capacity() < size) {
+			return; //we discard more than N buffers as we don't want to take up too much memory
+		else if(buffer.capacity() < bufferSize) {
 			return; //discard buffers that are released and are smaller
 		}
 		buffer.clear();

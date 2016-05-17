@@ -101,7 +101,7 @@ project(':http-frontend') {
 
 project(':embeddablehttpproxy') {
     dependencies {
-        compile 'com.google.inject:guice:3.0'
+        compile 'com.google.inject:guice:4.0'
         compile 'com.google.guava:guava:19.0'
         compile project(':http-frontend'), project(':http-parser'), project(':http-client')
     }

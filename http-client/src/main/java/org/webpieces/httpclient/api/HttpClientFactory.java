@@ -13,6 +13,8 @@ public abstract class HttpClientFactory {
 
 	public abstract HttpClient createHttpClient(int numThreads);
 	
+	public abstract HttpClient createHttpsClient(int numThreads, HttpsSslEngineFactory sslFactory);
+	
 	/**
 	 * BIG NOTE: You should pass the same BufferPool into both HttpParser and
 	 * ChannelManager such that they create and release BufferPools to each other
