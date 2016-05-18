@@ -1,19 +1,14 @@
 package org.webpieces.ssl.impl;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLEngine;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.ssl.api.ConnectionState;
 
 public class SslMementoImpl {
 
-	private static final Logger log = LoggerFactory.getLogger(SslMementoImpl.class);
 	private SSLEngine engine;
 	private String id;
 	private AtomicReference<ConnectionState> connectionState = new AtomicReference<ConnectionState>(ConnectionState.NOT_STARTED);

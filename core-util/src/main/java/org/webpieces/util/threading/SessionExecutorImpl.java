@@ -17,7 +17,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 	private Executor executor;
 	private Map<Object, List<Runnable>> cachedRunnables = new HashMap<>();
 	private Set<Object> currentlyRunning = new HashSet<>();
-	private int counter = 0;
+	//private int counter = 0;
 
 	public SessionExecutorImpl(Executor executor) {
 		this.executor = executor;
@@ -46,7 +46,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 				return;
 			}
 			nextRunnable = list.remove(0);
-			counter++;
+//			counter++;
 //			if(counter % 1000 == 0)
 //				log.info("list size="+list.size());
 			if(list.isEmpty()) {

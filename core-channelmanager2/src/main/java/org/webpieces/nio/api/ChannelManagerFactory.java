@@ -41,8 +41,6 @@ public abstract class ChannelManagerFactory {
 	 * the socket but the SessionExecutor layer ensures data enters your thread pool in order while not allowing
 	 * one channel to starve one thread....That makes it sound like it would get out of order, but the details
 	 * are encapsulated in SessionExecutorImpl if you would like to read that class to see how it is done.  
-	 * This also means you do not need to synchronize updates and read from ChannelSession unless 
-	 * you pass Channel or ChannelSession to another thread yourself.
 	 * 
 	 * @param id
 	 * @param pool

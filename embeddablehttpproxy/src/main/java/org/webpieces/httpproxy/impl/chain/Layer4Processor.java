@@ -64,7 +64,8 @@ public class Layer4Processor implements HttpRequestListener {
 			//without this, www.colorado.edu was returning 404 ...seems like a bug on their end to be honest
 			uri.setUri(info.getFullPath());
 		}
-		
+	
+		//need synchronization if two clients of proxy access same httpSocket/addr!!!
 		HttpSocket socket = cache.getIfPresent(addr);
 		if(socket != null) {
 			sendData(channel, socket, req);

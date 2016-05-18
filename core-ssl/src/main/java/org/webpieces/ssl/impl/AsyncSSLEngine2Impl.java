@@ -198,7 +198,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			
 			ByteBuffer outBuffer = mem.getCachedOut();
 			try {
-				result = sslEngine.unwrap(encryptedData, outBuffer);	
+				result = sslEngine.unwrap(encryptedData, outBuffer);
 			} catch(SSLException e) {
 				AsyncSSLEngineException ee = new AsyncSSLEngineException("status="+status+" hsStatus="+hsStatus+" b="+encryptedData, e);
 				throw ee;
@@ -320,7 +320,6 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 
 			synchronized(wrapLock) {
-				int remain = buffer.remaining();
 				SSLEngineResult result = sslEngine.wrap(buffer, engineToSocketData);
 				
 				Status status = result.getStatus();

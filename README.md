@@ -39,4 +39,6 @@ TODO:
 * httpparser(then httpclient) - if Content-Length > X, simulate http chunking so large files can be streamed through the system...and if < X just return entire response with body where X is configurable
 * Need to go back and write more api level tests to beef up the test suite
 * httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
-* need to actually test out passing Future the executor to make sure that behaves how we suspected
+* need to verify host/port is being put in hello ssl packet of http client to verify it works like browsers for SNI servername(not usually needed but we may need it for testing later)
+
+* ALPN is next!!!! 

@@ -12,10 +12,6 @@ import org.webpieces.httpproxy.api.ProxyConfig;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.webpieces.data.api.BufferCreationPool;
-import com.webpieces.data.api.BufferPool;
-import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.HttpParserFactory;
 
 public class HttpProxyModule implements Module {
 

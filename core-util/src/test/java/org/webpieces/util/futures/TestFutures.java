@@ -6,6 +6,7 @@ import org.junit.Test;
 
 public class TestFutures {
 
+	//private static final Logger log = LoggerFactory.getLogger(TestFutures.class);
 
 	@Test
 	public void testRegisterTwoListenersToSameFuture() {
@@ -92,4 +93,20 @@ public class TestFutures {
 		return p+"str";
 	}
 	
+//	@Test
+//	public void testExecutor() throws InterruptedException {
+//		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+//
+//		future.complete(6);
+//		
+//		ExecutorService executor = Executors.newFixedThreadPool(5, new NamedThreadFactory("hithere"));
+//		future.thenApplyAsync(v -> logIt(v), executor);
+//		
+//		Thread.sleep(5000);
+//	}
+//	
+//	public int logIt(int v) {
+//		log.info("thread="+Thread.currentThread()+" val="+v);
+//		return v;
+//	}
 }

@@ -27,7 +27,7 @@ public class TestBasicSsl {
 		ChannelManager svrMgr = createSvrChanMgr("server");
 		SelfSignedSSLEngineFactory sslFactory = new SelfSignedSSLEngineFactory();
 		TCPServerChannel svrChannel = svrMgr.createTCPServerChannel("svrChan", mockConnListener, sslFactory);
-		svrChannel.bind(new InetSocketAddress(0));
+		svrChannel.bind(new InetSocketAddress(8080));
 		
 		int port = svrChannel.getLocalAddress().getPort();
 		

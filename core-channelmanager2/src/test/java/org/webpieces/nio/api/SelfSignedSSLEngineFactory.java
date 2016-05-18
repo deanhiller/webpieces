@@ -13,9 +13,9 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
 
 	//private static final Logger log = Logger.getLogger(MockSSLEngineFactory.class.getName());
 	
-	private String clientKeystore = "src/test/resources/client.keystore";
-	private String serverKeystore = "src/test/resources/server.keystore";
-	private	String password = "root01";
+	private String clientKeystore = "src/test/resources/exampletrust.jks";
+	private String serverKeystore = "src/test/resources/exampleca.jks";
+	private	String password = "password";
 
 	public SSLEngine createSslEngine() {
 		try {
@@ -58,7 +58,7 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
 			tmf.init(ks);
 			sslContext.init(null, tmf.getTrustManagers(), null);		
 			//****************Client side specific*********************
-			
+
 			SSLEngine engine = sslContext.createSSLEngine();
 			engine.setUseClientMode(true);
 			

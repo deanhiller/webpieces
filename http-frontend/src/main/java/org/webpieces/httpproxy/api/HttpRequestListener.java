@@ -1,7 +1,5 @@
 package org.webpieces.httpproxy.api;
 
-import org.webpieces.nio.api.channels.Channel;
-
 import com.webpieces.httpparser.api.dto.HttpRequest;
 import com.webpieces.httpparser.api.dto.KnownStatusCode;
 

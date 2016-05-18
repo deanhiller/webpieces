@@ -1,13 +1,28 @@
 package org.webpieces.nio.impl.ssl;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.security.KeyStore;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SNIServerName;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+import javax.net.ssl.SSLEngineResult.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.SSLEngineFactoryWithHost;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -20,6 +35,7 @@ import com.webpieces.data.api.BufferPool;
 
 public class SslTCPChannel extends SslChannel implements TCPChannel {
 
+	private final static Logger log = LoggerFactory.getLogger(SslTCPChannel.class);
 	private AsyncSSLEngine sslEngine;
 	private SslTryCatchListener clientDataListener;
 	private final TCPChannel realChannel;
@@ -135,19 +151,58 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private class SocketDataListener implements DataListener {
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
-			if(sslEngine != null) {
-				//if established or establishing(handshake in process)
-				sslEngine.feedEncryptedPacket(b);
-				return;
+			if(sslEngine == null) {
+				setupSSLEngine(channel, b);
 			}
-			
-			//host fed in here...
-			SSLEngine engine = sslFactory.createSslEngine();
-			sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
-			
+
 			sslEngine.feedEncryptedPacket(b);
 		}
+
+		private void setupSSLEngine(Channel channel, ByteBuffer b) {
+			try {
+				setupSSLEngineImpl(channel, b);
+			} catch (SSLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		private void setupSSLEngineImpl(Channel channel, ByteBuffer b) throws SSLException {
+			SSLEngine engine;
+			if(sslFactory instanceof SSLEngineFactoryWithHost) {
+				SSLEngineFactoryWithHost sslFactoryWithHost = (SSLEngineFactoryWithHost) sslFactory;
+				SSLEngine dummyForSni = createSslEngine();
+				ByteBuffer out = pool.nextBuffer(dummyForSni.getSession().getApplicationBufferSize());
+				ByteBuffer duplicate = b.duplicate();
+				SSLEngineResult unwrap = dummyForSni.unwrap(duplicate, out);
+				if(unwrap.getStatus() != Status.OK)
+					throw new IllegalArgumentException("status="+unwrap.getStatus()+" so we should support this one?");
+				
+				List<SNIServerName> serverNames = dummyForSni.getSSLParameters().getServerNames();
+				List<String> names = translate(serverNames);
+				String host = null;
+				if(serverNames.size() == 0) {
+					log.warn("SNI servernames missing from client.  channel="+channel.getRemoteAddress());
+				} else if(serverNames.size() > 1) {
+					log.warn("SNI servernames are too many. names="+names+" channel="+channel.getRemoteAddress());
+				}
+				
+				engine = sslFactoryWithHost.createSslEngine(host);
+			} else {
+				engine = sslFactory.createSslEngine();
+			}
+			
+			sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
+		}
 	
+		private List<String> translate(List<SNIServerName> serverNames) {
+			List<String> names = new ArrayList<>();
+			for(SNIServerName sniName : serverNames) {
+				String name = new String(sniName.getEncoded());
+				names.add(name);
+			}
+			return names;
+		}
+
 		@Override
 		public void farEndClosed(Channel channel) {
 			clientDataListener.farEndClosed(SslTCPChannel.this);
@@ -166,6 +221,34 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		@Override
 		public void releaseBackPressure(Channel channel) {
 			clientDataListener.releaseBackPressure(SslTCPChannel.this);
+		}
+	}
+	
+	public SSLEngine createSslEngine() {
+		try {
+			// Create/initialize the SSLContext with key material
+	
+			InputStream in = getClass().getClassLoader().getResourceAsStream("selfsigned.jks");
+			
+			char[] passphrase = "password".toCharArray();
+			// First initialize the key and trust material.
+			KeyStore ks = KeyStore.getInstance("JKS");
+			ks.load(in, passphrase);
+			SSLContext sslContext = SSLContext.getInstance("TLS");
+			
+			//****************Server side specific*********************
+			// KeyManager's decide which key material to use.
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			kmf.init(ks, passphrase);
+			sslContext.init(kmf.getKeyManagers(), null, null);		
+			//****************Server side specific*********************
+			
+			SSLEngine engine = sslContext.createSSLEngine();
+			engine.setUseClientMode(false);
+			
+			return engine;
+		} catch(Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
