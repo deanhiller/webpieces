@@ -17,9 +17,12 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactoryWithHost {
 	private String serverKeystore = "src/test/resources/exampleca.jks";
 	private	String password = "password";
 
+	private String cachedHost = "";
 	@Override
 	public SSLEngine createSslEngine(String host) {
 		try {
+			this.cachedHost = host;
+			
 			// Create/initialize the SSLContext with key material
 	
 			char[] passphrase = password.toCharArray();
@@ -71,6 +74,10 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactoryWithHost {
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public String getCachedHost() {
+		return cachedHost;
 	}
 
 }

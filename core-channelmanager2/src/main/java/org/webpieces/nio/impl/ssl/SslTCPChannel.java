@@ -171,13 +171,13 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				ParseResult result = parser.fetchServerNamesIfEntirePacketAvailable(b);
 				List<String> sniServerNames = result.getNames();
 				
-				String host = null;
 				if(sniServerNames.size() == 0) {
 					log.warn("SNI servernames missing from client.  channel="+channel.getRemoteAddress());
 				} else if(sniServerNames.size() > 1) {
 					log.warn("SNI servernames are too many. names="+sniServerNames+" channel="+channel.getRemoteAddress());
 				}
 				
+				String host = sniServerNames.get(0);
 				SSLEngine engine = sslFactoryWithHost.createSslEngine(host);
 				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
 				return result.getBuffer(); // return the full accumulated packet(which may just be the buffer passed in above)

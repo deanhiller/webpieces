@@ -50,6 +50,10 @@ public class TestBasicSsl {
 		for(int i = 0; i < data.length; i++) {
 			Assert.assertEquals(data[i], newData[i]);
 		}
+		
+		//verify sniServerName was used in looking up security cert.
+		String host = sslFactory.getCachedHost();
+		Assert.assertEquals("cvs.xsoftware.biz", host);
 	}
 
 	private ChannelManager createSvrChanMgr(String name) {
