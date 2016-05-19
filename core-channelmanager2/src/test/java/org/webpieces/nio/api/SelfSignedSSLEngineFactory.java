@@ -9,7 +9,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 
 
-public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
+public class SelfSignedSSLEngineFactory implements SSLEngineFactoryWithHost {
 
 	//private static final Logger log = Logger.getLogger(MockSSLEngineFactory.class.getName());
 	
@@ -17,7 +17,8 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
 	private String serverKeystore = "src/test/resources/exampleca.jks";
 	private	String password = "password";
 
-	public SSLEngine createSslEngine() {
+	@Override
+	public SSLEngine createSslEngine(String host) {
 		try {
 			// Create/initialize the SSLContext with key material
 	
@@ -42,8 +43,12 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public SSLEngine createSslEngine() {
+		throw new IllegalStateException("Do not return here to make test fail if this no longer works");
+	}
 
-	public SSLEngine createEngineForClient() {
+	public SSLEngine createEngineForClient(String host, int port) {
 		try {
 			// Create/initialize the SSLContext with key material
 			char[] passphrase = password.toCharArray();
@@ -59,7 +64,7 @@ public class SelfSignedSSLEngineFactory implements SSLEngineFactory {
 			sslContext.init(null, tmf.getTrustManagers(), null);		
 			//****************Client side specific*********************
 
-			SSLEngine engine = sslContext.createSSLEngine();
+			SSLEngine engine = sslContext.createSSLEngine(host, port);
 			engine.setUseClientMode(true);
 			
 			return engine;

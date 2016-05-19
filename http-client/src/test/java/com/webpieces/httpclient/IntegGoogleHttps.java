@@ -57,20 +57,7 @@ public class IntegGoogleHttps {
 		req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
 		req.addHeader(new Header(KnownHeaderName.USER_AGENT, "webpieces/0.9"));
 		
-		BufferPool pool2 = new BufferCreationPool();
-		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
-		
-		HttpParser parser = HttpParserFactory.createParser(pool2);
-		
-		ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
-		
-		HttpClient client;
-		if(isHttp)
-			client = HttpClientFactory.createHttpClient(mgr, parser);
-		else
-			client = HttpClientFactory.createHttpsClient(mgr, parser, sslFactory);
+		HttpClient client = createHttpClient(isHttp);
 		
 		HttpSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
 		socket
@@ -79,6 +66,24 @@ public class IntegGoogleHttps {
 			.exceptionally(e -> reportException(socket, e));
 		
 		Thread.sleep(100000);
+	}
+
+	public static HttpClient createHttpClient(boolean isHttp) {
+		BufferPool pool2 = new BufferCreationPool();
+		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
+		
+		HttpParser parser = HttpParserFactory.createParser(pool2);
+		
+		HttpClient client;
+		if(isHttp)
+			client = HttpClientFactory.createHttpClient(mgr, parser);
+		else {
+			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
+			client = HttpClientFactory.createHttpsClient(mgr, parser, sslFactory);
+		}
+		return client;
 	}
 
 	private void sendRequest(HttpSocket socket, HttpRequest req) {

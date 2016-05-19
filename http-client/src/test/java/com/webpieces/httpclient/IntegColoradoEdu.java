@@ -23,14 +23,20 @@ public class IntegColoradoEdu {
 	private static final Logger log = LoggerFactory.getLogger(IntegColoradoEdu.class);
 	
 	public static void main(String[] args) {
+		boolean isHttp = false;
+		
 		String host = "www.colorado.edu";
-		int port = 80;
-
+		int port = 443;
+		if(isHttp)
+			port = 80;
+		
 		HttpRequest req = createRequest(host);
 
 		log.info("starting socket");
 		ChunkedResponseListener listener = new ChunkedResponseListener();
-		HttpClient client = HttpClientFactory.createHttpClient(5);
+		
+		HttpClient client = IntegGoogleHttps.createHttpClient(isHttp);
+		
 		HttpSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))
