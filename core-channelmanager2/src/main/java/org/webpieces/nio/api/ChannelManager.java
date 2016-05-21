@@ -51,6 +51,8 @@ public interface ChannelManager {
     public TCPChannel createTCPChannel(String id);
 
     public TCPChannel createTCPChannel(String id, SSLEngine engine);
+
+    public TCPChannel createTCPChannel(String id, SSLEngineProxy engine);
     
     /**
      * Creates a UDPChannel that can connect to a peer and receive/send data from/to

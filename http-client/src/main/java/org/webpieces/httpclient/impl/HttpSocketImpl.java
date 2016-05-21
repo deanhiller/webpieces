@@ -17,6 +17,7 @@ import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.SSLEngineProxy;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
@@ -66,18 +67,21 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	@Override
 	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr) {
+		SSLEngineProxy proxy = null;
 		if(factory == null) {
 			channel = mgr.createTCPChannel(idForLogging);
 		} else {
 			SSLEngine engine = factory.createSslEngine(addr.getHostName(), addr.getPort());
-			channel = mgr.createTCPChannel(idForLogging, engine);
+			proxy = new SSLEngineProxy(engine, true, "h2c", "http/1.1");
+			channel = mgr.createTCPChannel(idForLogging, proxy);
 		}
 		
 		if(false) {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
 		
-		connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected());
+		final SSLEngineProxy resultingProxy = proxy;
+		connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected(resultingProxy));
 		return connectFuture;
 	}
 
@@ -89,8 +93,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		return future;
 	}
 	
-	private synchronized HttpSocket connected() {
+	private synchronized HttpSocket connected(SSLEngineProxy proxy) {
 		connected = true;
+		
+		if(proxy != null) {
+			String resolvedProtocol = proxy.getResolvedProtocol();
+			log.info("we are going to talk protocol="+resolvedProtocol);
+		}
 		
 		while(!pendingRequests.isEmpty()) {
 			PendingRequest req = pendingRequests.remove();

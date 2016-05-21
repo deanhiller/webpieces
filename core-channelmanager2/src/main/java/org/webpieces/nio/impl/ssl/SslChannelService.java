@@ -6,6 +6,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.SSLEngineProxy;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -58,6 +59,18 @@ public class SslChannelService implements ChannelManager {
 		return sslChannel;
 	}
 
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngineProxy engine) {
+		if(engine == null || id == null)
+			throw new IllegalArgumentException("no arguments can be null");
+		
+		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.create(id, engine.getSslEngine(), pool, l);
+		
+		TCPChannel channel = mgr.createTCPChannel(id);
+		SslTCPChannel sslChannel = new SslTCPChannel(function, channel);
+		return sslChannel;
+	}
+	
 	@Override
 	public UDPChannel createUDPChannel(String id) {
 		return mgr.createUDPChannel(id);
