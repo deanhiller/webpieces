@@ -15,9 +15,9 @@ public interface HttpRequestListener {
 	void processHttpRequests(FrontendSocket channel, HttpRequest req);
 	
 	/**
-	 * In the event the client sends a bad request, OR your HttpRequestListener throws an exception,
-	 * we call this method to pass in the status you 'should' return to the client as well as the
-	 * channel to feed that response into
+	 * In the event the client sends a bad unparseable request, OR your HttpRequestListener 
+	 * throws an exception, we call this method to pass in the status you 'should' return to
+	 * the client as well as the channel to feed that response into
 	 * 
 	 * @param channel
 	 * @param exc
