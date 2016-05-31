@@ -1,4 +1,4 @@
-package org.webpieces.router.api;
+package org.webpieces.router.api.actions;
 
 public class Render implements Action {
 

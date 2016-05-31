@@ -19,7 +19,7 @@ public class IntegTestFrontend {
 	private static class OurListener implements HttpRequestListener {
 
 		@Override
-		public void processHttpRequests(FrontendSocket channel, HttpRequest req) {
+		public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		}
 
 		@Override

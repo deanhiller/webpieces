@@ -50,7 +50,7 @@ public class Layer4Processor implements HttpRequestListener {
 			    .build();
 	}
 	
-	public void processHttpRequests(FrontendSocket channel, HttpRequest req) {
+	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		log.info("incoming request. channel="+channel+"=\n"+req);
 		InetSocketAddress addr = req.getServerToConnectTo(null);
 		if(config.isForceAllConnectionToHttps()) {

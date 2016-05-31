@@ -12,7 +12,7 @@ public interface HttpRequestListener {
 	 * @param channel
 	 * @param req
 	 */
-	void processHttpRequests(FrontendSocket channel, HttpRequest req);
+	void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps);
 	
 	/**
 	 * In the event the client sends a bad unparseable request, OR your HttpRequestListener 

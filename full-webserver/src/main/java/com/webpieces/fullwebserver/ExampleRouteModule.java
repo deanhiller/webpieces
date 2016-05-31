@@ -4,9 +4,9 @@ import static com.webpieces.fullwebserver.ExampleRouteId.GET_CREATE_USER_PAGE;
 import static com.webpieces.fullwebserver.ExampleRouteId.GET_SHOW_USER;
 import static com.webpieces.fullwebserver.ExampleRouteId.POST_CREATE_USER;
 import static com.webpieces.fullwebserver.ExampleRouteId.SOME_EXAMPLE;
-import static org.webpieces.router.api.HttpMethod.GET;
-import static org.webpieces.router.api.HttpMethod.POST;
-import static org.webpieces.router.api.HttpMethod.getAllHttpMethods;
+import static org.webpieces.router.api.dto.HttpMethod.GET;
+import static org.webpieces.router.api.dto.HttpMethod.POST;
+import static org.webpieces.router.api.dto.HttpMethod.getAll;
 
 import javax.inject.Inject;
 
@@ -20,7 +20,9 @@ public class ExampleRouteModule implements RouteModule {
 	
 	@Override
 	public void configure(Router router) {
-		
+
+		Router scoped = router.getScopedRouter("/store", true);
+
 		//Issues to resolve...
 		//1. how to define page is only accessible over https (seam does pattern path="/secure/*" scheme="https" while we
 		//     have more flexibility here as the developer uses an api we provide(we can allow registration of hooks in the router)
@@ -33,11 +35,30 @@ public class ExampleRouteModule implements RouteModule {
 		//   current direction?..need to investigate)
 		//7. I can't find a better way as of yet than providing controller AND methodString for the controller due to the
 		//things that need to happen.  
+		//8. Have a global POST route that works for every controller.  It was nice never defining the post routes in play
+		//POST       /{controller}/{action}                  {controller}.post{action}
+		//# Routes for all ajaxAddEdit and delete stuff
+		//GET     /{controller}/ajaxAddEdit/{id}          {controller}.ajaxAddEdit
+		//GET     /{controller}/ajaxDelete/{id}           {controller}.ajaxDelete
+
+		//# Catch all
+		//POST       /{controller}/{action}                  {controller}.post{action}
 		
-		router.addRoute(SOME_EXAMPLE,         getAllHttpMethods(), "/something", controllerA, "someExample");
-		router.addRoute(GET_CREATE_USER_PAGE, GET,                 "/createuser", controllerA, "createUserForm");
-		router.addRoute(POST_CREATE_USER,     POST, "/createuser", controllerA, "postUser");
-		router.addRoute(GET_SHOW_USER,        GET, "/user/:id", controllerA, "getUser");
+
+
+		//CRUD...
+		//1. /user  - creating a user?   
+		//2. /user/:id - GET...display non-editable
+		//3. /users - separate route
+		//4. /user/:id - ....GET
+		//5. POST /edituser
+		
+		router.addRoute(getAll(), "/something",  "#{HomeControllerA.someExample}", SOME_EXAMPLE);
+		scoped.addRoute(GET,      "/createuser", "#{controllerA.createUserForm}",  GET_CREATE_USER_PAGE);
+		scoped.addRoute(POST,     "/createuser", "#{controllerA.postUser}",        POST_CREATE_USER);
+		scoped.addRoute(GET,      "/user/:id",   "#{controllerA.getUser}",         GET_SHOW_USER);
+		
+		scoped.addRoute(POST,     "/{controller}/{action}", "#{{controller}.post{action}}", null);
 		
 		router.addFilter("/secure/*", new SecurityFilter());
 		

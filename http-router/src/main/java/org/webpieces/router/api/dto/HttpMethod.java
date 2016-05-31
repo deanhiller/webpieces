@@ -1,4 +1,4 @@
-package org.webpieces.router.api;
+package org.webpieces.router.api.dto;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public enum HttpMethod {
 		return codeToKnownStatus.get(method);
 	}
 	
-	public static Set<HttpMethod> getAllHttpMethods() {
+	public static Set<HttpMethod> getAll() {
 		Collection<HttpMethod> values = codeToKnownStatus.values();
 		Set<HttpMethod> methods = new HashSet<>();
 		methods.addAll(values);

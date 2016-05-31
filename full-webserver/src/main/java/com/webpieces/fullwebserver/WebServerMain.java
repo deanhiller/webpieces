@@ -7,10 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouteModule;
 
-import com.webpieces.webserver.api.WebServer;
-import com.webpieces.webserver.api.WebServerConfig;
-import com.webpieces.webserver.api.WebServerFactory;
-
 public class WebServerMain {
 	private static final Logger log = LoggerFactory.getLogger(WebServerMain.class);
 	
@@ -20,10 +16,9 @@ public class WebServerMain {
 			List<RouteModule> routeModules = new ArrayList<>();
 			routeModules.add(new ExampleRouteModule());
 			
-			WebServerConfig config = new WebServerConfig();
-			WebServer server = WebServerFactory.create("webserver", null, config);
+			//RoutingService server = RouterSvcFactory.create(null, config);
 			
-			server.start();
+			//server.start();
 		} catch(Exception e) {
 			log.warn("excpeiton", e);
 		}

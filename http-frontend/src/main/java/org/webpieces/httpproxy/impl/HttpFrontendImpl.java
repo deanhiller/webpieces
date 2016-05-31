@@ -14,8 +14,8 @@ public class HttpFrontendImpl implements HttpFrontend {
 	private AsyncServer server;
 	private DataListenerToParserLayer dataListener;
 
-	public HttpFrontendImpl(HttpRequestListener listener, HttpParser parser) {
-		ParserLayer nextStage = new ParserLayer(parser, listener);
+	public HttpFrontendImpl(HttpRequestListener listener, HttpParser parser, boolean isHttps) {
+		ParserLayer nextStage = new ParserLayer(parser, listener, isHttps);
 		dataListener = new DataListenerToParserLayer(nextStage);
 	}
 	

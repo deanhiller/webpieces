@@ -23,7 +23,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
 	@Override
 	public HttpFrontend createHttpServer(String id, InetSocketAddress addr, HttpRequestListener listener) {
-		HttpFrontendImpl frontend = new HttpFrontendImpl(listener, parser);
+		HttpFrontendImpl frontend = new HttpFrontendImpl(listener, parser, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(id, addr, frontend.getDataListener());
 		frontend.init(tcpServer);
 		return frontend;
@@ -32,7 +32,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	@Override
 	public HttpFrontend createHttpsServer(String id, InetSocketAddress addr, HttpRequestListener listener,
 			SSLEngineFactory factory) {
-		HttpFrontendImpl frontend = new HttpFrontendImpl(listener, parser);
+		HttpFrontendImpl frontend = new HttpFrontendImpl(listener, parser, true);
 		AsyncServer tcpServer = svrManager.createTcpServer(id, addr, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
 		return frontend;

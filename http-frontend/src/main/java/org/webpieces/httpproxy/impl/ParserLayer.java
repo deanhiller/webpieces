@@ -29,10 +29,12 @@ public class ParserLayer {
 	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
 	private HttpRequestListener listener;
+	private boolean isHttps;
 	
-	public ParserLayer(HttpParser parser2, HttpRequestListener listener) {
+	public ParserLayer(HttpParser parser2, HttpRequestListener listener, boolean isHttps) {
 		this.parser = parser2;
 		this.listener = listener;
+		this.isHttps = isHttps;
 	}
 
 	public void deserialize(Channel channel, ByteBuffer chunk) {
@@ -40,7 +42,7 @@ public class ParserLayer {
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
 			for(HttpRequest req : parsedRequests) {
-				listener.processHttpRequests(translate(channel), req);
+				listener.processHttpRequests(translate(channel), req, isHttps);
 			}
 		} catch(ParseException e) {
 			//move down to debug level later on..
