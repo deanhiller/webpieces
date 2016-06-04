@@ -147,7 +147,6 @@ project(':full-webserver') {
 
 project('runtimecompile') {
     dependencies {
-        compile 'org.apache.commons:commons-io:1.3.2'
         compile 'org.eclipse.jdt.core.compiler:ecj:4.5.1'
     }
 }

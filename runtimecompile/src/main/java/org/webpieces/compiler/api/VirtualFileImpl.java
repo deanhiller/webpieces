@@ -9,10 +9,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
 
 public class VirtualFileImpl implements VirtualFile {
 
@@ -44,9 +43,9 @@ public class VirtualFileImpl implements VirtualFile {
 
 	@Override
 	public String contentAsString() {
-		try (InputStream in = inputstream()) {
-			return IOUtils.toString(in);
-		} catch(IOException e) {
+		try {
+			return new String(Files.readAllBytes(file.toPath()));
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
