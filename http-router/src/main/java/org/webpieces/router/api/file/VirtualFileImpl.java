@@ -31,5 +31,10 @@ public class VirtualFileImpl implements VirtualFile {
 	public String getName() {
 		return file.getAbsolutePath();
 	}
+
+	@Override
+	public String toString() {
+		return "[file=" + file + "]";
+	}
 	
 }
