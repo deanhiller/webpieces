@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.webpieces.compiler.api.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 public class FileStateHashCreator {
 

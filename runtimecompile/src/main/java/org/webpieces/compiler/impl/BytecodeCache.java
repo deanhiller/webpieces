@@ -7,7 +7,7 @@ import java.security.MessageDigest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.compiler.api.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 /**
  * Used to speed up compilation time
@@ -42,7 +42,7 @@ public class BytecodeCache {
         try {
             VirtualFile f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
             if (f.exists()) {
-            	try (InputStream fis = f.inputstream()) {
+            	try (InputStream fis = f.openInputStream()) {
 	                // Read hash
 	                int offset = 0;
 	                int read = -1;

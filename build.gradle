@@ -109,6 +109,7 @@ project(':http-router') {
     dependencies {
         compile 'com.google.inject:guice:4.0'
         project(':http-parser1_1')
+        compile project(':core-util')
     }
 }
 
@@ -148,5 +149,6 @@ project(':full-webserver') {
 project('runtimecompile') {
     dependencies {
         compile 'org.eclipse.jdt.core.compiler:ecj:4.5.1'
+        compile project(':core-util')
     }
 }

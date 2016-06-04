@@ -1,4 +1,4 @@
-package org.webpieces.compiler.api;
+package org.webpieces.util.file;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +17,15 @@ import java.util.List;
 public class VirtualFileImpl implements VirtualFile {
 
 	private File file;
+	private Charset charset;
 
 	public VirtualFileImpl(File file) {
+		this(file, Charset.defaultCharset());
+	}
+	
+	public VirtualFileImpl(File file, Charset charset) {
 		this.file = file;
+		this.charset = charset;
 	}
 
 	@Override
@@ -36,7 +43,7 @@ public class VirtualFileImpl implements VirtualFile {
 		File[] files = file.listFiles();
 		List<VirtualFile> theFiles = new ArrayList<>();
 		for(File f : files) {
-			theFiles.add(new VirtualFileImpl(f));
+			theFiles.add(new VirtualFileImpl(f, charset));
 		}
 		return theFiles;
 	}
@@ -44,7 +51,7 @@ public class VirtualFileImpl implements VirtualFile {
 	@Override
 	public String contentAsString() {
 		try {
-			return new String(Files.readAllBytes(file.toPath()));
+			return new String(Files.readAllBytes(file.toPath()), charset);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -58,7 +65,7 @@ public class VirtualFileImpl implements VirtualFile {
 	@Override
 	public VirtualFile child(String fileName) {
 		File child = new File(file, fileName);
-		return new VirtualFileImpl(child);
+		return new VirtualFileImpl(child, charset);
 	}
 
 	@Override
@@ -67,7 +74,7 @@ public class VirtualFileImpl implements VirtualFile {
 	}
 
 	@Override
-	public InputStream inputstream() {
+	public InputStream openInputStream() {
 		try {
 			return new FileInputStream(file);
 		} catch (FileNotFoundException e) {

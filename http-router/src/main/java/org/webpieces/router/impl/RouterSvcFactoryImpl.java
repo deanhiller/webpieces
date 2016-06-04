@@ -2,7 +2,7 @@ package org.webpieces.router.impl;
 
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.file.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Module;
 

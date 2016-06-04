@@ -1,4 +1,4 @@
-package org.webpieces.compiler.api;
+package org.webpieces.util.file;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,7 +27,7 @@ public interface VirtualFile {
 
 	boolean exists();
 
-	InputStream inputstream();
+	InputStream openInputStream();
 
 	String getAbsolutePath();
 

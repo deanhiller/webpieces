@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
-import org.webpieces.compiler.api.VirtualFile;
-import org.webpieces.compiler.api.VirtualFileImpl;
 import org.webpieces.compiler.impl.CompileOnDemandImpl;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileImpl;
 
 public abstract class AbstractCompileTest {
 

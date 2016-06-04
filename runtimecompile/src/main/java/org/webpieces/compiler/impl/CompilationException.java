@@ -3,7 +3,7 @@ package org.webpieces.compiler.impl;
 import java.util.Arrays;
 import java.util.List;
 
-import org.webpieces.compiler.api.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 /**
  * A java compilation error

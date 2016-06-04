@@ -2,7 +2,7 @@ package org.webpieces.compiler.impl;
 
 import java.util.List;
 
-import org.webpieces.compiler.api.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 public class FileLookup {
 

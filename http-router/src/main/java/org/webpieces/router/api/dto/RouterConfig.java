@@ -9,9 +9,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RouteModule;
-import org.webpieces.router.api.Router;
 import org.webpieces.router.api.RouterModules;
-import org.webpieces.router.api.file.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Module;
 

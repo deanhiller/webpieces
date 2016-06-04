@@ -21,7 +21,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.compiler.api.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 /*
  * Compile classes that need compiling to load them
@@ -188,7 +188,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         for (VirtualFile vf : config.getJavaPath()) {
             VirtualFile res = vf.child(name);
             if (res != null && res.exists()) {
-                return res.inputstream();
+                return res.openInputStream();
             }
         }
         return super.getResourceAsStream(name);

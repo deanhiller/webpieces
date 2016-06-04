@@ -8,8 +8,8 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
-import org.webpieces.router.api.file.VirtualFile;
 import org.webpieces.router.api.file.VirtualFileInputStream;
+import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -23,8 +23,7 @@ public class TestSimpleRoutes {
 	public void setUp() {
 		String moduleFileContents = AppModules.class.getName();
 		
-		ByteArrayInputStream in = new ByteArrayInputStream(moduleFileContents.getBytes());
-		VirtualFile f = new VirtualFileInputStream(in, "testAppModules");
+		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");
 		
 		server = RouterSvcFactory.create(f, new TestModule());
 		server.start();

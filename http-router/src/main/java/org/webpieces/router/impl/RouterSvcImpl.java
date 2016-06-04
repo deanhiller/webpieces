@@ -12,7 +12,7 @@ import org.webpieces.router.api.Router;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.dto.RouterConfig;
-import org.webpieces.router.api.file.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

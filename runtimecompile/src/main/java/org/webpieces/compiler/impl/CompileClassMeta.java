@@ -2,7 +2,7 @@ package org.webpieces.compiler.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.compiler.api.VirtualFile;
+import org.webpieces.util.file.VirtualFile;
 
 /**
  * Represent a application class

@@ -2,6 +2,8 @@ package org.webpieces.compiler.api;
 
 import java.util.List;
 
+import org.webpieces.util.file.VirtualFile;
+
 public class CompileConfig {
 
 	private List<VirtualFile> javaPath;
