@@ -19,7 +19,7 @@ public class ExampleRouteModule implements RouteModule {
 	private HomeController controllerA;
 	
 	@Override
-	public void configure(Router router) {
+	public void configure(Router router, String packageName) {
 
 		Router scoped = router.getScopedRouter("/store", true);
 

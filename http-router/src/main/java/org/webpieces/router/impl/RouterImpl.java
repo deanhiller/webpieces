@@ -49,7 +49,7 @@ public class RouterImpl implements Router {
 	 */
 	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {
 		Route r = meta.getRoute();
-		String controllerAndMethod = r.getController();
+		String controllerAndMethod = r.getControllerMethodString();
 		int lastIndex = controllerAndMethod.lastIndexOf(".");
 		int fromBeginIndex = controllerAndMethod.indexOf(".");
 		String methodStr = controllerAndMethod.substring(lastIndex+1);

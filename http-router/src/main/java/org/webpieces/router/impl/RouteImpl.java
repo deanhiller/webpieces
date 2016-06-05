@@ -18,6 +18,7 @@ public class RouteImpl implements Route {
 	private final Set<HttpMethod> methods;
 	private final List<String> argNames;
 	private final boolean isSecure;
+	private String controllerMethodString;
 
 	public RouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isSecure) {
 		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure);
@@ -30,6 +31,7 @@ public class RouteImpl implements Route {
 		this.patternToMatch = Pattern.compile(result.regExToMatch);
 		this.argNames = result.argNames;
 		this.isSecure = isSecure;
+		this.controllerMethodString = controllerMethod;
 	}
 
 	public RouteImpl(String controllerMethod) {
@@ -38,7 +40,7 @@ public class RouteImpl implements Route {
 		this.methods = null;
 		this.argNames = null;
 		this.isSecure = false;
-		
+		this.controllerMethodString = controllerMethod;
 	}
 
 	@Override
@@ -64,8 +66,7 @@ public class RouteImpl implements Route {
 	}
 
 	@Override
-	public String getController() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getControllerMethodString() {
+		return controllerMethodString;
 	}
 }

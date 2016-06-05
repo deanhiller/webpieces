@@ -21,8 +21,8 @@ public class MtgRouteModule implements RouteModule {
 		router.addRoute(POST,     "/createuser", "MeetingController.postUser",        POST_CREATE_USER);
 		router.addRoute(GET,      "/user/:id",   "MeetingController.getUser",         GET_SHOW_USER);
 		
-		router.addRoute(POST,     "/{controller}/{action}", "#{{controller}.post{action}}", null);
+		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setCatchAllRoute("MeetingController.notFound()");
+		router.setCatchAllRoute("MeetingController.notFound");
 	}
 }

@@ -26,6 +26,7 @@ public class RouterSvcImpl implements RoutingService {
 	@Override
 	public void start() {
 		config.load();
+		started = true;
 	}
 
 	@Override

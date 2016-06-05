@@ -11,5 +11,5 @@ public interface Route {
 	
 	boolean matches(Request request, String path);
 
-	String getController();
+	String getControllerMethodString();
 }

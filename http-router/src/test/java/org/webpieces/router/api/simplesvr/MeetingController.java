@@ -15,6 +15,9 @@ public class MeetingController {
 	@Inject
 	private SomeUtil util;
 	
+	public void notFound() {
+	}
+	
 	public Action someExample(String ... args) {
 		util.testMethod();
 		return new Render();
