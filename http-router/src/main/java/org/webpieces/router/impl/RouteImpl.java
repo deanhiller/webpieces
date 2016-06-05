@@ -10,7 +10,6 @@ import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
 
 import com.google.common.collect.Sets;
-import com.google.inject.Injector;
 
 public class RouteImpl implements Route {
 
@@ -65,8 +64,8 @@ public class RouteImpl implements Route {
 	}
 
 	@Override
-	public Object getController(Injector injector) {
-		
+	public String getController() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

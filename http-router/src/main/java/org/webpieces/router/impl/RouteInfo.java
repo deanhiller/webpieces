@@ -11,14 +11,14 @@ import org.webpieces.router.api.dto.Request;
 public class RouteInfo {
 
 	private final Map<String, RouteInfo> pathPrefixToInfo = new HashMap<>();
-	private List<Route> routes = new ArrayList<>();
-	private Route catchAllRoute;
+	private List<RouteMeta> routes = new ArrayList<>();
+	private RouteMeta catchAllRoute;
 	
-	public void addRoute(Route r) {
+	public void addRoute(RouteMeta r) {
 		this.routes.add(r);
 	}
 	
-	public void setCatchAllRoute(Route r) {
+	public void setCatchAllRoute(RouteMeta r) {
 		this.catchAllRoute = r;
 	}
 	
@@ -31,7 +31,7 @@ public class RouteInfo {
 		return routerInfo;
 	}
 
-	public Route fetchRoute(Request request, String path) {
+	public RouteMeta fetchRoute(Request request, String path) {
 		if(!path.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 
@@ -46,16 +46,17 @@ public class RouteInfo {
 		RouteInfo routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
 			String newRelativePath = path.substring(index, path.length());
-			Route route = routeInfo.fetchRoute(request, newRelativePath);
+			RouteMeta route = routeInfo.fetchRoute(request, newRelativePath);
 			if(route != null)
 				return route;
 			else
 				return catchAllRoute;
 		}
 
-		for(Route r : routes) {
+		for(RouteMeta meta : routes) {
+			Route r = meta.getRoute();
 			if(r.matches(request, path))
-				return r;
+				return meta;
 		}
 
 		return catchAllRoute;

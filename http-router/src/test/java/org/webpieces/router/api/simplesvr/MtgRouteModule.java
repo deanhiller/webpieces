@@ -12,9 +12,9 @@ import org.webpieces.router.api.RouteModule;
 import org.webpieces.router.api.Router;
 
 public class MtgRouteModule implements RouteModule {
-
+	
 	@Override
-	public void configure(Router router) {
+	public void configure(Router router, String packageName) {
 
 		router.addRoute(getAll(), "/something",  "MeetingController.someExample",     SOME_EXAMPLE);
 		router.addRoute(GET,      "/createuser", "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);

@@ -1,7 +1,5 @@
 package org.webpieces.router.api.simplesvr;
 
-import java.io.ByteArrayInputStream;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.router.api.RouterSvcFactory;

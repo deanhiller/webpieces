@@ -2,6 +2,6 @@ package org.webpieces.router.api;
 
 public interface RouteModule {
 
-	public void configure(Router router);
+	public void configure(Router router, String currentPackage);
 	
 }
