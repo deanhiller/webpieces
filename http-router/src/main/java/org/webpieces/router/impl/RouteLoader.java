@@ -23,38 +23,34 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-public abstract class RouterConfig {
-	private static final Logger log = LoggerFactory.getLogger(RouterConfig.class);
+public class RouteLoader {
+	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
+	private HttpRouterConfig config;
 	private RouteInfo routeInfo;
 	private ReverseRoutes reverseRoutes;
-	private Module overrideModule;
 	
-	protected VirtualFile routerModulesTextFile;
-	protected Loader loader;
 	protected RouterImpl router;
 
-	protected RouterModules routerModule;
-	
-	public RouterConfig(HttpRouterConfig config, Loader loader) {
-		this.routerModulesTextFile = config.getRoutersFile();
-		this.overrideModule = config.getOverridesModule();
-		this.loader = loader;
+	@Inject
+	public RouteLoader(HttpRouterConfig config) {
+		this.config = config;
 	}
 	
-	public void load() {
+	public RouterModules load(Loader loader) {
 		try {
-			loadImpl(routerModulesTextFile);
+			return loadImpl(loader);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private void loadImpl(VirtualFile modules) throws IOException {
+	private RouterModules loadImpl(Loader loader) throws IOException {
 		log.info("loading the master "+RouterModules.class.getSimpleName()+" class file");
 
+		VirtualFile fileWithRouterModulesName = config.getRoutersFile();
 		String moduleName;
-		try (InputStream str = modules.openInputStream()) {
+		try (InputStream str = fileWithRouterModulesName.openInputStream()) {
 			InputStreamReader reader = new InputStreamReader(str);
 			BufferedReader bufReader = new BufferedReader(reader);
 			moduleName = bufReader.readLine().trim();
@@ -68,15 +64,16 @@ public abstract class RouterConfig {
 
 		log.info(RouterModules.class.getSimpleName()+" loaded");
 
-		routerModule = (RouterModules) obj;
+		RouterModules routerModule = (RouterModules) obj;
 		Injector injector = createInjector(routerModule);
 
-		addRoutes(routerModule, injector);
+		addRoutes(routerModule, injector, loader);
+		return routerModule;
 	}
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
-	public void addRoutes(RouterModules rm, Injector injector) {
+	public void addRoutes(RouterModules rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
 		routeInfo = new RouteInfo();
@@ -100,8 +97,8 @@ public abstract class RouterConfig {
 		List<Module> guiceModules = rm.getGuiceModules();
 		
 		Module module = Modules.combine(guiceModules);
-		if(overrideModule != null)
-			module = Modules.override(module).with(overrideModule);
+		if(config.getOverridesModule() != null)
+			module = Modules.override(module).with(config.getOverridesModule());
 		
 		Injector injector = Guice.createInjector(module);
 		return injector;
@@ -117,8 +114,6 @@ public abstract class RouterConfig {
 		}
 	}
 
-	public abstract void processHttpRequests(Request req);
-	
 	public RouteMeta fetchRoute(Request req) {
 		RouteMeta meta = routeInfo.fetchRoute(req, req.relativePath);
 		if(meta == null)
@@ -127,7 +122,7 @@ public abstract class RouterConfig {
 		return meta;
 	}
 	
-	protected void invokeRoute(RouteMeta meta, Request req) {
+	public void invokeRoute(RouteMeta meta, Request req) {
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
@@ -143,5 +138,9 @@ public abstract class RouterConfig {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {
+		router.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
 	}
 }

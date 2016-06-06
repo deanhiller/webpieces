@@ -3,20 +3,42 @@ package org.webpieces.devrouter.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.routing.RouterModules;
+import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.RouterConfig;
+import org.webpieces.util.file.VirtualFile;
 
-public class DevRouterConfig extends RouterConfig {
+public class DevRoutingService implements RoutingService {
 
-	private static final Logger log = LoggerFactory.getLogger(DevRouterConfig.class);
+	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
 	private long lastFileTimestamp;
+	private RouteLoader routeConfig;
+	private DevLoader loader;
+	private VirtualFile routerModulesTextFile;
+	private RouterModules routerModule;
 
-	public DevRouterConfig(HttpRouterConfig config, DevLoader loader) {
-		super(config, loader);
+	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevLoader loader) {
+		routerModulesTextFile = config.getRoutersFile();
+		this.routeConfig = routeConfig;
+		this.loader = loader;
 		this.lastFileTimestamp = routerModulesTextFile.lastModified();
 	}
 
+	@Override
+	public void start() {
+		load();
+	}
+
+	@Override
+	public void stop() {
+	}
+	
+	private void load() {
+		routerModule = routeConfig.load(loader);		
+	}
+	
 	@Override
 	public void processHttpRequests(Request req) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
@@ -25,13 +47,13 @@ public class DevRouterConfig extends RouterConfig {
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		RouteMeta meta = fetchRoute(req);
+		RouteMeta meta = routeConfig.fetchRoute(req);
 		
 		if(meta.getControllerInstance() == null) {
-			router.loadControllerIntoMetaObject(meta, false);
+			routeConfig.loadControllerIntoMetaObject(meta, false);
 		}
 		
-		invokeRoute(meta, req);
+		routeConfig.invokeRoute(meta, req);
 	}
 	
 	/**
@@ -46,7 +68,7 @@ public class DevRouterConfig extends RouterConfig {
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
-		load();
+		routerModule = routeConfig.load(loader);
 		lastFileTimestamp = routerModulesTextFile.lastModified();
 		return true;
 	}

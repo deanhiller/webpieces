@@ -1,37 +1,34 @@
 package org.webpieces.router.impl;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
-import org.webpieces.router.impl.loader.MetaLoader;
 import org.webpieces.router.impl.loader.ProdLoader;
-import org.webpieces.util.file.VirtualFile;
 
-import com.google.inject.Module;
+@Singleton
+public class ProdRouterService implements RoutingService {
 
-public class RouterSvcImpl implements RoutingService {
-
-	private static final Logger log = LoggerFactory.getLogger(RouterSvcImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(ProdRouterService.class);
 	
-	private final RouterConfig config;
+	private RouteLoader config;
+	private ProdLoader loader;
 
 	private boolean started = false;
 	
 	@Inject
-	public RouterSvcImpl(RouterConfig config) {
-//		MetaLoader metaLoader = new MetaLoader();
-//		ProdLoader loader = new ProdLoader(metaLoader);
-//		config = new ProdRouterConfig(modules, overrideModule, loader);
+	public ProdRouterService(RouteLoader config, ProdLoader loader) {
 		this.config = config;
+		this.loader = loader;
 	}
 
 	//add Route HOOK callback so translate RouteId -> route and route->controller.method to call
 	@Override
 	public void start() {
-		config.load();
+		config.load(loader);
 		started = true;
 	}
 
@@ -44,7 +41,9 @@ public class RouterSvcImpl implements RoutingService {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 			
-		config.processHttpRequests(req);
+		RouteMeta meta = config.fetchRoute(req);
+		
+		config.invokeRoute(meta, req);
 		
 	}
 

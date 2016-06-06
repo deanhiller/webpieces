@@ -1,8 +1,6 @@
 package org.webpieces.router.api;
 
-import org.webpieces.router.impl.ProdRouterConfig;
-import org.webpieces.router.impl.RouterConfig;
-import org.webpieces.router.impl.RouterSvcImpl;
+import org.webpieces.router.impl.ProdRouterService;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -17,8 +15,7 @@ public class HttpRouterModule implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
-		binder.bind(RoutingService.class).to(RouterSvcImpl.class).asEagerSingleton();;
-		binder.bind(RouterConfig.class).to(ProdRouterConfig.class);
+		binder.bind(RoutingService.class).to(ProdRouterService.class).asEagerSingleton();;
 		binder.bind(HttpRouterConfig.class).toInstance(config);
 	}
 	

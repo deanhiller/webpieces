@@ -7,6 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
@@ -15,16 +17,17 @@ import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
 @RunWith(Parameterized.class)
 public class TestSimpleRoutes {
 	
+	private static final Logger log = LoggerFactory.getLogger(TestSimpleRoutes.class);
 	//protected MockFrontendSocket mockSocket;
 	private RoutingService server;
 
+	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
 	public static Collection bothServers() {
 		String moduleFileContents = AppModules.class.getName();
@@ -41,6 +44,7 @@ public class TestSimpleRoutes {
 
 	public TestSimpleRoutes(RoutingService svc, boolean expected) {
 		this.server = svc;
+		log.info("constructing test suite for server="+svc.getClass().getSimpleName());
 	}
 	
 	@Before
