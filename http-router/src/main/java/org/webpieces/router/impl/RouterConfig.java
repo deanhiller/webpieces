@@ -7,11 +7,14 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.RouteModule;
-import org.webpieces.router.api.RouterModules;
+import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.RouterModules;
 import org.webpieces.router.impl.loader.Loader;
 import org.webpieces.util.file.VirtualFile;
 
@@ -25,22 +28,23 @@ public abstract class RouterConfig {
 	
 	private RouteInfo routeInfo;
 	private ReverseRoutes reverseRoutes;
-	private VirtualFile modules;
 	private Module overrideModule;
+	
+	protected VirtualFile routerModulesTextFile;
 	protected Loader loader;
 	protected RouterImpl router;
 
 	protected RouterModules routerModule;
 	
-	public RouterConfig(VirtualFile modules, Module overrideModule, Loader loader) {
-		this.modules = modules;
-		this.overrideModule = overrideModule;
+	public RouterConfig(HttpRouterConfig config, Loader loader) {
+		this.routerModulesTextFile = config.getRoutersFile();
+		this.overrideModule = config.getOverridesModule();
 		this.loader = loader;
 	}
 	
 	public void load() {
 		try {
-			loadImpl(modules);
+			loadImpl(routerModulesTextFile);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -112,13 +116,6 @@ public abstract class RouterConfig {
 			throw new IllegalArgumentException("Your clazz="+clazz.getSimpleName()+" could not be created", e);
 		}
 	}
-
-	/**
-	 * Only used with DevRouterConfig which is not on classpath in prod mode
-	 * 
-	 * @return
-	 */
-	public abstract boolean reloadIfTextFileChanged();
 
 	public abstract void processHttpRequests(Request req);
 	

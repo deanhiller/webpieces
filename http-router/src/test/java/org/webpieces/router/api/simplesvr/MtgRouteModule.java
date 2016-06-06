@@ -8,8 +8,8 @@ import static org.webpieces.router.api.simplesvr.MtgRouteId.GET_SHOW_USER;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.POST_CREATE_USER;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.RouteModule;
-import org.webpieces.router.api.Router;
+import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Router;
 
 public class MtgRouteModule implements RouteModule {
 	

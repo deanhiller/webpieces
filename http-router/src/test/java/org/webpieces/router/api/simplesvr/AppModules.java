@@ -2,8 +2,8 @@ package org.webpieces.router.api.simplesvr;
 
 import java.util.List;
 
-import org.webpieces.router.api.RouteModule;
-import org.webpieces.router.api.RouterModules;
+import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.RouterModules;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;

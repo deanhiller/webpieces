@@ -3,7 +3,7 @@ package org.webpieces.router.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.webpieces.router.api.RouteId;
+import org.webpieces.router.api.routing.RouteId;
 
 public class ReverseRoutes {
 

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.webpieces.router.api.Route;
 import org.webpieces.router.api.dto.Request;
 
 public class RouteInfo {
@@ -49,8 +48,6 @@ public class RouteInfo {
 			RouteMeta route = routeInfo.fetchRoute(request, newRelativePath);
 			if(route != null)
 				return route;
-			else
-				return catchAllRoute;
 		}
 
 		for(RouteMeta meta : routes) {

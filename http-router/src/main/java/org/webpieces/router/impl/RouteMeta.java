@@ -2,8 +2,6 @@ package org.webpieces.router.impl;
 
 import java.lang.reflect.Method;
 
-import org.webpieces.router.api.Route;
-
 public class RouteMeta {
 
 	private final Route route;

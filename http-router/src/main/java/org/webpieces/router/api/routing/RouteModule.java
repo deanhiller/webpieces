@@ -1,4 +1,4 @@
-package org.webpieces.router.api;
+package org.webpieces.router.api.routing;
 
 public interface RouteModule {
 

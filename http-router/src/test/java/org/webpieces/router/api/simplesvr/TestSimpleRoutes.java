@@ -6,7 +6,7 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
-import org.webpieces.router.api.file.VirtualFileInputStream;
+import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Binder;
@@ -23,7 +23,7 @@ public class TestSimpleRoutes {
 		
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");
 		
-		server = RouterSvcFactory.create(f, new TestModule());
+		server = RouterSvcFactory.create(f);
 		server.start();
 	}
 

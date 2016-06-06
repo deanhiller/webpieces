@@ -1,8 +1,9 @@
-package org.webpieces.router.api;
+package org.webpieces.router.api.routing;
 
 import java.io.File;
 import java.util.Set;
 
+import org.webpieces.router.api.HttpFilter;
 import org.webpieces.router.api.dto.HttpMethod;
 
 /**
@@ -17,7 +18,8 @@ public interface Router {
 
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
-	void addRoute(Route r, RouteId routeId);
+	//later maybe when we move Route to the api
+	//void addRoute(Route r, RouteId routeId);
 	
 	void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
 	void addSecureRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
@@ -32,7 +34,8 @@ public interface Router {
 	 */
 	void setCatchAllRoute(String controllerMethod);
 	
-	void setCatchAllRoute(Route r);
+	//later maybe when we move Route to the api
+	//void setCatchAllRoute(Route r);
 	
 	/**
 	 * If you scope your router to /backend, every Router.addRoute path uses that prefix as the final

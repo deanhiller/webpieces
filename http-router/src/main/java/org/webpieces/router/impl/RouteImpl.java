@@ -4,10 +4,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.webpieces.router.api.Route;
-import org.webpieces.router.api.RouteId;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.routing.RouteId;
 
 import com.google.common.collect.Sets;
 

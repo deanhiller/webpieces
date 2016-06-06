@@ -1,9 +1,12 @@
 package org.webpieces.router.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.impl.loader.MetaLoader;
 import org.webpieces.router.impl.loader.ProdLoader;
 import org.webpieces.util.file.VirtualFile;
 
@@ -17,9 +20,12 @@ public class RouterSvcImpl implements RoutingService {
 
 	private boolean started = false;
 	
-	public RouterSvcImpl(VirtualFile modules, Module overrideModule) {
-		ProdLoader loader = new ProdLoader();
-		config = new ProdRouterConfig(modules, overrideModule, loader);
+	@Inject
+	public RouterSvcImpl(RouterConfig config) {
+//		MetaLoader metaLoader = new MetaLoader();
+//		ProdLoader loader = new ProdLoader(metaLoader);
+//		config = new ProdRouterConfig(modules, overrideModule, loader);
+		this.config = config;
 	}
 
 	//add Route HOOK callback so translate RouteId -> route and route->controller.method to call

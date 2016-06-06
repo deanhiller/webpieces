@@ -10,8 +10,8 @@ import static org.webpieces.router.api.dto.HttpMethod.getAll;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.api.RouteModule;
-import org.webpieces.router.api.Router;
+import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Router;
 
 public class ExampleRouteModule implements RouteModule {
 

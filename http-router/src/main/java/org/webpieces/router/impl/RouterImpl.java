@@ -1,16 +1,12 @@
 package org.webpieces.router.impl;
 
 import java.io.File;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.webpieces.router.api.HttpFilter;
-import org.webpieces.router.api.Route;
-import org.webpieces.router.api.RouteId;
-import org.webpieces.router.api.Router;
 import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.api.routing.Router;
 import org.webpieces.router.impl.loader.Loader;
 
 import com.google.inject.Injector;
@@ -31,7 +27,6 @@ public class RouterImpl implements Router {
 		this.loader = loader;
 	}
 	
-	@Override
 	public void addRoute(Route r, RouteId routeId) {		
 		RouteMeta meta = new RouteMeta(r);
 		loadControllerIntoMetaObject(meta, true);
@@ -58,29 +53,7 @@ public class RouterImpl implements Router {
 			controllerStr = currentPackage+"."+controllerStr;
 		}
 		
-		Object controllerInst = loader.createController(injector, controllerStr, isInitializingAllControllers);
-		if(controllerInst == null) {
-			//delayed construction for dev mode only(I hate having this code here as it should not be part of the prod server!!!)
-			//at least the DevLoader is only in the dev server
-			//TODO: Move this into the Loader I think....
-			return;
-		}
-		
-		Method[] methods = controllerInst.getClass().getMethods();
-		List<Method> matches = new ArrayList<>();
-		for(Method m : methods) {
-			if(m.getName().equals(methodStr))
-				matches.add(m);
-		}
-
-		if(matches.size() == 0)
-			throw new IllegalArgumentException("Invalid Route.  Cannot find 'public' method="+methodStr+" on class="+controllerStr);
-		else if(matches.size() > 1) 
-			throw new UnsupportedOperationException("You have more than one 'public' method named="+methodStr+" on class="+controllerStr+"  This is not yet supported until we support method parameters");
-		
-		Method method = matches.get(0);
-		meta.setControllerInstance(controllerInst);
-		meta.setMethod(method);
+		loader.loadControllerIntoMeta(meta, injector, controllerStr, methodStr, isInitializingAllControllers);
 	}
 
 	@Override
@@ -131,7 +104,6 @@ public class RouterImpl implements Router {
 		setCatchAllRoute(route);
 	}
 
-	@Override
 	public void setCatchAllRoute(Route r) {
 		RouteMeta meta = new RouteMeta(r);
 		loadControllerIntoMetaObject(meta, true);	

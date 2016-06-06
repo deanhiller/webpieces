@@ -114,6 +114,13 @@ project(':http-router') {
     }
 }
 
+project(':http-router-dev') {
+    dependencies {
+        compile project(':http-router')
+        compile project(':runtimecompile')
+    }
+}
+
 project(':http-templating') {
     dependencies {
         compile 'org.codehaus.groovy:groovy-all:2.4.6'

@@ -1,20 +1,16 @@
 package org.webpieces.router.impl;
 
-import org.webpieces.router.api.dto.Request;
-import org.webpieces.router.impl.loader.Loader;
-import org.webpieces.util.file.VirtualFile;
+import javax.inject.Inject;
 
-import com.google.inject.Module;
+import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.impl.loader.ProdLoader;
 
 public class ProdRouterConfig extends RouterConfig {
 
-	public ProdRouterConfig(VirtualFile modules, Module overrides, Loader loader) {
-		super(modules, overrides, loader);
-	}
-
-	@Override
-	public boolean reloadIfTextFileChanged() {
-		return false;
+	@Inject
+	public ProdRouterConfig(HttpRouterConfig config, ProdLoader loader) {
+		super(config, loader);
 	}
 
 	@Override

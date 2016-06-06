@@ -1,6 +1,6 @@
 package org.webpieces.router.api.actions;
 
-import org.webpieces.router.api.RouteId;
+import org.webpieces.router.api.routing.RouteId;
 
 public class Redirect implements Action {
 
