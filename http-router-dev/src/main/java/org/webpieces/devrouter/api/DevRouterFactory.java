@@ -1,30 +1,28 @@
-package org.webpieces.router.api;
+package org.webpieces.devrouter.api;
 
-import java.util.List;
-
+import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.HttpRouterModule;
+import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.RoutingService;
 import org.webpieces.util.file.VirtualFile;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
-public class RouterSvcFactory {
-	
-    protected RouterSvcFactory() {}
+public class DevRouterFactory {
+    protected DevRouterFactory() {}
 
     public static RoutingService create(VirtualFile routersFile) {
     	return create(new HttpRouterConfig(routersFile, null));
     }
     
 	public static RoutingService create(HttpRouterConfig config) {
+		
+		Modules.override(RouterSvcFactory.getModules(config)).with(new DevModule());
+		
 		Injector injector = Guice.createInjector(new HttpRouterModule(config));
 		RoutingService svc = injector.getInstance(RoutingService.class);
 		return svc;	
-	}
-
-	public static List<Module> getModules(HttpRouterConfig config) {
-		List<Module> modules = Lists.newArrayList(new HttpRouterModule(config));
-		return modules;
 	}
 }
