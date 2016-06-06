@@ -27,6 +27,8 @@ public class ErrorTest {
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
 		compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
+		
+		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
 	}
 	
 	@Test

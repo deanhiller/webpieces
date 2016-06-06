@@ -34,7 +34,7 @@ public class AddFileTest extends AbstractCompileTest {
 		Class c = compiler.loadClass(controller);
 
 		log.info("loaded");
-		int retVal = invokeMethod(c, "someMethod");
+		int retVal = invokeMethodReturnInt(c, "someMethod");
 		
 		Assert.assertEquals(1, retVal);
 		
@@ -42,7 +42,7 @@ public class AddFileTest extends AbstractCompileTest {
 		
 		Class c2 = compiler.loadClass(controller);
 		
-		int retVal2 = invokeMethod(c2, "someMethod");
+		int retVal2 = invokeMethodReturnInt(c2, "someMethod");
 		
 		Assert.assertEquals(2, retVal2);
 	}

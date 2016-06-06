@@ -16,4 +16,6 @@ public interface CompileOnDemand {
 	 */
 	Class<?> loadClass(String clazzName);
 
+	Class<?> loadClass(String name, boolean forceReload);
+
 }

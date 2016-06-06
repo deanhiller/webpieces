@@ -48,13 +48,16 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
      * Used to track change of the application sources path
      */
     private final int pathHash;
+
+	private FileLookup fileLookup;
     
-    public CompilingClassloader(CompileConfig config, CompilerWrapper compiler) {
+    public CompilingClassloader(CompileConfig config, CompilerWrapper compiler, FileLookup fileLookup) {
         super(CompilingClassloader.class.getClassLoader());
     	this.config = config;
     	this.byteCodeCache = new BytecodeCache(config);
     	this.compiler = compiler;
     	this.appClassMgr = compiler.getAppClassMgr();
+    	this.fileLookup = fileLookup;
     	
     	VirtualFile pathForCodeSrc = config.getJavaPath().get(0);
         // Clean the existing classes
@@ -108,8 +111,15 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         long start = System.currentTimeMillis();
         CompileClassMeta applicationClass = appClassMgr.getApplicationClass(name);
         
+        //For anonymous classes...
         if(applicationClass == null) {
-        	//the parent classloader is responsible for this class
+        	VirtualFile file = fileLookup.getJava(name);
+        	applicationClass = appClassMgr.getOrCreateApplicationClass(name, file);
+        }
+        
+        //if still null...
+        if(applicationClass == null) {
+        	//the parent classloader is responsible for this class as it is not on our compile path
         	return null;
         }
         

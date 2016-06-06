@@ -28,22 +28,26 @@ public abstract class AbstractCompileTest {
 	private static final File myResourcePath = new File(filePath + "/src/test/changedJavaFiles");
 	protected CompileOnDemand compiler;
 	private boolean filesMoved;
+	protected File byteCodeCacheDir = new File(property+"/bytecode");
 
 	@Before
 	public void setUp() {		
-		File f = new File(property+"/bytecode");
-		
-		log.info("storing bytecode cache in="+f.getAbsolutePath());
+		log.info("storing bytecode cache in="+byteCodeCacheDir.getAbsolutePath());
 		log.info("running tests from user.dir="+filePath);
 		
 		// clear out the bytecode cache (maybe not every time?)
-		clearByteCodeCache(f);
+		clearByteCodeCache(byteCodeCacheDir);
 
-		List<VirtualFile> arrayList = new ArrayList<>();
-		arrayList.add(new VirtualFileImpl(myCodePath));
-		CompileConfig config = new CompileConfig(arrayList, new VirtualFileImpl(f));
+		CompileConfig config = createCompileConfig();
 
 		compiler = new CompileOnDemandImpl(config, getPackageFilter());
+	}
+
+	protected CompileConfig createCompileConfig() {
+		List<VirtualFile> arrayList = new ArrayList<>();
+		arrayList.add(new VirtualFileImpl(myCodePath));
+		CompileConfig config = new CompileConfig(arrayList, new VirtualFileImpl(byteCodeCacheDir));
+		return config;
 	}
 
 	@After
@@ -62,22 +66,31 @@ public abstract class AbstractCompileTest {
 	protected abstract String getPackageFilter();
 
 	@SuppressWarnings("rawtypes")
-	protected int invokeMethod(Class c, String method) {
+	protected Object invokeMethod(Class c, String method) {
 		try {
 			return invokeMethodImpl(c, method);
 		} catch (Exception e) {
 			throw new RuntimeException("exception", e);
 		}
 	}
+	
+	@SuppressWarnings("rawtypes")
+	protected int invokeMethodReturnInt(Class c, String method) {
+		try {
+			return (Integer) invokeMethodImpl(c, method);
+		} catch (Exception e) {
+			throw new RuntimeException("exception", e);
+		}
+	}
 
 	@SuppressWarnings("rawtypes")
-	private int invokeMethodImpl(Class c, String method)
+	private Object invokeMethodImpl(Class c, String method)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Method[] methods = c.getMethods();
 		for (Method m : methods) {
 			if (method.equals(m.getName())) {
 				Object obj = c.newInstance();
-				return (Integer) m.invoke(obj);
+				return m.invoke(obj);
 			}
 		}
 		throw new IllegalStateException("method=" + method + " not found");
