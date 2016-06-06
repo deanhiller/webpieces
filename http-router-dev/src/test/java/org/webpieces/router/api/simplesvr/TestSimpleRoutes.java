@@ -1,5 +1,6 @@
 package org.webpieces.router.api.simplesvr;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
@@ -16,6 +18,7 @@ import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileImpl;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -34,7 +37,11 @@ public class TestSimpleRoutes {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
 		RoutingService prodSvc = RouterSvcFactory.create(f);
-		RoutingService devSvc = DevRouterFactory.create(f);
+		
+		String filePath = System.getProperty("user.dir");
+		File myCodePath = new File(filePath + "/src/test/java");
+		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
+		RoutingService devSvc = DevRouterFactory.create(f, compileConfig);
 		
 		return Arrays.asList(new Object[][] {
 	         { prodSvc, true },
@@ -49,11 +56,6 @@ public class TestSimpleRoutes {
 	
 	@Before
 	public void setUp() {
-		String moduleFileContents = AppModules.class.getName();
-		
-		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");
-		
-		server = RouterSvcFactory.create(f);
 		server.start();
 	}
 
@@ -65,7 +67,7 @@ public class TestSimpleRoutes {
 	
 	@Test
 	public void testBasicRoute() {
-		Request req = createHttpRequest(HttpMethod.GET, "/");
+		Request req = createHttpRequest(HttpMethod.GET, "/something");
 		server.processHttpRequests(req);
 		
 	}

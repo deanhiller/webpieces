@@ -106,8 +106,9 @@ public class CompileClassMeta {
 	 *            The bytecode.
 	 */
 	public void compiled(byte[] code) {
-		if(log.isTraceEnabled())
-			log.trace("class now compiled="+name);
+		//if(log.isTraceEnabled())
+		
+		log.info("class now compiled="+name);
 		javaByteCode = code;
 		compiled = true;
 		this.timestamp = this.javaFile.lastModified();

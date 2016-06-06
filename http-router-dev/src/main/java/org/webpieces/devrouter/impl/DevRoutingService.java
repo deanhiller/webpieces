@@ -1,5 +1,7 @@
 package org.webpieces.devrouter.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
@@ -19,6 +21,7 @@ public class DevRoutingService implements RoutingService {
 	private VirtualFile routerModulesTextFile;
 	private RouterModules routerModule;
 
+	@Inject
 	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevLoader loader) {
 		routerModulesTextFile = config.getRoutersFile();
 		this.routeConfig = routeConfig;

@@ -1,5 +1,7 @@
 package org.webpieces.devrouter.impl;
 
+import javax.inject.Inject;
+
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.loader.Loader;
@@ -12,6 +14,7 @@ public class DevLoader implements Loader {
 	private CompileOnDemand compileOnDemand;
 	private MetaLoader loader;
 
+	@Inject
 	public DevLoader(CompileOnDemand compile, MetaLoader loader) {
 		this.compileOnDemand = compile;
 		this.loader = loader;

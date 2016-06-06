@@ -247,7 +247,10 @@ public class CompilerWrapper {
                         log.trace("Received Success eclipse Compiled result for=" + clazzName);
                     }
 
-                    appClassMgr.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
+                    String name = clazzName.toString();
+                    VirtualFile file = fileLookup.getJava(name);
+                    CompileClassMeta appClass = appClassMgr.getOrCreateApplicationClass(name, file);
+                    appClass.compiled(clazzFile.getBytes());
                 }
             }
         };
