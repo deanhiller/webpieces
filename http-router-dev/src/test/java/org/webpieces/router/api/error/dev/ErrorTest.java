@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterFactory;
+import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
@@ -34,10 +35,8 @@ public class ErrorTest {
 	@Test
 	public void testNoMethod() {
 		log.info("starting");
-
 		String moduleFileContents = NoMethodRouterModules.class.getName();
-		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
-		RoutingService server = DevRouterFactory.create(f, compileConfig);
+		RoutingService server = createServer(moduleFileContents);
 		Request req = createHttpRequest(HttpMethod.GET, "/something");
 
 		//this should definitely not throw since we lazy load everything in dev...
@@ -52,6 +51,31 @@ public class ErrorTest {
 		
 	}
 
+	@Test
+	public void testArgsMismatch() {
+		log.info("starting");
+		String moduleFileContents = TooManyArgsRouterModules.class.getName();
+		RoutingService server = createServer(moduleFileContents);
+		Request req = createHttpRequest(HttpMethod.GET, "/something");
+
+		server.start();
+
+		
+		try {
+	
+			server.processHttpRequests(req);
+			Assert.fail("Should have thrown exception lazily since this i se");
+		} catch(IllegalArgumentException e) {
+			Assert.assertTrue(e.getMessage().contains("The method='argsMismatch' takes 2 arguments"));
+		}
+	}
+
+	private RoutingService createServer(String moduleFileContents) {
+		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
+		RoutingService server = DevRouterFactory.create(f, compileConfig);
+		return server;
+	}
+	
 	private Request createHttpRequest(HttpMethod method, String path) {
 		Request r = new Request();
 		r.method = method;

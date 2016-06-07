@@ -1,5 +1,6 @@
 package org.webpieces.router.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -37,7 +38,7 @@ public class RouteImpl implements Route {
 		this.path = null;
 		this.patternToMatch = null;
 		this.methods = null;
-		this.argNames = null;
+		this.argNames = new ArrayList<String>();
 		this.isSecure = false;
 		this.controllerMethodString = controllerMethod;
 	}
@@ -67,5 +68,10 @@ public class RouteImpl implements Route {
 	@Override
 	public String getControllerMethodString() {
 		return controllerMethodString;
+	}
+	
+	@Override
+	public List<String> getArgNames() {
+		return argNames;
 	}
 }

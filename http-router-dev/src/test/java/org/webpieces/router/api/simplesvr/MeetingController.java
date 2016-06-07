@@ -18,7 +18,7 @@ public class MeetingController {
 	public void notFound() {
 	}
 	
-	public Action someExample(String ... args) {
+	public Action someExample() {
 		util.testMethod();
 		return new Render();
 	}

@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class NoMethodRouterModules implements RouterModules {
+public class TooManyArgsRouterModules implements RouterModules {
 
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new Module() {
@@ -19,6 +19,6 @@ public class NoMethodRouterModules implements RouterModules {
 	}
 	
 	public List<RouteModule> getRouterModules() {
-		return Lists.newArrayList(new NoMethodRouteModule());
+		return Lists.newArrayList(new TooManyArgsRouteModule());
 	}
 }

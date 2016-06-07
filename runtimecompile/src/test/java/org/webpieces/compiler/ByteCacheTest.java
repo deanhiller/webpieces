@@ -46,7 +46,7 @@ public class ByteCacheTest extends AbstractCompileTest {
 		Assert.assertFalse(byteCodeEnumFile.exists());		
 		
 		log.info("loaded");
-		invokeMethodReturnInt(c, "createUserForm");
+		invokeMethod(c, "createUserForm");
 		
 		Assert.assertTrue(byteCodeControllerFile.exists());
 		Assert.assertTrue(byteCodeEnumFile.exists());

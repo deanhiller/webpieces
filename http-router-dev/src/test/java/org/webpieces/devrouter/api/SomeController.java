@@ -15,6 +15,10 @@ public class SomeController {
 	public void notFound() {
 	}
 	
+	public Action argsMismatch(String id, String accId) {
+		return new Render();
+	}
+	
 	public Action someExample(String ... args) {
 		return new Render();
 	}
