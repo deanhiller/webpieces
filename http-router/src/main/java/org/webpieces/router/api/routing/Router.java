@@ -14,12 +14,16 @@ import org.webpieces.router.api.dto.HttpMethod;
  */
 public interface Router {
 
+	void addPostRoute(String path, String controllerMethod);
+	
 	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
-
+	
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
 	//later maybe when we move Route to the api
 	//void addRoute(Route r, RouteId routeId);
+	
+	void addSecurePostRoute(String path, String controllerMethod);
 	
 	void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
 	void addSecureRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);

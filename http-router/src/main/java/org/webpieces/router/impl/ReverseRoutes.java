@@ -19,5 +19,8 @@ public class ReverseRoutes {
 		routeIdToRoute.put(routeId, meta);
 	}
 
+	public RouteMeta get(RouteId id) {
+		return routeIdToRoute.get(id);
+	}
 
 }

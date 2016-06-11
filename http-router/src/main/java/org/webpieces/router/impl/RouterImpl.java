@@ -27,12 +27,21 @@ public class RouterImpl implements Router {
 		this.loader = loader;
 	}
 	
-	public void addRoute(Route r, RouteId routeId) {		
+	@Override
+	public void addPostRoute(String path, String controllerMethod) {
+		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, null, false);
+		addRoute(route, null);
+	}
+	
+	public void addRoute(Route r, RouteId routeId) {
 		RouteMeta meta = new RouteMeta(r);
 		loadControllerIntoMetaObject(meta, true);
-		
+
 		info.addRoute(meta);
-		reverseRoutes.addRoute(routeId, meta);
+		
+		//POST methods have no route Id as we only redirect to GET pages
+		if(routeId != null)
+			reverseRoutes.addRoute(routeId, meta);
 	}
 	
 	/**
@@ -69,6 +78,12 @@ public class RouterImpl implements Router {
 	}
 
 	@Override
+	public void addSecurePostRoute(String path, String controllerMethod) {
+		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, null, true);
+		addRoute(route, null);
+	}
+	
+	@Override
 	public void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		Route route = new RouteImpl(method, path, controllerMethod, routeId, true);
 		addRoute(route, routeId);
@@ -98,6 +113,10 @@ public class RouterImpl implements Router {
 		return info;
 	}
 
+	public ReverseRoutes getReverseRoutes() {
+		return reverseRoutes; 
+	}
+	
 	@Override
 	public void setCatchAllRoute(String controllerMethod) {
 		Route route = new RouteImpl(controllerMethod);

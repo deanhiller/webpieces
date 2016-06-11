@@ -4,9 +4,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.RouteMeta;
 
 @Singleton
@@ -24,18 +27,25 @@ public class MetaLoader {
 		if(matches.size() == 0)
 			throw new IllegalArgumentException("Invalid Route.  Cannot find 'public' method="+methodStr+" on class="+controllerStr);
 		else if(matches.size() > 1) 
-			throw new UnsupportedOperationException("You have more than one 'public' method named="+methodStr+" on class="+controllerStr+"  This is not yet supported until we support method parameters");
+			throw new UnsupportedOperationException("You have more than one 'public' method named="+methodStr+" on class="+controllerStr+"  This is not yet supported until we support method parameters(let us know you hit this and we will immediately implement)");
 		
-		Method method = matches.get(0);
-		List<String> argNames = meta.getRoute().getArgNames();
-		Parameter[] parameters = method.getParameters();
+		Method controllerMethod = matches.get(0);
+		Parameter[] parameters = controllerMethod.getParameters();
+		List<String> paramNames = new ArrayList<>();
+		for(Parameter p : parameters) {
+			
+			String name = p.getName();
+			Param annotation = p.getAnnotation(Param.class);
+			if(annotation == null)
+				throw new IllegalArgumentException("Method='"+controllerMethod+"' has to have every argument annotated with @Param(paramName) so we\n"
+						+ "know what incoming parameter to map from.  NOTE: we may try to switch to variable names in the future but variable names are not always available");
+			
+			paramNames.add(annotation.value());
+		}
 		
-		//TODO: for now, lock the arguments in to match exactly...
-		if(argNames.size() != parameters.length)
-			throw new IllegalArgumentException("The method='"+methodStr+"' takes "+parameters.length+" arguments while the path string="+meta.getRoute().getPath()+" takes "+argNames.size()+" arguments");
-		
+		meta.setMethodParamNames(paramNames);
 		meta.setControllerInstance(controllerInst);
-		meta.setMethod(method);		
+		meta.setMethod(controllerMethod);		
 	}
 
 }

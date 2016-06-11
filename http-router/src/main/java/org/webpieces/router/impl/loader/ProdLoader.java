@@ -33,10 +33,15 @@ public class ProdLoader implements Loader {
 	@Override
 	public void loadControllerIntoMeta(RouteMeta meta, Injector injector, String controllerStr, String methodStr,
 			boolean isInitializingAllControllers) {
-		
-		Object controllerInst = createController(injector, controllerStr);
+		try {
+			Object controllerInst = createController(injector, controllerStr);
 
-		loader.loadInstIntoMeta(meta, controllerInst, methodStr);
+			loader.loadInstIntoMeta(meta, controllerInst, methodStr);
+		} catch(RuntimeException e) {
+			String msg = "error=\n'"+e.getMessage()+"'\n"
+					+"Check the stack trace for which client calls were calling addRoute or addXXXXRoute for which route is incorrect";
+			throw new RuntimeException(msg, e);
+		}
 	}
 
 }

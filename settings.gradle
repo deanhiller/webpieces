@@ -1,3 +1,4 @@
+include 'core-mock'
 include 'core-util'
 include 'core-datawrapper'
 include 'core-ssl'

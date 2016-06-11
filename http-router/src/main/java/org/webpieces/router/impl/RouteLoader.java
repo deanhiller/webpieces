@@ -6,16 +6,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.actions.Render;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.Response;
+import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.RouterModules;
 import org.webpieces.router.impl.loader.Loader;
+import org.webpieces.router.impl.params.ArgumentTranslator;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Guice;
@@ -27,14 +36,13 @@ public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
 	private HttpRouterConfig config;
-	private RouteInfo routeInfo;
-	private ReverseRoutes reverseRoutes;
-	
+	private ArgumentTranslator argumentTranslator;
 	protected RouterImpl router;
 
 	@Inject
-	public RouteLoader(HttpRouterConfig config) {
+	public RouteLoader(HttpRouterConfig config, ArgumentTranslator argumentTranslator) {
 		this.config = config;
+		this.argumentTranslator = argumentTranslator;
 	}
 	
 	public RouterModules load(Loader loader) {
@@ -76,10 +84,7 @@ public class RouteLoader {
 	public void addRoutes(RouterModules rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
-		routeInfo = new RouteInfo();
-		reverseRoutes = new ReverseRoutes();
-		
-		router = new RouterImpl(routeInfo, reverseRoutes, loader, injector);
+		router = new RouterImpl(new RouteInfo(), new ReverseRoutes(), loader, injector);
 		
 		for(RouteModule module : rm.getRouterModules()) {
 			String packageName = module.getClass().getPackage().getName();
@@ -87,7 +92,7 @@ public class RouteLoader {
 			module.configure(router, packageName);
 		}
 		
-		if(!routeInfo.isCatchallRouteSet())
+		if(!router.getRouterInfo().isCatchallRouteSet())
 			throw new IllegalStateException("Client RouterModule did not call top level router.setCatchAllRoute");
 		
 		log.info("added all routes to router");
@@ -115,28 +120,81 @@ public class RouteLoader {
 	}
 
 	public RouteMeta fetchRoute(Request req) {
-		RouteMeta meta = routeInfo.fetchRoute(req, req.relativePath);
+		RouteMeta meta = router.getRouterInfo().fetchRoute(req, req.relativePath);
 		if(meta == null)
 			throw new IllegalStateException("missing exception on creation if we go this far");
 
 		return meta;
 	}
 	
-	public void invokeRoute(RouteMeta meta, Request req) {
+	public void invokeRoute(RouteMeta meta, Request req, ResponseStreamer responseCb) {
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		invokeMethod(obj, method);
+		Object[] arguments = argumentTranslator.createArgs(meta, req);
 		
+		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
+		
+		response.thenApply(o -> continueProcessing(req, method, o, responseCb))
+			.exceptionally(e -> processException(responseCb, e));
+	}
+
+	public Object continueProcessing(Request r, Method method, Object response, ResponseStreamer responseCb) {
+		if(response instanceof Redirect) {
+			Redirect action = (Redirect) response;
+			RouteId id = action.getId();
+			ReverseRoutes reverseRoutes = router.getReverseRoutes();
+			RouteMeta meta = reverseRoutes.get(id);
+			
+			if(meta == null)
+				throw new IllegalArgumentException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
+
+			Route route = meta.getRoute();
+			Map<String, String> keysToValues = action.getKeysToValues();
+			Set<String> keySet = keysToValues.keySet();
+			List<String> argNames = route.getPathParamNames();
+			if(keySet.size() != argNames.size()) {
+				throw new IllegalArgumentException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
+			}
+
+			String path = route.getPath();
+			
+			for(String name : argNames) {
+				String value = keysToValues.get(name);
+				if(value == null) 
+					throw new IllegalArgumentException("Method='"+method+"' returns a Redirect that is missing argument key="+name+" to form the url on the redirect");
+				path = path.replace(":"+name, value);
+			}
+			
+			Response httpResponse = new Response(null, r.domain, path);
+			responseCb.sendRedirect(httpResponse);
+		} else if(response instanceof Render) {
+			//how are we going to render..
+		}
+		return null;
 	}
 	
-	private Object invokeMethod(Object obj, Method m) {
+	private Object processException(ResponseStreamer responseCb, Throwable e) {
+		responseCb.failure(e);
+		return null;
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private CompletableFuture<Object> invokeMethod(Object obj, Method m, Object[] arguments) {
 		try {
-			return m.invoke(obj, (Object[])null);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			Object retVal = m.invoke(obj, arguments);
+			if(retVal instanceof CompletableFuture) {
+				return (CompletableFuture) retVal;
+			} else {
+				return CompletableFuture.completedFuture(retVal);
+			}
+		} catch (Throwable e) {
+			//return a completed future with the exception inside...
+			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
+			futExc.completeExceptionally(e);
+			return futExc;
 		}
 	}
 

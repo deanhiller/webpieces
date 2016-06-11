@@ -13,6 +13,7 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
@@ -43,7 +44,7 @@ public class ErrorTest {
 		server.start();
 		
 		try {
-			server.processHttpRequests(req);
+			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("should have thrown");
 		} catch(IllegalArgumentException e) {
 			Assert.assertTrue(e.getMessage().contains("Cannot find 'public' method="));
@@ -63,7 +64,7 @@ public class ErrorTest {
 		
 		try {
 	
-			server.processHttpRequests(req);
+			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("Should have thrown exception lazily since this i se");
 		} catch(IllegalArgumentException e) {
 			Assert.assertTrue(e.getMessage().contains("The method='argsMismatch' takes 2 arguments"));

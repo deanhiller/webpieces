@@ -3,7 +3,9 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +18,8 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.Response;
+import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
@@ -68,10 +72,33 @@ public class TestSimpleRoutes {
 	@Test
 	public void testBasicRoute() {
 		Request req = createHttpRequest(HttpMethod.GET, "/something");
-		server.processHttpRequests(req);
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		server.processHttpRequests(req, mockResponseStream);
 		
+		List<Response> responses = mockResponseStream.getSendRedirectCalledList();
+		Assert.assertEquals(1, responses.size());
+		
+		Response response = responses.get(0);
+		Assert.assertEquals(req.domain, response.domain);
+		Assert.assertNull(response.isHttps);
+		Assert.assertEquals("/something", response.path);
 	}
 
+	@Test
+	public void testOneParamRoute() {
+		Request req = createHttpRequest(HttpMethod.POST, "/user/578");
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		server.processHttpRequests(req, mockResponseStream);
+		
+		List<Response> responses = mockResponseStream.getSendRedirectCalledList();
+		Assert.assertEquals(1, responses.size());
+		
+		Response response = responses.get(0);
+		Assert.assertEquals(req.domain, response.domain);
+		Assert.assertNull(response.isHttps);
+		Assert.assertEquals("/user/999", response.path);
+	}
+	
 	private Request createHttpRequest(HttpMethod method, String path) {
 		Request r = new Request();
 		r.method = method;

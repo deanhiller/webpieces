@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.impl.loader.ProdLoader;
@@ -28,6 +29,7 @@ public class ProdRouterService implements RoutingService {
 	//add Route HOOK callback so translate RouteId -> route and route->controller.method to call
 	@Override
 	public void start() {
+		log.info("Starting PROD server with NO compiling classloader");
 		config.load(loader);
 		started = true;
 	}
@@ -37,13 +39,13 @@ public class ProdRouterService implements RoutingService {
 	}
 
 	@Override
-	public void processHttpRequests(Request req) {
+	public void processHttpRequests(Request req, ResponseStreamer responseCb) {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 			
 		RouteMeta meta = config.fetchRoute(req);
 		
-		config.invokeRoute(meta, req);
+		config.invokeRoute(meta, req, responseCb);
 		
 	}
 

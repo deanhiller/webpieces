@@ -12,6 +12,7 @@ import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.error.dev.NoMethodRouterModules;
 import org.webpieces.router.api.error.dev.TooManyArgsRouterModules;
+import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
 
@@ -33,7 +34,7 @@ public class ErrorTest {
 		}
 		
 		try {
-			server.processHttpRequests(req);
+			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("should have thrown");
 		} catch(IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("start was not called by client or start threw"));
@@ -56,7 +57,7 @@ public class ErrorTest {
 		}
 		
 		try {
-			server.processHttpRequests(req);
+			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("should have thrown");
 		} catch(IllegalStateException e) {
 			Assert.assertTrue(e.getMessage().contains("start was not called by client or start threw"));

@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.routing.RouterModules;
@@ -31,6 +32,7 @@ public class DevRoutingService implements RoutingService {
 
 	@Override
 	public void start() {
+		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
 		load();
 	}
 
@@ -43,7 +45,7 @@ public class DevRoutingService implements RoutingService {
 	}
 	
 	@Override
-	public void processHttpRequests(Request req) {
+	public void processHttpRequests(Request req, ResponseStreamer responseCb) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		
@@ -56,7 +58,7 @@ public class DevRoutingService implements RoutingService {
 			routeConfig.loadControllerIntoMetaObject(meta, false);
 		}
 		
-		routeConfig.invokeRoute(meta, req);
+		routeConfig.invokeRoute(meta, req, responseCb);
 	}
 	
 	/**

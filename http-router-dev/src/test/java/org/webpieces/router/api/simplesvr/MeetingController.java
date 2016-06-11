@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.routing.Param;
 
 public class MeetingController {
 
@@ -20,7 +21,7 @@ public class MeetingController {
 	
 	public Action someExample() {
 		util.testMethod();
-		return new Render();
+		return new Redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
 	public CompletableFuture<Action> createUserForm() {
@@ -32,7 +33,7 @@ public class MeetingController {
 		return CompletableFuture.completedFuture(new Render());
 	}
 
-	public CompletableFuture<Action> postUser(MeetingDto user) {
+	public CompletableFuture<Action> postMeeting(@Param("mtg") MeetingDto mtg) {
 		
 		//if user is !valid {
 		if(isWantRedirect) {
@@ -53,7 +54,7 @@ public class MeetingController {
 	 * @param id
 	 * @return
 	 */
-	public Action getUser(int id) {
+	public Action getMeeting(@Param("id") int id) {
 
 		MeetingDto user = null; //in reality, this is a lookup from the database by id
 		

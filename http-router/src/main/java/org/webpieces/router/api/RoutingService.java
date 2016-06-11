@@ -8,6 +8,6 @@ public interface RoutingService {
 
 	void stop();
 
-	void processHttpRequests(Request req);
+	void processHttpRequests(Request req, ResponseStreamer streamer);
 	
 }

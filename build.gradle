@@ -118,6 +118,7 @@ project(':http-router-dev') {
     dependencies {
         compile project(':http-router')
         compile project(':runtimecompile')
+        testCompile project(':core-mock')
     }
 }
 
