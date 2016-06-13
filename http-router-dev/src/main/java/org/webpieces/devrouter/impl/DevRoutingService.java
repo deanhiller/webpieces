@@ -9,6 +9,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.routing.RouterModules;
+import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.util.file.VirtualFile;
@@ -52,13 +53,14 @@ public class DevRoutingService implements RoutingService {
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		RouteMeta meta = routeConfig.fetchRoute(req);
+		MatchResult result = routeConfig.fetchRoute(req);
 		
+		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			routeConfig.loadControllerIntoMetaObject(meta, false);
 		}
 		
-		routeConfig.invokeRoute(meta, req, responseCb);
+		routeConfig.invokeRoute(result, req, responseCb);
 	}
 	
 	/**

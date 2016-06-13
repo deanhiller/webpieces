@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.routing.Param;
+import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
 
 public class ArgumentTranslator {
@@ -21,7 +22,8 @@ public class ArgumentTranslator {
 		this.treeCreator = treeCreator;
 	}
 	
-	public Object[] createArgs(RouteMeta meta, Request req) {
+	public Object[] createArgs(MatchResult result, Request req) {
+		RouteMeta meta = result.getMeta();
 		Parameter[] paramMetas = meta.getMethod().getParameters();
 		
 		ParamTreeNode paramTree = new ParamTreeNode();
@@ -32,7 +34,7 @@ public class ArgumentTranslator {
 		//next multi-part overwrites query params (if duplicates which there should not be)
 		treeCreator.createTree(paramTree, req.multiPartFields);
 		//lastly path params overwrites multipart and query params (if duplicates which there should not be)
-		treeCreator.createTree(paramTree, createStruct(meta, req));
+		treeCreator.createTree(paramTree, createStruct(result.getPathParams()));
 		
 		List<Object> args = new ArrayList<>();
 		for(Parameter paramMeta : paramMetas) {
@@ -68,8 +70,7 @@ public class ArgumentTranslator {
 		return false;
 	}
 
-	private Map<String, String[]> createStruct(RouteMeta meta, Request req) {
-		Map<String, String> params = meta.getRoute().createParams(req);
+	private Map<String, String[]> createStruct(Map<String, String> params) {
 		//why is this not easy to do in jdk8 as this is pretty ugly...
 		return params.entrySet().stream()
 	            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> new String[] { entry.getValue() } ));

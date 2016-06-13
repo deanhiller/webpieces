@@ -13,7 +13,7 @@ public class RegExUtil {
 			if(index < 0) {
 				return new RegExResult(regEx, argNames);
 			}
-			
+
 			int next = regEx.indexOf("}", index);
 			if(next < 0)
 				throw new IllegalArgumentException("There is no matching } for the { found in path="+path1);
@@ -23,7 +23,7 @@ public class RegExUtil {
 			argNames.add(varName);
 			String lastPart = regEx.substring(next+1);
 			
-			regEx = firstPart + "[^/]+" + lastPart;
+			regEx = firstPart + "(?<"+varName+">[^/]+)" + lastPart;
 		}
 	}
 }

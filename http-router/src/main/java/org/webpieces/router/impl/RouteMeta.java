@@ -1,7 +1,12 @@
 package org.webpieces.router.impl;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+
+import org.webpieces.router.api.dto.Request;
 
 public class RouteMeta {
 
@@ -36,6 +41,27 @@ public class RouteMeta {
 
 	public void setMethodParamNames(List<String> paramNames) {
 		this.methodParamNames = paramNames;
+	}
+
+	public MatchResult matches(Request request, String path) {
+		Matcher matcher = route.matches(request, path);
+		if(matcher == null)
+			return null;
+		else if(!matcher.matches())
+			return null;
+		
+		
+		List<String> names = route.getPathParamNames();
+
+		Map<String, String> namesToValues = new HashMap<>();
+		for(String name : names) {
+			String value = matcher.group(name);
+			if(value == null) 
+				throw new IllegalArgumentException("Bug, something went wrong. request="+request);
+			namesToValues.put(name, value);
+		}
+		
+		return new MatchResult(this, namesToValues);
 	}
 	
 	

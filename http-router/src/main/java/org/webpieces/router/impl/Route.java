@@ -1,8 +1,8 @@
 package org.webpieces.router.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
@@ -13,7 +13,7 @@ public interface Route {
 
 	boolean matchesMethod(HttpMethod method);
 	
-	boolean matches(Request request, String path);
+	Matcher matches(Request request, String path);
 
 	String getControllerMethodString();
 
@@ -21,5 +21,4 @@ public interface Route {
 
 	Set<HttpMethod> getHttpMethods();
 
-	Map<String, String> createParams(Request req);
 }

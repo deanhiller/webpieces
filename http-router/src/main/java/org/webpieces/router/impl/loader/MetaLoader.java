@@ -4,11 +4,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.RouteMeta;
 

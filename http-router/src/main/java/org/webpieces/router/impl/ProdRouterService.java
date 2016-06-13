@@ -43,7 +43,7 @@ public class ProdRouterService implements RoutingService {
 		if(!started)
 			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 			
-		RouteMeta meta = config.fetchRoute(req);
+		MatchResult meta = config.fetchRoute(req);
 		
 		config.invokeRoute(meta, req, responseCb);
 		

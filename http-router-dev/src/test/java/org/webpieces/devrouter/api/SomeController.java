@@ -2,8 +2,6 @@ package org.webpieces.devrouter.api;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.inject.Inject;
-
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;

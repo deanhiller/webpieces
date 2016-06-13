@@ -30,7 +30,7 @@ public class RouteInfo {
 		return routerInfo;
 	}
 
-	public RouteMeta fetchRoute(Request request, String path) {
+	public MatchResult fetchRoute(Request request, String path) {
 		if(!path.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 
@@ -45,18 +45,18 @@ public class RouteInfo {
 		RouteInfo routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
 			String newRelativePath = path.substring(index, path.length());
-			RouteMeta route = routeInfo.fetchRoute(request, newRelativePath);
+			MatchResult route = routeInfo.fetchRoute(request, newRelativePath);
 			if(route != null)
 				return route;
 		}
 
 		for(RouteMeta meta : routes) {
-			Route r = meta.getRoute();
-			if(r.matches(request, path))
-				return meta;
+			MatchResult result = meta.matches(request, path);
+			if(result != null)
+				return result;
 		}
 
-		return catchAllRoute;
+		return new MatchResult(catchAllRoute);
 	}
 
 	public boolean isCatchallRouteSet() {

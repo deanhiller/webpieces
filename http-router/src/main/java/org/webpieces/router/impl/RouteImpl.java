@@ -3,8 +3,8 @@ package org.webpieces.router.impl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.router.api.dto.HttpMethod;
@@ -52,15 +52,16 @@ public class RouteImpl implements Route {
 		return false;
 	}
 	
-	public boolean matches(Request request, String path) {
+	public Matcher matches(Request request, String path) {
 		if(isSecure) {
 			if(!request.isHttps)
-				return false;
+				return null;
 		}
 		
 		//TODO: implement more in the future, domain/host matching, header matching, etc.
 		
-		return patternToMatch.matcher(path).matches();
+		Matcher matcher = patternToMatch.matcher(path);
+		return matcher;
 	}
 
 	public String getPath() {
@@ -82,9 +83,4 @@ public class RouteImpl implements Route {
 		return methods;
 	}
 
-	@Override
-	public Map<String, String> createParams(Request req) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

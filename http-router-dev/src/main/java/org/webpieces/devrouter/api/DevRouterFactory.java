@@ -2,7 +2,6 @@ package org.webpieces.devrouter.api;
 
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.router.api.HttpRouterConfig;
-import org.webpieces.router.api.HttpRouterModule;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.util.file.VirtualFile;

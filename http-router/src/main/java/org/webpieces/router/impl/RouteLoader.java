@@ -119,21 +119,22 @@ public class RouteLoader {
 		}
 	}
 
-	public RouteMeta fetchRoute(Request req) {
-		RouteMeta meta = router.getRouterInfo().fetchRoute(req, req.relativePath);
+	public MatchResult fetchRoute(Request req) {
+		MatchResult meta = router.getRouterInfo().fetchRoute(req, req.relativePath);
 		if(meta == null)
 			throw new IllegalStateException("missing exception on creation if we go this far");
 
 		return meta;
 	}
 	
-	public void invokeRoute(RouteMeta meta, Request req, ResponseStreamer responseCb) {
+	public void invokeRoute(MatchResult result, Request req, ResponseStreamer responseCb) {
+		RouteMeta meta = result.getMeta();
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Object[] arguments = argumentTranslator.createArgs(meta, req);
+		Object[] arguments = argumentTranslator.createArgs(result, req);
 		
 		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
 		
