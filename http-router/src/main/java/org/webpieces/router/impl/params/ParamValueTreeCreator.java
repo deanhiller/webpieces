@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.params;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +23,15 @@ public class ParamValueTreeCreator {
 			
 			for(Map.Entry<String, String[]> entry : params.entrySet()) {
 				String[] subKeys = entry.getKey().split(".");
-				listSubKeys = Arrays.asList(subKeys);
+				if(subKeys.length == 0) {
+					listSubKeys = new ArrayList<>(Arrays.asList(entry.getKey()));
+				} else {
+					listSubKeys = new ArrayList<>(Arrays.asList(subKeys));
+				}
 				createTree(paramTree, listSubKeys, entry.getValue());
 			}
 		} catch (RuntimeException e) {
-			throw new RuntimeException("Something bad happened with key list="+listSubKeys);
+			throw new RuntimeException("Something bad happened with key list="+listSubKeys, e);
 		}
 	}
 	
