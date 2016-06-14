@@ -96,7 +96,7 @@ public class TestSimpleRoutes {
 		Response response = responses.get(0);
 		Assert.assertEquals(req.domain, response.domain);
 		Assert.assertNull(response.isHttps);
-		Assert.assertEquals("/something", response.path);
+		Assert.assertEquals("/meeting/999", response.path);
 	}
 	
 	private Request createHttpRequest(HttpMethod method, String path) {

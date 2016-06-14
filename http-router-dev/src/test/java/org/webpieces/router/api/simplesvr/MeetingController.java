@@ -27,7 +27,7 @@ public class MeetingController {
 	public CompletableFuture<Action> createUserForm() {
 		//if for some reason, reached wrong thing or not enough users, redirect to another page....
 		if(isWantRedirect) {
-			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_USER_PAGE));
+			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		
 		return CompletableFuture.completedFuture(new Render());
@@ -40,12 +40,12 @@ public class MeetingController {
 			//flash.saveFormValues();
 			//flash.setGlobalMessage("You have errors")
 			//decorators kick in saying error per field with the field
-			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_USER_PAGE));
+			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		//}
 		
 		//need to send redirect at this point to getUser with id=id
-		return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_SHOW_USER));
+		return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_SHOW_MTG));
 	}
 	
 	/**
@@ -59,9 +59,11 @@ public class MeetingController {
 		MeetingDto user = null; //in reality, this is a lookup from the database by id
 		
 		//here, we would redirect if the user is not found to some other page and add error to master error message
-		
-		//pass in User to the Render so it is given to the page...
-		return new Redirect(MtgRouteId.SOME_EXAMPLE);
+
+		//here we could call getMeeting(id) so refactorings would apply BUT then we have to bytecode the crap
+		//out of the code so we don't call getMeeting and actually throw an exception back to the platform like play
+		//I wish there was a better way as I don't like either choice
+		return new Redirect(MtgRouteId.GET_SHOW_MTG, 999);
 	}
 	
 }

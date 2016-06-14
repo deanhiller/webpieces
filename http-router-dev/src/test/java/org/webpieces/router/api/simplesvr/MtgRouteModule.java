@@ -2,7 +2,7 @@ package org.webpieces.router.api.simplesvr;
 
 import static org.webpieces.router.api.dto.HttpMethod.GET;
 import static org.webpieces.router.api.dto.HttpMethod.getAll;
-import static org.webpieces.router.api.simplesvr.MtgRouteId.GET_SHOW_USER;
+import static org.webpieces.router.api.simplesvr.MtgRouteId.GET_SHOW_MTG;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
 import org.webpieces.router.api.routing.RouteModule;
@@ -33,7 +33,7 @@ public class MtgRouteModule implements RouteModule {
 		router.addRoute(getAll(), "/something",  "MeetingController.someExample",     SOME_EXAMPLE);
 //		router.addRoute(GET,      "/listuser",   "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
 		router.addPostRoute(      "/meeting",       "MeetingController.postMeeting");
-		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",         GET_SHOW_USER);
+		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",         GET_SHOW_MTG);
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		

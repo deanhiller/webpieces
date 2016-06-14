@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -153,7 +154,9 @@ public class RouteLoader {
 				throw new IllegalArgumentException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
 
 			Route route = meta.getRoute();
-			Map<String, String> keysToValues = action.getKeysToValues();
+			
+			Map<String, String> keysToValues = formMap(route.getPathParamNames(), action.getArgs());
+			
 			Set<String> keySet = keysToValues.keySet();
 			List<String> argNames = route.getPathParamNames();
 			if(keySet.size() != argNames.size()) {
@@ -166,7 +169,7 @@ public class RouteLoader {
 				String value = keysToValues.get(name);
 				if(value == null) 
 					throw new IllegalArgumentException("Method='"+method+"' returns a Redirect that is missing argument key="+name+" to form the url on the redirect");
-				path = path.replace(":"+name, value);
+				path = path.replace("{"+name+"}", value);
 			}
 			
 			Response httpResponse = new Response(null, r.domain, path);
@@ -177,6 +180,22 @@ public class RouteLoader {
 		return null;
 	}
 	
+	private Map<String, String> formMap(List<String> pathParamNames, List<Object> args) {
+		if(pathParamNames.size() != args.size())
+			throw new IllegalArgumentException("The Redirect object has the wrong number of arguments. args.size="+args.size()+" should be size="+pathParamNames.size());
+
+		Map<String, String> nameToValue = new HashMap<>();
+		for(int i = 0; i < pathParamNames.size(); i++) {
+			String key = pathParamNames.get(i);
+			Object obj = args.get(i);
+			if(obj != null) {
+				//TODO: need reverse binding here!!!!
+				nameToValue.put(key, obj.toString());
+			}
+		}
+		return nameToValue;
+	}
+
 	private Object processException(ResponseStreamer responseCb, Throwable e) {
 		responseCb.failure(e);
 		return null;

@@ -4,8 +4,8 @@ import org.webpieces.router.api.routing.RouteId;
 
 public enum MtgRouteId implements RouteId {
 
-	GET_CREATE_USER_PAGE,
-	GET_SHOW_USER,
+	GET_CREATE_MTG_PAGE,
+	GET_SHOW_MTG,
 	SOME_EXAMPLE;
 	
 }
