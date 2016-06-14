@@ -32,8 +32,8 @@ public class MtgRouteModule implements RouteModule {
 		
 		router.addRoute(getAll(), "/something",  "MeetingController.someExample",     SOME_EXAMPLE);
 //		router.addRoute(GET,      "/listuser",   "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
-		router.addPostRoute(      "/user",       "MeetingController.postMeeting");
-		router.addRoute(GET,      "/user/{mtg}", "MeetingController.getMeeting",         GET_SHOW_USER);
+		router.addPostRoute(      "/meeting",       "MeetingController.postMeeting");
+		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",         GET_SHOW_USER);
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		

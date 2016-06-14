@@ -25,11 +25,16 @@ public class Request {
 	 * library will parse the path in the request to get that information and NOT put it in this Map so
 	 * the app developer can grab all 3 different cases uniquely if they need to
 	 */
-	public Map<String, String[]> params = new HashMap<>();
+	public Map<String, String[]> queryParams = new HashMap<>();
 	
 	/**
 	 * this will be the multi-part form
 	 * upload with fields such as user.id, user.name, user.email, user.address, etc. etc.
 	 */
 	public Map<String, String[]> multiPartFields = new HashMap<>();
+	
+	/**
+	 * 
+	 */
+	public Map<String, String[]> urlPathParams = new HashMap<>();
 }

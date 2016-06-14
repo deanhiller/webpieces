@@ -61,7 +61,7 @@ public class MeetingController {
 		//here, we would redirect if the user is not found to some other page and add error to master error message
 		
 		//pass in User to the Render so it is given to the page...
-		return new Render(user);
+		return new Redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
 }

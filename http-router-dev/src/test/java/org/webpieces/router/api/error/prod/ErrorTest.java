@@ -23,15 +23,16 @@ public class ErrorTest {
 		log.info("starting");
 		String moduleFileContents = NoMethodRouterModules.class.getName();
 		RoutingService server = createServer(moduleFileContents);
-		Request req = createHttpRequest(HttpMethod.GET, "/something");
 
 		try {
 			server.start();
 			Assert.fail("Should have thrown exception on start since this is prod");
-		} catch(IllegalArgumentException e) {
+		} catch(RuntimeException e) {
+			Assert.assertTrue(e.getMessage().contains("Cannot find 'public' method=thisMethodNotExist on class="));
 		}
 		
 		try {
+			Request req = createHttpRequest(HttpMethod.GET, "/something");
 			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("should have thrown");
 		} catch(IllegalStateException e) {
@@ -45,20 +46,15 @@ public class ErrorTest {
 		log.info("starting");
 		String moduleFileContents = TooManyArgsRouterModules.class.getName();
 		RoutingService server = createServer(moduleFileContents);
-		Request req = createHttpRequest(HttpMethod.GET, "/something");
-
-		try {
-			server.start();
-			Assert.fail("Should have thrown exception on start since this is prod");
-		} catch(IllegalArgumentException e) {
-			Assert.assertTrue(e.getMessage().contains("The method='argsMismatch' takes 2 arguments"));
-		}
+		
+		server.start();
 		
 		try {
+			Request req = createHttpRequest(HttpMethod.GET, "/something");
 			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("should have thrown");
 		} catch(IllegalStateException e) {
-			Assert.assertTrue(e.getMessage().contains("start was not called by client or start threw"));
+			Assert.assertTrue(e.getMessage().contains("The method='argsMismatch' takes 2 arguments"));
 		}
 	}
 

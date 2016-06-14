@@ -17,6 +17,6 @@ public class TooManyArgsRouteModule implements RouteModule {
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setCatchAllRoute("MeetingController.notFound");
+		router.setCatchAllRoute("org.webpieces.devrouter.api.SomeController.notFound");
 	}
 }

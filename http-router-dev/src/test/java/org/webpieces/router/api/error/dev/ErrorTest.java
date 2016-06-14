@@ -37,12 +37,12 @@ public class ErrorTest {
 		log.info("starting");
 		String moduleFileContents = NoMethodRouterModules.class.getName();
 		RoutingService server = createServer(moduleFileContents);
-		Request req = createHttpRequest(HttpMethod.GET, "/something");
 
 		//this should definitely not throw since we lazy load everything in dev...
 		server.start();
 		
 		try {
+			Request req = createHttpRequest(HttpMethod.GET, "/something");
 			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("should have thrown");
 		} catch(IllegalArgumentException e) {
@@ -56,13 +56,11 @@ public class ErrorTest {
 		log.info("starting");
 		String moduleFileContents = TooManyArgsRouterModules.class.getName();
 		RoutingService server = createServer(moduleFileContents);
-		Request req = createHttpRequest(HttpMethod.GET, "/something");
 
 		server.start();
-
 		
 		try {
-	
+			Request req = createHttpRequest(HttpMethod.GET, "/something");	
 			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("Should have thrown exception lazily since this i se");
 		} catch(IllegalArgumentException e) {

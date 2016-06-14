@@ -8,4 +8,8 @@ public class ValueNode extends ParamNode {
 		this.value = value;
 	}
 
+
+	public String[] getValue() {
+		return value;
+	}
 }

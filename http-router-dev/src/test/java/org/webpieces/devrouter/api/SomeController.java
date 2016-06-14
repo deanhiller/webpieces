@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.routing.Param;
 
 public class SomeController {
 
@@ -13,11 +14,11 @@ public class SomeController {
 	public void notFound() {
 	}
 	
-	public Action argsMismatch(String id, String accId) {
+	public Action argsMismatch(@Param("id") String id, @Param("accId") String accId) {
 		return new Render();
 	}
 	
-	public Action someExample(String ... args) {
+	public Action someExample(@Param("array") String ... args) {
 		return new Render();
 	}
 	
@@ -51,7 +52,7 @@ public class SomeController {
 	 * @param id
 	 * @return
 	 */
-	public Action getUser(int id) {
+	public Action getUser(@Param("id") int id) {
 
 		Object user = null; //in reality, this is a lookup from the database by id
 		

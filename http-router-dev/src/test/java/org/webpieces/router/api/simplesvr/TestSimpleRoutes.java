@@ -86,7 +86,7 @@ public class TestSimpleRoutes {
 
 	@Test
 	public void testOneParamRoute() {
-		Request req = createHttpRequest(HttpMethod.POST, "/user/578");
+		Request req = createHttpRequest(HttpMethod.POST, "/meeting/578");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		server.processHttpRequests(req, mockResponseStream);
 		
@@ -96,7 +96,7 @@ public class TestSimpleRoutes {
 		Response response = responses.get(0);
 		Assert.assertEquals(req.domain, response.domain);
 		Assert.assertNull(response.isHttps);
-		Assert.assertEquals("/user/999", response.path);
+		Assert.assertEquals("/something", response.path);
 	}
 	
 	private Request createHttpRequest(HttpMethod method, String path) {

@@ -16,10 +16,12 @@ import org.webpieces.router.impl.RouteMeta;
 public class ArgumentTranslator {
 
 	private ParamValueTreeCreator treeCreator;
+	private PrimitiveTranslator primitiveConverter;
 
 	@Inject
-	public ArgumentTranslator(ParamValueTreeCreator treeCreator) {
+	public ArgumentTranslator(ParamValueTreeCreator treeCreator, PrimitiveTranslator primitiveConverter) {
 		this.treeCreator = treeCreator;
+		this.primitiveConverter = primitiveConverter;
 	}
 	
 	public Object[] createArgs(MatchResult result, Request req) {
@@ -30,7 +32,7 @@ public class ArgumentTranslator {
 		//For multipart AND for query params such as ?var=xxx&var=yyy&var2=xxx
 		
 		//query params first
-		treeCreator.createTree(paramTree, req.params);
+		treeCreator.createTree(paramTree, req.queryParams);
 		//next multi-part overwrites query params (if duplicates which there should not be)
 		treeCreator.createTree(paramTree, req.multiPartFields);
 		//lastly path params overwrites multipart and query params (if duplicates which there should not be)
@@ -51,7 +53,16 @@ public class ArgumentTranslator {
 		
 		Class<?> paramTypeToCreate = paramMeta.getType();
 		if(paramTypeToCreate.isPrimitive()) {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
+			if(!(valuesToUse instanceof ValueNode))
+				throw new IllegalArgumentException("method takes param type="+paramTypeToCreate+" but complex structure found");
+			ValueNode node = (ValueNode) valuesToUse;
+			String[] values = node.getValue();
+			if(values.length > 1)
+				throw new IllegalArgumentException("There is an array of values when the method only takes one value of type="+paramTypeToCreate+" and not an array");
+			String value = null;
+			if(values.length == 1)
+				value = values[0];
+			return primitiveConverter.convert(paramTypeToCreate, value);
 		} else if(paramTypeToCreate.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
 		} else if(paramTypeToCreate.isEnum()) {
