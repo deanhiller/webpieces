@@ -12,6 +12,7 @@ import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
@@ -52,7 +53,7 @@ public class ErrorTest {
 	}
 
 	@Test
-	public void testArgsMismatch() {
+	public void testArgsTypeMismatch() {
 		log.info("starting");
 		String moduleFileContents = TooManyArgsRouterModules.class.getName();
 		RoutingService server = createServer(moduleFileContents);
@@ -63,8 +64,8 @@ public class ErrorTest {
 			Request req = createHttpRequest(HttpMethod.GET, "/something");	
 			server.processHttpRequests(req, new MockResponseStream());
 			Assert.fail("Should have thrown exception lazily since this i se");
-		} catch(IllegalArgumentException e) {
-			Assert.assertTrue(e.getMessage().contains("The method='argsMismatch' takes 2 arguments"));
+		} catch(NotFoundException e) {
+			Assert.assertTrue(e.getMessage().contains("SomeController.argsMismatch(int,java.lang.String)' requires that @Param(id) be of type=int"));
 		}
 	}
 

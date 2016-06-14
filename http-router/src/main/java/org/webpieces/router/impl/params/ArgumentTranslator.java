@@ -1,14 +1,17 @@
 package org.webpieces.router.impl.params;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
@@ -40,29 +43,22 @@ public class ArgumentTranslator {
 		
 		List<Object> args = new ArrayList<>();
 		for(Parameter paramMeta : paramMetas) {
-			Object arg = translate(paramTree, paramMeta);
+			Object arg = translate(meta, paramTree, paramMeta);
 			args.add(arg);
 		}
 		return args.toArray();
 	}
 
-	private Object translate(ParamTreeNode paramTree, Parameter paramMeta) {
+	private Object translate(RouteMeta meta, ParamTreeNode paramTree, Parameter paramMeta) {
 		Param annotation = paramMeta.getAnnotation(Param.class);
 		String name = annotation.value();
 		ParamNode valuesToUse = paramTree.get(name);
 		
 		Class<?> paramTypeToCreate = paramMeta.getType();
-		if(paramTypeToCreate.isPrimitive()) {
-			if(!(valuesToUse instanceof ValueNode))
-				throw new IllegalArgumentException("method takes param type="+paramTypeToCreate+" but complex structure found");
-			ValueNode node = (ValueNode) valuesToUse;
-			String[] values = node.getValue();
-			if(values.length > 1)
-				throw new IllegalArgumentException("There is an array of values when the method only takes one value of type="+paramTypeToCreate+" and not an array");
-			String value = null;
-			if(values.length == 1)
-				value = values[0];
-			return primitiveConverter.convert(paramTypeToCreate, value);
+		
+		Function<String, Object> converter = primitiveConverter.getConverter(paramTypeToCreate);
+		if(converter != null) {
+			return convert(meta, name, valuesToUse, paramTypeToCreate, converter);
 		} else if(paramTypeToCreate.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
 		} else if(paramTypeToCreate.isEnum()) {
@@ -71,6 +67,38 @@ public class ArgumentTranslator {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
 		} else {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
+		}
+	}
+
+	private Object convert(RouteMeta meta, String name, ParamNode valuesToUse, Class<?> paramTypeToCreate, Function<String, Object> converter) {
+		Method method = meta.getMethod();
+		if(paramTypeToCreate.isPrimitive()) {
+			if(valuesToUse == null)
+				//This should be a 404 NotFound in production (in cases where user types a non-int value in the query param)
+				throw new NotFoundException("The method='"+method+"' requires that @Param("+name+") be of type="
+						+paramTypeToCreate+" but the request did not contain any value in query params, path "
+								+ "params nor multi-part form fields with a value and we can't convert null to a primitive");
+		}
+		
+		if(valuesToUse == null)
+			return null;
+		if(!(valuesToUse instanceof ValueNode))
+			throw new IllegalArgumentException("method takes param type="+paramTypeToCreate+" but complex structure found");
+		ValueNode node = (ValueNode) valuesToUse;
+		String[] values = node.getValue();
+		if(values.length > 1)
+			throw new NotFoundException("There is an array of values when the method only takes one value of type="+paramTypeToCreate+" and not an array");
+		String value = null;
+		if(values.length == 1)
+			value = values[0];
+		if(paramTypeToCreate == String.class)
+			return value;
+		try {
+			return converter.apply(value);
+		} catch(Exception e) {
+			//This should be a 404 in production
+			throw new NotFoundException("The method='"+method+"' requires that @Param("+name+") be of type="
+					+paramTypeToCreate+" but the request contained a value that could not be converted="+value);
 		}
 	}
 

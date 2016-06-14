@@ -14,7 +14,7 @@ public class SomeController {
 	public void notFound() {
 	}
 	
-	public Action argsMismatch(@Param("id") String id, @Param("accId") String accId) {
+	public Action argsMismatch(@Param("id") int id, @Param("accId") String accId) {
 		return new Render();
 	}
 	

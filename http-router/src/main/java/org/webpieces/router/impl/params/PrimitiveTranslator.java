@@ -23,12 +23,10 @@ public class PrimitiveTranslator {
 		classToConverter.put(Float.TYPE, s -> Float.parseFloat(s));
 		classToConverter.put(Double.class, s -> Double.parseDouble(s));
 		classToConverter.put(Double.TYPE, s -> Double.parseDouble(s));
+		classToConverter.put(String.class, s -> s);
 	}
 
-	public Object convert(Class<?> clazz, String s) {
-		Function<String, Object> function = classToConverter.get(clazz);
-		if(function == null)
-			throw new IllegalArgumentException("clazz="+clazz+" is not a primitive type");
-		return function.apply(s);
+	public Function<String, Object> getConverter(Class<?> paramTypeToCreate) {
+		return classToConverter.get(paramTypeToCreate);
 	}
 }

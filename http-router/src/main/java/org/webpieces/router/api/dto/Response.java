@@ -11,7 +11,10 @@ public class Response {
 		this.domain = domain;
 		this.path = path;
 	}
-	
-	
 
+	@Override
+	public String toString() {
+		return "Response [isHttps=" + isHttps + ", domain=" + domain + ", path=" + path + "]";
+	}
+	
 }

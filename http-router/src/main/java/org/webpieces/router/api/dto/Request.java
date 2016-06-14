@@ -37,4 +37,12 @@ public class Request {
 	 * 
 	 */
 	public Map<String, String[]> urlPathParams = new HashMap<>();
+
+	@Override
+	public String toString() {
+		return "Request [isHttps=" + isHttps + ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
+				+ ", \nrelativePath=" + relativePath + ", \ndomain=" + domain + ", \nmethod=" + method + ", \nqueryParams=\n"
+				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + ", \nurlPathParams=\n" + urlPathParams + "]";
+	}
+	
 }
