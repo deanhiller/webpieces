@@ -86,7 +86,7 @@ public class RouteLoader {
 	public void addRoutes(RouterModules rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
-		router = new RouterBuilder(new RouteInfo(), new ReverseRoutes(), loader, injector);
+		router = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), loader, injector);
 		
 		for(RouteModule module : rm.getRouterModules()) {
 			String packageName = module.getClass().getPackage().getName();

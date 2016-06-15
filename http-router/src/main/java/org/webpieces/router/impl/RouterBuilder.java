@@ -3,6 +3,8 @@ package org.webpieces.router.impl;
 import java.io.File;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpFilter;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.routing.RouteId;
@@ -13,14 +15,19 @@ import com.google.inject.Injector;
 
 public class RouterBuilder implements Router {
 
+	private static final Logger log = LoggerFactory.getLogger(RouterBuilder.class);
+	
 	public static String currentPackage;
 	
 	private final RouteInfo info;
 	private ReverseRoutes reverseRoutes;
 	private Injector injector;
 	private Loader loader;
+
+	private String path;
 	
-	public RouterBuilder(RouteInfo info, ReverseRoutes reverseRoutes, Loader loader, Injector injector) {
+	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, Loader loader, Injector injector) {
+		this.path = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
 		this.injector = injector;
@@ -34,6 +41,7 @@ public class RouterBuilder implements Router {
 	}
 	
 	public void addRoute(Route r, RouteId routeId) {
+		log.info("scope:'"+path+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r);
 		loadControllerIntoMetaObject(meta, true);
 
@@ -106,7 +114,7 @@ public class RouterBuilder implements Router {
 	@Override
 	public Router getScopedRouter(String path, boolean isSecure) {
 		RouteInfo subInfo = info.addScope(path);
-		return new RouterBuilder(subInfo, reverseRoutes, loader, injector);
+		return new RouterBuilder(path, subInfo, reverseRoutes, loader, injector);
 	}
 
 	public RouteInfo getRouterInfo() {
