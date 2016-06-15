@@ -56,7 +56,7 @@ public class MeetingController {
 	 */
 	public Action getMeeting(@Param("id") int id) {
 
-		MeetingDto user = null; //in reality, this is a lookup from the database by id
+		//MeetingDto user = null; //in reality, this is a lookup from the database by id
 		
 		//here, we would redirect if the user is not found to some other page and add error to master error message
 

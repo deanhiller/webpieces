@@ -4,16 +4,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.error.ErrorCommonTest;
+import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.error.dev.NoMethodRouterModules;
-import org.webpieces.router.api.error.dev.TooManyArgsRouterModules;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.mocks.MockResponseStream;
-import org.webpieces.router.api.mocks.VirtualFileInputStream;
-import org.webpieces.util.file.VirtualFile;
 
 public class ErrorTest {
 	
@@ -23,54 +20,23 @@ public class ErrorTest {
 	public void testNoMethod() {
 		log.info("starting");
 		String moduleFileContents = NoMethodRouterModules.class.getName();
-		RoutingService server = createServer(moduleFileContents);
+		RoutingService server = ErrorCommonTest.createServer(true, moduleFileContents);
 
 		try {
 			server.start();
 			Assert.fail("Should have thrown exception on start since this is prod");
 		} catch(RuntimeException e) {
-			Assert.assertTrue(e.getMessage().contains("Cannot find 'public' method=thisMethodNotExist on class="));
+			Assert.assertTrue(e.getMessage().contains("Cannot find 'public' method='thisMethodNotExist' on class="));
 		}
 		
-		try {
-			Request req = createHttpRequest(HttpMethod.GET, "/something");
-			server.processHttpRequests(req, new MockResponseStream());
-			Assert.fail("should have thrown");
-		} catch(IllegalStateException e) {
-			Assert.assertTrue(e.getMessage().contains("start was not called by client or start threw"));
-		}
+		Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
+		MockResponseStream mockResponseStream = new MockResponseStream();
 		
-	}
-	
-	@Test
-	public void testArgsTypeMismatch() {
-		log.info("starting");
-		String moduleFileContents = TooManyArgsRouterModules.class.getName();
-		RoutingService server = createServer(moduleFileContents);
+		server.processHttpRequests(req, mockResponseStream);
 		
-		server.start();
-		
-		try {
-			Request req = createHttpRequest(HttpMethod.GET, "/something");
-			server.processHttpRequests(req, new MockResponseStream());
-			Assert.fail("should have thrown");
-		} catch(NotFoundException e) {
-			Assert.assertTrue(e.getMessage().contains("SomeController.argsMismatch(int,java.lang.String)' requires that @Param(id) be of type=int"));
-		}
-	}
-
-	private RoutingService createServer(String moduleFileContents) {
-		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
-		RoutingService server = RouterSvcFactory.create(f);
-		return server;
-	}
-
-	private Request createHttpRequest(HttpMethod method, String path) {
-		Request r = new Request();
-		r.method = method;
-		r.relativePath = path;
-		
-		return r;
+		Exception e = mockResponseStream.getOnlyException();
+		Assert.assertEquals(IllegalStateException.class, e.getClass());
+		Assert.assertTrue(e.getMessage().contains("start was not called by client or start threw"));
 	}
 
 }

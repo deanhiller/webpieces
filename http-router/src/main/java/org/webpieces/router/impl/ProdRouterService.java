@@ -11,18 +11,16 @@ import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.impl.loader.ProdLoader;
 
 @Singleton
-public class ProdRouterService implements RoutingService {
+public class ProdRouterService extends AbstractRouterService implements RoutingService {
 
 	private static final Logger log = LoggerFactory.getLogger(ProdRouterService.class);
 	
-	private RouteLoader config;
+	private RouteLoader routeLoader;
 	private ProdLoader loader;
-
-	private boolean started = false;
 	
 	@Inject
-	public ProdRouterService(RouteLoader config, ProdLoader loader) {
-		this.config = config;
+	public ProdRouterService(RouteLoader routeLoader, ProdLoader loader) {
+		this.routeLoader = routeLoader;
 		this.loader = loader;
 	}
 
@@ -30,22 +28,21 @@ public class ProdRouterService implements RoutingService {
 	@Override
 	public void start() {
 		log.info("Starting PROD server with NO compiling classloader");
-		config.load(loader);
+		
+		routeLoader.load(loader);
 		started = true;
 	}
 
 	@Override
 	public void stop() {
+		started = false;
 	}
 
 	@Override
-	public void processHttpRequests(Request req, ResponseStreamer responseCb) {
-		if(!started)
-			throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
-			
-		MatchResult meta = config.fetchRoute(req);
+	public void processHttpRequestsImpl(Request req, ResponseStreamer responseCb) {
+		MatchResult meta = routeLoader.fetchRoute(req);
 		
-		config.invokeRoute(meta, req, responseCb);
+		routeLoader.invokeRoute(meta, req, responseCb);
 		
 	}
 

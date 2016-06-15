@@ -39,7 +39,7 @@ public class RouteInfo {
 		if(index == 1) {
 			throw new IllegalArgumentException("path cannot start with //");
 		} else if(index > 1) {
-			prefix = path.substring(0, index-1);
+			prefix = path.substring(0, index);
 		}
 
 		RouteInfo routeInfo = pathPrefixToInfo.get(prefix);

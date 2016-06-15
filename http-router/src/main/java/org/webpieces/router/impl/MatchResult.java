@@ -25,5 +25,10 @@ public class MatchResult {
 	public Map<String, String> getPathParams() {
 		return pathParams;
 	}
+	
+	@Override
+	public String toString() {
+		return "MatchResult [pathParams=" + pathParams + ", meta=" + meta + "]";
+	}
 
 }

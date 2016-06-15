@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import javax.inject.Inject;
 
@@ -38,7 +39,7 @@ public class RouteLoader {
 	
 	private HttpRouterConfig config;
 	private ArgumentTranslator argumentTranslator;
-	protected RouterImpl router;
+	protected RouterBuilder router;
 
 	@Inject
 	public RouteLoader(HttpRouterConfig config, ArgumentTranslator argumentTranslator) {
@@ -85,11 +86,11 @@ public class RouteLoader {
 	public void addRoutes(RouterModules rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
-		router = new RouterImpl(new RouteInfo(), new ReverseRoutes(), loader, injector);
+		router = new RouterBuilder(new RouteInfo(), new ReverseRoutes(), loader, injector);
 		
 		for(RouteModule module : rm.getRouterModules()) {
 			String packageName = module.getClass().getPackage().getName();
-			RouterImpl.currentPackage = packageName;
+			RouterBuilder.currentPackage = packageName;
 			module.configure(router, packageName);
 		}
 		
@@ -121,7 +122,8 @@ public class RouteLoader {
 	}
 
 	public MatchResult fetchRoute(Request req) {
-		MatchResult meta = router.getRouterInfo().fetchRoute(req, req.relativePath);
+		RouteInfo routerInfo = router.getRouterInfo();
+		MatchResult meta = routerInfo.fetchRoute(req, req.relativePath);
 		if(meta == null)
 			throw new IllegalStateException("missing exception on creation if we go this far");
 
@@ -155,7 +157,7 @@ public class RouteLoader {
 
 			Route route = meta.getRoute();
 			
-			Map<String, String> keysToValues = formMap(route.getPathParamNames(), action.getArgs());
+			Map<String, String> keysToValues = formMap(method, route.getPathParamNames(), action.getArgs());
 			
 			Set<String> keySet = keysToValues.keySet();
 			List<String> argNames = route.getPathParamNames();
@@ -180,9 +182,9 @@ public class RouteLoader {
 		return null;
 	}
 	
-	private Map<String, String> formMap(List<String> pathParamNames, List<Object> args) {
+	private Map<String, String> formMap(Method method, List<String> pathParamNames, List<Object> args) {
 		if(pathParamNames.size() != args.size())
-			throw new IllegalArgumentException("The Redirect object has the wrong number of arguments. args.size="+args.size()+" should be size="+pathParamNames.size());
+			throw new IllegalArgumentException("The Redirect object returned from method='"+method+"' has the wrong number of arguments. args.size="+args.size()+" should be size="+pathParamNames.size());
 
 		Map<String, String> nameToValue = new HashMap<>();
 		for(int i = 0; i < pathParamNames.size(); i++) {
@@ -197,6 +199,10 @@ public class RouteLoader {
 	}
 
 	private Object processException(ResponseStreamer responseCb, Throwable e) {
+		if(e instanceof CompletionException) {
+			//unwrap the exception to deliver the 'real' exception that occurred
+			e = e.getCause();
+		}
 		responseCb.failure(e);
 		return null;
 	}

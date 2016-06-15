@@ -11,7 +11,7 @@ import org.webpieces.router.impl.loader.Loader;
 
 import com.google.inject.Injector;
 
-public class RouterImpl implements Router {
+public class RouterBuilder implements Router {
 
 	public static String currentPackage;
 	
@@ -20,7 +20,7 @@ public class RouterImpl implements Router {
 	private Injector injector;
 	private Loader loader;
 	
-	public RouterImpl(RouteInfo info, ReverseRoutes reverseRoutes, Loader loader, Injector injector) {
+	public RouterBuilder(RouteInfo info, ReverseRoutes reverseRoutes, Loader loader, Injector injector) {
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
 		this.injector = injector;
@@ -106,7 +106,7 @@ public class RouterImpl implements Router {
 	@Override
 	public Router getScopedRouter(String path, boolean isSecure) {
 		RouteInfo subInfo = info.addScope(path);
-		return new RouterImpl(subInfo, reverseRoutes, loader, injector);
+		return new RouterBuilder(subInfo, reverseRoutes, loader, injector);
 	}
 
 	public RouteInfo getRouterInfo() {

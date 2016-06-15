@@ -23,7 +23,7 @@ public class MetaLoader {
 
 		String controllerStr = controllerInst.getClass().getSimpleName();
 		if(matches.size() == 0)
-			throw new IllegalArgumentException("Invalid Route.  Cannot find 'public' method="+methodStr+" on class="+controllerStr);
+			throw new IllegalArgumentException("Invalid Route.  Cannot find 'public' method='"+methodStr+"' on class="+controllerStr);
 		else if(matches.size() > 1) 
 			throw new UnsupportedOperationException("You have more than one 'public' method named="+methodStr+" on class="+controllerStr+"  This is not yet supported until we support method parameters(let us know you hit this and we will immediately implement)");
 		

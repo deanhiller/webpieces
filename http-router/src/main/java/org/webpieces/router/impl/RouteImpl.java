@@ -83,4 +83,10 @@ public class RouteImpl implements Route {
 		return methods;
 	}
 
+	@Override
+	public String toString() {
+		return "Route [path=" + path + ", \npatternToMatch=" + patternToMatch + ", \nmethods=" + methods + ", \nargNames="
+				+ argNames + ", \nisSecure=" + isSecure + ", \ncontrollerMethodString=" + controllerMethodString + "]";
+	}
+	
 }

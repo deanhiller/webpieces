@@ -64,6 +64,10 @@ public class RouteMeta {
 		return new MatchResult(this, namesToValues);
 	}
 	
-	
+	@Override
+	public String toString() {
+		return "RouteMeta [route=" + route + ", \nmethod=" + method
+				+ ", methodParamNames=" + methodParamNames + "]";
+	}
 	
 }

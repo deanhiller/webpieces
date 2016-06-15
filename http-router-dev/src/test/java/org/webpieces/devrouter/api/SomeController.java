@@ -6,6 +6,7 @@ import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
 import org.webpieces.router.api.routing.Param;
+import org.webpieces.router.api.simplesvr.MtgRouteId;
 
 public class SomeController {
 
@@ -16,6 +17,12 @@ public class SomeController {
 	
 	public Action argsMismatch(@Param("id") int id, @Param("accId") String accId) {
 		return new Render();
+	}
+	
+	public Redirect badRedirect(@Param("id") int id) {
+		
+		//This is missing the id parameter
+		return new Redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
 	public Action someExample(@Param("array") String ... args) {

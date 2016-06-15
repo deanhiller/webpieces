@@ -9,12 +9,13 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.routing.RouterModules;
+import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.util.file.VirtualFile;
 
-public class DevRoutingService implements RoutingService {
+public class DevRoutingService extends AbstractRouterService implements RoutingService {
 
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
 	private long lastFileTimestamp;
@@ -34,19 +35,17 @@ public class DevRoutingService implements RoutingService {
 	@Override
 	public void start() {
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
-		load();
+		loadOrReload();
+		started = true;
 	}
 
 	@Override
 	public void stop() {
-	}
-	
-	private void load() {
-		routerModule = routeConfig.load(loader);		
+		started = false;
 	}
 	
 	@Override
-	public void processHttpRequests(Request req, ResponseStreamer responseCb) {
+	public void processHttpRequestsImpl(Request req, ResponseStreamer responseCb) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		
@@ -90,7 +89,10 @@ public class DevRoutingService implements RoutingService {
 			return;
 		
 		log.info("classloader change so we need to reload all router classes");
-		load();
+		loadOrReload();
 	}
 
+	private void loadOrReload() {
+		routerModule = routeConfig.load(loader);		
+	}
 }
