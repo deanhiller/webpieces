@@ -40,5 +40,8 @@ TODO:
 * Need to go back and write more api level tests to beef up the test suite
 * httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
 * need to verify host/port is being put in hello ssl packet of http client to verify it works like browsers for SNI servername(not usually needed but we may need it for testing later)
+* httprouter - need to compile with variable names -g:vars
+* httprouter - tie method param count to path param count unless @Loose is used
+* CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 
 * ALPN is next!!!! 
