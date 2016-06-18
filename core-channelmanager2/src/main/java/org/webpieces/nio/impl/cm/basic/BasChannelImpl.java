@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
@@ -23,8 +24,6 @@ import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
-
-import com.webpieces.data.api.BufferPool;
 
 /**
  * @author Dean Hiller

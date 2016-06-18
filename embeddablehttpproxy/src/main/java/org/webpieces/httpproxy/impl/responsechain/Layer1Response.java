@@ -1,11 +1,10 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
+import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.httpclient.api.ResponseListener;
-import org.webpieces.httpproxy.api.FrontendSocket;
-
-import com.webpieces.httpparser.api.dto.HttpChunk;
-import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class Layer1Response implements ResponseListener {
 

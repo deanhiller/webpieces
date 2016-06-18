@@ -1,7 +1,7 @@
 package org.webpieces.httpclient.api;
 
-import com.webpieces.httpparser.api.dto.HttpChunk;
-import com.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface ResponseListener {
 

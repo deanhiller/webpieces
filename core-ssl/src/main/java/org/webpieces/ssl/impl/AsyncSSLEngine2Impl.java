@@ -14,12 +14,11 @@ import javax.net.ssl.SSLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SslListener;
-
-import com.webpieces.data.api.BufferPool;
 
 public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 

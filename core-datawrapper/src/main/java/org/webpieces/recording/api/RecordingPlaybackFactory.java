@@ -3,11 +3,10 @@ package org.webpieces.recording.api;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.recording.impl.PlaybackImpl;
 import org.webpieces.recording.impl.RecorderImpl;
-
-import com.webpieces.data.api.DataWrapperGenerator;
-import com.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public class RecordingPlaybackFactory {
 

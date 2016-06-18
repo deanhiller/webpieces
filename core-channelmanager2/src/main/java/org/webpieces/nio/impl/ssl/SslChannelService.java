@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import javax.net.ssl.SSLEngine;
 
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -15,8 +16,6 @@ import org.webpieces.nio.api.handlers.DatagramListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.SslListener;
-
-import com.webpieces.data.api.BufferPool;
 
 public class SslChannelService implements ChannelManager {
 

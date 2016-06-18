@@ -2,14 +2,13 @@ package org.webpieces.nio.impl.ssl;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
-
-import com.webpieces.data.api.BufferPool;
 
 public class SslConnectionListener implements ConnectionListener {
 

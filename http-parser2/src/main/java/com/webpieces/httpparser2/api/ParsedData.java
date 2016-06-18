@@ -1,6 +1,7 @@
 package com.webpieces.httpparser2.api;
 
-import com.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapper;
+
 import com.webpieces.httpparser2.api.dto.Http2Frame;
 
 public class ParsedData {

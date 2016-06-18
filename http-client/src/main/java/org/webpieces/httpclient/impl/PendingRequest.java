@@ -1,8 +1,7 @@
 package org.webpieces.httpclient.impl;
 
 import org.webpieces.httpclient.api.ResponseListener;
-
-import com.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public class PendingRequest {
 

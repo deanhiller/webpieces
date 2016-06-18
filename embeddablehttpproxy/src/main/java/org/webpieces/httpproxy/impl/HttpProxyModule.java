@@ -2,10 +2,10 @@ package org.webpieces.httpproxy.impl;
 
 import javax.inject.Singleton;
 
+import org.webpieces.frontend.api.HttpFrontendFactory;
+import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
-import org.webpieces.httpproxy.api.HttpFrontendFactory;
-import org.webpieces.httpproxy.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.api.ProxyConfig;
 

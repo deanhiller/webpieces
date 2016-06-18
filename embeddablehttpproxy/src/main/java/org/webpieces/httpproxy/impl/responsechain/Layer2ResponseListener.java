@@ -6,14 +6,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpproxy.api.FrontendSocket;
+import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpproxy.impl.chain.LayerZSendBadResponse;
 import org.webpieces.nio.api.channels.Channel;
-
-import com.webpieces.httpparser.api.dto.HttpPayload;
-import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class Layer2ResponseListener {
 

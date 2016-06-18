@@ -2,9 +2,8 @@ package org.webpieces.nio.api;
 
 import java.util.concurrent.Executor;
 
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.impl.cm.basic.BasChanSvcFactory;
-
-import com.webpieces.data.api.BufferPool;
 
 
 /**

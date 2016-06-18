@@ -1,11 +1,10 @@
 package org.webpieces.httpproxy.impl.chain;
 
-import org.webpieces.httpproxy.api.FrontendSocket;
-
-import com.webpieces.httpparser.api.dto.HttpResponse;
-import com.webpieces.httpparser.api.dto.HttpResponseStatus;
-import com.webpieces.httpparser.api.dto.HttpResponseStatusLine;
-import com.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpResponseStatus;
+import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class LayerZSendBadResponse {
 

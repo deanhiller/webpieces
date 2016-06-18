@@ -10,12 +10,11 @@ import javax.net.ssl.SSLEngine;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLFactory;
 import org.webpieces.ssl.api.ConnectionState;
-
-import com.webpieces.data.api.BufferCreationPool;
-import com.webpieces.data.api.BufferPool;
 
 public class TestSSLEngineClose {
 

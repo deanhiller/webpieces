@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.BufferPool;
 
 public class ClientHelloParser {
 	private static final short HANDSHAKE_CONTENT_TYPE = 22;

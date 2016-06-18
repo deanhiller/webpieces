@@ -2,6 +2,7 @@ package org.webpieces.nio.impl.cm.basic;
 
 import javax.net.ssl.SSLEngine;
 
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -14,8 +15,6 @@ import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
 import org.webpieces.nio.impl.cm.basic.udp.DatagramChannelImpl;
 import org.webpieces.nio.impl.cm.basic.udp.UDPChannelImpl;
-
-import com.webpieces.data.api.BufferPool;
 
 
 

@@ -12,26 +12,25 @@ import javax.net.ssl.SSLEngine;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.Memento;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
-
-import com.webpieces.data.api.DataWrapper;
-import com.webpieces.data.api.DataWrapperGenerator;
-import com.webpieces.data.api.DataWrapperGeneratorFactory;
-import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.Memento;
-import com.webpieces.httpparser.api.dto.HttpChunk;
-import com.webpieces.httpparser.api.dto.HttpPayload;
-import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public class HttpSocketImpl implements HttpSocket, Closeable {
 

@@ -3,15 +3,14 @@ package org.webpieces.httpclient.api;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.httpclient.impl.HttpClientImpl;
 import org.webpieces.httpclient.impl.HttpsClientImpl;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
-
-import com.webpieces.data.api.BufferCreationPool;
-import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.HttpParserFactory;
 
 public abstract class HttpClientFactory {
 

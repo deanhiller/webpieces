@@ -2,7 +2,7 @@ package com.webpieces.httpparser2.api;
 
 import java.nio.charset.Charset;
 
-import com.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.BufferPool;
 
 public class HttpParserFactory {
 

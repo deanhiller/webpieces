@@ -6,10 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.recording.api.Recorder;
-
-import com.webpieces.data.api.DataWrapper;
-import com.webpieces.data.api.DataWrapperGenerator;
 
 public class RecorderImpl implements Recorder {
 

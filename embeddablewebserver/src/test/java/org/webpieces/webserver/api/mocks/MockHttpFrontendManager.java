@@ -2,9 +2,9 @@ package org.webpieces.webserver.api.mocks;
 
 import java.net.InetSocketAddress;
 
-import org.webpieces.httpproxy.api.HttpFrontend;
-import org.webpieces.httpproxy.api.HttpFrontendManager;
-import org.webpieces.httpproxy.api.HttpRequestListener;
+import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 
 public class MockHttpFrontendManager implements HttpFrontendManager {

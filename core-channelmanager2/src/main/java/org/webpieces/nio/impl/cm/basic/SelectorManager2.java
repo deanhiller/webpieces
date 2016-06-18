@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -42,8 +43,6 @@ import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
 import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
 import org.webpieces.nio.impl.cm.basic.nioimpl.ChannelRegistrationListener;
-
-import com.webpieces.data.api.BufferPool;
 
 
 public class SelectorManager2 implements SelectorListener {

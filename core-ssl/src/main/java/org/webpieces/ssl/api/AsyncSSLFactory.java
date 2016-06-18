@@ -2,9 +2,8 @@ package org.webpieces.ssl.api;
 
 import javax.net.ssl.SSLEngine;
 
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.impl.AsyncSSLEngine2Impl;
-
-import com.webpieces.data.api.BufferPool;
 
 public class AsyncSSLFactory {
 

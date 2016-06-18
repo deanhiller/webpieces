@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpproxy.api.HttpFrontend;
-import org.webpieces.httpproxy.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer4Processor;
 

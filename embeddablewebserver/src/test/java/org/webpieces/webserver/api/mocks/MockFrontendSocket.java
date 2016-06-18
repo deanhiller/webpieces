@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpproxy.api.FrontendSocket;
+import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.nio.api.channels.Channel;
-
-import com.webpieces.httpparser.api.dto.HttpPayload;
 
 public class MockFrontendSocket implements FrontendSocket {
 

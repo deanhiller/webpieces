@@ -10,11 +10,10 @@ import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.ChannelManager;
-
-import com.webpieces.httpparser.api.HttpParser;
-import com.webpieces.httpparser.api.dto.HttpRequest;
-import com.webpieces.httpparser.api.dto.HttpResponse;
 
 public class HttpsClientImpl implements HttpClient {
 
