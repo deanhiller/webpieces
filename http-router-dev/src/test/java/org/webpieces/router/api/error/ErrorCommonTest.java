@@ -16,12 +16,10 @@ import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
@@ -36,7 +34,6 @@ public class ErrorCommonTest {
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
 	public static Collection bothServers() {
-		
 		return Arrays.asList(new Object[][] {
 	         { true, true },
 	         { false, true }

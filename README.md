@@ -43,5 +43,7 @@ TODO:
 * httprouter - need to compile with variable names -g:vars
 * httprouter - tie method param count to path param count unless @Loose is used
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
+* Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
+* Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 
 * ALPN is next!!!! 
