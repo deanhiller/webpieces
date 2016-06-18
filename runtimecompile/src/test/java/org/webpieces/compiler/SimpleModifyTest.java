@@ -14,8 +14,11 @@ public class SimpleModifyTest extends AbstractCompileTest {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testSimpleChangeMethodNameAndRetVal() {
+		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
+		//instead just tediously form the String ourselves...
+		String controller = getPackageFilter()+".SomeController";
 		log.info("loading class SomeController");
-		Class c = compiler.loadClass("org.webpieces.compiler.simple.SomeController");
+		Class c = compiler.loadClass(controller);
 
 		log.info("loaded");
 		int retVal = invokeMethodReturnInt(c, "someMethod");
@@ -24,7 +27,7 @@ public class SimpleModifyTest extends AbstractCompileTest {
 		
 		cacheAndMoveFiles();
 		
-		Class c2 = compiler.loadClass("org.webpieces.compiler.simple.SomeController");
+		Class c2 = compiler.loadClass(controller);
 		
 		int retVal2 = invokeMethodReturnInt(c2, "someMethod");
 		

@@ -1,9 +1,9 @@
 package org.webpieces.router.api.simplesvr;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,8 +12,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
@@ -23,15 +21,14 @@ import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileImpl;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
 @RunWith(Parameterized.class)
-public class TestSimpleRoutes {
+public class TestProdRouter {
 	
-	private static final Logger log = LoggerFactory.getLogger(TestSimpleRoutes.class);
+	private static final Logger log = LoggerFactory.getLogger(TestProdRouter.class);
 	private RoutingService server;
 	private TestModule overrides;
 
@@ -45,14 +42,8 @@ public class TestSimpleRoutes {
 		HttpRouterConfig config = new HttpRouterConfig(f, module);
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 		
-		String filePath = System.getProperty("user.dir");
-		File myCodePath = new File(filePath + "/src/test/java");
-		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
-		RoutingService devSvc = DevRouterFactory.create(config, compileConfig);
-		
 		return Arrays.asList(new Object[][] {
-	         { prodSvc, module },
-	         { devSvc, module }
+	         { prodSvc, module }
 	      });
 	}
 	
@@ -64,7 +55,7 @@ public class TestSimpleRoutes {
 		}
 	}
 	
-	public TestSimpleRoutes(RoutingService svc, TestModule module) {
+	public TestProdRouter(RoutingService svc, TestModule module) {
 		this.server = svc;
 		this.overrides = module;
 		log.info("constructing test class for server="+svc.getClass().getSimpleName());
@@ -75,34 +66,42 @@ public class TestSimpleRoutes {
 		server.start();
 	}
 	
+	/**
+	 * This test won't work in DevRoute right now as we need to do the following
+	 * 1. create CompileOnDemand very early on 
+	 * 2. do a Thread.current().setContextClassLoader(compileOnDemand.getLatestClassloader())
+	 * 
+	 * and this all needs to be done BEFORE TestModule is created and more importantly before
+	 * the bind(SomeService.class) as SomeService will be loaded from one classloader and then
+	 * when DEVrouter creates the controller, the compileOnDemand classloader is used resulting
+	 * in a mismatch.
+	 */
 	@Test
-	public void testBasicRoute() {
-		Request req = createHttpRequest(HttpMethod.GET, "/something");
-		MockResponseStream mockResponseStream = new MockResponseStream();
-		server.processHttpRequests(req, mockResponseStream);
+	public void testAsyncRouteAndMocking() {
 		
-		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
-		Assert.assertEquals(1, responses.size());
-		
-		RedirectResponse response = responses.get(0);
-		Assert.assertEquals(req.domain, response.domain);
-		Assert.assertNull(response.isHttps);
-		Assert.assertEquals("/something", response.redirectToPath);
-	}
+		Request req = createHttpRequest(HttpMethod.GET, "/async");
 
-	@Test
-	public void testOneParamRoute() {
-		Request req = createHttpRequest(HttpMethod.POST, "/meeting");
+		//setup returning a response
+		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		overrides.mockService.addToReturn(future);
+		
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		server.processHttpRequests(req, mockResponseStream);
 		
+		//no response yet...
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
+		Assert.assertEquals(0, responses.size());
+		
+		int id = 78888;
+		future.complete(id);
+
+		responses = mockResponseStream.getSendRedirectCalledList();
 		Assert.assertEquals(1, responses.size());
 		
 		RedirectResponse response = responses.get(0);
 		Assert.assertEquals(req.domain, response.domain);
 		Assert.assertNull(response.isHttps);
-		Assert.assertEquals("/meeting/888", response.redirectToPath);
+		Assert.assertEquals("/meeting/"+id, response.redirectToPath);		
 	}
 	
 	private Request createHttpRequest(HttpMethod method, String path) {

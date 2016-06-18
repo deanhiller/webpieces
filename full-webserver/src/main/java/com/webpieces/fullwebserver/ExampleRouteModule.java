@@ -8,16 +8,11 @@ import static org.webpieces.router.api.dto.HttpMethod.GET;
 import static org.webpieces.router.api.dto.HttpMethod.POST;
 import static org.webpieces.router.api.dto.HttpMethod.getAll;
 
-import javax.inject.Inject;
-
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.Router;
 
 public class ExampleRouteModule implements RouteModule {
 
-	@Inject
-	private HomeController controllerA;
-	
 	@Override
 	public void configure(Router router, String packageName) {
 

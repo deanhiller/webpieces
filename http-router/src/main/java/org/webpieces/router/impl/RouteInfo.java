@@ -62,5 +62,9 @@ public class RouteInfo {
 	public boolean isCatchallRouteSet() {
 		return catchAllRoute != null;
 	}
+
+	public RouteMeta getNotfoundRoute() {
+		return catchAllRoute;
+	}
 	
 }

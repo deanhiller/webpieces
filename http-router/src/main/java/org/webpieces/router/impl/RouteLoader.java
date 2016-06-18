@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -19,9 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.actions.RenderHtml;
+import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.Request;
-import org.webpieces.router.api.dto.Response;
+import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.RouterModules;
@@ -77,13 +82,13 @@ public class RouteLoader {
 		RouterModules routerModule = (RouterModules) obj;
 		Injector injector = createInjector(routerModule);
 
-		addRoutes(routerModule, injector, loader);
+		loadAllRoutes(routerModule, injector, loader);
 		return routerModule;
 	}
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
-	public void addRoutes(RouterModules rm, Injector injector, Loader loader) {
+	public void loadAllRoutes(RouterModules rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
 		router = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), loader, injector);
@@ -130,39 +135,52 @@ public class RouteLoader {
 		return meta;
 	}
 	
-	public void invokeRoute(MatchResult result, Request req, ResponseStreamer responseCb) {
+	public void invokeRoute(MatchResult result, Request req, ResponseStreamer responseCb, Supplier<MatchResult> notFoundRoute) {
 		RouteMeta meta = result.getMeta();
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Object[] arguments = argumentTranslator.createArgs(result, req);
+		Object[] arguments;
+		try {
+			arguments = argumentTranslator.createArgs(result, req);
+		} catch(NotFoundException e) {
+			result = notFoundRoute.get();
+			meta = result.getMeta();
+			obj = meta.getControllerInstance();
+			if(obj == null)
+				throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
+			method = meta.getMethod();			
+			arguments = argumentTranslator.createArgs(result, req);
+		}
 		
 		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
 		
-		response.thenApply(o -> continueProcessing(req, method, o, responseCb))
+		RouteMeta finalMeta = meta;
+		response.thenApply(o -> continueProcessing(req, finalMeta, o, responseCb))
 			.exceptionally(e -> processException(responseCb, e));
 	}
 
-	public Object continueProcessing(Request r, Method method, Object response, ResponseStreamer responseCb) {
+	public Object continueProcessing(Request r, RouteMeta incomingRequestMeta, Object response, ResponseStreamer responseCb) {
+		Method method = incomingRequestMeta.getMethod();
 		if(response instanceof Redirect) {
 			Redirect action = (Redirect) response;
 			RouteId id = action.getId();
 			ReverseRoutes reverseRoutes = router.getReverseRoutes();
-			RouteMeta meta = reverseRoutes.get(id);
+			RouteMeta nextRequestMeta = reverseRoutes.get(id);
 			
-			if(meta == null)
-				throw new IllegalArgumentException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
+			if(nextRequestMeta == null)
+				throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
 
-			Route route = meta.getRoute();
+			Route route = nextRequestMeta.getRoute();
 			
 			Map<String, String> keysToValues = formMap(method, route.getPathParamNames(), action.getArgs());
 			
 			Set<String> keySet = keysToValues.keySet();
 			List<String> argNames = route.getPathParamNames();
 			if(keySet.size() != argNames.size()) {
-				throw new IllegalArgumentException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
+				throw new IllegalReturnValueException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
 			}
 
 			String path = route.getPath();
@@ -174,17 +192,28 @@ public class RouteLoader {
 				path = path.replace("{"+name+"}", value);
 			}
 			
-			Response httpResponse = new Response(null, r.domain, path);
+			RedirectResponse httpResponse = new RedirectResponse(null, r.domain, path);
 			responseCb.sendRedirect(httpResponse);
-		} else if(response instanceof Render) {
-			//how are we going to render..
+		} else if(response instanceof RenderHtml) {
+			//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG
+			//If the POST route was not found, just render the notFound page that controller sends us
+			if(!incomingRequestMeta.isNotFoundRoute() && HttpMethod.POST == r.method) {
+				throw new IllegalReturnValueException("Controller method='"+method+"' MUST follow the PRG "
+						+ "pattern(https://en.wikipedia.org/wiki/Post/Redirect/Get) so "
+						+ "users don't have a poor experience using your website with the browser back button.  "
+						+ "This means on a POST request, you cannot return RenderHtml object and must return Redirects");
+			}
+			RenderHtml renderHtml = (RenderHtml) response;
+			
+			RenderResponse resp = new RenderResponse(renderHtml.getView());
+			responseCb.sendRenderHtml(resp);
 		}
 		return null;
 	}
 	
 	private Map<String, String> formMap(Method method, List<String> pathParamNames, List<Object> args) {
 		if(pathParamNames.size() != args.size())
-			throw new IllegalArgumentException("The Redirect object returned from method='"+method+"' has the wrong number of arguments. args.size="+args.size()+" should be size="+pathParamNames.size());
+			throw new IllegalReturnValueException("The Redirect object returned from method='"+method+"' has the wrong number of arguments. args.size="+args.size()+" should be size="+pathParamNames.size());
 
 		Map<String, String> nameToValue = new HashMap<>();
 		for(int i = 0; i < pathParamNames.size(); i++) {
@@ -192,6 +221,8 @@ public class RouteLoader {
 			Object obj = args.get(i);
 			if(obj != null) {
 				//TODO: need reverse binding here!!!!
+				//Anotherwords, apps register Converters String -> Object and Object to String and we should really be
+				//using that instead of toString to convert which could be different
 				nameToValue.put(key, obj.toString());
 			}
 		}
@@ -226,5 +257,11 @@ public class RouteLoader {
 
 	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {
 		router.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
+	}
+
+	public MatchResult fetchNotFoundRoute() {
+		RouteInfo routerInfo = router.getRouterInfo();
+		RouteMeta notfoundRoute = routerInfo.getNotfoundRoute();
+		return new MatchResult(notfoundRoute);
 	}
 }

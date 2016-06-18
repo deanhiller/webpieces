@@ -45,7 +45,8 @@ public class ParamValueTreeCreator {
 			if(!(node instanceof ParamTreeNode))
 				throw new IllegalStateException("Bug, something went wrong with key="+firstKey);
 			else if(asList.size() == 0)
-				throw new IllegalArgumentException("Bug, not enough subkeys...conflict in param list like user.account.id=5 and user.account=r which is not allowed");
+				throw new IllegalArgumentException("Bug, not enough subkeys...conflict in param list like user.account.id=5 "
+						+ "and user.account=99 which is not allowed(since user.account would be an object so we can't set it to 99)");
 			ParamTreeNode tree = (ParamTreeNode) node;
 			createTree(tree, asList, value);
 			return;

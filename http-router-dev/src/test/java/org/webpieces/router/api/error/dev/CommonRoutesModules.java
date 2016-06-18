@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class TooManyArgsRouterModules implements RouterModules {
+public class CommonRoutesModules implements RouterModules {
 
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new Module() {
@@ -19,6 +19,6 @@ public class TooManyArgsRouterModules implements RouterModules {
 	}
 	
 	public List<RouteModule> getRouterModules() {
-		return Lists.newArrayList(new TooManyArgsRouteModule());
+		return Lists.newArrayList(new CommonRouteModule());
 	}
 }

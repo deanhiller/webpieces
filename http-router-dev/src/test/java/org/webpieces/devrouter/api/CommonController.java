@@ -4,19 +4,24 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.simplesvr.MtgRouteId;
 
-public class SomeController {
+public class CommonController {
 
 	private boolean isWantRedirect = false;
 	
-	public void notFound() {
+	public Action notFound() {
+		return RenderHtml.createView("notFound.xhtml");
+	}
+	
+	public Action postReturnsHtmlRender() {
+		return RenderHtml.create();
 	}
 	
 	public Action argsMismatch(@Param("id") int id, @Param("accId") String accId) {
-		return new Render();
+		return RenderHtml.create();
 	}
 	
 	public Redirect badRedirect(@Param("id") int id) {
@@ -26,7 +31,7 @@ public class SomeController {
 	}
 	
 	public Action someExample(@Param("array") String ... args) {
-		return new Render();
+		return RenderHtml.create();
 	}
 	
 	public CompletableFuture<Action> createUserForm() {
@@ -35,7 +40,7 @@ public class SomeController {
 			return CompletableFuture.completedFuture(new Redirect(SomeRouteId.GET_CREATE_USER_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(new Render());
+		return CompletableFuture.completedFuture(RenderHtml.create());
 	}
 
 //	public CompletableFuture<Action> postUser(MeetingDto user) {
@@ -66,7 +71,7 @@ public class SomeController {
 		//here, we would redirect if the user is not found to some other page and add error to master error message
 		
 		//pass in User to the Render so it is given to the page...
-		return new Render(user);
+		return RenderHtml.create(user);
 	}
 	
 }

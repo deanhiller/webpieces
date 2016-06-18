@@ -4,14 +4,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.actions.RenderHtml;
 
 public class HomeController {
 
 	private boolean isWantRedirect = false;
 	
 	public Action someExample(String ... args) {
-		return new Render();
+		return RenderHtml.create();
 	}
 	
 	public CompletableFuture<Action> createUserForm() {
@@ -20,7 +20,7 @@ public class HomeController {
 			return CompletableFuture.completedFuture(new Redirect(ExampleRouteId.GET_CREATE_USER_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(new Render());
+		return CompletableFuture.completedFuture(RenderHtml.create());
 	}
 
 	public CompletableFuture<Action> postUser(UserDto user) {
@@ -51,7 +51,7 @@ public class HomeController {
 		//here, we would redirect if the user is not found to some other page and add error to master error message
 		
 		//pass in User to the Render so it is given to the page...
-		return new Render(user);
+		return RenderHtml.create(user);
 	}
 	
 }

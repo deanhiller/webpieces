@@ -3,6 +3,7 @@ package org.webpieces.router.api.error;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,9 +16,11 @@ import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.Request;
-import org.webpieces.router.api.error.dev.BadRedirectRouterModules;
-import org.webpieces.router.api.error.dev.TooManyArgsRouterModules;
+import org.webpieces.router.api.error.dev.CommonRoutesModules;
+import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
@@ -50,7 +53,7 @@ public class ErrorCommonTest {
 		//say method is something(int arg, String this)
 		//we verify redirects MUST match type and number of method arguments every time
 		//then when we form url, we put the stuff in the path OR put it as query params so it works on the way back in again too
-		String moduleFileContents = BadRedirectRouterModules.class.getName();
+		String moduleFileContents = CommonRoutesModules.class.getName();
 		RoutingService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
@@ -61,14 +64,14 @@ public class ErrorCommonTest {
 		server.processHttpRequests(req, mockResponseStream);
 			
 		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(IllegalArgumentException.class, e.getClass());
-		Assert.assertEquals(e.getMessage(), "The Redirect object returned from method='public org.webpieces.router.api.actions.Redirect org.webpieces.devrouter.api.SomeController.badRedirect(int)' has the wrong number of arguments. args.size=0 should be size=1");
+		Assert.assertEquals(IllegalReturnValueException.class, e.getClass());
+		Assert.assertEquals(e.getMessage(), "The Redirect object returned from method='public org.webpieces.router.api.actions.Redirect org.webpieces.devrouter.api.CommonController.badRedirect(int)' has the wrong number of arguments. args.size=0 should be size=1");
 	}
 	
 	@Test
 	public void testArgsTypeMismatch() {
 		log.info("starting");
-		String moduleFileContents = TooManyArgsRouterModules.class.getName();
+		String moduleFileContents = CommonRoutesModules.class.getName();
 		RoutingService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
@@ -78,9 +81,67 @@ public class ErrorCommonTest {
 		
 		server.processHttpRequests(req, mockResponseStream);
 
+		verifyNotFoundRendered(mockResponseStream);
+	}
+
+	private void verifyNotFoundRendered(MockResponseStream mockResponseStream) {
+		List<RenderResponse> responses = mockResponseStream.getSendRenderHtmlList();
+		Assert.assertEquals(1, responses.size());
+		Assert.assertEquals("notFound.xhtml", responses.get(0).view);
+	}
+	
+	@Test
+	public void testGetNotMatchPostRoute() {
+		log.info("starting");
+		String moduleFileContents = CommonRoutesModules.class.getName();
+		RoutingService server = createServer(isProdTest, moduleFileContents);
+		
+		server.start();
+		
+		Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		
+		server.processHttpRequests(req, mockResponseStream);
+
+		verifyNotFoundRendered(mockResponseStream);
+	}
+	
+	@Test
+	public void testRenderHTMLOnPostFromMatchingMethodSetFails() {
+		log.info("starting");
+		String moduleFileContents = CommonRoutesModules.class.getName();
+		RoutingService server = createServer(isProdTest, moduleFileContents);
+		
+		server.start();
+		
+		Request req = RequestCreation.createHttpRequest(HttpMethod.POST, "/postroute");
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		
+		server.processHttpRequests(req, mockResponseStream);
+
 		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(NotFoundException.class, e.getClass());
-		Assert.assertTrue(e.getMessage().contains("SomeController.argsMismatch(int,java.lang.String)' requires that @Param(id) be of type=int"));
+		Assert.assertEquals(IllegalReturnValueException.class, e.getClass());
+	}
+	
+	/** 
+	 * Need to live test with browser to see if PRG is better or just returning 404 is better!!!
+	 * Current behavior is to return a 404
+	 */
+	//TODO: Test this with browser and then fix for best user experience
+	@Test
+	public void testNotFoundPostRouteResultsInRedirectToNotFoundCatchAllController() {
+		log.info("starting");
+		String moduleFileContents = CommonRoutesModules.class.getName();
+		RoutingService server = createServer(isProdTest, moduleFileContents);
+		
+		server.start();
+		
+		Request req = RequestCreation.createHttpRequest(HttpMethod.POST, "/notexistpostroute");
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		
+		server.processHttpRequests(req, mockResponseStream);
+
+		verifyNotFoundRendered(mockResponseStream);
 	}
 	
 	public static RoutingService createServer(boolean isProdTest, String moduleFileContents) {

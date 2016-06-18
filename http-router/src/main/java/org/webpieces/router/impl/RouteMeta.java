@@ -14,9 +14,11 @@ public class RouteMeta {
 	private Object controllerInstance;
 	private Method method;
 	private List<String> methodParamNames;
+	private boolean isNotFoundRoute;
 
-	public RouteMeta(Route r) {
+	public RouteMeta(Route r, boolean isNotFoundRoute) {
 		this.route = r;
+		this.isNotFoundRoute = isNotFoundRoute;
 	}
 
 	public Route getRoute() {
@@ -68,6 +70,10 @@ public class RouteMeta {
 	public String toString() {
 		return "RouteMeta [route=" + route + ", \nmethod=" + method
 				+ ", methodParamNames=" + methodParamNames + "]";
+	}
+
+	public boolean isNotFoundRoute() {
+		return isNotFoundRoute;
 	}
 	
 }

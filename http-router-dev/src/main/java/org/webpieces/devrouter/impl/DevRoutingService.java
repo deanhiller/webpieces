@@ -19,7 +19,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
 	private long lastFileTimestamp;
-	private RouteLoader routeConfig;
+	private RouteLoader routeLoader;
 	private DevLoader loader;
 	private VirtualFile routerModulesTextFile;
 	private RouterModules routerModule;
@@ -27,7 +27,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	@Inject
 	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevLoader loader) {
 		routerModulesTextFile = config.getRoutersFile();
-		this.routeConfig = routeConfig;
+		this.routeLoader = routeConfig;
 		this.loader = loader;
 		this.lastFileTimestamp = routerModulesTextFile.lastModified();
 	}
@@ -52,14 +52,25 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		MatchResult result = routeConfig.fetchRoute(req);
+		MatchResult result = routeLoader.fetchRoute(req);
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			routeConfig.loadControllerIntoMetaObject(meta, false);
+			routeLoader.loadControllerIntoMetaObject(meta, false);
 		}
 		
-		routeConfig.invokeRoute(result, req, responseCb);
+		routeLoader.invokeRoute(result, req, responseCb, () -> fetchNotFoundRoute());
+	}
+	
+	public MatchResult fetchNotFoundRoute() {
+		MatchResult result = routeLoader.fetchNotFoundRoute();
+		
+		RouteMeta meta = result.getMeta();
+		if(meta.getControllerInstance() == null) {
+			routeLoader.loadControllerIntoMetaObject(meta, false);
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -74,7 +85,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
-		routerModule = routeConfig.load(loader);
+		routerModule = routeLoader.load(loader);
 		lastFileTimestamp = routerModulesTextFile.lastModified();
 		return true;
 	}
@@ -93,6 +104,6 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 
 	private void loadOrReload() {
-		routerModule = routeConfig.load(loader);		
+		routerModule = routeLoader.load(loader);		
 	}
 }

@@ -22,17 +22,12 @@ public abstract class ChannelManagerFactory {
 	}
 	
 	/**
-	 * This is untested and may result in deadlock.  Feel free to try, but use the more tested
-	 * createMultiThreadedChanMgr instead and you could pass in an 1 thread Executor if you like
-	 * such that there is only 2 threads(the selector thread and the Executor thread).
-	 * 
-	 * Creates a single threaded ChannelManager.  (You should probably use the other one)
+	 * Creates a single threaded ChannelManager. 
 	 * 
 	 * @param id
 	 * @param pool
 	 * @return
 	 */
-	@Deprecated
 	public abstract ChannelManager createSingleThreadedChanMgr(String id, BufferPool pool);
 	
 	/**

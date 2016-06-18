@@ -24,10 +24,10 @@ public class RouterBuilder implements Router {
 	private Injector injector;
 	private Loader loader;
 
-	private String path;
-	
+	private String routerPath;
+
 	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, Loader loader, Injector injector) {
-		this.path = path;
+		this.routerPath = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
 		this.injector = injector;
@@ -41,8 +41,8 @@ public class RouterBuilder implements Router {
 	}
 	
 	public void addRoute(Route r, RouteId routeId) {
-		log.info("scope:'"+path+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r);
+		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
+		RouteMeta meta = new RouteMeta(r, false);
 		loadControllerIntoMetaObject(meta, true);
 
 		info.addRoute(meta);
@@ -113,6 +113,8 @@ public class RouterBuilder implements Router {
 
 	@Override
 	public Router getScopedRouter(String path, boolean isSecure) {
+		if(path == null || path.length() == 0)
+			throw new IllegalArgumentException("path must be non-null and length must be greater than 0");
 		RouteInfo subInfo = info.addScope(path);
 		return new RouterBuilder(path, subInfo, reverseRoutes, loader, injector);
 	}
@@ -126,15 +128,17 @@ public class RouterBuilder implements Router {
 	}
 	
 	@Override
-	public void setCatchAllRoute(String controllerMethod) {
+	public void setNotFoundRoute(String controllerMethod) {
 		Route route = new RouteImpl(controllerMethod);
-		setCatchAllRoute(route);
+		setNotFoundRoute(route);
 	}
 
-	public void setCatchAllRoute(Route r) {
-		RouteMeta meta = new RouteMeta(r);
+	public void setNotFoundRoute(Route r) {
+		if(!"".equals(this.routerPath))
+			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
+		RouteMeta meta = new RouteMeta(r, true);
 		loadControllerIntoMetaObject(meta, true);	
 		info.setCatchAllRoute(meta);
 	}
-	
+
 }

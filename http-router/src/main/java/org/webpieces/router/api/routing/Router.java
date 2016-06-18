@@ -36,7 +36,7 @@ public interface Router {
 	/**
 	 * This is the controller for 404's where the path was not found AND this MUST be set
 	 */
-	void setCatchAllRoute(String controllerMethod);
+	void setNotFoundRoute(String controllerMethod);
 	
 	//later maybe when we move Route to the api
 	//void setCatchAllRoute(Route r);

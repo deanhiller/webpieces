@@ -14,6 +14,8 @@ public class ChildModifyTest extends AbstractCompileTest {
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void testSimpleChangeMethodNameAndRetVal() {
+		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
+		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".GrandfatherController";
 		log.info("loading class "+controller);
 		

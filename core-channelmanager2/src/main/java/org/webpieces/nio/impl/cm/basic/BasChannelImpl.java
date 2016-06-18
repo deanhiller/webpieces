@@ -50,10 +50,12 @@ public abstract class BasChannelImpl
 	private DataListener dataListener;
 	private Object writeLock = new Object();
 	private boolean inDelayedWriteMode;
+	private boolean isRecording;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr);
 		this.pool = pool;
+		this.isRecording = false;
 	}
 	
 	/* (non-Javadoc)
@@ -73,8 +75,7 @@ public abstract class BasChannelImpl
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
 		this.dataListener = listener;
 		
-		//enable recording..
-		if(false) 
+		if(isRecording) 
 			dataListener = new RecordingDataListener("singleThreaded-", listener);
 		
 		CompletableFuture<Channel> future = connectImpl(addr);

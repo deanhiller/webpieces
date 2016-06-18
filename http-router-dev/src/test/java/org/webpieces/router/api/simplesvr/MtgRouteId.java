@@ -6,6 +6,9 @@ public enum MtgRouteId implements RouteId {
 
 	GET_CREATE_MTG_PAGE,
 	GET_SHOW_MTG,
-	SOME_EXAMPLE;
+	SOME_EXAMPLE,
+	ASYNC_ROUTE,
+	ARGS_MISMATCH
+	;
 	
 }

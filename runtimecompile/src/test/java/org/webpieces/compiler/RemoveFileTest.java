@@ -21,6 +21,8 @@ public class RemoveFileTest extends AbstractCompileTest {
 	@Test
 	public void testAddingFileAndModifyingControllerToUseIt() {
 		log.info("loading class RemoveFileController");
+		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
+		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".RemoveFileController";
 		Class c = compiler.loadClass(controller);
 

@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.routing.Param;
 
 public class MeetingController {
@@ -15,6 +15,8 @@ public class MeetingController {
 	
 	@Inject
 	private SomeUtil util;
+	@Inject
+	private SomeService service;
 	
 	public void notFound() {
 	}
@@ -30,10 +32,10 @@ public class MeetingController {
 			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(new Render());
+		return CompletableFuture.completedFuture(RenderHtml.create());
 	}
 
-	public CompletableFuture<Action> postMeeting(@Param("mtg") MeetingDto mtg) {
+	public CompletableFuture<Action> postMeeting(/* @Param("mtg") MeetingDto mtg */) {
 		
 		//if user is !valid {
 		if(isWantRedirect) {
@@ -45,7 +47,7 @@ public class MeetingController {
 		//}
 		
 		//need to send redirect at this point to getUser with id=id
-		return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_SHOW_MTG));
+		return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_SHOW_MTG, 888));
 	}
 	
 	/**
@@ -64,6 +66,11 @@ public class MeetingController {
 		//out of the code so we don't call getMeeting and actually throw an exception back to the platform like play
 		//I wish there was a better way as I don't like either choice
 		return new Redirect(MtgRouteId.GET_SHOW_MTG, 999);
+	}
+	
+	public CompletableFuture<Redirect> asyncMethod() {
+		return service.remoteCall()
+			.thenApply(val -> new Redirect(MtgRouteId.GET_SHOW_MTG, val));
 	}
 	
 }

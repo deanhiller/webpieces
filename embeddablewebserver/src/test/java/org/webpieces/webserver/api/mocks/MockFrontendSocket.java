@@ -31,4 +31,7 @@ public class MockFrontendSocket implements FrontendSocket {
 		return null;
 	}
 
+	public boolean isClosed() {
+		return isClosed;
+	}
 }

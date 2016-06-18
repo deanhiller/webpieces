@@ -9,27 +9,34 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.dto.Response;
+import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RenderResponse;
 
 public class MockResponseStream extends MockSuperclass implements ResponseStreamer{
 
 	private static enum MockMethod implements MethodEnum {
-		SEND_REDIRECT, FAILURE;
+		SEND_REDIRECT, FAILURE, SEND_RENDER_HTML;
 	}
 	
+	
 	@Override
-	public void sendRedirect(Response httpResponse) {
+	public void sendRedirect(RedirectResponse httpResponse) {
 		super.calledMethod(MockMethod.SEND_REDIRECT, httpResponse);
 	}
 
+	@Override
+	public void sendRenderHtml(RenderResponse resp) {
+		super.calledMethod(MockMethod.SEND_RENDER_HTML, resp);
+	}
+	
 	@Override
 	public void failure(Throwable e) {
 		super.calledMethod(MockMethod.FAILURE, e);
 	}
 	
-	public List<Response> getSendRedirectCalledList() {
+	public List<RedirectResponse> getSendRedirectCalledList() {
 		Stream<ParametersPassedIn> params = super.getCalledMethod(MockMethod.SEND_REDIRECT);
-		Stream<Response> responseStr = params.map(p -> (Response)p.getArgs()[0]);
+		Stream<RedirectResponse> responseStr = params.map(p -> (RedirectResponse)p.getArgs()[0]);
 		return responseStr.collect(Collectors.toList());
 	}
 
@@ -42,5 +49,13 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 		
 		return (Exception) params.getArgs()[0];
 	}
+
+	public List<RenderResponse> getSendRenderHtmlList() {
+		Stream<ParametersPassedIn> params = super.getCalledMethod(MockMethod.SEND_RENDER_HTML);
+		Stream<RenderResponse> responseStr = params.map(p -> (RenderResponse)p.getArgs()[0]);
+		return responseStr.collect(Collectors.toList());		
+	}
+
+
 
 }

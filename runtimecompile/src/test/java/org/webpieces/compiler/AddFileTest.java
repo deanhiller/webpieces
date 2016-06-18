@@ -30,6 +30,8 @@ public class AddFileTest extends AbstractCompileTest {
 	@Test
 	public void testAddingFileAndModifyingControllerToUseIt() {
 		log.info("loading class AddFileController");
+		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
+		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".AddFileController";
 		Class c = compiler.loadClass(controller);
 

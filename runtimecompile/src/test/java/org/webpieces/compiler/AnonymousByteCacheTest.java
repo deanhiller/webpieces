@@ -1,6 +1,5 @@
 package org.webpieces.compiler;
 
-import java.io.File;
 import java.util.concurrent.Callable;
 
 import org.junit.After;
@@ -42,6 +41,8 @@ public class AnonymousByteCacheTest extends AbstractCompileTest {
 //		Assert.assertFalse(byteCodeEnumFile.exists());
 		
 		log.info("loading class SomeRouterModule");
+		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
+		//instead just tediously form the String ourselves...
 		String controller = getPackageFilter()+".SomeRouterModule";
 		Class c = compiler.loadClass(controller);
 

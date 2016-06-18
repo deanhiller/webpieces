@@ -53,6 +53,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private HttpsSslEngineFactory factory;
 	private ChannelManager mgr;
 	private String idForLogging;
+	private boolean isRecording = false;
 	
 	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser parser2,
 			CloseListener listener) {
@@ -73,7 +74,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			channel = mgr.createTCPChannel(idForLogging, engine);
 		}
 		
-		if(false) {
+		if(isRecording ) {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
 		

@@ -56,9 +56,9 @@ public class RouteImpl implements Route {
 		if(isSecure) {
 			if(!request.isHttps)
 				return null;
+		} else if(!methods.contains(request.method)) {
+			return null;
 		}
-		
-		//TODO: implement more in the future, domain/host matching, header matching, etc.
 		
 		Matcher matcher = patternToMatch.matcher(path);
 		return matcher;

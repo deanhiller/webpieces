@@ -13,10 +13,10 @@ public class NoMethodRouteModule implements RouteModule {
 		//We cannot do this or the compiler in dev router will compile it too early for testing
 		//String controllerName = SomeController.class.getName();
 
-		router.addRoute(getAll(), "/something",  "org.webpieces.devrouter.api.SomeController.thisMethodNotExist", SOME_EXAMPLE);
+		router.addRoute(getAll(), "/something",  "org.webpieces.devrouter.api.CommonController.thisMethodNotExist", SOME_EXAMPLE);
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setCatchAllRoute("MeetingController.notFound");
+		router.setNotFoundRoute("MeetingController.notFound");
 	}
 }

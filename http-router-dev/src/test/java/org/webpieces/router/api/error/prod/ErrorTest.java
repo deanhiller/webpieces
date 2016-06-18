@@ -15,7 +15,7 @@ import org.webpieces.router.api.mocks.MockResponseStream;
 public class ErrorTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(ErrorTest.class);
-
+	
 	@Test
 	public void testNoMethod() {
 		log.info("starting");
