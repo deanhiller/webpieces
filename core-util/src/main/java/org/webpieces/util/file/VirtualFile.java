@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.List;
 
 /**
- * Just use new VirtualFileImpl(File) unless you want to do something more advanced
+ * Just use new VirtualFileImpl(File) unless you want to do something more advanced or read from a different location
  * 
  * @author dhiller
  *
