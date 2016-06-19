@@ -1,11 +1,16 @@
 package org.webpieces.webserver.api;
 
+import java.net.InetSocketAddress;
+
 import org.webpieces.nio.api.SSLEngineFactory;
 
 import com.google.inject.Module;
 
 public class WebServerConfig {
 
+	private InetSocketAddress httpListenAddress;
+	private InetSocketAddress httpsListenAddress;
+	
 	private int numFrontendServerThreads = 20;
 	/**
 	 * Generally not needed by clients but we use this to overide certain objects for a development
@@ -38,7 +43,7 @@ public class WebServerConfig {
 		return this;
 	}
 
-	public SSLEngineFactory getSSLEngineFactory() {
+	public SSLEngineFactory getSslEngineFactory() {
 		return sslEngineFactory;
 	}
 
@@ -46,5 +51,26 @@ public class WebServerConfig {
 		this.sslEngineFactory = sslEngineFactory;
 		return this;
 	}
+
+	public InetSocketAddress getHttpListenAddress() {
+		return httpListenAddress;
+	}
+
+	public WebServerConfig setHttpListenAddress(InetSocketAddress httpListenAddress) {
+		this.httpListenAddress = httpListenAddress;
+		return this;
+	}
+
+	public InetSocketAddress getHttpsListenAddress() {
+		return httpsListenAddress;
+	}
+
+	public WebServerConfig setHttpsListenAddress(InetSocketAddress httpsListenAddress) {
+		this.httpsListenAddress = httpsListenAddress;
+		return this;
+	}
+
+
+	
 	
 }

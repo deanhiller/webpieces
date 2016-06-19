@@ -136,8 +136,9 @@ public class RouterBuilder implements Router {
 	public void setNotFoundRoute(Route r) {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
+		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, true);
-		loadControllerIntoMetaObject(meta, true);	
+		loadControllerIntoMetaObject(meta, true);
 		info.setPageNotFoundRoute(meta);
 	}
 

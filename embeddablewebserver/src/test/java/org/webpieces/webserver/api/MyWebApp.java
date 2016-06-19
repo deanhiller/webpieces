@@ -1,6 +1,7 @@
 package org.webpieces.webserver.api;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -14,7 +15,9 @@ public class MyWebApp {
 		VirtualFile configFile = new VirtualFileImpl(routerFile);
 		
 		HttpRouterConfig routerConfig = new HttpRouterConfig().setRoutersFile(configFile );
-		WebServerConfig config = new WebServerConfig();
+		WebServerConfig config = new WebServerConfig()
+										.setHttpListenAddress(new InetSocketAddress(8080))
+										.setHttpsListenAddress(new InetSocketAddress(8443));
 		WebServer webServer = WebServerFactory.create(config, routerConfig);
 		
 		webServer.start();

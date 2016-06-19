@@ -20,6 +20,13 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	@Override
 	public AsyncServer createTcpServer(
 			String id, SocketAddress addr, DataListener listener, SSLEngineFactory sslFactory) {
+		if(sslFactory == null)
+			throw new IllegalArgumentException("SSLEngineFactory is null but must be supplied");
+		return createTcpServerImpl(id, addr, listener, sslFactory);
+	}
+	
+	private AsyncServer createTcpServerImpl(
+			String id, SocketAddress addr, DataListener listener, SSLEngineFactory sslFactory) {
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels, proxyListener); 
@@ -38,6 +45,6 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	@Override
 	public AsyncServer createTcpServer(String id, SocketAddress addr, DataListener listener) {
-		return createTcpServer(id, addr, listener, null);
+		return createTcpServerImpl(id, addr, listener, null);
 	}
 }

@@ -23,10 +23,10 @@ public class WebServerModule implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
-		if(config.getSSLEngineFactory() == null) 
+		if(config.getSslEngineFactory() == null) 
 			binder.bind(SSLEngineFactory.class).toProvider(Providers.of(null));
 		else 
-			binder.bind(SSLEngineFactory.class).toInstance(config.getSSLEngineFactory());
+			binder.bind(SSLEngineFactory.class).toInstance(config.getSslEngineFactory());
 		
 		binder.bind(WebServer.class).to(WebServerImpl.class);
 

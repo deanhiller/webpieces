@@ -11,10 +11,14 @@ import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.webserver.api.WebServer;
+import org.webpieces.webserver.api.WebServerConfig;
 
 public class WebServerImpl implements WebServer {
 
 	private static final Logger log = LoggerFactory.getLogger(WebServerImpl.class);
+	
+	@Inject
+	private WebServerConfig config;
 	
 	@Inject @Nullable
 	private SSLEngineFactory factory;
@@ -34,11 +38,18 @@ public class WebServerImpl implements WebServer {
 		
 		routingService.start();
 		
-		InetSocketAddress addr = new InetSocketAddress(8080);
+		InetSocketAddress addr = config.getHttpListenAddress();
+		log.info("starting to listen to http port="+addr);
 		httpServer = serverMgr.createHttpServer("httpProxy", addr, serverListener);
 		
-		InetSocketAddress sslAddr = new InetSocketAddress(8443);
-		httpsServer = serverMgr.createHttpsServer("httpsProxy", sslAddr, serverListener, factory);
+		if(factory != null) {
+			InetSocketAddress sslAddr = config.getHttpsListenAddress();
+			log.info("starting to listen to https port="+sslAddr);
+			httpsServer = serverMgr.createHttpsServer("httpsProxy", sslAddr, serverListener, factory);
+		} else {
+			log.info("https port is disabled since configuration had no sslEngineFactory");
+		}
+		
 		log.info("now listening for incoming connections");
 	}
 
