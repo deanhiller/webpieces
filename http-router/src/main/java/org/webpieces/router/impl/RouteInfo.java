@@ -11,14 +11,14 @@ public class RouteInfo {
 
 	private final Map<String, RouteInfo> pathPrefixToInfo = new HashMap<>();
 	private List<RouteMeta> routes = new ArrayList<>();
-	private RouteMeta catchAllRoute;
+	private RouteMeta pageNotFoundRoute;
 	
 	public void addRoute(RouteMeta r) {
 		this.routes.add(r);
 	}
 	
-	public void setCatchAllRoute(RouteMeta r) {
-		this.catchAllRoute = r;
+	public void setPageNotFoundRoute(RouteMeta r) {
+		this.pageNotFoundRoute = r;
 	}
 	
 	public RouteInfo addScope(String path) {
@@ -56,15 +56,15 @@ public class RouteInfo {
 				return result;
 		}
 
-		return new MatchResult(catchAllRoute);
+		return new MatchResult(pageNotFoundRoute);
 	}
 
-	public boolean isCatchallRouteSet() {
-		return catchAllRoute != null;
+	public boolean isPageNotFoundRouteSet() {
+		return pageNotFoundRoute != null;
 	}
 
-	public RouteMeta getNotfoundRoute() {
-		return catchAllRoute;
+	public RouteMeta getPageNotfoundRoute() {
+		return pageNotFoundRoute;
 	}
 	
 }

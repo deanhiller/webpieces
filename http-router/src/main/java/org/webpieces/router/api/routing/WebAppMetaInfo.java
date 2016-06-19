@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.inject.Module;
 
-public interface RouterModules {
+public interface WebAppMetaInfo {
 
 	public List<Module> getGuiceModules();
 	

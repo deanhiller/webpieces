@@ -33,7 +33,6 @@ public class TestSimpleRoutes {
 	
 	private static final Logger log = LoggerFactory.getLogger(TestSimpleRoutes.class);
 	private RoutingService server;
-	private TestModule overrides;
 
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
@@ -42,7 +41,9 @@ public class TestSimpleRoutes {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
 		TestModule module = new TestModule();
-		HttpRouterConfig config = new HttpRouterConfig(f, module);
+		HttpRouterConfig config = new HttpRouterConfig()
+										.setRoutersFile(f)
+										.setWebappOverrides(module);
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 		
 		String filePath = System.getProperty("user.dir");
@@ -66,7 +67,6 @@ public class TestSimpleRoutes {
 	
 	public TestSimpleRoutes(RoutingService svc, TestModule module) {
 		this.server = svc;
-		this.overrides = module;
 		log.info("constructing test class for server="+svc.getClass().getSimpleName());
 	}
 	

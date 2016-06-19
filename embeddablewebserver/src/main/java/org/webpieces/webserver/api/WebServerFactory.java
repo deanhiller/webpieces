@@ -1,26 +1,37 @@
 package org.webpieces.webserver.api;
 
-import org.webpieces.webserver.impl.WebServerFactoryImpl;
+import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.HttpRouterModule;
+import org.webpieces.webserver.impl.WebServerModule;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
 public abstract class WebServerFactory {
 	
-	public static final String IMPL_CLASS_KEY = "org.webpieces.HttpProxyFactory.impl.string";
-	public static final String OVERRIDE_MODULE = "org.webpices.HttpProxy.modules.Module";
-	
     protected WebServerFactory() {}
 
-    public static WebServer create(String id, WebServerConfig config) {
-    	return create(id, null, config);
+    public static WebServer create(HttpRouterConfig config) {
+    	return create(new WebServerConfig(), config);
     }
     
-	public static WebServer create(String id, Module overrideModule, WebServerConfig config) {
-		WebServerFactory factory = new WebServerFactoryImpl();
-		WebServer proxyImpl = factory.createImpl(id, overrideModule, config);
-		return proxyImpl;	
+	public static WebServer create(WebServerConfig config, HttpRouterConfig routerConfig) {
+		Module allModules = getModules(config, routerConfig);
+		
+		Module platformOverrides = config.getPlatformOverrides();
+		if(platformOverrides != null) 
+			allModules = Modules.override(allModules).with(platformOverrides);
+
+		Injector injector = Guice.createInjector(allModules);
+		return injector.getInstance(WebServer.class);
 	}
 
-	protected abstract WebServer createImpl(String id, Module overrideModule, WebServerConfig config);
-	
+	private static Module getModules(WebServerConfig config, HttpRouterConfig routerConfig) {
+		return Modules.combine(
+			new WebServerModule(config),
+			new HttpRouterModule(routerConfig)
+		);
+	}
 }

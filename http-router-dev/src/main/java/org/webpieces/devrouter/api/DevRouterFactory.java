@@ -15,7 +15,7 @@ public class DevRouterFactory {
     protected DevRouterFactory() {}
 
     public static RoutingService create(VirtualFile routersFile, CompileConfig compileConfig) {
-    	return create(new HttpRouterConfig(routersFile, null), compileConfig);
+    	return create(new HttpRouterConfig().setRoutersFile(routersFile), compileConfig);
     }
     
 	public static RoutingService create(HttpRouterConfig config, CompileConfig compileConfig) {

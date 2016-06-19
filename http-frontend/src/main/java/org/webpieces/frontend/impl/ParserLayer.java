@@ -45,7 +45,6 @@ public class ParserLayer {
 			}
 		} catch(ParseException e) {
 			//move down to debug level later on..
-			//for now, this could actually be we screwed up until we are stable
 			log.info("Client screwed up", e);
 			listener.sendServerResponse(translate(channel), e, KnownStatusCode.HTTP400);
 		}

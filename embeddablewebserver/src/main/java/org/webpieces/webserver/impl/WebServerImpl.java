@@ -9,20 +9,21 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.router.api.RoutingService;
 import org.webpieces.webserver.api.WebServer;
 
 public class WebServerImpl implements WebServer {
 
 	private static final Logger log = LoggerFactory.getLogger(WebServerImpl.class);
 	
-	@Inject
+	@Inject @Nullable
 	private SSLEngineFactory factory;
 	@Inject
 	private HttpFrontendManager serverMgr;
 	@Inject
 	private RequestReceiver serverListener;
-//	@Inject
-//	private RoutesImpl routes;
+	@Inject
+	private RoutingService routingService;
 	
 	private HttpFrontend httpServer;
 	private HttpFrontend httpsServer;
@@ -30,7 +31,8 @@ public class WebServerImpl implements WebServer {
 	@Override
 	public void start() {
 		log.info("starting server");
-		//start router to begin scan?  why scan?  client calls in and registers?
+		
+		routingService.start();
 		
 		InetSocketAddress addr = new InetSocketAddress(8080);
 		httpServer = serverMgr.createHttpServer("httpProxy", addr, serverListener);

@@ -1,7 +1,7 @@
 # webpieces
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and actual http proxy and http client).
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and actual http proxy and http client).  This webserver is also made to be extremely Test Driven for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts
 
-This project is in process of implementing HTTP 2.0 as well.  Most projects like netty, grizzly, mina don't have a clean separation of an async http parser which is needed for nio so that was a priority for this project.  This project is essentially pieces that can be used to build any http related software and full stacks as well.  The http proxy will be very minimable but is for testing purposes of the http parser such that we can put it in the middle of chrome and firefox for integration testing.
+This project is in process of implementing HTTP 2.0 as well.  This project is essentially pieces that can be used to build any http related software and full stacks as well.  The http proxy will be very minimable but is for testing purposes of the http parser such that we can put it in the middle of chrome and firefox for integration testing.
 
 Some HTTP/2 features (we are actively working this)
  * better pipelining of requests fixing head of line blocking problem

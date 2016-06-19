@@ -29,7 +29,7 @@ import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.RouterModules;
+import org.webpieces.router.api.routing.WebAppMetaInfo;
 import org.webpieces.router.impl.loader.Loader;
 import org.webpieces.router.impl.params.ArgumentTranslator;
 import org.webpieces.util.file.VirtualFile;
@@ -52,7 +52,7 @@ public class RouteLoader {
 		this.argumentTranslator = argumentTranslator;
 	}
 	
-	public RouterModules load(Loader loader) {
+	public WebAppMetaInfo load(Loader loader) {
 		try {
 			return loadImpl(loader);
 		} catch (IOException e) {
@@ -60,8 +60,8 @@ public class RouteLoader {
 		}
 	}
 	
-	private RouterModules loadImpl(Loader loader) throws IOException {
-		log.info("loading the master "+RouterModules.class.getSimpleName()+" class file");
+	private WebAppMetaInfo loadImpl(Loader loader) throws IOException {
+		log.info("loading the master "+WebAppMetaInfo.class.getSimpleName()+" class file");
 
 		VirtualFile fileWithRouterModulesName = config.getRoutersFile();
 		String moduleName;
@@ -71,15 +71,15 @@ public class RouteLoader {
 			moduleName = bufReader.readLine().trim();
 		}
 
-		log.info(RouterModules.class.getSimpleName()+" class to load="+moduleName);
+		log.info(WebAppMetaInfo.class.getSimpleName()+" class to load="+moduleName);
 		Class<?> clazz = loader.clazzForName(moduleName);
 		Object obj = newInstance(clazz);
-		if(!(obj instanceof RouterModules))
-			throw new IllegalArgumentException("name="+moduleName+" does not implement "+RouterModules.class.getSimpleName());
+		if(!(obj instanceof WebAppMetaInfo))
+			throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMetaInfo.class.getSimpleName());
 
-		log.info(RouterModules.class.getSimpleName()+" loaded");
+		log.info(WebAppMetaInfo.class.getSimpleName()+" loaded");
 
-		RouterModules routerModule = (RouterModules) obj;
+		WebAppMetaInfo routerModule = (WebAppMetaInfo) obj;
 		Injector injector = createInjector(routerModule);
 
 		loadAllRoutes(routerModule, injector, loader);
@@ -88,7 +88,7 @@ public class RouteLoader {
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
-	public void loadAllRoutes(RouterModules rm, Injector injector, Loader loader) {
+	public void loadAllRoutes(WebAppMetaInfo rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
 		router = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), loader, injector);
@@ -99,13 +99,13 @@ public class RouteLoader {
 			module.configure(router, packageName);
 		}
 		
-		if(!router.getRouterInfo().isCatchallRouteSet())
-			throw new IllegalStateException("Client RouterModule did not call top level router.setCatchAllRoute");
+		if(!router.getRouterInfo().isPageNotFoundRouteSet())
+			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouterModules());
 		
 		log.info("added all routes to router");
 	}
 	
-	private Injector createInjector(RouterModules rm) {
+	private Injector createInjector(WebAppMetaInfo rm) {
 		List<Module> guiceModules = rm.getGuiceModules();
 		
 		Module module = Modules.combine(guiceModules);
@@ -261,7 +261,7 @@ public class RouteLoader {
 
 	public MatchResult fetchNotFoundRoute() {
 		RouteInfo routerInfo = router.getRouterInfo();
-		RouteMeta notfoundRoute = routerInfo.getNotfoundRoute();
+		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
 		return new MatchResult(notfoundRoute);
 	}
 }

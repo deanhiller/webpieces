@@ -39,7 +39,9 @@ public class TestProdRouter {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
 		TestModule module = new TestModule();
-		HttpRouterConfig config = new HttpRouterConfig(f, module);
+		HttpRouterConfig config = new HttpRouterConfig()
+										.setRoutersFile(f)
+										.setWebappOverrides(module);
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 		
 		return Arrays.asList(new Object[][] {

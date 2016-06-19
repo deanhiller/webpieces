@@ -71,6 +71,7 @@ public class SelectorImpl implements Select
 	        selector = provider.openSelector();
 	        
 	        thread = new PollingThread();
+	        thread.setDaemon(true);
 	        thread.setName(threadName);
 	        thread.start();
         } catch(IOException e) {

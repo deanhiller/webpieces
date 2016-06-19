@@ -138,7 +138,7 @@ public class RouterBuilder implements Router {
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		RouteMeta meta = new RouteMeta(r, true);
 		loadControllerIntoMetaObject(meta, true);	
-		info.setCatchAllRoute(meta);
+		info.setPageNotFoundRoute(meta);
 	}
 
 }

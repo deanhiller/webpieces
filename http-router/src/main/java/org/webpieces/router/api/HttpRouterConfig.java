@@ -7,18 +7,26 @@ import com.google.inject.Module;
 public class HttpRouterConfig {
 
 	private VirtualFile routersFile;
-	private Module overridesModule;
 	
-	public HttpRouterConfig(VirtualFile routersFile, Module overridesModule) {
-		super();
-		this.routersFile = routersFile;
-		this.overridesModule = overridesModule;
-	}
+	/**
+	 * WebApps can override remote services to mock them out for testing or swap prod classes with
+	 * an in-memory implementation such that tests can remain single threaded
+	 */
+	private Module webappOverrides;
+	
 	public VirtualFile getRoutersFile() {
 		return routersFile;
 	}
 	public Module getOverridesModule() {
-		return overridesModule;
+		return webappOverrides;
 	}
-	
+	public HttpRouterConfig setRoutersFile(VirtualFile routersFile) {
+		this.routersFile = routersFile;
+		return this;
+	}
+	public HttpRouterConfig setWebappOverrides(Module webappOverrides) {
+		this.webappOverrides = webappOverrides;
+		return this;
+	}
+
 }

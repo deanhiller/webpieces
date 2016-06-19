@@ -20,8 +20,9 @@ subprojects {
        testCompile 'junit:junit:4.11'
 
        compile 'javax.inject:javax.inject:1'
-       compile 'org.slf4j:slf4j-api:1.7.5'
-       compile 'ch.qos.logback:logback-classic:1.0.13'
+       compile 'org.slf4j:slf4j-api:1.7.21'
+       compile 'ch.qos.logback:logback-core:1.1.7'
+       compile 'ch.qos.logback:logback-classic:1.1.7'
 
        //This line includes any jars a developer drops into {project}/lib directory
        compile fileTree(dir: 'lib', include: '*.jar')
@@ -76,7 +77,7 @@ project(':core-netty') {
 
 project(':core-asyncserver') {
     dependencies {
-        compile project(':core-channelmanager2'), project(':core-netty')
+        compile project(':core-channelmanager2')
     }
 }
 
@@ -109,7 +110,6 @@ project(':http-router') {
         compile 'com.google.inject:guice:4.0'
         project(':http-parser1_1')
         compile project(':core-util')
-        compile project(':runtimecompile')
     }
 }
 
@@ -147,6 +147,7 @@ project(':embeddablewebserver') {
     dependencies {
         compile 'com.google.inject:guice:4.0'
         compile project(':http-frontend'), project(':http-parser1_1'), project(':http-router')
+        compile project(':http-router-dev'), project(':http-templating')
     }
 }
 

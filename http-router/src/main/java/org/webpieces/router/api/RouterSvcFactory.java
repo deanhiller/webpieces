@@ -14,7 +14,7 @@ public class RouterSvcFactory {
     protected RouterSvcFactory() {}
 
     public static RoutingService create(VirtualFile routersFile) {
-    	return create(new HttpRouterConfig(routersFile, null));
+    	return create(new HttpRouterConfig().setRoutersFile(routersFile));
     }
     
 	public static RoutingService create(HttpRouterConfig config) {
