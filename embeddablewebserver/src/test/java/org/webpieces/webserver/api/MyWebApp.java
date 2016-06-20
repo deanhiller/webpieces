@@ -10,6 +10,7 @@ import org.webpieces.util.file.VirtualFileImpl;
 public class MyWebApp {
 	
 	public static void main(String[] args) throws InterruptedException {
+		
 		String filePath = System.getProperty("user.dir");
 		File routerFile = new File(filePath + "/src/test/resources/routermodule.txt");
 		VirtualFile configFile = new VirtualFileImpl(routerFile);

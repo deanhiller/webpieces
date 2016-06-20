@@ -17,6 +17,10 @@ public class HttpRequestMethod {
 		method = knownMethod.getCode();
 	}
 	
+	public String getMethodAsString() {
+		return method;
+	}
+	
 	public KnownHttpMethod getKnownStatus() {
 		return KnownHttpMethod.lookup(method); 
 	}

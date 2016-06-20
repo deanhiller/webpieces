@@ -3,7 +3,7 @@ package org.webpieces.router.api.dto;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Request {
+public class RouterRequest {
 
 	public boolean isHttps;
 	//true if http2 so we respond with not just the response but all other responses that the client

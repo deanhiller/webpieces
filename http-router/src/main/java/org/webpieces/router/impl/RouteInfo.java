@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 
 public class RouteInfo {
 
@@ -30,7 +30,7 @@ public class RouteInfo {
 		return routerInfo;
 	}
 
-	public MatchResult fetchRoute(Request request, String path) {
+	public MatchResult fetchRoute(RouterRequest request, String path) {
 		if(!path.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 

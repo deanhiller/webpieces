@@ -46,5 +46,8 @@ TODO:
 * Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * PRG pattern vs. "POST request comes in, path not found, so send back 404 with rendered page".  Currently in this special instance, we violate PRG and go with 404 back to use with the page.  We NEED to test this though and find if this breaks the browser back button and if it does make it more usable for people using every website written on this webserver.  Every other instance, we force apps into PRG so their users have a GREAT experience with the website
+* gzip/deflate/sdch compression?
+* language
+
 
 * ALPN is next!!!! 

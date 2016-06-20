@@ -18,11 +18,14 @@ subprojects {
    }
    dependencies {
        testCompile 'junit:junit:4.11'
+       //for logging in tests
+       testCompile 'org.codehaus.groovy:groovy-all:2.4.6'
 
        compile 'javax.inject:javax.inject:1'
        compile 'org.slf4j:slf4j-api:1.7.21'
        compile 'ch.qos.logback:logback-core:1.1.7'
        compile 'ch.qos.logback:logback-classic:1.1.7'
+       compile 'joda-time:joda-time:2.9.4'
 
        //This line includes any jars a developer drops into {project}/lib directory
        compile fileTree(dir: 'lib', include: '*.jar')

@@ -17,7 +17,7 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RenderResponse;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.mocks.MockResponseStream;
@@ -55,7 +55,7 @@ public class ErrorCommonTest {
 		
 		server.start();
 		
-		Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/user/5553");
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/user/5553");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 
 		server.processHttpRequests(req, mockResponseStream);
@@ -73,7 +73,7 @@ public class ErrorCommonTest {
 		
 		server.start();
 		
-		Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
 		server.processHttpRequests(req, mockResponseStream);
@@ -95,7 +95,7 @@ public class ErrorCommonTest {
 		
 		server.start();
 		
-		Request req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
 		server.processHttpRequests(req, mockResponseStream);
@@ -111,7 +111,7 @@ public class ErrorCommonTest {
 		
 		server.start();
 		
-		Request req = RequestCreation.createHttpRequest(HttpMethod.POST, "/postroute");
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.POST, "/postroute");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
 		server.processHttpRequests(req, mockResponseStream);
@@ -133,7 +133,7 @@ public class ErrorCommonTest {
 		
 		server.start();
 		
-		Request req = RequestCreation.createHttpRequest(HttpMethod.POST, "/notexistpostroute");
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.POST, "/notexistpostroute");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
 		server.processHttpRequests(req, mockResponseStream);

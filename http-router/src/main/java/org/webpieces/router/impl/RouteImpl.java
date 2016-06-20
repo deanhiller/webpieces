@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteId;
 
 import com.google.common.collect.Sets;
@@ -52,7 +52,7 @@ public class RouteImpl implements Route {
 		return false;
 	}
 	
-	public Matcher matches(Request request, String path) {
+	public Matcher matches(RouterRequest request, String path) {
 		if(isSecure) {
 			if(!request.isHttps)
 				return null;

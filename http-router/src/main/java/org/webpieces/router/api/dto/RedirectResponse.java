@@ -2,7 +2,7 @@ package org.webpieces.router.api.dto;
 
 public class RedirectResponse {
 
-	public Boolean isHttps;
+	public boolean isHttps;
 	public String domain;
 	public String redirectToPath;
 

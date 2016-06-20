@@ -18,8 +18,8 @@ import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.dto.Request;
 import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
@@ -77,7 +77,7 @@ public class TestSimpleRoutes {
 	
 	@Test
 	public void testBasicRoute() {
-		Request req = createHttpRequest(HttpMethod.GET, "/something");
+		RouterRequest req = createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		server.processHttpRequests(req, mockResponseStream);
 		
@@ -86,13 +86,13 @@ public class TestSimpleRoutes {
 		
 		RedirectResponse response = responses.get(0);
 		Assert.assertEquals(req.domain, response.domain);
-		Assert.assertNull(response.isHttps);
+		Assert.assertFalse(response.isHttps);
 		Assert.assertEquals("/something", response.redirectToPath);
 	}
 
 	@Test
 	public void testOneParamRoute() {
-		Request req = createHttpRequest(HttpMethod.POST, "/meeting");
+		RouterRequest req = createHttpRequest(HttpMethod.POST, "/meeting");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		server.processHttpRequests(req, mockResponseStream);
 		
@@ -101,12 +101,12 @@ public class TestSimpleRoutes {
 		
 		RedirectResponse response = responses.get(0);
 		Assert.assertEquals(req.domain, response.domain);
-		Assert.assertNull(response.isHttps);
+		Assert.assertFalse(response.isHttps);
 		Assert.assertEquals("/meeting/888", response.redirectToPath);
 	}
 	
-	private Request createHttpRequest(HttpMethod method, String path) {
-		Request r = new Request();
+	private RouterRequest createHttpRequest(HttpMethod method, String path) {
+		RouterRequest r = new RouterRequest();
 		r.method = method;
 		r.relativePath = path;
 		

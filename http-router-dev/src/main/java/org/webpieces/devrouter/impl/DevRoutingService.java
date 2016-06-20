@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.WebAppMetaInfo;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.MatchResult;
@@ -45,7 +45,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 	
 	@Override
-	public void processHttpRequestsImpl(Request req, ResponseStreamer responseCb) {
+	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		

@@ -24,7 +24,7 @@ import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
@@ -126,7 +126,7 @@ public class RouteLoader {
 		}
 	}
 
-	public MatchResult fetchRoute(Request req) {
+	public MatchResult fetchRoute(RouterRequest req) {
 		RouteInfo routerInfo = router.getRouterInfo();
 		MatchResult meta = routerInfo.fetchRoute(req, req.relativePath);
 		if(meta == null)
@@ -135,7 +135,7 @@ public class RouteLoader {
 		return meta;
 	}
 	
-	public void invokeRoute(MatchResult result, Request req, ResponseStreamer responseCb, Supplier<MatchResult> notFoundRoute) {
+	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, Supplier<MatchResult> notFoundRoute) {
 		RouteMeta meta = result.getMeta();
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
@@ -162,7 +162,7 @@ public class RouteLoader {
 			.exceptionally(e -> processException(responseCb, e));
 	}
 
-	public Object continueProcessing(Request r, RouteMeta incomingRequestMeta, Object response, ResponseStreamer responseCb) {
+	public Object continueProcessing(RouterRequest r, RouteMeta incomingRequestMeta, Object response, ResponseStreamer responseCb) {
 		Method method = incomingRequestMeta.getMethod();
 		if(response instanceof Redirect) {
 			Redirect action = (Redirect) response;
@@ -192,7 +192,7 @@ public class RouteLoader {
 				path = path.replace("{"+name+"}", value);
 			}
 			
-			RedirectResponse httpResponse = new RedirectResponse(null, r.domain, path);
+			RedirectResponse httpResponse = new RedirectResponse(r.isHttps, r.domain, path);
 			responseCb.sendRedirect(httpResponse);
 		} else if(response instanceof RenderHtml) {
 			//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG

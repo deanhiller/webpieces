@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 
 public class RouteMeta {
 
@@ -45,7 +45,7 @@ public class RouteMeta {
 		this.methodParamNames = paramNames;
 	}
 
-	public MatchResult matches(Request request, String path) {
+	public MatchResult matches(RouterRequest request, String path) {
 		Matcher matcher = route.matches(request, path);
 		if(matcher == null)
 			return null;

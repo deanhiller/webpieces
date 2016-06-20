@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.impl.loader.ProdLoader;
 
 @Singleton
@@ -39,7 +39,7 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	}
 
 	@Override
-	public void processHttpRequestsImpl(Request req, ResponseStreamer responseCb) {
+	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
 		MatchResult meta = routeLoader.fetchRoute(req);
 		
 		routeLoader.invokeRoute(meta, req, responseCb, () -> routeLoader.fetchNotFoundRoute());

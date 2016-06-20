@@ -6,14 +6,14 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 
 public abstract class AbstractRouterService implements RoutingService {
 	
 	protected boolean started = false;
 	
 	@Override
-	public final void processHttpRequests(Request req, ResponseStreamer responseCb) {
+	public final void processHttpRequests(RouterRequest req, ResponseStreamer responseCb) {
 		LoggingStreamer str = new LoggingStreamer(responseCb);
 		try {
 			if(!started)
@@ -25,7 +25,7 @@ public abstract class AbstractRouterService implements RoutingService {
 		}
 	}
 
-	protected abstract void processHttpRequestsImpl(Request req, ResponseStreamer responseCb);
+	protected abstract void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb);
 	
 	private static class LoggingStreamer implements ResponseStreamer {
 		private static final Logger log = LoggerFactory.getLogger(LoggingStreamer.class);

@@ -1,6 +1,6 @@
 package org.webpieces.router.api;
 
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 
 public interface RoutingService {
 
@@ -8,6 +8,6 @@ public interface RoutingService {
 
 	void stop();
 
-	void processHttpRequests(Request req, ResponseStreamer streamer);
+	void processHttpRequests(RouterRequest req, ResponseStreamer streamer);
 	
 }

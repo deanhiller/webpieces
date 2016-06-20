@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.MatchResult;
@@ -27,7 +27,7 @@ public class ArgumentTranslator {
 		this.primitiveConverter = primitiveConverter;
 	}
 	
-	public Object[] createArgs(MatchResult result, Request req) {
+	public Object[] createArgs(MatchResult result, RouterRequest req) {
 		RouteMeta meta = result.getMeta();
 		Parameter[] paramMetas = meta.getMethod().getParameters();
 		

@@ -11,12 +11,13 @@ public enum KnownStatusCode {
 	HTTP300(300, "Multiple Choices", HttpStatusType.Redirection),
 	HTTP301(301, "Moved Permanently", HttpStatusType.Redirection),
 	HTTP302(302, "Found", HttpStatusType.Redirection),
+	HTTP303(303, "See Other", HttpStatusType.Redirection),
 
 	HTTP400(400, "Bad Request", HttpStatusType.ClientError),
 	HTTP401(401, "Unauthorized", HttpStatusType.ClientError),
 	HTTP404(404, "Not Found", HttpStatusType.ClientError),
 	
-	HTTP500(500, "Internal Server Error", HttpStatusType.ServerError) 
+	HTTP500(500, "Internal Server Error", HttpStatusType.ServerError),  
 	
 	//TODO: Fill the rest in..
 	;

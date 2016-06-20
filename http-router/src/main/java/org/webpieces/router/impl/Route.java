@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.dto.Request;
+import org.webpieces.router.api.dto.RouterRequest;
 
 public interface Route {
 
@@ -13,7 +13,7 @@ public interface Route {
 
 	boolean matchesMethod(HttpMethod method);
 	
-	Matcher matches(Request request, String path);
+	Matcher matches(RouterRequest request, String path);
 
 	String getControllerMethodString();
 
