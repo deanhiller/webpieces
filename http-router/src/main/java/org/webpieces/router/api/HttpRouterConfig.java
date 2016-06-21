@@ -21,6 +21,10 @@ public class HttpRouterConfig {
 		return webappOverrides;
 	}
 	public HttpRouterConfig setRoutersFile(VirtualFile routersFile) {
+		if(!routersFile.exists())
+			throw new IllegalArgumentException("path="+routersFile+" does not exist");
+		else if(routersFile.isDirectory())
+			throw new IllegalArgumentException("path="+routersFile+" is a directory and needs to be a file");
 		this.routersFile = routersFile;
 		return this;
 	}

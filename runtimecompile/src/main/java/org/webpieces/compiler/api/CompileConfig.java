@@ -33,6 +33,11 @@ public class CompileConfig {
 	}
 
 	private static List<VirtualFile> createList(VirtualFile javaPath) {
+		if(!javaPath.exists())
+			throw new IllegalArgumentException("path="+javaPath+" does not exist");
+		else if(!javaPath.isDirectory())
+			throw new IllegalArgumentException("path="+javaPath+" is not a directory");
+		
 		List<VirtualFile> list = new ArrayList<>();
 		list.add(javaPath);
 		return list;

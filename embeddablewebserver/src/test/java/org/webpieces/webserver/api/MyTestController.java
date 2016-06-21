@@ -6,13 +6,12 @@ import org.webpieces.router.api.actions.RenderHtml;
 
 public class MyTestController {
 
-	
 	public Action redirect() {
 		return new Redirect(MyTestRouteId.RENDER_PAGE);
 	}
 	
 	public Action render() {
-		return RenderHtml.create();
+		return RenderHtml.create("testing");
 	}
 	
 	public Action notFound() {

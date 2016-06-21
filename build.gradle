@@ -147,9 +147,26 @@ project(':full-httpproxy') {
 }
 
 project(':embeddablewebserver') {
+    configurations {
+        testOutput.extendsFrom (testCompile)
+    }
     dependencies {
         compile 'com.google.inject:guice:4.0'
         compile project(':http-frontend'), project(':http-parser1_1'), project(':http-router')
+        project(':http-templating')
+    }
+    task jarTest (type: Jar, dependsOn: testClasses) {
+        from sourceSets.test.output
+        classifier = 'test'
+    }
+    artifacts {
+        testOutput jarTest
+    }
+}
+
+project(':embeddabledevwebserver') {
+    dependencies {
+        compile project(path: ':embeddablewebserver', configuration: 'testOutput')
         compile project(':http-router-dev'), project(':http-templating')
     }
 }

@@ -28,6 +28,10 @@ public class VirtualFileImpl implements VirtualFile {
 		this.charset = charset;
 	}
 
+	public VirtualFileImpl(String fileName) {
+		this(new File(fileName), Charset.defaultCharset());
+	}
+
 	@Override
 	public boolean isDirectory() {
 		return file.isDirectory();

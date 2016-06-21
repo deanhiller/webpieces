@@ -68,7 +68,12 @@ public class ProxyResponse implements ResponseStreamer {
 		HttpResponse response = new HttpResponse();
 		response.setStatusLine(statusLine);
 
-		String content = "<html><head></head><body>Hello World</body></html>";
+		String argsList = "";
+		for(Object r : resp.args) {
+			argsList += r+" ";
+		}
+		
+		String content = "<html><head></head><body>Hello World="+argsList+"</body></html>";
 		byte[] bytes = content.getBytes();
 		
 		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, bytes.length+"");

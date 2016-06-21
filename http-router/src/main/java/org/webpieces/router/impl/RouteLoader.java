@@ -205,7 +205,7 @@ public class RouteLoader {
 			}
 			RenderHtml renderHtml = (RenderHtml) response;
 			
-			RenderResponse resp = new RenderResponse(renderHtml.getView());
+			RenderResponse resp = new RenderResponse(renderHtml.getView(), renderHtml.getPageArgs());
 			responseCb.sendRenderHtml(resp);
 		}
 		return null;
