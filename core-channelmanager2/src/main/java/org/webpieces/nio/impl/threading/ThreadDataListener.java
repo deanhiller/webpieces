@@ -31,7 +31,6 @@ public class ThreadDataListener implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
-		log.info("far end closed");
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {

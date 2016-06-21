@@ -15,6 +15,9 @@ public enum KnownHeaderName {
 	VIA("Via", HeaderType.GENERAL),
 	WARNING("Warning", HeaderType.GENERAL),
 
+	//https://tools.ietf.org/id/draft-thomson-hybi-http-timeout-01.html
+	KEEP_ALIVE("Keep-Alive", HeaderType.GENERAL),
+	
 	//Per RFC, these are the Request Header types
 	ACCEPT("Accept", HeaderType.REQUEST),
 	ACCEPT_CHARSET("Accept-Charset", HeaderType.REQUEST),

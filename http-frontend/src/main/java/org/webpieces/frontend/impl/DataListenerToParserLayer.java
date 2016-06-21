@@ -40,6 +40,7 @@ public class DataListenerToParserLayer implements DataListener {
 	}
 
 	public void farEndClosed(Channel channel) {
+		log.info("far end closed. channel="+channel);
 		processor.farEndClosed(channel);
 	}
 
@@ -56,6 +57,7 @@ public class DataListenerToParserLayer implements DataListener {
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
+		log.info("can release backpressure");
 		processor.releaseBackPressure(channel);
 	}
 
