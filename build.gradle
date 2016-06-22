@@ -140,20 +140,10 @@ project(':full-httpproxy') {
 }
 
 project(':embeddablewebserver') {
-    configurations {
-        testOutput.extendsFrom (testCompile)
-    }
     dependencies {
         compile 'com.google.inject:guice:4.0'
         compile project(':http-frontend'), project(':http-parser1_1'), project(':http-router')
         project(':http-templating')
-    }
-    task jarTest (type: Jar, dependsOn: testClasses) {
-        from sourceSets.test.output
-        classifier = 'test'
-    }
-    artifacts {
-        testOutput jarTest
     }
 }
 
@@ -172,10 +162,15 @@ project(':full-webserver') {
     }
 }
 
-project('runtimecompile') {
+project(':runtimecompile') {
     dependencies {
         compile 'org.eclipse.jdt.core.compiler:ecj:4.5.1'
         compile project(':core-util')
     }
 }
 
+dependencies {
+    compile project(':embeddablewebserver')
+    compile project(':http-client')
+    compile project(':embeddablehttpproxy')
+}
