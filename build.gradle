@@ -167,8 +167,10 @@ project(':embeddablewebserver') {
 project(':embeddabledevwebserver') {
     dependencies {
         compile project(path: ':embeddablewebserver', configuration: 'testOutput')
-        compile project(':http-router-dev'), project(':http-templating')
+        compile project(':http-router-dev')
     }
+
+    
 }
 
 project(':full-webserver') {
@@ -183,3 +185,4 @@ project('runtimecompile') {
         compile project(':core-util')
     }
 }
+
