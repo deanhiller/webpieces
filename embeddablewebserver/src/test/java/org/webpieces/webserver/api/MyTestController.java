@@ -1,20 +1,19 @@
 package org.webpieces.webserver.api;
 
 import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.RenderHtml;
+import org.webpieces.router.api.actions.Actions;
 
 public class MyTestController {
 
 	public Action redirect() {
-		return new Redirect(MyTestRouteId.RENDER_PAGE);
+		return Actions.redirect(MyTestRouteId.RENDER_PAGE);
 	}
 	
 	public Action render() {
-		return RenderHtml.create("testing");
+		return Actions.renderThis("testing");
 	}
 	
 	public Action notFound() {
-		return RenderHtml.create();
+		return Actions.renderThis();
 	}
 }

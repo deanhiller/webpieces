@@ -3,8 +3,8 @@ package org.webpieces.devrouter.api;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.simplesvr.MtgRouteId;
 
@@ -13,34 +13,34 @@ public class CommonController {
 	private boolean isWantRedirect = false;
 	
 	public Action notFound() {
-		return RenderHtml.createView("notFound.xhtml");
+		return Actions.renderView("notFound.xhtml");
 	}
 	
 	public Action postReturnsHtmlRender() {
-		return RenderHtml.create();
+		return Actions.renderThis();
 	}
 	
 	public Action argsMismatch(@Param("id") int id, @Param("accId") String accId) {
-		return RenderHtml.create();
+		return Actions.renderThis();
 	}
 	
 	public Redirect badRedirect(@Param("id") int id) {
 		
 		//This is missing the id parameter
-		return new Redirect(MtgRouteId.SOME_EXAMPLE);
+		return Actions.redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
 	public Action someExample(@Param("array") String ... args) {
-		return RenderHtml.create();
+		return Actions.renderThis();
 	}
 	
 	public CompletableFuture<Action> createUserForm() {
 		//if for some reason, reached wrong thing or not enough users, redirect to another page....
 		if(isWantRedirect) {
-			return CompletableFuture.completedFuture(new Redirect(SomeRouteId.GET_CREATE_USER_PAGE));
+			return CompletableFuture.completedFuture(Actions.redirect(SomeRouteId.GET_CREATE_USER_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(RenderHtml.create());
+		return CompletableFuture.completedFuture(Actions.renderThis());
 	}
 
 //	public CompletableFuture<Action> postUser(MeetingDto user) {
@@ -71,7 +71,7 @@ public class CommonController {
 		//here, we would redirect if the user is not found to some other page and add error to master error message
 		
 		//pass in User to the Render so it is given to the page...
-		return RenderHtml.create(user);
+		return Actions.renderThis(user);
 	}
 	
 }

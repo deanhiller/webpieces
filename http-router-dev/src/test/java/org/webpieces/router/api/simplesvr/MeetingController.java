@@ -5,8 +5,8 @@ import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.routing.Param;
 
 public class MeetingController {
@@ -23,16 +23,16 @@ public class MeetingController {
 	
 	public Action someExample() {
 		util.testMethod();
-		return new Redirect(MtgRouteId.SOME_EXAMPLE);
+		return Actions.redirect(MtgRouteId.SOME_EXAMPLE);
 	}
 	
 	public CompletableFuture<Action> createUserForm() {
 		//if for some reason, reached wrong thing or not enough users, redirect to another page....
 		if(isWantRedirect) {
-			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
+			return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		
-		return CompletableFuture.completedFuture(RenderHtml.create());
+		return CompletableFuture.completedFuture(Actions.renderThis());
 	}
 
 	public CompletableFuture<Action> postMeeting(/* @Param("mtg") MeetingDto mtg */) {
@@ -42,12 +42,12 @@ public class MeetingController {
 			//flash.saveFormValues();
 			//flash.setGlobalMessage("You have errors")
 			//decorators kick in saying error per field with the field
-			return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
+			return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_CREATE_MTG_PAGE));
 		}
 		//}
 		
 		//need to send redirect at this point to getUser with id=id
-		return CompletableFuture.completedFuture(new Redirect(MtgRouteId.GET_SHOW_MTG, 888));
+		return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_SHOW_MTG, 888));
 	}
 	
 	/**
@@ -65,12 +65,12 @@ public class MeetingController {
 		//here we could call getMeeting(id) so refactorings would apply BUT then we have to bytecode the crap
 		//out of the code so we don't call getMeeting and actually throw an exception back to the platform like play
 		//I wish there was a better way as I don't like either choice
-		return new Redirect(MtgRouteId.GET_SHOW_MTG, 999);
+		return Actions.redirect(MtgRouteId.GET_SHOW_MTG, 999);
 	}
 	
 	public CompletableFuture<Redirect> asyncMethod() {
 		return service.remoteCall()
-			.thenApply(val -> new Redirect(MtgRouteId.GET_SHOW_MTG, val));
+			.thenApply(val -> Actions.redirect(MtgRouteId.GET_SHOW_MTG, val));
 	}
 	
 }

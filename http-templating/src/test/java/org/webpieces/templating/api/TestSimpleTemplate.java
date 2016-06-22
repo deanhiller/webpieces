@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileImpl;
 
 public class TestSimpleTemplate {
 

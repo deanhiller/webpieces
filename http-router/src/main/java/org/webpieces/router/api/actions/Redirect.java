@@ -1,6 +1,5 @@
 package org.webpieces.router.api.actions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,14 +10,9 @@ public class Redirect implements Action {
 	private RouteId id;
 	private List<Object> args;
 
-	public Redirect(RouteId id, Object ... args) {
+	protected Redirect(RouteId id, Object ... args) {
 		this.id = id;
 		this.args = Arrays.asList(args);
-	}
-
-	public Redirect(RouteId routeId) {
-		this.id = routeId;
-		this.args = new ArrayList<>();
 	}
 
 	public RouteId getId() {

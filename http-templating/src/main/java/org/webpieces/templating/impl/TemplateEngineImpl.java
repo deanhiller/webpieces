@@ -3,12 +3,10 @@ package org.webpieces.templating.impl;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Map;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.webpieces.templating.api.TemplateEngine;
-import org.webpieces.util.file.VirtualFile;
 
 import groovy.lang.Writable;
 import groovy.text.StreamingTemplateEngine;
