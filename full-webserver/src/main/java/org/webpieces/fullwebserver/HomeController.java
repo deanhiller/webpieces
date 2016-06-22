@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
 
 public class HomeController {
 
