@@ -1,9 +1,0 @@
-package org.webpieces.nio.api.libs;
-
-/**
- */
-public interface SafeExecutorService
-{
-    void execute(ChannelsRunnable r);
-
-}
