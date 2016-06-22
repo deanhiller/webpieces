@@ -8,10 +8,11 @@ subprojects {
    apply plugin: 'idea'
 
    buildDir = file('output')
+   //This is an input directory that we read jars from if they are not in a repo somewhere
    project.ext.fixedLibDir = file('lib')
-   project.ext.stagingDir = file('staging')
+   //project.ext.stagingDir = file('staging')
    project.ext.toStagingDir = file(new File(buildDir, project.name))
-   project.ext.toStagingLibsDir = file(new File(toStagingDir, 'lib'))
+   project.ext.toStagingLibsDir = file(new File(toStagingDir, 'dependencylib'))
 
    repositories {
        mavenCentral()
@@ -31,6 +32,8 @@ subprojects {
        compile fileTree(dir: 'lib', include: '*.jar')
    }
 
+   //This is really only needed for devrouter, embeddablewebserver, http-client, and embeddablehttpproxy
+   //I wonder if we can list out those few projects and this task to each one and the assemble.dependsOn as well
    //let's at least copy all jars to a single directory to use in creating an application...
    task syncJars(type: Sync) {
        from(configurations.compile) {}
