@@ -17,3 +17,6 @@ include 'embeddablehttpproxy'
 include 'full-httpproxy'
 include 'runtimecompile'
 include 'projectcreator'
+include 'webpieces-webserver:templateProject:dev-server'
+include 'webpieces-webserver:templateProject:APPNAME'
+
