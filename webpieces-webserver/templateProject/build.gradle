@@ -51,3 +51,9 @@ project(':webapp') {
     }
 }
 
+project(':dev-server') {
+    dependencies {
+        compile 'com.google.inject:guice:4.0'
+        //compile project(':lib')
+    }
+}

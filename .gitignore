@@ -6,6 +6,7 @@ output
 /bin
 */bin
 .project
+.classpath
 .settings
 tmp/
 /eclipse/

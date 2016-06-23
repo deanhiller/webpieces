@@ -160,6 +160,12 @@ project(':runtimecompile') {
     }
 }
 
+project(':projectcreator') {
+    dependencies {
+        compile 'org.codehaus.groovy:groovy-all:2.4.6' //we use groovy in logback.xml
+    }
+}
+
 task stageTemplate(type: Copy) {
     from '.'
     into buildDir
@@ -174,5 +180,8 @@ task stageWebServer(type: Sync, dependsOn: [':embeddablewebserver:assemble', 'st
 task stageDevServer(type: Sync, dependsOn: [':http-router-dev:assemble', 'stageWebServer']) {
     from childProjects['http-router-dev'].toStagingDir
     into new File(outputStagingDir, 'development')
-    exclude stageWebServer
+    exclude { details -> 
+       def fileNames = stageWebServer.source.collect{ entry -> entry.getName()}
+       fileNames.contains(details.file.getName())
+    }
 }
