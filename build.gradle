@@ -14,6 +14,7 @@ subprojects {
    //This is an input directory that we read jars from if they are not in a repo somewhere
    project.ext.fixedLibDir = file('lib')
    project.ext.toStagingDir = file(new File(buildDir, 'alljars'))
+   archivesBaseName = "webpieces-${it.name}"
 
    repositories {
        mavenCentral()
