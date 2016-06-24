@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -41,7 +42,7 @@ public class IntegTestLocalhostThroughput {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, executor);
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer(mgr);
-		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestLocalhostServerListener());
+		server.createTcpServer(new AsyncConfig("tcpServer", new InetSocketAddress(8080)), new IntegTestLocalhostServerListener());
 		
 		BufferPool pool2 = new BufferCreationPool();
 		DataListener listener = new ClientDataListener(pool2, recorder);

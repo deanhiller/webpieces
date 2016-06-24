@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.google.inject.Module;
 
-public interface WebAppMetaInfo {
+public interface WebAppMeta {
 
 	public List<Module> getGuiceModules();
 	
-	public List<RouteModule> getRouterModules();
+	public List<RouteModule> getRouteModules();
 	
 }

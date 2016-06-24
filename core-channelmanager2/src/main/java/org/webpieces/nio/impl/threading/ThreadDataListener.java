@@ -2,15 +2,12 @@ package org.webpieces.nio.impl.threading;
 
 import java.nio.ByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.SessionExecutor;
 
 public class ThreadDataListener implements DataListener {
 
-	private static final Logger log = LoggerFactory.getLogger(ThreadDataListener.class);
 	private DataListener dataListener;
 	private SessionExecutor executor;
 

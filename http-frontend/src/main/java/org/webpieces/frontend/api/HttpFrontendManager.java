@@ -1,13 +1,12 @@
 package org.webpieces.frontend.api;
 
-import java.net.InetSocketAddress;
-
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.nio.api.SSLEngineFactory;
 
 public interface HttpFrontendManager {
 
-	HttpFrontend createHttpServer(String id, InetSocketAddress addr, HttpRequestListener listener);
+	HttpFrontend createHttpServer(AsyncConfig config, HttpRequestListener listener);
 	
-	HttpFrontend createHttpsServer(String id, InetSocketAddress addr, HttpRequestListener listener, SSLEngineFactory factory);
+	HttpFrontend createHttpsServer(AsyncConfig config, HttpRequestListener listener, SSLEngineFactory factory);
 
 }

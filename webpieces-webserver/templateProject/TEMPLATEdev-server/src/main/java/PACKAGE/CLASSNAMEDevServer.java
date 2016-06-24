@@ -18,19 +18,37 @@ public class CLASSNAMEDevServer {
 	//webserver classes to put in a place a runtime compiler so we can compiler your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
+		new CLASSNAMEDevServer(false).start();
+		
+		synchronized(CLASSNAMEDevServer.class) {
+			CLASSNAMEDevServer.class.wait();
+		}
+	}
+
+	
+	
+	
+	
+	private CLASSNAMEServer server;
+
+	public CLASSNAMEDevServer(boolean usePortZero) {
 		String filePath1 = System.getProperty("user.dir");
 		
 		//list all source paths here as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(new VirtualFileImpl(filePath1+"/../ZAPPNAME/src/main/java"));
+		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME/src/main/java"));
 		
 		CompileConfig devConfig = new CompileConfig(srcPaths);
 		Module platformOverrides = new DevModule(devConfig);
-		new CLASSNAMEServer(platformOverrides, null).start();
-		
-		synchronized(CLASSNAMEDevServer.class) {
-			CLASSNAMEDevServer.class.wait();
-		}
+		server = new CLASSNAMEServer(platformOverrides, null, usePortZero);		
+	}
+	
+	public void start() throws InterruptedException {
+		server.start();		
+	}
+
+	public void stop() {
+		server.stop();
 	}
 }

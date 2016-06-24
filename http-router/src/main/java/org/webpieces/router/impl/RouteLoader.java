@@ -29,7 +29,7 @@ import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.WebAppMetaInfo;
+import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.loader.Loader;
 import org.webpieces.router.impl.params.ArgumentTranslator;
 import org.webpieces.util.file.VirtualFile;
@@ -52,7 +52,7 @@ public class RouteLoader {
 		this.argumentTranslator = argumentTranslator;
 	}
 	
-	public WebAppMetaInfo load(Loader loader) {
+	public WebAppMeta load(Loader loader) {
 		try {
 			return loadImpl(loader);
 		} catch (IOException e) {
@@ -60,8 +60,8 @@ public class RouteLoader {
 		}
 	}
 	
-	private WebAppMetaInfo loadImpl(Loader loader) throws IOException {
-		log.info("loading the master "+WebAppMetaInfo.class.getSimpleName()+" class file");
+	private WebAppMeta loadImpl(Loader loader) throws IOException {
+		log.info("loading the master "+WebAppMeta.class.getSimpleName()+" class file");
 
 		VirtualFile fileWithMetaClassName = config.getMetaFile();
 		String moduleName;
@@ -71,15 +71,15 @@ public class RouteLoader {
 			moduleName = bufReader.readLine().trim();
 		}
 
-		log.info(WebAppMetaInfo.class.getSimpleName()+" class to load="+moduleName);
+		log.info(WebAppMeta.class.getSimpleName()+" class to load="+moduleName);
 		Class<?> clazz = loader.clazzForName(moduleName);
 		Object obj = newInstance(clazz);
-		if(!(obj instanceof WebAppMetaInfo))
-			throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMetaInfo.class.getSimpleName());
+		if(!(obj instanceof WebAppMeta))
+			throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMeta.class.getSimpleName());
 
-		log.info(WebAppMetaInfo.class.getSimpleName()+" loaded");
+		log.info(WebAppMeta.class.getSimpleName()+" loaded");
 
-		WebAppMetaInfo routerModule = (WebAppMetaInfo) obj;
+		WebAppMeta routerModule = (WebAppMeta) obj;
 		Injector injector = createInjector(routerModule);
 
 		loadAllRoutes(routerModule, injector, loader);
@@ -88,24 +88,24 @@ public class RouteLoader {
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
-	public void loadAllRoutes(WebAppMetaInfo rm, Injector injector, Loader loader) {
+	public void loadAllRoutes(WebAppMeta rm, Injector injector, Loader loader) {
 		log.info("adding routes");
 		
 		router = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), loader, injector);
 		
-		for(RouteModule module : rm.getRouterModules()) {
+		for(RouteModule module : rm.getRouteModules()) {
 			String packageName = module.getClass().getPackage().getName();
 			RouterBuilder.currentPackage = packageName;
 			module.configure(router, packageName);
 		}
 		
 		if(!router.getRouterInfo().isPageNotFoundRouteSet())
-			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouterModules());
+			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouteModules());
 		
 		log.info("added all routes to router");
 	}
 	
-	private Injector createInjector(WebAppMetaInfo rm) {
+	private Injector createInjector(WebAppMeta rm) {
 		List<Module> guiceModules = rm.getGuiceModules();
 		
 		Module module = Modules.combine(guiceModules);

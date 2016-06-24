@@ -3,18 +3,18 @@ package org.webpieces.router.api.simplesvr;
 import java.util.List;
 
 import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.WebAppMetaInfo;
+import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-public class AppModules implements WebAppMetaInfo {
+public class AppModules implements WebAppMeta {
 
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new MtgModule());
 	}
 	
-	public List<RouteModule> getRouterModules() {
+	public List<RouteModule> getRouteModules() {
 		return Lists.newArrayList(new MtgRouteModule());
 	}
 }

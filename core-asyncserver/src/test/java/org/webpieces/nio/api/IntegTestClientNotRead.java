@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -41,7 +42,7 @@ public class IntegTestClientNotRead {
 	public void testSoTimeoutOnSocket() throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool();
 		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer("server", pool);
-		server.createTcpServer("tcpServer", new InetSocketAddress(8080), new IntegTestClientNotReadListener());
+		server.createTcpServer(new AsyncConfig("tcpServer", new InetSocketAddress(8080)), new IntegTestClientNotReadListener());
 		
 		BufferCreationPool pool2 = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();

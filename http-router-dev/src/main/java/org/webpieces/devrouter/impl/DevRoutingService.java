@@ -8,7 +8,7 @@ import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouterRequest;
-import org.webpieces.router.api.routing.WebAppMetaInfo;
+import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteLoader;
@@ -22,7 +22,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private RouteLoader routeLoader;
 	private DevLoader loader;
 	private VirtualFile metaTextFile;
-	private WebAppMetaInfo routerModule;
+	private WebAppMeta routerModule;
 
 	@Inject
 	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevLoader loader) {

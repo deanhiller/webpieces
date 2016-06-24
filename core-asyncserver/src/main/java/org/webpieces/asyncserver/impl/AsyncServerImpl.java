@@ -1,6 +1,5 @@
 package org.webpieces.asyncserver.impl;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,8 +35,8 @@ public class AsyncServerImpl implements AsyncServer {
 	}
 
 	@Override
-	public InetSocketAddress getBoundAddr() {
-		return serverChannel.getLocalAddress();
+	public TCPServerChannel getUnderlyingChannel() {
+		return serverChannel;
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.webpieces.frontend.impl;
 
-import java.net.InetSocketAddress;
-
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.frontend.api.HttpFrontend;
@@ -21,18 +20,18 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpFrontend createHttpServer(String id, InetSocketAddress addr, HttpRequestListener listener) {
+	public HttpFrontend createHttpServer(AsyncConfig config, HttpRequestListener listener) {
 		HttpFrontendImpl frontend = new HttpFrontendImpl(listener, parser, false);
-		AsyncServer tcpServer = svrManager.createTcpServer(id, addr, frontend.getDataListener());
+		AsyncServer tcpServer = svrManager.createTcpServer(config, frontend.getDataListener());
 		frontend.init(tcpServer);
 		return frontend;
 	}
 
 	@Override
-	public HttpFrontend createHttpsServer(String id, InetSocketAddress addr, HttpRequestListener listener,
+	public HttpFrontend createHttpsServer(AsyncConfig config, HttpRequestListener listener,
 			SSLEngineFactory factory) {
 		HttpFrontendImpl frontend = new HttpFrontendImpl(listener, parser, true);
-		AsyncServer tcpServer = svrManager.createTcpServer(id, addr, frontend.getDataListener(), factory);
+		AsyncServer tcpServer = svrManager.createTcpServer(config, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
 		return frontend;
 	}

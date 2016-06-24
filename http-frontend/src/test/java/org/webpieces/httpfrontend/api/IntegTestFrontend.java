@@ -1,6 +1,7 @@
 package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
 
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
@@ -13,7 +14,7 @@ public class IntegTestFrontend {
 	public static void main(String[] args) {
 		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10);
 		
-		frontEndMgr.createHttpServer("id2", new InetSocketAddress(8080), new OurListener());
+		frontEndMgr.createHttpServer(new AsyncConfig("id2", new InetSocketAddress(8080)), new OurListener());
 	}
 	
 	private static class OurListener implements HttpRequestListener {

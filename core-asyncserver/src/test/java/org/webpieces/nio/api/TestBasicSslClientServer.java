@@ -1,6 +1,8 @@
 package org.webpieces.nio.api;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
@@ -33,9 +36,9 @@ public class TestBasicSslClientServer {
 		
 		TestSSLEngineFactory f = new TestSSLEngineFactory();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);
-		AsyncServer svr = svrFactory.createTcpServer("sslTcpSvr", addr, new SvrDataListener(), f);
+		AsyncServer svr = svrFactory.createTcpServer(new AsyncConfig("sslTcpSvr", addr), new SvrDataListener(), f);
 		
-		InetSocketAddress bound = svr.getBoundAddr();
+		InetSocketAddress bound = svr.getUnderlyingChannel().getLocalAddress();
 		System.out.println("port="+bound.getPort());
 		
 		TCPChannel channel = mgr.createTCPChannel("client", f.createEngineForSocket());

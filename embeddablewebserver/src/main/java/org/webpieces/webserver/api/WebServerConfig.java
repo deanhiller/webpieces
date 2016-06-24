@@ -1,8 +1,10 @@
 package org.webpieces.webserver.api;
 
 import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
 
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.nio.api.handlers.ConsumerFunc;
 
 import com.google.inject.Module;
 
@@ -24,6 +26,8 @@ public class WebServerConfig {
 	 * If not set, we will not open the SSL port for the webserver
 	 */
 	private SSLEngineFactory sslEngineFactory;
+	
+	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -67,6 +71,15 @@ public class WebServerConfig {
 
 	public WebServerConfig setHttpsListenAddress(InetSocketAddress httpsListenAddress) {
 		this.httpsListenAddress = httpsListenAddress;
+		return this;
+	}
+
+	public ConsumerFunc<ServerSocketChannel> getFunctionToConfigureServerSocket() {
+		return functionToConfigureServerSocket;
+	}
+
+	public WebServerConfig setFunctionToConfigureServerSocket(ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket) {
+		this.functionToConfigureServerSocket = functionToConfigureServerSocket;
 		return this;
 	}
 

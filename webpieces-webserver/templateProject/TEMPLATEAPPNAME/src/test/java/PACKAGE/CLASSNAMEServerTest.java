@@ -16,7 +16,7 @@ public class CLASSNAMEServerTest {
 	
 	@Before
 	public void setUp() throws InterruptedException {
-		new CLASSNAMEServer(null, new AppOverridesModule()).start();
+		new CLASSNAMEServer(null, new AppOverridesModule(), false).start();
 		
 		//ugh, we need to use platformOverride to insert a mockFrontend or something
 		//TBD on that...not a big deal really since we can swap stuff but need to figure out what we want

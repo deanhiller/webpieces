@@ -6,6 +6,7 @@ import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 
 public class HttpFrontendImpl implements HttpFrontend {
@@ -40,4 +41,10 @@ public class HttpFrontendImpl implements HttpFrontend {
 	public void disableOverloadMode() {
 		server.disableOverloadMode();
 	}
+
+	@Override
+	public TCPServerChannel getUnderlyingChannel() {
+		return server.getUnderlyingChannel();
+	}
+
 }

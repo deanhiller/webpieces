@@ -1,7 +1,6 @@
 package org.webpieces.asyncserver.impl;
 
-import java.net.SocketAddress;
-
+import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.nio.api.ChannelManager;
@@ -19,14 +18,15 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	@Override
 	public AsyncServer createTcpServer(
-			String id, SocketAddress addr, DataListener listener, SSLEngineFactory sslFactory) {
+			AsyncConfig config, DataListener listener, SSLEngineFactory sslFactory) {
 		if(sslFactory == null)
 			throw new IllegalArgumentException("SSLEngineFactory is null but must be supplied");
-		return createTcpServerImpl(id, addr, listener, sslFactory);
+		return createTcpServerImpl(config, listener, sslFactory);
 	}
 	
-	private AsyncServer createTcpServerImpl(
-			String id, SocketAddress addr, DataListener listener, SSLEngineFactory sslFactory) {
+	private AsyncServer createTcpServerImpl(AsyncConfig config,
+			DataListener listener, SSLEngineFactory sslFactory) {
+		String id = config.id;
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels, proxyListener); 
@@ -36,15 +36,18 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 			serverChannel = channelManager.createTCPServerChannel(id, connectionListener, sslFactory);
 		else
 			serverChannel = channelManager.createTCPServerChannel(id, connectionListener);
-		
-		serverChannel.bind(addr);
+
+		//MUST be called before bind...
 		serverChannel.setReuseAddress(true);
+		
+		serverChannel.configure(config.functionToConfigureBeforeBind);
+		serverChannel.bind(config.bindAddr);
 		
 		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener);
 	}
 
 	@Override
-	public AsyncServer createTcpServer(String id, SocketAddress addr, DataListener listener) {
-		return createTcpServerImpl(id, addr, listener, null);
+	public AsyncServer createTcpServer(AsyncConfig config, DataListener listener) {
+		return createTcpServerImpl(config, listener, null);
 	}
 }

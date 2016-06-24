@@ -18,6 +18,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
+import org.webpieces.nio.api.handlers.ConsumerFunc;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 
@@ -188,5 +189,20 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		InetAddress addr = channel.socket().getInetAddress();
 		int port = channel.socket().getLocalPort();
 		return new InetSocketAddress(addr, port);
+	}
+
+	@Override
+	public void configure(ConsumerFunc<ServerSocketChannel> methodToConfigure) {
+		try {
+			if(methodToConfigure != null)
+				methodToConfigure.accept(channel);
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public ServerSocketChannel getUnderlyingChannel() {
+		return channel;
 	}	
 }

@@ -1,8 +1,9 @@
 package org.webpieces.asyncserver.api;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface AsyncServer {
 
@@ -28,6 +29,6 @@ public interface AsyncServer {
 	 */
     public CompletableFuture<Void> closeServerChannel();
 
-	public InetSocketAddress getBoundAddr();
-    
+	public TCPServerChannel getUnderlyingChannel();
+
 }

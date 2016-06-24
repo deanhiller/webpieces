@@ -167,17 +167,17 @@ project(':projectcreator') {
     }
 }
 
-project(':webpieces-webserver:templateProject:ZAPPNAME') {
+project(':webpieces-webserver:templateProject:TEMPLATEAPPNAME') {
     dependencies {
         compile project(':embeddablewebserver')
     }
 }
 
-project(':webpieces-webserver:templateProject:dev-server') {
+project(':webpieces-webserver:templateProject:TEMPLATEdev-server') {
     dependencies {
         compile project(':embeddablewebserver')
         compile project(':http-router-dev')
-        compile project(':webpieces-webserver:templateProject:ZAPPNAME')
+        compile project(':webpieces-webserver:templateProject:TEMPLATEAPPNAME')
     }
 }
 
@@ -189,14 +189,23 @@ task stageTemplate(type: Copy) {
 
 task stageWebServer(type: Sync, dependsOn: [':embeddablewebserver:assemble', 'stageTemplate']) {
     from childProjects.embeddablewebserver.toStagingDir
-    into new File(outputStagingDir, 'prod')
+    into new File(outputStagingDir, 'lib-prod')
 }
 
 task stageDevServer(type: Sync, dependsOn: [':http-router-dev:assemble', 'stageWebServer']) {
     from childProjects['http-router-dev'].toStagingDir
-    into new File(outputStagingDir, 'development')
+    into new File(outputStagingDir, 'lib-development')
     exclude { details -> 
        def fileNames = stageWebServer.source.collect{ entry -> entry.getName()}
        fileNames.contains(details.file.getName())
     }
 }
+
+task stageProjectCreator(type: Sync, dependsOn: ':projectcreator:assemble') {
+    from childProjects['projectcreator'].toStagingDir
+    into new File(outputStagingDir, 'lib-creation')
+}
+
+task stageRelease(dependsOn: ['stageDevServer', 'stageProjectCreator'])
+
+
