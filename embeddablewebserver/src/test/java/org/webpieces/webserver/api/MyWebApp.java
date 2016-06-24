@@ -12,13 +12,21 @@ import com.google.inject.Module;
 public class MyWebApp {
 	
 	private Module platformOverrides;
+	private Module webappOverrides;
 	
 	public static void main(String[] args) throws InterruptedException {
-		new MyWebApp(null).start();
+
+		new MyWebApp(null, null).start();
+		
+		synchronized (MyWebApp.class) {
+			//wait forever for now so server doesn't shut down..
+			MyWebApp.class.wait();
+		}	
 	}
 
-	public MyWebApp(Module platformOverrides) {
+	public MyWebApp(Module platformOverrides, Module webappOverrides) {
 		this.platformOverrides = platformOverrides;
+		this.webappOverrides = webappOverrides;
 	}
 
 	public void start() throws InterruptedException {
@@ -31,7 +39,9 @@ public class MyWebApp {
 		File routerFile = new File(filePath + "/../embeddablewebserver/src/test/resources/routermodule.txt");
 		VirtualFile configFile = new VirtualFileImpl(routerFile);
 
-		HttpRouterConfig routerConfig = new HttpRouterConfig().setRoutersFile(configFile );
+		HttpRouterConfig routerConfig = new HttpRouterConfig()
+											.setRoutersFile(configFile )
+											.setWebappOverrides(webappOverrides);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
 										.setHttpListenAddress(new InetSocketAddress(8080))
@@ -39,11 +49,7 @@ public class MyWebApp {
 		WebServer webServer = WebServerFactory.create(config, routerConfig);
 		
 		webServer.start();
-		
-		synchronized (this) {
-			//wait forever for now so server doesn't shut down..
-			this.wait();
-		}		
+			
 	}
 	
 }

@@ -15,7 +15,7 @@ public class DevelopmentWebApp {
 		CompileConfig devConfig = new CompileConfig(srcDir);
 		Module platformOverrides = new DevModule(devConfig);
 		
-		new MyWebApp(platformOverrides).start();
+		new MyWebApp(platformOverrides, null).start();
 	}
 	
 }

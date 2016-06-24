@@ -10,7 +10,7 @@ public class MyTestController {
 	}
 	
 	public Action render() {
-		return Actions.renderThis("testing");
+		return Actions.renderThis("6666");
 	}
 	
 	public Action notFound() {

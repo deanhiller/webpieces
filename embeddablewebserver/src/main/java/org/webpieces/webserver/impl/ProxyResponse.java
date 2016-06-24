@@ -20,6 +20,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 
 public class ProxyResponse implements ResponseStreamer {
 
@@ -43,11 +44,21 @@ public class ProxyResponse implements ResponseStreamer {
 		HttpResponse response = new HttpResponse();
 		response.setStatusLine(statusLine);
 		
-		String prefix = "http";
-		if(httpResponse.isHttps)
-			prefix = "https";
+		String url = httpResponse.redirectToPath;
 		
-		String url = prefix + "://" + httpResponse.domain + httpResponse.redirectToPath;
+		if(httpResponse.domain != null && httpResponse.isHttps != null) {
+			String prefix = "http";
+			if(httpResponse.isHttps)
+				prefix = "https";
+			url = prefix + httpResponse.domain + httpResponse.redirectToPath;
+		} else if(httpResponse.domain != null) {
+			throw new IllegalReturnValueException("Controller is returning a domain without returning isHttps=true or"
+					+ " isHttps=false so we can form the entire redirect.  Either drop the domain or set isHttps");
+		} else if(httpResponse.isHttps != null) {
+			throw new IllegalReturnValueException("Controller is returning isHttps="+httpResponse.isHttps+" but there is"
+					+ "no domain set so we can't form the full redirect.  Either drop setting isHttps or set the domain");
+		}
+		
 		Header location = new Header(KnownHeaderName.LOCATION, url);
 		response.addHeader(location );
 		
