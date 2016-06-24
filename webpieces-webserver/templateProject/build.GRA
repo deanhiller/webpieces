@@ -20,6 +20,7 @@ subprojects {
        testCompile 'junit:junit:4.11'
 
        compile 'javax.inject:javax.inject:1'
+       compile 'com.google.inject:guice:4.0'
        compile 'org.slf4j:slf4j-api:1.7.5'
        compile 'ch.qos.logback:logback-classic:1.0.13'
 
@@ -28,6 +29,7 @@ subprojects {
    }
 
    //let's at least copy all jars to a single directory to use in creating an application...
+   //you may delete if you don't need this
    task syncJars(type: Sync) {
        from(configurations.compile) {}
        from(fixedLibDir) {}
@@ -44,16 +46,16 @@ subprojects {
 
 }
 
-project(':webapp') {
+project(':ZAPPNAME') {
     dependencies {
-        compile 'com.google.inject:guice:4.0'
-        //compile project(':lib')
+        //add dependencies here
+        //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer to include those
+        //source paths or it will not recompile that code as it changes
     }
 }
 
 project(':dev-server') {
     dependencies {
-        compile 'com.google.inject:guice:4.0'
-        //compile project(':lib')
+        compile project(':ZAPPNAME')
     }
 }

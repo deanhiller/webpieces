@@ -10,7 +10,7 @@ public class CLASSNAMEController {
 	}
 	
 	public Action render() {
-		return Actions.renderThis("6666");
+		return Actions.renderThis("hhhh");
 	}
 	
 	public Action notFound() {

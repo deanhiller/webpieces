@@ -63,9 +63,9 @@ public class RouteLoader {
 	private WebAppMetaInfo loadImpl(Loader loader) throws IOException {
 		log.info("loading the master "+WebAppMetaInfo.class.getSimpleName()+" class file");
 
-		VirtualFile fileWithRouterModulesName = config.getRoutersFile();
+		VirtualFile fileWithMetaClassName = config.getMetaFile();
 		String moduleName;
-		try (InputStream str = fileWithRouterModulesName.openInputStream()) {
+		try (InputStream str = fileWithMetaClassName.openInputStream()) {
 			InputStreamReader reader = new InputStreamReader(str);
 			BufferedReader bufReader = new BufferedReader(reader);
 			moduleName = bufReader.readLine().trim();

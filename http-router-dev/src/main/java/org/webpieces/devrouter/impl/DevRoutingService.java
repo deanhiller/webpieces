@@ -21,15 +21,15 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private long lastFileTimestamp;
 	private RouteLoader routeLoader;
 	private DevLoader loader;
-	private VirtualFile routerModulesTextFile;
+	private VirtualFile metaTextFile;
 	private WebAppMetaInfo routerModule;
 
 	@Inject
 	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevLoader loader) {
-		routerModulesTextFile = config.getRoutersFile();
+		metaTextFile = config.getMetaFile();
 		this.routeLoader = routeConfig;
 		this.loader = loader;
-		this.lastFileTimestamp = routerModulesTextFile.lastModified();
+		this.lastFileTimestamp = metaTextFile.lastModified();
 	}
 
 	@Override
@@ -80,13 +80,13 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	 */
 	private boolean reloadIfTextFileChanged() {
 		//if timestamp the same, no changes
-		if(lastFileTimestamp == routerModulesTextFile.lastModified())
+		if(lastFileTimestamp == metaTextFile.lastModified())
 			return false;
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
 		routerModule = routeLoader.load(loader);
-		lastFileTimestamp = routerModulesTextFile.lastModified();
+		lastFileTimestamp = metaTextFile.lastModified();
 		return true;
 	}
 

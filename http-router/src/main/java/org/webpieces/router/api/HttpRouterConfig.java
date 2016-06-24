@@ -6,7 +6,7 @@ import com.google.inject.Module;
 
 public class HttpRouterConfig {
 
-	private VirtualFile routersFile;
+	private VirtualFile metaFile;
 	
 	/**
 	 * WebApps can override remote services to mock them out for testing or swap prod classes with
@@ -14,18 +14,18 @@ public class HttpRouterConfig {
 	 */
 	private Module webappOverrides;
 	
-	public VirtualFile getRoutersFile() {
-		return routersFile;
+	public VirtualFile getMetaFile() {
+		return metaFile;
 	}
 	public Module getOverridesModule() {
 		return webappOverrides;
 	}
-	public HttpRouterConfig setRoutersFile(VirtualFile routersFile) {
+	public HttpRouterConfig setMetaFile(VirtualFile routersFile) {
 		if(!routersFile.exists())
 			throw new IllegalArgumentException("path="+routersFile+" does not exist");
 		else if(routersFile.isDirectory())
 			throw new IllegalArgumentException("path="+routersFile+" is a directory and needs to be a file");
-		this.routersFile = routersFile;
+		this.metaFile = routersFile;
 		return this;
 	}
 	public HttpRouterConfig setWebappOverrides(Module webappOverrides) {

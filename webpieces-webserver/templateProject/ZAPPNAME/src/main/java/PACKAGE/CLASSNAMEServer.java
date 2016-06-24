@@ -1,6 +1,5 @@
 package PACKAGE;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -18,6 +17,14 @@ import org.webpieces.webserver.api.WebServerFactory;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
+/**
+ * Except for changing CLASSNAMEMeta inner class, changes to this one bootstrap class
+ * and any classes you refer to here WILL require a restart when you are running the 
+ * DevelopmentServer.  This class should try to remain pretty thin.
+ * 
+ * @author dhiller
+ *
+ */
 public class CLASSNAMEServer {
 	
 	private static final Logger log = LoggerFactory.getLogger(CLASSNAMEServer.class);
@@ -64,15 +71,14 @@ public class CLASSNAMEServer {
 		log.info("property user.dir="+filePath);
 		
 		//This is so dev-server works.....
-		File routerFile = new File(filePath + "/../ZAPPNAME/src/main/resources/appmeta.txt");
-		VirtualFile configFile = new VirtualFileImpl(routerFile);
+		VirtualFile metaFile = new VirtualFileImpl(filePath + "/../ZAPPNAME/src/main/resources/appmeta.txt");
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
 		//by a QA team
 		HttpRouterConfig routerConfig = new HttpRouterConfig()
-											.setRoutersFile(configFile )
+											.setMetaFile(metaFile )
 											.setWebappOverrides(appOverrides);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)

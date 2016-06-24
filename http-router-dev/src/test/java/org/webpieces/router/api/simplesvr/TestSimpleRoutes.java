@@ -42,7 +42,7 @@ public class TestSimpleRoutes {
 		
 		TestModule module = new TestModule();
 		HttpRouterConfig config = new HttpRouterConfig()
-										.setRoutersFile(f)
+										.setMetaFile(f)
 										.setWebappOverrides(module);
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 		
