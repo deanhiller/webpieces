@@ -27,6 +27,10 @@ public class CompileConfig {
 		this(createList(javaPath), getTmpDir());
 	}
 
+	public CompileConfig(List<VirtualFile> javaPaths) {
+		this(javaPaths, getTmpDir());
+	}
+	
 	private static VirtualFile getTmpDir() {
 		String tmpPath = System.getProperty("java.io.tmpdir");
 		return new VirtualFileImpl(new File(tmpPath, "bytecode"));
