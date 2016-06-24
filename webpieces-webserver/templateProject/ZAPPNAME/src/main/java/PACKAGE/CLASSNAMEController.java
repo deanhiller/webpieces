@@ -1,12 +1,12 @@
-package org.webpieces.webserver.api;
+package PACKAGE;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
-public class MyTestController {
+public class CLASSNAMEController {
 
 	public Action redirect() {
-		return Actions.redirect(MyTestRouteId.RENDER_PAGE);
+		return Actions.redirect(CLASSNAMERouteId.RENDER_PAGE);
 	}
 	
 	public Action render() {

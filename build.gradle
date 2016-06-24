@@ -166,6 +166,20 @@ project(':projectcreator') {
     }
 }
 
+project(':webpieces-webserver:templateProject:ZAPPNAME') {
+    dependencies {
+        compile project(':embeddablewebserver')
+    }
+}
+
+project(':webpieces-webserver:templateProject:dev-server') {
+    dependencies {
+        compile project(':embeddablewebserver')
+        compile project(':http-router-dev')
+        compile project(':webpieces-webserver:templateProject:ZAPPNAME')
+    }
+}
+
 task stageTemplate(type: Copy) {
     from '.'
     into buildDir
