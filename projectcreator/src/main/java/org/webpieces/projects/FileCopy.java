@@ -113,6 +113,13 @@ public class FileCopy {
 		
 		if(name.contains("APPNAME"))
 			name = name.replace("APPNAME", appName);
+		
+		if(name.contains("GRA"))
+			name = name.replace("GRA", "gradle");
+		
+		if(name.contains("CLASSNAME"))
+			name = name.replace("CLASSNAME", appClassName);
+		
 		return name;
 	}
 
