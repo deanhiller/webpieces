@@ -46,7 +46,7 @@ subprojects {
 
 }
 
-project(':ZAPPNAME') {
+project(':APPNAME') {
     dependencies {
         //add dependencies here
         //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer to include those
@@ -56,6 +56,6 @@ project(':ZAPPNAME') {
 
 project(':dev-server') {
     dependencies {
-        compile project(':ZAPPNAME')
+        compile project(':APPNAME')
     }
 }

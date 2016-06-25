@@ -195,6 +195,23 @@ task stageTemplate(type: Copy) {
     from '.'
     into buildDir
     include stagingDirName + '/**'
+    exclude stagingDirName + '/output'
+    exclude stagingDirName + '/.classpath'
+    exclude stagingDirName + '/.project'
+    exclude stagingDirName + '/.settings'
+    exclude stagingDirName + '/templateProject/.classpath'
+    exclude stagingDirName + '/templateProject/.project'
+    exclude stagingDirName + '/templateProject/.settings'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/output'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/bin'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.classpath'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.project'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.settings'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/output'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/bin'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.classpath'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.project'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.settings'
 }
 
 task stageWebServer(type: Sync, dependsOn: [':embeddablewebserver:assemble', 'stageTemplate']) {

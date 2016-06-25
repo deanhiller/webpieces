@@ -1,2 +1,2 @@
-include 'ZAPPNAME'
+include 'APPNAME'
 include 'dev-server'

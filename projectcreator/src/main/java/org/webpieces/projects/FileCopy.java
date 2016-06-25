@@ -15,16 +15,10 @@ public class FileCopy {
 	private String packageStr;
 	private String[] packagePieces;
 	private String appName;
+	private File webpiecesDir;
 
-	public FileCopy(String appClassName, String appName, String packageStr, String directory) {
-		File newAppDirectory = new File(directory);
-		if(!newAppDirectory.exists()) {
-			newAppDirectory.mkdirs();
-		} else if(!newAppDirectory.isDirectory())
-			throw new IllegalArgumentException("directory="+newAppDirectory.getAbsolutePath()+" already exists BUT is not a directory and needs to be");
-		else if(packageStr.contains("/") || packageStr.contains("\\"))
-			throw new IllegalArgumentException("package must contain '.' character and no '/' nor '\\' characters");
-		
+	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory) {
+		this.webpiecesDir = webpiecesDir;
 		this.newAppDirectory = newAppDirectory;
 		this.appClassName = appClassName;
 		this.appName = appName;
@@ -42,11 +36,6 @@ public class FileCopy {
 		//ALSO, must rename all *.GRA files to *.GRADLE so the build is in place
 		//LASTLY, need to replace "TEMPLATE" with "" to make it disappear
 
-		//we only allow execution from the jar file right now due to this...(so running this in the IDE probably won't work)
-		String path = ProjectCreator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		File jarFile = new File(path);
-
-		File webpiecesDir = jarFile.getParentFile().getParentFile();
 		//currently, just the one template...
 		File template = new File(webpiecesDir, "templateProject");
 
@@ -76,11 +65,18 @@ public class FileCopy {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Files.copy(newFile.toPath(), out);
 			String contents = new String(out.toByteArray(), Charset.defaultCharset());
+			String original = contents;
 
-			contents.replace("PACKAGE", packageStr);
-			contents.replace("TEMPLATE", "");
-			contents.replace("CLASSNAME", appClassName);
+			contents = contents.replace("PACKAGE", packageStr);
+			contents = contents.replace("TEMPLATE", "");
+			contents = contents.replace("CLASSNAME", appClassName);
+			contents = contents.replace("APPNAME", appName);
+			
+			if(contents.equals(original))
+				return;
 		
+			System.out.println("contents="+contents);
+			
 			ByteArrayInputStream in = new ByteArrayInputStream(contents.getBytes(Charset.defaultCharset()));
 			Files.copy(in, newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			
