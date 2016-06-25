@@ -7,6 +7,12 @@ subprojects {
    apply plugin: 'eclipse'
    apply plugin: 'idea'
 
+   //These 2 lines make it so you don't have to use @Param annotation on 
+   //every controller method which can get quite annoying
+   [compileJava, compileTestJava]*.options.collect {options ->
+     options.compilerArgs.add '-parameters'
+   }
+
    buildDir = file('output')
    project.ext.fixedLibDir = file('lib')
    project.ext.stagingDir = file('staging')

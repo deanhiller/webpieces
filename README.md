@@ -50,5 +50,6 @@ TODO:
 * language
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
 * add save var names to the gradle compile for the projectTemplate so projects are much easier to keep adding to without needing annotations which can get annoying when there is too many
+* We need to wire :webpieces:test to depend on :webpieces:assemble and then run ./createProject.sh from gradle and then run that gradle build and make sure it is successful so we have a safeguard on the templates breaking
 
 * ALPN is next!!!! 

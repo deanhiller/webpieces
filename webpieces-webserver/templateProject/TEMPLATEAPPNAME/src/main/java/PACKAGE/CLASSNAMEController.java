@@ -5,7 +5,7 @@ import org.webpieces.router.api.actions.Actions;
 
 public class CLASSNAMEController {
 
-	public Action redirect() {
+	public Action redirect(String id) {
 		return Actions.redirect(CLASSNAMERouteId.RENDER_PAGE);
 	}
 	

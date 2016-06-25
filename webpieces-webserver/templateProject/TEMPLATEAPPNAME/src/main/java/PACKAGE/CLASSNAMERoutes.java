@@ -10,7 +10,7 @@ public class CLASSNAMERoutes implements RouteModule {
 	@Override
 	public void configure(Router router, String currentPackage) {
 
-		router.addRoute(HttpMethod.GET, "/", "CLASSNAMEController.redirect", CLASSNAMERouteId.REDIRECT_PAGE);
+		router.addRoute(HttpMethod.GET, "/redirect/{id}", "CLASSNAMEController.redirect", CLASSNAMERouteId.REDIRECT_PAGE);
 
 		router.addRoute(HttpMethod.GET, "/render", "CLASSNAMEController.render", CLASSNAMERouteId.RENDER_PAGE);
 		

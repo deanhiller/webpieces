@@ -1,5 +1,6 @@
 plugins {
     id 'com.gradle.build-scan' version '1.0'
+    id "com.dorongold.task-tree" version "1.2.2"
 }
 
 buildScan {
@@ -9,6 +10,14 @@ buildScan {
 
 allprojects {
    apply plugin: 'java'
+
+   //We could do this just for the template projects, BUT during debugging, it is sooo
+   //damn nice to have the var names, it is worth the performance penalty I think though
+   //we could change this
+   [compileJava, compileTestJava]*.options.collect {options ->
+     options.compilerArgs.add '-parameters'
+   }
+
    buildDir = file('output')
    project.ext {
       stagingDirName = 'webpieces-webserver'
@@ -233,6 +242,6 @@ task stageProjectCreator(type: Sync, dependsOn: ':projectcreator:assemble') {
     into new File(outputStagingDir, 'lib-creation')
 }
 
-task stageRelease(dependsOn: ['stageDevServer', 'stageProjectCreator'])
+assemble.dependsOn(['stageDevServer', 'stageProjectCreator'])
 
 
