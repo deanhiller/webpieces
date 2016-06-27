@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouterRequest;
-import org.webpieces.router.impl.loader.ProdLoader;
+import org.webpieces.router.impl.loader.ClassForName;
+import org.webpieces.router.impl.loader.ProdClassForName;
 
 @Singleton
 public class ProdRouterService extends AbstractRouterService implements RoutingService {
@@ -16,10 +17,10 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	private static final Logger log = LoggerFactory.getLogger(ProdRouterService.class);
 	
 	private RouteLoader routeLoader;
-	private ProdLoader loader;
+	private ClassForName loader;
 	
 	@Inject
-	public ProdRouterService(RouteLoader routeLoader, ProdLoader loader) {
+	public ProdRouterService(RouteLoader routeLoader, ProdClassForName loader) {
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 	}

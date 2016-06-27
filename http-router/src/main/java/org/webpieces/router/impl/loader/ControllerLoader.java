@@ -4,11 +4,9 @@ import org.webpieces.router.impl.RouteMeta;
 
 import com.google.inject.Injector;
 
-public interface Loader {
-
-	Class<?> clazzForName(String moduleName);
+public interface ControllerLoader {
 
 	void loadControllerIntoMeta(RouteMeta meta, Injector injector, String controllerStr, String methodStr,
 			boolean isInitializingAllControllers);
-
+	
 }

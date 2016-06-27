@@ -16,7 +16,8 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
-import org.webpieces.router.impl.loader.Loader;
+import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.ClassForName;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Guice;
@@ -31,14 +32,18 @@ public class RouteLoader {
 	protected RouterBuilder routerBuilder;
 	private RouteInvoker invoker;
 
+	private ControllerLoader controllerLoader;
+
 	@Inject
 	public RouteLoader(HttpRouterConfig config, 
-						RouteInvoker invoker) {
+						RouteInvoker invoker,
+						ControllerLoader controllerLoader) {
 		this.config = config;
 		this.invoker = invoker;
+		this.controllerLoader = controllerLoader;
 	}
 	
-	public WebAppMeta load(Loader loader) {
+	public WebAppMeta load(ClassForName loader) {
 		try {
 			return loadImpl(loader);
 		} catch (IOException e) {
@@ -46,7 +51,7 @@ public class RouteLoader {
 		}
 	}
 	
-	private WebAppMeta loadImpl(Loader loader) throws IOException {
+	private WebAppMeta loadImpl(ClassForName loader) throws IOException {
 		log.info("loading the master "+WebAppMeta.class.getSimpleName()+" class file");
 
 		VirtualFile fileWithMetaClassName = config.getMetaFile();
@@ -68,16 +73,16 @@ public class RouteLoader {
 		WebAppMeta routerModule = (WebAppMeta) obj;
 		Injector injector = createInjector(routerModule);
 
-		loadAllRoutes(routerModule, injector, loader);
+		loadAllRoutes(routerModule, injector);
 		return routerModule;
 	}
 
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
-	public void loadAllRoutes(WebAppMeta rm, Injector injector, Loader loader) {
+	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
 		log.info("adding routes");
 		
-		routerBuilder = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), loader, injector);
+		routerBuilder = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), controllerLoader, injector);
 		
 		for(RouteModule module : rm.getRouteModules()) {
 			Class<?> clazz = module.getClass();

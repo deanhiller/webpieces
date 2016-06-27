@@ -2,31 +2,25 @@ package org.webpieces.devrouter.impl;
 
 import javax.inject.Inject;
 
-import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.loader.Loader;
+import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.MetaLoader;
 
 import com.google.inject.Injector;
 
-public class DevLoader implements Loader {
+public class DevLoader implements ControllerLoader {
 
-	private CompileOnDemand compileOnDemand;
 	private MetaLoader loader;
+	private DevClassForName classLoader;
 
 	@Inject
-	public DevLoader(CompileOnDemand compile, MetaLoader loader) {
-		this.compileOnDemand = compile;
+	public DevLoader(MetaLoader loader, DevClassForName classLoader) {
 		this.loader = loader;
+		this.classLoader = classLoader;
 	}
 	
-	@Override
-	public Class<?> clazzForName(String moduleName) {
-		return compileOnDemand.loadClass(moduleName);
-	}
-
 	private Object createController(Injector injector, String controllerClassFullName) {
-		Class<?> clazz = clazzForName(controllerClassFullName);
+		Class<?> clazz = classLoader.clazzForName(controllerClassFullName);
 		return injector.getInstance(clazz);
 	}
 

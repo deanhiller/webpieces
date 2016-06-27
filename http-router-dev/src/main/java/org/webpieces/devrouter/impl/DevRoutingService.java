@@ -20,15 +20,15 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
 	private long lastFileTimestamp;
 	private RouteLoader routeLoader;
-	private DevLoader loader;
+	private DevClassForName classLoader;
 	private VirtualFile metaTextFile;
 	private WebAppMeta routerModule;
 
 	@Inject
-	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevLoader loader) {
+	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevClassForName loader) {
 		metaTextFile = config.getMetaFile();
 		this.routeLoader = routeConfig;
-		this.loader = loader;
+		this.classLoader = loader;
 		this.lastFileTimestamp = metaTextFile.lastModified();
 	}
 
@@ -85,7 +85,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
-		routerModule = routeLoader.load(loader);
+		routerModule = routeLoader.load(classLoader);
 		lastFileTimestamp = metaTextFile.lastModified();
 		return true;
 	}
@@ -94,7 +94,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		String routerModuleClassName = routerModule.getClass().getName();
 		ClassLoader previousCl = routerModule.getClass().getClassLoader();
 		
-		Class<?> newClazz = loader.clazzForName(routerModuleClassName);
+		Class<?> newClazz = classLoader.clazzForName(routerModuleClassName);
 		ClassLoader newClassLoader = newClazz.getClassLoader();
 		if(previousCl == newClassLoader)
 			return;
@@ -104,6 +104,6 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 
 	private void loadOrReload() {
-		routerModule = routeLoader.load(loader);		
+		routerModule = routeLoader.load(classLoader);		
 	}
 }

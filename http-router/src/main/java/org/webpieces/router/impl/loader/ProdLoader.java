@@ -8,26 +8,19 @@ import org.webpieces.router.impl.RouteMeta;
 import com.google.inject.Injector;
 
 @Singleton
-public class ProdLoader implements Loader {
+public class ProdLoader implements ControllerLoader {
 
 	private MetaLoader loader;
+	private ClassForName classLoader;
 	
 	@Inject
-	public ProdLoader(MetaLoader loader) {
+	public ProdLoader(MetaLoader loader, ProdClassForName classLoader) {
 		this.loader = loader;
-	}
-	
-	@Override
-	public Class<?> clazzForName(String moduleName) {
-		try {
-			return Class.forName(moduleName);
-		} catch (ClassNotFoundException e) {
-			throw new IllegalArgumentException("Your clazz="+moduleName+" was not found on the classpath", e);
-		}
+		this.classLoader = classLoader;
 	}
 	
 	private Object createController(Injector injector, String controllerClassFullName) {
-		Class<?> clazz = clazzForName(controllerClassFullName);
+		Class<?> clazz = classLoader.clazzForName(controllerClassFullName);
 		return injector.getInstance(clazz);
 	}
 	@Override

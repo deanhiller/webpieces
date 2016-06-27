@@ -18,13 +18,13 @@ public class RouterSvcFactory {
     }
     
 	public static RoutingService create(HttpRouterConfig config) {
-		Injector injector = Guice.createInjector(new HttpRouterModule(config));
+		Injector injector = Guice.createInjector(new ProdModule(config));
 		RoutingService svc = injector.getInstance(RoutingService.class);
 		return svc;	
 	}
 
 	public static List<Module> getModules(HttpRouterConfig config) {
-		List<Module> modules = Lists.newArrayList(new HttpRouterModule(config));
+		List<Module> modules = Lists.newArrayList(new ProdModule(config));
 		return modules;
 	}
 }
