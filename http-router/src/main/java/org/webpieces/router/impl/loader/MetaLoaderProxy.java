@@ -4,7 +4,7 @@ import org.webpieces.router.impl.RouteMeta;
 
 public interface MetaLoaderProxy {
 
-	void loadControllerIntoMeta(RouteMeta meta, String controllerStr, String methodStr,
+	void loadControllerIntoMeta(RouteMeta meta, ResolvedMethod method,
 			boolean isInitializingAllControllers);
 	
 }

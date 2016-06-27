@@ -16,8 +16,8 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
-import org.webpieces.router.impl.loader.MetaLoaderProxy;
 import org.webpieces.router.impl.loader.ClassForName;
+import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Guice;
@@ -32,12 +32,12 @@ public class RouteLoader {
 	protected RouterBuilder routerBuilder;
 	private RouteInvoker invoker;
 
-	private ControllerFinder controllerFinder;
+	private ControllerLoader controllerFinder;
 
 	@Inject
 	public RouteLoader(HttpRouterConfig config, 
 						RouteInvoker invoker,
-						ControllerFinder controllerFinder) {
+						ControllerLoader controllerFinder) {
 		this.config = config;
 		this.invoker = invoker;
 		this.controllerFinder = controllerFinder;

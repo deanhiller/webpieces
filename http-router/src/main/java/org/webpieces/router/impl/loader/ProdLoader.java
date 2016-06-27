@@ -23,10 +23,14 @@ public class ProdLoader implements MetaLoaderProxy {
 		Class<?> clazz = classLoader.clazzForName(controllerClassFullName);
 		return injector.getInstance(clazz);
 	}
+	
 	@Override
-	public void loadControllerIntoMeta(RouteMeta meta, String controllerStr, String methodStr,
+	public void loadControllerIntoMeta(RouteMeta meta, ResolvedMethod method,
 			boolean isInitializingAllControllers) {
 		try {
+			String controllerStr = method.getControllerStr();
+			String methodStr = method.getMethodStr();
+			
 			Injector injector = meta.getInjector();
 			Object controllerInst = createController(injector, controllerStr);
 

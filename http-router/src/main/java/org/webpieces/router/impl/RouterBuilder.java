@@ -9,7 +9,7 @@ import org.webpieces.router.api.HttpFilter;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;
-import org.webpieces.router.impl.loader.MetaLoaderProxy;
+import org.webpieces.router.impl.loader.ControllerLoader;
 
 import com.google.inject.Injector;
 
@@ -22,11 +22,11 @@ public class RouterBuilder implements Router {
 	
 	private final RouteInfo info;
 	private ReverseRoutes reverseRoutes;
-	private ControllerFinder finder;
+	private ControllerLoader finder;
 
 	private String routerPath;
 
-	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerFinder finder) {
+	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder) {
 		this.routerPath = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
