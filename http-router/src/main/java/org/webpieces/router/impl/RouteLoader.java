@@ -16,7 +16,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
-import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.MetaLoaderProxy;
 import org.webpieces.router.impl.loader.ClassForName;
 import org.webpieces.util.file.VirtualFile;
 
@@ -32,15 +32,15 @@ public class RouteLoader {
 	protected RouterBuilder routerBuilder;
 	private RouteInvoker invoker;
 
-	private ControllerLoader controllerLoader;
+	private ControllerFinder controllerFinder;
 
 	@Inject
 	public RouteLoader(HttpRouterConfig config, 
 						RouteInvoker invoker,
-						ControllerLoader controllerLoader) {
+						ControllerFinder controllerFinder) {
 		this.config = config;
 		this.invoker = invoker;
-		this.controllerLoader = controllerLoader;
+		this.controllerFinder = controllerFinder;
 	}
 	
 	public WebAppMeta load(ClassForName loader) {
@@ -82,14 +82,16 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
 		log.info("adding routes");
 		
-		routerBuilder = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), controllerLoader, injector);
+		routerBuilder = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), controllerFinder);
 		
 		for(RouteModule module : rm.getRouteModules()) {
 			Class<?> clazz = module.getClass();
 			String packageName = getPackage(clazz);
 			RouterBuilder.currentPackage.set(packageName);
+			RouterBuilder.injector.set(injector);
 			module.configure(routerBuilder, packageName);
 			RouterBuilder.currentPackage.set(null);
+			RouterBuilder.injector.set(null);
 		}
 		
 		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
@@ -139,7 +141,7 @@ public class RouteLoader {
 	}
 
 	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {
-		routerBuilder.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
+		controllerFinder.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
 	}
 
 	public MatchResult fetchNotFoundRoute() {

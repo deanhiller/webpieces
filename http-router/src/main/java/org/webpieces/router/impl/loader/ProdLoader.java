@@ -8,7 +8,7 @@ import org.webpieces.router.impl.RouteMeta;
 import com.google.inject.Injector;
 
 @Singleton
-public class ProdLoader implements ControllerLoader {
+public class ProdLoader implements MetaLoaderProxy {
 
 	private MetaLoader loader;
 	private ClassForName classLoader;
@@ -24,9 +24,10 @@ public class ProdLoader implements ControllerLoader {
 		return injector.getInstance(clazz);
 	}
 	@Override
-	public void loadControllerIntoMeta(RouteMeta meta, Injector injector, String controllerStr, String methodStr,
+	public void loadControllerIntoMeta(RouteMeta meta, String controllerStr, String methodStr,
 			boolean isInitializingAllControllers) {
 		try {
+			Injector injector = meta.getInjector();
 			Object controllerInst = createController(injector, controllerStr);
 
 			loader.loadInstIntoMeta(meta, controllerInst, methodStr);

@@ -9,7 +9,7 @@ import org.webpieces.router.api.HttpFilter;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;
-import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.MetaLoaderProxy;
 
 import com.google.inject.Injector;
 
@@ -18,20 +18,19 @@ public class RouterBuilder implements Router {
 	private static final Logger log = LoggerFactory.getLogger(RouterBuilder.class);
 	
 	public static ThreadLocal<String> currentPackage = new ThreadLocal<>();
+	public static ThreadLocal<Injector> injector = new ThreadLocal<>();
 	
 	private final RouteInfo info;
 	private ReverseRoutes reverseRoutes;
-	private Injector injector;
-	private ControllerLoader loader;
+	private ControllerFinder finder;
 
 	private String routerPath;
 
-	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerLoader loader, Injector injector) {
+	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerFinder finder) {
 		this.routerPath = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
-		this.injector = injector;
-		this.loader = loader;
+		this.finder = finder;
 	}
 	
 	@Override
@@ -42,35 +41,14 @@ public class RouterBuilder implements Router {
 	
 	public void addRoute(Route r, RouteId routeId) {
 		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, currentPackage.get(), false);
-		loadControllerIntoMetaObject(meta, true);
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), false);
+		finder.loadControllerIntoMetaObject(meta, true);
 
 		info.addRoute(meta);
 		
 		//POST methods have no route Id as we only redirect to GET pages
 		if(routeId != null)
 			reverseRoutes.addRoute(routeId, meta);
-	}
-	
-	/**
-	 * isInitializingAllControllers is true if in process of initializing ALL controllers and false if just being called to
-	 * initialize on controller
-	 * 
-	 * @param meta
-	 * @param isInitializingAllControllers
-	 */
-	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {
-		Route r = meta.getRoute();
-		String controllerAndMethod = r.getControllerMethodString();
-		int lastIndex = controllerAndMethod.lastIndexOf(".");
-		int fromBeginIndex = controllerAndMethod.indexOf(".");
-		String methodStr = controllerAndMethod.substring(lastIndex+1);
-		String controllerStr = controllerAndMethod.substring(0, lastIndex);
-		if(lastIndex == fromBeginIndex) {
-			controllerStr = meta.getPackageContext()+"."+controllerStr;
-		}
-		
-		loader.loadControllerIntoMeta(meta, injector, controllerStr, methodStr, isInitializingAllControllers);
 	}
 
 	@Override
@@ -116,7 +94,7 @@ public class RouterBuilder implements Router {
 		if(path == null || path.length() == 0)
 			throw new IllegalArgumentException("path must be non-null and length must be greater than 0");
 		RouteInfo subInfo = info.addScope(path);
-		return new RouterBuilder(path, subInfo, reverseRoutes, loader, injector);
+		return new RouterBuilder(path, subInfo, reverseRoutes, finder);
 	}
 
 	public RouteInfo getRouterInfo() {
@@ -137,8 +115,8 @@ public class RouterBuilder implements Router {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, currentPackage.get(), true);
-		loadControllerIntoMetaObject(meta, true);
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), true);
+		finder.loadControllerIntoMetaObject(meta, true);
 		info.setPageNotFoundRoute(meta);
 	}
 

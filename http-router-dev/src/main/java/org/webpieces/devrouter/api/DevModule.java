@@ -8,7 +8,7 @@ import org.webpieces.devrouter.impl.DevLoader;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.impl.loader.ClassForName;
-import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.MetaLoaderProxy;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -24,7 +24,7 @@ public class DevModule implements Module {
 	@Override
 	public void configure(Binder binder) {
 		binder.bind(RoutingService.class).to(DevRoutingService.class).asEagerSingleton();;
-		binder.bind(ControllerLoader.class).to(DevLoader.class).asEagerSingleton();
+		binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();
 		
 		CompileOnDemand onDemand = CompileOnDemandFactory.createCompileOnDemand(config);

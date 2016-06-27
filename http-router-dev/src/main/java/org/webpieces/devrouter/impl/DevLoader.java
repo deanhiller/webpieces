@@ -3,12 +3,12 @@ package org.webpieces.devrouter.impl;
 import javax.inject.Inject;
 
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.MetaLoaderProxy;
 import org.webpieces.router.impl.loader.MetaLoader;
 
 import com.google.inject.Injector;
 
-public class DevLoader implements ControllerLoader {
+public class DevLoader implements MetaLoaderProxy {
 
 	private MetaLoader loader;
 	private DevClassForName classLoader;
@@ -25,11 +25,12 @@ public class DevLoader implements ControllerLoader {
 	}
 
 	@Override
-	public void loadControllerIntoMeta(RouteMeta meta, Injector injector, String controllerStr, String methodStr,
+	public void loadControllerIntoMeta(RouteMeta meta, String controllerStr, String methodStr,
 			boolean isInitializingAllControllers) {
 		if(isInitializingAllControllers)
 			return;
 		
+		Injector injector = meta.getInjector();
 		Object controllerInst = createController(injector, controllerStr);
 		loader.loadInstIntoMeta(meta, controllerInst, methodStr);		
 	}

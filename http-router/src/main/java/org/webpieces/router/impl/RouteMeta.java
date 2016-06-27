@@ -8,6 +8,8 @@ import java.util.regex.Matcher;
 
 import org.webpieces.router.api.dto.RouterRequest;
 
+import com.google.inject.Injector;
+
 public class RouteMeta {
 
 	private final Route route;
@@ -17,11 +19,13 @@ public class RouteMeta {
 	private boolean isNotFoundRoute;
 	//The package for the RouteModule for context(so controllers are relative to that module)
 	private String packageContext;
+	private Injector injector;
 
-	public RouteMeta(Route r, String packageContext, boolean isNotFoundRoute) {
+	public RouteMeta(Route r, Injector injector, String packageContext, boolean isNotFoundRoute) {
 		this.route = r;
 		this.isNotFoundRoute = isNotFoundRoute;
 		this.packageContext = packageContext;
+		this.injector = injector;
 	}
 
 	public Route getRoute() {
@@ -81,6 +85,10 @@ public class RouteMeta {
 
 	public String getPackageContext() {
 		return packageContext;
+	}
+
+	public Injector getInjector() {
+		return injector;
 	}
 	
 }
