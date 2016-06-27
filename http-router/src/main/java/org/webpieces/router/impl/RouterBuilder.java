@@ -17,7 +17,7 @@ public class RouterBuilder implements Router {
 
 	private static final Logger log = LoggerFactory.getLogger(RouterBuilder.class);
 	
-	public static String currentPackage;
+	public static ThreadLocal<String> currentPackage = new ThreadLocal<>();
 	
 	private final RouteInfo info;
 	private ReverseRoutes reverseRoutes;
@@ -42,7 +42,7 @@ public class RouterBuilder implements Router {
 	
 	public void addRoute(Route r, RouteId routeId) {
 		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, false);
+		RouteMeta meta = new RouteMeta(r, currentPackage.get(), false);
 		loadControllerIntoMetaObject(meta, true);
 
 		info.addRoute(meta);
@@ -67,7 +67,7 @@ public class RouterBuilder implements Router {
 		String methodStr = controllerAndMethod.substring(lastIndex+1);
 		String controllerStr = controllerAndMethod.substring(0, lastIndex);
 		if(lastIndex == fromBeginIndex) {
-			controllerStr = currentPackage+"."+controllerStr;
+			controllerStr = meta.getPackageContext()+"."+controllerStr;
 		}
 		
 		loader.loadControllerIntoMeta(meta, injector, controllerStr, methodStr, isInitializingAllControllers);
@@ -137,7 +137,7 @@ public class RouterBuilder implements Router {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, true);
+		RouteMeta meta = new RouteMeta(r, currentPackage.get(), true);
 		loadControllerIntoMetaObject(meta, true);
 		info.setPageNotFoundRoute(meta);
 	}

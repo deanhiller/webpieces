@@ -1,7 +1,9 @@
-package PACKAGE;
+package PACKAGE.example;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+
+import PACKAGE.CLASSNAMERouteId;
 
 public class CLASSNAMEController {
 
@@ -9,7 +11,7 @@ public class CLASSNAMEController {
 		return Actions.redirect(CLASSNAMERouteId.RENDER_PAGE);
 	}
 	
-	public Action render() {
+	public Action myMethod() {
 		return Actions.renderThis("hhhh");
 	}
 	

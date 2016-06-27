@@ -20,6 +20,8 @@ import org.webpieces.webserver.api.WebServerFactory;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
+import PACKAGE.example.CLASSNAMERouteModule;
+
 /**
  * Except for changing CLASSNAMEMeta inner class, changes to this one bootstrap class
  * and any classes you refer to here WILL require a restart when you are running the 
@@ -50,7 +52,7 @@ public class CLASSNAMEServer {
 		}
 		
 		public List<RouteModule> getRouteModules() {
-			return Lists.newArrayList(new CLASSNAMERoutes());
+			return Lists.newArrayList(new CLASSNAMERouteModule());
 		}
 
 		//ALL APPLICATION plugins are added to classpath as a jar and then depending on the plugin has a RouteModule

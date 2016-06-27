@@ -15,10 +15,13 @@ public class RouteMeta {
 	private Method method;
 	private List<String> methodParamNames;
 	private boolean isNotFoundRoute;
+	//The package for the RouteModule for context(so controllers are relative to that module)
+	private String packageContext;
 
-	public RouteMeta(Route r, boolean isNotFoundRoute) {
+	public RouteMeta(Route r, String packageContext, boolean isNotFoundRoute) {
 		this.route = r;
 		this.isNotFoundRoute = isNotFoundRoute;
+		this.packageContext = packageContext;
 	}
 
 	public Route getRoute() {
@@ -74,6 +77,10 @@ public class RouteMeta {
 
 	public boolean isNotFoundRoute() {
 		return isNotFoundRoute;
+	}
+
+	public String getPackageContext() {
+		return packageContext;
 	}
 	
 }

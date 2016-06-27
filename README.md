@@ -40,8 +40,7 @@ TODO:
 * Need to go back and write more api level tests to beef up the test suite
 * httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
 * need to verify host/port is being put in hello ssl packet of http client to verify it works like browsers for SNI servername(not usually needed but we may need it for testing later)
-* httprouter - need to compile with variable names -g:vars
-* httprouter - tie method param count to path param count unless @Loose is used (we should do this earlier before more and more violations happen...it's easier to loosen constraints later than tighten them up)
+* httprouter - tie method param count to path param count unless @Loose is used (we should do this earlier before more and more violations happen...it's easier to loosen constraints later than tighten them up) OR have the routes be of the format <controller>.method(param1, param2) so we can count method count
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
@@ -49,7 +48,9 @@ TODO:
 * gzip/deflate/sdch compression?
 * language
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
-* add save var names to the gradle compile for the projectTemplate so projects are much easier to keep adding to without needing annotations which can get annoying when there is too many
 * We need to wire :webpieces:test to depend on :webpieces:assemble and then run ./createProject.sh from gradle and then run that gradle build and make sure it is successful so we have a safeguard on the templates breaking
+* Need to add tests for changing the MAIN module in the main server class
+* cookie hpttOnly and the other 
+* more header support
 
 * ALPN is next!!!! 
