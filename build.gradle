@@ -72,17 +72,20 @@ subprojects {
       }
    }
 
-    task checkJavaVersion << {
-       if (!JavaVersion.current().isJava8()) {
-        String message = "ERROR: Java 1.8 required but " +
-                         JavaVersion.current() + 
-                         " found. Change your JAVA_HOME environment variable.";
-        throw new IllegalStateException(message);
-       }
-    }
+   eclipseProject {
+      doLast {
+         // https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
 
-    compileJava.dependsOn checkJavaVersion
-
+         def props = new Properties()
+         file(".settings/org.eclipse.jdt.core.prefs").withInputStream {
+            stream -> props.load(stream)
+         }
+         props.setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
+         file(".settings/org.eclipse.jdt.core.prefs").withOutputStream {
+            stream -> props.store(stream, null)
+         }
+     }
+   }
 }
 
 project(':core-channelmanager2') {

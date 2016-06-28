@@ -12,6 +12,8 @@ public class CLASSNAMEController {
 	}
 	
 	public Action myMethod() {
+		//renderThis assumes the view is the <methodName>.html file so in this case
+		//myMethod.html which must be in the same directory as the Controller
 		return Actions.renderThis("hhhh");
 	}
 	
