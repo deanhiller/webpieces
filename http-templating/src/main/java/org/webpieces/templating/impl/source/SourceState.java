@@ -1,4 +1,4 @@
-package org.webpieces.templating.impl;
+package org.webpieces.templating.impl.source;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,4 +37,7 @@ public class SourceState {
 		return scriptLineNumToHtmlLineNum;
 	}
 
+	public int getLineNumber() {
+		return currentLine;
+	}
 }

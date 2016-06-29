@@ -1,4 +1,4 @@
-package org.webpieces.templating.impl;
+package org.webpieces.templating.impl.source;
 
 import java.util.List;
 import java.util.regex.Pattern;

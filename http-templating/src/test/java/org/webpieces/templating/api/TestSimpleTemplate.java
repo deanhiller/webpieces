@@ -5,19 +5,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.templating.impl.TokenizeHelper;
+import org.webpieces.templating.impl.source.GroovySrcGenerator;
+import org.webpieces.templating.impl.source.SourceState;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import org.webpieces.templating.impl.GroovySrcGenerator;
-import org.webpieces.templating.impl.SourceState;
-import org.webpieces.templating.impl.Token;
 
 public class TestSimpleTemplate {
 
@@ -30,14 +27,18 @@ public class TestSimpleTemplate {
 	}
 	
 	@Test
-	public void testTemp() {
+	public void testTemp() throws IOException {
 
-		String source = "<html>\n<head>\n *{ This is\n\n a comment }* \n</head>\n <body>\n This is the first raw html page ${user}$\n</body>\n</html>";
+		ClassLoader cl = TestSimpleTemplate.class.getClassLoader();
+		URL resource = cl.getResource("mytestfile.xhtml");
 		
-		SourceState sourceResult = srcGen.generate(source, "Template_MyClass");
-		
-		System.out.println("result=\n"+sourceResult.getScriptSourceCode());
-		System.out.println("map="+sourceResult.getLineMapping());
+		try (InputStream str = resource.openStream()) {
+			String source = IOUtils.toString(str);
+			SourceState sourceResult = srcGen.generate(source, "Template_MyClass");
+			
+			System.out.println("result=\n"+sourceResult.getScriptSourceCode());
+			System.out.println("map="+sourceResult.getLineMapping());	
+		}
 	}
 	
 	@Test

@@ -1,4 +1,4 @@
-package org.webpieces.templating.impl;
+package org.webpieces.templating.impl.source;
 
 public enum ScriptToken {
 
