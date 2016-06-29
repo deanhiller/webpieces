@@ -148,6 +148,7 @@ project(':http-router-dev') {
 
 project(':http-templating') {
     dependencies {
+        compile 'com.google.inject:guice:4.0'
         compile project(':core-util')
         compile 'org.codehaus.groovy:groovy-all:2.4.6'
     }

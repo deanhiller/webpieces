@@ -1,3 +1,8 @@
+
+//NOTE: There is a picture on https://docs.gradle.org/current/userguide/java_plugin.html as to the default gradle targets for the java
+//and here we modify that picture a little so that jar depends on compileHtml so that compiled html files end up in the production jar
+//file.  The dev-server does not have this since it relies on the source files to begin with recompiling when changes happen
+
 allprojects {
 
 }
@@ -8,7 +13,9 @@ subprojects {
    apply plugin: 'idea'
 
    //These 2 lines make it so you don't have to use @Param annotation on 
-   //every controller method which can get quite annoying
+   //every controller method which can get quite annoying.  Instead, webpieces
+   //will just use reflection to grab the param names which is just as fast as 
+   //annotations
    [compileJava, compileTestJava]*.options.collect {options ->
      options.compilerArgs.add '-parameters'
    }
@@ -16,8 +23,7 @@ subprojects {
    buildDir = file('output')
    project.ext.fixedLibDir = file('lib')
    project.ext.stagingDir = file('staging')
-   project.ext.toStagingDir = file(new File(buildDir, project.name))
-   project.ext.toStagingLibsDir = file(new File(toStagingDir, 'lib'))
+   project.ext.toStagingDir = file(new File(buildDir, 'alljars'))
 
    repositories {
        mavenCentral()
@@ -25,6 +31,7 @@ subprojects {
    dependencies {
        testCompile 'junit:junit:4.11'
 
+       //add global dependencies for all projects here....
        compile 'javax.inject:javax.inject:1'
        compile 'com.google.inject:guice:4.0'
        compile 'org.slf4j:slf4j-api:1.7.5'
@@ -34,12 +41,14 @@ subprojects {
        compile fileTree(dir: 'lib', include: '*.jar')
    }
 
-   //let's at least copy all jars to a single directory to use in creating an application...
-   //you may delete if you don't need this
-   task syncJars(type: Sync) {
+   //This copies new jars over from ivy/maven and project/lib and finally our built up jar so all jars are in
+   //one output directory AND it deletes jars in there that are no longer part of any of those locations as well since
+   //it is a task of type: Sync
+   task syncJars(type: Sync, dependsOn: 'jar') {
        from(configurations.compile) {}
        from(fixedLibDir) {}
-       into toStagingLibsDir
+       from(libsDir) {}
+       into toStagingDir
    }
 
    assemble.dependsOn('syncJars')
@@ -54,14 +63,17 @@ subprojects {
 
 project(':APPNAME') {
     dependencies {
-        //add dependencies here
-        //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer to include those
+        //add maven dependencies here
+        //compile 'javax.inject:javax.inject:1'
+
+        //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those
         //source paths or it will not recompile that code as it changes
     }
 }
 
 project(':dev-server') {
     dependencies {
+        //add dev-server only dependencies here if you have any(you shouldn't most likely)
         compile project(':APPNAME')
     }
 }

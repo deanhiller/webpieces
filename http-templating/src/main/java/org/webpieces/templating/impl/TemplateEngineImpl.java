@@ -46,4 +46,8 @@ public class TemplateEngineImpl implements TemplateEngine {
 		writer.writeTo(strWriter);
 		return strWriter.toString();
 	}
+
+	@Override
+	public void createGroovySource(String resourcePath) {
+	}
 }
