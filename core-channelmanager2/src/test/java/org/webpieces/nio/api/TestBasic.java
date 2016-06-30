@@ -4,8 +4,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,7 +11,6 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.util.threading.NamedThreadFactory;
 
 public class TestBasic {
 
@@ -51,9 +48,11 @@ public class TestBasic {
 	}
 
 	private ChannelManager createSvrChanMgr(String name) {
-		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(name));
+		//you can switch to multithreaded version and use this line...
+		//ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(name));
+		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), executor);
+		ChannelManager svrMgr = factory.createSingleThreadedChanMgr(name+"Mgr", new BufferCreationPool());
 		return svrMgr;
 	}
 }
