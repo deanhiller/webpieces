@@ -2,7 +2,12 @@
 
 # Package Files #
 */output
+output
 /bin
+*/bin
+.project
+.classpath
+.settings
 tmp/
 /eclipse/
 *.pyc
