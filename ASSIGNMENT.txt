@@ -1,3 +1,17 @@
+
+#1 ASSIGNMENT: step through TestBasic and learn the ChannelManager api
+
+#2 ASSIGNMENT: Create a main that creates a server using the apis learned in #1 above.  Create a client that has a for loop and sends data to that server and the server
+               should send echo the data back to the client and the client should print that data
+
+#3 ASSIGNMENT: (Scala, Java, Guave, etc...futures)  Create a program and a class called Service.java and Future.java where Service.java has 
+               method public Future returnValueFromThread(int value) and
+               then in that method return the Future, AND spin up a thread.  In that thread, call sleep(5000) then write a value to the 
+               Future.  Then have your program listen for the value.  Next create a method where the Future value is set in the method BEFORE it
+               is returned to the client
+
+#4 ASSIGNMENT: implement async server manager on top of channel manager (easier to explain once you are done with ASSIGNMENT #2)
+
 This assignment is to use the ChannelManager project but wrap it in an interface so users can just add a DataListener and receive Data from any sockets that connect in to the server.  To do this, you need to understand a little of the channelmanager api like so
 
 TCPServerChannel channel = channelManager.createTCPServerChannel();
