@@ -8,6 +8,6 @@ ASSIGNMENT #2 - implement ByteBufferDataWrapper with tests
 
 ASSIGNMENT #3 - implement response parsing on branch assignment/ImplementResponseParsing
 
-ASSIGNMENT #4 - implement Async server on branch assignment/implementAsyncServerProject
+ASSIGNMENT #4 - move over and do assignments from assignment/implementAsyncServerProject
 
 ASSIGNMENT #5 - implement HttpProxy Server
