@@ -17,12 +17,13 @@ import org.junit.Test;
  */
 public class ByteCacheTest extends AbstractCompileTest {
 
-	File byteCodeControllerFile = new File(byteCodeCacheDir, "org.webpieces.compiler.bytecache.ByteCacheController");
-	File byteCodeEnumFile = new File(byteCodeCacheDir, "org.webpieces.compiler.bytecache.SomeRouteId");
+	String packageStr = "org.webpieces.compiler.bytecache";
+	File byteCodeControllerFile = new File(byteCodeCacheDir, packageStr + ".ByteCacheController");
+	File byteCodeEnumFile = new File(byteCodeCacheDir, packageStr + ".ByteCacheRouteId");
 	
 	@Override
 	protected String getPackageFilter() {
-		return "org.webpieces.compiler.bytecache";
+		return packageStr;
 	}
 	
 	@After

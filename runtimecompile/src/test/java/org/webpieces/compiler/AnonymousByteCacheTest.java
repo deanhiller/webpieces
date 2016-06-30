@@ -1,5 +1,6 @@
 package org.webpieces.compiler;
 
+import java.io.File;
 import java.util.concurrent.Callable;
 
 import org.junit.After;
@@ -7,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemandFactory;
+import org.webpieces.compiler.impl.test.ForTestRouteId;
 
 /**
  * NOTE: I am not sure we want it to cache byte code only on class loading rather than compiling but then again if we are
@@ -19,48 +21,49 @@ import org.webpieces.compiler.api.CompileOnDemandFactory;
  */
 public class AnonymousByteCacheTest extends AbstractCompileTest {
 
-//	File byteCodeControllerFile = new File(byteCodeCacheDir, "org.webpieces.compiler.bytecache.ByteCacheController");
-//	File byteCodeEnumFile = new File(byteCodeCacheDir, "org.webpieces.compiler.bytecache.SomeRouteId");
+	String packageStr = "org.webpieces.compiler.anonymous";
+	File byteCodeControllerFile = new File(byteCodeCacheDir, packageStr + ".AnonymousController");
+	File byteCodeEnumFile = new File(byteCodeCacheDir, packageStr + ".AnonymousRouteId");
 	
 	@Override
 	protected String getPackageFilter() {
-		return "org.webpieces.compiler.anonymous";
+		return packageStr;
 	}
 	
 	@After
 	public void tearDown() {
-//		byteCodeControllerFile.delete();
-//		byteCodeEnumFile.delete();
+		byteCodeControllerFile.delete();
+		byteCodeEnumFile.delete();
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testByteCodeExistsAtCorrectTime() throws Exception {
 		
-//		Assert.assertFalse(byteCodeControllerFile.exists());
-//		Assert.assertFalse(byteCodeEnumFile.exists());
+		Assert.assertFalse(byteCodeControllerFile.exists());
+		Assert.assertFalse(byteCodeEnumFile.exists());
 		
-		log.info("loading class SomeRouterModule");
 		//DO NOT CALL Classname.getClass().getName() so that we don't pre-load it from the default classloader and
 		//instead just tediously form the String ourselves...
-		String controller = getPackageFilter()+".SomeRouterModule";
+		String controller = getPackageFilter()+".AnonymousController";
+		log.info("loading class "+controller);
 		Class c = compiler.loadClass(controller);
 
-//		Assert.assertTrue(byteCodeControllerFile.exists());
-//		Assert.assertFalse(byteCodeEnumFile.exists());		
+		Assert.assertTrue(byteCodeControllerFile.exists());
+		//The enum is not compiled yet...it is on-demand compiled later...
+		Assert.assertFalse(byteCodeEnumFile.exists());		
 		
 		log.info("loaded");
-		Callable<Integer> callable = (Callable<Integer>) invokeMethod(c, "getRunnable");
-		Integer value = callable.call();
-		Assert.assertEquals(new Integer(55),  value);
+		Callable<ForTestRouteId> callable = (Callable<ForTestRouteId>) invokeMethod(c, "getRunnable");
+		ForTestRouteId value = callable.call();
 		
 		CompileConfig config = createCompileConfig();
 		//now create a new compileOnDemand which will use the bytecode cache...
 		compiler = CompileOnDemandFactory.createCompileOnDemand(config);
 		
 		compiler.loadClass(controller, true);
-//		Assert.assertTrue(byteCodeControllerFile.exists());
-//		Assert.assertTrue(byteCodeEnumFile.exists());
+		Assert.assertTrue(byteCodeControllerFile.exists());
+		Assert.assertTrue(byteCodeEnumFile.exists());
 		
 	}
 

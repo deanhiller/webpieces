@@ -8,7 +8,7 @@ public class ByteCacheController {
 	}
 	
 	public ForTestAction createUserForm() {
-		return new ForTestAction(SomeRouteId.GET_CREATE_USER_PAGE);
+		return new ForTestAction(ByteCacheRouteId.GET_CREATE_USER_PAGE);
 	}
 	
 }
