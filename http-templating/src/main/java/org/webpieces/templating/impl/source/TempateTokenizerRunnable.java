@@ -3,7 +3,7 @@ package org.webpieces.templating.impl.source;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokenizeHelper {
+public class TempateTokenizerRunnable {
 
 	private String pageSource;
 	private ScriptToken state = ScriptToken.PLAIN;
@@ -13,7 +13,7 @@ public class TokenizeHelper {
 	private List<Integer> newLineMarks = new ArrayList<>();
 	private List<Token> tokens = new ArrayList<>();
 	
-	public TokenizeHelper(String source) {
+	public TempateTokenizerRunnable(String source) {
 		if(source.contains("\r"))
 			throw new IllegalArgumentException("We rely on source input never containing \\r and only containing \\n for newlines");
 		this.pageSource = source;

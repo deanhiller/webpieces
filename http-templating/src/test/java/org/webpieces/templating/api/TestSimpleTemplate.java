@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.templating.impl.source.GroovySrcGenerator;
+import org.webpieces.templating.impl.source.GroovyScriptGenerator;
 import org.webpieces.templating.impl.source.SourceState;
 
 import com.google.inject.Guice;
@@ -18,17 +18,16 @@ import com.google.inject.Injector;
 
 public class TestSimpleTemplate {
 
-	private GroovySrcGenerator srcGen;
+	private GroovyScriptGenerator srcGen;
 
 	@Before
 	public void setup() {
 		Injector injector = Guice.createInjector(new TemplateModule());
-		srcGen = injector.getInstance(GroovySrcGenerator.class);
+		srcGen = injector.getInstance(GroovyScriptGenerator.class);
 	}
 	
 	@Test
 	public void testTemp() throws IOException {
-
 		ClassLoader cl = TestSimpleTemplate.class.getClassLoader();
 		URL resource = cl.getResource("mytestfile.xhtml");
 		

@@ -3,7 +3,7 @@ package org.webpieces.templating.impl.source;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class SourceCreator {
+public class GroovySrcWriter {
 
 	//Some compilers can't deal with long lines so let's max at 40k
     protected static final int maxLineLength = 30000;
@@ -18,7 +18,7 @@ public class SourceCreator {
         //cleanStackTrace is looking in TemplateLoader.templates
 
         sourceCode.print(className);
-        sourceCode.println(" extends play.templates.GroovyTemplate.ExecutableTemplate {");
+        sourceCode.println(" extends org.webpieces.templating.impl.GroovyTemplateSuperclass {");
         sourceCode.println("  public Object run() {");
         sourceCode.println("    use(org.webpieces.templates.JavaExtensions) {");
 //        for (String n : extensionsClassnames) {

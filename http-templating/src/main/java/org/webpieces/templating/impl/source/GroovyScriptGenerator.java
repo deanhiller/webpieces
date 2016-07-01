@@ -6,16 +6,15 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.templating.impl.TemplateTokenizer;
 
-public class GroovySrcGenerator {
+public class GroovyScriptGenerator {
 
-	private static final Logger log = LoggerFactory.getLogger(GroovySrcGenerator.class);
+	private static final Logger log = LoggerFactory.getLogger(GroovyScriptGenerator.class);
 	private TemplateTokenizer tokenizer;
-	private SourceCreator creator;
+	private GroovySrcWriter creator;
 
 	@Inject
-	public GroovySrcGenerator(TemplateTokenizer tokenizer, SourceCreator creator) {
+	public GroovyScriptGenerator(TemplateTokenizer tokenizer, GroovySrcWriter creator) {
 		this.tokenizer = tokenizer;
 		this.creator = creator;
 	}
