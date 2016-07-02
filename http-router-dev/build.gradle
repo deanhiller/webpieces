@@ -1,5 +1,5 @@
 dependencies {
     compile project(':http-router')
     compile project(':runtimecompile')
-    testCompile project(':core-mock')
+    testCompile project(':core/core-mock')
 }

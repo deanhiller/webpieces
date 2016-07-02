@@ -1,5 +1,5 @@
 dependencies {
     compile 'com.google.inject:guice:4.0'
     compile 'org.codehaus.groovy:groovy-all:2.4.6'
-    compile project(':core-util')
+    compile project(':core/core-util')
 }

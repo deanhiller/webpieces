@@ -1,0 +1,3 @@
+dependencies {
+    compile project(':core/core-util'), project(':core/core-datawrapper'), project(':core/core-ssl')
+}

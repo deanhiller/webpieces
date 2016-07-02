@@ -1,4 +1,4 @@
 dependencies {
     compile 'com.google.inject:guice:4.0'
-    compile project(':core-util')
+    compile project(':core/core-util')
 }
