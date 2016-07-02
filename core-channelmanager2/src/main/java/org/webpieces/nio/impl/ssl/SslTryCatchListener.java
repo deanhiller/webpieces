@@ -21,7 +21,7 @@ public class SslTryCatchListener implements DataListener {
 		try {
 			listener.incomingData(channel, b);
 		} catch (Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 
@@ -29,7 +29,7 @@ public class SslTryCatchListener implements DataListener {
 		try {
 			listener.farEndClosed(channel);
 		} catch (Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 
@@ -37,7 +37,7 @@ public class SslTryCatchListener implements DataListener {
 		try {
 			listener.failure(channel, data, e);
 		} catch (Throwable ee) {
-			log.warn("Exception processing other exception", ee);
+			log.error("Exception processing other exception", ee);
 		}
 	}
 
@@ -45,7 +45,7 @@ public class SslTryCatchListener implements DataListener {
 		try {
 			listener.applyBackPressure(channel);
 		} catch (Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 
@@ -53,7 +53,7 @@ public class SslTryCatchListener implements DataListener {
 		try {
 			listener.releaseBackPressure(channel);
 		} catch (Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 

@@ -53,7 +53,7 @@ TODO:
 * cookie hpttOnly and the other 
 * more header support
 * search on Charset.defaultCharset, Charset.forName, StandardCharsets and unify them so it is configurable
-* search on log.warn and change all to log.error as all are really errors
+* (work on right now)search on log.error and change all to log.error as all are really errors
 * add a lot of pretty print objects/json stuff in the toString so when debugging, there is many less clicks to see the data!!!  it is just right there
 * come up with the http 500 strategy for dev server AND for production server
 * break out build.gradle file into multiple ones so as project grows, it scales better

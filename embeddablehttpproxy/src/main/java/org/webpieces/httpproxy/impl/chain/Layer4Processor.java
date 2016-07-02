@@ -126,7 +126,7 @@ public class Layer4Processor implements HttpRequestListener {
 
 	@Override
 	public void applyWriteBackPressure(FrontendSocket channel) {
-		log.warn("NEED APPLY BACKPRESSURE", new RuntimeException());
+		log.error("NEED APPLY BACKPRESSURE", new RuntimeException());
 	}
 
 	@Override

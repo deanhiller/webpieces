@@ -71,7 +71,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 			try {
 				runnable.run();
 			} catch(Throwable e) {
-				log.warn("Uncaught Exception", e);
+				log.error("Uncaught Exception", e);
 			} finally {
 				executeNext(key);
 			}

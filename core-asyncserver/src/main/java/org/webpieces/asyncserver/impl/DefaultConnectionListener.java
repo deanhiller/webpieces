@@ -70,7 +70,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 
 	@Override
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.warn("exception from client connecting in. channel="+channel, e);
+		log.error("exception from client connecting in. channel="+channel, e);
 	}
 
 	public void enableOverloadMode(ByteBuffer overloadResponse) {

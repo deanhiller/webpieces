@@ -123,7 +123,7 @@ public class TestExampleSessions extends TestCase
          */
         public void failed(RegisterableChannel channel, Throwable e)
         {
-            log.warn("", e);
+            log.error("", e);
         }
         
     }

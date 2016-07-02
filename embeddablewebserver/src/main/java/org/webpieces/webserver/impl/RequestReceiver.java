@@ -46,7 +46,7 @@ public class RequestReceiver implements HttpRequestListener {
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
-				log.warn("This webserver has not thought about supporting header="
+				log.error("This webserver has not thought about supporting header="
 						+h.getName()+" quite yet.  value="+h.getValue()+" Please let us know and we can quickly add support");
 		}
 		
@@ -77,7 +77,7 @@ public class RequestReceiver implements HttpRequestListener {
 
 	@Override
 	public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
-		log.warn("need send bad server response", exc);
+		log.error("need send bad server response", exc);
 	}
 
 	@Override

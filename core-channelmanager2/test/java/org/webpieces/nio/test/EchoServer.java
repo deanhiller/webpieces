@@ -69,7 +69,7 @@ public class EchoServer implements DataListener, ConnectionListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.warn("exception", e);
+		log.error("exception", e);
 	}
 	
 	public String toString() {
@@ -86,7 +86,7 @@ public class EchoServer implements DataListener, ConnectionListener {
 	}
 
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-		log.warning(channel+"Data not received");
+		log.erroring(channel+"Data not received");
 	}
 
 }

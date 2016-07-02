@@ -63,7 +63,7 @@ public class EventClient implements ConnectionCallback, DataListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.warn(channel+"Exception", e);
+		log.error(channel+"Exception", e);
 	}
 
 	public void incomingData(Channel channel, ByteBuffer chunk) throws IOException {
@@ -72,11 +72,11 @@ public class EventClient implements ConnectionCallback, DataListener {
 	}
 
 	public void farEndClosed(Channel channel) {
-		log.warning(channel+"Should never have closed from far end");
+		log.erroring(channel+"Should never have closed from far end");
 	}
 
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-		log.warning(channel+"Data not received");
+		log.erroring(channel+"Data not received");
 	}
 
 }

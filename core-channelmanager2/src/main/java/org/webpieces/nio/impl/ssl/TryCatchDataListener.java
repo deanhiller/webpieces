@@ -27,7 +27,7 @@ public class TryCatchDataListener implements DataListener {
 		try {
 			dataListener.incomingData(channel, b);
 		} catch(Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 
@@ -36,7 +36,7 @@ public class TryCatchDataListener implements DataListener {
 		try {
 			dataListener.farEndClosed(channel);
 		} catch(Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 
@@ -45,7 +45,7 @@ public class TryCatchDataListener implements DataListener {
 		try {
 			dataListener.failure(channel, data, e);
 		} catch(Throwable ee) {
-			log.warn("Exception caught trying to handle the other exception(the other exception IS more important)", ee);
+			log.error("Exception caught trying to handle the other exception(the other exception IS more important)", ee);
 		}
 	}
 
@@ -54,7 +54,7 @@ public class TryCatchDataListener implements DataListener {
 		try {
 			dataListener.applyBackPressure(channel);
 		} catch(Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class TryCatchDataListener implements DataListener {
 		try {
 			dataListener.releaseBackPressure(channel);
 		} catch(Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 		}
 	}
 

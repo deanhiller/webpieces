@@ -64,7 +64,7 @@ public class EchoClient {
 				recorder.recordBytes(size);
 			}
 		} catch(IOException e) {
-			log.warn("exception reading", e);
+			log.error("exception reading", e);
 		}
 	}
 	
@@ -83,9 +83,9 @@ public class EchoClient {
 //				}
 			}
 		} catch(IOException e) {
-			log.warn("exception reading", e);
+			log.error("exception reading", e);
 //		} catch (InterruptedException e) {
-//			log.warn("exception", e);
+//			log.error("exception", e);
 		}
 	}
 

@@ -201,7 +201,7 @@ public class DatagramChannelImpl implements DatagramChannel
             if(e instanceof SocketException && shutDownThread)
                 return;
             
-            log.warn(id+"Exception processing packet", e);
+            log.error(id+"Exception processing packet", e);
             fireFailure(fromAddr, buffer, e);
         }
     }
@@ -214,10 +214,10 @@ public class DatagramChannelImpl implements DatagramChannel
             listener.incomingData(c, fromAddr, b);
             
             if(b.remaining() > 0) {
-                log.warn(id+"Client="+listener+" did not read all the data from the buffer");
+                log.error(id+"Client="+listener+" did not read all the data from the buffer");
             }
         } catch(Throwable e) {
-            log.warn(id+"Exception in client's listener", e);
+            log.error(id+"Exception in client's listener", e);
         }
     }
 
@@ -229,7 +229,7 @@ public class DatagramChannelImpl implements DatagramChannel
         try {
             listener.failure(this, fromAddr, data, e);
         } catch(Throwable ee) {
-            log.warn(id+"Exception notifying client of exception", ee);
+            log.error(id+"Exception notifying client of exception", ee);
         }
     }
 

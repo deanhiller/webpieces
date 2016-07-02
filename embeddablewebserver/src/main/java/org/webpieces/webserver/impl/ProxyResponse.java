@@ -129,7 +129,7 @@ public class ProxyResponse implements ResponseStreamer {
 		String dateStr = formatter.print(now)+" GMT";
 
 		//in general, nearly all these headers are desired..
-		log.warn("Add these headers to Frontend to be re-used via a headerAdd plugin which is added by default but can be removed for users not wanting it");
+		log.error("Add these headers to Frontend to be re-used via a headerAdd plugin which is added by default but can be removed for users not wanting it");
 		Header date = new Header(KnownHeaderName.DATE, dateStr);
 		response.addHeader(date);
 
@@ -174,7 +174,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void failure(Throwable e) {
-		log.warn("Exception", e);
+		log.error("Exception", e);
 	}
 
 }

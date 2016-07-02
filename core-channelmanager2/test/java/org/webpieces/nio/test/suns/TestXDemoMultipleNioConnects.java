@@ -101,7 +101,7 @@ public class TestXDemoMultipleNioConnects extends TestCase {
 						break;
 				}
 			} catch (Exception e) {
-				log.warn("test failure", e);
+				log.error("test failure", e);
 				t = e;
 			}
 		}

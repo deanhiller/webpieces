@@ -87,7 +87,7 @@ public class TestBasicSslClientServer {
 
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
-			log.warn("client failed", e);
+			log.error("client failed", e);
 		}
 
 		@Override

@@ -21,7 +21,7 @@ public class CatchResponseListener implements ResponseListener {
 		try {
 			listener.incomingResponse(resp, isComplete);
 		} catch(Throwable e) {
-			log.warn("exception", e);
+			log.error("exception", e);
 		}
 	}
 
@@ -30,7 +30,7 @@ public class CatchResponseListener implements ResponseListener {
 		try {
 			listener.incomingChunk(chunk, isLastChunk);
 		} catch(Throwable e) {
-			log.warn("exception", e);
+			log.error("exception", e);
 		}
 	}
 
@@ -39,7 +39,7 @@ public class CatchResponseListener implements ResponseListener {
 		try {
 			listener.failure(e);
 		} catch(Throwable ee) {
-			log.warn("exception", ee);
+			log.error("exception", ee);
 		}			
 	}
 

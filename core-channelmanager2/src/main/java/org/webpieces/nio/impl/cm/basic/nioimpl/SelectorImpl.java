@@ -124,7 +124,7 @@ public class SelectorImpl implements Select
                     SelectorImpl.this.notifyAll();
                 }
             } catch (Exception e) {
-                log.warn("Exception on ConnectionManager thread", e);
+                log.error("Exception on ConnectionManager thread", e);
             }
         }
     }

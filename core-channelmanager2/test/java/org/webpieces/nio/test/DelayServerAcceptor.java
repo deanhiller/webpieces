@@ -54,7 +54,7 @@ public class DelayServerAcceptor implements ConnectionListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.warn("exception", e);
+		log.error("exception", e);
 	}
 
 	public void closeAllSockets() throws IOException {

@@ -24,7 +24,7 @@ public abstract class ChannelRegistrationListener implements EventListener {
 			run();
 			future.complete(null);
 		} catch(Throwable e) {
-			log.warn("Exception completing", e);
+			log.error("Exception completing", e);
 			future.completeExceptionally(e);
 		}
 	}

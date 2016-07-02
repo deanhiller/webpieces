@@ -227,7 +227,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
-			log.warn("Failure on channel="+channel, e);
+			log.error("Failure on channel="+channel, e);
 			while(!responsesToComplete.isEmpty()) {
 				ResponseListener listener = responsesToComplete.poll();
 				if(listener != null) {

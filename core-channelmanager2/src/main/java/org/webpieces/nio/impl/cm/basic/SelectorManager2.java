@@ -95,7 +95,7 @@ public class SelectorManager2 implements SelectorListener {
             selector.stopPollingThread();
         } catch(Throwable e) {
             //there is nothing a client can do to a recover from this so swallow it for them
-            log.warn("Exception stopping selector", e);
+            log.error("Exception stopping selector", e);
         }
 	}
 	

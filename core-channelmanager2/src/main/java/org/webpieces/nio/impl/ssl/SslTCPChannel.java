@@ -171,9 +171,9 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				List<String> sniServerNames = result.getNames();
 				
 				if(sniServerNames.size() == 0) {
-					log.warn("SNI servernames missing from client.  channel="+channel.getRemoteAddress());
+					log.error("SNI servernames missing from client.  channel="+channel.getRemoteAddress());
 				} else if(sniServerNames.size() > 1) {
-					log.warn("SNI servernames are too many. names="+sniServerNames+" channel="+channel.getRemoteAddress());
+					log.error("SNI servernames are too many. names="+sniServerNames+" channel="+channel.getRemoteAddress());
 				}
 				
 				String host = sniServerNames.get(0);

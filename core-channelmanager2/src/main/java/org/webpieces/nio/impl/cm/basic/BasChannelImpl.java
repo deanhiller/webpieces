@@ -387,7 +387,7 @@ public abstract class BasChannelImpl
 	        CloseRunnable runnable = new CloseRunnable(this, future);
 	        unqueueAndFailWritesThenClose(runnable);
         } catch(Exception e) {
-            log.warn(this+"Exception closing channel", e);
+            log.error(this+"Exception closing channel", e);
             future.completeExceptionally(e);
         }
     	return future;

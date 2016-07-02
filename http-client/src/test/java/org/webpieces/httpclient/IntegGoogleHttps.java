@@ -90,7 +90,7 @@ public class IntegGoogleHttps {
 	}
 
 	private Void reportException(HttpSocket socket, Throwable e) {
-		log.warn("exception on socket="+socket, e);
+		log.error("exception on socket="+socket, e);
 		return null;
 	}
 
@@ -109,7 +109,7 @@ public class IntegGoogleHttps {
 
 		@Override
 		public void failure(Throwable e) {
-			log.warn("exception", e);
+			log.error("exception", e);
 		}
 	}
 	

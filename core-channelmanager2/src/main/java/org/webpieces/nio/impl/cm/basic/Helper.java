@@ -54,19 +54,19 @@ public final class Helper {
 //			} catch(CancelledKeyException e) {
 //				log.log(Level.INFO, "Cancelled key may be normal", e);
 			} catch(IOException e) {
-				log.warn(key.attachment()+"Processing of key failed, closing channel", e);
+				log.error(key.attachment()+"Processing of key failed, closing channel", e);
 				try {
 					if(key != null) 
 						key.channel().close();
 				} catch(Throwable ee) {
-					log.warn(key.attachment()+"Close of channel failed", ee);
+					log.error(key.attachment()+"Close of channel failed", ee);
 				}
 			} catch(CancelledKeyException e) {
 				//TODO: get rid of this if...else statement by fixing
 				//CancelledKeyException on linux so the tests don't fail				
 				log.trace(key.attachment()+"Processing of key failed, but continuing channel manager loop", e);				
 			} catch(Throwable e) {
-				log.warn(key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
+				log.error(key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
 				try {
 					key.cancel();
 				} catch(Throwable ee) {
@@ -141,7 +141,7 @@ public final class Helper {
 			channel.finishConnect();
 			callback.complete(channel);
 		} catch(Exception e) {
-            log.warn(key.attachment()+"Could not open connection", e);
+            log.error(key.attachment()+"Could not open connection", e);
             callback.completeExceptionally(e);
 		}
 	}
@@ -183,7 +183,7 @@ public final class Helper {
         } catch(NotYetConnectedException e) {
             //this happens in udp when I disconnect after someone had already been streaming me
             //data.  It is supposed to stop listening but selector keeps firing.
-            log.warn("Can't read until UDPChannel is connected", e);
+            log.error("Can't read until UDPChannel is connected", e);
             in.failure(channel, null, e);
 		} catch(IOException e) {
             //kept getting the following exception so I added this as protection
@@ -236,7 +236,7 @@ public final class Helper {
 		            log.trace("Exception 2", e);
 		            processBytes(key, chunk, -1, mgr);
 			} else {
-				log.warn("IO Exception unexpected", e);
+				log.error("IO Exception unexpected", e);
 				in.failure(channel, null, e);
 			}
 		}

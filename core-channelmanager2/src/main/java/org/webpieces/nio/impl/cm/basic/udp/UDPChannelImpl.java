@@ -133,7 +133,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 
 			expires = Calendar.getInstance();
 			expires.add(Calendar.SECOND, 10);
-			log.warn("PortUnreachable.  NOTICE NOTICE:  We will ignore this exc again on this channel for 10 seconds");
+			log.error("PortUnreachable.  NOTICE NOTICE:  We will ignore this exc again on this channel for 10 seconds");
 			throw new NioPortUnreachableException(e);
 		} catch (IOException e) {
 			throw new NioException(e);

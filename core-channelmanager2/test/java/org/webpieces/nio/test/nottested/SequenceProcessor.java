@@ -157,7 +157,7 @@ public class SequenceProcessor implements PacketProcessor {
 		try {
 			return notifyImpl(b, passthrough);
 		} catch(CorruptPacketException e) {
-			log.warn("Corrupt packet received", e);
+			log.error("Corrupt packet received", e);
 			clearState();
 			throw e;
 		}
@@ -170,7 +170,7 @@ public class SequenceProcessor implements PacketProcessor {
 //			//state = RECOVERING;
 //			//notifyImpl(b);
 //		} catch(RuntimeException e) {
-//			log.warn("Ignoring exception as it happened after another\n"
+//			log.error("Ignoring exception as it happened after another\n"
 //					+"exception that we will throw back.  This exception may be\n"
 //					+"a result of the first exception", e);
 //		}

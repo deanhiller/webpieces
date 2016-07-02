@@ -19,7 +19,7 @@ public class HttpProxyMain {
 			
 			proxy.start();
 		} catch(Exception e) {
-			log.warn("excpeiton", e);
+			log.error("excpeiton", e);
 		}
 	}
 }

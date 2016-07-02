@@ -138,7 +138,7 @@ public class TestCloseWhenInSelector extends TestCase {
 				}
 			} catch (Exception e) {
 				t = e;
-				log.warn("Test failure", e);
+				log.error("Test failure", e);
 			}			
 		}
 		/**

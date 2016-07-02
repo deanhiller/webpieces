@@ -26,7 +26,7 @@ public class DataListenerToParserLayer implements DataListener {
 			log.info("incoming data. size="+b.remaining()+" channel="+channel);
 			processor.deserialize(channel, b);
 		} catch(Throwable e) {
-			log.warn("Exeption processing", e);
+			log.error("Exeption processing", e);
 			sendBadResponse(channel, e, KnownStatusCode.HTTP500);
 		}
 	}
@@ -51,7 +51,7 @@ public class DataListenerToParserLayer implements DataListener {
 
 	@Override
 	public void applyBackPressure(Channel channel) {
-		log.warn("Need to apply backpressure", new RuntimeException("demonstrates how we got here"));
+		log.error("Need to apply backpressure", new RuntimeException("demonstrates how we got here"));
 		processor.applyWriteBackPressure(channel);
 	}
 

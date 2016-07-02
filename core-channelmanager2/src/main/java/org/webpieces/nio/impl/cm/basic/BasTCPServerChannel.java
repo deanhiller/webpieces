@@ -78,7 +78,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));
 			
 		} catch(Throwable e) {
-			log.warn(this+"Failed to connect", e);
+			log.error(this+"Failed to connect", e);
 			connectionListener.failed(this, e);
 		}
 	}
@@ -151,7 +151,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			channel.close();
 			super.wakeupSelector();			
         } catch(Exception e) {
-            log.warn(this+"Exception closing channel", e);
+            log.error(this+"Exception closing channel", e);
         }
 	}
 	

@@ -69,7 +69,7 @@ public class EventServer implements ConnectionListener, DataListener {
 	}
 
 	public void failed(RegisterableChannel channel, Throwable e) {
-		log.warn(channel+"Exception", e);
+		log.error(channel+"Exception", e);
 	}
 
 	/**
@@ -105,13 +105,13 @@ public class EventServer implements ConnectionListener, DataListener {
 				c.oldWrite(b);
 				b.rewind();
 			} catch(Exception e) {
-				log.warn(c+"TimerTaskException", e);
+				log.error(c+"TimerTaskException", e);
 			}
 		}
 		
 	}
 
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-		log.warning(channel+"Data not received");
+		log.erroring(channel+"Data not received");
 	}
 }

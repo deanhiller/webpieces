@@ -144,7 +144,7 @@ public class TestXPassDisconnectAfterRead extends TestCase {
 			numKeys = selector.select();
 			log.info("coming out with keys="+numKeys);
 		} catch (IOException e) {
-			log.warn("Having trouble with a channel", e);
+			log.error("Having trouble with a channel", e);
 		}
 		Set<SelectionKey> keySet = selector.selectedKeys();
 		Iterator<SelectionKey> iter = keySet.iterator();	
@@ -183,7 +183,7 @@ public class TestXPassDisconnectAfterRead extends TestCase {
 					log.info("done waiting for close, it happened");
 				}
 			} catch(Throwable e) {
-				log.warn("Processing of key failed, but continuing channel manager loop", e);
+				log.error("Processing of key failed, but continuing channel manager loop", e);
 			}
 		}
 		keySet.clear();

@@ -32,7 +32,7 @@ public class CloseRunnable {
             
             handler.complete(channel);
 		} catch(Exception e) {
-			log.warn(channel+"Exception occurred", e);
+			log.error(channel+"Exception occurred", e);
 			handler.completeExceptionally(e);
 		}
 		return true;

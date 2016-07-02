@@ -46,7 +46,7 @@ public class BufferCreationPool implements BufferPool {
 	
 	public ByteBuffer nextBuffer(int minSize) {
 		if(bufferSize < minSize) {
-			log.warn("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this ");
+			log.error("minSize="+minSize+" requests is larger than the buffer size provided by this pool="+bufferSize+".  You should reconfigure this ");
 			return createBuffer(minSize);
 		}
 		

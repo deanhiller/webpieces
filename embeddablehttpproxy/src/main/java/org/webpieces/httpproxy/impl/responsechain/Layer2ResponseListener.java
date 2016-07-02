@@ -30,7 +30,7 @@ public class Layer2ResponseListener {
 	}
 
 	private Void failedWrite(FrontendSocket channel, Throwable e) {
-		log.warn("failed to respond to channel="+channel, e);
+		log.error("failed to respond to channel="+channel, e);
 		return null;
 	}
 
@@ -39,7 +39,7 @@ public class Layer2ResponseListener {
 	}
 
 	public Void processError(FrontendSocket channel, HttpRequest req, Throwable e) {
-		log.warn("could not process req="+req+" from channel="+channel+" due to exception", e);
+		log.error("could not process req="+req+" from channel="+channel+" due to exception", e);
 
 		if(e.getCause() instanceof UnresolvedAddressException) {
 			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP404);

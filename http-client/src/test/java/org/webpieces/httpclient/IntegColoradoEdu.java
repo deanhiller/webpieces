@@ -43,7 +43,7 @@ public class IntegColoradoEdu {
 	}
 
 	private static Void reportException(HttpSocket socket, Throwable e) {
-		log.warn("exception on socket="+socket, e);
+		log.error("exception on socket="+socket, e);
 		return null;
 	}
 
@@ -61,7 +61,7 @@ public class IntegColoradoEdu {
 
 		@Override
 		public void failure(Throwable e) {
-			log.warn("failed", e);
+			log.error("failed", e);
 		}
 		
 	}

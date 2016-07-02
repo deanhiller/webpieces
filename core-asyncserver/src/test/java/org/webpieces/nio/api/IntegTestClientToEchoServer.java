@@ -99,7 +99,7 @@ public class IntegTestClientToEchoServer {
 	}
 
 	private void logIt(Throwable e) {
-		log.warn("failed to write", e);
+		log.error("failed to write", e);
 	}
 
 	private void finished(Void r, Throwable e) {

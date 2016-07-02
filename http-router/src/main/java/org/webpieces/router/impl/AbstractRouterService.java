@@ -40,7 +40,7 @@ public abstract class AbstractRouterService implements RoutingService {
 		}
 
 		public void failure(Throwable e) {
-			log.warn("Exception", e);
+			log.error("Exception", e);
 			responseCb.failure(e);
 		}
 

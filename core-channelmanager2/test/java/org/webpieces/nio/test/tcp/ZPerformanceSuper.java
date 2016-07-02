@@ -202,9 +202,9 @@ public abstract class ZPerformanceSuper extends TestCase {
 				}
 			}
 		} catch(Exception e) {
-			log.warn("the exception", e);
+			log.error("the exception", e);
 		} finally {
-			log.warning("test ending*********************");
+			log.erroring("test ending*********************");
 		}
 //		long timePerConnect = result/size;
 //		log.info("time for initiating connects          ="+result2);

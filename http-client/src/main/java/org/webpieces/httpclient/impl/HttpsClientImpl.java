@@ -47,7 +47,7 @@ public class HttpsClientImpl implements HttpClient {
 	private Void fail(HttpSocket socket, ResponseListener listener, Throwable e) {
 		CompletableFuture<HttpSocket> closeSocket = socket.closeSocket();
 		closeSocket.exceptionally(ee -> {
-			log.warn("could not close socket due to exception");
+			log.error("could not close socket due to exception");
 			return socket;
 		});
 		listener.failure(e);

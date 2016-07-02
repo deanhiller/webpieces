@@ -46,7 +46,7 @@ public class Delayer implements DataListener {
 					HELPER.doneFillingBuffer(newBuffer);
 					to.oldWrite(newBuffer);
 				} catch (Exception e) {
-					log.warn("exception", e);
+					log.error("exception", e);
 				}
 			}
 			
@@ -61,7 +61,7 @@ public class Delayer implements DataListener {
 				try {
 					to.oldClose();
 				} catch (Exception e) {
-					log.warn("exception", e);
+					log.error("exception", e);
 				}
 			}
 			
@@ -69,7 +69,7 @@ public class Delayer implements DataListener {
 		timer.schedule(t, 1000);
 	}
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-		log.warning(channel+"Data not received");
+		log.erroring(channel+"Data not received");
 	}
 
 	
