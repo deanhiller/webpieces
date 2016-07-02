@@ -21,6 +21,7 @@ public class RouteImpl implements Route {
 	private final List<String> argNames;
 	private final boolean isSecure;
 	private String controllerMethodString;
+	private boolean isNotFoundRoute;
 
 	public RouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isSecure) {
 		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure);
@@ -36,7 +37,8 @@ public class RouteImpl implements Route {
 		this.controllerMethodString = controllerMethod;
 	}
 
-	public RouteImpl(String controllerMethod) {
+	public RouteImpl(String controllerMethod, boolean isNotFoundRoute) {
+		this.isNotFoundRoute = isNotFoundRoute;
 		this.path = null;
 		this.patternToMatch = null;
 		this.methods = new HashSet<>();
@@ -81,6 +83,10 @@ public class RouteImpl implements Route {
 	@Override
 	public Set<HttpMethod> getHttpMethods() {
 		return methods;
+	}
+	
+	public boolean isNotFoundRoute() {
+		return isNotFoundRoute;
 	}
 
 	@Override

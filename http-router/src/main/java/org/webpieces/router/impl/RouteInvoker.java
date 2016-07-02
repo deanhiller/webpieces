@@ -34,8 +34,7 @@ public class RouteInvoker {
 	}
 	
 	public void invoke(ReverseRoutes reverseRoutes, 
-			MatchResult result, RouterRequest req, ResponseStreamer responseCb,
-			Supplier<MatchResult> notFoundRoute) {
+			MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
 		RouteMeta meta = result.getMeta();
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
@@ -43,20 +42,20 @@ public class RouteInvoker {
 		Method method = meta.getMethod();
 
 		Object[] arguments;
-		try {
+//		try {
 			arguments = argumentTranslator.createArgs(result, req);
 //TODO: We need to render a page that says "This would be a 404 in production but in development this is an error as we assume you type
 			//in the correct urls.  Something about your url matched a route but then failed.  Details are below
 			//THEN we need tests in prod version and development version for this!!
-		} catch(NotFoundException e) {
-			result = notFoundRoute.get();
-			meta = result.getMeta();
-			obj = meta.getControllerInstance();
-			if(obj == null)
-				throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
-			method = meta.getMethod();			
-			arguments = argumentTranslator.createArgs(result, req);
-		}
+//		} catch(NotFoundException e) {
+//			result = notFoundRoute.get();
+//			meta = result.getMeta();
+//			obj = meta.getControllerInstance();
+//			if(obj == null)
+//				throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
+//			method = meta.getMethod();			
+//			arguments = argumentTranslator.createArgs(result, req);
+//		}
 		
 		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
 		
@@ -99,7 +98,7 @@ public class RouteInvoker {
 			view = new View(controllerName, methodName);
 		}
 		
-		RenderResponse resp = new RenderResponse(view);
+		RenderResponse resp = new RenderResponse(view, incomingRequestMeta.getRoute().isNotFoundRoute());
 		return resp;
 	}
 

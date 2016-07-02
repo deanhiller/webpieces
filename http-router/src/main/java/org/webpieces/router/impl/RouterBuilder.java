@@ -107,7 +107,7 @@ public class RouterBuilder implements Router {
 	
 	@Override
 	public void setNotFoundRoute(String controllerMethod) {
-		Route route = new RouteImpl(controllerMethod);
+		Route route = new RouteImpl(controllerMethod, true);
 		setNotFoundRoute(route);
 	}
 

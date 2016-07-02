@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.loader.ClassForName;
@@ -137,7 +138,20 @@ public class RouteLoader {
 	}
 	
 	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, Supplier<MatchResult> notFoundRoute) {
-		invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb, notFoundRoute);
+		try {
+			//This makes us consistent with other NotFoundExceptions
+			if(result.getMeta().getRoute().isNotFoundRoute())
+				notFound(null, "No route found for path="+req.relativePath, notFoundRoute, req, responseCb);
+
+			invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb);
+		} catch(NotFoundException e) {
+			notFound(e, e.getMessage(), notFoundRoute, req, responseCb);
+		}
+	}
+
+	private void notFound(NotFoundException e, String message, Supplier<MatchResult> notFoundRoute, RouterRequest req, ResponseStreamer responseCb) {
+		MatchResult result = notFoundRoute.get();
+		invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb);
 	}
 
 	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {

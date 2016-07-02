@@ -21,4 +21,5 @@ public interface Route {
 
 	Set<HttpMethod> getHttpMethods();
 
+	boolean isNotFoundRoute();
 }

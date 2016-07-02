@@ -25,10 +25,14 @@ public class GroovyScriptGenerator {
 		
 		List<Token> tokens = tokenizer.tokenize(source);
 
+		String className = fullClassName;
+		String packageStr = null;
 		//split class name if it has package
 		int index = fullClassName.lastIndexOf(".");
-		String className = fullClassName.substring(index+1);
-		String packageStr = fullClassName.substring(0, index);
+		if(index > 0) {
+			className = fullClassName.substring(index+1);
+			packageStr = fullClassName.substring(0, index);
+		}
 
 		ScriptCode sourceCode = new ScriptCode(packageStr, className);
 

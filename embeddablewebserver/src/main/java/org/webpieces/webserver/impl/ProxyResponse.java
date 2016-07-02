@@ -83,7 +83,11 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP200);
+		if(resp.isNotFoundRoute())
+			status.setKnownStatus(KnownStatusCode.HTTP404);
+		else
+			status.setKnownStatus(KnownStatusCode.HTTP200);
+		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		HttpResponse response = new HttpResponse();
@@ -117,8 +121,6 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		closeIfNeeded();
 	}
-	
-
 	
 	private void addCommonHeaders(HttpResponse response) {
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);

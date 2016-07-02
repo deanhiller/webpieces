@@ -49,7 +49,9 @@ public class ScriptCode {
 	}
 
 	public String getFullClassName() {
-		return packageStr+"."+className;
+		if(packageStr != null)
+			return packageStr+"."+className;
+		return className;
 	}
 	
 }
