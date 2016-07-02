@@ -2,12 +2,14 @@ package org.webpieces.router.api.dto;
 
 public class RenderResponse {
 
-	public String view;
-	public Object[] args;
+	private View view;
 
-	public RenderResponse(String view, Object ... args) {
+	public RenderResponse(View view) {
 		this.view = view;
-		this.args = args;
+	}
+
+	public View getView() {
+		return view;
 	}
 
 }

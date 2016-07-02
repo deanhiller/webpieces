@@ -23,7 +23,7 @@ public class TestSimpleTemplate {
 
 	@Before
 	public void setup() {
-		Injector injector = Guice.createInjector(new TemplateModule());
+		Injector injector = Guice.createInjector(new ProdTemplateModule());
 		srcGen = injector.getInstance(GroovyScriptGenerator.class);
 		engine = injector.getInstance(TemplateEngine.class);
 	}

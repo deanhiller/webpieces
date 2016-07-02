@@ -20,7 +20,7 @@ public class DevRouterFactory {
     
 	public static RoutingService create(HttpRouterConfig config, CompileConfig compileConfig) {
 		
-		Module devModules = Modules.override(RouterSvcFactory.getModules(config)).with(new DevModule(compileConfig));
+		Module devModules = Modules.override(RouterSvcFactory.getModules(config)).with(new DevRouterModule(compileConfig));
 		
 		Injector injector = Guice.createInjector(devModules);
 		RoutingService svc = injector.getInstance(RoutingService.class);

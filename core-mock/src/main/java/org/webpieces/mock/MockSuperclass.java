@@ -50,7 +50,7 @@ public abstract class MockSuperclass {
 		list.add(new ParametersPassedIn(args));
 	}
 
-	public Stream<ParametersPassedIn> getCalledMethod(MethodEnum method) {
+	protected Stream<ParametersPassedIn> getCalledMethod(MethodEnum method) {
 		List<ParametersPassedIn> params = calledMethods.get(method);
 		if(params == null) {
 			params = new ArrayList<>();

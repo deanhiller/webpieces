@@ -3,12 +3,16 @@ package PACKAGE;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
+
 import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.devrouter.api.DevModule;
+import org.webpieces.devrouter.api.DevRouterModule;
+import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
 public class CLASSNAMEDevServer {
 
@@ -24,10 +28,6 @@ public class CLASSNAMEDevServer {
 			CLASSNAMEDevServer.class.wait();
 		}
 	}
-
-	
-	
-	
 	
 	private CLASSNAMEServer server;
 
@@ -40,8 +40,10 @@ public class CLASSNAMEDevServer {
 		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME/src/main/java"));
 		
 		CompileConfig devConfig = new CompileConfig(srcPaths);
-		Module platformOverrides = new DevModule(devConfig);
-		server = new CLASSNAMEServer(platformOverrides, null, usePortZero);		
+		Module platformOverrides = Modules.combine(
+										new DevRouterModule(devConfig),
+										new DevTemplateModule());
+		server = new CLASSNAMEServer(platformOverrides, null, usePortZero);
 	}
 	
 	public void start() throws InterruptedException {

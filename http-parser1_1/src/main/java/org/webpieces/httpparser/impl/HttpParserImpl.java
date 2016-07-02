@@ -10,6 +10,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.ParsedStatus;
@@ -33,7 +34,7 @@ import org.webpieces.httpparser.api.dto.HttpVersion;
 public class HttpParserImpl implements HttpParser {
 
 	//private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
-	private static final Charset iso8859_1 = Charset.forName("ISO-8859-1");
+	private static final Charset iso8859_1 = HttpParserFactory.iso8859_1;
 	private static final String TRAILER_STR = "\r\n";
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final DataWrapper EMPTY_WRAPPER = dataGen.emptyWrapper();

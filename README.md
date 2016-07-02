@@ -52,5 +52,8 @@ TODO:
 * Need to add tests for changing the MAIN module in the main server class
 * cookie hpttOnly and the other 
 * more header support
+* search on Charset.defaultCharset, Charset.forName, StandardCharsets and unify them so it is configurable
+* search on log.warn and change all to log.error as all are really errors
+* fix the NotFoundException such that during dev it is a 500 and tells the user making it easier when they mistype something to figure it out faster
 
 * ALPN is next!!!! 

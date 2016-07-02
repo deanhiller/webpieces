@@ -19,12 +19,16 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.templating.api.TemplateService;
 
 public class RequestReceiver implements HttpRequestListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(RequestReceiver.class);
 	@Inject
 	private RoutingService routingService;
+	@Inject
+	private TemplateService templatingService;
+	
 	private Set<String> headersSupported = new HashSet<>();
 	
 	public RequestReceiver() {
@@ -38,7 +42,7 @@ public class RequestReceiver implements HttpRequestListener {
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
-		ResponseStreamer streamer = new ProxyResponse(req, channel);
+		ResponseStreamer streamer = new ProxyResponse(req, channel, templatingService);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))

@@ -18,6 +18,7 @@ import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
@@ -44,6 +45,9 @@ public class RouteInvoker {
 		Object[] arguments;
 		try {
 			arguments = argumentTranslator.createArgs(result, req);
+//TODO: We need to render a page that says "This would be a 404 in production but in development this is an error as we assume you type
+			//in the correct urls.  Something about your url matched a route but then failed.  Details are below
+			//THEN we need tests in prod version and development version for this!!
 		} catch(NotFoundException e) {
 			result = notFoundRoute.get();
 			meta = result.getMeta();
@@ -66,7 +70,7 @@ public class RouteInvoker {
 			RedirectResponse httpResponse = processRedirect(reverseRoutes, routerRequest, incomingRequestMeta, (Redirect)controllerResponse);
 			responseCb.sendRedirect(httpResponse);
 		} else if(controllerResponse instanceof RenderHtml) {
-			RenderResponse resp = renderHtml(routerRequest, incomingRequestMeta, controllerResponse);
+			RenderResponse resp = renderHtml(routerRequest, incomingRequestMeta, (RenderHtml)controllerResponse);
 			responseCb.sendRenderHtml(resp);
 		} else {
 			throw new UnsupportedOperationException("Not yet done but could "
@@ -75,7 +79,7 @@ public class RouteInvoker {
 		return null;
 	}
 
-	private RenderResponse renderHtml(RouterRequest routerRequest, RouteMeta incomingRequestMeta, Object controllerResponse) {
+	private RenderResponse renderHtml(RouterRequest routerRequest, RouteMeta incomingRequestMeta, RenderHtml controllerResponse) {
 		Method method = incomingRequestMeta.getMethod();
 		//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG
 		//If the POST route was not found, just render the notFound page that controller sends us violating the
@@ -87,10 +91,15 @@ public class RouteInvoker {
 					+ "users don't have a poor experience using your website with the browser back button.  "
 					+ "This means on a POST request, you cannot return RenderHtml object and must return Redirects");
 		}
-		RenderHtml renderHtml = (RenderHtml) controllerResponse;
 		
+		View view = controllerResponse.getView();
+		if(controllerResponse.getView() == null) {
+			String controllerName = incomingRequestMeta.getControllerInstance().getClass().getName();
+			String methodName = incomingRequestMeta.getMethod().getName();
+			view = new View(controllerName, methodName);
+		}
 		
-		RenderResponse resp = new RenderResponse(renderHtml.getView(), renderHtml.getPageArgs());
+		RenderResponse resp = new RenderResponse(view);
 		return resp;
 	}
 

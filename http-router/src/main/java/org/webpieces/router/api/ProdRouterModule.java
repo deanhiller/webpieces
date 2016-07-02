@@ -9,11 +9,11 @@ import org.webpieces.router.impl.loader.ProdLoader;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class ProdModule implements Module {
+public class ProdRouterModule implements Module {
 
 	private HttpRouterConfig config;
 
-	public ProdModule(HttpRouterConfig config) {
+	public ProdRouterModule(HttpRouterConfig config) {
 		this.config = config;
 	}
 	

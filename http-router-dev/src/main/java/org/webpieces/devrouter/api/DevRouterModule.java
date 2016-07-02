@@ -13,11 +13,11 @@ import org.webpieces.router.impl.loader.MetaLoaderProxy;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class DevModule implements Module {
+public class DevRouterModule implements Module {
 	
 	private CompileConfig config;
 
-	public DevModule(CompileConfig config) {
+	public DevRouterModule(CompileConfig config) {
 		this.config = config;
 	}
 

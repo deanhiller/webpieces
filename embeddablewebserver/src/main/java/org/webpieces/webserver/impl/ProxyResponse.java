@@ -1,5 +1,9 @@
 package org.webpieces.webserver.impl;
 
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -18,9 +22,13 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.templating.api.Template;
+import org.webpieces.templating.api.TemplateService;
 
 public class ProxyResponse implements ResponseStreamer {
 
@@ -29,10 +37,12 @@ public class ProxyResponse implements ResponseStreamer {
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private FrontendSocket channel;
 	private HttpRequest request;
+	private TemplateService templatingService;
 
-	public ProxyResponse(HttpRequest req, FrontendSocket channel) {
+	public ProxyResponse(HttpRequest req, FrontendSocket channel, TemplateService templatingService) {
 		this.request = req;
 		this.channel = channel;
+		this.templatingService = templatingService;
 	}
 
 	@Override
@@ -79,12 +89,19 @@ public class ProxyResponse implements ResponseStreamer {
 		HttpResponse response = new HttpResponse();
 		response.setStatusLine(statusLine);
 
-		String argsList = "";
-		for(Object r : resp.args) {
-			argsList += r+" ";
-		}
+		View view = resp.getView();
+		String packageStr = view.getControllerPackage();
+		//For this type of View, the template is the name of the method..
+		String templateClassName = view.getMethodName();
 		
-		String content = "<html><head></head><body>Hello World="+argsList+"</body></html>";
+		Map<String, Object> args = new HashMap<>();
+		Template template = templatingService.loadTemplate(packageStr, templateClassName, "html");
+		
+		//stream this out with chunked response instead....
+		StringWriter out = new StringWriter();
+		template.run(args, out);
+		
+		String content = out.toString();
 		byte[] bytes = content.getBytes();
 		
 		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, bytes.length+"");
@@ -99,8 +116,9 @@ public class ProxyResponse implements ResponseStreamer {
 		channel.write(response);
 		
 		closeIfNeeded();
-		
 	}
+	
+
 	
 	private void addCommonHeaders(HttpResponse response) {
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);

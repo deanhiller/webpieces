@@ -1,7 +1,8 @@
 package org.webpieces.webserver.api;
 
 import org.webpieces.router.api.HttpRouterConfig;
-import org.webpieces.router.api.ProdModule;
+import org.webpieces.router.api.ProdRouterModule;
+import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.webserver.impl.WebServerModule;
 
 import com.google.inject.Guice;
@@ -31,7 +32,8 @@ public abstract class WebServerFactory {
 	private static Module getModules(WebServerConfig config, HttpRouterConfig routerConfig) {
 		return Modules.combine(
 			new WebServerModule(config),
-			new ProdModule(routerConfig)
+			new ProdRouterModule(routerConfig),
+			new ProdTemplateModule()
 		);
 	}
 }
