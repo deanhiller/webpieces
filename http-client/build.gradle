@@ -1,0 +1,5 @@
+project(':http-client') {
+    dependencies {
+        compile project(':core-channelmanager2'), project(':http-parser1_1')
+    }
+}

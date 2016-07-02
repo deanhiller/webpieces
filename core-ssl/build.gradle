@@ -1,0 +1,5 @@
+project(':core-ssl') {
+    dependencies {
+        compile project(':core-datawrapper')
+    }
+}

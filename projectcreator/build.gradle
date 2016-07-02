@@ -1,0 +1,5 @@
+project(':projectcreator') {
+    dependencies {
+        compile 'org.codehaus.groovy:groovy-all:2.4.6' //we use groovy in logback.xml
+    }
+}

@@ -1,0 +1,6 @@
+project(':core-channelmanager2') {
+    dependencies {
+        compile project(':core-util'), project(':core-datawrapper'), project(':core-ssl')
+    }
+}
+

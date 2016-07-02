@@ -1,0 +1,5 @@
+project(':http-frontend') {
+    dependencies {
+        compile project(':core-asyncserver'), project(':http-parser1_1'), project(':http-client')
+    }
+}

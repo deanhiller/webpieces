@@ -1,0 +1,6 @@
+project(':http-templating-dev') {
+    dependencies {
+        compile project(':http-templating')
+        compile 'org.apache.commons:commons-io:1.3.2'
+    }
+}

@@ -1,0 +1,6 @@
+project(':runtimecompile') {
+    dependencies {
+        compile 'org.eclipse.jdt.core.compiler:ecj:4.5.1'
+        compile project(':core-util')
+    }
+}
