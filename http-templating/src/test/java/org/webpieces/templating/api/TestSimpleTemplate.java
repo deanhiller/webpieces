@@ -2,15 +2,12 @@ package org.webpieces.templating.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.templating.impl.source.GroovyScriptGenerator;
@@ -32,7 +29,7 @@ public class TestSimpleTemplate {
 	}
 	
 	@Test
-	public void testTemp() throws IOException {
+	public void testBasicTemplate() throws IOException {
 		ClassLoader cl = TestSimpleTemplate.class.getClassLoader();
 		URL resource = cl.getResource("mytestfile.xhtml");
 		
@@ -43,46 +40,27 @@ public class TestSimpleTemplate {
 			System.out.println("result=\n"+sourceResult.getScriptSourceCode());
 			System.out.println("map="+sourceResult.getLineMapping());
 
-			Map<String, Object> properties = new HashMap<>();
-			properties.put("user", "Dean Hiller");
-			properties.put("name", "dean");
-			properties.put("color", "green");
+			Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 			
 			Template template = engine.createTemplate("MyTestGroovy", source);
 			StringWriter out = new StringWriter();
 			template.run(properties, out);
+
+			//NOTE: We should be able to run with UserBean2 as well(this shows if
+			//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
+			Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
+			StringWriter out2 = new StringWriter();
+			template.run(args, out2);
 			
 			System.out.println("HTML=\n"+out);
 		}
 	}
+
+	private Map<String, Object> createArgs(Object user) {
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("user", user);
+		properties.put("color", "green");
+		return properties;
+	}
 	
-//	@Test
-//	public void testBasic() throws IOException {
-//		TemplateEngine engine = TemplatingFactory.create();
-//		
-//		engine.createGroovySource("org/webpieces/templating/api/simpleTemplate.html");
-//		
-//		
-//		
-//		
-//		
-//		UserBean userBean = new UserBean();
-//		userBean.setName("Dean");
-//		userBean.setNumSiblings(2);
-//		Map<String, Object> arguments = new HashMap<>();
-//		arguments.put("name", "Dean");
-//		arguments.put("color", "blue");
-//		arguments.put("user", userBean);
-//		
-//		ClassLoader cl = TestSimpleTemplate.class.getClassLoader();
-//		URL resource = cl.getResource("mytestfile.xhtml");
-//		
-//		try ( InputStream str = resource.openStream();
-//			  InputStreamReader reader = new InputStreamReader(str)) {
-//			
-//			String s = engine.createPage(reader, arguments);
-//			System.out.println("result="+s);
-//			
-//		}
-//	}
 }
