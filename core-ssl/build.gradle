@@ -1,5 +1,3 @@
-project(':core-ssl') {
-    dependencies {
-        compile project(':core-datawrapper')
-    }
+dependencies {
+    compile project(':core-datawrapper')
 }

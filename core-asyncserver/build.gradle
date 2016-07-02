@@ -1,5 +1,3 @@
-project(':core-asyncserver') {
-    dependencies {
-        compile project(':core-channelmanager2')
-    }
+dependencies {
+    compile project(':core-channelmanager2')
 }

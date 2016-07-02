@@ -1,5 +1,3 @@
-project(':http-parser2') {
-    dependencies {
-        compile project(':core-datawrapper')
-    }
+dependencies {
+    compile project(':core-datawrapper')
 }
