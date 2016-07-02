@@ -19,13 +19,13 @@ public class GroovyScriptGenerator {
 		this.creator = creator;
 	}
 	
-	public SourceState generate(String source, String className) {
+	public ScriptCode generate(String source, String className) {
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
 		List<Token> tokens = tokenizer.tokenize(source);
 
-		SourceState sourceCode = new SourceState();
+		ScriptCode sourceCode = new ScriptCode();
 		// Class header
 		creator.printHead(sourceCode, className);
 
@@ -42,7 +42,7 @@ public class GroovyScriptGenerator {
 		return sourceCode;
 	}
 
-	private void generateBody(SourceState sourceCode, List<Token> tokens) {
+	private void generateBody(ScriptCode sourceCode, List<Token> tokens) {
 
 		for(Token token : tokens) {
 			ScriptToken state = token.state;

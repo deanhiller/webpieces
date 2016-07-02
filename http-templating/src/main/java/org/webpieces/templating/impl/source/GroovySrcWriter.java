@@ -10,7 +10,8 @@ public class GroovySrcWriter {
     
 	private Pattern pattern = Pattern.compile("\"");
 			
-	public void printHead(SourceState sourceCode, String className) {
+	public void printHead(ScriptCode sourceCode, String className) {
+		sourceCode.setClassName(className);
         sourceCode.print("class ");
         //This generated classname is parsed when creating cleanStackTrace.
         //The part after "Template_" is used as key when
@@ -20,19 +21,19 @@ public class GroovySrcWriter {
         sourceCode.print(className);
         sourceCode.println(" extends org.webpieces.templating.impl.GroovyTemplateSuperclass {");
         sourceCode.println("  public Object run() {");
-        sourceCode.println("    use(org.webpieces.templates.JavaExtensions) {");
+        sourceCode.println("    use(org.webpieces.templating.impl.source.GroovyExtensions) {");
 //        for (String n : extensionsClassnames) {
 //            println("use(_('" + n + "')) {");
 //        }
 	}
 
-	public void printEnd(SourceState sourceCode) {
+	public void printEnd(ScriptCode sourceCode) {
 		sourceCode.println("    }");
 		sourceCode.println("  }");
 		sourceCode.println("}");
 	}
 
-	public void printPlain(Token token, SourceState sourceCode) {
+	public void printPlain(Token token, ScriptCode sourceCode) {
 		String srcText = token.getValue();
 		if(srcText.length() < maxLineLength) {
 			String text = addEscapesToSrc(srcText);
@@ -63,9 +64,9 @@ public class GroovySrcWriter {
 		
 	}
 
-	public void printExpression(Token token, SourceState sourceCode) {
+	public void printExpression(Token token, ScriptCode sourceCode) {
 		String expr = token.getValue().trim();
-        sourceCode.print("      out.print(__safeFaster("+expr+"));");
+        sourceCode.print("      out.print(__escapeTextCharacters("+expr+"));");
         sourceCode.appendTokenComment(token);
         sourceCode.println();
 	}

@@ -3,11 +3,12 @@ package org.webpieces.templating.impl.source;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SourceState {
+public class ScriptCode {
 
 	private StringBuffer scriptSourceCode = new StringBuffer();
 	private int currentLine = 1;
 	private Map<Integer, Integer> scriptLineNumToHtmlLineNum = new HashMap<>();
+	private String className;
 	
 	public void println(String text) {
 		scriptSourceCode.append(text);
@@ -40,4 +41,13 @@ public class SourceState {
 	public int getLineNumber() {
 		return currentLine;
 	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+	
 }
