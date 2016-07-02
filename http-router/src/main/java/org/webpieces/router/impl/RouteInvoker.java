@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -20,7 +19,6 @@ import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.params.ArgumentTranslator;
 

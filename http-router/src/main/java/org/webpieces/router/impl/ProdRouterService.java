@@ -43,7 +43,7 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
 		MatchResult meta = routeLoader.fetchRoute(req);
 		
-		routeLoader.invokeRoute(meta, req, responseCb, () -> routeLoader.fetchNotFoundRoute());
+		routeLoader.invokeRoute(meta, req, responseCb, (e) -> routeLoader.fetchNotFoundRoute(e));
 	}
 
 }

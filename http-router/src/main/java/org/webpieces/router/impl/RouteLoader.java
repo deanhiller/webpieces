@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -137,20 +137,22 @@ public class RouteLoader {
 		return meta;
 	}
 	
-	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, Supplier<MatchResult> notFoundRoute) {
+	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
 		try {
 			//This makes us consistent with other NotFoundExceptions
-			if(result.getMeta().getRoute().isNotFoundRoute())
-				notFound(null, "No route found for path="+req.relativePath, notFoundRoute, req, responseCb);
+			if(result.getMeta().getRoute().isNotFoundRoute()) {
+				MatchResult notFoundResult = notFoundRoute.apply(null);
+				notFound(notFoundResult, req, responseCb);
+			}
 
 			invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb);
 		} catch(NotFoundException e) {
-			notFound(e, e.getMessage(), notFoundRoute, req, responseCb);
+			MatchResult notFoundResult = notFoundRoute.apply(e);
+			notFound(notFoundResult, req, responseCb);
 		}
 	}
 
-	private void notFound(NotFoundException e, String message, Supplier<MatchResult> notFoundRoute, RouterRequest req, ResponseStreamer responseCb) {
-		MatchResult result = notFoundRoute.get();
+	private void notFound(MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
 		invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb);
 	}
 
@@ -158,9 +160,13 @@ public class RouteLoader {
 		controllerFinder.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
 	}
 
-	public MatchResult fetchNotFoundRoute() {
+	public MatchResult fetchNotFoundRoute(NotFoundException e) {
+		//NotFoundException only is non-null on param conversion mismatch which should be rare
+		//We could move to a FastException that doesn't fill in the stack trace for production if we really
+		//want to....
 		RouteInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
 		return new MatchResult(notfoundRoute);
 	}
+	
 }

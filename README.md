@@ -54,11 +54,9 @@ TODO:
 * more header support
 * search on Charset.defaultCharset, Charset.forName, StandardCharsets and unify them so it is configurable
 * search on log.warn and change all to log.error as all are really errors
-* fix the NotFoundException such that during dev it is a 500 and tells the user making it easier when they mistype something to figure it out faster
 * add a lot of pretty print objects/json stuff in the toString so when debugging, there is many less clicks to see the data!!!  it is just right there
 * come up with the http 500 strategy for dev server AND for production server
 * break out build.gradle file into multiple ones so as project grows, it scales better
 * have the dev server display it's OWN 404 page and then in a frame below dispay the webapps actual 404 page.  The dev server's page will have much more detail on what went wrong and why it was a 404 like type translation, etc.  The frame can be a redirect to GET the 404 page directly OR it could render inline maybe.....which one is better..not sure?  rendering inline is probably better so the notFound does not have a direct url to get to that page?  But only if the PRG holds true above!!!!
-* log error on 404 in development server mode as "You typed a bad url OR you have a bad route and need to fix it"
 
 * ALPN is next!!!! 
