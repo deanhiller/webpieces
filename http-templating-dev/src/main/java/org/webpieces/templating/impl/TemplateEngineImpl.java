@@ -21,8 +21,8 @@ public class TemplateEngineImpl implements TemplateEngine {
 	}
 	
 	@Override
-	public Template createTemplate(String className, String source) {
-		ScriptCode scriptCode = scriptGen.generate(source, className);
+	public Template createTemplate(String fullClassName, String source) {
+		ScriptCode scriptCode = scriptGen.generate(source, fullClassName);
 		Class<?> compiledTemplate = groovyCompile.compile(scriptCode);
 		return new TemplateImpl(compiledTemplate);
 	}

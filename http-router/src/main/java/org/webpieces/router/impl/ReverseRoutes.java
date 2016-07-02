@@ -23,4 +23,8 @@ public class ReverseRoutes {
 		return routeIdToRoute.get(id);
 	}
 
+	@Override
+	public String toString() {
+		return "ReverseRoutes [routeIdToRoute=" + routeIdToRoute + "]";
+	}
 }

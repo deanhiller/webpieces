@@ -75,7 +75,7 @@ public class RouteMeta {
 	
 	@Override
 	public String toString() {
-		return "RouteMeta [route=" + route + ", \nmethod=" + method
+		return "\nRouteMeta [route=\n   " + route + ", \n   method=" + method
 				+ ", methodParamNames=" + methodParamNames + "]";
 	}
 

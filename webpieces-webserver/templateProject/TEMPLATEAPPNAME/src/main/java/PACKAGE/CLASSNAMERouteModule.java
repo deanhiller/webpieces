@@ -14,7 +14,7 @@ public class CLASSNAMERouteModule implements RouteModule {
 		//way
 		
 		//local controller(same package as your RouteModule!!!!)
-		router.addRoute(HttpMethod.GET, "/somepathhere", "CLASSNAMELocalController.someMethod", CLASSNAMERouteId.SOME_ROUTE);
+		router.addRoute(HttpMethod.GET, "/", "CLASSNAMELocalController.someMethod", CLASSNAMERouteId.SOME_ROUTE);
 		
 		//relative path to Controller from your RouteModule....
 		router.addRoute(HttpMethod.GET, "/redirect/{id}", "example/CLASSNAMEController.redirect", CLASSNAMERouteId.REDIRECT_PAGE);

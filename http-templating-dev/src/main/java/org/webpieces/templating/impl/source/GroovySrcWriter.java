@@ -9,9 +9,13 @@ public class GroovySrcWriter {
     protected static final int maxLineLength = 30000;
     
 	private Pattern pattern = Pattern.compile("\"");
-			
-	public void printHead(ScriptCode sourceCode, String className) {
-		sourceCode.setClassName(className);
+
+	public void printHead(ScriptCode sourceCode, String packageStr, String className) {
+
+		if(packageStr != null && !"".equals(packageStr.trim())) {
+			sourceCode.println("package "+packageStr);
+		}
+		
         sourceCode.print("class ");
         //This generated classname is parsed when creating cleanStackTrace.
         //The part after "Template_" is used as key when

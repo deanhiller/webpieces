@@ -57,9 +57,9 @@ public class ProxyResponse implements ResponseStreamer {
 		String url = httpResponse.redirectToPath;
 		
 		if(httpResponse.domain != null && httpResponse.isHttps != null) {
-			String prefix = "http";
+			String prefix = "http://";
 			if(httpResponse.isHttps)
-				prefix = "https";
+				prefix = "https://";
 			url = prefix + httpResponse.domain + httpResponse.redirectToPath;
 		} else if(httpResponse.domain != null) {
 			throw new IllegalReturnValueException("Controller is returning a domain without returning isHttps=true or"

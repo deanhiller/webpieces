@@ -25,7 +25,7 @@ public class GroovyCompile {
 	private Class<?> compileImpl(ScriptCode scriptCode) throws ClassNotFoundException {
 		GroovyClassLoader cl = new GroovyClassLoader();
 		CompilationUnit compileUnit = new CompilationUnit();
-	    compileUnit.addSource(scriptCode.getClassName(), scriptCode.getScriptSourceCode());
+	    compileUnit.addSource(scriptCode.getFullClassName(), scriptCode.getScriptSourceCode());
 	    compileUnit.compile(Phases.CLASS_GENERATION);
 	    compileUnit.setClassLoader(cl);
 
@@ -33,7 +33,7 @@ public class GroovyCompile {
 	    for (Object compileClass : compileUnit.getClasses()) {
 	        GroovyClass groovyClass = (GroovyClass) compileClass;
 	        cl.defineClass(groovyClass.getName(), groovyClass.getBytes());
-	        if(groovyClass.getName().equals(scriptCode.getClassName())) {
+	        if(groovyClass.getName().equals(scriptCode.getFullClassName())) {
 	        	target = groovyClass;
 	        }
 	    }

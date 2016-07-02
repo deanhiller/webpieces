@@ -19,15 +19,21 @@ public class GroovyScriptGenerator {
 		this.creator = creator;
 	}
 	
-	public ScriptCode generate(String source, String className) {
+	public ScriptCode generate(String source, String fullClassName) {
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
 		List<Token> tokens = tokenizer.tokenize(source);
 
-		ScriptCode sourceCode = new ScriptCode();
+		//split class name if it has package
+		int index = fullClassName.lastIndexOf(".");
+		String className = fullClassName.substring(index+1);
+		String packageStr = fullClassName.substring(0, index);
+
+		ScriptCode sourceCode = new ScriptCode(packageStr, className);
+
 		// Class header
-		creator.printHead(sourceCode, className);
+		creator.printHead(sourceCode, packageStr, className);
 
 		generateBody(sourceCode, tokens);
 

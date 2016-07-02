@@ -33,18 +33,16 @@ public class DevTemplateService implements TemplateService {
 	public Template loadTemplateImpl(String packageStr, String templateClassName, String extension) throws IOException {
 		String directory = "/"+packageStr.replace(".", "/");
 		String fileName = templateClassName+"."+extension;
-		
+
 		InputStream resource = DevTemplateService.class.getResourceAsStream(directory+"/"+fileName);
 		if(resource == null)
 			throw new FileNotFoundException("resource="+directory+"/"+fileName+" was not found in classpath");
-		
+
 		String viewSource = IOUtils.toString(resource, Charset.defaultCharset().name());
-		
-		String fullClassName = packageStr+"."+"__"+templateClassName+"_"+extension;
-		
-		engine.createTemplate(fullClassName, viewSource);
-		
-		return null;
+
+		String fullClassName = packageStr+"."+templateClassName+"_"+extension;
+
+		return engine.createTemplate(fullClassName, viewSource);
 	}
 
 }

@@ -48,12 +48,13 @@ TODO:
 * gzip/deflate/sdch compression?
 * language
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
-* We need to wire :webpieces:test to depend on :webpieces:assemble and then run ./createProject.sh from gradle and then run that gradle build and make sure it is successful so we have a safeguard on the templates breaking
-* Need to add tests for changing the MAIN module in the main server class
+* We need to run the same class that ./createProject.sh runs and then start that projects webserver and send requests in to make sure the template generation is working and not broken
+* Need to add tests for changing the guice modules and router modules in the main server class while dev server is running and then hit website again to make sure it changed
 * cookie hpttOnly and the other 
 * more header support
 * search on Charset.defaultCharset, Charset.forName, StandardCharsets and unify them so it is configurable
 * search on log.warn and change all to log.error as all are really errors
 * fix the NotFoundException such that during dev it is a 500 and tells the user making it easier when they mistype something to figure it out faster
+* add a lot of pretty print objects/json stuff in the toString so when debugging, there is many less clicks to see the data!!!  it is just right there
 
 * ALPN is next!!!! 

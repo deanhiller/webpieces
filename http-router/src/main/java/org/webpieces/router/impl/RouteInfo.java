@@ -66,5 +66,12 @@ public class RouteInfo {
 	public RouteMeta getPageNotfoundRoute() {
 		return pageNotFoundRoute;
 	}
+
+	@Override
+	public String toString() {
+		return "RouteInfo state...\npageNotFoundRoute=\n*****"
+				+ pageNotFoundRoute + "\n*****\nroutes=" + routes + "\n\npathPrefixToInfo=" + pathPrefixToInfo + "]";
+	}
+	
 	
 }

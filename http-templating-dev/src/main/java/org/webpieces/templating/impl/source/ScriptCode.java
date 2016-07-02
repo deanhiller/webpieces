@@ -8,8 +8,14 @@ public class ScriptCode {
 	private StringBuffer scriptSourceCode = new StringBuffer();
 	private int currentLine = 1;
 	private Map<Integer, Integer> scriptLineNumToHtmlLineNum = new HashMap<>();
+	private String packageStr;
 	private String className;
-	
+
+	public ScriptCode(String packageStr, String className) {
+		this.packageStr = packageStr;
+		this.className = className;
+	}
+
 	public void println(String text) {
 		scriptSourceCode.append(text);
         println();
@@ -42,12 +48,8 @@ public class ScriptCode {
 		return currentLine;
 	}
 
-	public void setClassName(String className) {
-		this.className = className;
-	}
-
-	public String getClassName() {
-		return className;
+	public String getFullClassName() {
+		return packageStr+"."+className;
 	}
 	
 }
