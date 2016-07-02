@@ -1,3 +1,0 @@
-dependencies {
-    compile project(':core/core-asyncserver'), project(':http-parser1_1'), project(':http-client')
-}

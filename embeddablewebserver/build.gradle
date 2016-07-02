@@ -1,5 +1,5 @@
 dependencies {
     compile 'com.google.inject:guice:4.0'
-    compile project(':http-frontend'), project(':http-parser1_1'), project(':http-router')
-    compile project(':http-templating')
+    compile project(':http/http-frontend'), project(':http/http-parser1_1')
+    compile project(':http-templating'), project(':http-router')
 }

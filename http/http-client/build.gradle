@@ -1,0 +1,3 @@
+dependencies {
+    compile project(':core/core-channelmanager2'), project(':http/http-parser1_1')
+}
