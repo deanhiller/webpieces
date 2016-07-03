@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':core:runtimecompile')
+    compile project(':webserver:http-router')
+    testCompile project(':core:core-mock')
+}

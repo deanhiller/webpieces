@@ -1,0 +1,65 @@
+project.ext {
+  stagingDirName = 'webpieces-webserver'
+  outputStagingDir = new File(buildDir, stagingDirName)
+}
+
+project('webpieces-webserver:templateProject:TEMPLATEAPPNAME') {
+    dependencies {
+        compile project(':webserver:embeddablewebserver')
+    }
+}
+
+project('webpieces-webserver:templateProject:TEMPLATEdev-server') {
+    dependencies {
+        compile project(':webserver:embeddablewebserver')
+        compile project(':webserver:http-router-dev')
+        compile project(':webserver:http-templating-dev')
+        compile project(':webserver:webpieces-webserver:templateProject:TEMPLATEAPPNAME')
+    }
+}
+
+task stageTemplate(type: Copy) {
+    from '.'
+    into buildDir
+    include stagingDirName + '/**'
+    exclude stagingDirName + '/output'
+    exclude stagingDirName + '/.classpath'
+    exclude stagingDirName + '/.project'
+    exclude stagingDirName + '/.settings'
+    exclude stagingDirName + '/templateProject/.classpath'
+    exclude stagingDirName + '/templateProject/.project'
+    exclude stagingDirName + '/templateProject/.settings'
+    exclude stagingDirName + '/templateProject/output'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/output'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/bin'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.classpath'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.project'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.settings'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/output'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/bin'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.classpath'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.project'
+    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.settings'
+}
+
+task stageWebServer(type: Sync, dependsOn: ['embeddablewebserver:assemble', 'stageTemplate']) {
+    from childProjects['embeddablewebserver'].toStagingDir
+    into new File(outputStagingDir, 'lib-prod')
+}
+
+task stageDevServer(type: Sync, dependsOn: ['http-router-dev:assemble', 'stageWebServer']) {
+    from childProjects['http-router-dev'].toStagingDir
+    from childProjects['http-templating-dev'].toStagingDir
+    into new File(outputStagingDir, 'lib-development')
+    exclude { details ->
+       def fileNames = stageWebServer.source.collect{ entry -> entry.getName()}
+       fileNames.contains(details.file.getName())
+    }
+}
+
+task stageProjectCreator(type: Sync, dependsOn: 'projectcreator:assemble') {
+    from childProjects['projectcreator'].toStagingDir
+    into new File(outputStagingDir, 'lib-creation')
+}
+
+assemble.dependsOn(['stageDevServer', 'stageProjectCreator'])

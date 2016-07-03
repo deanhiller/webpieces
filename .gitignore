@@ -1,7 +1,12 @@
+# never check in class files
 *.class
 
-# Package Files #
-*/output
+# eclipse output files
+**/.project
+**/.settings
+
+#gradle output files
+**/output
 output
 /bin
 **/bin
@@ -11,8 +16,6 @@ output
 tmp/
 /eclipse/
 *.pyc
-*/.project
-*/.settings
 *.bak
 */.classpath
 /.metadata

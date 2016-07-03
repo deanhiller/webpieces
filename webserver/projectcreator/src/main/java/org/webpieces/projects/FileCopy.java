@@ -16,6 +16,7 @@ public class FileCopy {
 	private String[] packagePieces;
 	private String appName;
 	private File webpiecesDir;
+	private String packageDir;
 
 	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory) {
 		this.webpiecesDir = webpiecesDir;
@@ -23,9 +24,14 @@ public class FileCopy {
 		this.appClassName = appClassName;
 		this.appName = appName;
 		this.packageStr = packageStr;
+		this.packageDir = convert(packageStr);
 		this.packagePieces = packageStr.split("\\.");
 	}
 	
+	private String convert(String packageStr2) {
+		return packageStr2.replace(".", "/");
+	}
+
 	public void createProject() throws IOException {
 
 		//we have 
@@ -67,6 +73,7 @@ public class FileCopy {
 			String contents = new String(out.toByteArray(), Charset.defaultCharset());
 			String original = contents;
 
+			contents = contents.replace("/PACKAGE/", "/"+packageDir+"/");
 			contents = contents.replace("PACKAGE", packageStr);
 			contents = contents.replace("TEMPLATE", "");
 			contents = contents.replace("CLASSNAME", appClassName);
@@ -75,7 +82,7 @@ public class FileCopy {
 			if(contents.equals(original))
 				return;
 		
-			System.out.println("contents="+contents);
+			//System.out.println("contents="+contents);
 			
 			ByteArrayInputStream in = new ByteArrayInputStream(contents.getBytes(Charset.defaultCharset()));
 			Files.copy(in, newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

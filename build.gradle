@@ -9,7 +9,12 @@ buildScan {
 }
 
 allprojects {
+}
+
+subprojects {
    apply plugin: 'java'
+   apply plugin: 'eclipse'
+   apply plugin: 'idea'
 
    //We could do this just for the template projects, BUT during debugging, it is sooo
    //damn nice to have the var names, it is worth the performance penalty I think though
@@ -19,16 +24,6 @@ allprojects {
    }
 
    buildDir = file('output')
-   project.ext {
-      stagingDirName = 'webpieces-webserver'
-      outputStagingDir = new File(buildDir, stagingDirName) 
-   }
-}
-
-subprojects {
-   apply plugin: 'eclipse'
-   apply plugin: 'idea'
-
    //This is an input directory that we read jars from if they are not in a repo somewhere
    project.ext.fixedLibDir = file('lib')
    project.ext.toStagingDir = file(new File(buildDir, 'alljars'))
@@ -72,6 +67,13 @@ subprojects {
       }
    }
 
+   //Using eclipse gen folder is WAY too common.  use outputeclipse instead so we can safely ignore it
+   eclipse {
+      classpath {
+         defaultOutputDir = file('build-eclipse')
+      }
+   }
+
    eclipseProject {
       doLast {
          // https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
@@ -87,64 +89,4 @@ subprojects {
      }
    }
 }
-
-project(':webpieces-webserver:templateProject:TEMPLATEAPPNAME') {
-    dependencies {
-        compile project(':embeddablewebserver')
-    }
-}
-
-project(':webpieces-webserver:templateProject:TEMPLATEdev-server') {
-    dependencies {
-        compile project(':embeddablewebserver')
-        compile project(':http-router-dev')
-        compile project(':http-templating-dev')
-        compile project(':webpieces-webserver:templateProject:TEMPLATEAPPNAME')
-    }
-}
-
-task stageTemplate(type: Copy) {
-    from '.'
-    into buildDir
-    include stagingDirName + '/**'
-    exclude stagingDirName + '/output'
-    exclude stagingDirName + '/.classpath'
-    exclude stagingDirName + '/.project'
-    exclude stagingDirName + '/.settings'
-    exclude stagingDirName + '/templateProject/.classpath'
-    exclude stagingDirName + '/templateProject/.project'
-    exclude stagingDirName + '/templateProject/.settings'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/bin'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.classpath'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.project'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.settings'
-    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/bin'
-    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.classpath'
-    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.project'
-    exclude stagingDirName + '/templateProject/TEMPLATEdev-server/.settings'
-}
-
-task stageWebServer(type: Sync, dependsOn: [':embeddablewebserver:assemble', 'stageTemplate']) {
-    from childProjects.embeddablewebserver.toStagingDir
-    into new File(outputStagingDir, 'lib-prod')
-}
-
-task stageDevServer(type: Sync, dependsOn: [':http-router-dev:assemble', 'stageWebServer']) {
-    from childProjects['http-router-dev'].toStagingDir
-    into new File(outputStagingDir, 'lib-development')
-    exclude { details -> 
-       def fileNames = stageWebServer.source.collect{ entry -> entry.getName()}
-       fileNames.contains(details.file.getName())
-    }
-}
-
-task stageProjectCreator(type: Sync, dependsOn: ':projectcreator:assemble') {
-    from childProjects['projectcreator'].toStagingDir
-    into new File(outputStagingDir, 'lib-creation')
-}
-
-assemble.dependsOn(['stageDevServer', 'stageProjectCreator'])
-
 

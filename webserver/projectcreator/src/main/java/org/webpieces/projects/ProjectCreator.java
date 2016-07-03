@@ -42,16 +42,26 @@ public class ProjectCreator {
 			if(packageStr.contains("/") || packageStr.contains("\\"))
 				throw new IllegalArgumentException("package must contain '.' character and no '/' nor '\\' characters");
 			
-			File newAppDirectory = new File(directory);
-			if(!newAppDirectory.exists()) {
-				newAppDirectory.mkdirs();
-			} else if(!newAppDirectory.isDirectory())
-				throw new IllegalArgumentException("directory="+newAppDirectory.getAbsolutePath()+" already exists BUT is not a directory and needs to be");
+			File dirTheUserTypedIn = new File(directory);
+			setupDirectory(dirTheUserTypedIn);
 
-		    new FileCopy(webpiecesDir, appClassName, appName, packageStr, newAppDirectory).createProject();
+			File appDir = new File(dirTheUserTypedIn, appName);
+			setupDirectory(appDir);
+			
+		    new FileCopy(webpiecesDir, appClassName, appName, packageStr, appDir).createProject();
 		    
-		    copyPlatformJars(webpiecesDir, newAppDirectory, appName);
+		    copyPlatformJars(webpiecesDir, appDir, appName);
 		}
+	}
+
+	private void setupDirectory(File dirTheUserTypedIn) throws IOException {
+		if(!dirTheUserTypedIn.exists()) {
+			System.out.println("Directory not exist="+dirTheUserTypedIn.getCanonicalPath()+" so we are creating it");
+			dirTheUserTypedIn.mkdirs();
+		} else if(!dirTheUserTypedIn.isDirectory()) {
+			throw new IllegalArgumentException("directory="+dirTheUserTypedIn.getAbsolutePath()+" already exists BUT is not a directory and needs to be");
+		} else
+			System.out.println("Directory already exists so we are filling it in="+dirTheUserTypedIn.getCanonicalPath());
 	}
 
 	private void copyPlatformJars(File webpiecesDir, File newAppDirectory, String appName) throws IOException {

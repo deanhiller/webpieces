@@ -227,7 +227,9 @@ public class CompilerWrapper {
                             // Non sense !
                             message = problem.getArguments()[0] + " cannot be resolved";
                         }
-                        throw new CompilationException(appClassMgr.getApplicationClass(className).javaFile, message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+                        CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
+                        VirtualFile javaFile = applicationClass.javaFile;
+                        throw new CompilationException(javaFile, message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
                     }
                 }
                 // Something has been compiled
