@@ -41,7 +41,7 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	@Override
 	public String toString() {
-		return "FrontendSocket[channel=" + channel + "]";
+		return "FrontendSocket[" + channel + "]";
 	}
 
 	

@@ -23,9 +23,9 @@ public class TryCatchDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
 		try {
-			dataListener.incomingData(channel, b);
+			dataListener.incomingData(channel, b, isOpeningConnection);
 		} catch(Throwable e) {
 			log.error("Exception", e);
 		}

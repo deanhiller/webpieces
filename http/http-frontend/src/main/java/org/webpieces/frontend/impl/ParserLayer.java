@@ -94,6 +94,11 @@ public class ParserLayer {
 		listener.sendServerResponse(translate(channel), exc, status);
 	}
 
+	public void openedConnection(Channel channel) {
+		FrontendSocket socket = translate(channel);
+		listener.clientOpenChannel(socket);
+	}
+	
 	public void farEndClosed(Channel channel) {
 		listener.clientClosedChannel(translate(channel));		
 	}
@@ -115,4 +120,5 @@ public class ParserLayer {
 		}
 		return socket;
 	}
+
 }

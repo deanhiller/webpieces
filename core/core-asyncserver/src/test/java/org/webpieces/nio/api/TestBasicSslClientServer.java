@@ -65,7 +65,7 @@ public class TestBasicSslClientServer {
 	private class ClientListener implements DataListener {
 
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
+		public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
 			int value = b.get();
 			log.info("incoming client data="+value);
 			pool.releaseBuffer(b);
@@ -103,8 +103,8 @@ public class TestBasicSslClientServer {
 	private class SvrDataListener implements DataListener {
 
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
-			if(!b.hasRemaining())
+		public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+			if(isOpeningConnection)
 				return;
 			log.info("server received data");
 			channel.write(b);

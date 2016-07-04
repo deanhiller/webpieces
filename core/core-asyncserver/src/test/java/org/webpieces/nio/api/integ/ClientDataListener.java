@@ -20,7 +20,7 @@ final class ClientDataListener implements DataListener {
 	}
 	
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
 		recorder.recordBytes(b.remaining());
 		
 		b.position(b.limit());

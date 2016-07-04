@@ -22,4 +22,9 @@ public class ThreadTCPChannel extends ThreadChannel implements TCPChannel {
 		channel.setKeepAlive(b);
 	}
 
+	@Override
+	public String toString() {
+		return channel.toString();
+	}
+
 }

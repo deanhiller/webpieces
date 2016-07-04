@@ -39,6 +39,7 @@ public class TimedListener implements HttpRequestListener {
 		
 		log.info("closing channel="+channel+" due to response code="+status);
 		channel.close();
+		listener.clientClosedChannel(channel);
 	}
 
 	public void clientOpenChannel(FrontendSocket channel) {

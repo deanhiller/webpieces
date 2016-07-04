@@ -39,7 +39,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 		if(added) {
 			//represent the begin of an incoming connection with 0 data so that clients can
 			//start a timer task if no data comes in...
-			listener.incomingData(tcpChannel, zeroBuffer);
+			listener.incomingData(tcpChannel, zeroBuffer, true);
 		}
 		return CompletableFuture.completedFuture(listener);
 	}

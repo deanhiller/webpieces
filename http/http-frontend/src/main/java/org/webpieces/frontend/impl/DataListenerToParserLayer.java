@@ -19,8 +19,12 @@ public class DataListenerToParserLayer implements DataListener {
 		this.processor = nextStage;
 	}
 
-	public void incomingData(Channel channel, ByteBuffer b){
+	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection){
 		try {
+			if(isOpeningConnection) {
+				processor.openedConnection(channel);
+				return;
+			}
 			InetSocketAddress addr = channel.getRemoteAddress();
 			channel.setName(""+addr);
 			log.info("incoming data. size="+b.remaining()+" channel="+channel);

@@ -15,7 +15,10 @@ public class IntegTestLocalhostServerListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+		if(isOpeningConnection)
+			return;
+		
 		CompletableFuture<Channel> future = channel.write(b);
 		
 		future
