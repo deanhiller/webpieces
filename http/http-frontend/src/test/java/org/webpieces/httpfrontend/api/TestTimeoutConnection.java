@@ -7,8 +7,6 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -21,8 +19,6 @@ import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 
 public class TestTimeoutConnection {
-
-	private static final Logger log = LoggerFactory.getLogger(TestTimeoutConnection.class);
 
 	private MockTcpChannel mockServerChannel = new MockTcpChannel();
 	private MockTcpServerChannel mockChannel = new MockTcpServerChannel();

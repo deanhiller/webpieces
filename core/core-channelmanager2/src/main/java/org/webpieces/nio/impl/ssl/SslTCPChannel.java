@@ -85,6 +85,12 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	@Override
 	public CompletableFuture<Channel> close() {
 		closeFuture = new CompletableFuture<>();		
+		if(sslEngine == null) {
+			//this happens in the case where encryption link was not yet established(or even started for that matter)
+			//ie. HttpFrontend does a timeout on incoming client connections to the server so if someone connects to ssl, it
+			//times out and closes it
+			return realChannel.close();
+		}
 		sslEngine.close();
 		return closeFuture;
 	}

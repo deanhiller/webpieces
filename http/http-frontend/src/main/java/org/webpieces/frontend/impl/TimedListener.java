@@ -13,6 +13,7 @@ import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.util.threading.SafeRunnable;
 
 public class TimedListener {
 
@@ -58,7 +59,7 @@ public class TimedListener {
 		socketToTimeout.put(channel, future);
 	}
 
-	private class TimeoutOnRequest implements Runnable {
+	private class TimeoutOnRequest extends SafeRunnable {
 		
 		private FrontendSocket channel;
 
@@ -67,7 +68,7 @@ public class TimedListener {
 		}
 
 		@Override
-		public void run() {
+		public void runImpl() {
 			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket");
 			
 			RuntimeException exc = new RuntimeException("timing out a client who did not send a request in time");
