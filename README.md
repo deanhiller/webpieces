@@ -1,5 +1,4 @@
 # webpieces
-
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent asycn http parser1.1 and independent http parser2......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter)
 
 This project is in process of implementing HTTP 2.0 as well.  This project is essentially pieces that can be used to build any http related software and full stacks as well.  The http proxy will be very minimable but is for testing purposes of the http parser such that we can put it in the middle of chrome and firefox for integration testing.
