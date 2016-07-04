@@ -7,37 +7,44 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.TCPChannel;
 
 public class ConnectedChannels {
 
-	private Set<TCPChannel> connectedChannels = new HashSet<>();
+	private Set<Channel> connectedChannels = new HashSet<>();
+	private boolean closed;
 	
-	public synchronized void addChannel(TCPChannel channel) {
+	public synchronized boolean addChannel(Channel channel) {
+		if(closed) {
+			channel.close();
+			return false;
+		}
+		
 		this.connectedChannels.add(channel);
+		return true;
 	}
 	
-	public synchronized void removeChannel(TCPChannel channel) {
+	public synchronized void removeChannel(Channel channel) {
 		this.connectedChannels.remove(channel);
 	}
 
-	public synchronized Set<TCPChannel> getAllChannels() {
-		Set<TCPChannel> copy = new HashSet<>();
-		for(TCPChannel c : connectedChannels) {
+	public synchronized Set<Channel> getAllChannels() {
+		Set<Channel> copy = new HashSet<>();
+		for(Channel c : connectedChannels) {
 			copy.add(c);
 		}
 		
 		return copy;
 	}
 
-	public CompletableFuture<Void> closeChannels() {
+	public synchronized CompletableFuture<Void> closeChannels() {
 		List<CompletableFuture<Channel>> futures = new ArrayList<>();
-		for(TCPChannel c : getAllChannels()) {
+		for(Channel c : getAllChannels()) {
 			futures.add(c.close());
 		}
 		
 		@SuppressWarnings("rawtypes")
 		CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
+		closed = true;
 		return CompletableFuture.allOf(array);
 	}
 	

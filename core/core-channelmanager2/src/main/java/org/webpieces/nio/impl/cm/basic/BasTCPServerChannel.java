@@ -74,7 +74,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), pool);
 			if(log.isTraceEnabled())
 				log.trace(tcpChan+"Accepted new incoming connection");
-			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
+			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan);
 			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));
 			
 		} catch(Throwable e) {

@@ -9,6 +9,7 @@ public class AsyncConfig {
 
 	public String id;
 	public SocketAddress bindAddr;
+	
 	public ConsumerFunc<ServerSocketChannel> functionToConfigureBeforeBind;
 	
 	public AsyncConfig(String id, SocketAddress bindAddr) {

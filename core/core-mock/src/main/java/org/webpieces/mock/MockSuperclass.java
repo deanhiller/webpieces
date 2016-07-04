@@ -11,7 +11,7 @@ public abstract class MockSuperclass {
 	private Map<MethodEnum, List<ValueToReturn>> returnValues = new HashMap<>();
 	private Map<MethodEnum, List<ParametersPassedIn>> calledMethods = new HashMap<>();
 	
-	public void addValueToReturn(MethodEnum method, Object toReturn) {
+	protected void addValueToReturn(MethodEnum method, Object toReturn) {
 		ValueToReturn valueToReturn = new ValueToReturn(toReturn);
 		addValueToReturn(method, valueToReturn);
 	}
@@ -25,7 +25,7 @@ public abstract class MockSuperclass {
 		currentValues.add(valueToReturn);
 	}
 	
-	public void addExceptionToThrow(MethodEnum method, RuntimeException exc) {
+	protected void addExceptionToThrow(MethodEnum method, RuntimeException exc) {
 		ValueToReturn valueToReturn = new ValueToReturn(exc);
 		addValueToReturn(method, valueToReturn);
 	}
@@ -50,7 +50,7 @@ public abstract class MockSuperclass {
 		list.add(new ParametersPassedIn(args));
 	}
 
-	protected Stream<ParametersPassedIn> getCalledMethod(MethodEnum method) {
+	protected Stream<ParametersPassedIn> getCalledMethods(MethodEnum method) {
 		List<ParametersPassedIn> params = calledMethods.get(method);
 		if(params == null) {
 			params = new ArrayList<>();

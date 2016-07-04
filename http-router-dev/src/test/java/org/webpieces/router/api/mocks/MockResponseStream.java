@@ -35,13 +35,13 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	}
 	
 	public List<RedirectResponse> getSendRedirectCalledList() {
-		Stream<ParametersPassedIn> params = super.getCalledMethod(MockMethod.SEND_REDIRECT);
+		Stream<ParametersPassedIn> params = super.getCalledMethods(MockMethod.SEND_REDIRECT);
 		Stream<RedirectResponse> responseStr = params.map(p -> (RedirectResponse)p.getArgs()[0]);
 		return responseStr.collect(Collectors.toList());
 	}
 
 	public Exception getOnlyException() {
-		Stream<ParametersPassedIn> calledMethods = super.getCalledMethod(MockMethod.FAILURE);
+		Stream<ParametersPassedIn> calledMethods = super.getCalledMethods(MockMethod.FAILURE);
 		Object[] array = calledMethods.toArray();
 		Assert.assertEquals(1, array.length);
 		
@@ -51,7 +51,7 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	}
 
 	public List<RenderResponse> getSendRenderHtmlList() {
-		Stream<ParametersPassedIn> params = super.getCalledMethod(MockMethod.SEND_RENDER_HTML);
+		Stream<ParametersPassedIn> params = super.getCalledMethods(MockMethod.SEND_RENDER_HTML);
 		Stream<RenderResponse> responseStr = params.map(p -> (RenderResponse)p.getArgs()[0]);
 		return responseStr.collect(Collectors.toList());		
 	}

@@ -1,4 +1,4 @@
-package org.webpieces.nio.api;
+package org.webpieces.nio.api.integ;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
@@ -8,31 +8,37 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-public class IntegTestLocalhostServerListener implements DataListener {
-	private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostServerListener.class);
+public class IntegTestClientNotReadListener implements DataListener {
+	private static final Logger log = LoggerFactory.getLogger(IntegTestClientNotReadListener.class);
 
-	public IntegTestLocalhostServerListener() {
+	public IntegTestClientNotReadListener() {
 	}
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
+		log.info("receiving data server..writing now");
 		CompletableFuture<Channel> future = channel.write(b);
-		
+
 		future
 			.thenAccept(p -> finished("data written", b))
-			.whenComplete((r, e) -> fail(channel, b, r, e));
+			.exceptionally(e -> fail(channel, e));
+	}
+
+	private Void fail(Channel channel, Throwable e) {
+		log.info("finished exception="+e, e);
+		if(!channel.isClosed()) {
+			CompletableFuture<Channel> close = channel.close();
+			close.thenAccept(p -> {
+				log.info("Channel closed");
+			});
+		}
+		return null;
 	}
 
 	private void finished(String string, ByteBuffer buffer) {
+		log.info("writing finished reason="+string);
 	}
 
-	private void fail(Channel channel, ByteBuffer b, Void r, Throwable e) {
-		if(e != null) {
-			log.info("finished exception="+e, e);
-			channel.close();
-		}
-	}
-	
 	@Override
 	public void farEndClosed(Channel channel) {
 		log.info("far end closed");
@@ -45,22 +51,13 @@ public class IntegTestLocalhostServerListener implements DataListener {
 
 	@Override
 	public void applyBackPressure(Channel channel) {
-		//log.info("server apply backpressure");
-		channel.unregisterForReads().thenAccept(c -> logIt());
-	}
-
-	private void logIt() {
-		//log.info("UNregistereD for reads");
+		log.info("server unregistering for reads");
+		channel.unregisterForReads();
 	}
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
-		//log.info("server releasing backpressure");
-		channel.registerForReads().thenAccept(c -> logMe());
-		
-	}
-
-	private void logMe() {
-		//log.info("registereD for reads");
+		log.info("server registring for reads");
+		channel.registerForReads();
 	}
 }

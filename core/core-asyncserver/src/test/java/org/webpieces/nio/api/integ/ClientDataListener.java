@@ -1,4 +1,4 @@
-package org.webpieces.nio.api;
+package org.webpieces.nio.api.integ;
 
 import java.nio.ByteBuffer;
 

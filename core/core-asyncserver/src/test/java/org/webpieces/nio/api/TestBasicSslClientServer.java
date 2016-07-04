@@ -1,8 +1,6 @@
 package org.webpieces.nio.api;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +32,7 @@ public class TestBasicSslClientServer {
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool);
 		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr);
 		
-		TestSSLEngineFactory f = new TestSSLEngineFactory();
+		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);
 		AsyncServer svr = svrFactory.createTcpServer(new AsyncConfig("sslTcpSvr", addr), new SvrDataListener(), f);
 		

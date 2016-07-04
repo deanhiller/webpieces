@@ -93,7 +93,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			if(sslConnectfuture != null)
 				sslConnectfuture.complete(SslTCPChannel.this);
 			else {
-				CompletableFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this, false);
+				CompletableFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this);
 				if(!future.isDone())
 					conectionListener.failed(SslTCPChannel.this, new IllegalArgumentException("Client did not return a datalistener"));
 				try {

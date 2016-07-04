@@ -21,7 +21,7 @@ public interface ConnectionListener {
 	 * We do this, because you are in a thread pool, we only want to register for reads on the socket 
 	 * once we have this listener.  Without it, we don't want to read data with no where to send that data 
 	 */
-	public CompletableFuture<DataListener> connected(Channel channel, boolean s);
+	public CompletableFuture<DataListener> connected(Channel channel);
 	
 	/**
 	 * Unfortunately, channel may be the TCPServerChannel if accepting and failed or

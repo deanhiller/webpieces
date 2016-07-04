@@ -12,6 +12,7 @@ public class MockDataListener implements DataListener {
 
 	private List<ByteBuffer> buffers = new ArrayList<>();
 	private CompletableFuture<ByteBuffer> firstBufferFuture;
+	private boolean isClosed;
 
 	@Override
 	public synchronized void incomingData(Channel channel, ByteBuffer b) {
@@ -23,26 +24,19 @@ public class MockDataListener implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
-		// TODO Auto-generated method stub
-		
+		this.isClosed = true;
 	}
 
 	@Override
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void applyBackPressure(Channel channel) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void releaseBackPressure(Channel channel) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public synchronized CompletableFuture<ByteBuffer> getFirstBuffer() {
@@ -52,6 +46,10 @@ public class MockDataListener implements DataListener {
 		}
 		firstBufferFuture.complete(buffers.get(0));
 		return firstBufferFuture;
+	}
+
+	public boolean isClosed() {
+		return isClosed;
 	}
 
 }

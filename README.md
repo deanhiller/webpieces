@@ -28,13 +28,15 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* AsyncServer - timeout incoming server connection if client sends no data in X seconds
-* AsyncServer - timeout server connection if time between data is more than X seconds
+* FrontendServer - timeout incoming server connection if client sends no data in X seconds
+* FrontendServer - timeout server connection if time between data is more than X seconds...make sure is more than http2 timeout window that is sent back in frontend server.  ie. implement Keep-Alive: timeout=15, max=100  
+* verify keep alive timeout we chose with wireshark trace of google.com or some website
+* Integration test SoTimeout and setKeepAlive on two computers 
 * xxxx - make sure we close the connection on a write failure or read failure
 * httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
 * ChannelManager should offer up a timeout on the writes, the connection is closed (or a wrapper of some sort) so we don't all have to implement this - this is half done....a write() now checks the write at the begin of queue and if hasn't written, it will timeout (The other half is a timer checking all queues every 'timeout' seconds or something like that or the selector could fire and check itself)
 * httpproxy - AsyncServer has an overload mode that we should use when we are at a certain amount of outstanding requests(maybe?)
-* httpproxy - keep-alive connections should be timed out at some point albeit this is a demo anyways but we could build it into more
+* httpproxy - should respect keep-alive responses such that we send max N requests and shut down connection if no requests in keepalive timeout window occur
 * httpclient - timeout the request/response cycle
 * SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?  This helps if client holds up incomingData thread to backpressure just the channels that need it
 * httpparser(then httpclient) - if Content-Length > X, simulate http chunking so large files can be streamed through the system...and if < X just return entire response with body where X is configurable

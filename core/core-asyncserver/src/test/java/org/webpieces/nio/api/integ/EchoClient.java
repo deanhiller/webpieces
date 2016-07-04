@@ -1,4 +1,4 @@
-package org.webpieces.nio.api;
+package org.webpieces.nio.api.integ;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,3 +1,4 @@
 dependencies {
     compile project(':core:core-asyncserver'), project(':http:http-parser1_1'), project(':http:http-client')
+    testCompile project(':core:core-mock')    
 }

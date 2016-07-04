@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 
@@ -24,9 +23,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel channel, boolean s) {
-		TCPChannel tcpChannel = (TCPChannel) channel;
-		
+	public CompletableFuture<DataListener> connected(Channel tcpChannel) {
 		if(overloadResponse != null) {
 			//This is annoying.....
 			//1. we canNOT do synchronous write as it could block forever (if hacker simulates full nic)
@@ -36,11 +33,12 @@ public class DefaultConnectionListener implements ConnectionListener {
 			handleOverload(tcpChannel);
 			return new CompletableFuture<DataListener>(); //return a future that will never resolve so we do not register for reads
 		}
+
 		connectedChannels.addChannel(tcpChannel);
 		return CompletableFuture.completedFuture(listener);
 	}
 
-	private void handleOverload(TCPChannel tcpChannel) {
+	private void handleOverload(Channel tcpChannel) {
 		overloadResponse.mark();
 		try {
 			tcpChannel.write(overloadResponse);
@@ -58,7 +56,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 		overloadResponse.reset();		
 	}
 
-	private void close(TCPChannel tcpChannel) {
+	private void close(Channel tcpChannel) {
 		try {
 			tcpChannel.close();
 		} catch (Exception e) {
