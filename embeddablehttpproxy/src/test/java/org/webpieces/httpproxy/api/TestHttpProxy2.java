@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
@@ -36,7 +37,7 @@ public class TestHttpProxy2 {
 		HttpProxy proxy = HttpProxyFactory.createHttpProxy("myproxy", new TestModule(), config);
 		proxy.start();
 
-		List<DataListener> serverListeners = mockAsyncServer.getServerListeners();
+		List<AsyncDataListener> serverListeners = mockAsyncServer.getServerListeners();
 		dataListener = serverListeners.get(0);
 	}
 	

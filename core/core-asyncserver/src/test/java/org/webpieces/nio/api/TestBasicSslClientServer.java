@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
@@ -100,7 +101,7 @@ public class TestBasicSslClientServer {
 		
 	}
 	
-	private class SvrDataListener implements DataListener {
+	private class SvrDataListener implements AsyncDataListener {
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
@@ -111,8 +112,13 @@ public class TestBasicSslClientServer {
 		}
 
 		@Override
+		public void connectionOpened(TCPChannel channel, boolean isReadyForWrites) {
+			log.info("opened channel="+channel);
+		}
+		
+		@Override
 		public void farEndClosed(Channel channel) {
-			log.info("svr side....client must have closed the channel");
+			log.info("svr side....client must have closed the channel="+channel);
 		}
 
 		@Override

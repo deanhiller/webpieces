@@ -2,6 +2,7 @@ package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
 
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -11,9 +12,9 @@ public class ProxyDataListener implements DataListener {
 
 	private static final String EXISTING_PROXY_CHANNEL = "_existingProxyChannel";
 	private ConnectedChannels connectedChannels;
-	private DataListener dataListener;
+	private AsyncDataListener dataListener;
 
-	public ProxyDataListener(ConnectedChannels connectedChannels, DataListener dataListener) {
+	public ProxyDataListener(ConnectedChannels connectedChannels, AsyncDataListener dataListener) {
 		this.connectedChannels = connectedChannels;
 		this.dataListener = dataListener;
 	}
@@ -71,6 +72,11 @@ public class ProxyDataListener implements DataListener {
 	public void releaseBackPressure(Channel channel) {
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
 		dataListener.releaseBackPressure(proxy);
+	}
+
+	public void connectionOpened(Channel channel, boolean isReadyForWrites) {
+		TCPChannel proxy = lookupExistingOrCreateNew(channel);
+		dataListener.connectionOpened(proxy, isReadyForWrites);
 	}
 
 }

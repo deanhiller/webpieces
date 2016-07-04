@@ -13,18 +13,17 @@ import org.webpieces.nio.api.handlers.DataListener;
 public class DefaultConnectionListener implements ConnectionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultConnectionListener.class);
-	private static final ByteBuffer zeroBuffer = ByteBuffer.allocate(0);
 	private ConnectedChannels connectedChannels;
 	private ByteBuffer overloadResponse;
-	private DataListener listener;
+	private ProxyDataListener listener;
 
-	public DefaultConnectionListener(ConnectedChannels channels, DataListener listener) {
+	public DefaultConnectionListener(ConnectedChannels channels, ProxyDataListener listener) {
 		this.connectedChannels = channels;
 		this.listener = listener;
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel tcpChannel) {
+	public CompletableFuture<DataListener> connected(Channel tcpChannel, boolean isReadyForWrites) {
 		if(overloadResponse != null) {
 			//This is annoying.....
 			//1. we canNOT do synchronous write as it could block forever (if hacker simulates full nic)
@@ -39,7 +38,7 @@ public class DefaultConnectionListener implements ConnectionListener {
 		if(added) {
 			//represent the begin of an incoming connection with 0 data so that clients can
 			//start a timer task if no data comes in...
-			listener.incomingData(tcpChannel, zeroBuffer, true);
+			listener.connectionOpened(tcpChannel, isReadyForWrites);
 		}
 		return CompletableFuture.completedFuture(listener);
 	}

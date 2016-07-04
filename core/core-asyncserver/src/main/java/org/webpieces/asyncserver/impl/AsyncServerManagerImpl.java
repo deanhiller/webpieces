@@ -1,12 +1,12 @@
 package org.webpieces.asyncserver.impl;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.handlers.DataListener;
 
 public class AsyncServerManagerImpl implements AsyncServerManager {
 
@@ -18,14 +18,14 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	@Override
 	public AsyncServer createTcpServer(
-			AsyncConfig config, DataListener listener, SSLEngineFactory sslFactory) {
+			AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory) {
 		if(sslFactory == null)
 			throw new IllegalArgumentException("SSLEngineFactory is null but must be supplied");
 		return createTcpServerImpl(config, listener, sslFactory);
 	}
 	
 	private AsyncServer createTcpServerImpl(AsyncConfig config,
-			DataListener listener, SSLEngineFactory sslFactory) {
+			AsyncDataListener listener, SSLEngineFactory sslFactory) {
 		String id = config.id;
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
@@ -47,7 +47,7 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	}
 
 	@Override
-	public AsyncServer createTcpServer(AsyncConfig config, DataListener listener) {
+	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener) {
 		return createTcpServerImpl(config, listener, null);
 	}
 }

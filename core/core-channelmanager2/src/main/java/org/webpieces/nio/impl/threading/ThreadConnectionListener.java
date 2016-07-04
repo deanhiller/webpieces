@@ -20,13 +20,13 @@ public class ThreadConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel channel) {
+	public CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites) {
 		CompletableFuture<DataListener> future = new CompletableFuture<DataListener>();
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
 				ThreadTCPChannel proxy = new ThreadTCPChannel((TCPChannel) channel, executor);
-				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy);
+				CompletableFuture<DataListener> dataListener = connectionListener.connected(proxy, isReadyForWrites);
 				//transfer the listener to the future to be used
 				dataListener
 					.thenAccept(listener -> translate(future, listener))

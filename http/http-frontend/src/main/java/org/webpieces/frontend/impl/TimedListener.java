@@ -1,6 +1,5 @@
 package org.webpieces.frontend.impl;
 
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,7 +14,7 @@ import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
-public class TimedListener implements HttpRequestListener {
+public class TimedListener {
 
 	private static final Logger log = LoggerFactory.getLogger(TimedListener.class);
 
@@ -42,11 +41,21 @@ public class TimedListener implements HttpRequestListener {
 		listener.clientClosedChannel(channel);
 	}
 
-	public void clientOpenChannel(FrontendSocket channel) {
+	public void clientOpenChannel(FrontendSocket channel, boolean isReadyForWrites) {
+		if(!channel.getUnderlyingChannel().isSslChannel()) {
+			scheduleTimeout(channel);
+			listener.clientOpenChannel(channel);
+		} else if(isReadyForWrites) {
+			//if ready for writes, the channel is encrypted and fully open
+			listener.clientOpenChannel(channel);
+		} else { //if not ready for writes, the socket is open but encryption handshake is not been done yet
+			scheduleTimeout(channel);
+		}
+	}
+
+	private void scheduleTimeout(FrontendSocket channel) {
 		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(channel), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
 		socketToTimeout.put(channel, future);
-
-		listener.clientOpenChannel(channel);
 	}
 
 	private class TimeoutOnRequest implements Runnable {

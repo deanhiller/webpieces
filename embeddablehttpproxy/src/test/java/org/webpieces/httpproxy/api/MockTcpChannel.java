@@ -158,6 +158,11 @@ public class MockTcpChannel implements TCPChannel {
 		
 	}
 
+	@Override
+	public boolean isSslChannel() {
+		return false;
+	}
+
 
 	
 

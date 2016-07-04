@@ -127,4 +127,9 @@ public class ProxyTCPChannel implements TCPChannel {
 		return "" + channel;
 	}
 
+	@Override
+	public boolean isSslChannel() {
+		return channel.isSslChannel();
+	}
+
 }

@@ -10,7 +10,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
@@ -27,10 +26,10 @@ public class ParserLayer {
 	
 	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
-	private HttpRequestListener listener;
+	private TimedListener listener;
 	private boolean isHttps;
 	
-	public ParserLayer(HttpParser parser2, HttpRequestListener listener, boolean isHttps) {
+	public ParserLayer(HttpParser parser2, TimedListener listener, boolean isHttps) {
 		this.parser = parser2;
 		this.listener = listener;
 		this.isHttps = isHttps;
@@ -38,10 +37,6 @@ public class ParserLayer {
 
 	public void deserialize(Channel channel, ByteBuffer chunk) {
 		try {
-			//special case in channel is opening socket
-			if(!chunk.hasRemaining())
-				listener.clientOpenChannel(translate(channel));
-			
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
 			for(HttpRequest req : parsedRequests) {
@@ -94,9 +89,9 @@ public class ParserLayer {
 		listener.sendServerResponse(translate(channel), exc, status);
 	}
 
-	public void openedConnection(Channel channel) {
+	public void openedConnection(Channel channel, boolean isReadyForWrites) {
 		FrontendSocket socket = translate(channel);
-		listener.clientOpenChannel(socket);
+		listener.clientOpenChannel(socket, isReadyForWrites);
 	}
 	
 	public void farEndClosed(Channel channel) {

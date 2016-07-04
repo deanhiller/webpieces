@@ -5,10 +5,11 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.channels.TCPChannel;
 
-public class IntegTestClientNotReadListener implements DataListener {
+public class IntegTestClientNotReadListener implements AsyncDataListener {
 	private static final Logger log = LoggerFactory.getLogger(IntegTestClientNotReadListener.class);
 
 	public IntegTestClientNotReadListener() {
@@ -40,8 +41,13 @@ public class IntegTestClientNotReadListener implements DataListener {
 	}
 
 	@Override
+	public void connectionOpened(TCPChannel proxy, boolean isReadyForWrites) {
+		log.info("connection opened="+proxy+" ready="+isReadyForWrites);
+	}
+	
+	@Override
 	public void farEndClosed(Channel channel) {
-		log.info("far end closed");
+		log.info("far end closed="+channel);
 	}
 
 	@Override
@@ -60,4 +66,5 @@ public class IntegTestClientNotReadListener implements DataListener {
 		log.info("server registring for reads");
 		channel.registerForReads();
 	}
+
 }

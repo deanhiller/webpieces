@@ -158,6 +158,12 @@ public class MockTcpChannel implements TCPChannel {
 		
 	}
 
+	@Override
+	public boolean isSslChannel() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 
 	
 

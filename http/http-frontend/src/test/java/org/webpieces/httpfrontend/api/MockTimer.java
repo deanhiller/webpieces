@@ -127,4 +127,8 @@ public class MockTimer extends MockSuperclass implements ScheduledExecutorServic
 		return super.getCalledMethods(Method.SCHEDULE).toArray(ParametersPassedIn[] :: new);
 	}
 
+	public void addMockFuture(MockFuture<?> mockFuture) {
+		super.addValueToReturn(Method.SCHEDULE, mockFuture);
+	}
+
 }

@@ -149,4 +149,9 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		}
 	}
 
+	@Override
+	public boolean isSslChannel() {
+		return false;
+	}
+
 }

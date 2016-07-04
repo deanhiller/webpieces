@@ -127,4 +127,6 @@ public interface Channel extends RegisterableChannel {
 	
 	public int getMaxBytesBackupSize();
 	
+	public boolean isSslChannel();
+	
 }

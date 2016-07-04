@@ -213,4 +213,10 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		}
 	}
 
+
+	@Override
+	public boolean isSslChannel() {
+		return false;
+	}
+
 }

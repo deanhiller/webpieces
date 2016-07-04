@@ -19,7 +19,7 @@ public class MockConnectionListener implements ConnectionListener {
 	}
 
 	@Override
-	public CompletableFuture<DataListener> connected(Channel channel) {
+	public CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites) {
 		channels.add(channel);
 		return CompletableFuture.completedFuture(dataListener);
 	}

@@ -130,4 +130,9 @@ public class ThreadChannel implements Channel {
 		return tcpChannel.getMaxBytesBackupSize();
 	}
 
+	@Override
+	public boolean isSslChannel() {
+		return tcpChannel.isSslChannel();
+	}
+
 }

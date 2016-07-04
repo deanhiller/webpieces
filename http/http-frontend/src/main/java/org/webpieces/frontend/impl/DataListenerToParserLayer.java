@@ -5,11 +5,12 @@ import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.channels.TCPChannel;
 
-public class DataListenerToParserLayer implements DataListener {
+public class DataListenerToParserLayer implements AsyncDataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DataListenerToParserLayer.class);
 	
@@ -19,12 +20,13 @@ public class DataListenerToParserLayer implements DataListener {
 		this.processor = nextStage;
 	}
 
+	@Override
+	public void connectionOpened(TCPChannel channel, boolean isReadyForWrites) {
+		processor.openedConnection(channel, isReadyForWrites);
+	}
+	
 	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection){
 		try {
-			if(isOpeningConnection) {
-				processor.openedConnection(channel);
-				return;
-			}
 			InetSocketAddress addr = channel.getRemoteAddress();
 			channel.setName(""+addr);
 			log.info("incoming data. size="+b.remaining()+" channel="+channel);

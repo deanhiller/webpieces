@@ -25,9 +25,10 @@ public class SslConnectionListener implements ConnectionListener {
 	//thanks to SessionExecutor we will not start getting data to the listener until connected returns
 	//control back to the thread
 	@Override
-	public CompletableFuture<DataListener> connected(Channel c) {
+	public CompletableFuture<DataListener> connected(Channel c, boolean isReadyForWrites) {
 		TCPChannel realChannel = (TCPChannel) c;
 		SslTCPChannel sslChannel = new SslTCPChannel(pool, realChannel, connectionListener, sslFactory);
+		connectionListener.connected(sslChannel, false);
 		return CompletableFuture.completedFuture(sslChannel.getSocketDataListener());
 	}
 
