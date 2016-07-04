@@ -1,7 +1,7 @@
 package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
 
-import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
@@ -12,9 +12,9 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 public class IntegTestFrontend {
 
 	public static void main(String[] args) {
-		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10);
-		
-		frontEndMgr.createHttpServer(new AsyncConfig("id2", new InetSocketAddress(8080)), new OurListener());
+		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, null);
+		FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(8080));
+		frontEndMgr.createHttpServer(config, new OurListener());
 	}
 	
 	private static class OurListener implements HttpRequestListener {
@@ -27,6 +27,10 @@ public class IntegTestFrontend {
 		public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
 		}
 
+		@Override
+		public void clientOpenChannel(FrontendSocket channel) {
+		}
+		
 		@Override
 		public void clientClosedChannel(FrontendSocket channel) {
 		}

@@ -13,6 +13,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 public class DefaultConnectionListener implements ConnectionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultConnectionListener.class);
+	private static final ByteBuffer zeroBuffer = ByteBuffer.allocate(0);
 	private ConnectedChannels connectedChannels;
 	private ByteBuffer overloadResponse;
 	private DataListener listener;
@@ -34,7 +35,12 @@ public class DefaultConnectionListener implements ConnectionListener {
 			return new CompletableFuture<DataListener>(); //return a future that will never resolve so we do not register for reads
 		}
 
-		connectedChannels.addChannel(tcpChannel);
+		boolean added = connectedChannels.addChannel(tcpChannel);
+		if(added) {
+			//represent the begin of an incoming connection with 0 data so that clients can
+			//start a timer task if no data comes in...
+			listener.incomingData(tcpChannel, zeroBuffer);
+		}
 		return CompletableFuture.completedFuture(listener);
 	}
 

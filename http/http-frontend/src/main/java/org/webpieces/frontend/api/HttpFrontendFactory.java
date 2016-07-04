@@ -2,6 +2,7 @@ package org.webpieces.frontend.api;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
@@ -15,8 +16,6 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 public abstract class HttpFrontendFactory {
 	
-	protected abstract HttpFrontendManager createHttpProxyImpl();
-	
 	/**
 	 * 
 	 * @param id Use for logging and also file recording names
@@ -25,7 +24,7 @@ public abstract class HttpFrontendFactory {
 	 * 
 	 * @return
 	 */
-	public static HttpFrontendManager createFrontEnd(String id, int threadPoolSize) {
+	public static HttpFrontendManager createFrontEnd(String id, int threadPoolSize, ScheduledExecutorService timeout) {
 		Executor executor = Executors.newFixedThreadPool(threadPoolSize, new NamedThreadFactory(id));
 		BufferCreationPool pool = new BufferCreationPool();
 		HttpParserFactory.createParser(pool);
@@ -37,11 +36,11 @@ public abstract class HttpFrontendFactory {
 		
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		
-		return createFrontEnd(svrMgr, parser);
+		return createFrontEnd(svrMgr, timeout, parser);
 	}
 	
-	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, HttpParser parser) {
-		return new FrontEndServerManagerImpl(svrManager, parser);
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, HttpParser parser) {
+		return new FrontEndServerManagerImpl(svrManager, svc, parser);
 	}
 	
 }

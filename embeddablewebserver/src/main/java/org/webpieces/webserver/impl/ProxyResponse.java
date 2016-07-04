@@ -22,7 +22,6 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.View;

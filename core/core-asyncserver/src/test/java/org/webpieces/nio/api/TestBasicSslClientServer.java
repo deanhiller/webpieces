@@ -104,6 +104,8 @@ public class TestBasicSslClientServer {
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
+			if(!b.hasRemaining())
+				return;
 			log.info("server received data");
 			channel.write(b);
 		}

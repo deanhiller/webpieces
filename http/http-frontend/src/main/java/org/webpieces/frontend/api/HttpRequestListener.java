@@ -26,6 +26,12 @@ public interface HttpRequestListener {
 	void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status);
 
 	/**
+	 * client opened their channel(can start timeouts here)
+	 * @param channel
+	 */
+	void clientOpenChannel(FrontendSocket channel);
+	
+	/**
 	 * The client closed their channel.
 	 * 
 	 * @param channel

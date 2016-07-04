@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -38,15 +38,15 @@ public class WebServerImpl implements WebServer {
 		
 		routingService.start();
 
-		AsyncConfig svrChanConfig = new AsyncConfig("http", config.getHttpListenAddress());
-		svrChanConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-		log.info("starting to listen to http port="+svrChanConfig.bindAddr);
+		FrontendConfig svrChanConfig = new FrontendConfig("http", config.getHttpListenAddress());
+		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
+		log.info("starting to listen to http port="+svrChanConfig.asyncServerConfig.bindAddr);
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
 		
 		if(factory != null) {
-			AsyncConfig secureChanConfig = new AsyncConfig("https", config.getHttpsListenAddress());
-			secureChanConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-			log.info("starting to listen to https port="+secureChanConfig.bindAddr);
+			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress());
+			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
+			log.info("starting to listen to https port="+secureChanConfig.asyncServerConfig.bindAddr);
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
 		} else {
 			log.info("https port is disabled since configuration had no sslEngineFactory");

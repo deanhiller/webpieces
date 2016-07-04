@@ -25,6 +25,7 @@ import com.google.inject.Module;
 public class TestHttpProxy2 {
 	
 	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	private MockTimer timer = new MockTimer();
 	private MockAsyncServerManager mockAsyncServer = new MockAsyncServerManager();
 	private MockTcpChannel mockTcpChannel = new MockTcpChannel();
 	private DataListener dataListener;
@@ -55,8 +56,7 @@ public class TestHttpProxy2 {
 	private class TestModule implements Module {
 		@Override
 		public void configure(Binder binder) {
-
-			HttpFrontendManager frontEnd = HttpFrontendFactory.createFrontEnd(mockAsyncServer, parser);
+			HttpFrontendManager frontEnd = HttpFrontendFactory.createFrontEnd(mockAsyncServer, timer, parser);
 			binder.bind(HttpFrontendManager.class).toInstance(frontEnd);
 			binder.bind(Executor.class).toInstance(new DirectExecutor());
 		}

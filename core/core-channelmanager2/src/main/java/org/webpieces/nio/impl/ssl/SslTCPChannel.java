@@ -77,6 +77,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {
+		if(b.remaining() == 0)
+			throw new IllegalArgumentException("You must pass in bytebuffers that contain data.  b.remaining==0 in this buffer");
 		return sslEngine.feedPlainPacket(b).thenApply(v -> this);
 	}
 

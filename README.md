@@ -31,6 +31,7 @@ TODO:
 * FrontendServer - timeout incoming server connection if client sends no data in X seconds
 * FrontendServer - timeout server connection if time between data is more than X seconds...make sure is more than http2 timeout window that is sent back in frontend server.  ie. implement Keep-Alive: timeout=15, max=100  
 * verify keep alive timeout we chose with wireshark trace of google.com or some website
+* verify connection automatically closed if could not parse http request(ie. if that fails)
 * Integration test SoTimeout and setKeepAlive on two computers 
 * xxxx - make sure we close the connection on a write failure or read failure
 * httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
@@ -42,6 +43,7 @@ TODO:
 * httpparser(then httpclient) - if Content-Length > X, simulate http chunking so large files can be streamed through the system...and if < X just return entire response with body where X is configurable
 * Need to go back and write more api level tests to beef up the test suite
 * httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
+* response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * need to verify host/port is being put in hello ssl packet of http client to verify it works like browsers for SNI servername(not usually needed but we may need it for testing later)
 * httprouter - tie method param count to path param count unless @Loose is used (we should do this earlier before more and more violations happen...it's easier to loosen constraints later than tighten them up) OR have the routes be of the format <controller>.method(param1, param2) so we can count method count
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?

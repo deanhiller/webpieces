@@ -38,6 +38,10 @@ public class ParserLayer {
 
 	public void deserialize(Channel channel, ByteBuffer chunk) {
 		try {
+			//special case in channel is opening socket
+			if(!chunk.hasRemaining())
+				listener.clientOpenChannel(translate(channel));
+			
 			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
 			for(HttpRequest req : parsedRequests) {

@@ -18,6 +18,10 @@ public class MockRequestListener implements HttpRequestListener {
 	}
 
 	@Override
+	public void clientOpenChannel(FrontendSocket channel) {
+	}
+	
+	@Override
 	public void clientClosedChannel(FrontendSocket channel) {
 		isClosed = true;
 	}

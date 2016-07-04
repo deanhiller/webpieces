@@ -81,6 +81,11 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 
 	@Override
+	public void clientOpenChannel(FrontendSocket channel) {
+		log.info("browser client open channel="+channel);
+	}
+	
+	@Override
 	public void clientClosedChannel(FrontendSocket channel) {
 		log.info("browser client closed channel="+channel);
 	}

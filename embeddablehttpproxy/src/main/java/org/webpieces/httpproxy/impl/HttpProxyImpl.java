@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
@@ -27,8 +27,8 @@ public class HttpProxyImpl implements HttpProxy {
 	public void start() {
 		log.info("starting server");
 		InetSocketAddress addr = new InetSocketAddress(8080);
-		AsyncConfig config = new AsyncConfig("httpProxy", addr);
-		config.functionToConfigureBeforeBind = s -> s.socket().setReuseAddress(true);
+		FrontendConfig config = new FrontendConfig("httpProxy", addr);
+		config.asyncServerConfig.functionToConfigureBeforeBind = s -> s.socket().setReuseAddress(true);
 		httpServer = serverMgr.createHttpServer(config, serverListener);
 		
 //		InetSocketAddress sslAddr = new InetSocketAddress(8443);

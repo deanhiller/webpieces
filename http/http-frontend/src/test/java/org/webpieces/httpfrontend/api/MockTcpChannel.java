@@ -7,9 +7,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
+import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
-public class MockTcpChannel implements Channel {
+public class MockTcpChannel implements TCPChannel {
+
+	private boolean isClosed;
+	private ChannelSessionImpl session = new ChannelSessionImpl();
 
 	@Override
 	public void setReuseAddress(boolean b) {
@@ -49,8 +54,7 @@ public class MockTcpChannel implements Channel {
 
 	@Override
 	public boolean isClosed() {
-		// TODO Auto-generated method stub
-		return false;
+		return isClosed;
 	}
 
 	@Override
@@ -79,8 +83,8 @@ public class MockTcpChannel implements Channel {
 
 	@Override
 	public CompletableFuture<Channel> close() {
-		// TODO Auto-generated method stub
-		return null;
+		isClosed = true;
+		return CompletableFuture.completedFuture(this);
 	}
 
 	@Override
@@ -115,8 +119,7 @@ public class MockTcpChannel implements Channel {
 
 	@Override
 	public ChannelSession getSession() {
-		// TODO Auto-generated method stub
-		return null;
+		return session;
 	}
 
 	@Override
@@ -141,6 +144,18 @@ public class MockTcpChannel implements Channel {
 	public int getMaxBytesBackupSize() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean getKeepAlive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setKeepAlive(boolean b) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

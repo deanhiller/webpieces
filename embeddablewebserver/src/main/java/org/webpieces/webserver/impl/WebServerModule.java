@@ -1,10 +1,14 @@
 package org.webpieces.webserver.impl;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 import javax.inject.Singleton;
 
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -35,8 +39,14 @@ public class WebServerModule implements Module {
 
 	@Provides
 	@Singleton
-	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config) {
-		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads());
+	public ScheduledExecutorService provideTimer() {
+		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
+	}
+	
+	@Provides
+	@Singleton
+	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config, ScheduledExecutorService timer) {
+		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), timer);
 	}
 	
 }
