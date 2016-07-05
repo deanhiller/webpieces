@@ -47,7 +47,7 @@ task stageWebServer(type: Sync, dependsOn: ['embeddablewebserver:assemble', 'sta
     into new File(outputStagingDir, 'lib-prod')
 }
 
-task stageDevServer(type: Sync, dependsOn: ['http-router-dev:assemble', 'stageWebServer']) {
+task stageDevServer(type: Sync, dependsOn: ['http-router-dev:assemble', 'http-templating-dev:assemble', 'stageWebServer']) {
     from childProjects['http-router-dev'].toStagingDir
     from childProjects['http-templating-dev'].toStagingDir
     into new File(outputStagingDir, 'lib-development')
