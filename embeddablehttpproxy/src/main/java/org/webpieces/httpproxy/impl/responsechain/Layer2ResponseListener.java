@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.frontend.api.exception.HttpClientException;
+import org.webpieces.frontend.api.exception.HttpServerException;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -42,10 +44,13 @@ public class Layer2ResponseListener {
 		log.error("could not process req="+req+" from channel="+channel+" due to exception", e);
 
 		if(e.getCause() instanceof UnresolvedAddressException) {
-			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP404);
+			HttpClientException exc = new HttpClientException("Client gave a bad address to connect to", e);
+			badResponse.sendServerResponse(channel, exc, KnownStatusCode.HTTP404);
 		} else {
-			badResponse.sendServerResponse(channel, e, KnownStatusCode.HTTP500);
+			HttpServerException exc = new HttpServerException("Server has a bug", e);
+			badResponse.sendServerResponse(channel, exc, KnownStatusCode.HTTP500);
 		}
+		
 		channel.close();
 		
 		return null;

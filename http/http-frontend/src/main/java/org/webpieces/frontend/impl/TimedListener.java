@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.exception.HttpClientException;
+import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.SafeRunnable;
@@ -42,7 +44,7 @@ public class TimedListener {
 		}
 	}
 
-	public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
+	public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
 		listener.sendServerResponse(channel, exc, status);
 		
 		//safety measure preventing leak on quick connect/close clients
@@ -86,7 +88,7 @@ public class TimedListener {
 			socketToTimeout.remove(channel);
 			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket");
 			
-			RuntimeException exc = new RuntimeException("timing out a client who did not send a request in time");
+			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time");
 			sendServerResponse(channel, exc, KnownStatusCode.HTTP408);
 		}
 	}

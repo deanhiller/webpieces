@@ -6,6 +6,10 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.frontend.api.exception.HttpClientException;
+import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.frontend.api.exception.HttpServerException;
+import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -31,15 +35,21 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 			channel.setName(""+addr);
 			log.info("incoming data. size="+b.remaining()+" channel="+channel);
 			processor.deserialize(channel, b);
+		} catch(ParseException e) {
+			HttpClientException exc = new HttpClientException("Could not parse http request", e);
+			//move down to debug level later on..
+			log.info("Client screwed up", exc);
+			sendBadResponse(channel, exc, KnownStatusCode.HTTP400);
 		} catch(Throwable e) {
-			log.error("Exeption processing", e);
-			sendBadResponse(channel, e, KnownStatusCode.HTTP500);
+			HttpServerException exc = new HttpServerException("There was a bug in the server, please see the server logs", e);
+			log.error("Exeption processing", exc);
+			sendBadResponse(channel, exc, KnownStatusCode.HTTP500);
 		}
 	}
 
-	private void sendBadResponse(Channel channel, Throwable exc, KnownStatusCode http500) {
+	private void sendBadResponse(Channel channel, HttpException exc, KnownStatusCode statusCode) {
 		try {
-			processor.sendServerResponse(channel, exc, KnownStatusCode.HTTP500);
+			processor.sendServerResponse(channel, exc, statusCode);
 		} catch(Throwable e) {
 			log.info("Could not send response to client", e);
 		}

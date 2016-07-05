@@ -4,12 +4,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
@@ -22,8 +21,6 @@ import org.webpieces.nio.api.channels.ChannelSession;
 
 public class ParserLayer {
 
-	private static final Logger log = LoggerFactory.getLogger(ParserLayer.class);
-	
 	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
 	private TimedListener listener;
@@ -36,16 +33,10 @@ public class ParserLayer {
 	}
 
 	public void deserialize(Channel channel, ByteBuffer chunk) {
-		try {
-			List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
+		List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
-			for(HttpRequest req : parsedRequests) {
-				listener.processHttpRequests(translate(channel), req, isHttps);
-			}
-		} catch(ParseException e) {
-			//move down to debug level later on..
-			log.info("Client screwed up", e);
-			listener.sendServerResponse(translate(channel), e, KnownStatusCode.HTTP400);
+		for(HttpRequest req : parsedRequests) {
+			listener.processHttpRequests(translate(channel), req, isHttps);
 		}
 	}
 
@@ -62,10 +53,6 @@ public class ParserLayer {
 		
 		Memento resultMemento = parse(memento, dataWrapper);
 
-//		if(resultMemento.getStatus() == ParsedStatus.NEED_MORE_DATA) {
-//			return;
-//		}
-		
 		List<HttpPayload> parsedMsgs = resultMemento.getParsedMessages();
 		List<HttpRequest> parsedRequests = new ArrayList<>();
 		for(HttpPayload msg : parsedMsgs) {
@@ -77,16 +64,13 @@ public class ParserLayer {
 	}
 
 	private Memento parse(Memento memento, DataWrapper dataWrapper) {
-		try {
-			Memento resultMemento = parser.parse(memento, dataWrapper);
-			return resultMemento;
-		} catch(Throwable e) {
-			throw new ParseException("Parser could not parse", e);
-		}
+		Memento resultMemento = parser.parse(memento, dataWrapper);
+		return resultMemento;
 	}
 
-	public void sendServerResponse(Channel channel, Throwable exc, KnownStatusCode status) {
-		listener.sendServerResponse(translate(channel), exc, status);
+	public void sendServerResponse(Channel channel, HttpException exc, KnownStatusCode status) {
+		FrontendSocket socket = translate(channel);
+		listener.sendServerResponse(socket, exc, status);
 	}
 
 	public void openedConnection(Channel channel, boolean isReadyForWrites) {
@@ -95,15 +79,18 @@ public class ParserLayer {
 	}
 	
 	public void farEndClosed(Channel channel) {
-		listener.clientClosedChannel(translate(channel));		
+		FrontendSocket socket = translate(channel);
+		listener.clientClosedChannel(socket);		
 	}
 
 	public void applyWriteBackPressure(Channel channel) {
-		listener.applyWriteBackPressure(translate(channel));
+		FrontendSocket socket = translate(channel);
+		listener.applyWriteBackPressure(socket);
 	}
 
 	public void releaseBackPressure(Channel channel) {
-		listener.releaseBackPressure(translate(channel));
+		FrontendSocket socket = translate(channel);
+		listener.releaseBackPressure(socket);
 	}
 
 	private FrontendSocket translate(Channel channel) {

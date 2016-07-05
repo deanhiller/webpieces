@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,10 +16,6 @@ import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpRequestLine;
-import org.webpieces.httpparser.api.dto.HttpUri;
-import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;

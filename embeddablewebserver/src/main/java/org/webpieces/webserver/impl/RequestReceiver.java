@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -76,8 +77,14 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
-		log.error("need send bad server response", exc);
+	public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
+		//If status is a 4xx, send it back to the client with just raw information
+		
+		//If status is a 5xx, send it into the routingService to be displayed back to the user
+		
+		log.error("Need to clean this up and render good 500 page for real bugs");
+		ProxyResponse proxyResp = new ProxyResponse(channel);
+		proxyResp.sendFailure(exc, status);
 	}
 
 	@Override

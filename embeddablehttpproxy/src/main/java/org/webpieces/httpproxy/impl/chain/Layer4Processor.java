@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
@@ -125,7 +126,7 @@ public class Layer4Processor implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
+	public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
 		badResponse.sendServerResponse(channel, exc, status);
 	}
 

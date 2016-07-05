@@ -14,6 +14,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -44,6 +45,10 @@ public class ProxyResponse implements ResponseStreamer {
 		this.templatingService = templatingService;
 	}
 
+	public ProxyResponse(FrontendSocket channel) {
+		this.channel = channel;
+	}
+	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
 		HttpResponseStatus status = new HttpResponseStatus();
@@ -174,6 +179,20 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public void failure(Throwable e) {
 		log.error("Exception", e);
+	}
+
+	public void sendFailure(HttpException exc, KnownStatusCode statusCode) {
+		HttpResponseStatus status = new HttpResponseStatus();
+		status.setKnownStatus(statusCode);
+		
+		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
+		statusLine.setStatus(status);
+		HttpResponse response = new HttpResponse();
+		response.setStatusLine(statusLine);
+		
+		response.addHeader(new Header("Failure", exc.getMessage()));
+		
+		channel.write(response);
 	}
 
 }
