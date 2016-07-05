@@ -185,7 +185,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private boolean processingChunked = false;
 
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+		public void incomingData(Channel channel, ByteBuffer b) {
 			log.info("size="+b.remaining());
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 			memento = parser.parse(memento, wrapper);

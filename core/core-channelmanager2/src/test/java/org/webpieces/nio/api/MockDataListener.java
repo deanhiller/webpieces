@@ -15,7 +15,7 @@ public class MockDataListener implements DataListener {
 	private boolean isClosed;
 
 	@Override
-	public synchronized void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public synchronized void incomingData(Channel channel, ByteBuffer b) {
 		if(buffers.isEmpty() && firstBufferFuture != null) {
 			firstBufferFuture.complete(b);
 		}

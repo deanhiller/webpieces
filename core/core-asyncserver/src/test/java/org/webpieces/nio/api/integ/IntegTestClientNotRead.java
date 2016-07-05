@@ -114,7 +114,7 @@ public class IntegTestClientNotRead {
 
 	private class ClientDataListener implements DataListener {
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+		public void incomingData(Channel channel, ByteBuffer b) {
 			recordBytes(b.remaining());
 			
 			if(b.remaining() != 2000)

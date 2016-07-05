@@ -29,7 +29,7 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 		processor.openedConnection(channel, isReadyForWrites);
 	}
 	
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection){
+	public void incomingData(Channel channel, ByteBuffer b){
 		try {
 			InetSocketAddress addr = channel.getRemoteAddress();
 			channel.setName(""+addr);

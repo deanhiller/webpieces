@@ -20,9 +20,9 @@ public class ProxyDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public void incomingData(Channel channel, ByteBuffer b) {
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
-		dataListener.incomingData(proxy, b, isOpeningConnection);
+		dataListener.incomingData(proxy, b);
 	}
 
 	@Override

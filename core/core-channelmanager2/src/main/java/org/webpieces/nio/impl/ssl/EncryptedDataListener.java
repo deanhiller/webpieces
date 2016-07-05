@@ -8,7 +8,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 public class EncryptedDataListener implements DataListener {
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public void incomingData(Channel channel, ByteBuffer b) {
 	}
 
 	@Override

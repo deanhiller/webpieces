@@ -17,9 +17,9 @@ public class SslTryCatchListener implements DataListener {
 		this.listener = listener;
 	}
 
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public void incomingData(Channel channel, ByteBuffer b) {
 		try {
-			listener.incomingData(channel, b, isOpeningConnection);
+			listener.incomingData(channel, b);
 		} catch (Throwable e) {
 			log.error("Exception", e);
 		}

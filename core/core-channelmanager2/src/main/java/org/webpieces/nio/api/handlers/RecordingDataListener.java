@@ -21,10 +21,10 @@ public class RecordingDataListener implements DataListener {
 		this.realListener = realListener;
 	}
 
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public void incomingData(Channel channel, ByteBuffer b) {
 		Recorder recorder = getOrCreate(channel);
 		recorder.record(b);
-		realListener.incomingData(channel, b, isOpeningConnection);
+		realListener.incomingData(channel, b);
 	}
 
 	private Recorder getOrCreate(Channel channel) {

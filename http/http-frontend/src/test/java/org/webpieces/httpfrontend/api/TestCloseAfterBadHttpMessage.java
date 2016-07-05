@@ -58,7 +58,7 @@ public class TestCloseAfterBadHttpMessage {
 
 		DataListener dataListener = future.get();
 		ByteBuffer buffer = ByteBuffer.wrap("\r\n\r\nasdfsdf".getBytes());
-		dataListener.incomingData(mockServerChannel, buffer, false);
+		dataListener.incomingData(mockServerChannel, buffer);
 		
 		//verify our connection was not closed
 		Assert.assertTrue(mockServerChannel.isClosed());

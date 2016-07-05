@@ -45,9 +45,8 @@ public interface DataListener {
 	 * 
 	 * @param channel
 	 * @param b
-	 * @param isOpeningConnection TODO
 	 */
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection);
+	public void incomingData(Channel channel, ByteBuffer b);
 	
 	public void farEndClosed(Channel channel);
 

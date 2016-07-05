@@ -16,7 +16,7 @@ public class IntegTestClientNotReadListener implements AsyncDataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public void incomingData(Channel channel, ByteBuffer b) {
 		log.info("receiving data server..writing now");
 		CompletableFuture<Channel> future = channel.write(b);
 

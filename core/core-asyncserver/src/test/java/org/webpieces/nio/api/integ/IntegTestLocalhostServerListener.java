@@ -16,10 +16,7 @@ public class IntegTestLocalhostServerListener implements AsyncDataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
-		if(isOpeningConnection)
-			return;
-		
+	public void incomingData(Channel channel, ByteBuffer b) {
 		CompletableFuture<Channel> future = channel.write(b);
 		
 		future

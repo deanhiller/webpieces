@@ -130,7 +130,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		
 		@Override
 		public void packetUnencrypted(ByteBuffer out) {
-			clientDataListener.incomingData(SslTCPChannel.this, out, false);
+			clientDataListener.incomingData(SslTCPChannel.this, out);
 		}
 
 		@Override
@@ -154,7 +154,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private class SocketDataListener implements DataListener {
 		
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+		public void incomingData(Channel channel, ByteBuffer b) {
 			if(sslEngine == null) {
 				b = setupSSLEngine(channel, b);
 				if(b == null)

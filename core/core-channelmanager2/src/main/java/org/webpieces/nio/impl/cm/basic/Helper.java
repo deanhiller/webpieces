@@ -266,7 +266,7 @@ public final class Helper {
 		} else if(bytes > 0) {
 			if(apiLog.isTraceEnabled())
 				apiLog.trace(channel+"READ bytes="+bytes);
-			in.incomingData(channel, b, false);
+			in.incomingData(channel, b);
 		}
     }
     

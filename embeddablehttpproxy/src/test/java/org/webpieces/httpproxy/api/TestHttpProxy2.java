@@ -52,8 +52,8 @@ public class TestHttpProxy2 {
 		
 		ByteBuffer buffer = ByteBuffer.wrap(array);
 		
-		dataListener.incomingData(mockTcpChannel, ByteBuffer.allocate(0), true);
-		dataListener.incomingData(mockTcpChannel, buffer, false);
+		dataListener.incomingData(mockTcpChannel, ByteBuffer.allocate(0));
+		dataListener.incomingData(mockTcpChannel, buffer);
 	}
 	
 	private class TestModule implements Module {

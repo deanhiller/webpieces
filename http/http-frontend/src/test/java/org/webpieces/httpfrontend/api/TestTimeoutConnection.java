@@ -105,7 +105,7 @@ public class TestTimeoutConnection {
 
 		DataListener dataListener = future.get();
 		ByteBuffer buffer = createHttpRequest();
-		dataListener.incomingData(mockServerChannel, buffer, false);
+		dataListener.incomingData(mockServerChannel, buffer);
 		
 		//verify our connection was not closed
 		Assert.assertTrue(!mockServerChannel.isClosed());

@@ -17,11 +17,11 @@ public class ThreadDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b, boolean isOpeningConnection) {
+	public void incomingData(Channel channel, ByteBuffer b) {
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
-				dataListener.incomingData(channel, b, isOpeningConnection);
+				dataListener.incomingData(channel, b);
 			}
 		});
 	}
