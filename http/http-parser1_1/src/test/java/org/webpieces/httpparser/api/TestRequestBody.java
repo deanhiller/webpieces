@@ -58,6 +58,14 @@ public class TestRequestBody {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, wrap1);
 		
+		Assert.assertEquals(ParsingState.BODY, memento.getUnParsedState().getCurrentlyParsing());
+		Assert.assertEquals(10, memento.getUnParsedState().getCurrentUnparsedSize());
+		
+		HttpPayload payload = memento.getHalfParsedMessage();
+		HttpRequest httpRequest = payload.getHttpRequest();
+		Header header = httpRequest.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+		Assert.assertEquals("30", header.getValue());
+		
 		Assert.assertEquals(0, memento.getParsedMessages().size());
 		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
 		
@@ -100,6 +108,48 @@ public class TestRequestBody {
 		memento = parser.parse(memento, wrap2);
 		
 		Assert.assertEquals(2, memento.getParsedMessages().size());
+		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
+
+		HttpPayload msg = memento.getParsedMessages().get(0);
+		DataWrapper body = msg.getBody();
+		byte[] bodyBytesActual = body.createByteArray();
+		Assert.assertArrayEquals(expected, bodyBytesActual);
+	}
+	
+	@Test
+	public void testPartialHeaders() {
+		HttpRequest request = createPostRequestWithBody();
+		byte[] expected = request.getBody().createByteArray();
+		
+		byte[] data = parser.marshalToBytes(request);
+		
+		byte[] first = new byte[20];
+		byte[] second = new byte[10];
+		byte[] third = new byte[data.length - first.length - second.length];
+		System.arraycopy(data, 0, first, 0, first.length);
+		System.arraycopy(data, first.length, second, 0, second.length);
+		System.arraycopy(data, first.length+second.length, third, 0, third.length);
+		DataWrapper wrap1 = dataGen.wrapByteArray(first);
+		DataWrapper wrap2 = dataGen.wrapByteArray(second);
+		DataWrapper wrap3 = dataGen.wrapByteArray(third);
+		
+		Memento memento = parser.prepareToParse();
+		memento = parser.parse(memento, wrap1);
+
+		Assert.assertEquals(ParsingState.HEADERS, memento.getUnParsedState().getCurrentlyParsing());
+		Assert.assertEquals(20, memento.getUnParsedState().getCurrentUnparsedSize());
+		
+		memento = parser.parse(memento, wrap2);
+
+		Assert.assertEquals(ParsingState.HEADERS, memento.getUnParsedState().getCurrentlyParsing());
+		Assert.assertEquals(30, memento.getUnParsedState().getCurrentUnparsedSize());
+		
+		Assert.assertEquals(0, memento.getParsedMessages().size());
+		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
+		
+		memento = parser.parse(memento, wrap3);
+		
+		Assert.assertEquals(1, memento.getParsedMessages().size());
 		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 
 		HttpPayload msg = memento.getParsedMessages().get(0);

@@ -36,20 +36,20 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 			log.info("incoming data. size="+b.remaining()+" channel="+channel);
 			processor.deserialize(channel, b);
 		} catch(ParseException e) {
-			HttpClientException exc = new HttpClientException("Could not parse http request", e);
+			HttpClientException exc = new HttpClientException("Could not parse http request", KnownStatusCode.HTTP400, e);
 			//move down to debug level later on..
 			log.info("Client screwed up", exc);
-			sendBadResponse(channel, exc, KnownStatusCode.HTTP400);
+			sendBadResponse(channel, exc);
 		} catch(Throwable e) {
-			HttpServerException exc = new HttpServerException("There was a bug in the server, please see the server logs", e);
+			HttpServerException exc = new HttpServerException("There was a bug in the server, please see the server logs", KnownStatusCode.HTTP500, e);
 			log.error("Exeption processing", exc);
-			sendBadResponse(channel, exc, KnownStatusCode.HTTP500);
+			sendBadResponse(channel, exc);
 		}
 	}
 
-	private void sendBadResponse(Channel channel, HttpException exc, KnownStatusCode statusCode) {
+	private void sendBadResponse(Channel channel, HttpException exc) {
 		try {
-			processor.sendServerResponse(channel, exc, statusCode);
+			processor.sendServerResponse(channel, exc);
 		} catch(Throwable e) {
 			log.info("Could not send response to client", e);
 		}

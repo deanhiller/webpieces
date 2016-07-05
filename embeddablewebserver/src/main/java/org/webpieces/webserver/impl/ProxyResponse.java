@@ -181,9 +181,9 @@ public class ProxyResponse implements ResponseStreamer {
 		log.error("Exception", e);
 	}
 
-	public void sendFailure(HttpException exc, KnownStatusCode statusCode) {
+	public void sendFailure(HttpException exc) {
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(statusCode);
+		status.setKnownStatus(exc.getStatusCode());
 		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);

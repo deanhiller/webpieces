@@ -7,11 +7,14 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.frontend.api.exception.HttpClientException;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
+import org.webpieces.httpparser.api.UnparsedState;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -25,10 +28,12 @@ public class ParserLayer {
 	private HttpParser parser;
 	private TimedListener listener;
 	private boolean isHttps;
+	private FrontendConfig config;
 	
-	public ParserLayer(HttpParser parser2, TimedListener listener, boolean isHttps) {
+	public ParserLayer(HttpParser parser2, TimedListener listener, FrontendConfig config, boolean isHttps) {
 		this.parser = parser2;
 		this.listener = listener;
+		this.config = config;
 		this.isHttps = isHttps;
 	}
 
@@ -65,12 +70,27 @@ public class ParserLayer {
 
 	private Memento parse(Memento memento, DataWrapper dataWrapper) {
 		Memento resultMemento = parser.parse(memento, dataWrapper);
+		
+		UnparsedState unParsedState = resultMemento.getUnParsedState();
+		switch (unParsedState.getCurrentlyParsing()) {
+		case HEADERS:
+			if(unParsedState.getCurrentUnparsedSize() > config.maxHeaderSize)
+				throw new HttpClientException("Max heaader size="+config.maxHeaderSize+" was exceeded", KnownStatusCode.HTTP431);
+			break;
+		case BODY:
+		case CHUNK:
+			if(unParsedState.getCurrentUnparsedSize() > config.maxBodyOrChunkSize)
+				throw new HttpClientException("Body or chunk size limit exceeded", KnownStatusCode.HTTP413);
+		default:
+			break;
+		}
+		
 		return resultMemento;
 	}
 
-	public void sendServerResponse(Channel channel, HttpException exc, KnownStatusCode status) {
+	public void sendServerResponse(Channel channel, HttpException exc) {
 		FrontendSocket socket = translate(channel);
-		listener.sendServerResponse(socket, exc, status);
+		listener.sendServerResponse(socket, exc);
 	}
 
 	public void openedConnection(Channel channel, boolean isReadyForWrites) {

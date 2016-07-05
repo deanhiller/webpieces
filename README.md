@@ -28,7 +28,6 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* (working)httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
 * (working on right now)break out build.gradle file into multiple ones so as project grows, it scales better
 * open connection to google and see how long before timeout
 * gzip/deflate/sdch compression?

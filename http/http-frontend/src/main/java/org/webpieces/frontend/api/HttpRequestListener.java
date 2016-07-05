@@ -2,7 +2,6 @@ package org.webpieces.frontend.api;
 
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public interface HttpRequestListener {
 
@@ -24,7 +23,7 @@ public interface HttpRequestListener {
 	 * @param exc
 	 * @param http500
 	 */
-	void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status);
+	void sendServerResponse(FrontendSocket channel, HttpException exc);
 
 	/**
 	 * client opened their channel(can start timeouts here)

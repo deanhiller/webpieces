@@ -18,6 +18,9 @@ public enum KnownStatusCode {
 	HTTP404(404, "Not Found", HttpStatusType.ClientError),
 	
 	HTTP408(408, "Request Timeout", HttpStatusType.ClientError),
+
+	HTTP413(413, "Payload Too Large", HttpStatusType.ClientError),
+	HTTP431(431, "Request Header Fields Too Large", HttpStatusType.ClientError),
 	
 	HTTP500(500, "Internal Server Error", HttpStatusType.ServerError),  
 	

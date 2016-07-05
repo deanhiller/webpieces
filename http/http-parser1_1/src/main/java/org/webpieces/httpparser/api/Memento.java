@@ -15,4 +15,18 @@ public interface Memento {
 	 */
 	List<HttpPayload> getParsedMessages();
 	
+	/**
+	 * You probably never really need this, but if you need the headers BEFORE the body has finished coming in for
+	 * requests with a Content-Length header, then this will be non-null.  You will receive this however with the body
+	 * a second time when you call getParsedMessages
+	 */
+	public HttpPayload getHalfParsedMessage();
+
+	/**
+	 * For those who would like to throw an exception if the incoming size of all headers is too large, the current
+	 * size can be checked
+	 * @return
+	 */
+	UnparsedState getUnParsedState();
+	
 }

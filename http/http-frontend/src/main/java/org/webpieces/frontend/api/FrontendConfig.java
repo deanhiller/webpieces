@@ -3,6 +3,7 @@ package org.webpieces.frontend.api;
 import java.net.SocketAddress;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.data.api.BufferCreationPool;
 
 public class FrontendConfig {
 
@@ -24,7 +25,9 @@ public class FrontendConfig {
 	 * 
 	 * This is the max size of any http request(headers that is) or any chunk being uploaded
 	 */
-	public int maxPayloadSize = 16384;
+	public int maxHeaderSize = 4096;
+	
+	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;

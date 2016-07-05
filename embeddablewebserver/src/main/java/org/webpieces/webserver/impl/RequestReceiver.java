@@ -14,7 +14,6 @@ import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
@@ -77,14 +76,14 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
+	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
 		//If status is a 4xx, send it back to the client with just raw information
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
 		log.error("Need to clean this up and render good 500 page for real bugs");
 		ProxyResponse proxyResp = new ProxyResponse(channel);
-		proxyResp.sendFailure(exc, status);
+		proxyResp.sendFailure(exc);
 	}
 
 	@Override

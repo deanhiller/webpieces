@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class BufferCreationPool implements BufferPool {
 
 	private static final Logger log = LoggerFactory.getLogger(BufferCreationPool.class);
+	public static final int DEFAULT_MAX_BUFFER_SIZE = 16921;
 	
 	//a rough counter...doesn't need to be too accurate..
 	private AtomicInteger counter = new AtomicInteger();
@@ -35,7 +36,7 @@ public class BufferCreationPool implements BufferPool {
 	private int poolSize;
 	
 	public BufferCreationPool() {
-		this(false, 16921, 1000);
+		this(false, DEFAULT_MAX_BUFFER_SIZE, 1000);
 	}
 	
 	public BufferCreationPool(boolean isDirect, int bufferSize, int poolSize) {

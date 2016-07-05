@@ -143,6 +143,9 @@ public class TestChunkedParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, first);
 		
+		Assert.assertEquals(ParsingState.CHUNK, memento.getUnParsedState().getCurrentlyParsing());
+		Assert.assertEquals(11, memento.getUnParsedState().getCurrentUnparsedSize());
+		
 		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
 		
 		List<HttpPayload> msgs = memento.getParsedMessages();

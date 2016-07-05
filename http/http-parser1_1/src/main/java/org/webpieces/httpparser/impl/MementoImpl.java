@@ -6,6 +6,8 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParsedStatus;
+import org.webpieces.httpparser.api.ParsingState;
+import org.webpieces.httpparser.api.UnparsedState;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public class MementoImpl implements Memento {
@@ -93,6 +95,17 @@ public class MementoImpl implements Memento {
 
 	public boolean isInChunkParsingMode() {
 		return inChunkParsingMode;
+	}
+
+	@Override
+	public UnparsedState getUnParsedState() {
+		if(inChunkParsingMode) {
+			return new UnparsedState(ParsingState.CHUNK, leftOverData.getReadableSize());
+		} else if(halfParsedMessage != null) {
+			return new UnparsedState(ParsingState.BODY, leftOverData.getReadableSize());
+		}
+		
+		return new UnparsedState(ParsingState.HEADERS, leftOverData.getReadableSize());
 	}
 	
 }

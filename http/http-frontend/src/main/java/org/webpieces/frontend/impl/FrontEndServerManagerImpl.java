@@ -28,7 +28,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		preconditionCheck(config);
 		
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, false);
+		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, config, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
 		return frontend;
@@ -46,7 +46,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 			SSLEngineFactory factory) {
 		preconditionCheck(config);
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, true);
+		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, config, true);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
 		return frontend;

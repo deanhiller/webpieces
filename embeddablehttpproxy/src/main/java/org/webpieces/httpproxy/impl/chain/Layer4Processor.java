@@ -16,7 +16,6 @@ import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpUri;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpproxy.api.ProxyConfig;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
@@ -126,8 +125,8 @@ public class Layer4Processor implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
-		badResponse.sendServerResponse(channel, exc, status);
+	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
+		badResponse.sendServerResponse(channel, exc);
 	}
 
 	@Override

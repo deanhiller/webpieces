@@ -8,7 +8,6 @@ import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class IntegTestFrontend {
 
@@ -25,7 +24,7 @@ public class IntegTestFrontend {
 		}
 
 		@Override
-		public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
+		public void sendServerResponse(FrontendSocket channel, HttpException exc) {
 		}
 
 		@Override

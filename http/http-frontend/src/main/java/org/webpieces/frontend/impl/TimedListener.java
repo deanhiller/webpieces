@@ -44,13 +44,13 @@ public class TimedListener {
 		}
 	}
 
-	public void sendServerResponse(FrontendSocket channel, HttpException exc, KnownStatusCode status) {
-		listener.sendServerResponse(channel, exc, status);
+	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
+		listener.sendServerResponse(channel, exc);
 		
 		//safety measure preventing leak on quick connect/close clients
 		releaseTimeout(channel);
 		
-		log.info("closing channel="+channel+" due to response code="+status);
+		log.info("closing channel="+channel+" due to response code="+exc.getStatusCode());
 		channel.close();
 		listener.clientClosedChannel(channel);
 	}
@@ -91,8 +91,8 @@ public class TimedListener {
 			socketToTimeout.remove(channel);
 			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket");
 			
-			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time");
-			sendServerResponse(channel, exc, KnownStatusCode.HTTP408);
+			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time", KnownStatusCode.HTTP408);
+			sendServerResponse(channel, exc);
 		}
 	}
 	
