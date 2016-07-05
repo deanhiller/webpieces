@@ -28,10 +28,9 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* FrontendServer - timeout incoming server connection if client sends no data in X seconds
+* remove 3rd param from dataListener.incomingData(mockServerChannel, buffer, false);
 * FrontendServer - timeout server connection if time between data is more than X seconds...make sure is more than http2 timeout window that is sent back in frontend server.  ie. implement Keep-Alive: timeout=15, max=100  
 * verify keep alive timeout we chose with wireshark trace of google.com or some website
-* verify connection automatically closed if could not parse http request(ie. if that fails)
 * Integration test SoTimeout and setKeepAlive on two computers 
 * xxxx - make sure we close the connection on a write failure or read failure
 * httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)

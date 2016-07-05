@@ -31,11 +31,22 @@ public class TimedListener {
 	}
 
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+		releaseTimeout(channel);
 		listener.processHttpRequests(channel, req, isHttps);
+	}
+
+	private void releaseTimeout(FrontendSocket channel) {
+		ScheduledFuture<?> scheduledFuture = socketToTimeout.remove(channel);
+		if(scheduledFuture != null) {
+			scheduledFuture.cancel(false);
+		}
 	}
 
 	public void sendServerResponse(FrontendSocket channel, Throwable exc, KnownStatusCode status) {
 		listener.sendServerResponse(channel, exc, status);
+		
+		//safety measure preventing leak on quick connect/close clients
+		releaseTimeout(channel);
 		
 		log.info("closing channel="+channel+" due to response code="+status);
 		channel.close();
@@ -56,6 +67,9 @@ public class TimedListener {
 
 	private void scheduleTimeout(FrontendSocket channel) {
 		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(channel), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
+		//lifecycle of the entry in the Map is until the TimeoutOnRequest runs OR
+		//until processHttpRequests is invoked as we have a request OR
+		//client closes the socket before sending http request and before the timeout
 		socketToTimeout.put(channel, future);
 	}
 
@@ -69,6 +83,7 @@ public class TimedListener {
 
 		@Override
 		public void runImpl() {
+			socketToTimeout.remove(channel);
 			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket");
 			
 			RuntimeException exc = new RuntimeException("timing out a client who did not send a request in time");
