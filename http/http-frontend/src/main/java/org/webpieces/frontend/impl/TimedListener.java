@@ -68,6 +68,9 @@ public class TimedListener {
 	}
 
 	private void scheduleTimeout(FrontendSocket channel) {
+		if(timer == null)
+			return;
+		
 		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(channel), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
 		//lifecycle of the entry in the Map is until the TimeoutOnRequest runs OR
 		//until processHttpRequests is invoked as we have a request OR

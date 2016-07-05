@@ -17,6 +17,14 @@ public class FrontendConfig {
 	 * null means keep alive will be disabled
 	 */
 	public Integer keepAliveTimeoutMs = 15000;
+	
+	/**
+	 * The max size a client may send.  I advise not too large a limit here or DOS attacks become easier in that
+	 * you can send very large request to eat up memory of the server.
+	 * 
+	 * This is the max size of any http request(headers that is) or any chunk being uploaded
+	 */
+	public int maxPayloadSize = 16384;
 
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;

@@ -28,10 +28,10 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
+* httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
 * FrontendServer - timeout server connection if time between data is more than X seconds...make sure is more than http2 timeout window that is sent back in frontend server.  ie. implement Keep-Alive: timeout=15, max=100  
 * verify keep alive timeout we chose with wireshark trace of google.com or some website (Great, they don't use keep alive)
 * Integration test SoTimeout and setKeepAlive on two computers 
-* httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
 * ChannelManager should offer up a timeout on the writes, the connection is closed (or a wrapper of some sort) so we don't all have to implement this - this is half done....a write() now checks the write at the begin of queue and if hasn't written, it will timeout (The other half is a timer checking all queues every 'timeout' seconds or something like that or the selector could fire and check itself)
 * httpproxy - AsyncServer has an overload mode that we should use when we are at a certain amount of outstanding requests(maybe?)
 * httpproxy - should respect keep-alive responses such that we send max N requests and shut down connection if no requests in keepalive timeout window occur
@@ -52,8 +52,7 @@ TODO:
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
 * We need to run the same class that ./createProject.sh runs and then start that projects webserver and send requests in to make sure the template generation is working and not broken
 * Need to add tests for changing the guice modules and router modules in the main server class while dev server is running and then hit website again to make sure it changed
-* cookie hpttOnly and the other 
-* more header support
+* cookie hpttOnly and the other key as well
 * search on Charset.defaultCharset, Charset.forName, StandardCharsets and unify them so it is configurable
 * add a lot of pretty print objects/json stuff in the toString so when debugging, there is many less clicks to see the data!!!  it is just right there
 * come up with the http 500 strategy for dev server AND for production server

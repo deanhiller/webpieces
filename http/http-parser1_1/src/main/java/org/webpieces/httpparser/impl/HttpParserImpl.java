@@ -5,6 +5,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -33,7 +35,7 @@ import org.webpieces.httpparser.api.dto.HttpVersion;
 
 public class HttpParserImpl implements HttpParser {
 
-	//private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);
 	private static final Charset iso8859_1 = HttpParserFactory.iso8859_1;
 	private static final String TRAILER_STR = "\r\n";
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -195,6 +197,8 @@ public class HttpParserImpl implements HttpParser {
 					+ "to you from this method.  It contains state of leftover data");
 		}
 		
+		if(log.isTraceEnabled())
+			log.trace("Trying to parse message");
 //		if(log.isDebugEnabled()) {
 //			byte[] someData = moreData.createByteArray();
 //			String readable = conversion.convertToReadableForm(someData);
@@ -269,8 +273,9 @@ public class HttpParserImpl implements HttpParser {
 		byte fourthByte = dataToRead.readByteAt(i+3);
 		
 		//For debugging to see the 4 bytes that we are processing easier
-		byte[] data = dataToRead.createByteArray();
-		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
+//		log.error("This should be commented out, don't forget or we log this error");
+//		byte[] data = dataToRead.createByteArray();
+//		String fourBytesAre = conversion.convertToReadableForm(data, i, 4);
 		
 		boolean isFirstCr = conversion.isCarriageReturn(firstByte);
 		boolean isSecondLineFeed = conversion.isLineFeed(secondByte);
