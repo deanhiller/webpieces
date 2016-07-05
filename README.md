@@ -29,19 +29,9 @@ NOTE: There is a Recorder and Playback that if you wire in, you can record thing
 
 TODO: 
 * (working on right now)break out build.gradle file into multiple ones so as project grows, it scales better
-* open connection to google and see how long before timeout
 * gzip/deflate/sdch compression?
-* open keep alive connection to google, send ONE request and see how long before timeout
-* FrontendServer - timeout server connection if time between data is more than X seconds...make sure is more than http2 timeout window that is sent back in frontend server.  ie. implement Keep-Alive: timeout=15, max=100  
-* verify keep alive timeout we chose with wireshark trace of google.com or some website (Great, they don't use keep alive)
-* Integration test SoTimeout and setKeepAlive on two computers 
-* ChannelManager should offer up a timeout on the writes, the connection is closed (or a wrapper of some sort) so we don't all have to implement this - this is half done....a write() now checks the write at the begin of queue and if hasn't written, it will timeout (The other half is a timer checking all queues every 'timeout' seconds or something like that or the selector could fire and check itself)
-* httpproxy - AsyncServer has an overload mode that we should use when we are at a certain amount of outstanding requests(maybe?)
-* httpproxy - should respect keep-alive responses such that we send max N requests and shut down connection if no requests in keepalive timeout window occur
 * httpclient - timeout the request/response cycle
 * SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?  This helps if client holds up incomingData thread to backpressure just the channels that need it
-* Need to go back and write more api level tests to beef up the test suite
-* httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * httprouter - tie method param count to path param count unless @Loose is used (we should do this earlier before more and more violations happen...it's easier to loosen constraints later than tighten them up) OR have the routes be of the format <controller>.method(param1, param2) so we can count method count
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?

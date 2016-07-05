@@ -183,7 +183,7 @@ public abstract class BasChannelImpl
 				//we only fire when the value of applyingBackpressure changes
 				//Also, this is a real PITA since we must do this in the sync block and I don't like calling
 				//customers in a sync block though thankfully most won't use the single threaded channelmanager.
-				//The reason is that if this is outside, just before executor.execute({Runnable with call to
+				//The reason is that if this is outside sync block, just before executor.execute({Runnable with call to
 				//applyBackPressure}) is called (run from the writer thread that is), the channelmanager thread
 				//can then call releaseBackPressure and that can beat applyBackPressure up the stack(and has)
 				//This results in the client permanently enabling pressure since it is the last call....when
