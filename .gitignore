@@ -2,26 +2,21 @@
 *.class
 
 # eclipse output files
+**/eclipse-output
 **/.project
+**/.classpath
 **/.settings
+#This is only here as the gradle build plugin is ignore the eclipse defaultOutput
+**/bin
 
 #gradle output files
 **/output
-output
-/bin
-**/bin
-.project
-.classpath
-.settings
-tmp/
-/eclipse/
-*.pyc
-*.bak
-*/.classpath
-/.metadata
-/data/
 /.gradle/
+
+#Intellij Idea files
 *.iml
-*.iws
-*.ipr
-.DS_Store
+
+#Do I need these too...
+#*.iws
+#*.ipr
+#.DS_Store

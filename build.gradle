@@ -67,10 +67,10 @@ subprojects {
       }
    }
 
-   //Using eclipse gen folder is WAY too common.  use outputeclipse instead so we can safely ignore it
+   //Using eclipse bin folder is WAY too common.  use outputeclipse instead so we can safely ignore it
    eclipse {
       classpath {
-         defaultOutputDir = file('build-eclipse')
+         defaultOutputDir = file('eclipse-output')
       }
    }
 
