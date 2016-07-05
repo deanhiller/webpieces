@@ -28,7 +28,11 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
+* (working)httpparser - limit the payload size of an http request (if it has header after header after head, we should close the connection)
+* (working on right now)break out build.gradle file into multiple ones so as project grows, it scales better
+* open connection to google and see how long before timeout
+* gzip/deflate/sdch compression?
+* open keep alive connection to google, send ONE request and see how long before timeout
 * FrontendServer - timeout server connection if time between data is more than X seconds...make sure is more than http2 timeout window that is sent back in frontend server.  ie. implement Keep-Alive: timeout=15, max=100  
 * verify keep alive timeout we chose with wireshark trace of google.com or some website (Great, they don't use keep alive)
 * Integration test SoTimeout and setKeepAlive on two computers 
@@ -37,17 +41,14 @@ TODO:
 * httpproxy - should respect keep-alive responses such that we send max N requests and shut down connection if no requests in keepalive timeout window occur
 * httpclient - timeout the request/response cycle
 * SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?  This helps if client holds up incomingData thread to backpressure just the channels that need it
-* httpparser(then httpclient) - if Content-Length > X, simulate http chunking so large files can be streamed through the system...and if < X just return entire response with body where X is configurable
 * Need to go back and write more api level tests to beef up the test suite
 * httpproxy - test out the caching of httpSocket in httpproxy further to make sure we understand the corner cases
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
-* need to verify host/port is being put in hello ssl packet of http client to verify it works like browsers for SNI servername(not usually needed but we may need it for testing later)
 * httprouter - tie method param count to path param count unless @Loose is used (we should do this earlier before more and more violations happen...it's easier to loosen constraints later than tighten them up) OR have the routes be of the format <controller>.method(param1, param2) so we can count method count
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * PRG pattern vs. "POST request comes in, path not found, so send back 404 with rendered page".  Currently in this special instance, we violate PRG and go with 404 back to use with the page.  We NEED to test this though and find if this breaks the browser back button and if it does make it more usable for people using every website written on this webserver.  Every other instance, we force apps into PRG so their users have a GREAT experience with the website
-* gzip/deflate/sdch compression?
 * language
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
 * We need to run the same class that ./createProject.sh runs and then start that projects webserver and send requests in to make sure the template generation is working and not broken
@@ -56,7 +57,6 @@ TODO:
 * search on Charset.defaultCharset, Charset.forName, StandardCharsets and unify them so it is configurable
 * add a lot of pretty print objects/json stuff in the toString so when debugging, there is many less clicks to see the data!!!  it is just right there
 * come up with the http 500 strategy for dev server AND for production server
-* (working on right now)break out build.gradle file into multiple ones so as project grows, it scales better
 * have the dev server display it's OWN 404 page and then in a frame below dispay the webapps actual 404 page.  The dev server's page will have much more detail on what went wrong and why it was a 404 like type translation, etc.  The frame can be a redirect to GET the 404 page directly OR it could render inline maybe.....which one is better..not sure?  rendering inline is probably better so the notFound does not have a direct url to get to that page?  But only if the PRG holds true above!!!!
 
 * ALPN is next!!!! 
