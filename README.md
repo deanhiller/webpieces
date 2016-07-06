@@ -29,8 +29,6 @@ NOTE: There is a Recorder and Playback that if you wire in, you can record thing
 
 TODO: 
 * gzip/deflate/sdch compression?
-* httpclient - timeout the request/response cycle
-* SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?  This helps if client holds up incomingData thread to backpressure just the channels that need it
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * httprouter - tie method param count to path param count unless @Loose is used (we should do this earlier before more and more violations happen...it's easier to loosen constraints later than tighten them up) OR have the routes be of the format <controller>.method(param1, param2) so we can count method count
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?

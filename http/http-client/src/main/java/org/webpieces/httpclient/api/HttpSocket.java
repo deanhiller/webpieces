@@ -19,6 +19,7 @@ public interface HttpSocket {
 	 * @param request
 	 * @param cb
 	 */
+	//TODO: Implement timeout for clients so that requests will timeout
 	public CompletableFuture<HttpResponse> send(HttpRequest request);
 	
 	public void send(HttpRequest request, ResponseListener l);
