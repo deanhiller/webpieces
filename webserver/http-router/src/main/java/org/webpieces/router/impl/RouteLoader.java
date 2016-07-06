@@ -83,7 +83,9 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
 		log.info("adding routes");
 		
-		routerBuilder = new RouterBuilder("", new RouteInfo(), new ReverseRoutes(), controllerFinder);
+		ReverseRoutes reverseRoutes = new ReverseRoutes();
+		routerBuilder = new RouterBuilder("", new RouteInfo(), reverseRoutes, controllerFinder);
+		invoker.init(reverseRoutes);
 		
 		for(RouteModule module : rm.getRouteModules()) {
 			Class<?> clazz = module.getClass();
@@ -138,22 +140,8 @@ public class RouteLoader {
 	}
 	
 	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
-		try {
-			//This makes us consistent with other NotFoundExceptions
-			if(result.getMeta().getRoute().isNotFoundRoute()) {
-				MatchResult notFoundResult = notFoundRoute.apply(null);
-				notFound(notFoundResult, req, responseCb);
-			}
-
-			invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb);
-		} catch(NotFoundException e) {
-			MatchResult notFoundResult = notFoundRoute.apply(e);
-			notFound(notFoundResult, req, responseCb);
-		}
-	}
-
-	private void notFound(MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
-		invoker.invoke(routerBuilder.getReverseRoutes(), result, req, responseCb);
+		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
+		invoker.invoke(result, req, responseCb, notFoundRoute);
 	}
 
 	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {

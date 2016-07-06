@@ -1,5 +1,6 @@
 package org.webpieces.router.impl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -7,9 +8,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.RenderHtml;
@@ -19,47 +23,84 @@ import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.params.ArgumentTranslator;
 
 public class RouteInvoker {
 
+	private static final Logger log = LoggerFactory.getLogger(RouteInvoker.class);
+	
 	private ArgumentTranslator argumentTranslator;
+	//initialized in init() method and re-initialized in dev mode from that same method..
+	private ReverseRoutes reverseRoutes;
 	
 	@Inject
 	public RouteInvoker(ArgumentTranslator argumentTranslator) {
 		this.argumentTranslator = argumentTranslator;
 	}
+
+	public void invoke(
+			MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
+		//We convert all exceptions from invokeAsync into CompletableFuture..
+		CompletableFuture<Object> future = invokeAsync(result, req, responseCb, notFoundRoute);
+		future.exceptionally(e -> processHttp500InternalServerError(responseCb, e));
+	}
 	
-	public void invoke(ReverseRoutes reverseRoutes, 
-			MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
+	public CompletableFuture<Object> invokeAsync(
+		MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
+		
+		try {
+			//This makes us consistent with other NotFoundExceptions and without the cost of throwing an exception to the
+			//catch block
+			if(result.getMeta().getRoute().isNotFoundRoute()) {
+				MatchResult notFoundResult = notFoundRoute.apply(null);
+				return notFound(notFoundResult, req, responseCb);
+			}
+
+			return invokeImpl(result, req, responseCb);
+		} catch(NotFoundException e) {
+			//http 404...(unless an exception happens in calling this code and that then goes to 500)
+			MatchResult notFoundResult = notFoundRoute.apply(e);
+			return notFound(notFoundResult, req, responseCb);
+		} catch (Throwable e) {
+			//http 500...
+			//return a completed future with the exception inside...
+			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
+			futExc.completeExceptionally(e);
+			return futExc;
+		}
+	}
+	
+	private CompletableFuture<Object> notFound(MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
+		try {
+			return invokeImpl(result, req, responseCb);
+		} catch(Throwable e) {
+			//http 500...
+			//return a completed future with the exception inside...
+			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
+			futExc.completeExceptionally(e);
+			return futExc;			
+		}
+	}
+	
+	public CompletableFuture<Object> invokeImpl(MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
 		RouteMeta meta = result.getMeta();
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Object[] arguments;
-//		try {
-			arguments = argumentTranslator.createArgs(result, req);
-//TODO: We need to render a page that says "This would be a 404 in production but in development this is an error as we assume you type
+		Object[] arguments = argumentTranslator.createArgs(result, req);
+		//TODO: We need to render a page that says "This would be a 404 in production but in development this is an error as we assume you type
 			//in the correct urls.  Something about your url matched a route but then failed.  Details are below
 			//THEN we need tests in prod version and development version for this!!
-//		} catch(NotFoundException e) {
-//			result = notFoundRoute.get();
-//			meta = result.getMeta();
-//			obj = meta.getControllerInstance();
-//			if(obj == null)
-//				throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
-//			method = meta.getMethod();			
-//			arguments = argumentTranslator.createArgs(result, req);
-//		}
 		
 		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
 		
 		RouteMeta finalMeta = meta;
-		response.thenApply(o -> continueProcessing(reverseRoutes, req, finalMeta, o, responseCb))
-			.exceptionally(e -> processException(responseCb, e));
+		CompletableFuture<Object> future = response.thenApply(o -> continueProcessing(reverseRoutes, req, finalMeta, o, responseCb));
+		return future;
 	}
 
 	public Object continueProcessing(ReverseRoutes reverseRoutes, RouterRequest routerRequest, RouteMeta incomingRequestMeta, Object controllerResponse, ResponseStreamer responseCb) {
@@ -149,29 +190,38 @@ public class RouteInvoker {
 		return nameToValue;
 	}
 
-	private Object processException(ResponseStreamer responseCb, Throwable e) {
+	private Object processHttp500InternalServerError(ResponseStreamer responseCb, Throwable e) {
+		log.error("Exception occurred", e);
 		if(e instanceof CompletionException) {
 			//unwrap the exception to deliver the 'real' exception that occurred
 			e = e.getCause();
 		}
+		
 		responseCb.failure(e);
 		return null;
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private CompletableFuture<Object> invokeMethod(Object obj, Method m, Object[] arguments) {
 		try {
-			Object retVal = m.invoke(obj, arguments);
-			if(retVal instanceof CompletableFuture) {
-				return (CompletableFuture) retVal;
-			} else {
-				return CompletableFuture.completedFuture(retVal);
-			}
-		} catch (Throwable e) {
-			//return a completed future with the exception inside...
-			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
-			futExc.completeExceptionally(e);
-			return futExc;
+			return invokeMethodImpl(obj, m, arguments);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
 		}
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private CompletableFuture<Object> invokeMethodImpl(Object obj, Method m, Object[] arguments) 
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		
+		Object retVal = m.invoke(obj, arguments);
+		if(retVal instanceof CompletableFuture) {
+			return (CompletableFuture) retVal;
+		} else {
+			return CompletableFuture.completedFuture(retVal);
+		}
+	}
+
+	public void init(ReverseRoutes reverseRoutes) {
+		this.reverseRoutes = reverseRoutes;
 	}
 }
