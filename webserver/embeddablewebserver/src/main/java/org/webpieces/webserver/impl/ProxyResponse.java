@@ -153,12 +153,8 @@ public class ProxyResponse implements ResponseStreamer {
 		else if(!"keep-alive".equals(connHeader.getValue()))
 			return;
 
-		//TODO: Should really move this into the Frontend to warn clients of timeout values before
-		//we close their connection
-		Header keepAlive = new Header(KnownHeaderName.KEEP_ALIVE, "timeout=3, max=100");
 		//just re-use the connHeader from the request...
 		response.addHeader(connHeader);
-		response.addHeader(keepAlive);
 	}
 
 	private void closeIfNeeded() {

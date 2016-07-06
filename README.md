@@ -28,7 +28,6 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* (working on right now)break out build.gradle file into multiple ones so as project grows, it scales better
 * gzip/deflate/sdch compression?
 * httpclient - timeout the request/response cycle
 * SessionExecutor - should we limit the queue size per channel such that we backpressure a channel when the queue size reaches a certain limit? or at least make it configurable?  This helps if client holds up incomingData thread to backpressure just the channels that need it

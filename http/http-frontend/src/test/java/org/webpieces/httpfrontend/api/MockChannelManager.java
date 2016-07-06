@@ -35,25 +35,21 @@ public class MockChannelManager extends MockSuperclass implements ChannelManager
 
 	@Override
 	public TCPChannel createTCPChannel(String id) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public UDPChannel createUDPChannel(String id) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public DatagramChannel createDatagramChannel(String id, int bufferSize, DatagramListener listener) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

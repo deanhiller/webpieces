@@ -18,37 +18,30 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public void setReuseAddress(boolean b) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void setName(String string) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public String getChannelId() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void bind(SocketAddress addr) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public boolean isBlocking() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -59,25 +52,21 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public boolean isBound() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -89,31 +78,26 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public CompletableFuture<Channel> registerForReads() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public CompletableFuture<Channel> unregisterForReads() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean isRegisteredForReads() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public boolean isConnected() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -124,43 +108,35 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public void setWriteTimeoutMs(int timeout) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public int getWriteTimeoutMs() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public int getMaxBytesBackupSize() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public boolean getKeepAlive() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void setKeepAlive(boolean b) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public boolean isSslChannel() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
