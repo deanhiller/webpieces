@@ -27,6 +27,17 @@ public class ArgumentTranslator {
 		this.primitiveConverter = primitiveConverter;
 	}
 	
+	//ok, here are a few different scenarios to consider
+	//   1. /user/{var1}/{var2}/{var3}             Controller.method() and controller accesses RequestLocal.getRequest().getParams().get("var1");
+	//   2. /user/{var1}/{var2}/{var3}             Controller.method(var1, var2, var3)
+	//   3. /user/{var1}?var2=xx&var3=yyy&cat=dog  Controller.method(var1) and controller accesses RequestLocal.getRequest().getParams().get("var2");
+	//   4. /user/{var1}?var2=xx                   Controller.method(var2) and controller accesses RequestLocal.getRequest().getParams().get("var1");
+    //   5. /user?var1=xxx&var1=yyy                Controller.method({xxx, yyy}) as an array
+	//
+	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
+	//
+	//AND ON TOP of that, we have multi-part fields as well with keys and values
+	
 	public Object[] createArgs(MatchResult result, RouterRequest req) {
 		RouteMeta meta = result.getMeta();
 		Parameter[] paramMetas = meta.getMethod().getParameters();
