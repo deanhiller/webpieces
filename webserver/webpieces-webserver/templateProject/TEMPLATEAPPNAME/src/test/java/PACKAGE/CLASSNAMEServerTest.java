@@ -2,28 +2,26 @@ package PACKAGE;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
 public class CLASSNAMEServerTest {
 	
-	//This is in progress but basically you can provide app overrides to mock remote systems or swap
-	//in in-memory systems, etc.
-	
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	
+	private HttpRequestListener server;
+
 	@Before
 	public void setUp() throws InterruptedException {
-		new CLASSNAMEServer(null, new AppOverridesModule(), false).start();
-		
-		//ugh, we need to use platformOverride to insert a mockFrontend or something
-		//TBD on that...not a big deal really since we can swap stuff but need to figure out what we want
-		//it to look like to make it easy for users(and me!!!!)
-		//start method could return a reference that we can fire in requests to?
-		//though I especially want a emulator layer that I can call getElementById(xx).click() to write really
-		//really fast tests that really test everything
+		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
+		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
+		//This is however pretty fast to do in many systems...
+		CLASSNAMEServer webserver = new CLASSNAMEServer(new PlatformOverridesForTest(), new AppOverridesModule(), false);
+		server = webserver.start();
 	}
 	
 	@Test
@@ -40,4 +38,5 @@ public class CLASSNAMEServerTest {
 			//binder.bind(SomeRemoteSystem.class).toInstance(mockRemote); //see above comment on the field mockRemote
 		}
 	}
+	
 }

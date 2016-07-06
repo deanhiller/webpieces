@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
@@ -105,8 +106,8 @@ public class CLASSNAMEServer {
 		//channel.socket().setReceiveBufferSize(size);
 	}
 	
-	public void start() throws InterruptedException {
-		webServer.start();	
+	public HttpRequestListener start() {
+		return webServer.start();	
 	}
 
 	public void stop() {

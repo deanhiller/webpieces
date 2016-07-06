@@ -17,7 +17,7 @@ public class TestBasicStart {
 	// so in some cases, this can be valuable)
 	@Test
 	public void testBasicStartup() throws InterruptedException, IOException, ClassNotFoundException {
-		testArgSetup("test");
+		testWasCompiledWithParamNames("test");
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
 		CLASSNAMEServer server = new CLASSNAMEServer(null, null, true);
@@ -43,12 +43,12 @@ public class TestBasicStart {
 		server2.stop();
 	}
 
-	public void testArgSetup(String param) throws ClassNotFoundException {
+	public void testWasCompiledWithParamNames(String param) throws ClassNotFoundException {
 		Class<?> clazz = Class.forName(TestBasicStart.class.getName());
 		Method[] method = clazz.getDeclaredMethods();
 		Method target = null;
 		for(Method m : method) {
-			if("testArgSetup".equals(m.getName()))
+			if("testWasCompiledWithParamNames".equals(m.getName()))
 				target = m;
 		}
 		

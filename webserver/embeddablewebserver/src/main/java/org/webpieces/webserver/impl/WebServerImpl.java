@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RoutingService;
@@ -33,26 +34,25 @@ public class WebServerImpl implements WebServer {
 	private HttpFrontend httpsServer;
 
 	@Override
-	public void start() {
+	public HttpRequestListener start() {
 		log.info("starting server");
 		
 		routingService.start();
 
 		FrontendConfig svrChanConfig = new FrontendConfig("http", config.getHttpListenAddress());
 		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-		log.info("starting to listen to http port="+svrChanConfig.asyncServerConfig.bindAddr);
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
 		
 		if(factory != null) {
 			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress());
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
-			log.info("starting to listen to https port="+secureChanConfig.asyncServerConfig.bindAddr);
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
 		} else {
 			log.info("https port is disabled since configuration had no sslEngineFactory");
 		}
 		
-		log.info("now listening for incoming connections");
+		log.info("server started");
+		return serverListener;
 	}
 
 	@Override

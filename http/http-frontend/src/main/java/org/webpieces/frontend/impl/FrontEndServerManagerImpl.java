@@ -2,6 +2,8 @@ package org.webpieces.frontend.impl;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.frontend.api.FrontendConfig;
@@ -13,6 +15,7 @@ import org.webpieces.nio.api.SSLEngineFactory;
 
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
+	private static final Logger log = LoggerFactory.getLogger(FrontEndServerManagerImpl.class);
 	private AsyncServerManager svrManager;
 	private HttpParser parser;
 	private ScheduledExecutorService timer;
@@ -29,8 +32,10 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		
 		TimedListener timed = new TimedListener(timer, listener, config);
 		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, config, false);
+		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
+		log.info("not listening for incoming http requests");
 		return frontend;
 	}
 
@@ -47,8 +52,10 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		preconditionCheck(config);
 		TimedListener timed = new TimedListener(timer, listener, config);
 		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, config, true);
+		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
+		log.info("not listening for incoming https requests");
 		return frontend;
 	}
 
