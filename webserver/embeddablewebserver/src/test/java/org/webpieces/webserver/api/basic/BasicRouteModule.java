@@ -13,7 +13,7 @@ public class BasicRouteModule implements RouteModule {
 		router.addRoute(HttpMethod.GET, "/redirect/{id}", "biz/BasicController.redirect", BasicRouteId.REDIRECT_PAGE);
 		router.addRoute(HttpMethod.GET, "/myroute",       "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
 		
-		router.setNotFoundRoute("biz/BasicController.notFound");
+		router.setPageNotFoundRoute("biz/BasicController.notFound");
 	}
 
 }

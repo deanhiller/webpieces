@@ -11,6 +11,7 @@ import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
+import org.webpieces.router.impl.ErrorRoutes;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
@@ -60,20 +61,31 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			routeLoader.loadControllerIntoMetaObject(meta, false);
 		}
 		
-		routeLoader.invokeRoute(result, req, responseCb, (e) -> fetchNotFoundRoute(e, req));
+		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 
+	}
+	
+	private class DevErrorRoutes implements ErrorRoutes {
+		private RouterRequest req;
+		public DevErrorRoutes(RouterRequest req) {
+			this.req = req;
+		}
+
+		@Override
+		public MatchResult fetchNotfoundRoute(NotFoundException e) {
+			return fetchNotFoundRoute(e, req);
+		}
+
+		@Override
+		public MatchResult fetchInternalServerErrorRoute() {
+			return fetchInternalErrorRoute(req);
+		}
+		
 	}
 	
 	public MatchResult fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
-		//There is no exception when it is purely no match was found...
-		if(e == null)
-			e = new NotFoundException("No route found for path="+req.relativePath);
-		//else if a match was found and we could not convert certain params to their correct types, it is an exception of
-		//NotfoundException as well since we found a route but it didn't 'really' match
-		//This makes it easier to find type conversion mistakes since we blatantly tell you about them (FAIL FAST pattern)
-
 		log.error("Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way, something needs a'fixin", e);
 		
-		MatchResult result = routeLoader.fetchNotFoundRoute(e);
+		MatchResult result = routeLoader.fetchNotFoundRoute();
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
@@ -82,7 +94,17 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		return result;
 	}
-	
+
+	public MatchResult fetchInternalErrorRoute(RouterRequest req) {
+		MatchResult result = routeLoader.fetchInternalErrorRoute();
+		
+		RouteMeta meta = result.getMeta();
+		if(meta.getControllerInstance() == null) {
+			routeLoader.loadControllerIntoMetaObject(meta, false);
+		}
+		
+		return result;
+	}
 	/**
 	 * Only used with DevRouterConfig which is not on classpath in prod mode
 	 * 

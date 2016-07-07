@@ -21,6 +21,9 @@ public class MeetingController {
 	public void notFound() {
 	}
 	
+	public void internalError() {
+	}
+	
 	public Action someExample() {
 		util.testMethod();
 		return Actions.redirect(MtgRouteId.SOME_EXAMPLE);

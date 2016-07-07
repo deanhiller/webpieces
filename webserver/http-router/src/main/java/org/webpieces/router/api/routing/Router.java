@@ -36,10 +36,9 @@ public interface Router {
 	/**
 	 * This is the controller for 404's where the path was not found AND this MUST be set
 	 */
-	void setNotFoundRoute(String controllerMethod);
+	void setPageNotFoundRoute(String controllerMethod);
 	
-	//later maybe when we move Route to the api
-	//void setCatchAllRoute(Route r);
+	void setInternalErrorRoute(String controllerMethod);
 	
 	/**
 	 * If you scope your router to /backend, every Router.addRoute path uses that prefix as the final

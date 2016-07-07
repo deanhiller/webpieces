@@ -15,6 +15,9 @@ public class CommonController {
 	public Action notFound() {
 		return Actions.renderView("notFound.xhtml");
 	}
+	public Action internalError() {
+		throw new IllegalStateException("fail this for testing");
+	}
 	
 	public Action postReturnsHtmlRender() {
 		return Actions.renderThis();

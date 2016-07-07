@@ -20,6 +20,7 @@ public class CommonRouteModule implements RouteModule {
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
+		router.setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
+		router.setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
 	}
 }

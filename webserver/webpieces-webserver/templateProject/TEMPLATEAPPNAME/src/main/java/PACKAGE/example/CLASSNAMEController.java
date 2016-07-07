@@ -15,12 +15,16 @@ public class CLASSNAMEController {
 		//renderThis assumes the view is the <methodName>.html file so in this case
 		//myMethod.html which must be in the same directory as the Controller
 		return Actions.renderThis(
-				"user", "Dean Hiller",
+				"usxxxer", "Dean Hiller",
 				"id", 500,
 				"otherKey", "key");
 	}
 	
 	public Action notFound() {
+		return Actions.renderThis();
+	}
+	
+	public Action internalError() {
 		return Actions.renderThis();
 	}
 }

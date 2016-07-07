@@ -22,6 +22,7 @@ import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
+import org.webpieces.router.impl.InvokeException;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
@@ -61,8 +62,7 @@ public class ErrorCommonTest {
 		server.processHttpRequests(req, mockResponseStream);
 			
 		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(IllegalReturnValueException.class, e.getClass());
-		Assert.assertEquals(e.getMessage(), "The Redirect object returned from method='public org.webpieces.router.api.actions.Redirect org.webpieces.devrouter.api.CommonController.badRedirect(int)' has the wrong number of arguments. args.size=0 should be size=1");
+		Assert.assertEquals(InvokeException.class, e.getClass());
 	}
 	
 //	@Test
@@ -117,7 +117,7 @@ public class ErrorCommonTest {
 		server.processHttpRequests(req, mockResponseStream);
 
 		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(IllegalReturnValueException.class, e.getClass());
+		Assert.assertEquals(InvokeException.class, e.getClass());
 	}
 	
 	/** 

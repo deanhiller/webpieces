@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -30,7 +29,6 @@ import org.webpieces.router.impl.params.ArgumentTranslator;
 public class RouteInvoker {
 
 	private static final Logger log = LoggerFactory.getLogger(RouteInvoker.class);
-	
 	private ArgumentTranslator argumentTranslator;
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
@@ -41,28 +39,51 @@ public class RouteInvoker {
 	}
 
 	public void invoke(
-			MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
+			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
 		//We convert all exceptions from invokeAsync into CompletableFuture..
-		CompletableFuture<Object> future = invokeAsync(result, req, responseCb, notFoundRoute);
-		future.exceptionally(e -> processHttp500InternalServerError(responseCb, e));
+		CompletableFuture<Object> future = invokeAsync(result, req, responseCb, errorRoutes);
+		future.exceptionally(e -> processException(responseCb, req, e, errorRoutes));
+	}
+	
+	private Object processException(ResponseStreamer responseCb, RouterRequest req, Throwable e, ErrorRoutes errorRoutes) {
+		if(e instanceof CompletionException) {
+			//unwrap the exception to deliver the 'real' exception that occurred
+			e = e.getCause();
+		}
+		
+		if(e == null || e instanceof NotFoundException) {
+			NotFoundException exc = (NotFoundException) e;
+			//http 404...(unless an exception happens in calling this code and that then goes to 500)
+			CompletableFuture<Object> future = notFound(errorRoutes, exc, req, responseCb);
+			//If not found fails with sync or async exception, we processException and wrap in new Runtime to process as 500 next
+			future.exceptionally(exception -> processException(responseCb, req, new RuntimeException("notFound page failed", exception), errorRoutes));
+			return null;
+		}
+
+		//If this fails, then the users 5xx page is messed up and we then render our own 5xx page
+		CompletableFuture<Object> future = internalServerError(errorRoutes, e, req, responseCb);
+		future.exceptionally(finalExc -> finalFailure(responseCb, finalExc));
+		
+		return null;
+	}
+	
+	public Object finalFailure(ResponseStreamer responseCb, Throwable e) {
+		responseCb.failure(e);
+		return null;
 	}
 	
 	public CompletableFuture<Object> invokeAsync(
-		MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
-		
+		MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
 		try {
-			//This makes us consistent with other NotFoundExceptions and without the cost of throwing an exception to the
-			//catch block
+			//This makes us consistent with other NotFoundExceptions and without the cost of 
+			//throwing an exception and filling in stack trace...
+			//We could convert the exc. to FastException and override method so stack is not filled in but that
+			//can get very annoying
 			if(result.getMeta().getRoute().isNotFoundRoute()) {
-				MatchResult notFoundResult = notFoundRoute.apply(null);
-				return notFound(notFoundResult, req, responseCb);
+				processException(responseCb, req, null, notFoundRoute);
 			}
 
 			return invokeImpl(result, req, responseCb);
-		} catch(NotFoundException e) {
-			//http 404...(unless an exception happens in calling this code and that then goes to 500)
-			MatchResult notFoundResult = notFoundRoute.apply(e);
-			return notFound(notFoundResult, req, responseCb);
 		} catch (Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -72,8 +93,23 @@ public class RouteInvoker {
 		}
 	}
 	
-	private CompletableFuture<Object> notFound(MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
+	private CompletableFuture<Object> notFound(ErrorRoutes errorRoutes, NotFoundException exc, RouterRequest req, ResponseStreamer responseCb) {
 		try {
+			MatchResult notFoundResult = errorRoutes.fetchNotfoundRoute(exc);
+			return invokeImpl(notFoundResult, req, responseCb);
+		} catch(Throwable e) {
+			//http 500...
+			//return a completed future with the exception inside...
+			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
+			futExc.completeExceptionally(e);
+			return futExc;			
+		}
+	}
+
+	private CompletableFuture<Object> internalServerError(ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb) {
+		try {
+			log.error("Exception occurred, rendering client application 5xx page", exc);
+			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
 			return invokeImpl(result, req, responseCb);
 		} catch(Throwable e) {
 			//http 500...
@@ -189,23 +225,12 @@ public class RouteInvoker {
 		}
 		return nameToValue;
 	}
-
-	private Object processHttp500InternalServerError(ResponseStreamer responseCb, Throwable e) {
-		log.error("Exception occurred", e);
-		if(e instanceof CompletionException) {
-			//unwrap the exception to deliver the 'real' exception that occurred
-			e = e.getCause();
-		}
-		
-		responseCb.failure(e);
-		return null;
-	}
 	
 	private CompletableFuture<Object> invokeMethod(Object obj, Method m, Object[] arguments) {
 		try {
 			return invokeMethodImpl(obj, m, arguments);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(e);
+			throw new InvokeException(e);
 		}
 	}
 	

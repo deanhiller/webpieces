@@ -106,7 +106,7 @@ public class RouterBuilder implements Router {
 	}
 	
 	@Override
-	public void setNotFoundRoute(String controllerMethod) {
+	public void setPageNotFoundRoute(String controllerMethod) {
 		Route route = new RouteImpl(controllerMethod, true);
 		setNotFoundRoute(route);
 	}
@@ -120,4 +120,18 @@ public class RouterBuilder implements Router {
 		info.setPageNotFoundRoute(meta);
 	}
 
+	@Override
+	public void setInternalErrorRoute(String controllerMethod) {
+		Route route = new RouteImpl(controllerMethod, true);
+		setInternalSvrErrorRoute(route);
+	}
+	
+	public void setInternalSvrErrorRoute(Route r) {
+		if(!"".equals(this.routerPath))
+			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
+		log.info("scope:'"+routerPath+"' adding INTERNAL_SVR_ERROR route="+r.getPath()+" method="+r.getControllerMethodString());
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), true);
+		finder.loadControllerIntoMetaObject(meta, true);
+		info.setInternalSvrErrorRoute(meta);
+	}
 }

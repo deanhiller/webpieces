@@ -17,6 +17,7 @@ public class NoMethodRouteModule implements RouteModule {
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setNotFoundRoute("MeetingController.notFound");
+		router.setPageNotFoundRoute("MeetingController.notFound");
+		router.setInternalErrorRoute("MeetingController.internalError");
 	}
 }

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.loader.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 
@@ -43,7 +44,24 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
 		MatchResult meta = routeLoader.fetchRoute(req);
 		
-		routeLoader.invokeRoute(meta, req, responseCb, (e) -> routeLoader.fetchNotFoundRoute(e));
+		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(routeLoader);
+		routeLoader.invokeRoute(meta, req, responseCb, errorRoutes);
 	}
 
+	//This only exists so dev mode can swap it out and load error routes dynamically as code changes..
+	private static class ProdErrorRoutes implements ErrorRoutes {
+		private RouteLoader routeLoader;
+		public ProdErrorRoutes(RouteLoader routeLoader) {
+			this.routeLoader = routeLoader;
+		}
+
+		public MatchResult fetchNotfoundRoute(NotFoundException e) {
+			//not found is normal in prod mode so we don't log that and only log warnings in dev mode
+			return routeLoader.fetchNotFoundRoute();
+		}
+		
+		public MatchResult fetchInternalServerErrorRoute() {
+			return routeLoader.fetchInternalErrorRoute();
+		}
+	}
 }

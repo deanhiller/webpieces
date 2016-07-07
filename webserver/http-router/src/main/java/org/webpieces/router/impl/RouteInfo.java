@@ -12,13 +12,22 @@ public class RouteInfo {
 	private final Map<String, RouteInfo> pathPrefixToInfo = new HashMap<>();
 	private List<RouteMeta> routes = new ArrayList<>();
 	private RouteMeta pageNotFoundRoute;
+	private RouteMeta internalSvrErrorRoute;
 	
 	public void addRoute(RouteMeta r) {
 		this.routes.add(r);
 	}
 	
 	public void setPageNotFoundRoute(RouteMeta r) {
+		if(pageNotFoundRoute != null)
+			throw new IllegalStateException("You cannot set the PageNotFoundRoute twice");
 		this.pageNotFoundRoute = r;
+	}
+	
+	public void setInternalSvrErrorRoute(RouteMeta r) {
+		if(internalSvrErrorRoute != null)
+			throw new IllegalStateException("You cannot set the InternalSvrErrorRoute twice");
+		this.internalSvrErrorRoute = r;
 	}
 	
 	public RouteInfo addScope(String path) {
@@ -67,11 +76,18 @@ public class RouteInfo {
 		return pageNotFoundRoute;
 	}
 
+	public RouteMeta getInternalErrorRoute() {
+		return internalSvrErrorRoute;
+	}
+	
 	@Override
 	public String toString() {
 		return "RouteInfo state...\npageNotFoundRoute=\n*****"
 				+ pageNotFoundRoute + "\n*****\nroutes=" + routes + "\n\npathPrefixToInfo=" + pathPrefixToInfo + "]";
 	}
-	
+
+	public boolean isInternalSvrErrorRouteSet() {
+		return internalSvrErrorRoute != null;
+	}
 	
 }

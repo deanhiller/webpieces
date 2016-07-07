@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.loader.ClassForName;
@@ -99,6 +97,9 @@ public class RouteLoader {
 		
 		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
 			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouteModules());
+		else if(!routerBuilder.getRouterInfo().isInternalSvrErrorRouteSet())
+			throw new IllegalStateException("None of the RouteModule implementations called top level router.setInternalSvrErrorRoute.  Modules="+rm.getRouteModules());
+			
 		
 		log.info("added all routes to router");
 	}
@@ -139,7 +140,7 @@ public class RouteLoader {
 		return meta;
 	}
 	
-	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, Function<NotFoundException, MatchResult> notFoundRoute) {
+	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
 		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
 		invoker.invoke(result, req, responseCb, notFoundRoute);
 	}
@@ -148,13 +149,16 @@ public class RouteLoader {
 		controllerFinder.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
 	}
 
-	public MatchResult fetchNotFoundRoute(NotFoundException e) {
-		//NotFoundException only is non-null on param conversion mismatch which should be rare
-		//We could move to a FastException that doesn't fill in the stack trace for production if we really
-		//want to....
+	public MatchResult fetchNotFoundRoute() {
 		RouteInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
 		return new MatchResult(notfoundRoute);
+	}
+
+	public MatchResult fetchInternalErrorRoute() {
+		RouteInfo routerInfo = routerBuilder.getRouterInfo();
+		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
+		return new MatchResult(internalErrorRoute);
 	}
 	
 }

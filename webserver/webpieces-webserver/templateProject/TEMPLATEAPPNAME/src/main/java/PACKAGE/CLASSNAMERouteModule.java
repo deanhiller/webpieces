@@ -23,7 +23,9 @@ public class CLASSNAMERouteModule implements RouteModule {
 		router.addRoute(HttpMethod.GET, "/myroute", "/PACKAGE/example/CLASSNAMEController.myMethod", CLASSNAMERouteId.RENDER_PAGE);
 
 		//relative going down a level and back up relative to your RouteModule
-		router.setNotFoundRoute("../PACKAGE/example/CLASSNAMEController.notFound");
+		router.setPageNotFoundRoute("../PACKAGE/example/CLASSNAMEController.notFound");
+		
+		router.setInternalErrorRoute("../PACKAGE/example/CLASSNAMEController.internalError");
 	}
 
 }
