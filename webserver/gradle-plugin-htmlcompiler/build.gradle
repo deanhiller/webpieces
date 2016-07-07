@@ -1,0 +1,16 @@
+group = 'org.webpieces'
+version = '1.0.0'
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    compile gradleApi()
+
+    testCompile 'junit:junit:4.12'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}

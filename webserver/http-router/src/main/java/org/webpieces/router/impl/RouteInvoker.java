@@ -137,7 +137,7 @@ public class RouteInvoker {
 			view = new View(controllerName, methodName);
 		}
 		
-		RenderResponse resp = new RenderResponse(view, incomingRequestMeta.getRoute().isNotFoundRoute());
+		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), incomingRequestMeta.getRoute().isNotFoundRoute());
 		return resp;
 	}
 

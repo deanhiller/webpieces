@@ -102,12 +102,11 @@ public class ProxyResponse implements ResponseStreamer {
 		//For this type of View, the template is the name of the method..
 		String templateClassName = view.getMethodName();
 		
-		Map<String, Object> args = new HashMap<>();
 		Template template = templatingService.loadTemplate(packageStr, templateClassName, "html");
 		
 		//stream this out with chunked response instead....
 		StringWriter out = new StringWriter();
-		template.run(args, out);
+		template.run(resp.getPageArgs(), out);
 		
 		String content = out.toString();
 		byte[] bytes = content.getBytes();
