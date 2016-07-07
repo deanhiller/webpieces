@@ -3,6 +3,7 @@ package org.webpieces.webserver.impl;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -29,6 +30,8 @@ import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
+
+import groovy.lang.MissingPropertyException;
 
 public class ProxyResponse implements ResponseStreamer {
 
@@ -106,7 +109,16 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		//stream this out with chunked response instead....
 		StringWriter out = new StringWriter();
-		template.run(resp.getPageArgs(), out);
+		
+		Map<String, Object> copy = new HashMap<>(resp.getPageArgs());
+		try {
+			template.run(copy, out);
+		} catch(MissingPropertyException e) {
+			Set<String> keys = resp.getPageArgs().keySet();
+			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
+					+ " return enough arguments for the template.  specifically, the method\nreturned these"
+					+ " arguments="+keys+"  The missing properties are as follows....\n"+e.getMessage(), e);
+		}
 		
 		String content = out.toString();
 		byte[] bytes = content.getBytes();
@@ -132,7 +144,6 @@ public class ProxyResponse implements ResponseStreamer {
 		String dateStr = formatter.print(now)+" GMT";
 
 		//in general, nearly all these headers are desired..
-		log.error("Add these headers to Frontend to be re-used via a headerAdd plugin which is added by default but can be removed for users not wanting it");
 		Header date = new Header(KnownHeaderName.DATE, dateStr);
 		response.addHeader(date);
 

@@ -108,7 +108,7 @@ public class RouteInvoker {
 
 	private CompletableFuture<Object> internalServerError(ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb) {
 		try {
-			log.error("Exception occurred, rendering client application 5xx page", exc);
+			log.error("Exception occurred rendeering previous page.  Next try to render apps 5xx page", exc);
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
 			return invokeImpl(result, req, responseCb);
 		} catch(Throwable e) {

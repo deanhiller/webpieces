@@ -41,7 +41,7 @@ public class GroovySrcWriter {
 		String srcText = token.getValue();
 		if(srcText.length() < maxLineLength) {
 			String text = addEscapesToSrc(srcText);
-			sourceCode.println("      out.print(\""+text+"\");");
+			sourceCode.println("      __out.print(\""+text+"\");");
 			return;
 		}
 
@@ -53,7 +53,7 @@ public class GroovySrcWriter {
 			String prefix = srcText.substring(0, cutpoint);
 			srcText = srcText.substring(cutpoint);
 			String text = addEscapesToSrc(prefix);
-			sourceCode.println("      out.print(\""+text+"\");");
+			sourceCode.println("      __out.print(\""+text+"\");");
 		}
 	}
 
@@ -70,7 +70,7 @@ public class GroovySrcWriter {
 
 	public void printExpression(Token token, ScriptCode sourceCode) {
 		String expr = token.getValue().trim();
-        sourceCode.print("      out.print(__escapeTextCharacters("+expr+"));");
+        sourceCode.print("      __out.print(__escapeTextCharacters("+expr+"));");
         sourceCode.appendTokenComment(token);
         sourceCode.println();
 	}

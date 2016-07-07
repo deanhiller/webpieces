@@ -20,7 +20,7 @@ public class TemplateImpl implements Template {
 	@Override
 	public void run(Map<String, Object> args, Writer out) {
 		Binding binding = new Binding(args);
-		binding.setProperty("out", out);
+		binding.setProperty("__out", out);
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);
 		
