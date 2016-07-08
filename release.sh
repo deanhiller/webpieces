@@ -1,0 +1,1 @@
+./gradlew ... -Prelease uploadArchives closeAndPromoteRepository

@@ -1,3 +1,7 @@
 dependencies {
     compile project(':core:core-datawrapper')
 }
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='a wrapper around SSLEngine in java to make it easier to use'
+}

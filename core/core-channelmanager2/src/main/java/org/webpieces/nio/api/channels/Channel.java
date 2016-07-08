@@ -11,10 +11,10 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 /**
  * 
- * TCPServerChannel ->       RegisterableChannel
- * TCPChannel -> Channel ->  RegisterableChannel
- * UDPChannel -> Channel ->  RegisterableChannel
- * DatagramChannel  ->       RegisterableChannel
+ * TCPServerChannel -       RegisterableChannel
+ * TCPChannel - Channel -  RegisterableChannel
+ * UDPChannel - Channel -  RegisterableChannel
+ * DatagramChannel  -       RegisterableChannel
  * 
  * This is the superclass for UDPChannel and TCPChannel 
  * <pre>
@@ -31,10 +31,10 @@ import org.webpieces.nio.api.handlers.DataListener;
  * This implies the superinterface of UDPChannel and TCPChannel share the
  * same superinterface as TCPServerChannel
  * 
- * TCPServerChannel ->       RegisterableChannel
- * TCPChannel -> Channel ->  RegisterableChannel
- * UDPChannel -> Channel ->  RegisterableChannel
- * DatagramChannel  ->       RegisterableChannel
+ * TCPServerChannel -       RegisterableChannel
+ * TCPChannel - Channel -  RegisterableChannel
+ * UDPChannel - Channel -  RegisterableChannel
+ * DatagramChannel  -       RegisterableChannel
  * </pre>
  * 
  * @author Dean Hiller
@@ -78,8 +78,6 @@ public interface Channel extends RegisterableChannel {
      * channel safely to not overload your server when needed and when systems you are talking
      * to take too long to respond
      * 
-     * @throws IOException
-     * @throws InterruptedException
      */
     public CompletableFuture<Channel> unregisterForReads();
     
@@ -120,8 +118,6 @@ public interface Channel extends RegisterableChannel {
      * It is important if far end stops reading that we only backup writes to a certain point and then
      * fail so you don't blow your RAM and keep trying to write.  The default will be set to 10 writes.  
      * 	 
-	 * @param maxQueueSize The number of backed up writes in the queue.  The queue only backs up
-     * if things are not being written to local nic buffer to be sent out.
 	 */
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup);
 	

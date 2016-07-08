@@ -91,7 +91,6 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
     /**
      * @param allOps
      * @param struct
-     * @throws ClosedChannelException 
      */
     public SelectionKey register(Select select, int allOps, WrapperAndListener struct) {
         SelectableChannel s = getRealChannel();

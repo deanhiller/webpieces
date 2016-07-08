@@ -38,21 +38,18 @@ public class DatagramChannelImpl implements DatagramChannel
         this.listener = dataListener;
     }
 
-    /**
-     * @see org.webpieces.nio.api.channels.Channel#registerForReads(org.webpieces.nio.api.handlers.DataListener)
-     */
     public void registerForReads() {
     }
 
     /**
-     * @see org.webpieces.nio.api.channels.Channel#unregisterForReads()
+     * @see org.webpieces.nio.api.channels.DatagramChannel#unregisterForReads()
      */
     public void unregisterForReads() {
     }
 
 
     /**
-     * @see org.webpieces.nio.api.channels.Channel#getSession()
+     * @see org.webpieces.nio.api.channels.DatagramChannel#getSession()
      */
     public ChannelSession getSession() {
         return session;
@@ -92,14 +89,12 @@ public class DatagramChannelImpl implements DatagramChannel
     }
 
     /**
-     * @see org.webpieces.nio.api.channels.RegisterableChannel#isBlocking()
      */
     public boolean isBlocking() {
         return true;
     }
 
     /**
-     * @see org.webpieces.nio.api.channels.RegisterableChannel#close()
      */
     public void close() {
         if(socket == null)
@@ -124,7 +119,6 @@ public class DatagramChannelImpl implements DatagramChannel
     }
     
     /**
-     * @see org.webpieces.nio.api.channels.RegisterableChannel#isClosed()
      */
     public boolean isClosed() {
         if(socket == null)

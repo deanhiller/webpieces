@@ -1,6 +1,5 @@
 dependencies {
-    compile 'com.google.inject:guice:4.0'
-    compile 'com.google.guava:guava:19.0'
+    compile deps['guice'], deps['guava']
     compile project(':http:http-frontend'), project(':http:http-parser1_1'), project(':http:http-client')
     testCompile project(':core:core-mock')
 }

@@ -39,7 +39,6 @@ public interface DataWrapper {
 	 * likely can discard the one of the DataWrappers resulting in that one and the ByteBuffers
 	 * it holds to be garbage collected
 	 * 
-	 * @return
 	 */
 	public void addUnderlyingBuffersToList(List<ByteBuffer> buffers);
 	

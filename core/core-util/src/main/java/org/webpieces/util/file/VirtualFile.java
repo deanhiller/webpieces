@@ -41,4 +41,6 @@ public interface VirtualFile {
 
 	boolean delete();
 
+	String getCanonicalPath();
+
 }

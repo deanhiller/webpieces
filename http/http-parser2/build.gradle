@@ -1,3 +1,7 @@
 dependencies {
     compile project(':core:core-datawrapper')
 }
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='A re-usable asynchronous http2 parser'
+}

@@ -88,4 +88,9 @@ public class VirtualFileClasspath implements VirtualFile {
 		throw new UnsupportedOperationException("not yet");
 	}
 
+	@Override
+	public String getCanonicalPath() {
+		return getAbsolutePath();
+	}
+
 }

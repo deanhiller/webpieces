@@ -25,7 +25,7 @@ public interface HttpClient {
 	 * of the download after that.
 	 * 
 	 * @param request
-	 * @param cb
+	 * @param l
 	 */
 	public void sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener l);
 

@@ -16,8 +16,6 @@ public abstract class HttpMessage extends HttpPayload {
 	
 	/**
 	 * Order of HTTP Headers matters for Headers with the same key
-	 * 
-	 * @param headers
 	 */
 	public List<Header> getHeaders() {
 		return Collections.unmodifiableList(headers);

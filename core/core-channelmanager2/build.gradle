@@ -1,3 +1,8 @@
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='NIO library that is very lightweight and very mockable/testable so you can write higher level tests for your system'
+}
+
 dependencies {
     compile project(':core:core-util'), project(':core:core-datawrapper'), project(':core:core-ssl')
 }
+

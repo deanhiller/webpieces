@@ -19,6 +19,13 @@ public class CompileConfig {
 	 * @param byteCodeCacheDir The directory we use to cache class byte code so we can avoid recompiling in certain cases
 	 */
 	public CompileConfig(List<VirtualFile> javaPath, VirtualFile byteCodeCacheDir) {
+		for(VirtualFile f : javaPath) {
+			if(!f.exists())
+				throw new IllegalArgumentException("Directory="+f.getCanonicalPath()+" is not found");
+			else if(!f.isDirectory())
+				throw new IllegalArgumentException("Only directories are allowed.  This file="+f.getCanonicalPath()+" is a file not a directory");
+		}
+		
 		this.javaPath = javaPath;
 		this.byteCodeCacheDir = byteCodeCacheDir;
 	}

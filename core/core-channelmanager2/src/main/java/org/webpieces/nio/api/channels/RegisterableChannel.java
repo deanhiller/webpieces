@@ -5,10 +5,10 @@ import java.net.SocketAddress;
 
 /**
  * 
- * TCPServerChannel ->       RegisterableChannel
- * TCPChannel -> Channel ->  RegisterableChannel
- * UDPChannel -> Channel ->  RegisterableChannel
- * DatagramChannel  ->       RegisterableChannel
+ * TCPServerChannel -       RegisterableChannel
+ * TCPChannel - Channel -  RegisterableChannel
+ * UDPChannel - Channel -  RegisterableChannel
+ * DatagramChannel  -       RegisterableChannel
  * 
  * This is the top of the tree where all our channels come from. 
  * <pre>
@@ -25,10 +25,10 @@ import java.net.SocketAddress;
  * This implies the superinterface of UDPChannel and TCPChannel share the
  * same superinterface as TCPServerChannel
  * 
- * TCPServerChannel ->       RegisterableChannel
- * TCPChannel -> Channel ->  RegisterableChannel
- * UDPChannel -> Channel ->  RegisterableChannel
- * DatagramChannel  ->       RegisterableChannel
+ * TCPServerChannel -       RegisterableChannel
+ * TCPChannel - Channel -  RegisterableChannel
+ * UDPChannel - Channel -  RegisterableChannel
+ * DatagramChannel  -       RegisterableChannel
  * </pre>
  * 
  * @author Dean Hiller

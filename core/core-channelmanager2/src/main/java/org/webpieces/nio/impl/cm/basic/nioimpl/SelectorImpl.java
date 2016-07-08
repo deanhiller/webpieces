@@ -59,10 +59,6 @@ public class SelectorImpl implements Select
     public Selector getSelector() {
         return selector;
     }
-    /**
-     * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#startPollingThread(org.webpieces.nio.impl.cm.basic.SelectorManager2)
-     */
     public void startPollingThread(SelectorListener l, String threadName) {
         if(running)
             throw new IllegalStateException("Already running, can't start again");        
@@ -79,10 +75,6 @@ public class SelectorImpl implements Select
         }
     }
 
-    /**
-     * @throws InterruptedException 
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#stopPollingThread()
-     */
     public void stopPollingThread() {
         if(!running)
             return;
@@ -149,10 +141,6 @@ public class SelectorImpl implements Select
         return selector.selectedKeys();
     }
 
-    /**
-     * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#select()
-     */
     public int select() {
         try {
 			return selector.select();
@@ -175,25 +163,14 @@ public class SelectorImpl implements Select
         return wantToShutDown;
     }
 
-    /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#setRunning(boolean)
-     */
     public void setRunning(boolean b) {
         running = b;
     }
 
-    /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#getKeyFromChannel(java.nio.channels.SelectableChannel)
-     */
     public SelectionKey getKeyFromChannel(SelectableChannel realChannel) {
         return realChannel.keyFor(selector);
     }
 
-    /**
-     * @throws ClosedChannelException 
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#register(java.nio.channels.SelectableChannel,
-     *                       int, org.webpieces.nio.impl.cm.basic.WrapperAndListener)
-     */
     public SelectionKey register(SelectableChannel s, int allOps, Object struct) {
     	if(struct == null)
     		throw new IllegalArgumentException("struct cannot be null");

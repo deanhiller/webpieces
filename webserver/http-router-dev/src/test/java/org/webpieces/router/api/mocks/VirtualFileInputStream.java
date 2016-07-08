@@ -88,4 +88,9 @@ public class VirtualFileInputStream implements VirtualFile {
 		throw new IllegalStateException("This is read only");
 	}
 
+	@Override
+	public String getCanonicalPath() {
+		return getAbsolutePath();
+	}
+
 }

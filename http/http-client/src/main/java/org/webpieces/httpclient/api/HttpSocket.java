@@ -17,7 +17,6 @@ public interface HttpSocket {
 	 * are just a very very large download you don't want existing in RAM anyways.
 	 * 
 	 * @param request
-	 * @param cb
 	 */
 	//TODO: Implement timeout for clients so that requests will timeout
 	public CompletableFuture<HttpResponse> send(HttpRequest request);

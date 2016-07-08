@@ -1,0 +1,3 @@
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='A simple utilitiy library with special executor but rather small amount of code in here'
+}

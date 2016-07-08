@@ -35,7 +35,7 @@ public class CLASSNAMEDevServer {
 		//list all source paths here as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME/src/main/java"));
+		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME-prod/src/main/java"));
 		
 		CompileConfig devConfig = new CompileConfig(srcPaths);
 		Module platformOverrides = Modules.combine(

@@ -38,8 +38,6 @@ public interface HttpParser {
 	 * Call prepareToParse to get the state object to pass back and 
 	 * forth.
 	 * 
-	 * @param msg
-	 * @return
 	 */	
 	public Memento parse(Memento state, DataWrapper moreData);
 	

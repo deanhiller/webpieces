@@ -1,4 +1,8 @@
 dependencies {
-    compile 'org.apache.commons:commons-io:1.3.2'
+    compile deps['apache-commons-io']
     compile project(':webserver:http-templating')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Library that swaps out http-templating classes to enable compiling on any incoming request if the source code has changed for development servers'
 }

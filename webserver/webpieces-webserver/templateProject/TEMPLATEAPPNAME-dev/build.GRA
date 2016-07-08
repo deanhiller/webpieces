@@ -1,0 +1,4 @@
+dependencies {
+  //add dev-server only dependencies here if you have any(you shouldn't most likely)
+  compile project(':APPNAME')
+}

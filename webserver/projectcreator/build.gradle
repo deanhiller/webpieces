@@ -1,3 +1,7 @@
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.6' //we use groovy in logback.xml
+    compile deps['groovy'] //we use groovy in logback.xml
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Project to create wepieces webservers with a gradle build, dev server, prod server and example app'
 }

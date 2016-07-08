@@ -1,5 +1,9 @@
 dependencies {
-    compile 'com.google.inject:guice:4.0'
-    compile 'org.codehaus.groovy:groovy-all:2.4.6'
+    compile deps['guice']
+    compile deps['groovy']
     compile project(':core:core-util')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Templating library using groovy as the scripting language'
 }

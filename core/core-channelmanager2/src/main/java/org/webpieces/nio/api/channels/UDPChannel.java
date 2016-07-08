@@ -7,10 +7,6 @@ import java.io.IOException;
  */
 public interface UDPChannel extends Channel {
 
-    /**
-     * @throws IOException 
-     * 
-     */
     public void disconnect();
 
 }

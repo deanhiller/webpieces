@@ -1,3 +1,7 @@
 dependencies {
     compile project(':core:core-channelmanager2')
 }
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='NIO wrapper on top of core-channelmanager2 making creating a tcp server just 3 lines of code'
+}

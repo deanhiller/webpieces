@@ -9,7 +9,6 @@ public interface SslListener {
 	 * This is basically the SSL connected even in that your channel is now secure so go ahead and start writing to
 	 * to the AsynchSSLEngine interface.
 	 * 
-	 * @throws IOException
 	 */
 	void encryptedLinkEstablished();
 

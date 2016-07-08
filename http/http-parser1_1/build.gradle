@@ -1,3 +1,7 @@
 dependencies {
     compile project(':core:core-datawrapper')
 }
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='A re-usable asynchronous http 1.1 parser that can be used with any nio client'
+}

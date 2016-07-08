@@ -7,8 +7,6 @@ public interface AsyncSSLEngine {
 
 	/**
 	 * Begins a handshake on one end (or asks for a re-handhsake)
-	 * @param memento
-	 * @return
 	 */
 	void beginHandshake();
 
@@ -32,7 +30,7 @@ public interface AsyncSSLEngine {
 	 * receiving an encrypted packet, this starts a handshake and then from then
 	 * on, just feed encrypted packets here
 	 * 
-	 * @param b The bytes
+	 * @param buffer The bytes
 	 */	
 	void feedEncryptedPacket(ByteBuffer buffer);
 

@@ -3,6 +3,32 @@
 //and here we modify that picture a little so that jar depends on compileHtml so that compiled html files end up in the production jar
 //file.  The dev-server does not have this since it relies on the source files to begin with recompiling when changes happen
 
+ext {
+
+    /*
+     * Dependencies can be named so that sub-projects can reference consistent version of them.
+     * dependencies {
+     *     compile deps['joda-time']
+     * }
+     *
+     * This list is NOT who you depend on but just a Map of String, String...
+     */
+    deps = [
+       'junit':           'junit:junit:4.11',  
+       'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+       'javax-inject':    'javax.inject:javax.inject:1',
+       'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
+       //do we need this one...
+       //'logback-core':  'ch.qos.logback:logback-core:1.1.7', 
+       'logback-classic': 'ch.qos.logback:logback-classic:1.1.7',
+       'joda-time':       'joda-time:joda-time:2.9.4',
+       'guice':           'com.google.inject:guice:4.0',
+       'guava':           'com.google.guava:guava:19.0',
+       'eclipse-compiler':'org.eclipse.jdt.core.compiler:ecj:4.5.1',
+       'apache-commons-io': 'org.apache.commons:commons-io:1.3.2'
+    ]  
+}
+
 allprojects {
 
 }
@@ -29,13 +55,13 @@ subprojects {
        mavenCentral()
    }
    dependencies {
-       testCompile 'junit:junit:4.11'
+       testCompile deps['junit']
 
        //add global dependencies for all projects here....
-       compile 'javax.inject:javax.inject:1'
-       compile 'com.google.inject:guice:4.0'
-       compile 'org.slf4j:slf4j-api:1.7.5'
-       compile 'ch.qos.logback:logback-classic:1.0.13'
+       compile deps['javax-inject']
+       compile deps['guice']
+       compile deps['slf4j-api']
+       compile deps['logback-classic']
 
        //This line includes any jars a developer drops into {project}/lib directory
        compile fileTree(dir: 'lib', include: '*.jar')
@@ -59,21 +85,4 @@ subprojects {
       }
    }
 
-}
-
-project(':APPNAME') {
-    dependencies {
-        //add maven dependencies here
-        //compile 'javax.inject:javax.inject:1'
-
-        //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those
-        //source paths or it will not recompile that code as it changes
-    }
-}
-
-project(':dev-server') {
-    dependencies {
-        //add dev-server only dependencies here if you have any(you shouldn't most likely)
-        compile project(':APPNAME')
-    }
 }

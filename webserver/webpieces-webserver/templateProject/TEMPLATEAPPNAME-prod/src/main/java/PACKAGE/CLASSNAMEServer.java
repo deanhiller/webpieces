@@ -77,7 +77,7 @@ public class CLASSNAMEServer {
 		log.info("property user.dir="+filePath);
 		
 		//This is so dev-server works.....
-		VirtualFile metaFile = new VirtualFileImpl(filePath + "/../TEMPLATEAPPNAME/src/main/resources/appmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(filePath + "/../TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
 
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 

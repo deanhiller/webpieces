@@ -18,8 +18,9 @@ public class RouterRequest {
 	public String domain;
 	public HttpMethod method;
 	
+	//Fill this in with the query parameters in the url (ie. the <pre> ?var1=xxx&var2=yyyy&var1=www&var3=999</pre>
 	/**
-	 * Fill this in with the query parameters in the url (ie. the ?var1=xxx&var2=yyyy&var1=www&var3=999
+	 * 
 	 * 
 	 * Let's not let this contain stuff from the path such as /user/{id}/account/{account}.  The
 	 * library will parse the path in the request to get that information and NOT put it in this Map so

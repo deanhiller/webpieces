@@ -97,6 +97,15 @@ public class VirtualFileImpl implements VirtualFile {
 	}
 
 	@Override
+	public String getCanonicalPath() {
+		try {
+			return file.getCanonicalPath();
+		} catch (IOException e) {
+			throw new RuntimeException("exception resolving path to full form="+file.getAbsolutePath(), e);
+		}
+	}
+	
+	@Override
 	public URL toURL() {
 		try {
 			return file.toURI().toURL();

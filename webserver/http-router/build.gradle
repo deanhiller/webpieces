@@ -1,4 +1,8 @@
 dependencies {
-    compile 'com.google.inject:guice:4.0'
+    compile deps['guice']
     compile project(':core:core-util')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Http Router where you feed http requests in and get responses in the form of which view needs to be shown with the arguments that you need to give to that view'
 }

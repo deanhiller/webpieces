@@ -21,7 +21,6 @@ public interface HttpRequestListener {
 	 * 
 	 * @param channel
 	 * @param exc
-	 * @param http500
 	 */
 	void sendServerResponse(FrontendSocket channel, HttpException exc);
 

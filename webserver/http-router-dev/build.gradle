@@ -3,3 +3,7 @@ dependencies {
     compile project(':webserver:http-router')
     testCompile project(':core:core-mock')
 }
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Library that swaps out specific http-router components to be able to compile code on any request that has changed for use in development servers'
+}

@@ -1,5 +1,9 @@
 dependencies {
-    compile 'com.google.inject:guice:4.0'
+    compile deps['guice']
     compile project(':http:http-frontend'), project(':http:http-parser1_1')
     compile project(':webserver:http-templating'), project(':webserver:http-router')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='The full webpieces server AS A library'
 }

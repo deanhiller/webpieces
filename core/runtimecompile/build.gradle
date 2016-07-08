@@ -1,4 +1,8 @@
 dependencies {
-    compile 'org.eclipse.jdt.core.compiler:ecj:4.5.1'
+    compile deps['eclipse-compiler']
     compile project(':core:core-util')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='A runtimecompiler library backed by eclipse compiler such that programs can just call lib.getClass(Class z) and z will be compiled if source has changed(and the dependencies as well)'
 }

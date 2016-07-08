@@ -70,7 +70,6 @@ public class HttpRequest extends HttpMessage {
 	 * not found there, this method will throw an exception.  port parameter is only required
 	 * when there is not an absolute uri. (ie. only HOST header exists)
 	 * 
-	 * @param request
 	 * @param port
 	 * @return
 	 */

@@ -14,14 +14,9 @@ public interface Select
      */
     void wakeup();
 
-    /**
-     * @param manager2
-     */
     void startPollingThread(SelectorListener manager2, String threadName);
 
     /**
-     * @throws InterruptedException 
-     * 
      */
     void stopPollingThread();
 
@@ -45,22 +40,10 @@ public interface Select
      */
     boolean isWantShutdown();
 
-    /**
-     * @param b
-     */
     void setRunning(boolean b);
 
-    /**
-     * @param realChannel
-     */
     SelectionKey getKeyFromChannel(SelectableChannel realChannel);
 
-    /**
-     * @param s
-     * @param allOps
-     * @param struct
-     * @throws ClosedChannelException 
-     */
     SelectionKey register(SelectableChannel s, int allOps, Object struct);
 
 }

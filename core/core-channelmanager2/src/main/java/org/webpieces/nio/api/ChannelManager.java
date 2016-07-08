@@ -32,7 +32,6 @@ public interface ChannelManager {
      * 
      * @param id (Should not be null)Used for logging purposes. 
      * @param connectionListener The listener that is notified every time a Channel connects in
-     * @param DataListener This listener is notified of any data that comes in and what Channel that data came from
      * 
      * @return a TCPServerChannel
      */
@@ -44,7 +43,6 @@ public interface ChannelManager {
     /**
      * Returns a non-blocking TCPChannel.
      * @param id (Should not be null)Used for logging purposes.
-     * @param listener The listener that is notified of Data that comes in
      *  
      * @return a non-blocking TCPChannel.
      */
@@ -59,8 +57,6 @@ public interface ChannelManager {
      * 
      * @param id
      *  
-     * @return a UDPChannel
-     * @throws IOException
      */
     public UDPChannel createUDPChannel(String id);
 	
