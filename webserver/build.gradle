@@ -1,20 +1,20 @@
 project.ext {
-  stagingDirName = 'project-template'
+  stagingDirName = 'projecttemplates'
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-project('project-template:templateProject:TEMPLATEAPPNAME-prod') {
+project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
     dependencies {
         compile project(':webserver:webserver')
     }
 }
 
-project('project-template:templateProject:TEMPLATEAPPNAME-dev') {
+project('projecttemplates:templateProject:TEMPLATEAPPNAME-dev') {
     dependencies {
         compile project(':webserver:webserver')
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
-        compile project(':webserver:project-template:templateProject:TEMPLATEAPPNAME-prod')
+        compile project(':webserver:projecttemplates:templateProject:TEMPLATEAPPNAME-prod')
     }
 }
 
