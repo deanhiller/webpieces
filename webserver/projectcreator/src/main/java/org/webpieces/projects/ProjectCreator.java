@@ -36,8 +36,10 @@ public class ProjectCreator {
 			//we only allow execution from the jar file right now due to this...(so running this in the IDE probably won't work)
 			String path = ProjectCreator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			File jarFile = new File(path);
+			System.out.println("Running from jar file="+jarFile);
 
-			File webpiecesDir = jarFile.getParentFile().getParentFile();
+			File webpiecesDir = jarFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+			System.out.println("Base Directory="+webpiecesDir);
 
 			if(packageStr.contains("/") || packageStr.contains("\\"))
 				throw new IllegalArgumentException("package must contain '.' character and no '/' nor '\\' characters");

@@ -46,12 +46,15 @@ public class FileCopy {
 		File template = new File(webpiecesDir, "templateProject");
 
 		System.out.println("/n");
-		System.out.println("copy from directory="+template);
-		System.out.println("copy to directory  ="+newAppDirectory);
+		System.out.println("copy from directory="+template.getCanonicalPath());
+		System.out.println("copy to directory  ="+newAppDirectory.getCanonicalPath());
 		copyFiles(template, newAppDirectory);
 	}
 
-	private void copyFiles(File template, File targetDirectory) {
+	private void copyFiles(File template, File targetDirectory) throws IOException {
+		if(!template.exists())
+			throw new IllegalArgumentException("Directory="+template.getCanonicalPath()+"does not exist");
+		
 		for(File f : template.listFiles()) {
 			if(f.isDirectory()) {
 				copyDirectory(f, targetDirectory);
@@ -92,7 +95,7 @@ public class FileCopy {
 		}
 	}
 
-	private void copyDirectory(File f, File targetDirectory) {
+	private void copyDirectory(File f, File targetDirectory) throws IOException {
 		String name = getFileName(f);
 		
 		String[] pieces = new String[] { name };
@@ -103,8 +106,8 @@ public class FileCopy {
 		File toCreate = createPackageFile(targetDirectory, pieces);
 		toCreate.mkdirs();
 		
-		System.out.println("copy from directory="+f.getAbsolutePath());
-		System.out.println("copy to directory  ="+toCreate.getAbsolutePath());
+		System.out.println("copy from directory="+f.getCanonicalPath());
+		System.out.println("copy to directory  ="+toCreate.getCanonicalPath());
 		
 		copyFiles(f, toCreate);
 	}

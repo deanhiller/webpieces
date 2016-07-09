@@ -1,0 +1,16 @@
+apply plugin: 'application'
+apply plugin: 'java'
+
+repositories {
+   mavenCentral()
+   //For testing and to be removed...
+   maven {
+     url uri('/tmp/myRepo/')
+   }
+}
+
+dependencies {
+   compile 'org.webpieces:projectcreator:${version}'
+}
+
+mainClassName = "org.webpieces.projects.ProjectCreator"

@@ -26,6 +26,7 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/.classpath'
     exclude stagingDirName + '/.project'
     exclude stagingDirName + '/.settings'
+    exclude stagingDirName + '/build.gradle.template'
     exclude stagingDirName + '/templateProject/.classpath'
     exclude stagingDirName + '/templateProject/.project'
     exclude stagingDirName + '/templateProject/.settings'
@@ -42,9 +43,12 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/.settings'
 }
 
-task stageProjectCreator(type: Sync, dependsOn: ['projectcreator:assemble', 'stageTemplate']) {
-    from childProjects['projectcreator'].toStagingDir
-    into new File(outputStagingDir, 'lib-creation')
+task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {
+    from stagingDirName
+    into outputStagingDir
+    include 'build.gradle.template'
+    rename { file -> 'build.gradle' }
+    expand(version: version, title: 'ProjectInfo')
 }
 
-assemble.dependsOn(['stageProjectCreator'])
+assemble.dependsOn(['copyGradleTemplate'])
