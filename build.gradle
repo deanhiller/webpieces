@@ -59,7 +59,13 @@ subprojects {
    apply plugin: 'maven'
 
    group = 'org.webpieces'
-   version = '1.9.6'
+   if(project.hasProperty('projVersion')) {
+     println("CREATING RELEASE VERSION")
+     project.version = '1.9.'+project.projVersion
+   } else {
+     println("CREATING DEVELOPER VERSION")
+     version = '1.9-developer'
+   }
    buildDir = file('output')
 
    ext {
@@ -69,7 +75,8 @@ subprojects {
       github_org = 'deanhiller'
       project_name = 'webpieces'
    }
-   archivesBaseName = "webpieces-${it.name}"
+   //doing this modifies the mvn artifact id and we can't seem to reset it
+   //archivesBaseName = "webpieces-${it.name}"
 
    repositories {
        mavenCentral()
@@ -97,13 +104,13 @@ subprojects {
      options.compilerArgs.add '-parameters'
    }
 
-if (JavaVersion.current().isJava8Compatible()) {
-    tasks.withType(Javadoc) {
+   if (JavaVersion.current().isJava8Compatible()) {
+     tasks.withType(Javadoc) {
         // disable the crazy super-strict doclint tool in Java 8
         //noinspection SpellCheckingInspection
         options.addStringOption('Xdoclint:none', '-quiet')
-    }
-}
+     }
+   }
 
    jar {
       //TODO: Share the source and binary manifest code!!! so changes are done in one place

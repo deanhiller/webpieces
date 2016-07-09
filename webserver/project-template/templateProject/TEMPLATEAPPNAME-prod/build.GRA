@@ -1,5 +1,6 @@
 dependencies {
   //add maven dependencies here
+  compile deps['web-webserver']
   //compile deps['javax-inject']
 
   //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those

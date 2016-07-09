@@ -1,20 +1,20 @@
 project.ext {
-  stagingDirName = 'webpieces-webserver'
+  stagingDirName = 'project-template'
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-project('webpieces-webserver:templateProject:TEMPLATEAPPNAME-prod') {
+project('project-template:templateProject:TEMPLATEAPPNAME-prod') {
     dependencies {
-        compile project(':webserver:embeddablewebserver')
+        compile project(':webserver:webserver')
     }
 }
 
-project('webpieces-webserver:templateProject:TEMPLATEAPPNAME-dev') {
+project('project-template:templateProject:TEMPLATEAPPNAME-dev') {
     dependencies {
-        compile project(':webserver:embeddablewebserver')
+        compile project(':webserver:webserver')
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
-        compile project(':webserver:webpieces-webserver:templateProject:TEMPLATEAPPNAME-prod')
+        compile project(':webserver:project-template:templateProject:TEMPLATEAPPNAME-prod')
     }
 }
 
@@ -42,24 +42,9 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/.settings'
 }
 
-task stageWebServer(type: Sync, dependsOn: ['embeddablewebserver:assemble', 'stageTemplate']) {
-    from childProjects['embeddablewebserver'].toStagingDir
-    into new File(outputStagingDir, 'lib-prod')
-}
-
-task stageDevServer(type: Sync, dependsOn: ['http-router-dev:assemble', 'http-templating-dev:assemble', 'stageWebServer']) {
-    from childProjects['http-router-dev'].toStagingDir
-    from childProjects['http-templating-dev'].toStagingDir
-    into new File(outputStagingDir, 'lib-development')
-    exclude { details ->
-       def fileNames = stageWebServer.source.collect{ entry -> entry.getName()}
-       fileNames.contains(details.file.getName())
-    }
-}
-
-task stageProjectCreator(type: Sync, dependsOn: 'projectcreator:assemble') {
+task stageProjectCreator(type: Sync, dependsOn: ['projectcreator:assemble', 'stageTemplate']) {
     from childProjects['projectcreator'].toStagingDir
     into new File(outputStagingDir, 'lib-creation')
 }
 
-assemble.dependsOn(['stageDevServer', 'stageProjectCreator'])
+assemble.dependsOn(['stageProjectCreator'])

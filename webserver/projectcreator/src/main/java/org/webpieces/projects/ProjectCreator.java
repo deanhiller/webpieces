@@ -49,8 +49,6 @@ public class ProjectCreator {
 			setupDirectory(appDir);
 			
 		    new FileCopy(webpiecesDir, appClassName, appName, packageStr, appDir).createProject();
-		    
-		    copyPlatformJars(webpiecesDir, appDir, appName);
 		}
 	}
 
@@ -64,26 +62,4 @@ public class ProjectCreator {
 			System.out.println("Directory already exists so we are filling it in="+dirTheUserTypedIn.getCanonicalPath());
 	}
 
-	private void copyPlatformJars(File webpiecesDir, File newAppDirectory, String appName) throws IOException {
-		
-		File appDir = new File(newAppDirectory, appName);
-		File devDir = new File(newAppDirectory, "dev-server");
-		
-		copyJars(new File(webpiecesDir, "lib-prod"), appDir);
-		copyJars(new File(webpiecesDir, "lib-development"), devDir);
-	}
-
-	private void copyJars(File file, File appDir) throws IOException {
-		File prodLib = new File(appDir, "lib");
-		prodLib.mkdirs();
-		
-		copyDirToDir(file, prodLib);
-	}
-
-	private void copyDirToDir(File file, File lib) throws IOException {
-		for(File f : file.listFiles()) {
-			File newFile = new File(lib, f.getName());
-			Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
-		}
-	}
 }
