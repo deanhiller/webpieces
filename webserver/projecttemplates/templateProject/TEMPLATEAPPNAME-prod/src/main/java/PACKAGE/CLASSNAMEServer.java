@@ -13,7 +13,7 @@ import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -62,7 +62,7 @@ public class CLASSNAMEServer {
 	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
-		new CLASSNAMEServer(null, null, false).start();
+		new CLASSNAMEServer(null, null, false, null).start();
 		
 		synchronized (CLASSNAMEServer.class) {
 			//wait forever for now so server doesn't shut down..
@@ -72,13 +72,14 @@ public class CLASSNAMEServer {
 
 	private WebServer webServer;
 
-	public CLASSNAMEServer(Module platformOverrides, Module appOverrides, boolean usePortZero) {
+	public CLASSNAMEServer(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
-		
-		//This is so dev-server works.....
-		VirtualFile metaFile = new VirtualFileImpl(filePath + "/../TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
 
+		//Dev server has to override this
+		if(metaFile == null)
+			metaFile = new VirtualFileClasspath("/appmeta.txt", CLASSNAMEServer.class.getClassLoader());
+		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing

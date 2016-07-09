@@ -1,11 +1,9 @@
-package org.webpieces.templating.api;
+package org.webpieces.util.file;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
-
-import org.webpieces.util.file.VirtualFile;
 
 public class VirtualFileClasspath implements VirtualFile {
 
@@ -50,7 +48,7 @@ public class VirtualFileClasspath implements VirtualFile {
 
 	@Override
 	public boolean exists() {
-		throw new UnsupportedOperationException("not yet");
+		return resource != null;
 	}
 
 	@Override
@@ -60,7 +58,7 @@ public class VirtualFileClasspath implements VirtualFile {
 
 	@Override
 	public String getAbsolutePath() {
-		throw new UnsupportedOperationException("not yet");
+		return resource.toExternalForm();
 	}
 
 	@Override
@@ -91,6 +89,15 @@ public class VirtualFileClasspath implements VirtualFile {
 	@Override
 	public String getCanonicalPath() {
 		return getAbsolutePath();
+	}
+
+	@Override
+	public String toString() {
+		String resourceStr = null;
+		if(resource != null) 
+			resourceStr = resource.toExternalForm();
+			
+		return "[VirtualFileClasspath: path="+path+" resource="+resourceStr+"]";
 	}
 
 }

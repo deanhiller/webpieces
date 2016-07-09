@@ -88,7 +88,7 @@ public class VirtualFileImpl implements VirtualFile {
 
 	@Override
 	public String toString() {
-		return "[file=" + file + "]";
+		return "[file=" + getCanonicalPath() + "]";
 	}
 
 	@Override
