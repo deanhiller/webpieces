@@ -1,3 +1,5 @@
+apply plugin: 'application'
+
 dependencies {
   //add maven dependencies here
   compile deps['web-webserver']
@@ -6,3 +8,5 @@ dependencies {
   //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those
   //source paths or it will not recompile that code as it changes
 }
+
+mainClassName = "PACKAGE.CLASSNAMEServer"
