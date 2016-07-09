@@ -1,5 +1,6 @@
 package org.webpieces.util.file;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -18,7 +19,7 @@ public class VirtualFileClasspath implements VirtualFile {
 
 	@Override
 	public boolean isDirectory() {
-		throw new UnsupportedOperationException("not yet");
+		return false;
 	}
 
 	@Override
@@ -53,7 +54,11 @@ public class VirtualFileClasspath implements VirtualFile {
 
 	@Override
 	public InputStream openInputStream() {
-		throw new UnsupportedOperationException("not yet");
+		try {
+			return resource.openStream();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

@@ -78,7 +78,7 @@ public class CLASSNAMEServer {
 
 		//Dev server has to override this
 		if(metaFile == null)
-			metaFile = new VirtualFileClasspath("/appmeta.txt", CLASSNAMEServer.class.getClassLoader());
+			metaFile = new VirtualFileClasspath("appmeta.txt", CLASSNAMEServer.class.getClassLoader());
 		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
