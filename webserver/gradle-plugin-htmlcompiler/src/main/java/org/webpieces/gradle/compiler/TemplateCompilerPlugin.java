@@ -37,7 +37,7 @@ public class TemplateCompilerPlugin implements Plugin<ProjectInternal> {
                 final DefaultTemplateSourceSet templateSourceSet = new DefaultTemplateSourceSet(((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
                 new DslObject(sourceSet).getConvention().getPlugins().put("templates", templateSourceSet);
 
-                templateSourceSet.getTemplatesSrc().srcDir("src/main/java");
+                templateSourceSet.getTemplatesSrc().srcDir("src/"+sourceSet.getName()+"/java");
                 sourceSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
                     public boolean isSatisfiedBy(FileTreeElement element) {
                         return templateSourceSet.getTemplatesSrc().contains(element.getFile());

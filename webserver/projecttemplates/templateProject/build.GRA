@@ -14,7 +14,7 @@ ext {
      * This list is NOT who you depend on but just a Map of String, String...
      */
     deps = [
-       'web-webserver':     'org.webpieces:webserver:1.9.2',
+       'web-webserver':     'org.webpieces:http-webserver:1.9.2',
        'web-devrouter':     'org.webpieces:http-router-dev:1.9.2',
        'web-devtemplating': 'org.webpieces:http-templating-dev:1.9.2',
 

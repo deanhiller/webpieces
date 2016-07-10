@@ -5,13 +5,13 @@ project.ext {
 
 project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
     dependencies {
-        compile project(':webserver:webserver')
+        compile project(':webserver:http-webserver')
     }
 }
 
 project('projecttemplates:templateProject:TEMPLATEAPPNAME-dev') {
     dependencies {
-        compile project(':webserver:webserver')
+        compile project(':webserver:http-webserver')
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
         compile project(':webserver:projecttemplates:templateProject:TEMPLATEAPPNAME-prod')
