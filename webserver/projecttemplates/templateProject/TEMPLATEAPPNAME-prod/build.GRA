@@ -14,6 +14,16 @@ buildscript {
 apply plugin: 'application'
 apply plugin: 'org.webpieces.templatecompiler'
 
+sourceSets {
+    //For testing, we need to put the html files on the classpath
+    test {
+        resources {
+            srcDirs = ["src/main/java"]
+            includes = ["**/*.html"]
+        }
+    }
+}
+
 dependencies {
   //add maven dependencies here
   compile deps['web-webserver']
@@ -22,6 +32,8 @@ dependencies {
   //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those
   //source paths or it will not recompile that code as it changes
 
+  //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
+  //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code.
   testCompile deps['web-webserver-test']
 }
 
