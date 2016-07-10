@@ -1,0 +1,13 @@
+dependencies {
+    compile deps['guice']
+    compile project(':http:http-frontend')
+
+    //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
+    //need for a generate html to class files each time (it uses the same template compiler that the
+    //webpieces gradle plugin uses so it tests a bit more anyways which is good)
+    compile project(':webserver:http-templating-dev')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='The full webpieces server AS A library'
+}

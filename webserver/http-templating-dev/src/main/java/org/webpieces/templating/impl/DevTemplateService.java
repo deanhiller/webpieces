@@ -38,15 +38,16 @@ public class DevTemplateService implements TemplateService {
 	}
 	
 	private Template loadTemplateImpl(String packageStr, String templateClassName, String extension) throws IOException, ClassNotFoundException {
-		String directory = "";
-		if(!"".equals(packageStr))
-			directory = "/"+packageStr.replace(".", "/");
-		String fileName = templateClassName+"."+extension;
-		String fullPath = directory+"/"+fileName;
+		String fullPath = templateClassName+"."+extension;
+		if(!"".equals(packageStr)) {
+			String directory = packageStr.replace(".", "/");
+			fullPath = directory + "/" + fullPath;
+		}
+		fullPath = "/" + fullPath;
 
 		InputStream resource = DevTemplateService.class.getResourceAsStream(fullPath);
 		if(resource == null)
-			throw new FileNotFoundException("resource="+directory+"/"+fileName+" was not found in classpath");
+			throw new FileNotFoundException("resource="+fullPath+" was not found in classpath");
 
 		String viewSource = IOUtils.toString(resource, Charset.defaultCharset().name());
 

@@ -14,6 +14,7 @@ public class BasicRouteModule implements RouteModule {
 		router.addRoute(HttpMethod.GET, "/myroute",       "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
 		
 		router.setPageNotFoundRoute("biz/BasicController.notFound");
+		router.setInternalErrorRoute("biz/BasicController.internalError");
 	}
 
 }

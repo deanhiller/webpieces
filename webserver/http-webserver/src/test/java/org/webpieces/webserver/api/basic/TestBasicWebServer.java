@@ -1,6 +1,5 @@
 package org.webpieces.webserver.api.basic;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -24,19 +23,19 @@ public class TestBasicWebServer {
 	
 	@Test
 	public void testBasic() {
-//		BasicWebserver webserver = new BasicWebserver(new PlatformOverridesForTest(), null);
-//		HttpRequestListener server = webserver.start();
-//
-//		HttpRequest req = createRequest(KnownHttpMethod.GET, "/myroute");
-//		server.processHttpRequests(socket, req , false);
-//		
-//		List<HttpPayload> responses = socket.getResponses();
-//		Assert.assertEquals(1, responses.size());
-//		
-//		HttpResponse response = responses.get(0).getHttpResponse();
-//		DataWrapper body = response.getBody();
-//		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-//		Assert.assertEquals("", html);
+		BasicWebserver webserver = new BasicWebserver(new PlatformOverridesForTest(), null);
+		HttpRequestListener server = webserver.start();
+
+		HttpRequest req = createRequest(KnownHttpMethod.GET, "/myroute");
+		server.processHttpRequests(socket, req , false);
+		
+		List<HttpPayload> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		HttpResponse response = responses.get(0).getHttpResponse();
+		DataWrapper body = response.getBody();
+		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
+		Assert.assertTrue("payload="+html, html.contains("This is the first raw html page"));
 	}
 
 	private HttpRequest createRequest(KnownHttpMethod method, String url) {

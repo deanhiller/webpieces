@@ -1,3 +1,12 @@
+sourceSets {
+    test {
+        resources {
+            srcDirs = ["src/test/java"]
+            includes = ["**/*.html"]
+        }
+    }
+}
+
 dependencies {
     compile deps['apache-commons-io']
     compile project(':webserver:http-templating')

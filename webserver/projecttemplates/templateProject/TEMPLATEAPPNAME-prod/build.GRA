@@ -21,6 +21,8 @@ dependencies {
 
   //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those
   //source paths or it will not recompile that code as it changes
+
+  testCompile deps['web-webserver-test']
 }
 
 mainClassName = "PACKAGE.CLASSNAMEServer"

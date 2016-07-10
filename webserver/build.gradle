@@ -6,6 +6,8 @@ project.ext {
 project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
     dependencies {
         compile project(':webserver:http-webserver')
+
+        testCompile project(':webserver:http-webserver-test')
     }
 }
 

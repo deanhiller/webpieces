@@ -1,7 +1,18 @@
+sourceSets {
+    test {
+        resources {
+            srcDirs = ["src/test/java"]
+            includes = ["**/*.html"]
+        }
+    }
+}
+
 dependencies {
     compile deps['guice']
     compile project(':http:http-frontend'), project(':http:http-parser1_1')
     compile project(':webserver:http-templating'), project(':webserver:http-router')
+
+    testCompile project(':webserver:http-webserver-test')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

@@ -17,10 +17,14 @@ public class BasicController {
 	public Action myMethod() {
 		//renderThis assumes the view is the <methodName>.html file so in this case
 		//myMethod.html which must be in the same directory as the Controller
-		return Actions.renderThis("hhhh");
+		return Actions.renderThis("hhhh", 86);
 	}
 	
 	public Action notFound() {
+		return Actions.renderThis();
+	}
+	
+	public Action internalError() {
 		return Actions.renderThis();
 	}
 	
