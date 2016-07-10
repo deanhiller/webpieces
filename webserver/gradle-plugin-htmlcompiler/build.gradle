@@ -3,6 +3,7 @@ apply plugin: 'maven'
 
 dependencies {
     compile gradleApi()
+    compile project(':webserver:http-templating-dev')
 
     testCompile deps['junit']
 }

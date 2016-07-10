@@ -34,8 +34,6 @@ public class TemplateCompilerPlugin implements Plugin<ProjectInternal> {
     private void configureSourceSetDefaults(Project project, final JavaBasePlugin javaBasePlugin) {
         project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(new Action<SourceSet>() {
             public void execute(SourceSet sourceSet) {
-            	System.out.println("hi there....awesome");
-            	
                 final DefaultTemplateSourceSet templateSourceSet = new DefaultTemplateSourceSet(((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
                 new DslObject(sourceSet).getConvention().getPlugins().put("templates", templateSourceSet);
 
