@@ -9,16 +9,19 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.webpieces.templating.api.Template;
-import org.webpieces.templating.api.TemplateEngine;
 import org.webpieces.templating.api.TemplateService;
+import org.webpieces.templating.impl.source.GroovyScriptGenerator;
+import org.webpieces.templating.impl.source.ScriptCode;
 
 public class DevTemplateService implements TemplateService {
 
-	private TemplateEngine engine;
+	private GroovyScriptGenerator scriptGen;
+	private GroovyCompile groovyCompile;
 
 	@Inject
-	public DevTemplateService(TemplateEngine engine) {
-		this.engine = engine;
+	public DevTemplateService(GroovyScriptGenerator scriptGen, GroovyCompile groovyCompile) {
+		this.scriptGen = scriptGen; 
+		this.groovyCompile = groovyCompile;
 	}
 
 	@Override
@@ -30,19 +33,29 @@ public class DevTemplateService implements TemplateService {
 		}
 	}
 	
-	public Template loadTemplateImpl(String packageStr, String templateClassName, String extension) throws IOException {
-		String directory = "/"+packageStr.replace(".", "/");
+	private Template loadTemplateImpl(String packageStr, String templateClassName, String extension) throws IOException {
+		String directory = "";
+		if(!"".equals(packageStr))
+			directory = "/"+packageStr.replace(".", "/");
 		String fileName = templateClassName+"."+extension;
+		String fullPath = directory+"/"+fileName;
 
-		InputStream resource = DevTemplateService.class.getResourceAsStream(directory+"/"+fileName);
+		InputStream resource = DevTemplateService.class.getResourceAsStream(fullPath);
 		if(resource == null)
 			throw new FileNotFoundException("resource="+directory+"/"+fileName+" was not found in classpath");
 
 		String viewSource = IOUtils.toString(resource, Charset.defaultCharset().name());
 
-		String fullClassName = packageStr+"."+templateClassName+"_"+extension;
+		String fullClassName = templateClassName+"_"+extension;
+		if(!"".equals(packageStr))
+			fullClassName = packageStr+"."+fullClassName;
 
-		return engine.createTemplate(fullClassName, viewSource);
+		return createTemplate(fullClassName, viewSource);
 	}
 
+	private Template createTemplate(String fullClassName, String source) {
+		ScriptCode scriptCode = scriptGen.generate(source, fullClassName);
+		Class<?> compiledTemplate = groovyCompile.compile(scriptCode);
+		return new TemplateImpl(compiledTemplate);
+	}
 }

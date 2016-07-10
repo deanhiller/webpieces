@@ -1,10 +1,10 @@
 package org.webpieces.templating.api;
 
-import org.webpieces.templating.impl.TemplateServiceImpl;
+import org.webpieces.templating.impl.ProdTemplateService;
 
 import com.google.inject.ImplementedBy;
 
-@ImplementedBy(TemplateServiceImpl.class)
+@ImplementedBy(ProdTemplateService.class)
 public interface TemplateService {
 
 	Template loadTemplate(String packageStr, String templateClassName, String extension);

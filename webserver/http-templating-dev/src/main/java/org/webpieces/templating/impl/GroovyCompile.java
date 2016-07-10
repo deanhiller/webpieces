@@ -43,36 +43,5 @@ public class GroovyCompile {
 	    
 	    return cl.loadClass(target.getName());
 	}
-	
-//	private Class<?> compileImpl(ScriptCode scriptCode) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, ClassNotFoundException {
-//		
-//		GroovyClassLoader cl = new GroovyClassLoader(GroovyCompile.class.getClassLoader());
-//		
-//        // Let's compile the groovy source
-//        final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
-//        // ~~~ Please !
-//        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();        
-//        compilerConfiguration.setSourceEncoding("utf-8"); // ouf
-//        
-//        CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
-//        compilationUnit.addSource(new SourceUnit(scriptCode.getClassName(), scriptCode.getScriptSourceCode(), compilerConfiguration, cl, compilationUnit.getErrorCollector()));
-//
-//        Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
-//        phasesF.setAccessible(true);
-//        LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
-//        LinkedList<GroovyClassOperation> output = new LinkedList<GroovyClassOperation>();
-//        phases[Phases.OUTPUT] = output;
-//        output.add(new GroovyClassOperation() {
-//            @Override
-//            public void call(GroovyClass gclass) {
-//                groovyClassesForThisTemplate.add(gclass);
-//            }
-//        });
-//        compilationUnit.compile();
-//        
-//        
-//        Class<?> compiledTemplate = cl.loadClass(groovyClassesForThisTemplate.get(0).getName());
-//        return compiledTemplate;
-//	}
 
 }
