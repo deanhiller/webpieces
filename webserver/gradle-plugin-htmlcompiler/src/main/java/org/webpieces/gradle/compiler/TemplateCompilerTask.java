@@ -10,7 +10,6 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.gradle.api.Action;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.file.FileTree;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
@@ -124,7 +123,10 @@ public class TemplateCompilerTask extends AbstractCompile {
 
 	private Object compiledGroovyClass(File destinationDir, GroovyClass clazz) {
 		String name = clazz.getName();
-		File f = new File(destinationDir, name);
+		String path = name.replace('.', '/');
+		String fullPathName = path+".class";
+		File f = new File(destinationDir, fullPathName);
+		//File f = createFile(destinationDir, name);
 		System.out.println("file write to="+f);
 		
 		try {
@@ -137,4 +139,5 @@ public class TemplateCompilerTask extends AbstractCompile {
 		return null;
 		
 	}
+
 }

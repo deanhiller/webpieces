@@ -7,7 +7,20 @@ public class ProdTemplateService implements TemplateService {
 
 	@Override
 	public Template loadTemplate(String packageStr, String templateClassName, String extension) {
-		throw new UnsupportedOperationException("not there yet, but would load p="+packageStr+" template="+templateClassName+" ext="+extension);
+		String fullTemplateName = templateClassName;
+		if(!"".equals(packageStr))
+			fullTemplateName = packageStr + "." + templateClassName;
+
+		if(!"".equals(extension))
+			fullTemplateName = fullTemplateName+"_"+extension;
+		
+		ClassLoader cl = getClass().getClassLoader();
+		try {
+			Class<?> compiledTemplate = cl.loadClass(fullTemplateName);
+			return new TemplateImpl(compiledTemplate);
+		} catch(ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
