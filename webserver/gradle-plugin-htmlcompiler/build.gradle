@@ -1,6 +1,3 @@
-group = 'org.webpieces'
-version = '1.0.0'
-
 apply plugin: 'groovy'
 apply plugin: 'maven'
 

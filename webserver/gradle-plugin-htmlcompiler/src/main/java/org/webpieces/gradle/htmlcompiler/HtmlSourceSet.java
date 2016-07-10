@@ -1,5 +1,5 @@
 package org.webpieces.gradle.htmlcompiler;
 
-public class DemoPluginExtension {
+public interface HtmlSourceSet {
 
 }
