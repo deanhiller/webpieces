@@ -1,4 +1,4 @@
-package org.webpieces.gradle.htmlcompiler;
+package org.webpieces.gradle.compiler;
 
 import javax.inject.Inject;
 
@@ -15,12 +15,12 @@ import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.SourceSet;
 
-public class HtmlCompilePlugin implements Plugin<ProjectInternal> {
+public class TemplateCompilerPlugin implements Plugin<ProjectInternal> {
 	
     private final SourceDirectorySetFactory sourceDirectorySetFactory;
 
     @Inject
-    public HtmlCompilePlugin(SourceDirectorySetFactory sourceDirectorySetFactory) {
+    public TemplateCompilerPlugin(SourceDirectorySetFactory sourceDirectorySetFactory) {
         this.sourceDirectorySetFactory = sourceDirectorySetFactory;
     }
     
@@ -36,7 +36,7 @@ public class HtmlCompilePlugin implements Plugin<ProjectInternal> {
             public void execute(SourceSet sourceSet) {
             	System.out.println("hi there....awesome");
             	
-                final DefaultHtmlSourceSet templateSourceSet = new DefaultHtmlSourceSet(((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
+                final DefaultTemplateSourceSet templateSourceSet = new DefaultTemplateSourceSet(((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
                 new DslObject(sourceSet).getConvention().getPlugins().put("templates", templateSourceSet);
 
                 templateSourceSet.getTemplatesSrc().srcDir("src/main/java");
@@ -49,7 +49,7 @@ public class HtmlCompilePlugin implements Plugin<ProjectInternal> {
                 sourceSet.getAllSource().source(templateSourceSet.getTemplatesSrc());
 
                 String compileTaskName = sourceSet.getCompileTaskName("templates");
-                HtmlCompileTask compile = project.getTasks().create(compileTaskName, HtmlCompileTask.class);
+                TemplateCompilerTask compile = project.getTasks().create(compileTaskName, TemplateCompilerTask.class);
                 javaBasePlugin.configureForSourceSet(sourceSet, compile);
                 compile.setGroup("Build");
                 compile.setDescription("Compiles the " + sourceSet.getName() + " Html or other template files source.");

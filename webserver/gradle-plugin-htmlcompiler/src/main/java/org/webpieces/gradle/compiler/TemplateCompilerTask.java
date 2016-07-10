@@ -1,4 +1,4 @@
-package org.webpieces.gradle.htmlcompiler;
+package org.webpieces.gradle.compiler;
 
 import java.io.File;
 import java.util.Set;
@@ -6,7 +6,6 @@ import java.util.Set;
 import org.gradle.api.Action;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.LogLevel;
-import org.gradle.api.plugins.ExtraPropertiesExtension;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
@@ -15,17 +14,17 @@ import org.slf4j.LoggerFactory;
 
 import groovy.lang.Closure;
 
-public class HtmlCompileTask extends AbstractCompile {
-	private static final Logger log = LoggerFactory.getLogger(HtmlCompileTask.class);
+public class TemplateCompilerTask extends AbstractCompile {
+	private static final Logger log = LoggerFactory.getLogger(TemplateCompilerTask.class);
 
-    private HtmlCompileOptions options = new HtmlCompileOptions();
+    private TemplateCompileOptions options = new TemplateCompileOptions();
 
     @Nested
-    public HtmlCompileOptions getOptions() {
+    public TemplateCompileOptions getOptions() {
         return options;
     }
 
-    public void options(Action<HtmlCompileOptions> action) {
+    public void options(Action<TemplateCompileOptions> action) {
         action.execute(getOptions());
     }
 
@@ -44,7 +43,6 @@ public class HtmlCompileTask extends AbstractCompile {
         for(File f : files) {
         	System.out.println("file="+f);
         }
-
 
 		setDidWork(true);
 	}

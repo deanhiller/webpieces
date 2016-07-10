@@ -1,4 +1,18 @@
+buildscript {
+    repositories {
+       mavenCentral()
+       //For testing and to be removed...
+       maven {
+         url uri('/tmp/myRepo/')
+       }
+    }
+    dependencies {
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.2'
+    }
+}
+
 apply plugin: 'application'
+apply plugin: 'org.webpieces.templatecompiler'
 
 dependencies {
   //add maven dependencies here

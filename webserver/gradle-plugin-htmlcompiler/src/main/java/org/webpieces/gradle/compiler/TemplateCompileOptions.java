@@ -1,9 +1,9 @@
-package org.webpieces.gradle.htmlcompiler;
+package org.webpieces.gradle.compiler;
 
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 
-public class HtmlCompileOptions {
+public class TemplateCompileOptions {
     private String encoding = "UTF-8";
     
     @Optional @Input
