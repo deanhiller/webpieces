@@ -4,6 +4,15 @@ project.ext {
 }
 
 project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
+    sourceSets {
+        test {
+            resources {
+                srcDirs = ["src/main/java"]
+                includes = ["**/*.html"]
+            }
+        }
+    }
+
     dependencies {
         compile project(':webserver:http-webserver')
 

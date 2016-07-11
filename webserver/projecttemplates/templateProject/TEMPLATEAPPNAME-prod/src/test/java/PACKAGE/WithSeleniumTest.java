@@ -30,6 +30,7 @@ public class WithSeleniumTest {
 	}
 	@AfterClass
 	public static void tearDown() {
+		driver.close();
 		driver.quit();
 	}
 	
