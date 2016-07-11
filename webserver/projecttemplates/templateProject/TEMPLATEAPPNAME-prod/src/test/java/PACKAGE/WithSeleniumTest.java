@@ -1,35 +1,52 @@
 package PACKAGE;
 
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.SeleniumOverridesForTest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class CLASSNAMEServerTest {
+public class WithSeleniumTest {
 	
+	private static WebDriver driver;
+	
+	static {
+		//expensive call so create once for this test class..
+        driver = new FirefoxDriver();
+	}
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	
 	private HttpRequestListener server;
+	private int port;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		TestBasicStart.testWasCompiledWithParamNames("test");
-		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		CLASSNAMEServer webserver = new CLASSNAMEServer(new PlatformOverridesForTest(), new AppOverridesModule(), false, null);
+		CLASSNAMEServer webserver = new CLASSNAMEServer(new SeleniumOverridesForTest(), new AppOverridesModule(), true, null);
 		server = webserver.start();
+		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
 	
+	//You must have firefox installed to run this test...
+	//@Ignore
 	@Test
-	public void testSomething() {
+	public void testSomething() throws ClassNotFoundException {
 
+		driver.get("http://localhost:"+port);
 		
+		String pageSource = driver.getPageSource();
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is the first"));
 		
 	}
 	

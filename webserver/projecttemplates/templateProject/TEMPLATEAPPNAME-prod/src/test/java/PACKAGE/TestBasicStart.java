@@ -43,7 +43,7 @@ public class TestBasicStart {
 		server2.stop();
 	}
 
-	public void testWasCompiledWithParamNames(String param) throws ClassNotFoundException {
+	public static void testWasCompiledWithParamNames(String param) throws ClassNotFoundException {
 		Class<?> clazz = Class.forName(TestBasicStart.class.getName());
 		Method[] method = clazz.getDeclaredMethods();
 		Method target = null;

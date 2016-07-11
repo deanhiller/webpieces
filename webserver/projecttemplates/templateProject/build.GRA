@@ -18,6 +18,7 @@ ext {
        'web-webserver-test': 'org.webpieces:http-webserver-test:1.9.2',
        'web-devrouter':      'org.webpieces:http-router-dev:1.9.2',
        'web-devtemplating':  'org.webpieces:http-templating-dev:1.9.2',
+       'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
 
        //These next two are in case you have libraries that want to use an
        //http-client or a nio library...

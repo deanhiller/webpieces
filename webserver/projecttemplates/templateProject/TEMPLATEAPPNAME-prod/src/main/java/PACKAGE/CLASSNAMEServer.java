@@ -119,4 +119,7 @@ public class CLASSNAMEServer {
 		return webServer.getUnderlyingHttpChannel();
 	}
 
+	public TCPServerChannel getUnderlyingHttpsChannel() {
+		return webServer.getUnderlyingHttpsChannel();
+	}
 }

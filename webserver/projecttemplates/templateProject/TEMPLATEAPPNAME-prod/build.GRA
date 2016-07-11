@@ -35,6 +35,7 @@ dependencies {
   //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
   //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code.
   testCompile deps['web-webserver-test']
+  testCompile deps['selenium']
 }
 
 mainClassName = "PACKAGE.CLASSNAMEServer"

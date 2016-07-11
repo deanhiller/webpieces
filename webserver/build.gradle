@@ -8,6 +8,7 @@ project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
         compile project(':webserver:http-webserver')
 
         testCompile project(':webserver:http-webserver-test')
+        testCompile deps['selenium']
     }
 }
 
