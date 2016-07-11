@@ -68,7 +68,7 @@ public class HttpParserImpl implements HttpParser {
 		
 		DataWrapper body = request.getBody();
 		Header header = msg.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
-		if(header != null) {
+		if(header != null && !header.getValue().equals("0")) {
 			if(body == null)
 				throw new IllegalArgumentException("Header KnownHeaderName.CONTENT_LENGTH found but no body was set.  set a body");
 			String value = header.getValue();

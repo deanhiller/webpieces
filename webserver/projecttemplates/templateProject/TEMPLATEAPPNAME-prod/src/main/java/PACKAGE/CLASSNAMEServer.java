@@ -94,6 +94,7 @@ public class CLASSNAMEServer {
 											.setWebappOverrides(appOverrides);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
+										.setHtmlResponsePayloadEncoding(ALL_FILE_ENCODINGS)
 										.setHttpListenAddress(new InetSocketAddress(8080))
 										.setHttpsListenAddress(new InetSocketAddress(8443))
 										.setFunctionToConfigureServerSocket(s -> configure(s));

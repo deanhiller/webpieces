@@ -1,13 +1,15 @@
 package PACKAGE;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.frontend.api.HttpRequestListener;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
 import org.webpieces.webserver.test.SeleniumOverridesForTest;
 
 import com.google.inject.Binder;
@@ -17,16 +19,20 @@ public class WithSeleniumTest {
 	
 	private static WebDriver driver;
 	
-	static {
-		//expensive call so create once for this test class..
-        driver = new FirefoxDriver();
-	}
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	
-	private HttpRequestListener server;
 	private int port;
 
+	@BeforeClass
+	public static void staticSetup() {
+		driver = new FirefoxDriver();
+	}
+	@AfterClass
+	public static void tearDown() {
+		driver.quit();
+	}
+	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		TestBasicProductionStart.testWasCompiledWithParamNames("test");
@@ -34,12 +40,14 @@ public class WithSeleniumTest {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		CLASSNAMEServer webserver = new CLASSNAMEServer(new SeleniumOverridesForTest(), new AppOverridesModule(), true, null);
-		server = webserver.start();
+		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
 	
+
+	
 	//You must have firefox installed to run this test...
-	@Ignore
+	//@Ignore
 	@Test
 	public void testSomething() throws ClassNotFoundException {
 
@@ -47,6 +55,7 @@ public class WithSeleniumTest {
 		
 		String pageSource = driver.getPageSource();
 		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is the first"));
+		
 		
 	}
 	

@@ -81,6 +81,7 @@ public class FileCopy {
 			contents = contents.replace("TEMPLATE", "");
 			contents = contents.replace("CLASSNAME", appClassName);
 			contents = contents.replace("APPNAME", appName);
+			contents = contents.replace("//@Ignore", "@Ignore");
 			
 			if(contents.equals(original))
 				return;

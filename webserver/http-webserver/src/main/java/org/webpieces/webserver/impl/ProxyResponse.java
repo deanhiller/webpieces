@@ -1,6 +1,7 @@
 package org.webpieces.webserver.impl;
 
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
+import org.webpieces.webserver.api.WebServerConfig;
 
 import groovy.lang.MissingPropertyException;
 
@@ -41,11 +43,13 @@ public class ProxyResponse implements ResponseStreamer {
 	private FrontendSocket channel;
 	private HttpRequest request;
 	private TemplateService templatingService;
+	private WebServerConfig config;
 
-	public ProxyResponse(HttpRequest req, FrontendSocket channel, TemplateService templatingService) {
+	public ProxyResponse(HttpRequest req, FrontendSocket channel, TemplateService templatingService, WebServerConfig config) {
 		this.request = req;
 		this.channel = channel;
 		this.templatingService = templatingService;
+		this.config = config;
 	}
 
 	public ProxyResponse(FrontendSocket channel) {
@@ -79,9 +83,10 @@ public class ProxyResponse implements ResponseStreamer {
 		Header location = new Header(KnownHeaderName.LOCATION, url);
 		response.addHeader(location );
 		
-		addCommonHeaders(response);
+		//Firefox requires a content length of 0 (chrome doesn't)!!!...
+		addCommonHeaders(response, 0);
 		
-		log.info("sending response channel="+channel);
+		log.info("sending REDIRECT response channel="+channel);
 		channel.write(response);
 
 		closeIfNeeded();
@@ -120,24 +125,29 @@ public class ProxyResponse implements ResponseStreamer {
 					+ " arguments="+keys+"  The missing properties are as follows....\n"+e.getMessage(), e);
 		}
 		
+		Charset encoding = config.getHtmlResponsePayloadEncoding();
 		String content = out.toString();
-		byte[] bytes = content.getBytes();
+		byte[] bytes = content.getBytes(encoding);
 		
-		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, bytes.length+"");
-		response.addHeader(header);
+		Header contentType = new Header(KnownHeaderName.CONTENT_TYPE, "text/html; charset="+encoding.name().toLowerCase());
+		response.addHeader(contentType);
 		
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		response.setBody(data);
 
-		addCommonHeaders(response);
+		addCommonHeaders(response, bytes.length);
 		
-		log.info("sending response channel="+channel);
+		log.info("sending RENDERHTML response channel="+channel);
 		channel.write(response);
 		
 		closeIfNeeded();
 	}
 	
-	private void addCommonHeaders(HttpResponse response) {
+	private void addCommonHeaders(HttpResponse response, int contentLength) {
+		
+		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+"");
+		response.addHeader(header);
+		
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
@@ -147,8 +157,8 @@ public class ProxyResponse implements ResponseStreamer {
 		Header date = new Header(KnownHeaderName.DATE, dateStr);
 		response.addHeader(date);
 
-		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
-		response.addHeader(xFrame);
+//		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
+//		response.addHeader(xFrame);
 		
 		//X-XSS-Protection: 1; mode=block
 		//X-Frame-Options: SAMEORIGIN

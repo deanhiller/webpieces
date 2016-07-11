@@ -83,7 +83,8 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 	
 	public MatchResult fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
-		log.error("Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way, something needs a'fixin", e);
+		log.error("Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
+				+ " something needs a'fixin.  req="+req, e);
 		
 		MatchResult result = routeLoader.fetchNotFoundRoute();
 		

@@ -20,6 +20,7 @@ import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.templating.api.TemplateService;
+import org.webpieces.webserver.api.WebServerConfig;
 
 public class RequestReceiver implements HttpRequestListener {
 	
@@ -28,6 +29,8 @@ public class RequestReceiver implements HttpRequestListener {
 	private RoutingService routingService;
 	@Inject
 	private TemplateService templatingService;
+	@Inject
+	private WebServerConfig config;
 	
 	private Set<String> headersSupported = new HashSet<>();
 	
@@ -42,7 +45,7 @@ public class RequestReceiver implements HttpRequestListener {
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
-		ResponseStreamer streamer = new ProxyResponse(req, channel, templatingService);
+		ResponseStreamer streamer = new ProxyResponse(req, channel, templatingService, config);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))

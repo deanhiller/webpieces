@@ -33,7 +33,8 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 		try {
 			InetSocketAddress addr = channel.getRemoteAddress();
 			channel.setName(""+addr);
-			log.info("incoming data. size="+b.remaining()+" channel="+channel);
+			if(log.isTraceEnabled())
+				log.trace("incoming data. size="+b.remaining()+" channel="+channel);
 			processor.deserialize(channel, b);
 		} catch(ParseException e) {
 			HttpClientException exc = new HttpClientException("Could not parse http request", KnownStatusCode.HTTP400, e);
@@ -56,7 +57,8 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 	}
 
 	public void farEndClosed(Channel channel) {
-		log.info("far end closed. channel="+channel);
+		if(log.isTraceEnabled())
+			log.trace("far end closed. channel="+channel);
 		processor.farEndClosed(channel);
 	}
 

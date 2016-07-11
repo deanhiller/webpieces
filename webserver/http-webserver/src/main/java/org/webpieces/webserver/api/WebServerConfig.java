@@ -2,6 +2,8 @@ package org.webpieces.webserver.api;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
@@ -28,6 +30,7 @@ public class WebServerConfig {
 	private SSLEngineFactory sslEngineFactory;
 	
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
+	private Charset htmlResponsePayloadEncoding = StandardCharsets.UTF_8;
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -83,7 +86,13 @@ public class WebServerConfig {
 		return this;
 	}
 
+	public Charset getHtmlResponsePayloadEncoding() {
+		return htmlResponsePayloadEncoding;
+	}
 
-	
+	public WebServerConfig setHtmlResponsePayloadEncoding(Charset htmlResponsePayloadEncoding) {
+		this.htmlResponsePayloadEncoding = htmlResponsePayloadEncoding;
+		return this;
+	}
 	
 }
