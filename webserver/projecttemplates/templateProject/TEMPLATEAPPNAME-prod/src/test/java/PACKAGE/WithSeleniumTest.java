@@ -29,7 +29,7 @@ public class WithSeleniumTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
-		TestBasicStart.testWasCompiledWithParamNames("test");
+		TestBasicProductionStart.testWasCompiledWithParamNames("test");
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
@@ -39,7 +39,7 @@ public class WithSeleniumTest {
 	}
 	
 	//You must have firefox installed to run this test...
-	//@Ignore
+	@Ignore
 	@Test
 	public void testSomething() throws ClassNotFoundException {
 

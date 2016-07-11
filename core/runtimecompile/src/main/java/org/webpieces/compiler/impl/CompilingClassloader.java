@@ -43,7 +43,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
 
 	private final CompileMetaMgr appClassMgr;
     
-    private final FileStateHashCreator classStateHashCreator = new FileStateHashCreator();
+    private final FileStateHashCreator classStateHashCreator;
     /**
      * Used to track change of the application sources path
      */
@@ -58,6 +58,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
     	this.compiler = compiler;
     	this.appClassMgr = compiler.getAppClassMgr();
     	this.fileLookup = fileLookup;
+    	this.classStateHashCreator = new FileStateHashCreator(config);
     	
     	VirtualFile pathForCodeSrc = config.getJavaPath().get(0);
         // Clean the existing classes

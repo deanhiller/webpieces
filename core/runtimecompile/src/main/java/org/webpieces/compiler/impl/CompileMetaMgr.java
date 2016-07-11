@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
 /**
@@ -19,8 +20,10 @@ public class CompileMetaMgr {
      * Cache of all compiled classes
      */
     Map<String, CompileClassMeta> classes = new HashMap<String, CompileClassMeta>();
-
-    public CompileMetaMgr() {
+	private CompileConfig config;
+    
+    public CompileMetaMgr(CompileConfig config) {
+    	this.config = config;
 	}
 
 	/**
@@ -39,7 +42,7 @@ public class CompileMetaMgr {
 
     	if(log.isTraceEnabled())
     		log.trace("Adding class="+name+" to ApplicationClassMgr");
-		CompileClassMeta appClass = new CompileClassMeta(name, current);
+		CompileClassMeta appClass = new CompileClassMeta(name, current, config);
 		classes.put(name, appClass);
 		return appClass;
     }

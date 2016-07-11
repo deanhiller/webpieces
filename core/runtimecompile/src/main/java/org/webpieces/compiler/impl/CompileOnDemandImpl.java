@@ -18,9 +18,9 @@ public class CompileOnDemandImpl implements CompileOnDemand {
 	
 	public CompileOnDemandImpl(CompileConfig config, String basePackage) {
 		this.config = config;
-		appClassMgr = new CompileMetaMgr();
+		appClassMgr = new CompileMetaMgr(config);
 		fileLookup = new FileLookup(appClassMgr, config.getJavaPath());
-		compiler = new CompilerWrapper(appClassMgr, fileLookup);
+		compiler = new CompilerWrapper(appClassMgr, fileLookup, config);
 		classloader = new CompilingClassloader(config, compiler, fileLookup);
 		fileLookup.scanFilesWithFilter(basePackage);
 	}

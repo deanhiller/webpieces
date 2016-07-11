@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -14,9 +15,8 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.templating.api.DevTemplateModule;
+import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
 
 import com.google.inject.Guice;
@@ -25,17 +25,9 @@ import com.google.inject.Injector;
 import groovy.lang.Closure;
 
 public class TemplateCompilerTask extends AbstractCompile {
-	private static final Logger log = LoggerFactory.getLogger(TemplateCompilerTask.class);
-
-	private static HtmlToJavaClassCompiler compiler;
 
     private TemplateCompileOptions options = new TemplateCompileOptions();
 
-    static {
-    	Injector injector = Guice.createInjector(new DevTemplateModule());
-    	compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
-    }
-    
     @Nested
     public TemplateCompileOptions getOptions() {
         return options;
@@ -51,6 +43,10 @@ public class TemplateCompilerTask extends AbstractCompile {
     
 	@TaskAction
 	public void compile() {
+		TemplateCompileConfig config = new TemplateCompileConfig(Charset.forName(options.getEncoding()));
+    	Injector injector = Guice.createInjector(new DevTemplateModule(config));
+    	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
+    	
         LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
         
         File destinationDir = getDestinationDir();

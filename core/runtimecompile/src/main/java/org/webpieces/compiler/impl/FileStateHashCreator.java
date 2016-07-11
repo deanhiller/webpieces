@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
 public class FileStateHashCreator {
@@ -15,6 +16,12 @@ public class FileStateHashCreator {
     //no need to release references as this whole class goes away with CompilingClassLoader
     private final Map<String, FileWithClassDefs> classDefsInFileCache = new HashMap<>();
 
+	private CompileConfig config;
+
+    public FileStateHashCreator(CompileConfig config) {
+    	this.config = config;
+    }
+    
     public synchronized int computePathHash(List<VirtualFile> paths) {
         StringBuffer buf = new StringBuffer();
         for (VirtualFile virtualFile : paths) {
@@ -54,7 +61,7 @@ public class FileStateHashCreator {
         // we must re-parse it
 
         StringBuilder buf = new StringBuilder();
-        Matcher matcher = classDefFinderPattern.matcher(current.contentAsString());
+        Matcher matcher = classDefFinderPattern.matcher(current.contentAsString(config.getFileEncoding()));
         buf.append(current.getName());
         buf.append("(");
         while (matcher.find()) {

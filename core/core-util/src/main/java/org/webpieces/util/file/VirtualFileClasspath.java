@@ -1,9 +1,12 @@
 package org.webpieces.util.file;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 public class VirtualFileClasspath implements VirtualFile {
@@ -33,8 +36,25 @@ public class VirtualFileClasspath implements VirtualFile {
 	}
 
 	@Override
-	public String contentAsString() {
-		return null;
+	public String contentAsString(Charset charset) {
+		//all this to avoid IOUtils.getString(inputStream, charset)
+		//is it worth it ?  
+		try {
+			StringBuilder builder = new StringBuilder();
+			try (InputStream str = openInputStream();
+				InputStreamReader r = new InputStreamReader(str, charset);
+				BufferedReader br = new BufferedReader(r)) {
+
+		        for(String line=br.readLine(); line!=null; line=br.readLine()) {
+	                builder.append(line);
+	                builder.append('\n');
+	            }
+				
+				return builder.toString();
+			}
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

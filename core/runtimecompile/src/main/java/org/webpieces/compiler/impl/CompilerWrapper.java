@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
 public class CompilerWrapper {
@@ -34,13 +35,15 @@ public class CompilerWrapper {
     Map<String, String> settings;
 
 	private FileLookup fileLookup;
+	private CompileConfig config;
 
     /**
      * Try to guess the magic configuration options
      */
-    public CompilerWrapper(CompileMetaMgr appClassMgr, FileLookup lookup) {
+    public CompilerWrapper(CompileMetaMgr appClassMgr, FileLookup lookup, CompileConfig config) {
         this.appClassMgr = appClassMgr;
         this.fileLookup = lookup;
+        this.config = config;
         this.settings = new HashMap<String, String>();
         this.settings.put(CompilerOptions.OPTION_ReportMissingSerialVersion, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.GENERATE);
@@ -229,7 +232,7 @@ public class CompilerWrapper {
                         }
                         CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                         VirtualFile javaFile = applicationClass.javaFile;
-                        throw new CompilationException(javaFile, message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+                        throw new CompilationException(javaFile, config.getFileEncoding(), message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
                     }
                 }
                 // Something has been compiled

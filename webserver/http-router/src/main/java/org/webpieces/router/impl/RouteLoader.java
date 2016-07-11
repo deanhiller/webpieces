@@ -1,9 +1,7 @@
 package org.webpieces.router.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -55,12 +53,11 @@ public class RouteLoader {
 
 		VirtualFile fileWithMetaClassName = config.getMetaFile();
 		String moduleName;
-		try (InputStream str = fileWithMetaClassName.openInputStream()) {
-			InputStreamReader reader = new InputStreamReader(str);
-			BufferedReader bufReader = new BufferedReader(reader);
-			moduleName = bufReader.readLine().trim();
-		}
-
+		
+		Charset fileEncoding = config.getFileEncoding();
+		String contents = fileWithMetaClassName.contentAsString(fileEncoding);
+		moduleName = contents.trim();
+		
 		log.info(WebAppMeta.class.getSimpleName()+" class to load="+moduleName);
 		Class<?> clazz = loader.clazzForName(moduleName);
 		Object obj = newInstance(clazz);

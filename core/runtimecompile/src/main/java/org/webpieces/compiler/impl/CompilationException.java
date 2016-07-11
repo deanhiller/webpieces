@@ -1,5 +1,6 @@
 package org.webpieces.compiler.impl;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,15 +17,18 @@ public class CompilationException extends RuntimeException {
     private Integer line;
     private Integer start;
     private Integer end;
+	private Charset charset;
 
-    public CompilationException(String problem) {
+    public CompilationException(String problem, Charset charset) {
         super(problem);
         this.problem = problem;
+        this.charset = charset;
     }
 
-    public CompilationException(VirtualFile source, String problem, int line, int start, int end) {
+    public CompilationException(VirtualFile source, Charset charset, String problem, int line, int start, int end) {
         super(problem);
         this.problem = problem;
+        this.charset = charset;
         this.line = line;
         this.source = source;
         this.start = start;
@@ -45,7 +49,7 @@ public class CompilationException extends RuntimeException {
     }
 
     public List<String> getSource() {
-        String sourceCode = source.contentAsString();
+        String sourceCode = source.contentAsString(charset);
         if(start != -1 && end != -1) {
             if(start.equals(end)) {
                 sourceCode = sourceCode.substring(0, start + 1) + "↓" + sourceCode.substring(end + 1);

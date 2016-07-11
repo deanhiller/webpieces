@@ -3,6 +3,7 @@ package org.webpieces.webserver.api.basic;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -55,7 +56,8 @@ public class BasicWebserver {
 
 		HttpRouterConfig routerConfig = new HttpRouterConfig()
 											.setMetaFile(metaFile )
-											.setWebappOverrides(appOverrides);
+											.setWebappOverrides(appOverrides)
+											.setFileEncoding(StandardCharsets.UTF_8);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
 										.setHttpListenAddress(new InetSocketAddress(8080))

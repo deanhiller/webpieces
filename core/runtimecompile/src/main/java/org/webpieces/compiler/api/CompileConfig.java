@@ -1,6 +1,8 @@
 package org.webpieces.compiler.api;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,7 @@ public class CompileConfig {
 
 	private List<VirtualFile> javaPath;
 	private VirtualFile byteCodeCacheDir;
+	private Charset fileEncoding = StandardCharsets.UTF_8;
 	
 	/**
 	 * VirtualFiles can be created with new VirtualFileImpl
@@ -60,6 +63,15 @@ public class CompileConfig {
 
 	public VirtualFile getByteCodeCacheDir() {
 		return byteCodeCacheDir;
+	}
+
+	public Charset getFileEncoding() {
+		return fileEncoding ;
+	}
+
+	public CompileConfig setFileEncoding(Charset fileEncoding) {
+		this.fileEncoding = fileEncoding;
+		return this;
 	}
 
 }

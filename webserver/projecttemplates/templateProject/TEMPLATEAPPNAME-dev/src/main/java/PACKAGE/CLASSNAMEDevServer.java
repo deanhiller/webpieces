@@ -1,5 +1,6 @@
 package PACKAGE;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.templating.api.DevTemplateModule;
+import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
@@ -45,10 +47,15 @@ public class CLASSNAMEDevServer {
 		VirtualFile metaFile = new VirtualFileImpl(filePath1 + "/../TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
-		CompileConfig devConfig = new CompileConfig(srcPaths);
+		//html and json template file encoding...
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(CLASSNAMEServer.ALL_FILE_ENCODINGS);
+		
+		//java source files encoding...
+		CompileConfig devConfig = new CompileConfig(srcPaths)
+										.setFileEncoding(CLASSNAMEServer.ALL_FILE_ENCODINGS);
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
-										new DevTemplateModule());
+										new DevTemplateModule(templateConfig));
 		server = new CLASSNAMEServer(platformOverrides, null, usePortZero, metaFile);
 	}
 	

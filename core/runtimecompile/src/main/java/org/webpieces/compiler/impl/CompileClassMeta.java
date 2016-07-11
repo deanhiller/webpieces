@@ -2,6 +2,7 @@ package org.webpieces.compiler.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
 /**
@@ -40,12 +41,16 @@ public class CompileClassMeta {
 	 */
 	boolean compiled;
 
-	public CompileClassMeta() {
+	private CompileConfig config;
+
+	public CompileClassMeta(CompileConfig config) {
+		this.config = config;
 	}
 
-	public CompileClassMeta(String name, VirtualFile javaFile) {
+	public CompileClassMeta(String name, VirtualFile javaFile, CompileConfig config) {
 		this.name = name;
 		this.javaFile = javaFile;
+		this.config = config;
 		this.refresh();
 	}
 
@@ -53,9 +58,10 @@ public class CompileClassMeta {
 	 * Need to refresh this class !
 	 */
 	public void refresh() {
-		if (this.javaFile != null) {
-			this.javaSource = this.javaFile.contentAsString();
-		}
+		//does this ever happen where javaFile is null...?  class is deleted?
+		//if (this.javaFile != null) {
+		this.javaSource = this.javaFile.contentAsString(config.getFileEncoding());
+		//}
 		this.javaByteCode = null;
 		this.compiled = false;
 		this.timestamp = javaFile.lastModified();

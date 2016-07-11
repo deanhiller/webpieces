@@ -17,19 +17,13 @@ import java.util.List;
 public class VirtualFileImpl implements VirtualFile {
 
 	private File file;
-	private Charset charset;
 
 	public VirtualFileImpl(File file) {
-		this(file, Charset.defaultCharset());
+		this.file = file;
 	}
 	
-	public VirtualFileImpl(File file, Charset charset) {
-		this.file = file;
-		this.charset = charset;
-	}
-
 	public VirtualFileImpl(String fileName) {
-		this(new File(fileName), Charset.defaultCharset());
+		this(new File(fileName));
 	}
 
 	@Override
@@ -47,13 +41,13 @@ public class VirtualFileImpl implements VirtualFile {
 		File[] files = file.listFiles();
 		List<VirtualFile> theFiles = new ArrayList<>();
 		for(File f : files) {
-			theFiles.add(new VirtualFileImpl(f, charset));
+			theFiles.add(new VirtualFileImpl(f));
 		}
 		return theFiles;
 	}
 
 	@Override
-	public String contentAsString() {
+	public String contentAsString(Charset charset) {
 		try {
 			return new String(Files.readAllBytes(file.toPath()), charset);
 		} catch (IOException e) {
@@ -69,7 +63,7 @@ public class VirtualFileImpl implements VirtualFile {
 	@Override
 	public VirtualFile child(String fileName) {
 		File child = new File(file, fileName);
-		return new VirtualFileImpl(child, charset);
+		return new VirtualFileImpl(child);
 	}
 
 	@Override

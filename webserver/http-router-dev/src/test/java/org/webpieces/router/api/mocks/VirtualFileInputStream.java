@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.webpieces.util.file.VirtualFile;
@@ -39,8 +40,8 @@ public class VirtualFileInputStream implements VirtualFile {
 	}
 
 	@Override
-	public String contentAsString() {
-		return new String(data);
+	public String contentAsString(Charset charset) {
+		return new String(data, charset);
 	}
 
 	@Override

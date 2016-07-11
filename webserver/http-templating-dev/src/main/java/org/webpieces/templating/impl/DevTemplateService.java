@@ -3,16 +3,14 @@ package org.webpieces.templating.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templating.api.Template;
+import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.api.TemplateService;
-import org.webpieces.templating.impl.source.GroovyScriptGenerator;
 import org.webpieces.templating.impl.source.ScriptCode;
 
 import groovy.lang.GroovyClassLoader;
@@ -20,10 +18,12 @@ import groovy.lang.GroovyClassLoader;
 public class DevTemplateService implements TemplateService {
 
 	private HtmlToJavaClassCompiler compiler;
+	private TemplateCompileConfig config;
 
 	@Inject
-	public DevTemplateService(HtmlToJavaClassCompiler compiler) {
+	public DevTemplateService(HtmlToJavaClassCompiler compiler, TemplateCompileConfig config) {
 		this.compiler = compiler;
+		this.config = config;
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class DevTemplateService implements TemplateService {
 		if(resource == null)
 			throw new FileNotFoundException("resource="+fullPath+" was not found in classpath");
 
-		String viewSource = IOUtils.toString(resource, Charset.defaultCharset().name());
+		String viewSource = IOUtils.toString(resource, config.getFileEncoding().name());
 
 		String fullClassName = templateClassName+"_"+extension;
 		if(!"".equals(packageStr))

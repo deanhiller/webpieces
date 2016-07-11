@@ -6,7 +6,7 @@ import java.lang.reflect.Parameter;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestBasicStart {
+public class TestBasicProductionStart {
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 
 	//talk to, you will need to change this test and pass in appOverridesModule to override those 
@@ -16,7 +16,7 @@ public class TestBasicStart {
 	//our http parser and other pieces (which sometimes can catch bugs when you upgrade webpieces
 	// so in some cases, this can be valuable)
 	@Test
-	public void testBasicStartup() throws InterruptedException, IOException, ClassNotFoundException {
+	public void testBasicProdStartup() throws InterruptedException, IOException, ClassNotFoundException {
 		testWasCompiledWithParamNames("test");
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
@@ -44,7 +44,7 @@ public class TestBasicStart {
 	}
 
 	public static void testWasCompiledWithParamNames(String param) throws ClassNotFoundException {
-		Class<?> clazz = Class.forName(TestBasicStart.class.getName());
+		Class<?> clazz = Class.forName(TestBasicProductionStart.class.getName());
 		Method[] method = clazz.getDeclaredMethods();
 		Method target = null;
 		for(Method m : method) {

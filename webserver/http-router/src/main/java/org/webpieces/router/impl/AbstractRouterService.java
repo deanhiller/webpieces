@@ -1,11 +1,7 @@
 package org.webpieces.router.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.dto.RedirectResponse;
-import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouterRequest;
 
 public abstract class AbstractRouterService implements RoutingService {

@@ -13,7 +13,7 @@ public class TestBasicDevStart {
 	//We normally don't need to test the development server, but we at least make sure developers are 
 	//not breaking the startup of the development server here...
 	@Test
-	public void testBasicStartup() throws InterruptedException, ClassNotFoundException {
+	public void testBasicDevStartup() throws InterruptedException, ClassNotFoundException {
 		testArgSetup("test");
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes

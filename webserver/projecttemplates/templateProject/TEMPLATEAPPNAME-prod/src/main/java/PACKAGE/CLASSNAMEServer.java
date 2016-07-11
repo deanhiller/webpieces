@@ -3,6 +3,8 @@ package PACKAGE;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -32,6 +34,8 @@ import com.google.inject.Module;
 public class CLASSNAMEServer {
 	
 	private static final Logger log = LoggerFactory.getLogger(CLASSNAMEServer.class);
+	
+	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
 	
 	//This is where the list of Guice Modules go as well as the list of RouterModules which is the
 	//core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -86,6 +90,7 @@ public class CLASSNAMEServer {
 		//by a QA team
 		HttpRouterConfig routerConfig = new HttpRouterConfig()
 											.setMetaFile(metaFile )
+											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
 											.setWebappOverrides(appOverrides);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)

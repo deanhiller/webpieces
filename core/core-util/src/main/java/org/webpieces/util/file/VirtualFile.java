@@ -3,6 +3,7 @@ package org.webpieces.util.file;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public interface VirtualFile {
 
 	List<VirtualFile> list();
 
-	String contentAsString();
+	String contentAsString(Charset charset);
 
 	long lastModified();
 

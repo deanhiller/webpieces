@@ -18,7 +18,8 @@ public class DefaultTemplateSourceSet implements TemplateSourceSet {
         return groovy;
     }
 
-    public TemplateSourceSet htmlSourceSet(Closure configureClosure) {
+    @SuppressWarnings("rawtypes")
+	public TemplateSourceSet htmlSourceSet(Closure configureClosure) {
         ConfigureUtil.configure(configureClosure, getTemplatesSrc());
         return this;
     }

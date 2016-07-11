@@ -1,5 +1,8 @@
 package org.webpieces.router.api;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Module;
@@ -7,6 +10,8 @@ import com.google.inject.Module;
 public class HttpRouterConfig {
 
 	private VirtualFile metaFile;
+	
+	private Charset fileEncoding = StandardCharsets.UTF_8;
 	
 	/**
 	 * WebApps can override remote services to mock them out for testing or swap prod classes with
@@ -32,5 +37,13 @@ public class HttpRouterConfig {
 		this.webappOverrides = webappOverrides;
 		return this;
 	}
+	public Charset getFileEncoding() {
+		return fileEncoding;
+	}
+	public HttpRouterConfig setFileEncoding(Charset fileEncoding) {
+		this.fileEncoding = fileEncoding;
+		return this;
+	}
 
+	
 }

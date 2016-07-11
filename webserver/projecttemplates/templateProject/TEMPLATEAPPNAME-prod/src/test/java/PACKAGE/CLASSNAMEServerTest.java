@@ -17,7 +17,7 @@ public class CLASSNAMEServerTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
-		TestBasicStart.testWasCompiledWithParamNames("test");
+		TestBasicProductionStart.testWasCompiledWithParamNames("test");
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
