@@ -1,9 +1,9 @@
 project.ext {
-  stagingDirName = 'projecttemplates'
+  stagingDirName = 'webpiecesServerBuilder'
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
+project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod') {
     sourceSets {
         test {
             resources {
@@ -21,12 +21,12 @@ project('projecttemplates:templateProject:TEMPLATEAPPNAME-prod') {
     }
 }
 
-project('projecttemplates:templateProject:TEMPLATEAPPNAME-dev') {
+project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
     dependencies {
         compile project(':webserver:http-webserver')
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
-        compile project(':webserver:projecttemplates:templateProject:TEMPLATEAPPNAME-prod')
+        compile project(':webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod')
     }
 }
 
@@ -63,4 +63,10 @@ task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {
     expand(version: version, title: 'ProjectInfo')
 }
 
-assemble.dependsOn(['copyGradleTemplate'])
+task zipGradleTemplate(type: Zip, dependsOn: 'copyGradleTemplate') {
+   from buildDir
+   include stagingDirName + "/**"
+   baseName stagingDirName
+}
+
+assemble.dependsOn(['zipGradleTemplate'])

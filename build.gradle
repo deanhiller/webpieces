@@ -1,10 +1,12 @@
 buildscript {
     repositories {
         jcenter()
+        mavenCentral()
     }
 
     dependencies {
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
     }
 }
 
@@ -15,6 +17,8 @@ plugins {
     id 'com.gradle.build-scan' version '1.0' //google "gradle build scan"
     id 'com.dorongold.task-tree' version '1.2.2' //This prints out a task tree dependency (pretty print)
 }
+
+apply plugin: 'io.codearte.nexus-staging'
 
 ext {
     // Project constants
@@ -61,11 +65,11 @@ subprojects {
 
    group = 'org.webpieces'
    if(project.hasProperty('projVersion')) {
-     println("CREATING RELEASE VERSION")
      project.version = '1.9.'+project.projVersion
+     println("CREATING RELEASE VERSION "+project.version)
    } else {
-     println("CREATING DEVELOPER VERSION")
-     version = '1.9-developer'
+     project.version = '1.9-developer'
+     println("CREATING DEVELOPER VERSION "+version)
    }
    buildDir = file('output')
 
@@ -206,10 +210,19 @@ subprojects {
    }
 
    uploadArchives {
+      doFirst {
+         if(!project.hasProperty("projVersion") || "".equals(project.projVersion.trim()))
+            throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
+      }
       
       repositories {
         mavenDeployer {
-            repository(url: "file://localhost/tmp/myRepo/")
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+      
+            //repository(url: "file://localhost/tmp/myRepo/")
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+              authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
             pom.project {
               name project.name 
               description 'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
@@ -242,3 +255,7 @@ subprojects {
    }
 }
 
+nexusStaging {  
+    username = sonatypeUsername
+    password = sonatypePassword
+}
