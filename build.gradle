@@ -277,13 +277,12 @@ uploadArchives.dependsOn {
 
 closeRepository.dependsOn('uploadArchives')
 closeRepository << {
-  Thread.sleep(2000)
+  println("sleeping after close repo and before promote or promote fails")
+  Thread.sleep(15000)
+  println("done sleeping go promote repo now");
 }
 
 promoteRepository.dependsOn('closeRepository')
-promoteRepository << {
-  Thread.sleep(2000)
-}
 
 task release(dependsOn: ':webserver:githubRelease')
 
