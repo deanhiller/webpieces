@@ -28,6 +28,10 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
+* gradle questions to post....how to disable uploadArchives on projects that are not in settings.gradle as those are not projects to begin with
+* how to flip between local and remote repo (projVersion is set only when using remote repo)
+* multithreaded projects do multithreaded uploadArchives making build REAL fast but breaking nexus on race condition through maven plugin.  can this be avoided?
+* Project 'webpieces' not found in root project 'webpieces' how to list all tasks for root project as it won't seem to let me with --all that is.  without --all, just leave off the project.  with --all, it shows all other projects :(
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?

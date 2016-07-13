@@ -7,7 +7,7 @@ buildscript {
        }
     }
     dependencies {
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.2'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:VERSION'
     }
 }
 

@@ -2,8 +2,6 @@ package org.webpieces.projects;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
 
 public class ProjectCreator {
@@ -13,7 +11,10 @@ public class ProjectCreator {
 	}
 
 	private void start() throws IOException {
-		System.out.println("Starting up");
+		String version = System.getProperty("webpieces.version");
+		if(version == null)
+			throw new IllegalArgumentException("We must have the version on project creation");
+		System.out.println("Starting up VERSION="+version);
 		
 		try (Scanner scanner = new Scanner(System.in)) {
 		    //  prompt for the user's name
@@ -50,7 +51,7 @@ public class ProjectCreator {
 			File appDir = new File(dirTheUserTypedIn, appName);
 			setupDirectory(appDir);
 			
-		    new FileCopy(webpiecesDir, appClassName, appName, packageStr, appDir).createProject();
+		    new FileCopy(webpiecesDir, appClassName, appName, packageStr, appDir, version).createProject();
 		}
 	}
 

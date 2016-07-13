@@ -17,8 +17,9 @@ public class FileCopy {
 	private String appName;
 	private File webpiecesDir;
 	private String packageDir;
+	private String version;
 
-	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory) {
+	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory, String version) {
 		this.webpiecesDir = webpiecesDir;
 		this.newAppDirectory = newAppDirectory;
 		this.appClassName = appClassName;
@@ -26,6 +27,7 @@ public class FileCopy {
 		this.packageStr = packageStr;
 		this.packageDir = convert(packageStr);
 		this.packagePieces = packageStr.split("\\.");
+		this.version = version;
 	}
 	
 	private String convert(String packageStr2) {
@@ -82,6 +84,7 @@ public class FileCopy {
 			contents = contents.replace("CLASSNAME", appClassName);
 			contents = contents.replace("APPNAME", appName);
 			contents = contents.replace("//@Ignore", "@Ignore");
+			contents = contents.replace("VERSION", version);
 			
 			if(contents.equals(original))
 				return;

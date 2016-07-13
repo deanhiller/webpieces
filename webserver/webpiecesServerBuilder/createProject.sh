@@ -6,6 +6,5 @@ cd $DIR
 ./gradlew installDist
 
 echo $DIR
-./build/install/projecttemplates/bin/projecttemplates
-
+./build/install/webpiecesServerBuilder/bin/webpiecesServerBuilder
 

@@ -3,14 +3,18 @@ apply plugin: 'java'
 
 repositories {
    mavenCentral()
-   //For testing and to be removed...
+   //For testing locally...
    maven {
      url uri('/tmp/myRepo/')
    }
 }
 
+project.ext.webpiecesVersion = '${version}'
+
 dependencies {
    compile 'org.webpieces:projectcreator:${version}'
 }
 
+
 mainClassName = "org.webpieces.projects.ProjectCreator"
+applicationDefaultJvmArgs = ["-Dwebpieces.version=${version}"]

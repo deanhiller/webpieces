@@ -5,6 +5,8 @@
 
 ext {
 
+    webpiecesVersion = 'VERSION'
+
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.
      * dependencies {
@@ -14,16 +16,16 @@ ext {
      * This list is NOT who you depend on but just a Map of String, String...
      */
     deps = [
-       'web-webserver':      'org.webpieces:http-webserver:1.9.2',
-       'web-webserver-test': 'org.webpieces:http-webserver-test:1.9.2',
-       'web-devrouter':      'org.webpieces:http-router-dev:1.9.2',
-       'web-devtemplating':  'org.webpieces:http-templating-dev:1.9.2',
+       'web-webserver':      "org.webpieces:http-webserver:${webpiecesVersion}",
+       'web-webserver-test': "org.webpieces:http-webserver-test:${webpiecesVersion}",
+       'web-devrouter':      "org.webpieces:http-router-dev:${webpiecesVersion}",
+       'web-devtemplating':  "org.webpieces:http-templating-dev:${webpiecesVersion}",
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
 
        //These next two are in case you have libraries that want to use an
        //http-client or a nio library...
-       'web-channelmgr':  'org.webpieces:core-channelmanager2:1.9.2',
-       'web-httpclient':  'org.webpieces:http-client:1.9.2',
+       'web-channelmgr':  "org.webpieces:core-channelmanager2:${webpiecesVersion}",
+       'web-httpclient':  "org.webpieces:http-client:${webpiecesVersion}",
        'junit':           'junit:junit:4.11',  
        'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
        'javax-inject':    'javax.inject:javax.inject:1',
@@ -62,7 +64,7 @@ subprojects {
 
    repositories {
        mavenCentral()
-       //For testing and to be removed...
+       //For testing locally
        maven {
          url uri('/tmp/myRepo/')
        }
