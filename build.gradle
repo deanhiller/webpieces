@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+        classpath 'gradle.plugin.co.riiid:gradle-github-plugin:0.4.2'
     }
 }
 
@@ -209,6 +210,7 @@ subprojects {
       }
    }
 
+   uploadArchives.dependsOn('build')
    uploadArchives {
       doFirst {
          if(!project.hasProperty("projVersion") || "".equals(project.projVersion.trim()))
@@ -253,9 +255,17 @@ subprojects {
         }
       }
    }
+
 }
 
 nexusStaging {  
+    packageGroup = 'org.webpieces'
+    stagingProfileId = '683f50db65952'
     username = sonatypeUsername
     password = sonatypePassword
 }
+
+//promoteRepository.dependsOn('closeRepository')
+
+task release(dependsOn: ':webserver:githubRelease')
+

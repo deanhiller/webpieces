@@ -1,3 +1,5 @@
+apply plugin: 'co.riiid.gradle'
+
 project.ext {
   stagingDirName = 'webpiecesServerBuilder'
   outputStagingDir = new File(buildDir, stagingDirName)
@@ -19,6 +21,9 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod') {
         testCompile project(':webserver:http-webserver-test')
         testCompile deps['selenium']
     }
+
+    task uploadArchives(overwrite: true) << {
+    }
 }
 
 project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
@@ -27,6 +32,9 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
         compile project(':webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod')
+    }
+    
+    task uploadArchives(overwrite: true) << {
     }
 }
 
@@ -61,6 +69,7 @@ task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {
     include 'build.gradle.template'
     rename { file -> 'build.gradle' }
     expand(version: version, title: 'ProjectInfo')
+    outputs.upToDateWhen { false }
 }
 
 task zipGradleTemplate(type: Zip, dependsOn: 'copyGradleTemplate') {
@@ -70,3 +79,28 @@ task zipGradleTemplate(type: Zip, dependsOn: 'copyGradleTemplate') {
 }
 
 assemble.dependsOn(['zipGradleTemplate'])
+
+task uploadArchives(overwrite: true) << {
+}
+
+github {
+    owner = 'deanhiller'
+    repo = 'webpieces'
+    token = githubToken
+    tagName = version
+    name = 'webpiecesServerBuilder'+version
+    body = 'Official Release of '+version
+    assets = [
+       zipGradleTemplate.archivePath
+    ]
+}
+
+githubRelease.dependsOn(':webserver:build')
+githubRelease {
+    doFirst {
+       if(!project.hasProperty("projVersion") || "".equals(project.projVersion.trim()))
+          throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
+
+       println("the path="+github.assets)
+    }
+}
