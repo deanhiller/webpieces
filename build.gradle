@@ -267,13 +267,22 @@ nexusStaging {
     password = sonatypePassword
 }
 
-//promoteRepository.dependsOn('closeRepository')
 
 
 task uploadArchives << { }
 
 uploadArchives.dependsOn {
     project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("uploadArchives") }
+}
+
+closeRepository.dependsOn('uploadArchives')
+closeRepository << {
+  Thread.sleep(2000)
+}
+
+promoteRepository.dependsOn('closeRepository')
+promoteRepository << {
+  Thread.sleep(2000)
 }
 
 task release(dependsOn: ':webserver:githubRelease')

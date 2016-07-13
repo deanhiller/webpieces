@@ -95,7 +95,7 @@ github {
     ]
 }
 
-githubRelease.dependsOn(':webserver:build')
+githubRelease.dependsOn([':webserver:build', ':promoteRepository'])
 githubRelease {
     doFirst {
        if(!project.hasProperty("projVersion") || "".equals(project.projVersion.trim()))
