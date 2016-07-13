@@ -84,7 +84,7 @@ public class RequestReceiver implements HttpRequestListener {
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
-		log.error("Need to clean this up and render good 500 page for real bugs");
+		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName());
 		ProxyResponse proxyResp = new ProxyResponse(channel);
 		proxyResp.sendFailure(exc);
 	}

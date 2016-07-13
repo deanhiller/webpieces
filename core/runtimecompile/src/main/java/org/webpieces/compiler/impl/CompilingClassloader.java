@@ -272,6 +272,11 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
                 throw new IllegalStateException("In what case can this ever happen in?"); 
             } else {
                 byteCodeCache.cacheBytecode(applicationClass.javaByteCode, applicationClass.name, applicationClass.javaSource);
+                //in rare case where outerclass is outside scope of compiling, but inner static class can be recompiled
+                if(applicationClass.javaClass == null) {
+                	loadApplicationClass(applicationClass.name);
+                }
+                
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
             }
         }
