@@ -272,20 +272,19 @@ if(project.hasProperty('projVersion')) {
     }
 }
 
-task uploadArchives << { }
+task uploadArchives2 << { }
 
-uploadArchives.dependsOn {
+uploadArchives2.dependsOn {
     project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("uploadArchives") }
 }
 
-closeRepository.dependsOn('uploadArchives')
-closeRepository << {
+closeRepository.dependsOn('uploadArchives2')
+promoteRepository.dependsOn('closeRepository')
+promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
   Thread.sleep(15000)
   println("done sleeping go promote repo now");
 }
-
-promoteRepository.dependsOn('closeRepository')
 
 task printTasks << {
     project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }

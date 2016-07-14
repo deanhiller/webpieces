@@ -22,8 +22,8 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod') {
         testCompile deps['selenium']
     }
 
-    task uploadArchives(overwrite: true) << {
-    }
+    //task uploadArchives(overwrite: true) << {
+    //}
 }
 
 project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
@@ -34,8 +34,8 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
         compile project(':webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod')
     }
     
-    task uploadArchives(overwrite: true) << {
-    }
+    //task uploadArchives(overwrite: true) << {
+    //}
 }
 
 task stageTemplate(type: Copy) {
@@ -80,8 +80,8 @@ task zipGradleTemplate(type: Zip, dependsOn: 'copyGradleTemplate') {
 
 assemble.dependsOn(['zipGradleTemplate'])
 
-task uploadArchives(overwrite: true, dependsOn: 'build') << {
-}
+//task uploadArchives(overwrite: true, dependsOn: 'build') << {
+//}
 
 if(project.hasProperty('projVersion')) {
     github {
@@ -102,4 +102,6 @@ if(project.hasProperty('projVersion')) {
             println("releasing to github="+github.assets)
         }
     }
+} else {
+    task githubRelease(overwrite:true, dependsOn: [':webserver:build', ':uploadArchives2'])
 }
