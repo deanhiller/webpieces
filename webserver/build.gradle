@@ -83,24 +83,23 @@ assemble.dependsOn(['zipGradleTemplate'])
 task uploadArchives(overwrite: true, dependsOn: 'build') << {
 }
 
-github {
-    owner = 'deanhiller'
-    repo = 'webpieces'
-    token = githubToken
-    tagName = version
-    name = 'webpiecesServerBuilder'+version
-    body = 'Official Release of '+version
-    assets = [
-       zipGradleTemplate.archivePath
-    ]
-}
+if(project.hasProperty('projVersion')) {
+    github {
+        owner = 'deanhiller'
+        repo = 'webpieces'
+        token = githubToken
+        tagName = version
+        name = 'webpiecesServerBuilder'+version
+        body = 'Official Release of '+version
+        assets = [
+            zipGradleTemplate.archivePath
+        ]
+    }
 
-githubRelease.dependsOn([':webserver:build', ':promoteRepository'])
-githubRelease {
-    doFirst {
-       if(!project.hasProperty("projVersion") || "".equals(project.projVersion.trim()))
-          throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
-
-       println("the path="+github.assets)
+    githubRelease.dependsOn([':webserver:build', ':promoteRepository'])
+    githubRelease {
+        doFirst {
+            println("releasing to github="+github.assets)
+        }
     }
 }

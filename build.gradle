@@ -214,19 +214,18 @@ subprojects {
    //we only want to upload if the build passed first..ie. tests, etc.
    uploadArchives.dependsOn('build')
    uploadArchives {
-      doFirst {
-         //if(!project.hasProperty("projVersion") || "".equals(project.projVersion.trim()))
-         //   throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
-      }
-      
       repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-      
-            //repository(url: "file://localhost/tmp/myRepo/")
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-              authentication(userName: sonatypeUsername, password: sonatypePassword)
+
+            if(project.hasProperty('projVersion')) {
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+            } else {
+                repository(url: "file://localhost/tmp/myRepo/")
             }
+
             pom.project {
               name project.name 
               description 'Someone forgot to fill this in.  See http://stackoverflow.com/questions/38272550/how-to-fail-the-gradle-build-if-subproject-is-missing-a-property'
@@ -260,14 +259,15 @@ subprojects {
 
 }
 
-nexusStaging {  
-    packageGroup = 'org.webpieces'
-    stagingProfileId = '683f50db65952'
-    username = sonatypeUsername
-    password = sonatypePassword
+
+if(project.hasProperty('projVersion')) {
+    nexusStaging {  
+        packageGroup = 'org.webpieces'
+        stagingProfileId = '683f50db65952'
+        username = sonatypeUsername
+        password = sonatypePassword
+    }
 }
-
-
 
 task uploadArchives << { }
 
