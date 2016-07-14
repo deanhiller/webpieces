@@ -28,10 +28,11 @@ public class ByteBufferDataWrapper extends SliceableDataWrapper {
 	public String createStringFrom(int offset, int length, Charset charSet) {
 		//wanted to go from piece of ByteBuffer to String directly but can't find a good way...
 		byte[] data = new byte[length];
-		for(int i = 0; i < length; i++) {
-			data[i] = readByteAt(i+offset);
-		}
-		
+		buffer.mark();
+		buffer.position(offset);
+		//for HeapByteBuffer, this is an array copy and for Mapped, it loops through reading each byte(hopefully from memory).
+		buffer.get(data);
+		buffer.reset();
 		return new String(data, charSet);
 	}
 
