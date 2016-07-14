@@ -148,9 +148,9 @@ public class HttpParserImpl implements HttpParser {
 		}
 		
 		if(log.isDebugEnabled()) {
-			byte[] someData = moreData.createByteArray();
-			String readable = conversion.convertToReadableForm(someData);
-			log.info("about to parse=\n\n'"+readable+"'\n\n");
+//			byte[] someData = moreData.createByteArray();
+//			String readable = conversion.convertToReadableForm(someData);
+//			log.info("about to parse=\n\n'"+readable+"'\n\n");
 		}
 
 		MementoImpl memento = (MementoImpl) state;
