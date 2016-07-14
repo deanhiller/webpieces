@@ -284,5 +284,9 @@ closeRepository << {
 
 promoteRepository.dependsOn('closeRepository')
 
+task printTasks << {
+    project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
+}
+
 task release(dependsOn: ':webserver:githubRelease')
 
