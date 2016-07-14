@@ -219,6 +219,9 @@ subprojects {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
             if(project.hasProperty('projVersion')) {
+                if("".equals(project.projVersion.trim())) {
+                    throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
+                }
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                     authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
