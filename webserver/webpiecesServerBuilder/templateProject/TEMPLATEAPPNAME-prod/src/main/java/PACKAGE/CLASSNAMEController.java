@@ -1,17 +1,19 @@
-package PACKAGE.example;
+package PACKAGE;
+
+import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
-import PACKAGE.CLASSNAMERouteId;
+import PACKAGE.example.SomeLibrary;
 
 public class CLASSNAMEController {
-
-	public Action redirect(String id) {
-		return Actions.redirect(CLASSNAMERouteId.RENDER_PAGE);
-	}
+	
+	@Inject
+	private SomeLibrary someLibrary;
 	
 	public Action myMethod() {
+		someLibrary.doSomething();
 		//renderThis assumes the view is the <methodName>.html file so in this case
 		//myMethod.html which must be in the same directory as the Controller
 		return Actions.renderThis(
@@ -20,11 +22,8 @@ public class CLASSNAMEController {
 				"otherKey", "key");
 	}
 	
-	public Action notFound() {
-		return Actions.renderThis();
+	public Action anotherMethod() {
+		return Actions.redirect(CLASSNAMERouteId.SOME_ROUTE);
 	}
 	
-	public Action internalError() {
-		return Actions.renderThis();
-	}
 }

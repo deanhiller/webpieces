@@ -6,6 +6,7 @@ import java.util.Map;
 public enum KnownStatusCode {
 
 	HTTP_100_CONTINUE(100, "Continue", HttpStatusType.Informational),
+	
 	HTTP_200_OK(200, "OK", HttpStatusType.Success), 
 	
 	HTTP_300_MULTIPLE_CHOICES(300, "Multiple Choices", HttpStatusType.Redirection),

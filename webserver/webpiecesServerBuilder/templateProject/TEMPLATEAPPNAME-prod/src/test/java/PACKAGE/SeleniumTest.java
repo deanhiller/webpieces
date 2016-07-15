@@ -1,21 +1,18 @@
 package PACKAGE;
 
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.webserver.test.SeleniumOverridesForTest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class BasicSeleniumTest {
+public class SeleniumTest {
 	
 	private static WebDriver driver;
 	
@@ -55,8 +52,8 @@ public class BasicSeleniumTest {
 		driver.get("http://localhost:"+port);
 		
 		String pageSource = driver.getPageSource();
-		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is the first"));
 		
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is some raw index page"));
 		
 	}
 	

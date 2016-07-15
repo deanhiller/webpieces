@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteId;
 
@@ -20,8 +21,8 @@ public class RouteImpl implements Route {
 	private final Set<HttpMethod> methods;
 	private final List<String> argNames;
 	private final boolean isSecure;
+	private final RouteType routeType;
 	private String controllerMethodString;
-	private boolean isNotFoundRoute;
 
 	public RouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isSecure) {
 		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure);
@@ -35,10 +36,11 @@ public class RouteImpl implements Route {
 		this.argNames = result.argNames;
 		this.isSecure = isSecure;
 		this.controllerMethodString = controllerMethod;
+		this.routeType = RouteType.BASIC;
 	}
 
-	public RouteImpl(String controllerMethod, boolean isNotFoundRoute) {
-		this.isNotFoundRoute = isNotFoundRoute;
+	public RouteImpl(String controllerMethod, RouteType routeType) {
+		this.routeType = routeType;
 		this.path = null;
 		this.patternToMatch = null;
 		this.methods = new HashSet<>();
@@ -85,8 +87,8 @@ public class RouteImpl implements Route {
 		return methods;
 	}
 	
-	public boolean isNotFoundRoute() {
-		return isNotFoundRoute;
+	public RouteType getRouteType() {
+		return routeType;
 	}
 
 	@Override

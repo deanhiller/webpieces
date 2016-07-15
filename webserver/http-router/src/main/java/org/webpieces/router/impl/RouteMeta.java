@@ -16,14 +16,12 @@ public class RouteMeta {
 	private Object controllerInstance;
 	private Method method;
 	private List<String> methodParamNames;
-	private boolean isNotFoundRoute;
 	//The package for the RouteModule for context(so controllers are relative to that module)
 	private String packageContext;
 	private Injector injector;
 
-	public RouteMeta(Route r, Injector injector, String packageContext, boolean isNotFoundRoute) {
+	public RouteMeta(Route r, Injector injector, String packageContext) {
 		this.route = r;
-		this.isNotFoundRoute = isNotFoundRoute;
 		this.packageContext = packageContext;
 		this.injector = injector;
 	}
@@ -77,10 +75,6 @@ public class RouteMeta {
 	public String toString() {
 		return "\nRouteMeta [route=\n   " + route + ", \n   method=" + method
 				+ ", methodParamNames=" + methodParamNames + "]";
-	}
-
-	public boolean isNotFoundRoute() {
-		return isNotFoundRoute;
 	}
 
 	public String getPackageContext() {

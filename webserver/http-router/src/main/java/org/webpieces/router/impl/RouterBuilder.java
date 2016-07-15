@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpFilter;
 import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;
 import org.webpieces.router.impl.loader.ControllerLoader;
@@ -41,7 +42,7 @@ public class RouterBuilder implements Router {
 	
 	public void addRoute(Route r, RouteId routeId) {
 		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), false);
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get());
 		finder.loadControllerIntoMetaObject(meta, true);
 
 		info.addRoute(meta);
@@ -107,7 +108,7 @@ public class RouterBuilder implements Router {
 	
 	@Override
 	public void setPageNotFoundRoute(String controllerMethod) {
-		Route route = new RouteImpl(controllerMethod, true);
+		Route route = new RouteImpl(controllerMethod, RouteType.NOT_FOUND);
 		setNotFoundRoute(route);
 	}
 
@@ -115,14 +116,14 @@ public class RouterBuilder implements Router {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), true);
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get());
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setPageNotFoundRoute(meta);
 	}
 
 	@Override
 	public void setInternalErrorRoute(String controllerMethod) {
-		Route route = new RouteImpl(controllerMethod, true);
+		Route route = new RouteImpl(controllerMethod, RouteType.INTERNAL_SERVER_ERROR);
 		setInternalSvrErrorRoute(route);
 	}
 	
@@ -130,7 +131,7 @@ public class RouterBuilder implements Router {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerPath+"' adding INTERNAL_SVR_ERROR route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), true);
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get());
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setInternalSvrErrorRoute(meta);
 	}

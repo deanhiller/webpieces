@@ -15,6 +15,7 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestBasicWebServer {

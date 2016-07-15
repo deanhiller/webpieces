@@ -103,7 +103,7 @@ public class ErrorCommonTest {
 //	}
 	
 	@Test
-	public void testRenderHTMLOnPostFromMatchingMethodSetFails() {
+	public void testHTMLPostAndTryingToRenderInsteadOfRedirectFails() {
 		log.info("starting");
 		String moduleFileContents = CommonRoutesModules.class.getName();
 		RoutingService server = createServer(isProdTest, moduleFileContents);

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 
 public interface Route {
@@ -21,5 +22,5 @@ public interface Route {
 
 	Set<HttpMethod> getHttpMethods();
 
-	boolean isNotFoundRoute();
+	RouteType getRouteType();
 }

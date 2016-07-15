@@ -73,11 +73,12 @@ public class ControllerResolver {
 
 	private String stripOneOff(String packageContext) {
 		int lastIndexOf = packageContext.lastIndexOf(".");
-		if(!"".equals(packageContext)) {
+		if(lastIndexOf > 0) {
+			return packageContext.substring(0, lastIndexOf);
+		} else if(!"".equals(packageContext)) {
 			return "";
-		} else if(lastIndexOf < 0)
+		} else 
 			throw new IllegalArgumentException("Too many .. were used in the path and we ended up going past the root classpath");
-		return packageContext.substring(0, lastIndexOf);
 	}
 	
 }

@@ -19,6 +19,7 @@ import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
@@ -79,7 +80,7 @@ public class RouteInvoker {
 			//throwing an exception and filling in stack trace...
 			//We could convert the exc. to FastException and override method so stack is not filled in but that
 			//can get very annoying
-			if(result.getMeta().getRoute().isNotFoundRoute()) {
+			if(result.getMeta().getRoute().getRouteType() == RouteType.NOT_FOUND) {
 				processException(responseCb, req, null, notFoundRoute);
 			}
 
@@ -153,13 +154,13 @@ public class RouteInvoker {
 		return null;
 	}
 
-	private RenderResponse renderHtml(RouterRequest routerRequest, RouteMeta incomingRequestMeta, RenderHtml controllerResponse) {
-		Method method = incomingRequestMeta.getMethod();
+	private RenderResponse renderHtml(RouterRequest routerRequest, RouteMeta matchedMeta, RenderHtml controllerResponse) {
+		Method method = matchedMeta.getMethod();
 		//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG
 		//If the POST route was not found, just render the notFound page that controller sends us violating the
 		//PRG pattern in this one specific case for now (until we test it with the browser to make sure back button is
 		//not broken)
-		if(!incomingRequestMeta.isNotFoundRoute() && HttpMethod.POST == routerRequest.method) {
+		if(matchedMeta.getRoute().getRouteType() == RouteType.BASIC && HttpMethod.POST == routerRequest.method) {
 			throw new IllegalReturnValueException("Controller method='"+method+"' MUST follow the PRG "
 					+ "pattern(https://en.wikipedia.org/wiki/Post/Redirect/Get) so "
 					+ "users don't have a poor experience using your website with the browser back button.  "
@@ -168,12 +169,12 @@ public class RouteInvoker {
 		
 		View view = controllerResponse.getView();
 		if(controllerResponse.getView() == null) {
-			String controllerName = incomingRequestMeta.getControllerInstance().getClass().getName();
-			String methodName = incomingRequestMeta.getMethod().getName();
+			String controllerName = matchedMeta.getControllerInstance().getClass().getName();
+			String methodName = matchedMeta.getMethod().getName();
 			view = new View(controllerName, methodName);
 		}
 		
-		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), incomingRequestMeta.getRoute().isNotFoundRoute());
+		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType());
 		return resp;
 	}
 

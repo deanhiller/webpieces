@@ -95,10 +95,19 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
 		HttpResponseStatus status = new HttpResponseStatus();
-		if(resp.isNotFoundRoute())
-			status.setKnownStatus(KnownStatusCode.HTTP_404_NOTFOUND);
-		else
+		switch(resp.getRouteType()) {
+		case BASIC:
 			status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
+			break;
+		case NOT_FOUND:
+			status.setKnownStatus(KnownStatusCode.HTTP_404_NOTFOUND);
+			break;
+		case INTERNAL_SERVER_ERROR:
+			status.setKnownStatus(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+			break;
+		default:
+			throw new IllegalStateException("did add case for state="+resp.getRouteType());
+		}
 		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
