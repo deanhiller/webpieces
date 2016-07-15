@@ -272,6 +272,12 @@ if(project.hasProperty('projVersion')) {
     }
 }
 
+//TODO: Create uploadArchivesLocal in subprojects, and create integrationTestTemplate that depends on ALL those
+//and depends on :webserver:build and run ./gradlew xxxx to create template and then runs ./gradlew test in the
+//created template and all tests should pass which would guarantee the template is still working and not broken
+//We will do this if we see it breaking now and then if needed to prevent breaks
+//task integrationTestTemplate
+
 task uploadArchives2 << { }
 
 uploadArchives2.dependsOn {

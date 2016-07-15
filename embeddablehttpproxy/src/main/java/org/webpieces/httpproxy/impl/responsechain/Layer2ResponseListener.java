@@ -44,10 +44,10 @@ public class Layer2ResponseListener {
 		log.error("could not process req="+req+" from channel="+channel+" due to exception", e);
 
 		if(e.getCause() instanceof UnresolvedAddressException) {
-			HttpClientException exc = new HttpClientException("Client gave a bad address to connect to", KnownStatusCode.HTTP404, e);
+			HttpClientException exc = new HttpClientException("Client gave a bad address to connect to", KnownStatusCode.HTTP_404_NOTFOUND, e);
 			badResponse.sendServerResponse(channel, exc);
 		} else {
-			HttpServerException exc = new HttpServerException("Server has a bug", KnownStatusCode.HTTP500, e);
+			HttpServerException exc = new HttpServerException("Server has a bug", KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, e);
 			badResponse.sendServerResponse(channel, exc);
 		}
 		

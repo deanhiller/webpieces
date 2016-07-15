@@ -27,7 +27,7 @@ public class TestResponseParsing {
 	@Test
 	public void testBasic() {
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP200);
+		status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
 		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
@@ -180,7 +180,7 @@ public class TestResponseParsing {
 		header2.setValue("betterValue");
 		
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP200);
+		status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		

@@ -209,7 +209,7 @@ public class TestChunkedParsing {
 		header1.setValue("CooolValue");
 		
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP400);
+		status.setKnownStatus(KnownStatusCode.HTTP_400_BADREQUEST);
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		

@@ -11,6 +11,7 @@ public interface HttpRequestListener {
 	 * 
 	 * @param channel
 	 * @param req
+	 * @param isHttps true if this request came in over an https socket
 	 */
 	void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps);
 	

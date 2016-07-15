@@ -28,8 +28,6 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* We need to run the same class that ./createProject.sh runs and then start that projects webserver and send requests in to make sure the template generation is working and not broken
-* REALLY need a template test to call createProject and run webserver and run ./gradle test after to test it out so it doesn't get broken!!!
 * come up with the http 500 strategy for dev server AND for production server
 * exc from route goes to 500
 * tests

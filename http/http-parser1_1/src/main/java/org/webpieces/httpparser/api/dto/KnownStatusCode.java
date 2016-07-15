@@ -5,24 +5,24 @@ import java.util.Map;
 
 public enum KnownStatusCode {
 
-	HTTP100(100, "Continue", HttpStatusType.Informational),
-	HTTP200(200, "OK", HttpStatusType.Success), 
+	HTTP_100_CONTINUE(100, "Continue", HttpStatusType.Informational),
+	HTTP_200_OK(200, "OK", HttpStatusType.Success), 
 	
-	HTTP300(300, "Multiple Choices", HttpStatusType.Redirection),
-	HTTP301(301, "Moved Permanently", HttpStatusType.Redirection),
-	HTTP302(302, "Found", HttpStatusType.Redirection),
-	HTTP303(303, "See Other", HttpStatusType.Redirection),
+	HTTP_300_MULTIPLE_CHOICES(300, "Multiple Choices", HttpStatusType.Redirection),
+	HTTP_301_MOVED_PERMANENTLY(301, "Moved Permanently", HttpStatusType.Redirection),
+	HTTP_302_FOUND(302, "Found", HttpStatusType.Redirection),
+	HTTP_303_SEEOTHER(303, "See Other", HttpStatusType.Redirection),
 
-	HTTP400(400, "Bad Request", HttpStatusType.ClientError),
-	HTTP401(401, "Unauthorized", HttpStatusType.ClientError),
-	HTTP404(404, "Not Found", HttpStatusType.ClientError),
+	HTTP_400_BADREQUEST(400, "Bad Request", HttpStatusType.ClientError),
+	HTTP_401_UNAUTHORIZED(401, "Unauthorized", HttpStatusType.ClientError),
+	HTTP_404_NOTFOUND(404, "Not Found", HttpStatusType.ClientError),
 	
-	HTTP408(408, "Request Timeout", HttpStatusType.ClientError),
+	HTTP_408_REQUEST_TIMEOUT(408, "Request Timeout", HttpStatusType.ClientError),
 
-	HTTP413(413, "Payload Too Large", HttpStatusType.ClientError),
-	HTTP431(431, "Request Header Fields Too Large", HttpStatusType.ClientError),
+	HTTP_413_PAYLOAD_TOO_LARGE(413, "Payload Too Large", HttpStatusType.ClientError),
+	HTTP_431_REQUEST_HEADERS_TOO_LARGE(431, "Request Header Fields Too Large", HttpStatusType.ClientError),
 	
-	HTTP500(500, "Internal Server Error", HttpStatusType.ServerError),  
+	HTTP_500_INTERNAL_SVR_ERROR(500, "Internal Server Error", HttpStatusType.ServerError),  
 	
 	//TODO: Fill the rest in..
 	;

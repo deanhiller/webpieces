@@ -59,7 +59,7 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP303);
+		status.setKnownStatus(KnownStatusCode.HTTP_303_SEEOTHER);
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		HttpResponse response = new HttpResponse();
@@ -96,9 +96,9 @@ public class ProxyResponse implements ResponseStreamer {
 	public void sendRenderHtml(RenderResponse resp) {
 		HttpResponseStatus status = new HttpResponseStatus();
 		if(resp.isNotFoundRoute())
-			status.setKnownStatus(KnownStatusCode.HTTP404);
+			status.setKnownStatus(KnownStatusCode.HTTP_404_NOTFOUND);
 		else
-			status.setKnownStatus(KnownStatusCode.HTTP200);
+			status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
 		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);

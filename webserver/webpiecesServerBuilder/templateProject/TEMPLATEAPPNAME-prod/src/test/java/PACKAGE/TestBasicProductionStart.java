@@ -44,6 +44,8 @@ public class TestBasicProductionStart {
 	}
 
 	public static void testWasCompiledWithParamNames(String param) throws ClassNotFoundException {
+		//This is here for those that forget to configure their IDE to compile with param names
+		//We do this on eclipse generation and need to try to do it for intellij generation too
 		Class<?> clazz = Class.forName(TestBasicProductionStart.class.getName());
 		Method[] method = clazz.getDeclaredMethods();
 		Method target = null;

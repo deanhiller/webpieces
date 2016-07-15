@@ -75,12 +75,12 @@ public class ParserLayer {
 		switch (unParsedState.getCurrentlyParsing()) {
 		case HEADERS:
 			if(unParsedState.getCurrentUnparsedSize() > config.maxHeaderSize)
-				throw new HttpClientException("Max heaader size="+config.maxHeaderSize+" was exceeded", KnownStatusCode.HTTP431);
+				throw new HttpClientException("Max heaader size="+config.maxHeaderSize+" was exceeded", KnownStatusCode.HTTP_431_REQUEST_HEADERS_TOO_LARGE);
 			break;
 		case BODY:
 		case CHUNK:
 			if(unParsedState.getCurrentUnparsedSize() > config.maxBodyOrChunkSize)
-				throw new HttpClientException("Body or chunk size limit exceeded", KnownStatusCode.HTTP413);
+				throw new HttpClientException("Body or chunk size limit exceeded", KnownStatusCode.HTTP_413_PAYLOAD_TOO_LARGE);
 		default:
 			break;
 		}

@@ -15,7 +15,7 @@ import org.webpieces.webserver.test.SeleniumOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class WithSeleniumTest {
+public class BasicSeleniumTest {
 	
 	private static WebDriver driver;
 	
