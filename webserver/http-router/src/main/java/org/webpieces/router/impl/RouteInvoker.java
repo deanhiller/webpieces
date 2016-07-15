@@ -82,6 +82,8 @@ public class RouteInvoker {
 			//can get very annoying
 			if(result.getMeta().getRoute().getRouteType() == RouteType.NOT_FOUND) {
 				processException(responseCb, req, null, notFoundRoute);
+				//This is a special case....check the NotFound tests
+				return CompletableFuture.completedFuture(null);
 			}
 
 			return invokeImpl(result, req, responseCb);

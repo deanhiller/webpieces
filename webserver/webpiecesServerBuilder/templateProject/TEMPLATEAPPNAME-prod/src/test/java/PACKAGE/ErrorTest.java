@@ -73,6 +73,26 @@ public class ErrorTest {
 	}
 	
 	/**
+	 * You could also test notFound route fails with exception too...
+	 */
+	@Test
+	public void testNotFound() {
+		HttpRequest req = BasicServerTest.createRequest("/route/that/does/not/exist");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<HttpPayload> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		HttpPayload httpPayload = responses.get(0);
+		HttpResponse httpResponse = httpPayload.getHttpResponse();
+		Assert.assertEquals(KnownStatusCode.HTTP_404_NOTFOUND, httpResponse.getStatusLine().getStatus().getKnownStatus());
+		DataWrapper body = httpResponse.getBody();
+		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
+		Assert.assertTrue("invalid html="+html, html.contains("Your page was not found"));		
+	}
+	
+	/**
 	 * Tests a remote asynchronous system fails and a 500 error page is rendered
 	 */
 	@Test
