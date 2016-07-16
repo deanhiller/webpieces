@@ -1,4 +1,4 @@
-package org.webpieces.webserver.sync.error;
+package org.webpieces.webserver.basic;
 
 import java.util.List;
 
@@ -12,8 +12,10 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
-import org.webpieces.webserver.sync.basic.InternalSvrErrorLib;
-import org.webpieces.webserver.sync.basic.NotFoundLib;
+import org.webpieces.webserver.basic.biz.InternalSvrErrorLib;
+import org.webpieces.webserver.basic.biz.NotFoundLib;
+import org.webpieces.webserver.mock.MockErrorLib;
+import org.webpieces.webserver.mock.MockNotFoundLogic;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
@@ -26,7 +28,7 @@ import com.google.inject.Module;
  * @author dhiller
  *
  */
-public class TestNotFound {
+public class TestSynchronousErrors {
 
 	private HttpRequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
@@ -160,20 +162,33 @@ public class TestNotFound {
 	 */
 	@Test
 	public void testWebAppHasBugRenders500Route() {
-//		mockLibrary.throwException(new RuntimeException("test internal bug page"));
-//		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
-//		
-//		server.processHttpRequests(mockResponseSocket, req, false);
-//		
-//		List<HttpPayload> responses = mockResponseSocket.getResponses();
-//		Assert.assertEquals(1, responses.size());
-//
-//		HttpPayload httpPayload = responses.get(0);
-//		HttpResponse httpResponse = httpPayload.getHttpResponse();
-//		Assert.assertEquals(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, httpResponse.getStatusLine().getStatus().getKnownStatus());
-//		DataWrapper body = httpResponse.getBody();
-//		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-//		Assert.assertTrue("invalid html="+html, html.contains("You encountered a 5xx in your server"));
+		mockNotFoundLib.throwRuntime();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("There was a bug in our software...sorry about that");	
+	}
+	
+	@Test
+	public void testWebAppHasBugAndRender500HasBug() {
+		mockNotFoundLib.throwRuntime();
+		mockInternalSvrErrorLib.throwRuntime();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("The webpieces platform saved them");	
 	}
 	
 	/**

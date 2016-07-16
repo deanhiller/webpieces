@@ -1,4 +1,4 @@
-package org.webpieces.webserver.sync.basic;
+package org.webpieces.webserver.basic.biz;
 
 public class InternalSvrErrorLib {
 

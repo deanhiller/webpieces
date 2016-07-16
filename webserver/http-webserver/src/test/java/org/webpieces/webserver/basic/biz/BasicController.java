@@ -1,11 +1,11 @@
-package org.webpieces.webserver.sync.basic;
+package org.webpieces.webserver.basic.biz;
 
 import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.webserver.sync.BasicRouteId;
+import org.webpieces.webserver.basic.BasicRouteId;
 
 public class BasicController {
 
@@ -15,6 +15,7 @@ public class BasicController {
 	private InternalSvrErrorLib errorLib;
 	
 	public Action someMethod() {
+		notFoundLib.someBusinessLogic();
 		return Actions.redirect(BasicRouteId.RENDER_PAGE);
 	}
 	

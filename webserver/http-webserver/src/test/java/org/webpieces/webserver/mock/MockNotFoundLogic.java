@@ -1,9 +1,9 @@
-package org.webpieces.webserver.sync.error;
+package org.webpieces.webserver.mock;
 
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.webserver.sync.basic.InternalSvrErrorLib;
+import org.webpieces.webserver.basic.biz.NotFoundLib;
 
-public class MockErrorLib extends InternalSvrErrorLib {
+public class MockNotFoundLogic extends NotFoundLib {
 
 	private boolean throwNotFound;
 	private boolean throwRuntime;
