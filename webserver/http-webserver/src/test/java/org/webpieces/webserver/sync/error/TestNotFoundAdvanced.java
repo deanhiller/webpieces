@@ -14,6 +14,8 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
@@ -29,7 +31,7 @@ import com.google.inject.Module;
  * @author dhiller
  *
  */
-public class TestNotFound {
+public class TestNotFoundAdvanced {
 
 	private HttpRequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
@@ -44,15 +46,13 @@ public class TestNotFound {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
-		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
-		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), new AppOverridesModule(), false, null);
+		VirtualFile metaFile = new VirtualFileClasspath("notfound.txt", WebserverForTest.class.getClassLoader());
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), new AppOverridesModule(), false, metaFile);
 		server = webserver.start();
 	}
 	
 	@Test
-	public void testNotFoundRoute() {
+	public void testNotFoundHandlerThrowsNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		server.processHttpRequests(mockResponseSocket, req, false);
@@ -61,43 +61,8 @@ public class TestNotFound {
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your page was not found");
-	}
-	
-	@Test
-	public void testNotFoundFromMismatchArgType() {	
-		//because 'notAnInt' is not convertable to integer, this result in NotFound rather than 500 as truly a route with
-		//no int doesn't really exist so it's a NotFound
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
-		
-		server.processHttpRequests(mockResponseSocket, req, false);
-		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your page was not found");		
-	}
-	
-	@Test
-	public void testWebappThrowsNotFound() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
-		
-		server.processHttpRequests(mockResponseSocket, req, false);
-		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your page was not found");		
-	}
-	
-	@Test
-	public void testNotFoundHandlerThrowsNotFound() {
-		
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("There was a bug bug bug in our software...sorry about that");
 	}
 	
 	@Test

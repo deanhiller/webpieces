@@ -21,7 +21,6 @@ import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
-import org.webpieces.router.impl.InvokeException;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
@@ -61,7 +60,7 @@ public class ErrorCommonTest {
 		server.processHttpRequests(req, mockResponseStream);
 			
 		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(InvokeException.class, e.getClass());
+		Assert.assertEquals(IllegalStateException.class, e.getClass());
 	}
 	
 //	@Test
@@ -116,7 +115,7 @@ public class ErrorCommonTest {
 		server.processHttpRequests(req, mockResponseStream);
 
 		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(InvokeException.class, e.getClass());
+		Assert.assertEquals(IllegalStateException.class, e.getClass());
 	}
 	
 	/** 
