@@ -1,12 +1,10 @@
 package PACKAGE;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.webserver.test.Asserts;
 
-public class TestBasicProductionStart {
+public class TestLesson3BasicStart {
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 
 	//talk to, you will need to change this test and pass in appOverridesModule to override those 
@@ -17,7 +15,7 @@ public class TestBasicProductionStart {
 	// so in some cases, this can be valuable)
 	@Test
 	public void testBasicProdStartup() throws InterruptedException, IOException, ClassNotFoundException {
-		testWasCompiledWithParamNames("test");
+		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
 		CLASSNAMEServer server = new CLASSNAMEServer(null, null, true, null);
@@ -41,22 +39,5 @@ public class TestBasicProductionStart {
 		//we should depend on http client and send a request in to ensure operation here...
 		
 		server2.stop();
-	}
-
-	public static void testWasCompiledWithParamNames(String param) throws ClassNotFoundException {
-		//This is here for those that forget to configure their IDE to compile with param names
-		//We do this on eclipse generation and need to try to do it for intellij generation too
-		Class<?> clazz = Class.forName(TestBasicProductionStart.class.getName());
-		Method[] method = clazz.getDeclaredMethods();
-		Method target = null;
-		for(Method m : method) {
-			if("testWasCompiledWithParamNames".equals(m.getName()))
-				target = m;
-		}
-		
-		Assert.assertNotNull(target);
-		Parameter[] parameters = target.getParameters();
-		String name = parameters[0].getName();
-		Assert.assertEquals("Compiler option is not on so we can't run this test", "param", name);
 	}
 }

@@ -10,7 +10,7 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod') {
         test {
             resources {
                 srcDirs = ["src/main/java"]
-                includes = ["**/*.html"]
+                includes = ["**/*.html", "**/*.txt", "**/*.xml"]
             }
         }
     }

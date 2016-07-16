@@ -1,8 +1,8 @@
-package org.webpieces.webserver.api.basic.biz;
+package org.webpieces.webserver.sync.basic;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
-import org.webpieces.webserver.api.basic.BasicRouteId;
+import org.webpieces.webserver.sync.BasicRouteId;
 
 public class BasicController {
 

@@ -1,4 +1,4 @@
-package PACKAGE;
+package PACKAGE.mock;
 
 import java.util.concurrent.CompletableFuture;
 

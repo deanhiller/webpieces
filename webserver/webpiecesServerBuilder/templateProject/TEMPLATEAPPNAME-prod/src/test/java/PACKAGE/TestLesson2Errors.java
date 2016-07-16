@@ -1,18 +1,16 @@
 package PACKAGE;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpRequestListener;
-import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
@@ -21,15 +19,23 @@ import com.google.inject.Module;
 
 import PACKAGE.example.RemoteService;
 import PACKAGE.example.SomeLibrary;
+import PACKAGE.mock.MockRemoteSystem;
+import PACKAGE.mock.MockSomeLibrary;
 
 /**
+ * Error/Failure testing is something that tends to get missed but it can be pretty important to make sure you render a nice message
+ * when errors happen with links to other things.  The same goes for not found pages too so these are good tests to have/modify for
+ * your use case.  I leave it to the test write to add one where rendering the 500 or 404 page fails ;).  On render 500 failure, our
+ * platform swaps in a page of our own....ie. don't let your 500 page fail in the first place as our page does not match the style of
+ * your website but at least let's the user know there was a bug (on top of a bug).
+ * 
  * These are working examples of tests that sometimes are better done with the BasicSeleniumTest example but are here for completeness
- * so you can test the way you would like to test
+ * so you can test the way you would like to test.
  * 
  * @author dhiller
  *
  */
-public class ErrorTest {
+public class TestLesson2Errors {
 
 	private HttpRequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
@@ -41,7 +47,7 @@ public class ErrorTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
-		TestBasicProductionStart.testWasCompiledWithParamNames("test");
+		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
@@ -57,19 +63,16 @@ public class ErrorTest {
 	@Test
 	public void testWebAppHasBugRenders500Route() {
 		mockLibrary.throwException(new RuntimeException("test internal bug page"));
-		HttpRequest req = BasicServerTest.createRequest("/absolute");
+		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
 		
 		server.processHttpRequests(mockResponseSocket, req, false);
 		
-		List<HttpPayload> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
-		HttpPayload httpPayload = responses.get(0);
-		HttpResponse httpResponse = httpPayload.getHttpResponse();
-		Assert.assertEquals(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, httpResponse.getStatusLine().getStatus().getKnownStatus());
-		DataWrapper body = httpResponse.getBody();
-		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-		Assert.assertTrue("invalid html="+html, html.contains("You encountered a 5xx in your server"));
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("You encountered a 5xx in your server");
 	}
 	
 	/**
@@ -77,19 +80,16 @@ public class ErrorTest {
 	 */
 	@Test
 	public void testNotFound() {
-		HttpRequest req = BasicServerTest.createRequest("/route/that/does/not/exist");
+		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
 		
 		server.processHttpRequests(mockResponseSocket, req, false);
 		
-		List<HttpPayload> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
-		HttpPayload httpPayload = responses.get(0);
-		HttpResponse httpResponse = httpPayload.getHttpResponse();
-		Assert.assertEquals(KnownStatusCode.HTTP_404_NOTFOUND, httpResponse.getStatusLine().getStatus().getKnownStatus());
-		DataWrapper body = httpResponse.getBody();
-		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-		Assert.assertTrue("invalid html="+html, html.contains("Your page was not found"));		
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		httpPayload.assertContains("Your page was not found");
 	}
 	
 	/**
@@ -99,26 +99,23 @@ public class ErrorTest {
 	public void testRemoteSystemDown() {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockRemote.addValueToReturn(future);
-		HttpRequest req = BasicServerTest.createRequest("/async");
+		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
 		
 		server.processHttpRequests(mockResponseSocket, req, false);
 		
-		List<HttpPayload> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());
 
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
 		//next, simulate remote system returning a value..
 		future.completeExceptionally(new RuntimeException("complete future with exception"));
 
-		List<HttpPayload> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses2.size());
 		
-		HttpPayload httpPayload = responses2.get(0);
-		HttpResponse httpResponse = httpPayload.getHttpResponse();
-		Assert.assertEquals(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, httpResponse.getStatusLine().getStatus().getKnownStatus());
-		DataWrapper body = httpResponse.getBody();
-		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-		Assert.assertTrue("invalid html="+html, html.contains("You encountered a 5xx in your server"));
+		FullResponse httpPayload = responses2.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("You encountered a 5xx in your server");
 	}
 
 	private class AppOverridesModule implements Module {

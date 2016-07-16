@@ -28,6 +28,8 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
+* test 500 ends up throwing another 500
+* test notfound in different cases
 * come up with the http 500 strategy for dev server AND for production server
 * exc from route goes to 500
 * tests

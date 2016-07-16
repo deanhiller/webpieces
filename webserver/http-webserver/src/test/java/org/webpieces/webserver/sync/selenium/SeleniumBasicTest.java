@@ -1,4 +1,4 @@
-package PACKAGE;
+package org.webpieces.webserver.sync.selenium;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -7,17 +7,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.SeleniumOverridesForTest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class SeleniumTest {
+public class SeleniumBasicTest {
 	
 	private static WebDriver driver;
-	
-	//see below comments in AppOverrideModule
-	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	
 	private int port;
 
@@ -33,11 +33,13 @@ public class SeleniumTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
-		TestBasicProductionStart.testWasCompiledWithParamNames("test");
+		Asserts.assertWasCompiledWithParamNames("test");
+		
+		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		CLASSNAMEServer webserver = new CLASSNAMEServer(new SeleniumOverridesForTest(), new AppOverridesModule(), true, null);
+		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config ), new AppOverridesModule(), true, null);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
@@ -53,7 +55,7 @@ public class SeleniumTest {
 		
 		String pageSource = driver.getPageSource();
 		
-		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is some raw index page"));
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is the first raw html page"));
 		
 	}
 	

@@ -1,4 +1,4 @@
-package org.webpieces.webserver.api.basic;
+package org.webpieces.webserver.sync;
 
 import org.webpieces.router.api.routing.RouteId;
 

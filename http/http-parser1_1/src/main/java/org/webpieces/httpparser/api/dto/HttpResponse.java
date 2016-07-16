@@ -59,5 +59,5 @@ public class HttpResponse extends HttpMessage {
 	public HttpMessageType getMessageType() {
 		return HttpMessageType.RESPONSE;
 	}
-	
+
 }

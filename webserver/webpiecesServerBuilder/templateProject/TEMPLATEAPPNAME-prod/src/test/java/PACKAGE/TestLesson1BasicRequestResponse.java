@@ -1,23 +1,21 @@
 package PACKAGE;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
@@ -25,6 +23,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 import PACKAGE.example.RemoteService;
+import PACKAGE.mock.MockRemoteSystem;
 
 /**
  * These are working examples of tests that sometimes are better done with the BasicSeleniumTest example but are here for completeness
@@ -33,7 +32,7 @@ import PACKAGE.example.RemoteService;
  * @author dhiller
  *
  */
-public class BasicServerTest {
+public class TestLesson1BasicRequestResponse {
 
 	private HttpRequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
@@ -44,7 +43,7 @@ public class BasicServerTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
-		TestBasicProductionStart.testWasCompiledWithParamNames("test");
+		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
@@ -62,20 +61,19 @@ public class BasicServerTest {
 		
 		server.processHttpRequests(mockResponseSocket, req, false);
 		
-		List<HttpPayload> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
-		HttpPayload httpPayload = responses.get(0);
-		HttpResponse httpResponse = httpPayload.getHttpResponse();
-		Assert.assertEquals(KnownStatusCode.HTTP_200_OK, httpResponse.getStatusLine().getStatus().getKnownStatus());
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 	}
 	
 	/**
 	 * This is a single threaded test that actually allows the webserver thread to return back to the test before 
-	 * the response comes.  (in production the thread would process other requests).  Then it simulates the response
-	 * coming in and makes sure we send a response back to the FrontendSocket.  In implementations like this with 
-	 * a remote system, one can avoid holding threads up and allow them to keep working while waiting for a response
-	 * from the remote system.
+	 * the response comes.  (in production the thread would process other requests while waiting for remote system response).  
+	 * Then the test simulates the response coming in from remote system and makes sure we send a response back
+	 * to the FrontendSocket.  In implementations like this with a remote system, one can avoid holding threads up
+	 * and allow them to keep working while waiting for a response from the remote system.
 	 */
 	@Test
 	public void testAsyncControllerAndRemoteSystem() {
@@ -85,7 +83,7 @@ public class BasicServerTest {
 		
 		server.processHttpRequests(mockResponseSocket, req, false);
 		
-		List<HttpPayload> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());
 
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
@@ -93,15 +91,12 @@ public class BasicServerTest {
 		int value = 85;
 		future.complete(value);
 
-		List<HttpPayload> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses2.size());
 		
-		HttpPayload httpPayload = responses2.get(0);
-		HttpResponse httpResponse = httpPayload.getHttpResponse();
-		Assert.assertEquals(KnownStatusCode.HTTP_200_OK, httpResponse.getStatusLine().getStatus().getKnownStatus());
-		DataWrapper body = httpResponse.getBody();
-		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-		Assert.assertTrue("invalid html="+html, html.contains("This is a page with value="+value));
+		FullResponse httpPayload = responses2.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		httpPayload.assertContains("This is a page with value="+value);
 	}
 
 	static HttpRequest createRequest(String uri) {

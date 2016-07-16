@@ -1,4 +1,4 @@
-package org.webpieces.webserver.api.basic;
+package org.webpieces.webserver.sync.selenium;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

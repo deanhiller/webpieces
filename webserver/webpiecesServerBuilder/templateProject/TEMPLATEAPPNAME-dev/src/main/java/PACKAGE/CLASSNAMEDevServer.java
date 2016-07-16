@@ -1,6 +1,5 @@
 package PACKAGE;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class CLASSNAMEDevServer {
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME-prod/src/main/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(filePath1 + "/../TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(filePath1 + "/../TEMPLATEAPPNAME-prod/src/main/java/appmeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...

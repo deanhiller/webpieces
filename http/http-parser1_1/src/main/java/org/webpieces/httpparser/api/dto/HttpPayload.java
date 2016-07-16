@@ -1,9 +1,11 @@
 package org.webpieces.httpparser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public abstract class HttpPayload {
 	
+	private static final DataWrapper EMPTY_WRAPPER = DataWrapperGeneratorFactory.createDataWrapperGenerator().emptyWrapper();
 	private DataWrapper body;
 
 	public abstract HttpMessageType getMessageType();
@@ -51,4 +53,14 @@ public abstract class HttpPayload {
 	 * @return
 	 */
 	public abstract boolean isHasChunkedTransferHeader();
+	
+	/**
+	 * convenience method for non-null body that will be 0 bytes if it was null
+	 * @return
+	 */
+	public DataWrapper getBodyNonNull() {
+		if(body == null)
+			return EMPTY_WRAPPER;
+		return body;
+	}
 }

@@ -2,7 +2,7 @@ sourceSets {
     test {
         resources {
             srcDirs = ["src/test/java"]
-            includes = ["**/*.html"]
+            includes = ["**/*.html", "**/*.xml", "**/*.txt"]
         }
     }
 }
