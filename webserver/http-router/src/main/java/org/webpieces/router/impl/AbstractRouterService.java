@@ -16,7 +16,7 @@ public abstract class AbstractRouterService implements RoutingService {
 			
 			processHttpRequestsImpl(req, responseCb);
 		} catch (Throwable e) {
-			responseCb.failure(e);
+			responseCb.failureRenderingInternalServerErrorPage(e);
 		}
 	}
 

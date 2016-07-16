@@ -94,26 +94,6 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
-		HttpResponseStatus status = new HttpResponseStatus();
-		switch(resp.getRouteType()) {
-		case BASIC:
-			status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
-			break;
-		case NOT_FOUND:
-			status.setKnownStatus(KnownStatusCode.HTTP_404_NOTFOUND);
-			break;
-		case INTERNAL_SERVER_ERROR:
-			status.setKnownStatus(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-			break;
-		default:
-			throw new IllegalStateException("did add case for state="+resp.getRouteType());
-		}
-		
-		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
-		statusLine.setStatus(status);
-		HttpResponse response = new HttpResponse();
-		response.setStatusLine(statusLine);
-
 		View view = resp.getView();
 		String packageStr = view.getControllerPackage();
 		//For this type of View, the template is the name of the method..
@@ -133,10 +113,44 @@ public class ProxyResponse implements ResponseStreamer {
 					+ " return enough arguments for the template.  specifically, the method\nreturned these"
 					+ " arguments="+keys+"  The missing properties are as follows....\n"+e.getMessage(), e);
 		}
-		
-		Charset encoding = config.getHtmlResponsePayloadEncoding();
+
 		String content = out.toString();
+		
+		KnownStatusCode statusCode = KnownStatusCode.HTTP_200_OK;
+		switch(resp.getRouteType()) {
+		case BASIC:
+			statusCode = KnownStatusCode.HTTP_200_OK;
+			break;
+		case NOT_FOUND:
+			statusCode = KnownStatusCode.HTTP_404_NOTFOUND;
+			break;
+		case INTERNAL_SERVER_ERROR:
+			statusCode = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
+			break;
+		default:
+			throw new IllegalStateException("did add case for state="+resp.getRouteType());
+		}
+		
+		HttpResponse response = createResponse(statusCode, content);
+		
+		log.info("sending RENDERHTML response channel="+channel);
+		channel.write(response);
+		
+		closeIfNeeded();
+	}
+
+	private HttpResponse createResponse(KnownStatusCode statusCode, String content) {
+		Charset encoding = config.getHtmlResponsePayloadEncoding();
+
 		byte[] bytes = content.getBytes(encoding);
+		
+		HttpResponseStatus status = new HttpResponseStatus();
+		status.setKnownStatus(statusCode);
+		
+		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
+		statusLine.setStatus(status);
+		HttpResponse response = new HttpResponse();
+		response.setStatusLine(statusLine);
 		
 		Header contentType = new Header(KnownHeaderName.CONTENT_TYPE, "text/html; charset="+encoding.name().toLowerCase());
 		response.addHeader(contentType);
@@ -145,11 +159,7 @@ public class ProxyResponse implements ResponseStreamer {
 		response.setBody(data);
 
 		addCommonHeaders(response, bytes.length);
-		
-		log.info("sending RENDERHTML response channel="+channel);
-		channel.write(response);
-		
-		closeIfNeeded();
+		return response;
 	}
 	
 	private void addCommonHeaders(HttpResponse response, int contentLength) {
@@ -202,8 +212,18 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	@Override
-	public void failure(Throwable e) {
-		log.error("Exception", e);
+	public void failureRenderingInternalServerErrorPage(Throwable e) {
+		//This is a final failure so we send a webpieces page next (in the future, we should just use a customer static html file if set)
+		//This is only if the webapp 500 html page fails as many times it is a template and they could have another bug in that template.
+		String html = "<html><head></head><body>This website had a bug, "
+				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
+				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
+				+ "with a screen shot of this page</body></html>";
+		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html);
+		
+		channel.write(response);
+		
+		closeIfNeeded();
 	}
 
 	public void sendFailure(HttpException exc) {

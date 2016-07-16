@@ -69,7 +69,7 @@ public class RouteInvoker {
 	}
 	
 	public Object finalFailure(ResponseStreamer responseCb, Throwable e) {
-		responseCb.failure(e);
+		responseCb.failureRenderingInternalServerErrorPage(e);
 		return null;
 	}
 	

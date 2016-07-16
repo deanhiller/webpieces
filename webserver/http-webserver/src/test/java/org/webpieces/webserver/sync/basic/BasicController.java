@@ -1,5 +1,7 @@
 package org.webpieces.webserver.sync.basic;
 
+import javax.inject.Inject;
+
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -7,6 +9,11 @@ import org.webpieces.webserver.sync.BasicRouteId;
 
 public class BasicController {
 
+	@Inject
+	private NotFoundLib notFoundLib;
+	@Inject
+	private InternalSvrErrorLib errorLib;
+	
 	public Action someMethod() {
 		return Actions.redirect(BasicRouteId.RENDER_PAGE);
 	}
@@ -30,10 +37,14 @@ public class BasicController {
 	}
 	
 	public Action notFound() {
+		//we use this to mock and throw NotFoundException or some RuntimeException for testing notFound path failures
+		notFoundLib.someBusinessLogic();
 		return Actions.renderThis();
 	}
 	
 	public Action internalError() {
+		//we use this to mock and throw exceptions when needed for testing
+		errorLib.someBusinessLogic();
 		return Actions.renderThis();
 	}
 	

@@ -30,7 +30,7 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	}
 	
 	@Override
-	public void failure(Throwable e) {
+	public void failureRenderingInternalServerErrorPage(Throwable e) {
 		super.calledMethod(MockMethod.FAILURE, e);
 	}
 	

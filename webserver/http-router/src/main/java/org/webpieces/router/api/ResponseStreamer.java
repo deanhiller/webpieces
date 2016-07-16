@@ -9,7 +9,7 @@ public interface ResponseStreamer {
 	
 	void sendRenderHtml(RenderResponse resp);
 	
-	void failure(Throwable e);
+	void failureRenderingInternalServerErrorPage(Throwable e);
 
 
 

@@ -1,22 +1,19 @@
 package org.webpieces.webserver.sync.error;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpRequestListener;
-import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.sync.basic.InternalSvrErrorLib;
+import org.webpieces.webserver.sync.basic.NotFoundLib;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
@@ -35,9 +32,8 @@ public class TestNotFound {
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
 	//any redirects in the application properly..
 	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
-	//see below comments in AppOverrideModule
-//	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
-//	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
+	private MockNotFoundLogic mockNotFoundLib = new MockNotFoundLogic();
+	private MockErrorLib mockInternalSvrErrorLib = new MockErrorLib();
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
@@ -97,15 +93,65 @@ public class TestNotFound {
 	
 	@Test
 	public void testNotFoundHandlerThrowsNotFound() {
+		mockNotFoundLib.throwNotFound();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("There was a bug in our software...sorry about that");
 	}
 	
 	@Test
 	public void testNotFoundThrowsException() {
+		mockNotFoundLib.throwRuntime();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("There was a bug in our software...sorry about that");		
 	}
 	
 	@Test
 	public void testNotFoundThrowsThenInternalSvrErrorHandlerThrows() {
+		mockNotFoundLib.throwRuntime();
+		mockInternalSvrErrorLib.throwRuntime();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("The webpieces platform saved them");
+	}
+	
+	//This would be very weird but make sure it works in case they do it...
+	@Test
+	public void testInternalSvrErrorRouteThrowsNotFound() {
+		mockNotFoundLib.throwRuntime();
+		mockInternalSvrErrorLib.throwNotFound();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("The webpieces platform saved them");
 	}
 	
 	/**
@@ -162,10 +208,8 @@ public class TestNotFound {
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {
-			//Add overrides here generally using mocks from fields in the test class
-			
-//			binder.bind(RemoteService.class).toInstance(mockRemote); //see above comment on the field mockRemote
-//			binder.bind(SomeLibrary.class).toInstance(mockLibrary);
+			binder.bind(NotFoundLib.class).toInstance(mockNotFoundLib);
+			binder.bind(InternalSvrErrorLib.class).toInstance(mockInternalSvrErrorLib);
 		}
 	}
 	
