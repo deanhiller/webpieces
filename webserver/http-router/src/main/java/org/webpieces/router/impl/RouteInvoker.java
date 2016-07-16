@@ -43,10 +43,10 @@ public class RouteInvoker {
 			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
 		//We convert all exceptions from invokeAsync into CompletableFuture..
 		CompletableFuture<Object> future = invokeAsync(result, req, responseCb, errorRoutes);
-		future.exceptionally(e -> processException(responseCb, req, e, errorRoutes));
+		future.exceptionally(e -> processException(responseCb, req, e, errorRoutes, result.getMeta()));
 	}
 	
-	private Object processException(ResponseStreamer responseCb, RouterRequest req, Throwable e, ErrorRoutes errorRoutes) {
+	private Object processException(ResponseStreamer responseCb, RouterRequest req, Throwable e, ErrorRoutes errorRoutes, RouteMeta meta) {
 		if(e instanceof CompletionException) {
 			//unwrap the exception to deliver the 'real' exception that occurred
 			e = e.getCause();
@@ -54,21 +54,23 @@ public class RouteInvoker {
 		
 		if(e == null || e instanceof NotFoundException) {
 			NotFoundException exc = (NotFoundException) e;
+			MatchResult notFoundResult = errorRoutes.fetchNotfoundRoute(exc);
 			//http 404...(unless an exception happens in calling this code and that then goes to 500)
-			CompletableFuture<Object> future = notFound(errorRoutes, exc, req, responseCb);
+			CompletableFuture<Object> future = notFound(notFoundResult, exc, req, responseCb);
 			//If not found fails with sync or async exception, we processException and wrap in new Runtime to process as 500 next
-			future.exceptionally(exception -> processException(responseCb, req, new RuntimeException("notFound page failed", exception), errorRoutes));
+			future.exceptionally(exception -> processException(responseCb, req, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult.getMeta()));
 			return null;
 		}
 
 		//If this fails, then the users 5xx page is messed up and we then render our own 5xx page
-		CompletableFuture<Object> future = internalServerError(errorRoutes, e, req, responseCb);
+		CompletableFuture<Object> future = internalServerError(errorRoutes, e, req, responseCb, meta);
 		future.exceptionally(finalExc -> finalFailure(responseCb, finalExc));
 		
 		return null;
 	}
 	
 	public Object finalFailure(ResponseStreamer responseCb, Throwable e) {
+		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e); 
 		responseCb.failureRenderingInternalServerErrorPage(e);
 		return null;
 	}
@@ -81,7 +83,7 @@ public class RouteInvoker {
 			//We could convert the exc. to FastException and override method so stack is not filled in but that
 			//can get very annoying
 			if(result.getMeta().getRoute().getRouteType() == RouteType.NOT_FOUND) {
-				processException(responseCb, req, null, notFoundRoute);
+				processException(responseCb, req, null, notFoundRoute, null);
 				//This is a special case....check the NotFound tests
 				return CompletableFuture.completedFuture(null);
 			}
@@ -96,9 +98,8 @@ public class RouteInvoker {
 		}
 	}
 	
-	private CompletableFuture<Object> notFound(ErrorRoutes errorRoutes, NotFoundException exc, RouterRequest req, ResponseStreamer responseCb) {
+	private CompletableFuture<Object> notFound(MatchResult notFoundResult, NotFoundException exc, RouterRequest req, ResponseStreamer responseCb) {
 		try {
-			MatchResult notFoundResult = errorRoutes.fetchNotfoundRoute(exc);
 			return invokeImpl(notFoundResult, req, responseCb);
 		} catch(Throwable e) {
 			//http 500...
@@ -109,9 +110,10 @@ public class RouteInvoker {
 		}
 	}
 
-	private CompletableFuture<Object> internalServerError(ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb) {
+	private CompletableFuture<Object> internalServerError(
+			ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb, RouteMeta failedRoute) {
 		try {
-			log.error("Exception occurred rendeering previous page.  Next try to render apps 5xx page", exc);
+			log.error("Exception occurred rendering Route Meta="+failedRoute+".  Next try to render apps 5xx page", exc);
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
 			return invokeImpl(result, req, responseCb);
 		} catch(Throwable e) {

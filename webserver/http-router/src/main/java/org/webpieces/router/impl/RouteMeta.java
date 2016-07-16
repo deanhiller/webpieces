@@ -74,7 +74,7 @@ public class RouteMeta {
 	@Override
 	public String toString() {
 		return "\nRouteMeta [route=\n   " + route + ", \n   method=" + method
-				+ ", methodParamNames=" + methodParamNames + "]";
+				+ ",\n   methodParamNames=" + methodParamNames + "]";
 	}
 
 	public String getPackageContext() {
