@@ -232,7 +232,14 @@ public class RouteInvoker {
 	private CompletableFuture<Object> invokeMethod(Object obj, Method m, Object[] arguments) {
 		try {
 			return invokeMethodImpl(obj, m, arguments);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch(InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof RuntimeException) {
+				throw (RuntimeException)cause;
+			} else {
+				throw new InvokeException(e);
+			}
+		} catch (IllegalAccessException | IllegalArgumentException e) {
 			throw new InvokeException(e);
 		}
 	}

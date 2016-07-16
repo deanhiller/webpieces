@@ -2,6 +2,7 @@ package org.webpieces.webserver.sync.basic;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.sync.BasicRouteId;
 
 public class BasicController {
@@ -12,6 +13,14 @@ public class BasicController {
 	
 	public Action redirect(String id) {
 		return Actions.redirect(BasicRouteId.RENDER_PAGE);
+	}
+	
+	public Action redirectWithInt(int id) {
+		return Actions.redirect(BasicRouteId.RENDER_PAGE);
+	}
+
+	public Action throwNotFound() {
+		throw new NotFoundException("not found");
 	}
 	
 	public Action myMethod() {

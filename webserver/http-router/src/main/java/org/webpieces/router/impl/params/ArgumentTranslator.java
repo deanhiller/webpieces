@@ -62,7 +62,10 @@ public class ArgumentTranslator {
 
 	private Object translate(RouteMeta meta, ParamTreeNode paramTree, Parameter paramMeta) {
 		Param annotation = paramMeta.getAnnotation(Param.class);
-		String name = annotation.value();
+		String name = paramMeta.getName();
+		if(annotation != null) {
+			name = annotation.value();
+		}
 		ParamNode valuesToUse = paramTree.get(name);
 		
 		Class<?> paramTypeToCreate = paramMeta.getType();

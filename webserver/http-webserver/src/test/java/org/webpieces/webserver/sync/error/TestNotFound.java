@@ -1,11 +1,24 @@
 package org.webpieces.webserver.sync.error;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.webserver.Requests;
+import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
@@ -40,15 +53,46 @@ public class TestNotFound {
 	
 	@Test
 	public void testNotFoundRoute() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		httpPayload.assertContains("Your page was not found");
 	}
 	
 	@Test
 	public void testNotFoundFromMismatchArgType() {	
+		//because 'notAnInt' is not convertable to integer, this result in NotFound rather than 500 as truly a route with
+		//no int doesn't really exist so it's a NotFound
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		httpPayload.assertContains("Your page was not found");		
 	}
 	
 	@Test
 	public void testWebappThrowsNotFound() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		httpPayload.assertContains("Your page was not found");		
 	}
 	
 	@Test
@@ -83,26 +127,6 @@ public class TestNotFound {
 //		DataWrapper body = httpResponse.getBody();
 //		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
 //		Assert.assertTrue("invalid html="+html, html.contains("You encountered a 5xx in your server"));
-	}
-	
-	/**
-	 * You could also test notFound route fails with exception too...
-	 */
-	@Test
-	public void testNotFound() {
-//		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
-//		
-//		server.processHttpRequests(mockResponseSocket, req, false);
-//		
-//		List<HttpPayload> responses = mockResponseSocket.getResponses();
-//		Assert.assertEquals(1, responses.size());
-//
-//		HttpPayload httpPayload = responses.get(0);
-//		HttpResponse httpResponse = httpPayload.getHttpResponse();
-//		Assert.assertEquals(KnownStatusCode.HTTP_404_NOTFOUND, httpResponse.getStatusLine().getStatus().getKnownStatus());
-//		DataWrapper body = httpResponse.getBody();
-//		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-//		Assert.assertTrue("invalid html="+html, html.contains("Your page was not found"));		
 	}
 	
 	/**
