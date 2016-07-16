@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.hooks.ClassForName;
+import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 
 import com.google.inject.Injector;
 

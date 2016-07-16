@@ -1,6 +1,7 @@
-package org.webpieces.router.impl.loader;
+package org.webpieces.router.impl.hooks;
 
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.loader.ResolvedMethod;
 
 public interface MetaLoaderProxy {
 

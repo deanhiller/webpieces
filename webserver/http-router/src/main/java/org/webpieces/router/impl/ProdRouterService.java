@@ -9,7 +9,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.loader.ClassForName;
+import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 
 @Singleton

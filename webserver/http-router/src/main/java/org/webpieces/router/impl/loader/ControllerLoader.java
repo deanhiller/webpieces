@@ -3,6 +3,7 @@ package org.webpieces.router.impl.loader;
 import javax.inject.Inject;
 
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 
 public class ControllerLoader {
 

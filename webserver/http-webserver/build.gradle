@@ -13,6 +13,7 @@ dependencies {
     compile project(':webserver:http-templating'), project(':webserver:http-router')
 
     testCompile project(':webserver:http-webserver-test')
+    testCompile project(':webserver:http-router-dev')
     testCompile deps['selenium']
 }
 

@@ -2,6 +2,8 @@ package org.webpieces.router.impl.loader;
 
 import javax.inject.Singleton;
 
+import org.webpieces.router.impl.hooks.ClassForName;
+
 @Singleton
 public class ProdClassForName implements ClassForName {
 

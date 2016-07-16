@@ -13,7 +13,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
-import org.webpieces.router.impl.loader.ClassForName;
+import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.util.file.VirtualFile;
 
@@ -25,16 +25,17 @@ import com.google.inject.util.Modules;
 public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
-	private HttpRouterConfig config;
+	private final HttpRouterConfig config;
+	private final RouteInvoker invoker;
+	private final ControllerLoader controllerFinder;
+
 	protected RouterBuilder routerBuilder;
-	private RouteInvoker invoker;
-
-	private ControllerLoader controllerFinder;
-
+	
 	@Inject
 	public RouteLoader(HttpRouterConfig config, 
 						RouteInvoker invoker,
-						ControllerLoader controllerFinder) {
+						ControllerLoader controllerFinder
+	) {
 		this.config = config;
 		this.invoker = invoker;
 		this.controllerFinder = controllerFinder;
@@ -73,6 +74,17 @@ public class RouteLoader {
 		return routerModule;
 	}
 
+	public Injector createInjector(WebAppMeta routerModule) {
+		List<Module> guiceModules = routerModule.getGuiceModules();
+		
+		Module module = Modules.combine(guiceModules);
+		if(config.getOverridesModule() != null)
+			module = Modules.override(module).with(config.getOverridesModule());
+		
+		Injector injector = Guice.createInjector(module);
+		return injector;
+	}
+	
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
 	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
@@ -105,17 +117,6 @@ public class RouteLoader {
 		int lastIndexOf = clazz.getName().lastIndexOf(".");
 		String pkgName = clazz.getName().substring(0, lastIndexOf);
 		return pkgName;
-	}
-
-	private Injector createInjector(WebAppMeta rm) {
-		List<Module> guiceModules = rm.getGuiceModules();
-		
-		Module module = Modules.combine(guiceModules);
-		if(config.getOverridesModule() != null)
-			module = Modules.override(module).with(config.getOverridesModule());
-		
-		Injector injector = Guice.createInjector(module);
-		return injector;
 	}
 	
 	private Object newInstance(Class<?> clazz) {

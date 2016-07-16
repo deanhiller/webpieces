@@ -7,8 +7,8 @@ import org.webpieces.devrouter.impl.DevClassForName;
 import org.webpieces.devrouter.impl.DevLoader;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.impl.loader.ClassForName;
-import org.webpieces.router.impl.loader.MetaLoaderProxy;
+import org.webpieces.router.impl.hooks.ClassForName;
+import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

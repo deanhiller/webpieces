@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.loader;
+package org.webpieces.router.impl.hooks;
 
 public interface ClassForName {
 

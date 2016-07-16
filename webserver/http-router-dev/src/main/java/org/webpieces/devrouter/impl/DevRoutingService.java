@@ -23,19 +23,25 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private long lastFileTimestamp;
 	private RouteLoader routeLoader;
 	private DevClassForName classLoader;
-	private VirtualFile metaTextFile;
 	private WebAppMeta routerModule;
+	private HttpRouterConfig config;
 
 	@Inject
 	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevClassForName loader) {
-		metaTextFile = config.getMetaFile();
 		this.routeLoader = routeConfig;
+		this.config = config;
 		this.classLoader = loader;
-		this.lastFileTimestamp = metaTextFile.lastModified();
+		this.lastFileTimestamp = config.getMetaFile().lastModified();
 	}
 
 	@Override
 	public void start() {
+		if(config.getOverridesModule() != null) {
+			throw new IllegalArgumentException("Any development server cannot be passed overrides through the api."
+				+ "  ie. config.getOverridesModule must be null.  If you want to override in a DevServer, then "
+				+ "look at some of the development test examples and you need to override CompileOnDemand as well");
+		}
+		
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
 		loadOrReload();
 		started = true;
@@ -83,7 +89,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 	
 	public MatchResult fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
-		log.error("Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
+		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
 				+ " something needs a'fixin.  req="+req, e);
 		
 		MatchResult result = routeLoader.fetchNotFoundRoute();
@@ -112,6 +118,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	 * @return
 	 */
 	private boolean reloadIfTextFileChanged() {
+		VirtualFile metaTextFile = config.getMetaFile();
 		//if timestamp the same, no changes
 		if(lastFileTimestamp == metaTextFile.lastModified())
 			return false;

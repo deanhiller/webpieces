@@ -30,7 +30,10 @@ public class CompileOnDemandImpl implements CompileOnDemand {
 		if(classloader.isNeedToReloadJavaFiles()) {
 			classloader = new CompilingClassloader(config, compiler, fileLookup);
 		}
-		return classloader.loadApplicationClass(name);
+		Class<?> clazz = classloader.loadApplicationClass(name);
+		if(clazz == null)
+			throw new IllegalArgumentException("class name="+name+" is not found in the source directories="+config.getJavaPath());
+		return clazz;
 	}
 
 	@Override

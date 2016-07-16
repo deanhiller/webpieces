@@ -3,7 +3,7 @@ package org.webpieces.devrouter.impl;
 import javax.inject.Inject;
 
 import org.webpieces.compiler.api.CompileOnDemand;
-import org.webpieces.router.impl.loader.ClassForName;
+import org.webpieces.router.impl.hooks.ClassForName;
 
 public class DevClassForName implements ClassForName {
 

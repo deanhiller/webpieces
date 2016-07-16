@@ -45,6 +45,9 @@ public class TestSimpleRoutes {
 										.setMetaFile(f)
 										.setWebappOverrides(module);
 		RoutingService prodSvc = RouterSvcFactory.create(config);
+
+		//for dev must be null
+		config.setWebappOverrides(null);
 		
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");

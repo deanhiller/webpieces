@@ -1,8 +1,8 @@
 package org.webpieces.router.api;
 
 import org.webpieces.router.impl.ProdRouterService;
-import org.webpieces.router.impl.loader.ClassForName;
-import org.webpieces.router.impl.loader.MetaLoaderProxy;
+import org.webpieces.router.impl.hooks.ClassForName;
+import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.loader.ProdLoader;
 

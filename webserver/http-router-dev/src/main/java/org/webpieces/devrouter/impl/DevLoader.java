@@ -3,7 +3,7 @@ package org.webpieces.devrouter.impl;
 import javax.inject.Inject;
 
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.loader.MetaLoaderProxy;
+import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.loader.ResolvedMethod;
 import org.webpieces.router.impl.loader.MetaLoader;
 
