@@ -36,12 +36,6 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 	@Override
 	public void start() {
-		if(config.getOverridesModule() != null) {
-			throw new IllegalArgumentException("Any development server cannot be passed overrides through the api."
-				+ "  ie. config.getOverridesModule must be null.  If you want to override in a DevServer, then "
-				+ "look at some of the development test examples and you need to override CompileOnDemand as well");
-		}
-		
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
 		loadOrReload();
 		started = true;
