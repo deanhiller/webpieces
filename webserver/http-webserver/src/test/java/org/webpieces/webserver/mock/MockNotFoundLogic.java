@@ -16,9 +16,9 @@ public class MockNotFoundLogic extends NotFoundLib {
 	@Override
 	public CompletableFuture<Integer> someBusinessLogic() {
 		if(throwNotFound)
-			throw new NotFoundException("testing if app throws NotFoundException(which they shouldn't) results in 500 page");
+			throw new NotFoundException("testing if app throws NotFoundException in certain conditions");
 		else if(throwRuntime)
-			throw new RuntimeException("testing throwing exception on notFound route results in 500");
+			throw new RuntimeException("testing throwing exception results in 500");
 		else if(queueFuture.size() > 0)
 			return queueFuture.remove(0);
 		

@@ -111,7 +111,7 @@ public class ArgumentTranslator {
 			return converter.apply(value);
 		} catch(Exception e) {
 			//This should be a 404 in production
-			throw new NotFoundException("The method='"+method+"' requires that @Param("+name+") be of type="
+			throw new NotFoundException("The method='"+method+"' requires that the parameter named '"+name+"' or annotated with @Param("+name+") be of type="
 					+paramTypeToCreate+" but the request contained a value that could not be converted="+value);
 		}
 	}

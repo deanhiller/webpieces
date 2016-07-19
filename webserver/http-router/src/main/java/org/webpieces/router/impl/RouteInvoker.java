@@ -19,6 +19,7 @@ import org.webpieces.router.api.actions.RenderHtml;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RequestLocal;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.dto.View;
@@ -54,11 +55,13 @@ public class RouteInvoker {
 		
 		if(e == null || e instanceof NotFoundException) {
 			NotFoundException exc = (NotFoundException) e;
-			MatchResult notFoundResult = errorRoutes.fetchNotfoundRoute(exc);
+			NotFoundInfo notFoundInfo = errorRoutes.fetchNotfoundRoute(exc);
+			MatchResult notFoundResult = notFoundInfo.getResult();
+			RouterRequest overridenRequest = notFoundInfo.getReq();
 			//http 404...(unless an exception happens in calling this code and that then goes to 500)
-			CompletableFuture<Object> future = notFound(notFoundResult, exc, req, responseCb);
+			CompletableFuture<Object> future = notFound(notFoundResult, exc, overridenRequest, responseCb);
 			//If not found fails with sync or async exception, we processException and wrap in new Runtime to process as 500 next
-			future.exceptionally(exception -> processException(responseCb, req, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult.getMeta()));
+			future.exceptionally(exception -> processException(responseCb, overridenRequest, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult.getMeta()));
 			return null;
 		}
 
@@ -136,7 +139,8 @@ public class RouteInvoker {
 		//TODO: We need to render a page that says "This would be a 404 in production but in development this is an error as we assume you type
 			//in the correct urls.  Something about your url matched a route but then failed.  Details are below
 			//THEN we need tests in prod version and development version for this!!
-		
+
+		RequestLocal.setRequest(req);
 		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
 		
 		RouteMeta finalMeta = meta;

@@ -44,20 +44,23 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
 		MatchResult meta = routeLoader.fetchRoute(req);
 		
-		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(routeLoader);
+		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(req, routeLoader);
 		routeLoader.invokeRoute(meta, req, responseCb, errorRoutes);
 	}
 
 	//This only exists so dev mode can swap it out and load error routes dynamically as code changes..
 	private static class ProdErrorRoutes implements ErrorRoutes {
 		private RouteLoader routeLoader;
-		public ProdErrorRoutes(RouteLoader routeLoader) {
+		private RouterRequest req;
+		public ProdErrorRoutes(RouterRequest req, RouteLoader routeLoader) {
+			this.req = req;
 			this.routeLoader = routeLoader;
 		}
 
-		public MatchResult fetchNotfoundRoute(NotFoundException e) {
+		public NotFoundInfo fetchNotfoundRoute(NotFoundException e) {
 			//not found is normal in prod mode so we don't log that and only log warnings in dev mode
-			return routeLoader.fetchNotFoundRoute();
+			MatchResult result = routeLoader.fetchNotFoundRoute();
+			return new NotFoundInfo(result, req);
 		}
 		
 		public MatchResult fetchInternalServerErrorRoute() {

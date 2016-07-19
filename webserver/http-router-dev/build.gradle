@@ -1,3 +1,12 @@
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/java"]
+            includes = ["**/*.html", "**/*.txt", "**/*.xml"]
+        }
+    }
+}
+
 dependencies {
     compile project(':core:runtimecompile')
     compile project(':webserver:http-router')

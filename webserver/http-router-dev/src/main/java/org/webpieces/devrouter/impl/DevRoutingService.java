@@ -1,5 +1,8 @@
 package org.webpieces.devrouter.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,12 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.ErrorRoutes;
 import org.webpieces.router.impl.MatchResult;
+import org.webpieces.router.impl.NotFoundInfo;
+import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.util.file.VirtualFile;
@@ -71,7 +77,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		}
 
 		@Override
-		public MatchResult fetchNotfoundRoute(NotFoundException e) {
+		public NotFoundInfo fetchNotfoundRoute(NotFoundException e) {
 			return fetchNotFoundRoute(e, req);
 		}
 
@@ -82,18 +88,30 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 	}
 	
-	public MatchResult fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
+	public NotFoundInfo fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
 				+ " something needs a'fixin.  req="+req, e);
+
+		//Production app's notFound route TBD and used in iframe later
+		MatchResult origResult = routeLoader.fetchNotFoundRoute();
+		RouteMeta origMeta = origResult.getMeta();
+
+		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
+		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), "");
+		MatchResult result = new MatchResult(meta);
 		
-		MatchResult result = routeLoader.fetchNotFoundRoute();
-		
-		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			routeLoader.loadControllerIntoMetaObject(meta, false);
 		}
 		
-		return result;
+		String reason = "Your route was not found in routes table";
+		if(e != null)
+			reason = e.getMessage();
+		
+		RouterRequest newRequest = new RouterRequest();
+		newRequest.urlPathParams.put("error", new String[] {"Exception message="+reason });
+		
+		return new NotFoundInfo(result, newRequest);
 	}
 
 	public MatchResult fetchInternalErrorRoute(RouterRequest req) {
