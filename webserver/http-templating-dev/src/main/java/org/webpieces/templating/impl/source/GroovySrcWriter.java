@@ -1,7 +1,12 @@
 package org.webpieces.templating.impl.source;
 
 import java.util.List;
+import java.util.Stack;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+
+import org.webpieces.templating.api.Tag;
 
 public class GroovySrcWriter {
 
@@ -10,7 +15,17 @@ public class GroovySrcWriter {
     
 	private Pattern pattern = Pattern.compile("\"");
 
+	private ThreadLocal<Stack<Tag>> tagStack = new ThreadLocal<>();
+	
+	private TagLookup tagLookup;
+
+	@Inject
+	public GroovySrcWriter(TagLookup lookup) {
+		tagLookup = lookup;
+	}
+	
 	public void printHead(ScriptCode sourceCode, String packageStr, String className) {
+		tagStack.set(new Stack<>());
 
 		if(packageStr != null && !"".equals(packageStr.trim())) {
 			sourceCode.println("package "+packageStr);
@@ -35,6 +50,8 @@ public class GroovySrcWriter {
 		sourceCode.println("    }");
 		sourceCode.println("  }");
 		sourceCode.println("}");
+		
+		tagStack.set(null);
 	}
 
 	public void printPlain(Token token, ScriptCode sourceCode) {
@@ -70,7 +87,7 @@ public class GroovySrcWriter {
 
 	public void printExpression(Token token, ScriptCode sourceCode) {
 		String expr = token.getValue().trim();
-        sourceCode.print("      __out.print(__escapeTextCharacters("+expr+"));");
+        sourceCode.print("      __out.print(useFormatter("+expr+"));");
         sourceCode.appendTokenComment(token);
         sourceCode.println();
 	}
@@ -83,13 +100,60 @@ public class GroovySrcWriter {
 		
 	}
 
-	public void printStartTag() {
-	}
-
-	public void printEndTag() {
+	/**
+	 * This is for tags with no body(or ones where the body is optional and #{../}# was used.
+	 * 
+	 * @param token
+	 * @param sourceCode
+	 */
+	public void printStartEndTag(Token token, ScriptCode sourceCode) {
+		String expr = cleanTag(token);
+		int indexOfSpace = expr.indexOf(" ");
+		String tagName = expr;
+		if(indexOfSpace > 0) {
+			//we have arguments to parse
+			throw new UnsupportedOperationException("not done yet...need to implement arguments");
+		}
 		
+		Tag tag = tagLookup.lookup(tagName, token);
+		tag.generateStartAndEnd(sourceCode);
 	}
 
+	public void printStartTag(Token token, ScriptCode sourceCode) {
+		String expr = cleanTag(token);
+		int indexOfSpace = expr.indexOf(" ");
+		String tagName = expr;
+		if(indexOfSpace > 0) {
+			//we have arguments to parse
+			throw new UnsupportedOperationException("not done yet...need to implement arguments");
+		}		
+
+		Tag tag = tagLookup.lookup(tagName, token);
+		tagStack.get().push(tag);
+		tag.generateStart(sourceCode);
+//        sourceCode.print("      __out.print(escapeHtml("+expr+"));");
+//        sourceCode.appendTokenComment(token);
+//        sourceCode.println();
+	}
+
+	public void printEndTag(Token token, ScriptCode sourceCode) {
+		String expr = cleanTag(token);
+		Tag tag = tagLookup.lookup(expr, token);
+		if(tagStack.get().size() == 0)
+			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag was not found..only the end tag on line="+token.beginLineNumber+" in file="+token.getFilePath());
+		Tag startTag = tagStack.get().pop();
+		if(tag != startTag)
+			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+startTag.getName()
+			+"}# which does not match.  end tag found on line="+token.beginLineNumber+" in file="+token.getFilePath());
+		
+		tag.generateEnd(sourceCode);
+	}
+
+	private String cleanTag(Token token) {
+		String expr = token.getValue().replaceAll("\r", "").replaceAll("\n", " ").trim();
+		return expr;
+	}
+	
 	public void unprintUpToLastNewLine() {
 		
 	}

@@ -14,6 +14,8 @@ public class BasicRouteModule implements RouteModule {
 		router.addRoute(HttpMethod.GET, "/redirectint/{id}", "biz/BasicController.redirectWithInt", BasicRouteId.REDIRECT2);
 		router.addRoute(HttpMethod.GET, "/myroute",          "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
 		router.addRoute(HttpMethod.GET, "/throwNotFound",    "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
+		router.addRoute(HttpMethod.GET, "/pageparam",        "biz/BasicController.pageParam", BasicRouteId.PAGE_PARAM);
+		router.addRoute(HttpMethod.GET, "/verbatim",         "biz/BasicController.verbatimTag", BasicRouteId.VERBATIM);
 		
 		router.setPageNotFoundRoute("biz/BasicController.notFound");
 		router.setInternalErrorRoute("biz/BasicController.internalError");

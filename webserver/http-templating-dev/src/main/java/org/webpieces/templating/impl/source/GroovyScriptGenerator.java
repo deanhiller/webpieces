@@ -19,11 +19,11 @@ public class GroovyScriptGenerator {
 		this.creator = creator;
 	}
 	
-	public ScriptCode generate(String source, String fullClassName) {
+	public ScriptCode generate(String filePath, String source, String fullClassName) {
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
-		List<Token> tokens = tokenizer.tokenize(source);
+		List<Token> tokens = tokenizer.tokenize(filePath, source);
 
 		String className = fullClassName;
 		String packageStr = null;
@@ -81,11 +81,14 @@ public class GroovyScriptGenerator {
 			case COMMENT:
 				creator.unprintUpToLastNewLine();
 				break;
+			case START_END_TAG:
+				creator.printStartEndTag(token, sourceCode);
+				break;
 			case START_TAG:
-				creator.printStartTag();
+				creator.printStartTag(token, sourceCode);
 				break;
 			case END_TAG:
-				creator.printEndTag();
+				creator.printEndTag(token, sourceCode);
 				break;
 			}
 		}

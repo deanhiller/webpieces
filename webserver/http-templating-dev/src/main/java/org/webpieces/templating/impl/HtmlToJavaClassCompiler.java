@@ -19,7 +19,9 @@ public class HtmlToJavaClassCompiler {
 	}
 	
 	public ScriptCode compile(String fullClassName, String source, Consumer<GroovyClass> compiledCallback) {
-		ScriptCode scriptCode = scriptGen.generate(source, fullClassName);
+		String filePath = fullClassName.replace(".", "/").replace("_", ".");
+		
+		ScriptCode scriptCode = scriptGen.generate(filePath, source, fullClassName);
 		groovyCompile.compile(scriptCode, compiledCallback);
 		return scriptCode;
 	}

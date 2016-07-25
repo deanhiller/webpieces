@@ -12,8 +12,10 @@ public class TempateTokenizerRunnable {
 	private int beginLineNumber = 0;
 	private List<Integer> newLineMarks = new ArrayList<>();
 	private List<Token> tokens = new ArrayList<>();
+	private String filePath;
 	
-	public TempateTokenizerRunnable(String source) {
+	public TempateTokenizerRunnable(String filePath, String source) {
+		this.filePath = filePath;
 		if(source.contains("\r"))
 			throw new IllegalArgumentException("We rely on source input never containing \\r and only containing \\n for newlines");
 		this.pageSource = source;
@@ -67,10 +69,10 @@ public class TempateTokenizerRunnable {
                     }
                     break;
                 case START_TAG:
-                    if (c == '}' && c == '#') {
+                    if (c == '}' && c1 == '#') {
                         found(ScriptToken.PLAIN, 2, lineNumber);
                     } else if (c == '/' && c1 == '}' && c2 == '#') {
-                        found(ScriptToken.END_TAG, 3, lineNumber);
+                        found(ScriptToken.PLAIN, 3, lineNumber, true);
                     }
                     break;
                 case END_TAG:
@@ -108,8 +110,8 @@ public class TempateTokenizerRunnable {
         if(state != ScriptToken.PLAIN) {
         	Token token = tokens.get(tokens.size()-1);
         	int lastLine = token.endLineNumber;
-        	throw new IllegalArgumentException("Line number="+lastLine+" has an unmatched token='"
-        			+state.getStart()+"' where after the source is missing the end tag='"+state.getEnd()+"'");
+        	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end tag of='"+state.getEnd()+"'"
+        			+ " where the start tag was on line number="+lastLine+" and start tag looks like='"+state.getStart()+"'");
         }
         
         end++;
@@ -148,8 +150,15 @@ public class TempateTokenizerRunnable {
     	comment.beginLineNumber++;
 	}
 
-	private void found(ScriptToken newState, int skip, int endLineNumber) {
-        Token lastToken = new Token(begin, --end, state, beginLineNumber, endLineNumber, pageSource);
+    private void found(ScriptToken newState, int skip, int endLineNumber) {
+    	found(newState, skip, endLineNumber, false);
+    }
+	private void found(ScriptToken newState, int skip, int endLineNumber, boolean isOpenCloseTag) {
+		ScriptToken finalState = state;
+		if(isOpenCloseTag)
+			finalState = ScriptToken.START_END_TAG;
+		
+        Token lastToken = new Token(filePath, begin, --end, finalState, beginLineNumber, endLineNumber, pageSource);
         begin = end += skip;
         beginLineNumber = endLineNumber;
         state = newState;

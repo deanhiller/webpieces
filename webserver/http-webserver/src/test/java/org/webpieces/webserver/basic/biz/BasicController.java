@@ -49,4 +49,13 @@ public class BasicController {
 		return Actions.renderThis();
 	}
 	
+	public Action pageParam() {
+		return Actions.renderThis("user", "Dean Hiller");
+	}
+
+	public Action verbatimTag() {
+		//The html will be escaped so it shows up to the user as <br/> UNLESS wrapped in verbatim tag in which case
+		//This will end up actually being a <br/> in the html and will cause a line break(normally you should not do that)
+		return Actions.renderThis("escaped", "'''escaped by default &'''", "verbatim", "'''verbatim & so do not escape'''");
+	}
 }

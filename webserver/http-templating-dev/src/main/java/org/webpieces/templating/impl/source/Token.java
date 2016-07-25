@@ -8,8 +8,10 @@ public class Token {
 	public int beginLineNumber;
 	public int endLineNumber;
 	public String source;
+	private String filePath;
 
-	public Token(int begin, int end, ScriptToken state, int beginLineNumber, int endLineNumber, String source) {
+	public Token(String filePath, int begin, int end, ScriptToken state, int beginLineNumber, int endLineNumber, String source) {
+		this.filePath = filePath;
 		this.begin = begin;
 		this.end = end;
 		this.state = state;
@@ -28,4 +30,7 @@ public class Token {
 		return source.substring(begin, end);
 	}
 
+	public String getFilePath() {
+		return filePath;
+	}
 }

@@ -116,7 +116,7 @@ public class RouteInvoker {
 	private CompletableFuture<Object> internalServerError(
 			ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb, RouteMeta failedRoute) {
 		try {
-			log.error("Exception occurred rendering Route Meta="+failedRoute+".  Next try to render apps 5xx page", exc);
+			log.error("(Also, read exception msg below for more detailed info). Exception occurred rendering Route Meta="+failedRoute+".  Next try to render apps 5xx page\n\n", exc);
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
 			return invokeImpl(result, req, responseCb);
 		} catch(Throwable e) {
