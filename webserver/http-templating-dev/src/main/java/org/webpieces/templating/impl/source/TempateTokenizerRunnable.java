@@ -6,7 +6,7 @@ import java.util.List;
 public class TempateTokenizerRunnable {
 
 	private String pageSource;
-	private ScriptToken state = ScriptToken.PLAIN;
+	private TemplateToken state = TemplateToken.PLAIN;
 	private int end = 0;
 	private int begin = 0;
 	private int beginLineNumber = 0;
@@ -40,64 +40,64 @@ public class TempateTokenizerRunnable {
             switch (state) {
                 case PLAIN:
                     if (c == '%' && c1 == '{') {
-                        found(ScriptToken.SCRIPT, 2, lineNumber);
+                        found(TemplateToken.SCRIPT, 2, lineNumber);
                     } else if (c == '$' && c1 == '{') {
-                        found(ScriptToken.EXPR, 2, lineNumber);
+                        found(TemplateToken.EXPR, 2, lineNumber);
                     } else if (c == '#' && c1 == '{' && c2 == '/') {
-                        found(ScriptToken.END_TAG, 3, lineNumber);
+                        found(TemplateToken.END_TAG, 3, lineNumber);
                     } else if (c == '#' && c1 == '{') {
-                        found(ScriptToken.START_TAG, 2, lineNumber);
+                        found(TemplateToken.START_TAG, 2, lineNumber);
                     } else if (c == '&' && c1 == '{') {
-                        found(ScriptToken.MESSAGE, 2, lineNumber);
+                        found(TemplateToken.MESSAGE, 2, lineNumber);
                     } else if (c == '@' && c1 == '@' && c2 == '{') {
-                        found(ScriptToken.ABSOLUTE_ACTION, 3, lineNumber);
+                        found(TemplateToken.ABSOLUTE_ACTION, 3, lineNumber);
                     } else if (c == '@' && c1 == '{') {
-                        found(ScriptToken.ACTION, 2, lineNumber);
+                        found(TemplateToken.ACTION, 2, lineNumber);
                     } else if (c == '*' && c1 == '{') {
-                        found(ScriptToken.COMMENT, 2, lineNumber);
+                        found(TemplateToken.COMMENT, 2, lineNumber);
                     }
                     break;
                 case SCRIPT:
                     if (c == '}' && c1 == '%') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                     }
                     break;
                 case COMMENT:
                     if (c == '}' && c1 == '*') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                         cleanupBeforeCommentWhitespace();
                     }
                     break;
                 case START_TAG:
                     if (c == '}' && c1 == '#') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                     } else if (c == '/' && c1 == '}' && c2 == '#') {
-                        found(ScriptToken.PLAIN, 3, lineNumber, true);
+                        found(TemplateToken.PLAIN, 3, lineNumber, true);
                     }
                     break;
                 case END_TAG:
                     if (c == '}' && c1 == '#') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                     }
                     break;
                 case EXPR:
                     if (c == '}' && c1 == '$') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                     }
                     break;
                 case ACTION:
                     if (c == '}' && c1 == '@') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                     }
                     break;
                 case ABSOLUTE_ACTION:
                     if (c == '}' && c1 == '@' && c2 == '@') {
-                        found(ScriptToken.PLAIN, 3, lineNumber);
+                        found(TemplateToken.PLAIN, 3, lineNumber);
                     }
                     break;
                 case MESSAGE:
                     if (c == '}' && c1 == '&') {
-                        found(ScriptToken.PLAIN, 2, lineNumber);
+                        found(TemplateToken.PLAIN, 2, lineNumber);
                     }
                     break;
                 case EOF:
@@ -107,7 +107,7 @@ public class TempateTokenizerRunnable {
             left = pageSource.length() - end;
         }
         
-        if(state != ScriptToken.PLAIN) {
+        if(state != TemplateToken.PLAIN) {
         	Token token = tokens.get(tokens.size()-1);
         	int lastLine = token.endLineNumber;
         	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end tag of='"+state.getEnd()+"'"
@@ -115,7 +115,7 @@ public class TempateTokenizerRunnable {
         }
         
         end++;
-        found(ScriptToken.EOF, 0, lineNumber);
+        found(TemplateToken.EOF, 0, lineNumber);
         return tokens;
 	}
 	
@@ -150,13 +150,13 @@ public class TempateTokenizerRunnable {
     	comment.beginLineNumber++;
 	}
 
-    private void found(ScriptToken newState, int skip, int endLineNumber) {
+    private void found(TemplateToken newState, int skip, int endLineNumber) {
     	found(newState, skip, endLineNumber, false);
     }
-	private void found(ScriptToken newState, int skip, int endLineNumber, boolean isOpenCloseTag) {
-		ScriptToken finalState = state;
+	private void found(TemplateToken newState, int skip, int endLineNumber, boolean isOpenCloseTag) {
+		TemplateToken finalState = state;
 		if(isOpenCloseTag)
-			finalState = ScriptToken.START_END_TAG;
+			finalState = TemplateToken.START_END_TAG;
 		
         Token lastToken = new Token(filePath, begin, --end, finalState, beginLineNumber, endLineNumber, pageSource);
         begin = end += skip;

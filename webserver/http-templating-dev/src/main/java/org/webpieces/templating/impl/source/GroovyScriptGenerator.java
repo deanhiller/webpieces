@@ -11,15 +11,15 @@ public class GroovyScriptGenerator {
 
 	private static final Logger log = LoggerFactory.getLogger(GroovyScriptGenerator.class);
 	private TemplateTokenizer tokenizer;
-	private GroovySrcWriter creator;
+	private ScriptWriter creator;
 
 	@Inject
-	public GroovyScriptGenerator(TemplateTokenizer tokenizer, GroovySrcWriter creator) {
+	public GroovyScriptGenerator(TemplateTokenizer tokenizer, ScriptWriter creator) {
 		this.tokenizer = tokenizer;
 		this.creator = creator;
 	}
 	
-	public ScriptCode generate(String filePath, String source, String fullClassName) {
+	public ScriptOutputImpl generate(String filePath, String source, String fullClassName) {
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
@@ -34,7 +34,7 @@ public class GroovyScriptGenerator {
 			packageStr = fullClassName.substring(0, index);
 		}
 
-		ScriptCode sourceCode = new ScriptCode(packageStr, className);
+		ScriptOutputImpl sourceCode = new ScriptOutputImpl(packageStr, className);
 
 		// Class header
 		creator.printHead(sourceCode, packageStr, className);
@@ -52,10 +52,10 @@ public class GroovyScriptGenerator {
 		return sourceCode;
 	}
 
-	private void generateBody(ScriptCode sourceCode, List<Token> tokens) {
+	private void generateBody(ScriptOutputImpl sourceCode, List<Token> tokens) {
 
 		for(Token token : tokens) {
-			ScriptToken state = token.state;
+			TemplateToken state = token.state;
 			
 			switch (state) {
 			case EOF:

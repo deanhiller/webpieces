@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templating.impl.source.GroovyScriptGenerator;
-import org.webpieces.templating.impl.source.ScriptCode;
+import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
 public class HtmlToJavaClassCompiler {
 	private GroovyScriptGenerator scriptGen;
@@ -18,10 +18,10 @@ public class HtmlToJavaClassCompiler {
 		this.groovyCompile = groovyCompile;
 	}
 	
-	public ScriptCode compile(String fullClassName, String source, Consumer<GroovyClass> compiledCallback) {
+	public ScriptOutputImpl compile(String fullClassName, String source, Consumer<GroovyClass> compiledCallback) {
 		String filePath = fullClassName.replace(".", "/").replace("_", ".");
 		
-		ScriptCode scriptCode = scriptGen.generate(filePath, source, fullClassName);
+		ScriptOutputImpl scriptCode = scriptGen.generate(filePath, source, fullClassName);
 		groovyCompile.compile(scriptCode, compiledCallback);
 		return scriptCode;
 	}

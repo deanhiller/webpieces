@@ -3,7 +3,9 @@ package org.webpieces.templating.impl.source;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ScriptCode {
+import org.webpieces.templating.api.ScriptOutput;
+
+public class ScriptOutputImpl implements ScriptOutput {
 
 	private StringBuffer scriptSourceCode = new StringBuffer();
 	private int currentLine = 1;
@@ -11,7 +13,7 @@ public class ScriptCode {
 	private String packageStr;
 	private String className;
 
-	public ScriptCode(String packageStr, String className) {
+	public ScriptOutputImpl(String packageStr, String className) {
 		this.packageStr = packageStr;
 		this.className = className;
 	}

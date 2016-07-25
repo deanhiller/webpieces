@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import org.webpieces.templating.api.Tag;
 
-public class GroovySrcWriter {
+public class ScriptWriter {
 
 	//Some compilers can't deal with long lines so let's max at 40k
     protected static final int maxLineLength = 30000;
@@ -20,11 +20,11 @@ public class GroovySrcWriter {
 	private TagLookup tagLookup;
 
 	@Inject
-	public GroovySrcWriter(TagLookup lookup) {
+	public ScriptWriter(TagLookup lookup) {
 		tagLookup = lookup;
 	}
 	
-	public void printHead(ScriptCode sourceCode, String packageStr, String className) {
+	public void printHead(ScriptOutputImpl sourceCode, String packageStr, String className) {
 		tagStack.set(new Stack<>());
 
 		if(packageStr != null && !"".equals(packageStr.trim())) {
@@ -46,7 +46,7 @@ public class GroovySrcWriter {
 //        }
 	}
 
-	public void printEnd(ScriptCode sourceCode) {
+	public void printEnd(ScriptOutputImpl sourceCode) {
 		sourceCode.println("    }");
 		sourceCode.println("  }");
 		sourceCode.println("}");
@@ -54,7 +54,7 @@ public class GroovySrcWriter {
 		tagStack.set(null);
 	}
 
-	public void printPlain(Token token, ScriptCode sourceCode) {
+	public void printPlain(Token token, ScriptOutputImpl sourceCode) {
 		String srcText = token.getValue();
 		if(srcText.length() < maxLineLength) {
 			String text = addEscapesToSrc(srcText);
@@ -85,7 +85,7 @@ public class GroovySrcWriter {
 		
 	}
 
-	public void printExpression(Token token, ScriptCode sourceCode) {
+	public void printExpression(Token token, ScriptOutputImpl sourceCode) {
 		String expr = token.getValue().trim();
         sourceCode.print("      __out.print(useFormatter("+expr+"));");
         sourceCode.appendTokenComment(token);
@@ -106,7 +106,7 @@ public class GroovySrcWriter {
 	 * @param token
 	 * @param sourceCode
 	 */
-	public void printStartEndTag(Token token, ScriptCode sourceCode) {
+	public void printStartEndTag(Token token, ScriptOutputImpl sourceCode) {
 		String expr = cleanTag(token);
 		int indexOfSpace = expr.indexOf(" ");
 		String tagName = expr;
@@ -119,7 +119,7 @@ public class GroovySrcWriter {
 		tag.generateStartAndEnd(sourceCode);
 	}
 
-	public void printStartTag(Token token, ScriptCode sourceCode) {
+	public void printStartTag(Token token, ScriptOutputImpl sourceCode) {
 		String expr = cleanTag(token);
 		int indexOfSpace = expr.indexOf(" ");
 		String tagName = expr;
@@ -136,7 +136,7 @@ public class GroovySrcWriter {
 //        sourceCode.println();
 	}
 
-	public void printEndTag(Token token, ScriptCode sourceCode) {
+	public void printEndTag(Token token, ScriptOutputImpl sourceCode) {
 		String expr = cleanTag(token);
 		Tag tag = tagLookup.lookup(expr, token);
 		if(tagStack.get().size() == 0)

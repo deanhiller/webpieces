@@ -4,13 +4,13 @@ public class Token {
 
 	public int begin;
 	public int end;
-	public ScriptToken state;
+	public TemplateToken state;
 	public int beginLineNumber;
 	public int endLineNumber;
 	public String source;
 	private String filePath;
 
-	public Token(String filePath, int begin, int end, ScriptToken state, int beginLineNumber, int endLineNumber, String source) {
+	public Token(String filePath, int begin, int end, TemplateToken state, int beginLineNumber, int endLineNumber, String source) {
 		this.filePath = filePath;
 		this.begin = begin;
 		this.end = end;

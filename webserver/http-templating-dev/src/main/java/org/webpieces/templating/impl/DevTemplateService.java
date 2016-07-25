@@ -11,7 +11,7 @@ import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.api.TemplateService;
-import org.webpieces.templating.impl.source.ScriptCode;
+import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
 import groovy.lang.GroovyClassLoader;
 
@@ -63,7 +63,7 @@ public class DevTemplateService implements TemplateService {
 	private Class<?> createTemplate(String fullClassName, String source) throws ClassNotFoundException {
 		GroovyClassLoader cl = new GroovyClassLoader();
 		
-		ScriptCode scriptCode = compiler.compile(fullClassName, source, groovy -> defineClass(cl, groovy));
+		ScriptOutputImpl scriptCode = compiler.compile(fullClassName, source, groovy -> defineClass(cl, groovy));
 		
 		return cl.loadClass(scriptCode.getFullClassName());
 	}

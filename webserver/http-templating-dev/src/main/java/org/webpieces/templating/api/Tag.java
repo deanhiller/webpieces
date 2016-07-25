@@ -1,15 +1,13 @@
 package org.webpieces.templating.api;
 
-import org.webpieces.templating.impl.source.ScriptCode;
-
 public interface Tag {
 
-	void generateStartAndEnd(ScriptCode sourceCode);
+	void generateStartAndEnd(ScriptOutput sourceCode);
 
 	String getName();
 
-	void generateStart(ScriptCode sourceCode);
+	void generateStart(ScriptOutput sourceCode);
 
-	void generateEnd(ScriptCode sourceCode);
+	void generateEnd(ScriptOutput sourceCode);
 
 }

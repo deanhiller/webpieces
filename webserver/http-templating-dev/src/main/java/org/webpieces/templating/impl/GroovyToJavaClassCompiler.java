@@ -5,13 +5,13 @@ import java.util.function.Consumer;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.tools.GroovyClass;
-import org.webpieces.templating.impl.source.ScriptCode;
+import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
 import groovy.lang.GroovyClassLoader;
 
 public class GroovyToJavaClassCompiler {
 
-	public void compile(ScriptCode scriptCode, Consumer<GroovyClass> compiledCallback) {
+	public void compile(ScriptOutputImpl scriptCode, Consumer<GroovyClass> compiledCallback) {
 		try {
 			compileImpl(scriptCode, compiledCallback);
 			//F'ing checked exceptions should have been runtime so I don't have all this cruft in my app...
@@ -22,7 +22,7 @@ public class GroovyToJavaClassCompiler {
 		}
 	}
 
-	private void compileImpl(ScriptCode scriptCode, Consumer<GroovyClass> compiledCallback) {
+	private void compileImpl(ScriptOutputImpl scriptCode, Consumer<GroovyClass> compiledCallback) {
 		GroovyClassLoader cl = new GroovyClassLoader();
 		CompilationUnit compileUnit = new CompilationUnit();
 	    compileUnit.addSource(scriptCode.getFullClassName(), scriptCode.getScriptSourceCode());

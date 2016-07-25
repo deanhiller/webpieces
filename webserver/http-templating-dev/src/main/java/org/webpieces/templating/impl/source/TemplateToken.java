@@ -1,6 +1,6 @@
 package org.webpieces.templating.impl.source;
 
-public enum ScriptToken {
+public enum TemplateToken {
 
     EOF(null, null),            //end of file
     PLAIN(null, null),          //normal text
@@ -17,7 +17,7 @@ public enum ScriptToken {
     private String start;
 	private String end;
 
-	private ScriptToken(String start, String end) {
+	private TemplateToken(String start, String end) {
     	this.start = start;
     	this.end = end;
     }

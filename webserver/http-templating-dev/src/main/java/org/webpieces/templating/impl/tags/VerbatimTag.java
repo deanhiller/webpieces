@@ -1,7 +1,8 @@
 package org.webpieces.templating.impl.tags;
 
+import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Tag;
-import org.webpieces.templating.impl.source.ScriptCode;
+import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
 public class VerbatimTag implements Tag {
 
@@ -11,17 +12,17 @@ public class VerbatimTag implements Tag {
 	}
 	
 	@Override
-	public void generateStartAndEnd(ScriptCode sourceCode) {
+	public void generateStartAndEnd(ScriptOutput sourceCode) {
 		//do nothing
 	}
 
 	@Override
-	public void generateStart(ScriptCode sourceCode) {
+	public void generateStart(ScriptOutput sourceCode) {
 		sourceCode.println("      installNullFormatter();");
 	}
 
 	@Override
-	public void generateEnd(ScriptCode sourceCode) {
+	public void generateEnd(ScriptOutput sourceCode) {
 		sourceCode.println("      installHtmlFormatter();");
 	}
 
