@@ -4,7 +4,7 @@ import java.util.List;
 
 public class TemplateTokenizer {
 
-	public List<Token> tokenize(String filePath, String source) {
+	public List<TokenImpl> tokenize(String filePath, String source) {
 		return new TempateTokenizerRunnable(filePath, source).parseSource();
 	}
 	

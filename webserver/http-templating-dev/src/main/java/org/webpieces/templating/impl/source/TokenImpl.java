@@ -1,6 +1,8 @@
 package org.webpieces.templating.impl.source;
 
-public class Token {
+import org.webpieces.templating.api.Token;
+
+public class TokenImpl implements Token {
 
 	public int begin;
 	public int end;
@@ -10,7 +12,7 @@ public class Token {
 	public String source;
 	private String filePath;
 
-	public Token(String filePath, int begin, int end, TemplateToken state, int beginLineNumber, int endLineNumber, String source) {
+	public TokenImpl(String filePath, int begin, int end, TemplateToken state, int beginLineNumber, int endLineNumber, String source) {
 		this.filePath = filePath;
 		this.begin = begin;
 		this.end = end;
@@ -30,7 +32,15 @@ public class Token {
 		return source.substring(begin, end);
 	}
 
+	public String getCleanValue() {
+		return getValue().replaceAll("\r", "").replaceAll("\n", " ").trim();
+	}
+	
 	public String getFilePath() {
 		return filePath;
+	}
+	
+	public String getSourceLocation() {
+		return "File="+filePath+" line number="+beginLineNumber;
 	}
 }

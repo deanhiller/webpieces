@@ -2,12 +2,12 @@ package org.webpieces.templating.api;
 
 public interface Tag {
 
-	void generateStartAndEnd(ScriptOutput sourceCode);
-
 	String getName();
+	
+	void generateStartAndEnd(ScriptOutput sourceCode, Token token);
 
-	void generateStart(ScriptOutput sourceCode);
+	void generateStart(ScriptOutput sourceCode, Token token);
 
-	void generateEnd(ScriptOutput sourceCode);
+	void generateEnd(ScriptOutput sourceCode, Token token);
 
 }

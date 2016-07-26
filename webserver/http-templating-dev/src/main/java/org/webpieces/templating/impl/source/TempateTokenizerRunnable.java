@@ -11,7 +11,7 @@ public class TempateTokenizerRunnable {
 	private int begin = 0;
 	private int beginLineNumber = 0;
 	private List<Integer> newLineMarks = new ArrayList<>();
-	private List<Token> tokens = new ArrayList<>();
+	private List<TokenImpl> tokens = new ArrayList<>();
 	private String filePath;
 	
 	public TempateTokenizerRunnable(String filePath, String source) {
@@ -21,7 +21,7 @@ public class TempateTokenizerRunnable {
 		this.pageSource = source;
 	}
 
-	public List<Token> parseSource() {
+	public List<TokenImpl> parseSource() {
 		int lineNumber = 1;
 		int left = pageSource.length() - end;
         while(left != 0) {
@@ -108,10 +108,10 @@ public class TempateTokenizerRunnable {
         }
         
         if(state != TemplateToken.PLAIN) {
-        	Token token = tokens.get(tokens.size()-1);
+        	TokenImpl token = tokens.get(tokens.size()-1);
         	int lastLine = token.endLineNumber;
         	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end tag of='"+state.getEnd()+"'"
-        			+ " where the start tag was on line number="+lastLine+" and start tag looks like='"+state.getStart()+"'");
+        			+ " where the start tag was on line number="+lastLine+" and start token of the tag looks like='"+state.getStart()+"'");
         }
         
         end++;
@@ -127,8 +127,8 @@ public class TempateTokenizerRunnable {
 	 * or implement something in this class to rework those two Tokens as well.
 	 */
     private void cleanupBeforeCommentWhitespace() {
-    	Token comment = tokens.get(tokens.size()-1);
-    	Token plain = tokens.get(tokens.size()-2);
+    	TokenImpl comment = tokens.get(tokens.size()-1);
+    	TokenImpl plain = tokens.get(tokens.size()-2);
     	
     	int beginMark = comment.begin;
     	int newLineMark = 0;
@@ -158,7 +158,7 @@ public class TempateTokenizerRunnable {
 		if(isOpenCloseTag)
 			finalState = TemplateToken.START_END_TAG;
 		
-        Token lastToken = new Token(filePath, begin, --end, finalState, beginLineNumber, endLineNumber, pageSource);
+        TokenImpl lastToken = new TokenImpl(filePath, begin, --end, finalState, beginLineNumber, endLineNumber, pageSource);
         begin = end += skip;
         beginLineNumber = endLineNumber;
         state = newState;

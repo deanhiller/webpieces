@@ -23,7 +23,7 @@ public class GroovyScriptGenerator {
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
-		List<Token> tokens = tokenizer.tokenize(filePath, source);
+		List<TokenImpl> tokens = tokenizer.tokenize(filePath, source);
 
 		String className = fullClassName;
 		String packageStr = null;
@@ -44,7 +44,7 @@ public class GroovyScriptGenerator {
 		// Class end
 		creator.printEnd(sourceCode);
 		
-		Token token = tokens.get(tokens.size()-1);
+		TokenImpl token = tokens.get(tokens.size()-1);
 		int lastLine = token.endLineNumber;
 		long total = System.currentTimeMillis() - start;
 		log.info(total+"ms source generation. class="+className+" from "+lastLine+" html lines of code to "+sourceCode.getLineNumber()+" lines of groovy code");
@@ -52,9 +52,9 @@ public class GroovyScriptGenerator {
 		return sourceCode;
 	}
 
-	private void generateBody(ScriptOutputImpl sourceCode, List<Token> tokens) {
+	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens) {
 
-		for(Token token : tokens) {
+		for(TokenImpl token : tokens) {
 			TemplateToken state = token.state;
 			
 			switch (state) {

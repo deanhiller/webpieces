@@ -82,4 +82,10 @@ public class FullResponse {
 			throw new IllegalStateException("Expected body to contain='"+text+"' but body was="+bodyAsString);
 	}
 
+	public void assertNotContains(String text) {
+		String bodyAsString = getBodyAsString();
+		if(bodyAsString.contains(text))
+			throw new IllegalStateException("Expected body to NOT contain='"+text+"' but body was="+bodyAsString);		
+	}
+
 }
