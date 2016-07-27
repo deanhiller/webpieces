@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.templating.api.Tag;
+import org.webpieces.templating.impl.tags.ElseTag;
 import org.webpieces.templating.impl.tags.IfTag;
 import org.webpieces.templating.impl.tags.VerbatimTag;
 
@@ -14,6 +15,7 @@ public class TagLookup {
 	public TagLookup() {
 		put(new VerbatimTag());
 		put(new IfTag());
+		put(new ElseTag());
 	}
 	
 	protected void put(Tag tag) {

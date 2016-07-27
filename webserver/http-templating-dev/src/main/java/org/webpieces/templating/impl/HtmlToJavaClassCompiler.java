@@ -22,7 +22,12 @@ public class HtmlToJavaClassCompiler {
 		String filePath = fullClassName.replace(".", "/").replace("_", ".");
 		
 		ScriptOutputImpl scriptCode = scriptGen.generate(filePath, source, fullClassName);
-		groovyCompile.compile(scriptCode, compiledCallback);
+		try {
+			groovyCompile.compile(scriptCode, compiledCallback);
+		} catch(Exception e) {
+			throw new RuntimeException("Generated a groovy script file but compilation failed for file="
+					+filePath+" Script code generated=\n"+scriptCode.getScriptSourceCode(), e);
+		}
 		return scriptCode;
 	}
 }

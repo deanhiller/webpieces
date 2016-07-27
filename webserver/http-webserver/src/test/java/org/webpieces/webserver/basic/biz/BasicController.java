@@ -59,7 +59,14 @@ public class BasicController {
 	}
 	
 	public Action ifTag() {
-		
+		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
+	}
+	
+	public Action elseTag() {
+		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
+	}
+
+	public Action elseTagFail() {
 		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
 	}
 }
