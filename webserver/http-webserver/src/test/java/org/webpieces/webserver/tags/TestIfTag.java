@@ -55,12 +55,26 @@ public class TestIfTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("This should exist");
 		response.assertNotContains("This should not exist");
-		response.assertNotContains("Negative1");
+		response.assertContains("This should exist");
 		response.assertContains("Else1");
-		response.assertNotContains("Negative2");
 		response.assertContains("Else2");
+		response.assertContains("Else3");
 	}	
-	
+
+	@Test
+	public void testElseIFTag() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/elseif");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertNotContains("This should not exist");
+		response.assertContains("This should exist");
+		response.assertContains("ElseIf1");
+	}
 }

@@ -7,15 +7,25 @@
         <br/>This should exist<br/>
     #{/if}#
     #{else}#
-        This should not exist
+        This should not exist1
     #{/else}#
     
-    #{if negative}#Negative1#{/if}##{else}#Else1#{/else}#
+    #{if negative}#This should not exist2#{/if}##{else}#Else1#{/else}#
     
     #{if negative2}#
-         Negative2
+         This should not exist3
     #{/if}##{else}#
          Else2
+    #{/else}#
+    
+    #{if negative}#
+         This should not exist4
+    #{/if}#
+    #{elseif negative2}#
+         This should not exist5
+    #{/elseif}#
+    #{else}#
+         Else3
     #{/else}#
   </body>
 </html>

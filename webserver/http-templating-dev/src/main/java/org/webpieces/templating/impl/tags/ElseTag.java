@@ -57,8 +57,8 @@ public class ElseTag extends AbstractTag {
 					+ " #{"+name+"} is in error.  location="+current.getSourceLocation());
 		
 		String previousTagName = prevous.getCleanValue();
-		if(!"if".equals(previousTagName)) {
-			throw new IllegalArgumentException(name+" tag is missing the previous #{/if}# tag.  Instead we "
+		if(!"if".equals(previousTagName) && !"elseif".equals(previousTagName)) {
+			throw new IllegalArgumentException(name+" tag is missing the previous #{/if}# or #{/elseif}# tag.  Instead we "
 					+ "found a #{/"+previousTagName+"}# tag before the else. location="+current.getSourceLocation());
 		}
 	}

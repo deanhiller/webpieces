@@ -55,14 +55,14 @@ public class ElseIfTag extends AbstractTag {
 		String name = getName();
 		if(!prevous.isEndTag())
 			throw new IllegalArgumentException(name+" tag is misused.  Either there is no previous #{/if}# tag OR\n"
-					+ " it must be used like #{/if}##{else}# or #{/elseif}##{else}# with no\n"
-					+ " spaces between the end if tag and begin else tag OR both #{/if}# and #{else}# must be on it's\n"
-					+ " own lines with no text(only whitespace) or both #{/elseif}# and #{else}# must be on it's\n"
+					+ " it must be used like #{/if}##{elseif}# or #{/elseif}##{elseif}# with no\n"
+					+ " spaces between the end if tag and begin else tag OR both #{/if}# and #{elseif}# must be on it's\n"
+					+ " own lines with no text(only whitespace) or both #{/elseif}# and #{elseif}# must be on it's\n"
 					+ " own lines with no text(only whitespace)\n"
 					+ " #{"+name+"} is in error.  location="+current.getSourceLocation());
 		
 		String previousTagName = prevous.getCleanValue();
-		if(!"if".equals(previousTagName)) {
+		if(!"if".equals(previousTagName) && !"elseif".equals(previousTagName)) {
 			throw new IllegalArgumentException(name+" tag is missing the previous #{/if}# tag.  Instead we "
 					+ "found a #{/"+previousTagName+"}# tag before the else. location="+current.getSourceLocation());
 		}

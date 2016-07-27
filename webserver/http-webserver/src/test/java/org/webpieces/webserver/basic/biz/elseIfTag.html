@@ -2,20 +2,31 @@
   <head>
   </head>
   <body>
-    Testing for if
+    Testing for elseif
     #{if positive}#
         <br/>This should exist<br/>
     #{/if}#
+    #{elseif positive}#
+        This should not exist1    
+    #{/elseif}#
+    #{elseif positive}#
+        This should not exist2    
+    #{/elseif}#
     #{else}#
-        This should not exist
+        This should not exist3
     #{/else}#
     
-    #{if negative}#Negative1#{/if}##{else}#Else1#{/else}#
-    
-    #{if negative2}#
-         Negative2
-    #{/if}##{else}#
-         Else2
+    #{if negative}#
+        This should not exist4
+    #{/if}#
+    #{elseif negative2}#
+        This should not exist5    
+    #{/elseif}#
+    #{elseif positive}#
+        ElseIf1    
+    #{/elseif}#
+    #{else}#
+        This should not exist6
     #{/else}#
   </body>
 </html>
