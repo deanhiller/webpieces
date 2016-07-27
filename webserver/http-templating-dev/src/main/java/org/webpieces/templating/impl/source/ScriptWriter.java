@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.Tag;
 
 public class ScriptWriter {
@@ -119,7 +120,7 @@ public class ScriptWriter {
 		tag.generateStartAndEnd(sourceCode, token);
 	}
 
-	public void printStartTag(TokenImpl token, ScriptOutputImpl sourceCode) {
+	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
 		String expr = token.getCleanValue();
 		int indexOfSpace = expr.indexOf(" ");
 		String tagName = expr;
@@ -129,6 +130,11 @@ public class ScriptWriter {
 
 		Tag tag = tagLookup.lookup(tagName, token);
 		tagStack.get().push(tag);
+		if(tag instanceof AbstractTag) {
+			AbstractTag abstractTag = (AbstractTag) tag;
+			//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
+			abstractTag.validatePreviousSibling(token, previousToken);
+		}
 		tag.generateStart(sourceCode, token);
 //        sourceCode.print("      __out.print(escapeHtml("+expr+"));");
 //        sourceCode.appendTokenComment(token);

@@ -66,7 +66,7 @@ public class BasicController {
 		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
 	}
 
-	public Action elseTagFail() {
+	public Action elseIfTag() {
 		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
 	}
 }

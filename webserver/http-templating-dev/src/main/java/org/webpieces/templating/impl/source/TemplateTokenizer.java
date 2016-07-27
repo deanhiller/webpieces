@@ -24,6 +24,9 @@ public class TemplateTokenizer {
 					tokens.remove(i+1);
 					tokens.remove(i-1);
 				}
+			} else if(token.state == TemplateToken.PLAIN && "".equals(token.getValue())) {
+				//remove tokens that are just "" as we don't need to print empty string out
+				tokens.remove(i);
 			}
 		}
 	

@@ -1,22 +1,15 @@
 package org.webpieces.templating.impl.tags;
 
+import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.ScriptOutput;
-import org.webpieces.templating.api.Tag;
 import org.webpieces.templating.api.Token;
 
-public class IfTag implements Tag {
+public class IfTag extends AbstractTag {
 
 	@Override
 	public String getName() {
 		return "if";
 	}
-
-	@Override
-	public void generateStartAndEnd(ScriptOutput sourceCode, Token token) {
-		throw new IllegalArgumentException("if tag can only be used with a body so"
-				+ " #{if/} is not usable.  location="+token.getSourceLocation());
-	}
-	
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token) {
 		String cleanValue = token.getCleanValue();

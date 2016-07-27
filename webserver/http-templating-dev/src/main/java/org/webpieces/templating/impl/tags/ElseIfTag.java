@@ -2,19 +2,24 @@ package org.webpieces.templating.impl.tags;
 
 import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.ScriptOutput;
-import org.webpieces.templating.api.Tag;
 import org.webpieces.templating.api.Token;
 
-public class ElseTag extends AbstractTag {
+public class ElseIfTag extends AbstractTag {
 
 	@Override
 	public String getName() {
-		return "else";
+		return "elseif";
 	}
 
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token) {
-		sourceCode.println(" else {");
+		String cleanValue = token.getCleanValue();
+		int indexOf = cleanValue.indexOf(" ");
+		if(indexOf < 0)
+			throw new IllegalArgumentException("elseif statement is missing expression.  "
+					+ "It must be #{elseif expression}# to work.  location="+token.getSourceLocation());
+		String expression = cleanValue.substring(indexOf+1);
+		sourceCode.println(" else if ("+expression+") {");
 	}
 
 	@Override

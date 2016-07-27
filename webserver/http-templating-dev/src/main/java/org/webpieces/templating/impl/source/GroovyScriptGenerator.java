@@ -54,7 +54,12 @@ public class GroovyScriptGenerator {
 
 	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens) {
 
-		for(TokenImpl token : tokens) {
+		for(int i = 0; i < tokens.size(); i++) {
+			TokenImpl token = tokens.get(i);
+			TokenImpl previousToken = null;
+			if(i > 0)
+				previousToken = tokens.get(i-1);
+			
 			TemplateToken state = token.state;
 			
 			switch (state) {
@@ -85,7 +90,7 @@ public class GroovyScriptGenerator {
 				creator.printStartEndTag(token, sourceCode);
 				break;
 			case START_TAG:
-				creator.printStartTag(token, sourceCode);
+				creator.printStartTag(token, previousToken, sourceCode);
 				break;
 			case END_TAG:
 				creator.printEndTag(token, sourceCode);

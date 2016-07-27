@@ -11,5 +11,7 @@ public interface Token {
 	 * Get's the entire String between #{ and }# including arguments
 	 */
 	public String getCleanValue();
+
+	public boolean isEndTag();
 	
 }

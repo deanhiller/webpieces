@@ -44,4 +44,9 @@ public class TokenImpl implements Token {
 	public String getSourceLocation() {
 		return "File="+filePath+" line number="+beginLineNumber;
 	}
+
+	@Override
+	public boolean isEndTag() {
+		return state == TemplateToken.END_TAG;
+	}
 }
