@@ -53,7 +53,8 @@ public class TestSimpleTemplate {
 		StringWriter out2 = new StringWriter();
 		template.run(args, out2);
 		
-		Assert.assertTrue(out.toString().contains("Hi there, my name is Dean Hiller and my favorite color is green"));
+		String html = out.toString();
+		Assert.assertTrue("Html was="+html, html.contains("Hi there, my name is Dean Hiller and my favorite color is green"));
 	}
 	
 	private Map<String, Object> createArgs(Object user) {

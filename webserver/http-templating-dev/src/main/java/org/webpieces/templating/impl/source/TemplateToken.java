@@ -12,7 +12,7 @@ public enum TemplateToken {
     MESSAGE("&{", "}&"),        // &{...}&
     ACTION("@{", "}@"),         // @{...}@
     ABSOLUTE_ACTION("@@{", "}@@"), // @@{...}@@
-    COMMENT("*{", "}*");        // *{...}*
+    COMMENT("*{", "}*");          // *{...}*
     
     private String start;
 	private String end;

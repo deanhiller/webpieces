@@ -3,6 +3,14 @@ package org.webpieces.templating.impl.source;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+* for discarding extra lines, it is a bit tricky
+* case 1: Hi there, my name is ${user.name}$ and my favorite color is ${color}$ (preserve all)
+* case 2: Hi there, my name is ${user.name}$\n and this is my story (preserve all)
+* case 3: #{if}#\nShow this\n#{/if}\n  should rewrite as "Show this\n" so two \n are removed
+* case 4: #{if}#Show this#{/if}# should preserve all as "Show this\n"
+* case 5:
+*/  
 public class TempateTokenizerRunnable {
 
 	private String pageSource;
@@ -55,6 +63,9 @@ public class TempateTokenizerRunnable {
                         found(TemplateToken.ACTION, 2, lineNumber);
                     } else if (c == '*' && c1 == '{') {
                         found(TemplateToken.COMMENT, 2, lineNumber);
+                    } else if(c == '\n') {
+                    	//We do this so any plain tokens that are all whitespace can be discarded...
+                    	found(TemplateToken.PLAIN, 1, lineNumber, false, true);
                     }
                     break;
                 case SCRIPT:
@@ -65,14 +76,13 @@ public class TempateTokenizerRunnable {
                 case COMMENT:
                     if (c == '}' && c1 == '*') {
                         found(TemplateToken.PLAIN, 2, lineNumber);
-                        cleanupBeforeCommentWhitespace();
                     }
                     break;
                 case START_TAG:
                     if (c == '}' && c1 == '#') {
                         found(TemplateToken.PLAIN, 2, lineNumber);
                     } else if (c == '/' && c1 == '}' && c2 == '#') {
-                        found(TemplateToken.PLAIN, 3, lineNumber, true);
+                        found(TemplateToken.PLAIN, 3, lineNumber, true, false);
                     }
                     break;
                 case END_TAG:
@@ -119,46 +129,53 @@ public class TempateTokenizerRunnable {
         return tokens;
 	}
 	
-	/** 
-	 * Extra newline caused by simple comments are annoying when rendered so this strips them out.  This is not
-	 * run in production anyways as we compile the resulting template file for production use.
-	 * 
-	 * We only strip whitespace before comments not after, so always ensure \n follows the end of the comment
-	 * or implement something in this class to rework those two Tokens as well.
-	 */
-    private void cleanupBeforeCommentWhitespace() {
-    	TokenImpl comment = tokens.get(tokens.size()-1);
-    	TokenImpl plain = tokens.get(tokens.size()-2);
-    	
-    	int beginMark = comment.begin;
-    	int newLineMark = 0;
-    	for(int i = newLineMarks.size()-1; i > 0; i--) {
-    		newLineMark = newLineMarks.get(i);
-    		if(newLineMark < beginMark) {
-    			break;
-    		}
-    	}
-    	String candidateWhitespace = pageSource.substring(newLineMark, beginMark-2);
-    	if(!candidateWhitespace.trim().equals("")) {
-    		return;
-    	}
-    	
-    	//otherwise, let's change some things
-    	comment.begin = newLineMark;
-    	plain.end = newLineMark;
-    	plain.endLineNumber--;
-    	comment.beginLineNumber++;
-	}
+//	/** 
+//	 * Extra newline caused by simple comments are annoying when rendered so this strips them out.  This is not
+//	 * run in production anyways as we compile the resulting template file for production use.
+//	 * 
+//	 * We only strip whitespace before comments not after, so always ensure \n follows the end of the comment
+//	 * or implement something in this class to rework those two Tokens as well.
+//	 */
+//    private void cleanupBeforeCommentWhitespace() {
+//    	TokenImpl comment = tokens.get(tokens.size()-1);
+//    	TokenImpl plain = tokens.get(tokens.size()-2);
+//    	
+//    	int beginMark = comment.begin;
+//    	int newLineMark = 0;
+//    	for(int i = newLineMarks.size()-1; i > 0; i--) {
+//    		newLineMark = newLineMarks.get(i);
+//    		if(newLineMark < beginMark) {
+//    			break;
+//    		}
+//    	}
+//    	String candidateWhitespace = pageSource.substring(newLineMark, beginMark-2);
+//    	if(!candidateWhitespace.trim().equals("")) {
+//    		return;
+//    	}
+//    	
+//    	//otherwise, let's change some things
+//    	comment.begin = newLineMark;
+//    	plain.end = newLineMark;
+//    	plain.endLineNumber--;
+//    	comment.beginLineNumber++;
+//	}
 
     private void found(TemplateToken newState, int skip, int endLineNumber) {
-    	found(newState, skip, endLineNumber, false);
+    	found(newState, skip, endLineNumber, false, false);
     }
-	private void found(TemplateToken newState, int skip, int endLineNumber, boolean isOpenCloseTag) {
+    
+	private void found(TemplateToken newState, int skip, int endLineNumber, boolean isOpenCloseTag, boolean hasNewLine) {
 		TemplateToken finalState = state;
 		if(isOpenCloseTag)
 			finalState = TemplateToken.START_END_TAG;
 		
-        TokenImpl lastToken = new TokenImpl(filePath, begin, --end, finalState, beginLineNumber, endLineNumber, pageSource);
+		--end;
+		int endValue = end;
+		if(hasNewLine) //special case for PLAIN
+			endValue++;
+		
+        TokenImpl lastToken = new TokenImpl(filePath, begin, endValue, finalState, beginLineNumber, endLineNumber, pageSource);
+        
         begin = end += skip;
         beginLineNumber = endLineNumber;
         state = newState;

@@ -29,7 +29,8 @@ public class TokenImpl implements Token {
 	}
 
 	public String getValue() {
-		return source.substring(begin, end);
+		String value = source.substring(begin, end);
+		return value;
 	}
 
 	public String getCleanValue() {
