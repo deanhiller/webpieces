@@ -15,7 +15,7 @@ public class CLASSNAMELocalController {
 	private RemoteService service;
 	
 	public Action someMethod() {
-		return Actions.renderThis();
+		return Actions.renderThis("user", "Dean Hiller");
 	}
 	
 	public CompletableFuture<Action> myAsyncMethod() {

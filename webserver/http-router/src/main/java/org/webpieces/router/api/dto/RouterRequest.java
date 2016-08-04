@@ -41,7 +41,7 @@ public class RouterRequest {
 
 	@Override
 	public String toString() {
-		return "Request [isHttps=" + isHttps + ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
+		return "RouterRequest [isHttps=" + isHttps + ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
 				+ ", \nrelativePath=" + relativePath + ", \ndomain=" + domain + ", \nmethod=" + method + ", \nqueryParams=\n"
 				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + ", \nurlPathParams=\n" + urlPathParams + "]";
 	}
