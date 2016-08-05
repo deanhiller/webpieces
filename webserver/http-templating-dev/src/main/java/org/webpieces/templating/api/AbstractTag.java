@@ -1,6 +1,6 @@
 package org.webpieces.templating.api;
 
-public abstract class AbstractTag implements Tag {
+public abstract class AbstractTag implements GroovyGen {
 
 
 	@Override

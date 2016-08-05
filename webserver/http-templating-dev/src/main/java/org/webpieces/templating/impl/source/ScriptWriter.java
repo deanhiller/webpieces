@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
-import org.webpieces.templating.api.Tag;
+import org.webpieces.templating.api.GroovyGen;
 
 public class ScriptWriter {
 
@@ -20,14 +20,14 @@ public class ScriptWriter {
 
 	private ThreadLocal<Stack<String>> tagStack = new ThreadLocal<>();
 	
-	private TagLookup tagLookup;
+	private GenLookup generatorLookup;
 
 	private HtmlTagLookup htmlTagLookup;
 
 	@Inject
-	public ScriptWriter(HtmlTagLookup htmlTagLookup, TagLookup lookup) {
+	public ScriptWriter(HtmlTagLookup htmlTagLookup, GenLookup lookup) {
 		this.htmlTagLookup = htmlTagLookup;
-		tagLookup = lookup;
+		generatorLookup = lookup;
 	}
 	
 	public void printHead(ScriptOutputImpl sourceCode, String packageStr, String className) {
@@ -121,7 +121,7 @@ public class ScriptWriter {
 			throw new UnsupportedOperationException("not done yet...need to implement arguments");
 		}
 		
-		Tag tag = tagLookup.lookup(tagName, token);
+		GroovyGen tag = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(tag != null) {
 			tag.generateStartAndEnd(sourceCode, token);
@@ -140,15 +140,15 @@ public class ScriptWriter {
 
 		tagStack.get().push(tagName);
 		
-		Tag tag = tagLookup.lookup(tagName, token);
+		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
-		if(tag != null) {
-			if(tag instanceof AbstractTag) {
-				AbstractTag abstractTag = (AbstractTag) tag;
+		if(generator != null) {
+			if(generator instanceof AbstractTag) {
+				AbstractTag abstractTag = (AbstractTag) generator;
 				//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
 				abstractTag.validatePreviousSibling(token, previousToken);
 			}
-			tag.generateStart(sourceCode, token);
+			generator.generateStart(sourceCode, token);
 		} else if(htmltag != null) {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
 		}
@@ -167,9 +167,9 @@ public class ScriptWriter {
 			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+startTagName
 			+"}# which does not match.  end tag location="+token.getSourceLocation());
 
-		Tag tag = tagLookup.lookup(expr, token);
-		if(tag != null)
-			tag.generateEnd(sourceCode, token);
+		GroovyGen generator = generatorLookup.lookup(expr, token);
+		if(generator != null)
+			generator.generateEnd(sourceCode, token);
 	}
 
 	public void unprintUpToLastNewLine() {

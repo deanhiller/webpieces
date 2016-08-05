@@ -2,10 +2,10 @@ package org.webpieces.templating.impl.tags;
 
 import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.ScriptOutput;
-import org.webpieces.templating.api.Tag;
+import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.Token;
 
-public class ElseTag extends AbstractTag {
+public class ElseGen extends AbstractTag {
 
 	@Override
 	public String getName() {

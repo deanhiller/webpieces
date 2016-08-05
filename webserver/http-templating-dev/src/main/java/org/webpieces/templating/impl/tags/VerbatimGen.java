@@ -4,7 +4,7 @@ import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 
-public class VerbatimTag extends AbstractTag {
+public class VerbatimGen extends AbstractTag {
 
 	@Override
 	public String getName() {

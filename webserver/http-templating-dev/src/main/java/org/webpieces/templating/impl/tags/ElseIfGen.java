@@ -4,7 +4,7 @@ import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 
-public class ElseIfTag extends AbstractTag {
+public class ElseIfGen extends AbstractTag {
 
 	@Override
 	public String getName() {

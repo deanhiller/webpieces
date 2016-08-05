@@ -1,6 +1,6 @@
 package org.webpieces.templating.api;
 
-public interface Tag {
+public interface GroovyGen {
 
 	String getName();
 	
