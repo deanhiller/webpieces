@@ -5,6 +5,6 @@ import java.util.Map;
 
 public interface Template {
 
-	public void run(Map<String, Object> properties, Writer str);
-	
+	public TemplateInfo run(Map<String, Object> properties, Writer str);
+
 }

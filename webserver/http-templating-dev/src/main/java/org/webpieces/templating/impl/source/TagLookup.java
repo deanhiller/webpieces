@@ -26,10 +26,6 @@ public class TagLookup {
 
 	public Tag lookup(String tagName, TokenImpl token) {
 		Tag tag = tags.get(tagName);
-		if(tag == null)
-			throw new IllegalArgumentException("tagName="+tagName+" not found from file="
-					+token.getFilePath()+" line="+token.beginLineNumber+" to line="+token.endLineNumber);
-
 		return tag;
 	}
 }

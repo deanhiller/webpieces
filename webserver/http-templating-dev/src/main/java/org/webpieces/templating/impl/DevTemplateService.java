@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
+import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.api.TemplateService;
@@ -15,13 +16,16 @@ import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
 import groovy.lang.GroovyClassLoader;
 
-public class DevTemplateService implements TemplateService {
+public class DevTemplateService extends ProdTemplateService implements TemplateService {
 
 	private HtmlToJavaClassCompiler compiler;
 	private TemplateCompileConfig config;
+	private HtmlTagLookup htmlTagLookup;
 
 	@Inject
-	public DevTemplateService(HtmlToJavaClassCompiler compiler, TemplateCompileConfig config) {
+	public DevTemplateService(HtmlTagLookup htmlTagLookup, HtmlToJavaClassCompiler compiler, TemplateCompileConfig config) {
+		super(htmlTagLookup);
+		this.htmlTagLookup = htmlTagLookup;
 		this.compiler = compiler;
 		this.config = config;
 	}
@@ -57,7 +61,7 @@ public class DevTemplateService implements TemplateService {
 
 		Class<?> compiledTemplate = createTemplate(fullClassName, viewSource);
 		
-		return new TemplateImpl(compiledTemplate);
+		return new TemplateImpl(htmlTagLookup, compiledTemplate);
 	}
 
 	private Class<?> createTemplate(String fullClassName, String source) throws ClassNotFoundException {
@@ -68,9 +72,8 @@ public class DevTemplateService implements TemplateService {
 		return cl.loadClass(scriptCode.getFullClassName());
 	}
 
-	private Object defineClass(GroovyClassLoader cl, GroovyClass groovyClass) {
+	private Void defineClass(GroovyClassLoader cl, GroovyClass groovyClass) {
         cl.defineClass(groovyClass.getName(), groovyClass.getBytes());
-
 		return null;
 	}
 

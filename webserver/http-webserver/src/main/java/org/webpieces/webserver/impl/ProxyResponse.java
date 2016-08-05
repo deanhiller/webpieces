@@ -2,8 +2,6 @@ package org.webpieces.webserver.impl;
 
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.joda.time.DateTime;
@@ -100,20 +98,19 @@ public class ProxyResponse implements ResponseStreamer {
 		String templateClassName = view.getMethodName();
 		
 		Template template = templatingService.loadTemplate(packageStr, templateClassName, "html");
-		
-		//stream this out with chunked response instead....
+
+		//TODO: stream this out with chunked response instead??....
 		StringWriter out = new StringWriter();
 		
-		Map<String, Object> copy = new HashMap<>(resp.getPageArgs());
 		try {
-			template.run(copy, out);
+			templatingService.runTemplate(template, out, resp.getPageArgs());
 		} catch(MissingPropertyException e) {
 			Set<String> keys = resp.getPageArgs().keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
 					+ " return enough arguments for the template.  specifically, the method\nreturned these"
 					+ " arguments="+keys+"  The missing properties are as follows....\n"+e.getMessage(), e);
 		}
-
+		
 		String content = out.toString();
 		
 		KnownStatusCode statusCode = KnownStatusCode.HTTP_200_OK;

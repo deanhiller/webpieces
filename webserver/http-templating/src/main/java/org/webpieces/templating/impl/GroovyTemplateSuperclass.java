@@ -1,8 +1,14 @@
 package org.webpieces.templating.impl;
 
+import java.io.PrintWriter;
+import java.util.Map;
+
+import org.webpieces.templating.api.HtmlTag;
+import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.impl.html.EscapeHTMLFormatter;
 import org.webpieces.templating.impl.html.NullFormatter;
 
+import groovy.lang.Closure;
 import groovy.lang.Script;
 
 public abstract class GroovyTemplateSuperclass extends Script {
@@ -13,9 +19,11 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private static final NullFormatter NULL_FORMATTER = new NullFormatter();
 	
 	private EscapeCharactersFormatter formatter;
+	private HtmlTagLookup lookup;
 	
-    public void initialize(EscapeCharactersFormatter f) {
+    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup lookup) {
     	formatter = f;
+    	this.lookup = lookup;
     }
     
     protected void installNullFormatter() {
@@ -29,4 +37,10 @@ public abstract class GroovyTemplateSuperclass extends Script {
     protected String useFormatter(Object val) {
     	return formatter.format(val);
     }
+    
+    protected void runTag(String tagName, Map<?, ?> args, Closure<?> closure, PrintWriter writer) {
+    	HtmlTag tag = lookup.lookup(tagName);
+    	tag.runTag(args, closure, writer);
+    }
+
 }

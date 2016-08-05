@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.AbstractTag;
+import org.webpieces.templating.api.HtmlTag;
+import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.Tag;
 
 public class ScriptWriter {
@@ -16,12 +18,15 @@ public class ScriptWriter {
     
 	private Pattern pattern = Pattern.compile("\"");
 
-	private ThreadLocal<Stack<Tag>> tagStack = new ThreadLocal<>();
+	private ThreadLocal<Stack<String>> tagStack = new ThreadLocal<>();
 	
 	private TagLookup tagLookup;
 
+	private HtmlTagLookup htmlTagLookup;
+
 	@Inject
-	public ScriptWriter(TagLookup lookup) {
+	public ScriptWriter(HtmlTagLookup htmlTagLookup, TagLookup lookup) {
+		this.htmlTagLookup = htmlTagLookup;
 		tagLookup = lookup;
 	}
 	
@@ -117,7 +122,12 @@ public class ScriptWriter {
 		}
 		
 		Tag tag = tagLookup.lookup(tagName, token);
-		tag.generateStartAndEnd(sourceCode, token);
+		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
+		if(tag != null) {
+			tag.generateStartAndEnd(sourceCode, token);
+		} else if(htmltag != null) {
+			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
+		}
 	}
 
 	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
@@ -128,14 +138,21 @@ public class ScriptWriter {
 			tagName = expr.substring(0, indexOfSpace);
 		}		
 
+		tagStack.get().push(tagName);
+		
 		Tag tag = tagLookup.lookup(tagName, token);
-		tagStack.get().push(tag);
-		if(tag instanceof AbstractTag) {
-			AbstractTag abstractTag = (AbstractTag) tag;
-			//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
-			abstractTag.validatePreviousSibling(token, previousToken);
+		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
+		if(tag != null) {
+			if(tag instanceof AbstractTag) {
+				AbstractTag abstractTag = (AbstractTag) tag;
+				//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
+				abstractTag.validatePreviousSibling(token, previousToken);
+			}
+			tag.generateStart(sourceCode, token);
+		} else if(htmltag != null) {
+			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
 		}
-		tag.generateStart(sourceCode, token);
+
 //        sourceCode.print("      __out.print(escapeHtml("+expr+"));");
 //        sourceCode.appendTokenComment(token);
 //        sourceCode.println();
@@ -143,15 +160,16 @@ public class ScriptWriter {
 
 	public void printEndTag(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String expr = token.getCleanValue();
-		Tag tag = tagLookup.lookup(expr, token);
 		if(tagStack.get().size() == 0)
-			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag was not found..only the end tag on line="+token.beginLineNumber+" in file="+token.getFilePath());
-		Tag startTag = tagStack.get().pop();
-		if(tag != startTag)
-			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+startTag.getName()
-			+"}# which does not match.  end tag found on line="+token.beginLineNumber+" in file="+token.getFilePath());
-		
-		tag.generateEnd(sourceCode, token);
+			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag was not found..only the end tag. location="+token.getSourceLocation());
+		String startTagName = tagStack.get().pop();
+		if(!expr.equals(startTagName))
+			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+startTagName
+			+"}# which does not match.  end tag location="+token.getSourceLocation());
+
+		Tag tag = tagLookup.lookup(expr, token);
+		if(tag != null)
+			tag.generateEnd(sourceCode, token);
 	}
 
 	public void unprintUpToLastNewLine() {
