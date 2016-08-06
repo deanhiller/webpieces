@@ -29,6 +29,10 @@ public class ProdTemplateService implements TemplateService {
 		if(!"".equals(extension))
 			fullTemplateName = fullTemplateName+"_"+extension;
 		
+		return loadTemplate(fullTemplateName);
+	}
+
+	private Template loadTemplate(String fullTemplateName) {
 		ClassLoader cl = getClass().getClassLoader();
 		try {
 			Class<?> compiledTemplate = cl.loadClass(fullTemplateName);
@@ -42,12 +46,17 @@ public class ProdTemplateService implements TemplateService {
 	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
 		Map<String, Object> copy = new HashMap<>(pageArgs);
 		TemplateInfo info = template.run(copy, out);
-		
-		String superclass = info.getSuperTemplate();
-		if(superclass != null) {
-			Template superTemplate = loadTemplate("", "", "");
-			runTemplate(superTemplate, out, pageArgs);
-			throw new UnsupportedOperationException("not done yet");
+
+		String className = info.getTemplateClass();
+		String superTemplateFilePath = info.getSuperTemplateFilePath();
+		try {
+			if(superTemplateFilePath != null) {
+				Template superTemplate = loadTemplate(superTemplateFilePath);
+				runTemplate(superTemplate, out, pageArgs);
+			}
+		} catch(Exception e) {
+			throw new RuntimeException("template failed="+superTemplateFilePath+" called from template="
+					+className+" See below exception messages for more information", e);
 		}
 	}
 

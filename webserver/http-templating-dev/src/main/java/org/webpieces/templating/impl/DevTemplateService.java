@@ -48,11 +48,13 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 			fullPath = directory + "/" + fullPath;
 		}
 		fullPath = "/" + fullPath;
-
+		
 		InputStream resource = DevTemplateService.class.getResourceAsStream(fullPath);
 		if(resource == null)
 			throw new FileNotFoundException("resource="+fullPath+" was not found in classpath");
-
+		else if(templateClassName.contains("_"))
+			throw new IllegalArgumentException("template names cannot contain _ in them.  name="+templateClassName);
+		
 		String viewSource = IOUtils.toString(resource, config.getFileEncoding().name());
 
 		String fullClassName = templateClassName+"_"+extension;

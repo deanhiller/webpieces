@@ -23,6 +23,8 @@ public class TemplateTokenizer {
 				if("".equals(left.getValue().trim()) && "".equals(right.getValue().trim())) {
 					tokens.remove(i+1);
 					tokens.remove(i-1);
+					if(i >= tokens.size())
+						i--;
 				}
 			} else if(token.state == TemplateToken.PLAIN && "".equals(token.getValue())) {
 				//remove tokens that are just "" as we don't need to print empty string out

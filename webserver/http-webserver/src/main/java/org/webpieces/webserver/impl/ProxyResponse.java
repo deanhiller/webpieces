@@ -97,6 +97,8 @@ public class ProxyResponse implements ResponseStreamer {
 		//For this type of View, the template is the name of the method..
 		String templateClassName = view.getMethodName();
 		
+		//TODO: get html from the request such that we look up the correct template? AND if not found like they request only json, than
+		//we send back a 404 rather than a 500
 		Template template = templatingService.loadTemplate(packageStr, templateClassName, "html");
 
 		//TODO: stream this out with chunked response instead??....

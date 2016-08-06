@@ -19,7 +19,7 @@ public class ScriptWriter {
     
 	private Pattern pattern = Pattern.compile("\"");
 
-	private ThreadLocal<Stack<GroovyGen>> tagStack = new ThreadLocal<>();
+	private ThreadLocal<Stack<TagState>> tagStack = new ThreadLocal<>();
 	private GenLookup generatorLookup;
 	private HtmlTagLookup htmlTagLookup;
 	private UniqueIdGenerator uniqueIdGen;
@@ -48,6 +48,7 @@ public class ScriptWriter {
         sourceCode.println(" extends org.webpieces.templating.impl.GroovyTemplateSuperclass {");
         sourceCode.println("  public Object run() {");
         sourceCode.println("    use(org.webpieces.templating.impl.source.GroovyExtensions) {");
+        
 //        for (String n : extensionsClassnames) {
 //            println("use(_('" + n + "')) {");
 //        }
@@ -58,7 +59,11 @@ public class ScriptWriter {
 		sourceCode.println("  }");
 		sourceCode.println("}");
 		
-		tagStack.set(null);
+		if(tagStack.get().size() > 0) {
+			TagState state = tagStack.get().pop();
+			TokenImpl token = state.getToken();
+			throw new IllegalStateException("Found unmatched tag #{"+token.getCleanValue()+"}#. "+token.getSourceLocation()); 
+		}
 	}
 
 	public void printPlain(TokenImpl token, ScriptOutputImpl sourceCode) {
@@ -134,12 +139,7 @@ public class ScriptWriter {
 	}
 
 	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
-		String expr = token.getCleanValue();
-		int indexOfSpace = expr.indexOf(" ");
-		String tagName = expr;
-		if(indexOfSpace > 0) {
-			tagName = expr.substring(0, indexOfSpace);
-		}
+		String tagName = token.getTagName();
 
 		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
@@ -157,27 +157,29 @@ public class ScriptWriter {
 		}
 
 		generator.generateStart(sourceCode, token);
-		tagStack.get().push(generator);
+		tagStack.get().push(new TagState(token, generator));
 	}
 
 	public void printEndTag(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String expr = token.getCleanValue();
 		if(tagStack.get().size() == 0)
 			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag was not found..only the end tag. location="+token.getSourceLocation());
-		GroovyGen currentGenerator = tagStack.get().pop();
-		if(!expr.equals(currentGenerator.getName()))
-			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+currentGenerator
-			+"}# which does not match.  end tag location="+token.getSourceLocation());
+		TagState currentState = tagStack.get().pop();
+		TokenImpl currentToken = currentState.getToken();
+		if(!expr.equals(currentToken.getTagName()))
+			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+currentToken.getCleanValue()
+			+"}# which does not match.  end tag location="+token.getSourceLocation()+" begin tag location="+currentToken.getSourceLocation());
 
-		currentGenerator.generateEnd(sourceCode, token);
+		GroovyGen generator = currentState.getGenerator();
+		generator.generateEnd(sourceCode, token);
 	}
 
 	public void unprintUpToLastNewLine() {
 		
 	}
 
-	public void verifyTagIntegrity(List<TokenImpl> tokens) {
-		
+	public void cleanup() {
+		tagStack.set(null);
 	}
 
 }

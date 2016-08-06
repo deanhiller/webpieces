@@ -73,4 +73,8 @@ public class BasicController {
 	public Action getTag() {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
+	
+	public Action extendsTag() {
+		return Actions.renderThis("user", "Dean Hiller");
+	}
 }

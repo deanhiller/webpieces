@@ -22,6 +22,7 @@ public class BasicRouteModule implements RouteModule {
 		router.addRoute(HttpMethod.GET, "/elseif",           "biz/BasicController.elseIfTag", BasicRouteId.ELSEIF);
 
 		router.addRoute(HttpMethod.GET, "/setget",           "biz/BasicController.getTag", BasicRouteId.SETGET);
+		router.addRoute(HttpMethod.GET, "/extends",          "biz/BasicController.extendsTag", BasicRouteId.EXTENDS);
 		
 		router.setPageNotFoundRoute("biz/BasicController.notFound");
 		router.setInternalErrorRoute("biz/BasicController.internalError");

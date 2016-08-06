@@ -36,13 +36,17 @@ public class GroovyScriptGenerator {
 
 		ScriptOutputImpl sourceCode = new ScriptOutputImpl(packageStr, className);
 
-		// Class header
-		creator.printHead(sourceCode, packageStr, className);
-
-		generateBody(sourceCode, tokens);
-
-		// Class end
-		creator.printEnd(sourceCode);
+		try {
+			// Class header
+			creator.printHead(sourceCode, packageStr, className);
+	
+			generateBody(sourceCode, tokens);
+	
+			// Class end
+			creator.printEnd(sourceCode);
+		} finally {
+			creator.cleanup();
+		}
 		
 		TokenImpl token = tokens.get(tokens.size()-1);
 		int lastLine = token.endLineNumber;
@@ -53,7 +57,6 @@ public class GroovyScriptGenerator {
 	}
 
 	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens) {
-
 		for(int i = 0; i < tokens.size(); i++) {
 			TokenImpl token = tokens.get(i);
 			TokenImpl previousToken = null;
@@ -97,7 +100,5 @@ public class GroovyScriptGenerator {
 				break;
 			}
 		}
-		
-		creator.verifyTagIntegrity(tokens);
 	}
 }

@@ -49,4 +49,14 @@ public class TokenImpl implements Token {
 	public boolean isEndTag() {
 		return state == TemplateToken.END_TAG;
 	}
+	
+	public String getTagName() {
+		String expr = getCleanValue();
+		int indexOfSpace = expr.indexOf(" ");
+		String tagName = expr;
+		if(indexOfSpace > 0) {
+			tagName = expr.substring(0, indexOfSpace);
+		}
+		return tagName;
+	}
 }

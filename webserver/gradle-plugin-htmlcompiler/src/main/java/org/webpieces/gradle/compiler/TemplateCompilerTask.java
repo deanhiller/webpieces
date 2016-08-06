@@ -83,6 +83,9 @@ public class TemplateCompilerTask extends AbstractCompile {
 	}
 	
 	private String findFullName(File baseDir, File f) {
+		if(f.getName().contains("_"))
+			throw new IllegalArgumentException("File name is invalid.  It cannot contain _ in the name="+f.getAbsolutePath());
+		
 		String name = f.getName().replace(".", "_");
 		File current = f.getParentFile();
 		while(current != null && !baseDir.equals(current)) {

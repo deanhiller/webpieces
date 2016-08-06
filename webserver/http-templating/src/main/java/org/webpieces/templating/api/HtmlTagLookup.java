@@ -3,6 +3,7 @@ package org.webpieces.templating.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
 
@@ -13,6 +14,7 @@ public class HtmlTagLookup {
 	public HtmlTagLookup() {
 		put(new HtmlSetTag());
 		put(new HtmlGetTag());
+		put(new ExtendsTag());
 	}
 
 	protected void put(HtmlTag tag) {

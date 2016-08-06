@@ -11,8 +11,12 @@ public class TemplateInfoImpl implements TemplateInfo {
 	}
 
 	@Override
-	public String getSuperTemplate() {
-		return null;
+	public String getSuperTemplateFilePath() {
+		return t.getSuperTemplateFilePath();
+	}
+	
+	public String getTemplateClass() {
+		return t.getClass().getName();
 	}
 	
 }
