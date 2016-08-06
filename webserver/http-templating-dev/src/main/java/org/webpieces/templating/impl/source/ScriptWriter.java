@@ -149,14 +149,14 @@ public class ScriptWriter {
 				//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
 				abstractTag.validatePreviousSibling(token, previousToken);
 			}
-			generator.generateStart(sourceCode, token);
-		} else if(htmltag != null) {
+		} else if(htmltag == null) {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
 		} else {
 			int id = uniqueIdGen.generateId();
 			generator = new TagGen(tagName, token, id);
 		}
 
+		generator.generateStart(sourceCode, token);
 		tagStack.get().push(generator);
 	}
 
