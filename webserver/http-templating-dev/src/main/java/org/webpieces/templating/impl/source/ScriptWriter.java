@@ -1,16 +1,15 @@
 package org.webpieces.templating.impl.source;
 
-import java.util.List;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.AbstractTag;
+import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.impl.tags.TagGen;
-import org.webpieces.templating.api.GroovyGen;
 
 public class ScriptWriter {
 

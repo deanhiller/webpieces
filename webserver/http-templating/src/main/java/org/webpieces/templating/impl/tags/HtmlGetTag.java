@@ -36,7 +36,7 @@ public class HtmlGetTag implements HtmlTag {
         			+ "forgot quotes around your argument? as it is then used as a variable if there are no quotes.\n"
         			+ "Another thing you could do is have the tag be #{get key:variable, failfast:false}# or #{get key:'name', failfast:false}# if\n"
         			+ "you would like it to not fail and just print whatever the body of the get is when the property is not found.\nlocation="+srcLocation);
-        } else {
+        } else if(body != null){
         	//put the body of the #{get}#...body...#{/get}# into the page
         	String value = ClosureUtil.toString(body);
         	out.print(value);

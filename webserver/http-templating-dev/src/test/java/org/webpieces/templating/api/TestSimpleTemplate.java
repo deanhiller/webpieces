@@ -1,7 +1,6 @@
 package org.webpieces.templating.api;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,35 +24,30 @@ public class TestSimpleTemplate {
 	
 	@Test
 	public void testBasicTemplate() throws IOException {
-		StringWriter out = new StringWriter();
-		
 		Template template = svc.loadTemplate("/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
-		template.run(properties, out);
+		TemplateInfo result = template.run(properties, null);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		StringWriter out2 = new StringWriter();
-		template.run(args, out2);
+		template.run(args, null);
 		
-		System.out.println("HTML=\n"+out);
+		System.out.println("HTML=\n"+result.getResult());
 	}
 
 	@Test
 	public void testWithPackage() throws IOException {
-		StringWriter out = new StringWriter();
 		Template template = svc.loadTemplate("/org/webpieces/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
-		template.run(properties, out);
+		TemplateInfo result = template.run(properties, null);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		StringWriter out2 = new StringWriter();
-		template.run(args, out2);
+		template.run(args, null);
 		
-		String html = out.toString();
+		String html = result.getResult();
 		Assert.assertTrue("Html was="+html, html.contains("Hi there, my name is Dean Hiller and my favorite color is green"));
 	}
 	

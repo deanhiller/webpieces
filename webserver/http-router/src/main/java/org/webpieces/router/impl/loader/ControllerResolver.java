@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.util.file.ClassUtil;
 
 public class ControllerResolver {
 
@@ -31,7 +32,7 @@ public class ControllerResolver {
 			controllerStr = controllerStr.substring(1);
 		} else if(controllerStr.contains("/")) {
 			//relative reference is annoying but easier for users..(and more concise..
-			controllerStr = translate(meta.getPackageContext(), controllerStr);
+			controllerStr = ClassUtil.translate(meta.getPackageContext(), controllerStr);
 		} else {
 			//finally for Controllers in the same package as the router, it makes the 
 			//Controller.method really concise...
@@ -48,37 +49,6 @@ public class ControllerResolver {
 		while(matcher.find())
 			counter++;
 		return counter;
-	}
-
-	private String translate(String packageContext, String controllerStr) {
-		String[] split = controllerStr.split("/");
-		for(int i = 0; i < split.length-1; i++) {
-			String partialPath = split[i];
-			if("..".equals(partialPath)) {
-				packageContext = stripOneOff(packageContext);
-			} else {
-				packageContext = append(packageContext, partialPath);
-			}
-		}
-		
-		return packageContext + "." + split[split.length-1];
-	}
-
-	private String append(String packageContext, String partialPath) {
-		if("".equals(packageContext))
-			return partialPath;
-		
-		return packageContext + "." + partialPath;
-	}
-
-	private String stripOneOff(String packageContext) {
-		int lastIndexOf = packageContext.lastIndexOf(".");
-		if(lastIndexOf > 0) {
-			return packageContext.substring(0, lastIndexOf);
-		} else if(!"".equals(packageContext)) {
-			return "";
-		} else 
-			throw new IllegalArgumentException("Too many .. were used in the path and we ended up going past the root classpath");
 	}
 	
 }

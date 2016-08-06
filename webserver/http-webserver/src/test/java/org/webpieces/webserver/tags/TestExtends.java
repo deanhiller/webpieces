@@ -39,9 +39,11 @@ public class TestExtends {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("result=Jeff M");
-		response.assertContains("key not exist so body is printed 'COOL' and test failfast:false works");
-		response.assertContains("This is set body result='testing set body here Dean Hiller'");
+		response.assertContains("The body will be put here='Testing normal body='Dean Hiller''");
+		response.assertContains("User is here='Dean Hiller'");
+		response.assertContains("Body2='Test2'");
+		response.assertContains("Body3=''");
+		response.assertContains("Then anything not in a set will be assigned to 'body'");
 	}
 	
 

@@ -43,19 +43,33 @@ public class ProdTemplateService implements TemplateService {
 
 	@Override
 	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
+		String result = runTemplate(template, pageArgs, new HashMap<>());
+		out.write(result);
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps) {
+		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
-		TemplateInfo info = template.run(copy, out);
+		TemplateInfo info = template.run(copy, templateProps);
 
-		String className = info.getTemplateClass();
-		String superTemplateFilePath = info.getSuperTemplateFilePath();
+		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
+		Map templateProperties = info.getTemplateProperties();
+		templateProperties.put("body", info.getResult());
+		
+		String className = info.getTemplateClassName();
+		String templatePath = TemplateUtil.convertTemplateClassToPath(className);
+		String superTemplateClassName = info.getSuperTemplateClassName();
+		String superTemplateFilePath = TemplateUtil.convertTemplateClassToPath(superTemplateClassName);
 		try {
 			if(superTemplateFilePath != null) {
 				Template superTemplate = loadTemplate(superTemplateFilePath);
-				runTemplate(superTemplate, out, pageArgs);
-			}
+				return runTemplate(superTemplate, pageArgs, templateProperties);
+			} else
+				return info.getResult();
 		} catch(Exception e) {
 			throw new RuntimeException("template failed="+superTemplateFilePath+" called from template="
-					+className+" See below exception messages for more information", e);
+					+templatePath+" See below exception messages for more information", e);
 		}
 	}
 

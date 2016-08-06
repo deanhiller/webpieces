@@ -1,7 +1,6 @@
 package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.templating.api.HtmlTag;
@@ -22,12 +21,13 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private EscapeCharactersFormatter formatter;
 	private HtmlTagLookup lookup;
 	@SuppressWarnings("rawtypes")
-	private Map templateProperties = new HashMap();
+	private Map templateProperties;
 	private String superTemplateFilePath;
 	
-    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup lookup) {
+    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup lookup, Map<?, ?> templateProps) {
     	formatter = f;
     	this.lookup = lookup;
+    	this.templateProperties = templateProps;
     }
     
     protected void installNullFormatter() {
@@ -63,5 +63,9 @@ public abstract class GroovyTemplateSuperclass extends Script {
 
 	public String getSuperTemplateFilePath() {
 		return superTemplateFilePath;
+	}
+
+	public Map<?, ?> getTemplateProperties() {
+		return templateProperties;
 	}
 }
