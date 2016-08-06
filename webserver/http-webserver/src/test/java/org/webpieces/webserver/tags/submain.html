@@ -1,0 +1,10 @@
+#{extends '/org/webpieces/webserver/tags/main.html'/}#
+
+This is a supertemplate that has another supertemplate
+
+The body will be put here='#{get 'body1'/}#'
+User is here='${user}$'
+Body2='#{get key:'body2'/}#'
+Body3='#{get key:'notexistbody', failfast:false/}#'
+
+#{get 'body'/}#

@@ -44,6 +44,7 @@ public class TestExtends {
 		response.assertContains("Body2='Test2'");
 		response.assertContains("Body3=''");
 		response.assertContains("Then anything not in a set will be assigned to 'body'");
+		response.assertContains("SUPERTEMPLATE");
 	}
 	
 
