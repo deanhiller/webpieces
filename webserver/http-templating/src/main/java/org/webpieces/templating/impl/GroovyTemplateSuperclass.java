@@ -1,6 +1,8 @@
 package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.templating.api.HtmlTag;
@@ -13,13 +15,15 @@ import groovy.lang.Script;
 
 public abstract class GroovyTemplateSuperclass extends Script {
 
-	public static final String ESCAPER_PROPERTY_NAME = "__escaper";
-	public static final String OUT_PROPERTY_NAME = "__out";
+	public static String ESCAPER_PROPERTY_NAME = "__escaper";
+	public static String OUT_PROPERTY_NAME = "__out";
 	public static final EscapeHTMLFormatter ESCAPE_HTML_FORMATTER = new EscapeHTMLFormatter();
 	private static final NullFormatter NULL_FORMATTER = new NullFormatter();
 	
 	private EscapeCharactersFormatter formatter;
 	private HtmlTagLookup lookup;
+	@SuppressWarnings("rawtypes")
+	private Map templateProperties = new HashMap();
 	
     public void initialize(EscapeCharactersFormatter f, HtmlTagLookup lookup) {
     	formatter = f;
@@ -34,13 +38,22 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	formatter = ESCAPE_HTML_FORMATTER;
     }
 
-    protected String useFormatter(Object val) {
+    public String useFormatter(Object val) {
     	return formatter.format(val);
     }
-    
-    protected void runTag(String tagName, Map<?, ?> args, Closure<?> closure, PrintWriter writer) {
+
+    protected void runTag(String tagName, Map<?, ?> args, Closure<?> closure, String srcLocation) {
     	HtmlTag tag = lookup.lookup(tagName);
-    	tag.runTag(args, closure, writer);
+    	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
+    	tag.runTag(args, closure, writer, this, srcLocation);
     }
 
+	@SuppressWarnings("unchecked")
+	public void putTemplateProperty(Object key, Object val) {
+		templateProperties.put(key, val);
+	}
+	
+	public Object getTemplateProperty(Object key) {
+		return templateProperties.get(key);
+	}
 }

@@ -13,5 +13,5 @@ public interface Token {
 	public String getCleanValue();
 
 	public boolean isEndTag();
-	
+
 }

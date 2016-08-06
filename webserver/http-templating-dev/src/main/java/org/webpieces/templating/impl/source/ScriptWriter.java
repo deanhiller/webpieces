@@ -9,25 +9,26 @@ import javax.inject.Inject;
 import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.impl.tags.TagGen;
 import org.webpieces.templating.api.GroovyGen;
 
 public class ScriptWriter {
 
-	//Some compilers can't deal with long lines so let's max at 40k
+	//Some compilers can't deal with long lines so let's max at 30k
     protected static final int maxLineLength = 30000;
     
 	private Pattern pattern = Pattern.compile("\"");
 
-	private ThreadLocal<Stack<String>> tagStack = new ThreadLocal<>();
-	
+	private ThreadLocal<Stack<GroovyGen>> tagStack = new ThreadLocal<>();
 	private GenLookup generatorLookup;
-
 	private HtmlTagLookup htmlTagLookup;
+	private UniqueIdGenerator uniqueIdGen;
 
 	@Inject
-	public ScriptWriter(HtmlTagLookup htmlTagLookup, GenLookup lookup) {
+	public ScriptWriter(HtmlTagLookup htmlTagLookup, GenLookup lookup, UniqueIdGenerator generator) {
 		this.htmlTagLookup = htmlTagLookup;
 		generatorLookup = lookup;
+		this.uniqueIdGen = generator;
 	}
 	
 	public void printHead(ScriptOutputImpl sourceCode, String packageStr, String className) {
@@ -117,16 +118,18 @@ public class ScriptWriter {
 		int indexOfSpace = expr.indexOf(" ");
 		String tagName = expr;
 		if(indexOfSpace > 0) {
-			//we have arguments to parse
-			throw new UnsupportedOperationException("not done yet...need to implement arguments");
+			tagName = expr.substring(0, indexOfSpace);
 		}
 		
-		GroovyGen tag = generatorLookup.lookup(tagName, token);
+		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
-		if(tag != null) {
-			tag.generateStartAndEnd(sourceCode, token);
-		} else if(htmltag != null) {
+		if(generator != null) {
+			generator.generateStartAndEnd(sourceCode, token);
+		} else if(htmltag == null) {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
+		} else {
+			int id = uniqueIdGen.generateId();
+			new TagGen(tagName, token, id).generateStartAndEnd(sourceCode, token);
 		}
 	}
 
@@ -136,10 +139,8 @@ public class ScriptWriter {
 		String tagName = expr;
 		if(indexOfSpace > 0) {
 			tagName = expr.substring(0, indexOfSpace);
-		}		
+		}
 
-		tagStack.get().push(tagName);
-		
 		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
@@ -151,25 +152,24 @@ public class ScriptWriter {
 			generator.generateStart(sourceCode, token);
 		} else if(htmltag != null) {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
+		} else {
+			int id = uniqueIdGen.generateId();
+			generator = new TagGen(tagName, token, id);
 		}
 
-//        sourceCode.print("      __out.print(escapeHtml("+expr+"));");
-//        sourceCode.appendTokenComment(token);
-//        sourceCode.println();
+		tagStack.get().push(generator);
 	}
 
 	public void printEndTag(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String expr = token.getCleanValue();
 		if(tagStack.get().size() == 0)
 			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag was not found..only the end tag. location="+token.getSourceLocation());
-		String startTagName = tagStack.get().pop();
-		if(!expr.equals(startTagName))
-			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+startTagName
+		GroovyGen currentGenerator = tagStack.get().pop();
+		if(!expr.equals(currentGenerator.getName()))
+			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+currentGenerator
 			+"}# which does not match.  end tag location="+token.getSourceLocation());
 
-		GroovyGen generator = generatorLookup.lookup(expr, token);
-		if(generator != null)
-			generator.generateEnd(sourceCode, token);
+		currentGenerator.generateEnd(sourceCode, token);
 	}
 
 	public void unprintUpToLastNewLine() {

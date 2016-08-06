@@ -1,0 +1,12 @@
+<html>
+  <head>
+  </head>
+  <body>
+    #{set user:'Jeff M'/}#
+
+    This should match Jeff not 'Dean Hiller' result=#{get 'user'/}#
+    <br/><br/>
+    Dean Hiller comes from the controller as ${user}$ which is different
+    <br/><br/>
+  </body>
+</html>

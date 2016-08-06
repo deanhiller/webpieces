@@ -2,7 +2,6 @@ package org.webpieces.templating.impl.tags;
 
 import org.webpieces.templating.api.AbstractTag;
 import org.webpieces.templating.api.ScriptOutput;
-import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.Token;
 
 public class ElseGen extends AbstractTag {
@@ -14,12 +13,12 @@ public class ElseGen extends AbstractTag {
 
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token) {
-		sourceCode.println(" else {");
+		sourceCode.println(" else { //"+token.getSourceLocation());
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token) {
-		sourceCode.println("}");
+		sourceCode.println("} //"+token.getSourceLocation());
 	}
 
 	/*

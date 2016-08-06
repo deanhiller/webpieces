@@ -120,7 +120,7 @@ public class TempateTokenizerRunnable {
         if(state != TemplateToken.PLAIN) {
         	TokenImpl token = tokens.get(tokens.size()-1);
         	int lastLine = token.endLineNumber;
-        	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end tag of='"+state.getEnd()+"'"
+        	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end token of='"+state.getEnd()+"'"
         			+ " where the start tag was on line number="+lastLine+" and start token of the tag looks like='"+state.getStart()+"'");
         }
         

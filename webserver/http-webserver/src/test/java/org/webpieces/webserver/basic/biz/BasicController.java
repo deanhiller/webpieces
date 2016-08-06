@@ -69,4 +69,8 @@ public class BasicController {
 	public Action elseIfTag() {
 		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
 	}
+	
+	public Action getTag() {
+		return Actions.renderThis("user", "Dean Hiller");
+	}
 }

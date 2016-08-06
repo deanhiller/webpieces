@@ -3,12 +3,16 @@ package org.webpieces.templating.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.webpieces.templating.impl.tags.HtmlGetTag;
+import org.webpieces.templating.impl.tags.HtmlSetTag;
+
 public class HtmlTagLookup {
 	
 	private Map<String, HtmlTag> tags = new HashMap<>();
 	
 	public HtmlTagLookup() {
-		
+		put(new HtmlSetTag());
+		put(new HtmlGetTag());
 	}
 
 	protected void put(HtmlTag tag) {

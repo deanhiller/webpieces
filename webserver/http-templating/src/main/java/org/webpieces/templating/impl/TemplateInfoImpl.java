@@ -15,6 +15,4 @@ public class TemplateInfoImpl implements TemplateInfo {
 		return null;
 	}
 	
-	
-
 }

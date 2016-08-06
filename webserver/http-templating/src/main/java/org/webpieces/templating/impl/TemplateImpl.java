@@ -1,5 +1,6 @@
 package org.webpieces.templating.impl;
 
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Map;
 
@@ -22,9 +23,9 @@ public class TemplateImpl implements Template {
 
 	@Override
 	public TemplateInfo run(Map<String, Object> args, Writer out) {
-		
+		PrintWriter writer = new PrintWriter(out);
 		Binding binding = new Binding(args);
-		binding.setProperty(GroovyTemplateSuperclass.OUT_PROPERTY_NAME, out);
+		binding.setProperty(GroovyTemplateSuperclass.OUT_PROPERTY_NAME, writer);
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);
 		
