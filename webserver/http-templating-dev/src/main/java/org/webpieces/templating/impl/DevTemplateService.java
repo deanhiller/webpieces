@@ -31,9 +31,9 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 	}
 
 	@Override
-	public Template loadTemplate(String packageStr, String templateClassName, String extension) {
+	protected Template loadTemplate(String fullTemplatePath, String fullClassName) {
 		try {
-			return loadTemplateImpl(packageStr, templateClassName, extension);
+			return loadTemplateImpl(fullTemplatePath, fullClassName);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
@@ -41,27 +41,14 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 		}
 	}
 	
-	private Template loadTemplateImpl(String packageStr, String templateClassName, String extension) throws IOException, ClassNotFoundException {
-		String fullPath = templateClassName+"."+extension;
-		if(!"".equals(packageStr)) {
-			String directory = packageStr.replace(".", "/");
-			fullPath = directory + "/" + fullPath;
-		}
-		fullPath = "/" + fullPath;
-		
-		InputStream resource = DevTemplateService.class.getResourceAsStream(fullPath);
+	private Template loadTemplateImpl(String fullTemplatePath, String templateFullClassName) throws IOException, ClassNotFoundException {
+		InputStream resource = DevTemplateService.class.getResourceAsStream(fullTemplatePath);
 		if(resource == null)
-			throw new FileNotFoundException("resource="+fullPath+" was not found in classpath");
-		else if(templateClassName.contains("_"))
-			throw new IllegalArgumentException("template names cannot contain _ in them.  name="+templateClassName);
+			throw new FileNotFoundException("resource="+fullTemplatePath+" was not found in classpath");
 		
 		String viewSource = IOUtils.toString(resource, config.getFileEncoding().name());
 
-		String fullClassName = templateClassName+"_"+extension;
-		if(!"".equals(packageStr))
-			fullClassName = packageStr+"."+fullClassName;
-
-		Class<?> compiledTemplate = createTemplate(fullClassName, viewSource);
+		Class<?> compiledTemplate = createTemplate(templateFullClassName, viewSource);
 		
 		return new TemplateImpl(htmlTagLookup, compiledTemplate);
 	}

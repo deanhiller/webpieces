@@ -29,6 +29,7 @@ import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
+import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.webserver.api.WebServerConfig;
 
 import groovy.lang.MissingPropertyException;
@@ -97,9 +98,11 @@ public class ProxyResponse implements ResponseStreamer {
 		//For this type of View, the template is the name of the method..
 		String templateClassName = view.getMethodName();
 		
+		String path = getTemplatePath(packageStr, templateClassName, "html");
+		
 		//TODO: get html from the request such that we look up the correct template? AND if not found like they request only json, than
 		//we send back a 404 rather than a 500
-		Template template = templatingService.loadTemplate(packageStr, templateClassName, "html");
+		Template template = templatingService.loadTemplate(path);
 
 		//TODO: stream this out with chunked response instead??....
 		StringWriter out = new StringWriter();
@@ -138,6 +141,16 @@ public class ProxyResponse implements ResponseStreamer {
 		channel.write(response);
 		
 		closeIfNeeded();
+	}
+
+	private String getTemplatePath(String packageStr, String templateClassName, String extension) {
+		String className = templateClassName;
+		if(!"".equals(packageStr))
+			className = packageStr+"."+className;
+		if(!"".equals(extension))
+			className = className+"_"+extension;
+		
+		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
 	private HttpResponse createResponse(KnownStatusCode statusCode, String content) {

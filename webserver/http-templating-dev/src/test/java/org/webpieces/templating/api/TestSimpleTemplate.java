@@ -27,7 +27,7 @@ public class TestSimpleTemplate {
 	public void testBasicTemplate() throws IOException {
 		StringWriter out = new StringWriter();
 		
-		Template template = svc.loadTemplate("", "mytestfile", "html");
+		Template template = svc.loadTemplate("/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 		template.run(properties, out);
 		
@@ -43,7 +43,7 @@ public class TestSimpleTemplate {
 	@Test
 	public void testWithPackage() throws IOException {
 		StringWriter out = new StringWriter();
-		Template template = svc.loadTemplate("org.webpieces", "mytestfile", "html");
+		Template template = svc.loadTemplate("/org/webpieces/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 		template.run(properties, out);
 		

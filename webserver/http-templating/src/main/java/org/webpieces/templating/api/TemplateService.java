@@ -10,9 +10,8 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ProdTemplateService.class)
 public interface TemplateService {
 
-	Template loadTemplate(String packageStr, String templateClassName, String extension);
+	Template loadTemplate(String templateClass);
 
 	void runTemplate(Template template, StringWriter out, Map<String, Object> copy);
-
 	
 }
