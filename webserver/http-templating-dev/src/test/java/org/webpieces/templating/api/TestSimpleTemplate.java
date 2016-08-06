@@ -26,7 +26,7 @@ public class TestSimpleTemplate {
 	public void testBasicTemplate() throws IOException {
 		Template template = svc.loadTemplate("/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
-		TemplateInfo result = template.run(properties, null);
+		TemplateResult result = template.run(properties, null);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
@@ -40,7 +40,7 @@ public class TestSimpleTemplate {
 	public void testWithPackage() throws IOException {
 		Template template = svc.loadTemplate("/org/webpieces/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
-		TemplateInfo result = template.run(properties, null);
+		TemplateResult result = template.run(properties, null);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode

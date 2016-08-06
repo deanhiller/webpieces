@@ -2,16 +2,16 @@ package org.webpieces.templating.impl;
 
 import java.util.Map;
 
-import org.webpieces.templating.api.TemplateInfo;
+import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.util.file.ClassUtil;
 
-public class TemplateInfoImpl implements TemplateInfo {
+public class TemplateResultImpl implements TemplateResult {
 
 	private GroovyTemplateSuperclass t;
 	private String result;
 
-	public TemplateInfoImpl(GroovyTemplateSuperclass t, String result) {
+	public TemplateResultImpl(GroovyTemplateSuperclass t, String result) {
 		this.t = t;
 		this.result = result;
 	}

@@ -2,7 +2,7 @@ package org.webpieces.templating.api;
 
 import java.util.Map;
 
-public interface TemplateInfo {
+public interface TemplateResult {
 
 	String getSuperTemplateClassName();
 

@@ -7,7 +7,7 @@ import java.util.Map;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.Template;
-import org.webpieces.templating.api.TemplateInfo;
+import org.webpieces.templating.api.TemplateResult;
 
 import groovy.lang.Binding;
 
@@ -22,7 +22,7 @@ public class TemplateImpl implements Template {
 	}
 
 	@Override
-	public TemplateInfo run(Map<String, Object> args, Map<?, ?> templateProps) {
+	public TemplateResult run(Map<String, Object> args, Map<?, ?> templateProps) {
 		StringWriter out = new StringWriter();
 		PrintWriter writer = new PrintWriter(out);
 		Binding binding = new Binding(args);
@@ -34,7 +34,7 @@ public class TemplateImpl implements Template {
 
 		t.run();
 		
-		return new TemplateInfoImpl(t, out.toString());
+		return new TemplateResultImpl(t, out.toString());
 	}
 
 }

@@ -8,7 +8,7 @@ import javax.inject.Inject;
 
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.Template;
-import org.webpieces.templating.api.TemplateInfo;
+import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 
@@ -51,7 +51,7 @@ public class ProdTemplateService implements TemplateService {
 	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
-		TemplateInfo info = template.run(copy, templateProps);
+		TemplateResult info = template.run(copy, templateProps);
 
 		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
 		Map templateProperties = info.getTemplateProperties();
