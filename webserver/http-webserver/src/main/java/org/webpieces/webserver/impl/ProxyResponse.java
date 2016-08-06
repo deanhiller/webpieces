@@ -108,7 +108,9 @@ public class ProxyResponse implements ResponseStreamer {
 			Set<String> keys = resp.getPageArgs().keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
 					+ " return enough arguments for the template.  specifically, the method\nreturned these"
-					+ " arguments="+keys+"  The missing properties are as follows....\n"+e.getMessage(), e);
+					+ " arguments="+keys+"  There is a chance in your html you forgot the '' around a variable name\n"
+							+ "such as #{set 'key'}# but you put #{set key}# which is 'usually' not the correct way\n"
+							+ "The missing properties are as follows....\n"+e.getMessage(), e);
 		}
 		
 		String content = out.toString();

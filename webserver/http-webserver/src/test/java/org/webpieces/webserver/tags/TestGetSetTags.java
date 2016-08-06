@@ -41,6 +41,7 @@ public class TestGetSetTags {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("result=Jeff M");
 		response.assertContains("key not exist so body is printed 'COOL' and test failfast:false works");
+		response.assertContains("This is set body result='testing set body here Dean Hiller'");
 	}
 	
 

@@ -9,5 +9,10 @@
     Dean Hiller comes from the controller as ${user}$ which is different
     <br/><br/>
     key not exist so body is printed '#{get key:'notexistkey', failfast:false}#COOL#{/get}#' and test failfast:false works
+    <br/><br/>
+    #{set 'something'}#testing set body here ${user}$#{/set}#
+    
+    <br/>
+    This is set body result='#{get 'something'/}#'
   </body>
 </html>
