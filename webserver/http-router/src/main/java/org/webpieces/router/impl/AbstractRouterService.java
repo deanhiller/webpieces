@@ -1,5 +1,7 @@
 package org.webpieces.router.impl;
 
+import java.util.Map;
+
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouterRequest;
@@ -7,7 +9,12 @@ import org.webpieces.router.api.dto.RouterRequest;
 public abstract class AbstractRouterService implements RoutingService {
 	
 	protected boolean started = false;
+	private RouteLoader routeLoader;
 	
+	public AbstractRouterService(RouteLoader routeLoader) {
+		this.routeLoader = routeLoader;
+	}
+
 	@Override
 	public final void processHttpRequests(RouterRequest req, ResponseStreamer responseCb) {
 		try {
@@ -22,4 +29,8 @@ public abstract class AbstractRouterService implements RoutingService {
 
 	protected abstract void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb);
 	
+	@Override
+	public String convertToUrl(String routeId, Map<String, String> args) {
+		return routeLoader.convertToUrl(routeId, args);
+	}
 }

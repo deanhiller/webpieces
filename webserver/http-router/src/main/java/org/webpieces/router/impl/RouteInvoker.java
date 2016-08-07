@@ -266,4 +266,8 @@ public class RouteInvoker {
 	public void init(ReverseRoutes reverseRoutes) {
 		this.reverseRoutes = reverseRoutes;
 	}
+
+	public String convertToUrl(String routeId, Map<String, String> args) {
+		return reverseRoutes.convertToUrl(routeId, args);
+	}
 }

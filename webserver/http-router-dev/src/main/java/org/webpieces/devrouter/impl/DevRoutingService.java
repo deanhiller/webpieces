@@ -34,6 +34,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 	@Inject
 	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevClassForName loader) {
+		super(routeConfig);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.classLoader = loader;

@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateService;
@@ -42,16 +43,16 @@ public class ProdTemplateService implements TemplateService {
 	}
 
 	@Override
-	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
-		String result = runTemplate(template, pageArgs, new HashMap<>());
+	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup lookup) {
+		String result = runTemplate(template, pageArgs, new HashMap<>(), lookup);
 		out.write(result);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps) {
+	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup lookup) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
-		TemplateResult info = template.run(copy, templateProps);
+		TemplateResult info = template.run(copy, templateProps, lookup);
 
 		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
 		Map templateProperties = info.getTemplateProperties();
@@ -64,7 +65,7 @@ public class ProdTemplateService implements TemplateService {
 		try {
 			if(superTemplateFilePath != null) {
 				Template superTemplate = loadTemplate(superTemplateFilePath);
-				return runTemplate(superTemplate, pageArgs, templateProperties);
+				return runTemplate(superTemplate, pageArgs, templateProperties, lookup);
 			} else
 				return info.getResult();
 		} catch(Exception e) {

@@ -7,4 +7,6 @@ package org.webpieces.router.api.routing;
  */
 public interface RouteId {
 
+	public String name();
+	
 }

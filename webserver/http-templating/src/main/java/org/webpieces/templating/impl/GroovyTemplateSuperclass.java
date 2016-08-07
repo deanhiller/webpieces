@@ -1,10 +1,12 @@
 package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.impl.html.EscapeHTMLFormatter;
 import org.webpieces.templating.impl.html.NullFormatter;
 
@@ -19,15 +21,17 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private static final NullFormatter NULL_FORMATTER = new NullFormatter();
 	
 	private EscapeCharactersFormatter formatter;
-	private HtmlTagLookup lookup;
+	private HtmlTagLookup tagLookup;
 	@SuppressWarnings("rawtypes")
 	private Map templateProperties;
 	private String superTemplateFilePath;
+	private ReverseUrlLookup urlLookup;
 	
-    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup lookup, Map<?, ?> templateProps) {
+    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
     	formatter = f;
-    	this.lookup = lookup;
+    	this.tagLookup = tagLookup;
     	this.templateProperties = templateProps;
+    	this.urlLookup = urlLookup;
     }
     
     protected void installNullFormatter() {
@@ -43,7 +47,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
     }
 
     protected void runTag(String tagName, Map<?, ?> args, Closure<?> closure, String srcLocation) {
-    	HtmlTag tag = lookup.lookup(tagName);
+    	HtmlTag tag = tagLookup.lookup(tagName);
     	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
     	tag.runTag(args, closure, writer, this, srcLocation);
     }
@@ -67,5 +71,17 @@ public abstract class GroovyTemplateSuperclass extends Script {
 
 	public Map<?, ?> getTemplateProperties() {
 		return templateProperties;
+	}
+	
+	public String fetchUrl(String routeId, Map<?, ?> args) {
+		Map<String, String> urlParams = new HashMap<>();
+		for(Map.Entry<?, ?> entry : args.entrySet()) {
+			String key = entry.getKey().toString();
+			Object value = entry.getValue();
+			if(value == null)
+				throw new IllegalArgumentException("Cannot use null param in a url for param name="+key);
+			urlParams.put(key, value.toString());
+		}
+		return urlLookup.fetchUrl(routeId, urlParams);
 	}
 }

@@ -3,6 +3,7 @@ package org.webpieces.router.impl;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -104,6 +105,8 @@ public class RouteLoader {
 			RouterBuilder.injector.set(null);
 		}
 		
+		reverseRoutes.finalSetup();
+		
 		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
 			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouteModules());
 		else if(!routerBuilder.getRouterInfo().isInternalSvrErrorRouteSet())
@@ -157,6 +160,10 @@ public class RouteLoader {
 		RouteInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
 		return new MatchResult(internalErrorRoute);
+	}
+
+	public String convertToUrl(String routeId, Map<String, String> args) {
+		return invoker.convertToUrl(routeId, args);
 	}
 	
 }

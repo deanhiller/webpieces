@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateResult;
 
@@ -22,7 +23,7 @@ public class TemplateImpl implements Template {
 	}
 
 	@Override
-	public TemplateResult run(Map<String, Object> args, Map<?, ?> templateProps) {
+	public TemplateResult run(Map<String, Object> args, Map<?, ?> templateProps, ReverseUrlLookup lookup) {
 		StringWriter out = new StringWriter();
 		PrintWriter writer = new PrintWriter(out);
 		Binding binding = new Binding(args);
@@ -30,7 +31,7 @@ public class TemplateImpl implements Template {
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);		
 		
-		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps);
+		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, lookup);
 
 		t.run();
 		

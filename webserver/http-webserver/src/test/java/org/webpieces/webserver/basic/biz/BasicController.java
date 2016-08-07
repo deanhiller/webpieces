@@ -77,4 +77,8 @@ public class BasicController {
 	public Action extendsTag() {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
+	
+	public Action aHrefTag() {
+		return Actions.renderThis("user", "Dean Hiller");
+	}
 }

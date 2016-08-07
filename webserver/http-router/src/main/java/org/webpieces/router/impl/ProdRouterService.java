@@ -22,6 +22,7 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	
 	@Inject
 	public ProdRouterService(RouteLoader routeLoader, ProdClassForName loader) {
+		super(routeLoader);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 	}

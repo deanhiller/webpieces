@@ -26,12 +26,12 @@ public class TestSimpleTemplate {
 	public void testBasicTemplate() throws IOException {
 		Template template = svc.loadTemplate("/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
-		TemplateResult result = template.run(properties, null);
+		TemplateResult result = template.run(properties, null, null);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		template.run(args, null);
+		template.run(args, null, null);
 		
 		System.out.println("HTML=\n"+result.getResult());
 	}
@@ -40,12 +40,12 @@ public class TestSimpleTemplate {
 	public void testWithPackage() throws IOException {
 		Template template = svc.loadTemplate("/org/webpieces/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
-		TemplateResult result = template.run(properties, null);
+		TemplateResult result = template.run(properties, null, null);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		template.run(args, null);
+		template.run(args, null, null);
 		
 		String html = result.getResult();
 		Assert.assertTrue("Html was="+html, html.contains("Hi there, my name is Dean Hiller and my favorite color is green"));

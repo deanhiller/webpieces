@@ -1,5 +1,10 @@
 package org.webpieces.templating.api;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class TemplateUtil {
 
 	public static String convertTemplateClassToPath(String fullClass) {
@@ -19,4 +24,26 @@ public class TemplateUtil {
 		//replace the one extension . with the _ then replace all / with package .
 		return className.replace(".", "_").replace("/", ".");
 	}
+	
+    public static String serialize(Map<?, ?> args, String... unless) {
+    	Set<String> unlessSet = new HashSet<String>(Arrays.asList(unless));
+    	unlessSet.add("_arg");
+        StringBuilder attrs = new StringBuilder();
+        for (Object key : args.keySet()) {
+            String keyStr = key.toString();
+            Object value = args.get(key);
+            String valueStr = "";
+            if(value != null)
+            	valueStr = value.toString();
+            if (!unlessSet.contains(keyStr)) {
+            	attrs.append(" ");
+                attrs.append(keyStr);
+                attrs.append("=\"");
+                attrs.append(valueStr);
+                attrs.append("\"");
+            }
+        }
+        return attrs.toString();
+    }
+    
 }

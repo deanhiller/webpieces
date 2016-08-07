@@ -27,6 +27,7 @@ import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
@@ -43,10 +44,12 @@ public class ProxyResponse implements ResponseStreamer {
 	private HttpRequest request;
 	private TemplateService templatingService;
 	private WebServerConfig config;
+	private ReverseUrlLookup lookup;
 
-	public ProxyResponse(HttpRequest req, FrontendSocket channel, TemplateService templatingService, WebServerConfig config) {
+	public ProxyResponse(HttpRequest req, FrontendSocket channel, ReverseUrlLookup lookup, TemplateService templatingService, WebServerConfig config) {
 		this.request = req;
 		this.channel = channel;
+		this.lookup = lookup;
 		this.templatingService = templatingService;
 		this.config = config;
 	}
@@ -108,7 +111,7 @@ public class ProxyResponse implements ResponseStreamer {
 		StringWriter out = new StringWriter();
 		
 		try {
-			templatingService.runTemplate(template, out, resp.getPageArgs());
+			templatingService.runTemplate(template, out, resp.getPageArgs(), lookup);
 		} catch(MissingPropertyException e) {
 			Set<String> keys = resp.getPageArgs().keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"

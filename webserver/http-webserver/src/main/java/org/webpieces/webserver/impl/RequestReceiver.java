@@ -1,6 +1,7 @@
 package org.webpieces.webserver.impl;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,6 +20,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -31,6 +33,7 @@ public class RequestReceiver implements HttpRequestListener {
 	private TemplateService templatingService;
 	@Inject
 	private WebServerConfig config;
+	private UrlLookup lookup = new UrlLookup();
 	
 	private Set<String> headersSupported = new HashSet<>();
 	
@@ -45,7 +48,7 @@ public class RequestReceiver implements HttpRequestListener {
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
-		ResponseStreamer streamer = new ProxyResponse(req, channel, templatingService, config);
+		ResponseStreamer streamer = new ProxyResponse(req, channel, lookup, templatingService, config);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
@@ -107,4 +110,10 @@ public class RequestReceiver implements HttpRequestListener {
 	public void releaseBackPressure(FrontendSocket channel) {
 	}
 
+	private class UrlLookup implements ReverseUrlLookup {
+		@Override
+		public String fetchUrl(String routeId, Map<String, String> args) {
+			return routingService.convertToUrl(routeId, args);
+		}
+	}
 }
