@@ -1,6 +1,9 @@
 package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +30,8 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private String superTemplateFilePath;
 	private ReverseUrlLookup urlLookup;
 	
-    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
+    public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, 
+    		Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
     	formatter = f;
     	this.tagLookup = tagLookup;
     	this.templateProperties = templateProps;
@@ -49,7 +53,11 @@ public abstract class GroovyTemplateSuperclass extends Script {
     protected void runTag(String tagName, Map<?, ?> args, Closure<?> closure, String srcLocation) {
     	HtmlTag tag = tagLookup.lookup(tagName);
     	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
-    	tag.runTag(args, closure, writer, this, srcLocation);
+    	try {
+    		tag.runTag(args, closure, writer, this, srcLocation);
+    	} catch(Exception e) {
+			throw new RuntimeException("Error running tag "+tagName+"("+e.getMessage()+").  "+srcLocation, e);
+    	}
     }
 
 	@SuppressWarnings("unchecked")
@@ -73,15 +81,22 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		return templateProperties;
 	}
 	
-	public String fetchUrl(String routeId, Map<?, ?> args) {
-		Map<String, String> urlParams = new HashMap<>();
-		for(Map.Entry<?, ?> entry : args.entrySet()) {
-			String key = entry.getKey().toString();
-			Object value = entry.getValue();
-			if(value == null)
-				throw new IllegalArgumentException("Cannot use null param in a url for param name="+key);
-			urlParams.put(key, value.toString());
+	public String fetchUrl(String routeId, Map<?, ?> args, String srcLocation) {
+		try {
+			Map<String, String> urlParams = new HashMap<>();
+			for(Map.Entry<?, ?> entry : args.entrySet()) {
+				String key = entry.getKey().toString();
+				Object value = entry.getValue();
+				if(value == null)
+					throw new IllegalArgumentException("Cannot use null param in a url for param name="+key);
+				//urlencoding happens for each value in the router...
+				urlParams.put(key, value.toString());
+			}
+
+			return urlLookup.fetchUrl(routeId, urlParams);
+		} catch(Exception e) {
+			throw new RuntimeException("Error fetching route("+e.getMessage()+").  "+srcLocation+"\nThe list of params fed from html file="+args, e);
 		}
-		return urlLookup.fetchUrl(routeId, urlParams);
 	}
+
 }

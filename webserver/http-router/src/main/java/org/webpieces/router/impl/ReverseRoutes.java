@@ -1,5 +1,8 @@
 package org.webpieces.router.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +23,12 @@ public class ReverseRoutes {
 	private Map<String, RouteMeta> classAndNameToRoute = new HashMap<>();
 	private Set<String> duplicateClassAndNames = new HashSet<>();
 	private Map<String, RouteMeta> fullClassAndNameToRoute = new HashMap<>();
+
+	private Charset urlEncoding;
+	
+	public ReverseRoutes(Charset urlEncoding) {
+		this.urlEncoding = urlEncoding;
+	}
 	
 	public void addRoute(RouteId routeId, RouteMeta meta) {
 		RouteMeta existingRoute = routeIdToRoute.get(routeId);
@@ -135,10 +144,18 @@ public class ReverseRoutes {
 			String val = args.get(param);
 			if(val == null)
 				throw new IllegalArgumentException("missing argument to create url.  param="+param+" is required to be non-null");
-			path = path.replace("{"+param+"}", val);
+			String encodedVal = urlEncode(val);
+			path = path.replace("{"+param+"}", encodedVal);
 		}
 		
 		return path;
 	}
 	
+	private String urlEncode(Object value) {
+		try {
+			return URLEncoder.encode(value.toString(), urlEncoding.name());
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

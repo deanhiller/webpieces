@@ -3,11 +3,13 @@
   </head>
   <body>
     #{a href:@PAGE_PARAM[:], id:'myid'}#My link#{/a}#
+    #{a href:@BasicRouteId.RENDER_PAGE[:]}#My render link#{/a}#  
+    #{a href:@org.webpieces.webserver.basic.BasicRouteId.IF[:]}#My link#{/a}#
+    
+    #{a href:@REDIRECT_PAGE[id:user]}#The link#{/a}#
     
     *{
-    #{a href:@BasicRouteId.RENDER_PAGE[:]}#My link#{/a}#
-    #{a href:@org.webpieces.webserver.basic.BasicRouteId.RENDER_PAGE[user:user, count:count]}#My link#{/a}#
-    
+    next do arguments into the routeid
     }*
   </body>
 </html>

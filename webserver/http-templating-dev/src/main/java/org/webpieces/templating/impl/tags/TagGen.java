@@ -90,7 +90,7 @@ public class TagGen implements GroovyGen {
 		String leftover = tagArgs.substring(indexOfRightParen+1);
 
 		log.warn("need to record the route here with argument names by splitting on : and , and can do some trivial validation on that as well and fail early");
-		String groovy = prefix + "fetchUrl('"+route+"', "+args+")" + leftover;
+		String groovy = prefix + "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation()+"')" + leftover;
 		return groovy;
 	}
 

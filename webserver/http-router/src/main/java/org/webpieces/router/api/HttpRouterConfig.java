@@ -12,6 +12,7 @@ public class HttpRouterConfig {
 	private VirtualFile metaFile;
 	
 	private Charset fileEncoding = StandardCharsets.UTF_8;
+	private Charset urlEncoding = StandardCharsets.UTF_8;
 	
 	/**
 	 * WebApps can override remote services to mock them out for testing or swap prod classes with
@@ -44,6 +45,8 @@ public class HttpRouterConfig {
 		this.fileEncoding = fileEncoding;
 		return this;
 	}
+	public Charset getUrlEncoding() {
+		return urlEncoding;
+	}
 
-	
 }

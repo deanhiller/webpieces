@@ -91,7 +91,7 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
 		log.info("adding routes");
 		
-		ReverseRoutes reverseRoutes = new ReverseRoutes();
+		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
 		routerBuilder = new RouterBuilder("", new RouteInfo(), reverseRoutes, controllerFinder);
 		invoker.init(reverseRoutes);
 		

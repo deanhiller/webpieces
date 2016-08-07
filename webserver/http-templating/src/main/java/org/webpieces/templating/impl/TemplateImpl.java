@@ -2,6 +2,7 @@ package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.codehaus.groovy.runtime.InvokerHelper;

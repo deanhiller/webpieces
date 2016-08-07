@@ -39,8 +39,9 @@ public class TestAHrefTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		String expected = "<a href=`/pageparam` id=`myid`>My link</a>".replace('`', '"');
-		response.assertContains(expected);
+		response.assertContains("<a href=`/pageparam` id=`myid`>My link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/myroute`>My render link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/redirect/Dean+Hiller`>The link</a>".replace('`', '"'));
 	}
 	
 
