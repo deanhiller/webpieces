@@ -92,7 +92,7 @@ public class RouteLoader {
 		log.info("adding routes");
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
-		routerBuilder = new RouterBuilder("", new RouteInfo(), reverseRoutes, controllerFinder);
+		routerBuilder = new RouterBuilder("", new RouteInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		invoker.init(reverseRoutes);
 		
 		for(RouteModule module : rm.getRouteModules()) {

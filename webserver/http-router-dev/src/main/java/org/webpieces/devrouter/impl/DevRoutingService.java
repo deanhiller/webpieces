@@ -1,8 +1,5 @@
 package org.webpieces.devrouter.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -98,7 +95,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteMeta origMeta = origResult.getMeta();
 
 		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
-		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), "");
+		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), "", config.getUrlEncoding());
 		MatchResult result = new MatchResult(meta);
 		
 		if(meta.getControllerInstance() == null) {

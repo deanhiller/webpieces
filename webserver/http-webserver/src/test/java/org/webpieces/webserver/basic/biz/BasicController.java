@@ -81,4 +81,8 @@ public class BasicController {
 	public Action aHrefTag() {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
+	
+	public Action urlEncoding(String user) {
+		return Actions.renderThis("user", user);
+	}
 }

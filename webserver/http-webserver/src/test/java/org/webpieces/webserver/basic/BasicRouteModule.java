@@ -1,32 +1,34 @@
 package org.webpieces.webserver.basic;
 
 import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.api.routing.AbstractRouteModule;
 
-public class BasicRouteModule implements RouteModule {
+public class BasicRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(Router router, String currentPackage) {
-		
-		router.addRoute(HttpMethod.GET, "/",                 "biz/BasicController.someMethod", BasicRouteId.SOME_ROUTE);
-		router.addRoute(HttpMethod.GET, "/redirect/{id}",    "biz/BasicController.redirect", BasicRouteId.REDIRECT_PAGE);
-		router.addRoute(HttpMethod.GET, "/redirectint/{id}", "biz/BasicController.redirectWithInt", BasicRouteId.REDIRECT2);
-		router.addRoute(HttpMethod.GET, "/myroute",          "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
-		router.addRoute(HttpMethod.GET, "/throwNotFound",    "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
-		router.addRoute(HttpMethod.GET, "/pageparam",        "biz/BasicController.pageParam", BasicRouteId.PAGE_PARAM);
-		router.addRoute(HttpMethod.GET, "/verbatim",         "biz/BasicController.verbatimTag", BasicRouteId.VERBATIM);
+	protected void configure(String currentPackage) {
+		addRoute(HttpMethod.GET, "/",                  "biz/BasicController.someMethod", BasicRouteId.SOME_ROUTE);
+		addRoute(HttpMethod.GET, "/redirect/{id}",     "biz/BasicController.redirect", BasicRouteId.REDIRECT_PAGE);
+		addRoute(HttpMethod.GET, "/redirectint/{id}",  "biz/BasicController.redirectWithInt", BasicRouteId.REDIRECT2);
+		addRoute(HttpMethod.GET, "/myroute",           "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
+		addRoute(HttpMethod.GET, "/throwNotFound",     "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
+		addRoute(HttpMethod.GET, "/pageparam",         "biz/BasicController.pageParam", BasicRouteId.PAGE_PARAM);
+		addRoute(HttpMethod.GET, "/verbatim",          "biz/BasicController.verbatimTag", BasicRouteId.VERBATIM);
 
-		router.addRoute(HttpMethod.GET, "/if",               "biz/BasicController.ifTag", BasicRouteId.IF);
-		router.addRoute(HttpMethod.GET, "/else",             "biz/BasicController.elseTag", BasicRouteId.ELSE);
-		router.addRoute(HttpMethod.GET, "/elseif",           "biz/BasicController.elseIfTag", BasicRouteId.ELSEIF);
+		addRoute(HttpMethod.GET, "/if",                "biz/BasicController.ifTag", BasicRouteId.IF);
+		addRoute(HttpMethod.GET, "/else",              "biz/BasicController.elseTag", BasicRouteId.ELSE);
+		addRoute(HttpMethod.GET, "/elseif",            "biz/BasicController.elseIfTag", BasicRouteId.ELSEIF);
 
-		router.addRoute(HttpMethod.GET, "/setget",           "biz/BasicController.getTag", BasicRouteId.SETGET);
-		router.addRoute(HttpMethod.GET, "/extends",          "biz/BasicController.extendsTag", BasicRouteId.EXTENDS);
-		router.addRoute(HttpMethod.GET, "/ahref",          "biz/BasicController.aHrefTag", BasicRouteId.AHREF);
+		addRoute(HttpMethod.GET, "/setget",            "biz/BasicController.getTag", BasicRouteId.SETGET);
+		addRoute(HttpMethod.GET, "/extends",           "biz/BasicController.extendsTag", BasicRouteId.EXTENDS);
+		addRoute(HttpMethod.GET, "/ahref",             "biz/BasicController.aHrefTag", BasicRouteId.AHREF);
 
-		router.setPageNotFoundRoute("biz/BasicController.notFound");
-		router.setInternalErrorRoute("biz/BasicController.internalError");
+		addRoute(HttpMethod.GET, "/urlencoding/{user}","biz/BasicController.urlEncoding", BasicRouteId.URLENCODE);
+
+		setPageNotFoundRoute("biz/BasicController.notFound");
+		setInternalErrorRoute("biz/BasicController.internalError");
 	}
+
+
 
 }

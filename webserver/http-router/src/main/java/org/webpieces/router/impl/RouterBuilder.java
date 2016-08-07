@@ -1,6 +1,7 @@
 package org.webpieces.router.impl;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -27,11 +28,14 @@ public class RouterBuilder implements Router {
 
 	private String routerPath;
 
-	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder) {
+	private Charset urlEncoding;
+
+	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder, Charset urlEncoding) {
 		this.routerPath = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
 		this.finder = finder;
+		this.urlEncoding = urlEncoding;
 	}
 	
 	@Override
@@ -42,7 +46,7 @@ public class RouterBuilder implements Router {
 	
 	public void addRoute(Route r, RouteId routeId) {
 		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get());
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 
 		info.addRoute(meta);
@@ -95,7 +99,7 @@ public class RouterBuilder implements Router {
 		if(path == null || path.length() == 0)
 			throw new IllegalArgumentException("path must be non-null and length must be greater than 0");
 		RouteInfo subInfo = info.addScope(path);
-		return new RouterBuilder(path, subInfo, reverseRoutes, finder);
+		return new RouterBuilder(path, subInfo, reverseRoutes, finder, urlEncoding);
 	}
 
 	public RouteInfo getRouterInfo() {
@@ -116,7 +120,7 @@ public class RouterBuilder implements Router {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get());
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setPageNotFoundRoute(meta);
 	}
@@ -131,7 +135,7 @@ public class RouterBuilder implements Router {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerPath+"' adding INTERNAL_SVR_ERROR route="+r.getPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get());
+		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setInternalSvrErrorRoute(meta);
 	}

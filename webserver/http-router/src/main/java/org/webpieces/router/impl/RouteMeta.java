@@ -1,6 +1,9 @@
 package org.webpieces.router.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +22,13 @@ public class RouteMeta {
 	//The package for the RouteModule for context(so controllers are relative to that module)
 	private String packageContext;
 	private Injector injector;
+	private Charset urlEncoding;
 
-	public RouteMeta(Route r, Injector injector, String packageContext) {
+	public RouteMeta(Route r, Injector injector, String packageContext, Charset urlEncoding) {
 		this.route = r;
 		this.packageContext = packageContext;
 		this.injector = injector;
+		this.urlEncoding = urlEncoding;
 	}
 
 	public Route getRoute() {
@@ -65,7 +70,9 @@ public class RouteMeta {
 			String value = matcher.group(name);
 			if(value == null) 
 				throw new IllegalArgumentException("Bug, something went wrong. request="+request);
-			namesToValues.put(name, value);
+			//convert special characters back to their normal form like '+' to ' ' (space)
+			String decodedVal = urlDecode(value);
+			namesToValues.put(name, decodedVal);
 		}
 		
 		return new MatchResult(this, namesToValues);
@@ -83,6 +90,14 @@ public class RouteMeta {
 
 	public Injector getInjector() {
 		return injector;
+	}
+	
+	private String urlDecode(Object value) {
+		try {
+			return URLDecoder.decode(value.toString(), urlEncoding.name());
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

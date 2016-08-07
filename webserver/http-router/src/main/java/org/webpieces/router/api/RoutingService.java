@@ -20,6 +20,6 @@ public interface RoutingService {
 	 * @param args
 	 * @return
 	 */
-	String convertToUrl(String routeId, Map<String, String> args);
+	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs);
 	
 }
