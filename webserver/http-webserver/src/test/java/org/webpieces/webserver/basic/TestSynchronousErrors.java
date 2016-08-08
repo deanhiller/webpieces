@@ -190,37 +190,6 @@ public class TestSynchronousErrors {
 		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		httpPayload.assertContains("The webpieces platform saved them");	
 	}
-	
-	/**
-	 * Tests a remote asynchronous system fails and a 500 error page is rendered
-	 */
-	@Test
-	public void testRemoteSystemDown() {
-		//TODO: try to bring this back to life sometime...
-		
-//		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
-//		mockRemote.addValueToReturn(future);
-//		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
-//		
-//		server.processHttpRequests(mockResponseSocket, req, false);
-//		
-//		List<HttpPayload> responses = mockResponseSocket.getResponses();
-//		Assert.assertEquals(0, responses.size());
-//
-//		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
-//		//next, simulate remote system returning a value..
-//		future.completeExceptionally(new RuntimeException("complete future with exception"));
-//
-//		List<HttpPayload> responses2 = mockResponseSocket.getResponses();
-//		Assert.assertEquals(1, responses2.size());
-//		
-//		HttpPayload httpPayload = responses2.get(0);
-//		HttpResponse httpResponse = httpPayload.getHttpResponse();
-//		Assert.assertEquals(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, httpResponse.getStatusLine().getStatus().getKnownStatus());
-//		DataWrapper body = httpResponse.getBody();
-//		String html = body.createStringFrom(0, body.getReadableSize(), StandardCharsets.UTF_8);
-//		Assert.assertTrue("invalid html="+html, html.contains("You encountered a 5xx in your server"));
-	}
 
 	private class AppOverridesModule implements Module {
 		@Override

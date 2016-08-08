@@ -194,6 +194,8 @@ public class RouteInvoker {
 		
 		if(nextRequestMeta == null)
 			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
+		else if(!nextRequestMeta.getRoute().matchesMethod(HttpMethod.GET))
+			throw new IllegalReturnValueException("method='"+method+"' is trying to redirect to routeid="+id+" but that route is not a GET method route and must be");
 
 		Route route = nextRequestMeta.getRoute();
 		

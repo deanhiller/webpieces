@@ -17,6 +17,7 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.mocks.MockResponseStream;
@@ -63,43 +64,43 @@ public class ErrorCommonTest {
 		Assert.assertEquals(IllegalStateException.class, e.getClass());
 	}
 	
-//	@Test
-//	public void testArgsTypeMismatch() {
-//		log.info("starting");
-//		String moduleFileContents = CommonRoutesModules.class.getName();
-//		RoutingService server = createServer(isProdTest, moduleFileContents);
-//		
-//		server.start();
-//		
-//		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
-//		MockResponseStream mockResponseStream = new MockResponseStream();
-//		
-//		server.processHttpRequests(req, mockResponseStream);
-//
-//		verifyNotFoundRendered(mockResponseStream);
-//	}
+	@Test
+	public void testArgsTypeMismatch() {
+		log.info("starting");
+		String moduleFileContents = CommonRoutesModules.class.getName();
+		RoutingService server = createServer(isProdTest, moduleFileContents);
+		
+		server.start();
+		
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		
+		server.processHttpRequests(req, mockResponseStream);
+
+		verifyNotFoundRendered(mockResponseStream);
+	}
 
 	private void verifyNotFoundRendered(MockResponseStream mockResponseStream) {
 		List<RenderResponse> responses = mockResponseStream.getSendRenderHtmlList();
 		Assert.assertEquals(1, responses.size());
-		Assert.assertEquals("notFound.xhtml", responses.get(0).getView());
+		Assert.assertEquals(RouteType.NOT_FOUND, responses.get(0).getRouteType());
 	}
 	
-//	@Test
-//	public void testGetNotMatchPostRoute() {
-//		log.info("starting");
-//		String moduleFileContents = CommonRoutesModules.class.getName();
-//		RoutingService server = createServer(isProdTest, moduleFileContents);
-//		
-//		server.start();
-//		
-//		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
-//		MockResponseStream mockResponseStream = new MockResponseStream();
-//		
-//		server.processHttpRequests(req, mockResponseStream);
-//
-//		verifyNotFoundRendered(mockResponseStream);
-//	}
+	@Test
+	public void testGetNotMatchPostRoute() {
+		log.info("starting");
+		String moduleFileContents = CommonRoutesModules.class.getName();
+		RoutingService server = createServer(isProdTest, moduleFileContents);
+		
+		server.start();
+		
+		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
+		MockResponseStream mockResponseStream = new MockResponseStream();
+		
+		server.processHttpRequests(req, mockResponseStream);
+
+		verifyNotFoundRendered(mockResponseStream);
+	}
 	
 	@Test
 	public void testHTMLPostAndTryingToRenderInsteadOfRedirectFails() {

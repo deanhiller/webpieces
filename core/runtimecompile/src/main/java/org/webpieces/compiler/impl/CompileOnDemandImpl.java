@@ -31,9 +31,22 @@ public class CompileOnDemandImpl implements CompileOnDemand {
 			classloader = new CompilingClassloader(config, compiler, fileLookup);
 		}
 		Class<?> clazz = classloader.loadApplicationClass(name);
+		if(clazz == null) {
+			clazz = loadClassFromDefaultClassloader(name);
+		}
+		
 		if(clazz == null)
-			throw new IllegalArgumentException("class name="+name+" is not found in the source directories="+config.getJavaPath());
+			throw new IllegalArgumentException("class name="+name+" is not found in the source directories="+config.getJavaPath()+" nor on the classpath");
 		return clazz;
+	}
+
+	private Class<?> loadClassFromDefaultClassloader(String name) {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		try {
+			return cl.loadClass(name);
+		} catch (ClassNotFoundException e) {
+			throw new IllegalArgumentException("class name="+name+" is not found in the source directories="+config.getJavaPath()+" nor on the classpath");
+		}
 	}
 
 	@Override
