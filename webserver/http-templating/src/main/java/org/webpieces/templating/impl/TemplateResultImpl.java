@@ -66,5 +66,5 @@ public class TemplateResultImpl implements TemplateResult {
 	public String getResult() {
 		return result;
 	}
-	
+
 }

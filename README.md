@@ -29,6 +29,8 @@ NOTE: There is a Recorder and Playback that if you wire in, you can record thing
 
 TODO: 
 * generate file with list of routeid enums on compile and then on startup verify each one can be resolved uniquely so if not found, we can prevent release since there is definitely pages with bugs
+* implement field tag next
+* implement a real form and try out post redirect get and especially what to do on post not found situation
 * catch-all route with POST
 * AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?

@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 import org.codehaus.groovy.tools.GroovyClass;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.impl.source.GroovyScriptGenerator;
 import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
@@ -18,12 +19,12 @@ public class HtmlToJavaClassCompiler {
 		this.groovyCompile = groovyCompile;
 	}
 	
-	public ScriptOutputImpl compile(String fullClassName, String source, Consumer<GroovyClass> compiledCallback) {
+	public ScriptOutputImpl compile(String fullClassName, String source, CompileCallback callbacks) {
 		String filePath = fullClassName.replace(".", "/").replace("_", ".");
 		
-		ScriptOutputImpl scriptCode = scriptGen.generate(filePath, source, fullClassName);
+		ScriptOutputImpl scriptCode = scriptGen.generate(filePath, source, fullClassName, callbacks);
 		try {
-			groovyCompile.compile(scriptCode, compiledCallback);
+			groovyCompile.compile(scriptCode, callbacks);
 		} catch(Exception e) {
 			throw new RuntimeException("Generated a groovy script file but compilation failed for file="
 					+filePath+" Script code generated=\n\n"+scriptCode.getScriptSourceCode(), e);

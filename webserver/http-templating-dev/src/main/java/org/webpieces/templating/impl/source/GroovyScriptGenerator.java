@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.templating.api.CompileCallback;
 
 public class GroovyScriptGenerator {
 
@@ -19,7 +20,7 @@ public class GroovyScriptGenerator {
 		this.creator = creator;
 	}
 	
-	public ScriptOutputImpl generate(String filePath, String source, String fullClassName) {
+	public ScriptOutputImpl generate(String filePath, String source, String fullClassName, CompileCallback callbacks) {
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
@@ -40,7 +41,7 @@ public class GroovyScriptGenerator {
 			// Class header
 			creator.printHead(sourceCode, packageStr, className);
 	
-			generateBody(sourceCode, tokens);
+			generateBody(sourceCode, tokens, callbacks);
 	
 			// Class end
 			creator.printEnd(sourceCode);
@@ -56,7 +57,7 @@ public class GroovyScriptGenerator {
 		return sourceCode;
 	}
 
-	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens) {
+	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens, CompileCallback callbacks) {
 		for(int i = 0; i < tokens.size(); i++) {
 			TokenImpl token = tokens.get(i);
 			TokenImpl previousToken = null;
@@ -90,10 +91,10 @@ public class GroovyScriptGenerator {
 				creator.unprintUpToLastNewLine();
 				break;
 			case START_END_TAG:
-				creator.printStartEndTag(token, sourceCode);
+				creator.printStartEndTag(token, sourceCode, callbacks);
 				break;
 			case START_TAG:
-				creator.printStartTag(token, previousToken, sourceCode);
+				creator.printStartTag(token, previousToken, sourceCode, callbacks);
 				break;
 			case END_TAG:
 				creator.printEndTag(token, sourceCode);

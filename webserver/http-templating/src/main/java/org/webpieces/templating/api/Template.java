@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface Template {
 
-	TemplateResult run(Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup lookup);
+	TemplateResult run(Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup urlLookup);
 
 }

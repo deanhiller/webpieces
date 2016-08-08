@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.AbstractTag;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
@@ -116,8 +117,9 @@ public class ScriptWriter {
 	 * 
 	 * @param token
 	 * @param sourceCode
+	 * @param callbacks 
 	 */
-	public void printStartEndTag(TokenImpl token, ScriptOutputImpl sourceCode) {
+	public void printStartEndTag(TokenImpl token, ScriptOutputImpl sourceCode, CompileCallback callbacks) {
 		String expr = token.getCleanValue();
 		int indexOfSpace = expr.indexOf(" ");
 		String tagName = expr;
@@ -133,11 +135,11 @@ public class ScriptWriter {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
 		} else {
 			int id = uniqueIdGen.generateId();
-			new TagGen(tagName, token, id).generateStartAndEnd(sourceCode, token);
+			new TagGen(tagName, token, id, callbacks).generateStartAndEnd(sourceCode, token);
 		}
 	}
 
-	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
+	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode, CompileCallback callbacks) {
 		String tagName = token.getTagName();
 
 		GroovyGen generator = generatorLookup.lookup(tagName, token);
@@ -152,7 +154,7 @@ public class ScriptWriter {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation());
 		} else {
 			int id = uniqueIdGen.generateId();
-			generator = new TagGen(tagName, token, id);
+			generator = new TagGen(tagName, token, id, callbacks);
 		}
 
 		generator.generateStart(sourceCode, token);

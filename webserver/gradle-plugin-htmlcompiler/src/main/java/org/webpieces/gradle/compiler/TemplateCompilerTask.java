@@ -1,10 +1,13 @@
 package org.webpieces.gradle.compiler;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -15,6 +18,7 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
@@ -43,7 +47,16 @@ public class TemplateCompilerTask extends AbstractCompile {
     
 	@TaskAction
 	public void compile() {
-		TemplateCompileConfig config = new TemplateCompileConfig(Charset.forName(options.getEncoding()));
+		try {
+			compileImpl();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public void compileImpl() throws IOException {
+		Charset encoding = Charset.forName(options.getEncoding());
+		TemplateCompileConfig config = new TemplateCompileConfig(encoding);
     	Injector injector = Guice.createInjector(new DevTemplateModule(config));
     	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
     	
@@ -51,23 +64,33 @@ public class TemplateCompilerTask extends AbstractCompile {
         
         File destinationDir = getDestinationDir();
         System.out.println("destDir="+destinationDir);
+        File routeIdFile = new File(destinationDir, "org.webpieces.routeId.txt");
+        if(routeIdFile.exists())
+        	routeIdFile.delete();
+        routeIdFile.createNewFile();
+        
+        System.out.println("routeId.txt file="+routeIdFile.getAbsolutePath());
         
         FileCollection srcCollection = getSource();
         Set<File> files = srcCollection.getFiles();
         
         File firstFile = files.iterator().next();
         File baseDir = findBase(firstFile);
-        
-        for(File f : files) {
-        	System.out.println("file="+f);
-        	
-        	String fullName = findFullName(baseDir, f);
-        	System.out.println("name="+fullName);
-        	
-        	String source = readSource(f);
-        	
-        	compiler.compile(fullName, source, clazz -> compiledGroovyClass(destinationDir, clazz));
-        }
+        try (FileOutputStream routeOut = new FileOutputStream(routeIdFile);
+        		OutputStreamWriter write = new OutputStreamWriter(routeOut, encoding.name());
+        		BufferedWriter bufWrite = new BufferedWriter(write)
+        		) {
+	        for(File f : files) {
+	        	System.out.println("file="+f);
+	        	
+	        	String fullName = findFullName(baseDir, f);
+	        	System.out.println("name="+fullName);
+	        	
+	        	String source = readSource(f);
+	        	
+	        	compiler.compile(fullName, source, new PluginCompileCallback(destinationDir, bufWrite)); 
+	        }
+		}
         
 		setDidWork(true);
 	}
@@ -120,23 +143,46 @@ public class TemplateCompilerTask extends AbstractCompile {
 		return recurse(firstFile.getParentFile());
 	}
 
-	private Object compiledGroovyClass(File destinationDir, GroovyClass clazz) {
-		String name = clazz.getName();
-		String path = name.replace('.', '/');
-		String fullPathName = path+".class";
-		File f = new File(destinationDir, fullPathName);
-		//File f = createFile(destinationDir, name);
-		System.out.println("file write to="+f);
+	private static class PluginCompileCallback implements CompileCallback {
 		
-		try {
-			try (FileOutputStream str = new FileOutputStream(f)) {
-				IOUtils.write(clazz.getBytes(), str);
-			}
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
-		return null;
-		
-	}
+		private File destinationDir;
+		private BufferedWriter routeOut;
 
+		public PluginCompileCallback(File destinationDir, BufferedWriter bufWrite) {
+			this.destinationDir = destinationDir;
+			this.routeOut = bufWrite;
+		}
+		
+		public void compiledGroovyClass(GroovyClass clazz) {
+			String name = clazz.getName();
+			String path = name.replace('.', '/');
+			String fullPathName = path+".class";
+			File f = new File(destinationDir, fullPathName);
+			//File f = createFile(destinationDir, name);
+			System.out.println("file write to="+f);
+			
+			try {
+				try (FileOutputStream str = new FileOutputStream(f)) {
+					IOUtils.write(clazz.getBytes(), str);
+				}
+			} catch(IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public void routeIdFound(String routeId, List<String> argNames, String sourceLocation) {
+			String argStr = "";
+			for(String s: argNames) {
+				argStr += ","+s;
+			}
+			
+			try {
+				routeOut.write(routeId+":"+argStr+":"+sourceLocation+"\n");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
 }

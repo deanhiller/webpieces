@@ -1,11 +1,14 @@
 package org.webpieces.templating.impl.tags;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
-import org.webpieces.templating.impl.source.TokenImpl;
 
 public class TagGen implements GroovyGen {
 
@@ -13,11 +16,13 @@ public class TagGen implements GroovyGen {
 	private String name;
 	private int uniqueId;
 	private Token startToken;
+	private CompileCallback callback;
 
-	public TagGen(String tagName, Token startToken, int uniqueId) {
+	public TagGen(String tagName, Token startToken, int uniqueId, CompileCallback callback) {
 		this.name = tagName;
 		this.uniqueId = uniqueId;
 		this.startToken = startToken;
+		this.callback = callback;
 	}
 
 	@Override
@@ -89,9 +94,29 @@ public class TagGen implements GroovyGen {
 		String args = tagArgs.substring(indexOfLeftParen, indexOfRightParen+1);
 		String leftover = tagArgs.substring(indexOfRightParen+1);
 
+		List<String> argNames = fetchArgNames(args, token);
+		callback.routeIdFound(route, argNames, token.getSourceLocation());
+		
 		log.warn("need to record the route here with argument names by splitting on : and , and can do some trivial validation on that as well and fail early");
 		String groovy = prefix + "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation()+"')" + leftover;
 		return groovy;
+	}
+
+	private List<String> fetchArgNames(String args, Token token) {
+		List<String> names = new ArrayList<>();
+		if("[:]".equals(args))
+			return names;
+			
+		String noBracketsArgs = args.substring(1, args.length()-1);
+		String[] split = noBracketsArgs.split("[:,]");
+		if(split.length % 2 != 0)
+			throw new IllegalArgumentException("The groovy Map appears to be invalid as splitting on [:,] results in"
+					+ " an odd amount of elements and it shold be key:value,key2:value "+token.getSourceLocation());
+		for(int i = 0; i < split.length; i+=2) {
+			names.add(split[i]);
+		}
+		
+		return names;
 	}
 
 	private String getMessage(Token token, int atIndex, String errorMsg) {

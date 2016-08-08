@@ -23,7 +23,7 @@ public class TemplateImpl implements Template {
 	}
 
 	@Override
-	public TemplateResult run(Map<String, Object> args, Map<?, ?> templateProps, ReverseUrlLookup lookup) {
+	public TemplateResult run(Map<String, Object> args, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
 		StringWriter out = new StringWriter();
 		PrintWriter writer = new PrintWriter(out);
 		Binding binding = new Binding(args);
@@ -31,7 +31,7 @@ public class TemplateImpl implements Template {
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);		
 		
-		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, lookup);
+		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, urlLookup);
 
 		t.run();
 		

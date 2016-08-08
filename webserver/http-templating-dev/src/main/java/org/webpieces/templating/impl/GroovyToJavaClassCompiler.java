@@ -1,19 +1,18 @@
 package org.webpieces.templating.impl;
 
-import java.util.function.Consumer;
-
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.tools.GroovyClass;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.impl.source.ScriptOutputImpl;
 
 import groovy.lang.GroovyClassLoader;
 
 public class GroovyToJavaClassCompiler {
 
-	public void compile(ScriptOutputImpl scriptCode, Consumer<GroovyClass> compiledCallback) {
+	public void compile(ScriptOutputImpl scriptCode, CompileCallback callbacks) {
 		try {
-			compileImpl(scriptCode, compiledCallback);
+			compileImpl(scriptCode, callbacks);
 			//F'ing checked exceptions should have been runtime so I don't have all this cruft in my app...
 		} catch (SecurityException e) {
 			throw new RuntimeException(e);
@@ -22,7 +21,7 @@ public class GroovyToJavaClassCompiler {
 		}
 	}
 
-	private void compileImpl(ScriptOutputImpl scriptCode, Consumer<GroovyClass> compiledCallback) {
+	private void compileImpl(ScriptOutputImpl scriptCode, CompileCallback callbacks) {
 		GroovyClassLoader cl = new GroovyClassLoader();
 		CompilationUnit compileUnit = new CompilationUnit();
 	    compileUnit.addSource(scriptCode.getFullClassName(), scriptCode.getScriptSourceCode());
@@ -31,7 +30,7 @@ public class GroovyToJavaClassCompiler {
 
 	    for (Object compileClass : compileUnit.getClasses()) {
 	        GroovyClass groovyClass = (GroovyClass) compileClass;
-	        compiledCallback.accept(groovyClass);
+	        callbacks.compiledGroovyClass(groovyClass);
 	    }
 	}
 

@@ -43,16 +43,16 @@ public class ProdTemplateService implements TemplateService {
 	}
 
 	@Override
-	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup lookup) {
-		String result = runTemplate(template, pageArgs, new HashMap<>(), lookup);
+	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup urlLookup) {
+		String result = runTemplate(template, pageArgs, new HashMap<>(), urlLookup);
 		out.write(result);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup lookup) {
+	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
-		TemplateResult info = template.run(copy, templateProps, lookup);
+		TemplateResult info = template.run(copy, templateProps, urlLookup);
 
 		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
 		Map templateProperties = info.getTemplateProperties();
@@ -65,7 +65,7 @@ public class ProdTemplateService implements TemplateService {
 		try {
 			if(superTemplateFilePath != null) {
 				Template superTemplate = loadTemplate(superTemplateFilePath);
-				return runTemplate(superTemplate, pageArgs, templateProperties, lookup);
+				return runTemplate(superTemplate, pageArgs, templateProperties, urlLookup);
 			} else
 				return info.getResult();
 		} catch(Exception e) {

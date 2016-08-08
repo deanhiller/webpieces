@@ -3,11 +3,13 @@ package org.webpieces.templating.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateCompileConfig;
@@ -56,14 +58,28 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 	private Class<?> createTemplate(String fullClassName, String source) throws ClassNotFoundException {
 		GroovyClassLoader cl = new GroovyClassLoader();
 		
-		ScriptOutputImpl scriptCode = compiler.compile(fullClassName, source, groovy -> defineClass(cl, groovy));
+		ScriptOutputImpl scriptCode = compiler.compile(fullClassName, source, new DevTemplateCompileCallback(cl));
 		
 		return cl.loadClass(scriptCode.getFullClassName());
 	}
 
-	private Void defineClass(GroovyClassLoader cl, GroovyClass groovyClass) {
-        cl.defineClass(groovyClass.getName(), groovyClass.getBytes());
-		return null;
-	}
+	private static class DevTemplateCompileCallback implements CompileCallback {
 
+		private GroovyClassLoader cl;
+
+		public DevTemplateCompileCallback(GroovyClassLoader cl) {
+			this.cl = cl;
+		}
+
+		@Override
+		public void compiledGroovyClass(GroovyClass groovyClass) {
+			cl.defineClass(groovyClass.getName(), groovyClass.getBytes());	
+		}
+
+		@Override
+		public void routeIdFound(String routeId, List<String> argNames, String sourceLocation) {
+			//validate??
+		}
+		
+	}
 }

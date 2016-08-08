@@ -1,14 +1,10 @@
 package org.webpieces.webserver.basic.biz;
 
-import static org.webpieces.router.api.dto.HttpMethod.GET;
-import static org.webpieces.router.api.dto.HttpMethod.POST;
-
 import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.webserver.basic.BasicRouteId;
 
 public class BasicController {
