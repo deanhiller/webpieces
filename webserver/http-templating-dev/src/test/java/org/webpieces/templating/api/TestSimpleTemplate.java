@@ -18,7 +18,7 @@ public class TestSimpleTemplate {
 
 	@Before
 	public void setup() {
-		Injector injector = Guice.createInjector(new ProdTemplateModule());
+		Injector injector = Guice.createInjector(new ProdTemplateModule(new TemplateConfig()));
 		svc = injector.getInstance(DevTemplateService.class);
 	}
 	

@@ -8,7 +8,9 @@ public enum MtgRouteId implements RouteId {
 	GET_SHOW_MTG,
 	SOME_EXAMPLE,
 	ASYNC_ROUTE,
-	ARGS_MISMATCH
+	ARGS_MISMATCH,
+	POST_ROUTE,
+	POST_MEETING
 	;
 	
 }

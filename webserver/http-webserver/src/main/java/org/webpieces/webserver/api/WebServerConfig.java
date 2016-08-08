@@ -31,6 +31,7 @@ public class WebServerConfig {
 	
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
 	private Charset htmlResponsePayloadEncoding = StandardCharsets.UTF_8;
+	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -94,5 +95,13 @@ public class WebServerConfig {
 		this.htmlResponsePayloadEncoding = htmlResponsePayloadEncoding;
 		return this;
 	}
+
+	public Charset getDefaultFormAcceptEncoding() {
+		return defaultFormAcceptEncoding;
+	}
 	
+	public WebServerConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
+		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
+		return this;
+	}
 }

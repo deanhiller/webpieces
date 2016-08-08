@@ -196,6 +196,8 @@ public class TestSynchronousErrors {
 	 */
 	@Test
 	public void testRemoteSystemDown() {
+		//TODO: try to bring this back to life sometime...
+		
 //		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 //		mockRemote.addValueToReturn(future);
 //		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");

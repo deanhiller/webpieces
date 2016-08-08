@@ -28,15 +28,9 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* test 500 ends up throwing another 500
-* test notfound in different cases
-* come up with the http 500 strategy for dev server AND for production server
-* exc from route goes to 500
-* tests
-  * throw not found synchronously in controler, then throw notfound exception from notfound route, then throw exception from 500 route
-  * throw not found async in controller, then throw async not found from not found route, then render 500 route
-  * throw not found async in controller, then throw sync in not found route
-  * throw async in controller and verify notfound route shown
+* generate file with list of routeid enums on compile and then on startup verify each one can be resolved uniquely so if not found, we can prevent release since there is definitely pages with bugs
+* catch-all route with POST
+* AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?

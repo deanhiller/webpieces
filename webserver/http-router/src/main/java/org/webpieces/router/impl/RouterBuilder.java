@@ -38,12 +38,6 @@ public class RouterBuilder implements Router {
 		this.urlEncoding = urlEncoding;
 	}
 	
-	@Override
-	public void addPostRoute(String path, String controllerMethod) {
-		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, null, false);
-		addRoute(route, null);
-	}
-	
 	public void addRoute(Route r, RouteId routeId) {
 		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
@@ -51,9 +45,7 @@ public class RouterBuilder implements Router {
 
 		info.addRoute(meta);
 		
-		//POST methods have no route Id as we only redirect to GET pages
-		if(routeId != null)
-			reverseRoutes.addRoute(routeId, meta);
+		reverseRoutes.addRoute(routeId, meta);
 	}
 
 	@Override
@@ -68,12 +60,6 @@ public class RouterBuilder implements Router {
 		addRoute(route, routeId);
 	}
 
-	@Override
-	public void addSecurePostRoute(String path, String controllerMethod) {
-		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, null, true);
-		addRoute(route, null);
-	}
-	
 	@Override
 	public void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		Route route = new RouteImpl(method, path, controllerMethod, routeId, true);

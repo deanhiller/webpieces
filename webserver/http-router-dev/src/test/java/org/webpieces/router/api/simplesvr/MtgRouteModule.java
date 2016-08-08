@@ -1,7 +1,6 @@
 package org.webpieces.router.api.simplesvr;
 
-import static org.webpieces.router.api.dto.HttpMethod.GET;
-import static org.webpieces.router.api.dto.HttpMethod.getAll;
+import static org.webpieces.router.api.dto.HttpMethod.*;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.*;
 
 import org.webpieces.router.api.routing.RouteModule;
@@ -27,13 +26,13 @@ public class MtgRouteModule implements RouteModule {
 		//
 		//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 		//
-		//AND ON TOP of that, we have multi-part fields as well with keys and values
+		//AND ON TOP of that, we have multi-part fields as well with keys and values for POSTs
 		
-		router.addRoute(getAll(), "/something",  "MeetingController.someExample",     SOME_EXAMPLE);
-//		router.addRoute(GET,      "/listuser",   "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
-		router.addPostRoute(      "/meeting",       "MeetingController.postMeeting");
+		router.addRoute(getAll(), "/something",    "MeetingController.someExample",     SOME_EXAMPLE);
+//		router.addRoute(GET,      "/listuser",     "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
+		router.addRoute(POST,     "/meeting",      "MeetingController.postMeeting", POST_MEETING);
 		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",    GET_SHOW_MTG);
-		router.addRoute(GET,      "/async",      "MeetingController.asyncMethod",     ASYNC_ROUTE);
+		router.addRoute(GET,      "/async",        "MeetingController.asyncMethod",     ASYNC_ROUTE);
 		
 		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		

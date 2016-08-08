@@ -16,7 +16,7 @@ public class AHrefTag implements HtmlTag {
 	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
         Object url = args.get("href");
         if(url == null)
-        	throw new IllegalArgumentException("#{a/}# tag must contain a template name like #{extends '../template.html'/}#. "+srcLocation);
+        	throw new IllegalArgumentException("#{a/}# tag must contain an href argument name like #{a href:@ROUTE[:]}#. "+srcLocation);
         else if(body == null)
         	throw new IllegalArgumentException("You must have an open and close tag(ie.  #{a}# and #{/a}#).  #{a/}# is not allowed");
 

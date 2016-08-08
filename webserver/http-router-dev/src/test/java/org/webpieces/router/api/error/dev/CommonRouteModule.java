@@ -1,26 +1,26 @@
 package org.webpieces.router.api.error.dev;
 
-import static org.webpieces.router.api.dto.HttpMethod.GET;
+import static org.webpieces.router.api.dto.HttpMethod.*;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.ARGS_MISMATCH;
+import static org.webpieces.router.api.simplesvr.MtgRouteId.POST_ROUTE;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.api.routing.AbstractRouteModule;
 
-public class CommonRouteModule implements RouteModule {
+public class CommonRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(Router router, String packageName) {
+	public void configure(String packageName) {
 		//We cannot do this or the compiler in dev router will compile it too early for testing
 		//String controllerName = SomeController.class.getName();
 
-		router.addRoute(GET, "/user/{id}",  "org.webpieces.devrouter.api.CommonController.badRedirect", SOME_EXAMPLE);
-		router.addRoute(GET, "/something",  "org.webpieces.devrouter.api.CommonController.argsMismatch", ARGS_MISMATCH);
-		router.addPostRoute("/postroute",    "org.webpieces.devrouter.api.CommonController.postReturnsHtmlRender");
+		addRoute(GET, "/user/{id}",  "org.webpieces.devrouter.api.CommonController.badRedirect", SOME_EXAMPLE);
+		addRoute(GET, "/something",  "org.webpieces.devrouter.api.CommonController.argsMismatch", ARGS_MISMATCH);
+		addRoute(POST, "/postroute",  "org.webpieces.devrouter.api.CommonController.postReturnsHtmlRender", POST_ROUTE);
 		
-		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
+		//addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
-		router.setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
+		setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
+		setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
 	}
 }

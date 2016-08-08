@@ -26,7 +26,7 @@ public class HtmlToJavaClassCompiler {
 			groovyCompile.compile(scriptCode, compiledCallback);
 		} catch(Exception e) {
 			throw new RuntimeException("Generated a groovy script file but compilation failed for file="
-					+filePath+" Script code generated=\n"+scriptCode.getScriptSourceCode(), e);
+					+filePath+" Script code generated=\n\n"+scriptCode.getScriptSourceCode(), e);
 		}
 		return scriptCode;
 	}

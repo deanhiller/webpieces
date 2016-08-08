@@ -18,20 +18,12 @@ public abstract class AbstractRouteModule implements RouteModule {
 
 	protected abstract void configure(String currentPackage);
 
-	public void addPostRoute(String path, String controllerMethod) {
-		router.addPostRoute(path, controllerMethod);
-	}
-
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		router.addRoute(method, path, controllerMethod, routeId);
 	}
 
 	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
 		router.addRoute(methods, path, controllerMethod, routeId);
-	}
-
-	public void addSecurePostRoute(String path, String controllerMethod) {
-		router.addSecurePostRoute(path, controllerMethod);
 	}
 
 	public void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {

@@ -3,6 +3,7 @@ package org.webpieces.webserver.api;
 import org.webpieces.router.api.HttpRouterConfig;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.templating.api.ProdTemplateModule;
+import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.webserver.impl.WebServerModule;
 
 import com.google.inject.Guice;
@@ -33,7 +34,7 @@ public abstract class WebServerFactory {
 		return Modules.combine(
 			new WebServerModule(config),
 			new ProdRouterModule(routerConfig),
-			new ProdTemplateModule()
+			new ProdTemplateModule(new TemplateConfig(config.getDefaultFormAcceptEncoding()))
 		);
 	}
 }

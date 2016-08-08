@@ -117,7 +117,7 @@ public class RouteInvoker {
 			ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb, RouteMeta failedRoute) {
 		try {
 			log.error("There is three parts to this error message... request, route found, and the exception "
-					+ "message.  You should\nread the exception message below the RouterRequest and RouteMeta first.\n\n"+req+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
+					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"+req+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
 			return invokeImpl(result, req, responseCb);
 		} catch(Throwable e) {

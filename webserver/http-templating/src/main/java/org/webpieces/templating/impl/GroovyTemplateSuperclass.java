@@ -1,9 +1,6 @@
 package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
