@@ -98,6 +98,8 @@ subprojects {
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
+      
+      systemProperty "gradle.running", "true"
    }
 
 }

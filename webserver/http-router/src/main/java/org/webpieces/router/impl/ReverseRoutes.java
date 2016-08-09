@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.webpieces.router.api.RouteNotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 
 public class ReverseRoutes {
@@ -89,7 +90,7 @@ public class ReverseRoutes {
 	private RouteMeta getByFullClassAndName(String name) {
 		RouteMeta meta = fullClassAndNameToRoute.get(name);
 		if(meta == null)
-			throw new IllegalStateException("route="+name+" not found");
+			throw new RouteNotFoundException("route="+name+" not found.");
 		return meta;
 	}
 
@@ -103,12 +104,12 @@ public class ReverseRoutes {
 					routes += "\nroute="+id.getClass().getName()+"."+id.name();
 			}
 			
-			throw new IllegalArgumentException("There is more than one route matching the class and name.  Qualify it with the package like org.web."
+			throw new RouteNotFoundException("There is more than one route matching the class and name.  Qualify it with the package like org.web."
 					+name+".  These are the conflicting ids which is why you need to be more specific="+routes);
 		}
 		RouteMeta routeMeta = classAndNameToRoute.get(name);
 		if(routeMeta == null)
-			throw new IllegalStateException("route="+name+" not found");
+			throw new RouteNotFoundException("route="+name+" not found");
 		return routeMeta;
 	}
 	
@@ -121,12 +122,12 @@ public class ReverseRoutes {
 					routes += "\nroute="+id.getClass();
 			}
 			
-			throw new IllegalArgumentException("There is more than one route matching the name.  Qualify it with the class like XXXRouteId."
+			throw new RouteNotFoundException("There is more than one route matching the name.  Qualify it with the class like XXXRouteId."
 					+name+".  Same names are found in these enum classes="+routes);
 		}
 		RouteMeta routeMeta = routeNameToRoute.get(name);
 		if(routeMeta == null)
-			throw new IllegalStateException("route="+name+" not found");
+			throw new RouteNotFoundException("route="+name+" not found.");
 		return routeMeta;
 	}
 	
@@ -143,7 +144,7 @@ public class ReverseRoutes {
 		for(String param : pathParamNames) {
 			String val = args.get(param);
 			if(val == null)
-				throw new IllegalArgumentException("missing argument to create url.  param="+param+" is required to be non-null");
+				throw new RouteNotFoundException("missing argument.  param="+param+" is required to exist(and cannot be null as well).");
 			String encodedVal = urlEncode(val);
 			path = path.replace("{"+param+"}", encodedVal);
 		}

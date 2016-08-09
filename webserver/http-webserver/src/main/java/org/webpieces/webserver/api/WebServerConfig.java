@@ -14,6 +14,8 @@ public class WebServerConfig {
 
 	private InetSocketAddress httpListenAddress;
 	private InetSocketAddress httpsListenAddress;
+	//typically only true during a test, but could be done before production server runs as well though it will slow down startup time
+	private boolean validateRouteIdsOnStartup = false;
 	
 	private int numFrontendServerThreads = 20;
 	/**
@@ -104,4 +106,15 @@ public class WebServerConfig {
 		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
 		return this;
 	}
+
+	public boolean isValidateRouteIdsOnStartup() {
+		return validateRouteIdsOnStartup;
+	}
+
+	public WebServerConfig setValidateRouteIdsOnStartup(boolean validateRouteIdsOnStartup) {
+		this.validateRouteIdsOnStartup = validateRouteIdsOnStartup;
+		return this;
+	}
+	
+	
 }

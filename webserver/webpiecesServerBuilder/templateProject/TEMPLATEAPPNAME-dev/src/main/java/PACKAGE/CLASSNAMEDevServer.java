@@ -55,7 +55,15 @@ public class CLASSNAMEDevServer {
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
-		server = new CLASSNAMEServer(platformOverrides, null, usePortZero, metaFile);
+		
+		ServerConfig config = new ServerConfig();
+		if(usePortZero) {
+			config.setHttpPort(0);
+			config.setHttpsPort(0);
+		}
+		
+		config.setMetaFile(metaFile);
+		server = new CLASSNAMEServer(platformOverrides, null, config);
 	}
 	
 	public void start() throws InterruptedException {

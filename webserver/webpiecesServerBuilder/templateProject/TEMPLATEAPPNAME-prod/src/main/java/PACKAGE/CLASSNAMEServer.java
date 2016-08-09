@@ -68,7 +68,9 @@ public class CLASSNAMEServer {
 	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
-		new CLASSNAMEServer(null, null, false, null).start();
+		CLASSNAMEServer server = new CLASSNAMEServer(null, null, new ServerConfig());
+		
+		server.start();
 		
 		synchronized (CLASSNAMEServer.class) {
 			//wait forever for now so server doesn't shut down..
@@ -78,10 +80,11 @@ public class CLASSNAMEServer {
 
 	private WebServer webServer;
 
-	public CLASSNAMEServer(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
+	public CLASSNAMEServer(Module platformOverrides, Module appOverrides, ServerConfig svrConfig) {
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 
+		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
 		if(metaFile == null)
 			metaFile = new VirtualFileClasspath("appmeta.txt", CLASSNAMEServer.class.getClassLoader());
@@ -97,14 +100,10 @@ public class CLASSNAMEServer {
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
 										.setHtmlResponsePayloadEncoding(ALL_FILE_ENCODINGS)
-										.setHttpListenAddress(new InetSocketAddress(8080))
-										.setHttpsListenAddress(new InetSocketAddress(8443))
-										.setFunctionToConfigureServerSocket(s -> configure(s));
-		
-		if(usePortZero) {
-			config.setHttpListenAddress(new InetSocketAddress(0));
-			config.setHttpsListenAddress(new InetSocketAddress(0));
-		}
+										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
+										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
+										.setFunctionToConfigureServerSocket(s -> configure(s))
+										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
 		
 		webServer = WebServerFactory.create(config, routerConfig);
 	}

@@ -4,7 +4,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
+//import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -39,7 +39,7 @@ public class TestLesson4WithSelenium {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		CLASSNAMEServer webserver = new CLASSNAMEServer(new SeleniumOverridesForTest(), new AppOverridesModule(), true, null);
+		CLASSNAMEServer webserver = new CLASSNAMEServer(new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0));
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

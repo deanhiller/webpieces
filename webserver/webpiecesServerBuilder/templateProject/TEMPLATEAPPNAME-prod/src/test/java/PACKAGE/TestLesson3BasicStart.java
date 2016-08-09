@@ -18,7 +18,7 @@ public class TestLesson3BasicStart {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		CLASSNAMEServer server = new CLASSNAMEServer(null, null, true, null);
+		CLASSNAMEServer server = new CLASSNAMEServer(null, null, new ServerConfig(0, 0));
 		//In this case, we bind a port
 		server.start();
 
@@ -31,7 +31,7 @@ public class TestLesson3BasicStart {
 		// non-guice singletons).  A guice singleton is only a singleton within the scope of a server
 		//while a java singleton....well, pretty much sucks.  Google "Singletons are evil".
 		
-		CLASSNAMEServer server2 = new CLASSNAMEServer(null, null, true, null);
+		CLASSNAMEServer server2 = new CLASSNAMEServer(null, null, new ServerConfig(0, 0));
 		//In this case, we bind a port
 		server2.start();
 		System.out.println("bound port="+server.getUnderlyingHttpChannel().getLocalAddress());
