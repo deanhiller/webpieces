@@ -187,7 +187,7 @@ public class RouteInvoker {
 		return resp;
 	}
 
-	private RedirectResponse processRedirect(ReverseRoutes reverseRoutes, RouterRequest r, RouteMeta incomingRequestMeta, Redirect action) {
+	private RedirectResponse processRedirect(ReverseRoutes reverseRoutes, RouterRequest request, RouteMeta incomingRequestMeta, Redirect action) {
 		Method method = incomingRequestMeta.getMethod();
 		RouteId id = action.getId();
 		RouteMeta nextRequestMeta = reverseRoutes.get(id);
@@ -216,7 +216,7 @@ public class RouteInvoker {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		return new RedirectResponse(r.isHttps, r.domain, path);
+		return new RedirectResponse(request.isHttps, request.domain, path);
 	}
 	
 

@@ -22,7 +22,7 @@ public class RouterBuilder implements Router {
 	public static ThreadLocal<String> currentPackage = new ThreadLocal<>();
 	public static ThreadLocal<Injector> injector = new ThreadLocal<>();
 	
-	private final RouteInfo info;
+	private final AllRoutingInfo info;
 	private ReverseRoutes reverseRoutes;
 	private ControllerLoader finder;
 
@@ -30,7 +30,7 @@ public class RouterBuilder implements Router {
 
 	private Charset urlEncoding;
 
-	public RouterBuilder(String path, RouteInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder, Charset urlEncoding) {
+	public RouterBuilder(String path, AllRoutingInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder, Charset urlEncoding) {
 		this.routerPath = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
@@ -84,11 +84,11 @@ public class RouterBuilder implements Router {
 	public Router getScopedRouter(String path, boolean isSecure) {
 		if(path == null || path.length() == 0)
 			throw new IllegalArgumentException("path must be non-null and length must be greater than 0");
-		RouteInfo subInfo = info.addScope(path);
+		AllRoutingInfo subInfo = info.addScope(path);
 		return new RouterBuilder(path, subInfo, reverseRoutes, finder, urlEncoding);
 	}
 
-	public RouteInfo getRouterInfo() {
+	public AllRoutingInfo getRouterInfo() {
 		return info;
 	}
 

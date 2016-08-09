@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.webpieces.router.api.dto.RouterRequest;
 
-public class RouteInfo {
+public class AllRoutingInfo {
 
-	private final Map<String, RouteInfo> pathPrefixToInfo = new HashMap<>();
+	private final Map<String, AllRoutingInfo> pathPrefixToInfo = new HashMap<>();
 	private List<RouteMeta> routes = new ArrayList<>();
 	private RouteMeta pageNotFoundRoute;
 	private RouteMeta internalSvrErrorRoute;
@@ -30,10 +30,10 @@ public class RouteInfo {
 		this.internalSvrErrorRoute = r;
 	}
 	
-	public RouteInfo addScope(String path) {
-		RouteInfo routerInfo = pathPrefixToInfo.get(path);
+	public AllRoutingInfo addScope(String path) {
+		AllRoutingInfo routerInfo = pathPrefixToInfo.get(path);
 		if(routerInfo == null) {
-			routerInfo = new RouteInfo();
+			routerInfo = new AllRoutingInfo();
 			pathPrefixToInfo.put(path, routerInfo);
 		}
 		return routerInfo;
@@ -51,7 +51,7 @@ public class RouteInfo {
 			prefix = path.substring(0, index);
 		}
 
-		RouteInfo routeInfo = pathPrefixToInfo.get(prefix);
+		AllRoutingInfo routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
 			String newRelativePath = path.substring(index, path.length());
 			MatchResult route = routeInfo.fetchRoute(request, newRelativePath);

@@ -13,16 +13,16 @@ import com.google.inject.Injector;
 public class ProdLoader implements MetaLoaderProxy {
 
 	private MetaLoader loader;
-	private ClassForName classLoader;
+	private ClassForName classForName;
 	
 	@Inject
 	public ProdLoader(MetaLoader loader, ProdClassForName classLoader) {
 		this.loader = loader;
-		this.classLoader = classLoader;
+		this.classForName = classLoader;
 	}
 	
 	private Object createController(Injector injector, String controllerClassFullName) {
-		Class<?> clazz = classLoader.clazzForName(controllerClassFullName);
+		Class<?> clazz = classForName.clazzForName(controllerClassFullName);
 		return injector.getInstance(clazz);
 	}
 	

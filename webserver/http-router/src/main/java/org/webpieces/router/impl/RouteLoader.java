@@ -92,7 +92,7 @@ public class RouteLoader {
 		log.info("adding routes");
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
-		routerBuilder = new RouterBuilder("", new RouteInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
+		routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		invoker.init(reverseRoutes);
 		
 		for(RouteModule module : rm.getRouteModules()) {
@@ -133,8 +133,8 @@ public class RouteLoader {
 	}
 
 	public MatchResult fetchRoute(RouterRequest req) {
-		RouteInfo routerInfo = routerBuilder.getRouterInfo();
-		MatchResult meta = routerInfo.fetchRoute(req, req.relativePath);
+		AllRoutingInfo allRoutingInfo = routerBuilder.getRouterInfo();
+		MatchResult meta = allRoutingInfo.fetchRoute(req, req.relativePath);
 		if(meta == null)
 			throw new IllegalStateException("missing exception on creation if we go this far");
 
@@ -151,13 +151,13 @@ public class RouteLoader {
 	}
 
 	public MatchResult fetchNotFoundRoute() {
-		RouteInfo routerInfo = routerBuilder.getRouterInfo();
+		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
 		return new MatchResult(notfoundRoute);
 	}
 
 	public MatchResult fetchInternalErrorRoute() {
-		RouteInfo routerInfo = routerBuilder.getRouterInfo();
+		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
 		return new MatchResult(internalErrorRoute);
 	}
