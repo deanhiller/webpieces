@@ -1,10 +1,10 @@
 # webpieces
 
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent asycn http parser1.1 and independent http parser2......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter)
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter)
 
-This project is in process of implementing HTTP 2.0 as well.  This project is essentially pieces that can be used to build any http related software and full stacks as well.  The http proxy will be very minimable but is for testing purposes of the http parser such that we can put it in the middle of chrome and firefox for integration testing.
+This project is essentially pieces that can be used to build any http related software and full stacks as well.  
 
-Some HTTP/2 features (we are actively working this)
+Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
  * Server push - sending responses before requests even come based on the first page requests (pre-emptively send what you know they will need)
  * Data compression of HTTP headers
@@ -16,8 +16,6 @@ Pieces with HTTP/2 support
  * embeddablewebserver - a webserver with http 2 support
  * httpclient - An http client with http 2 support
 
-"Composition over inheritance" is a well documented ideal.  Generally speaking, after years of development a developer comes to understand why composition is preferred over inheritance.  It is generally more flexible to changing requirements.  In this regard, I also believe "libraries over frameworks" is much of the same and there are many frameworks like netty, http servers, etc. that I believe you could actually do as a library that would be more composable(ie. embeddablewebserver and embeddablehttpproxy are BOTH libraries not frameworks!!!!!).  Basically, webpieces is trying to follow the 'libraries over frameworks' idiom.  Creating a main method is easy, and with webpieces, you have so much more control.....lastly, you can swap ANY piece in these libraries by just bindingin a different piece via one line of java code.  ie. These are very hackable libraries to support many different needs
-
 channelmanager - a very thin layer on nio for speed
 asyncserver - a thin wrapper on channelmanager to create a one call tcp server
 
@@ -28,10 +26,8 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* generate file with list of routeid enums on compile and then on startup verify each one can be resolved uniquely so if not found, we can prevent release since there is definitely pages with bugs
 * implement field tag next
-* implement a real form and try out post redirect get and especially what to do on post not found situation
-* catch-all route with POST
+* catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)

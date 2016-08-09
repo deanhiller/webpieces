@@ -2,7 +2,9 @@ package org.webpieces.router.api.dto;
 
 import java.util.Map;
 
-public class RenderResponse {
+import org.webpieces.router.api.actions.RenderHtml;
+
+public class RenderResponse implements RenderHtml {
 
 	private View view;
 	private RouteType routeType;

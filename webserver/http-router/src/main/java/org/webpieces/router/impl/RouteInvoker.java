@@ -2,10 +2,7 @@ package org.webpieces.router.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -14,19 +11,18 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.RenderHtml;
-import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RequestLocal;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
-import org.webpieces.router.api.dto.View;
-import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.impl.actions.RedirectImpl;
+import org.webpieces.router.impl.actions.RenderHtmlImpl;
+import org.webpieces.router.impl.ctx.LocalContext;
+import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.params.ArgumentTranslator;
+import org.webpieces.router.impl.params.ObjectToStringTranslator;
 
 public class RouteInvoker {
 
@@ -34,10 +30,12 @@ public class RouteInvoker {
 	private ArgumentTranslator argumentTranslator;
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
+	private ObjectToStringTranslator reverseTranslator;
 	
 	@Inject
-	public RouteInvoker(ArgumentTranslator argumentTranslator) {
+	public RouteInvoker(ArgumentTranslator argumentTranslator, ObjectToStringTranslator translator) {
 		this.argumentTranslator = argumentTranslator;
+		this.reverseTranslator = translator;
 	}
 
 	public void invoke(
@@ -137,105 +135,37 @@ public class RouteInvoker {
 		Method method = meta.getMethod();
 
 		Object[] arguments = argumentTranslator.createArgs(result, req);
-		//TODO: We need to render a page that says "This would be a 404 in production but in development this is an error as we assume you type
-			//in the correct urls.  Something about your url matched a route but then failed.  Details are below
-			//THEN we need tests in prod version and development version for this!!
 
 		RequestLocal.setRequest(req);
-		CompletableFuture<Object> response = invokeMethod(obj, method, arguments);
+		ResponseProcessor processor = new ResponseProcessor(reverseRoutes, reverseTranslator, req, meta);
+		LocalContext.setResponseProcessor(processor);
+		CompletableFuture<Object> response;
+		try {
+			response = invokeMethod(obj, method, arguments);
+		} finally {
+			LocalContext.setResponseProcessor(null);
+		}
 		
-		RouteMeta finalMeta = meta;
-		CompletableFuture<Object> future = response.thenApply(o -> continueProcessing(reverseRoutes, req, finalMeta, o, responseCb));
+		CompletableFuture<Object> future = response.thenApply(resp -> continueProcessing(processor, resp, responseCb));
 		return future;
 	}
 
-	public Object continueProcessing(ReverseRoutes reverseRoutes, RouterRequest routerRequest, RouteMeta incomingRequestMeta, Object controllerResponse, ResponseStreamer responseCb) {
-		if(controllerResponse instanceof Redirect) {
-			RedirectResponse httpResponse = processRedirect(reverseRoutes, routerRequest, incomingRequestMeta, (Redirect)controllerResponse);
+	public Object continueProcessing(ResponseProcessor processor, Object controllerResponse, ResponseStreamer responseCb) {
+		if(controllerResponse instanceof RedirectResponse) {
+			responseCb.sendRedirect((RedirectResponse)controllerResponse);
+		} else if(controllerResponse instanceof RenderResponse) {
+			responseCb.sendRenderHtml((RenderResponse)controllerResponse);
+		} else if(controllerResponse instanceof RedirectImpl) {
+			RedirectResponse httpResponse = processor.createFullRedirect((RedirectImpl)controllerResponse);
 			responseCb.sendRedirect(httpResponse);
-		} else if(controllerResponse instanceof RenderHtml) {
-			RenderResponse resp = renderHtml(routerRequest, incomingRequestMeta, (RenderHtml)controllerResponse);
+		} else if(controllerResponse instanceof RenderHtmlImpl) {
+			RenderResponse resp = processor.createRenderResponse((RenderHtmlImpl)controllerResponse);
 			responseCb.sendRenderHtml(resp);
 		} else {
 			throw new UnsupportedOperationException("Not yet done but could "
 					+ "call into the Action witht the responseCb to handle so apps can decide what to send back");
 		}
 		return null;
-	}
-
-	private RenderResponse renderHtml(RouterRequest routerRequest, RouteMeta matchedMeta, RenderHtml controllerResponse) {
-		Method method = matchedMeta.getMethod();
-		//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG
-		//If the POST route was not found, just render the notFound page that controller sends us violating the
-		//PRG pattern in this one specific case for now (until we test it with the browser to make sure back button is
-		//not broken)
-		if(matchedMeta.getRoute().getRouteType() == RouteType.BASIC && HttpMethod.POST == routerRequest.method) {
-			throw new IllegalReturnValueException("Controller method='"+method+"' MUST follow the PRG "
-					+ "pattern(https://en.wikipedia.org/wiki/Post/Redirect/Get) so "
-					+ "users don't have a poor experience using your website with the browser back button.  "
-					+ "This means on a POST request, you cannot return RenderHtml object and must return Redirects");
-		}
-		
-		View view = controllerResponse.getView();
-		if(controllerResponse.getView() == null) {
-			String controllerName = matchedMeta.getControllerInstance().getClass().getName();
-			String methodName = matchedMeta.getMethod().getName();
-			view = new View(controllerName, methodName);
-		}
-		
-		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType());
-		return resp;
-	}
-
-	private RedirectResponse processRedirect(ReverseRoutes reverseRoutes, RouterRequest request, RouteMeta incomingRequestMeta, Redirect action) {
-		Method method = incomingRequestMeta.getMethod();
-		RouteId id = action.getId();
-		RouteMeta nextRequestMeta = reverseRoutes.get(id);
-		
-		if(nextRequestMeta == null)
-			throw new IllegalReturnValueException("Route="+id+" returned from method='"+method+"' was not added in the RouterModules");
-		else if(!nextRequestMeta.getRoute().matchesMethod(HttpMethod.GET))
-			throw new IllegalReturnValueException("method='"+method+"' is trying to redirect to routeid="+id+" but that route is not a GET method route and must be");
-
-		Route route = nextRequestMeta.getRoute();
-		
-		Map<String, String> keysToValues = formMap(method, route.getPathParamNames(), action.getArgs());
-		
-		Set<String> keySet = keysToValues.keySet();
-		List<String> argNames = route.getPathParamNames();
-		if(keySet.size() != argNames.size()) {
-			throw new IllegalReturnValueException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
-		}
-
-		String path = route.getPath();
-		
-		for(String name : argNames) {
-			String value = keysToValues.get(name);
-			if(value == null) 
-				throw new IllegalArgumentException("Method='"+method+"' returns a Redirect that is missing argument key="+name+" to form the url on the redirect");
-			path = path.replace("{"+name+"}", value);
-		}
-		
-		return new RedirectResponse(request.isHttps, request.domain, path);
-	}
-	
-
-	private Map<String, String> formMap(Method method, List<String> pathParamNames, List<Object> args) {
-		if(pathParamNames.size() != args.size())
-			throw new IllegalReturnValueException("The Redirect object returned from method='"+method+"' has the wrong number of arguments. args.size="+args.size()+" should be size="+pathParamNames.size());
-
-		Map<String, String> nameToValue = new HashMap<>();
-		for(int i = 0; i < pathParamNames.size(); i++) {
-			String key = pathParamNames.get(i);
-			Object obj = args.get(i);
-			if(obj != null) {
-				//TODO: need reverse binding here!!!!
-				//Anotherwords, apps register Converters String -> Object and Object to String and we should really be
-				//using that instead of toString to convert which could be different
-				nameToValue.put(key, obj.toString());
-			}
-		}
-		return nameToValue;
 	}
 	
 	private CompletableFuture<Object> invokeMethod(Object obj, Method m, Object[] arguments) {

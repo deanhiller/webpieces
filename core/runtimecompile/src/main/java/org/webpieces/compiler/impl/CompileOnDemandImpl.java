@@ -1,10 +1,13 @@
 package org.webpieces.compiler.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 
 public class CompileOnDemandImpl implements CompileOnDemand {
 
+	private static final Logger log = LoggerFactory.getLogger(CompileOnDemandImpl.class);
 	private final CompileConfig config;
 	private final CompileMetaMgr appClassMgr;
 	private final FileLookup fileLookup;	
@@ -23,6 +26,8 @@ public class CompileOnDemandImpl implements CompileOnDemand {
 		compiler = new CompilerWrapper(appClassMgr, fileLookup, config);
 		classloader = new CompilingClassloader(config, compiler, fileLookup);
 		fileLookup.scanFilesWithFilter(basePackage);
+		log.info("using bytecode cache directory="+config.getByteCodeCacheDir());
+		log.info("using src directories to compile from="+config.getJavaPath());
 	}
 	
 	@Override

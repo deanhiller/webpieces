@@ -13,7 +13,7 @@ public class CommonController {
 	private boolean isWantRedirect = false;
 	
 	public Action notFound() {
-		return Actions.renderView("notFound.xhtml");
+		return Actions.renderThis();
 	}
 	public Action internalError() {
 		throw new IllegalStateException("fail this for testing");

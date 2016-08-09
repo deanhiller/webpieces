@@ -52,6 +52,7 @@ public class CompilerWrapper {
         this.settings.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_Encoding, "UTF-8");
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
+        this.settings.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.GENERATE);
         String javaVersion = CompilerOptions.VERSION_1_8;
         
         this.settings.put(CompilerOptions.OPTION_Source, javaVersion);

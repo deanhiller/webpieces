@@ -2,12 +2,15 @@ package org.webpieces.router.impl;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouterRequest;
 
 public abstract class AbstractRouterService implements RoutingService {
 	
+	private static final Logger log = LoggerFactory.getLogger(AbstractRouterService.class);
 	protected boolean started = false;
 	private RouteLoader routeLoader;
 	
@@ -23,6 +26,7 @@ public abstract class AbstractRouterService implements RoutingService {
 			
 			processHttpRequestsImpl(req, responseCb);
 		} catch (Throwable e) {
+			log.warn("uncaught exception", e);
 			responseCb.failureRenderingInternalServerErrorPage(e);
 		}
 	}
