@@ -11,6 +11,7 @@ import org.webpieces.templating.impl.html.EscapeHTMLFormatter;
 import org.webpieces.templating.impl.html.NullFormatter;
 
 import groovy.lang.Closure;
+import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
 
 public abstract class GroovyTemplateSuperclass extends Script {
@@ -96,4 +97,12 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		}
 	}
 
+    @Override
+    public Object getProperty(String property) {
+        try {
+            return super.getProperty(property);
+        } catch (MissingPropertyException e) {
+        	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes around it or you forgot to pass it in from the controller's return value(with the RouteId)", e);
+        }
+    }
 }

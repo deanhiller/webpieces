@@ -96,5 +96,16 @@ public class RouteImpl implements Route {
 		return "RouteImpl [\n      path=" + path + ", \n      patternToMatch=" + patternToMatch + ", \n      methods=" + methods + ", \n      argNames="
 				+ argNames + ", \n      isSecure=" + isSecure + ", \n      routeType="+routeType+"\n      controllerMethodString=" + controllerMethodString + "]";
 	}
+
+	@Override
+	public boolean isPostOnly() {
+		if(methods.size() != 1)
+			return false;
+		HttpMethod method = methods.iterator().next();
+		if(method == HttpMethod.POST)
+			return true;
+		
+		return false;
+	}
 	
 }

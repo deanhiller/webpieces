@@ -23,4 +23,6 @@ public interface Route {
 	Set<HttpMethod> getHttpMethods();
 
 	RouteType getRouteType();
+
+	boolean isPostOnly();
 }

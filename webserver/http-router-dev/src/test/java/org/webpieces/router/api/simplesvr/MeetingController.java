@@ -38,7 +38,7 @@ public class MeetingController {
 		return CompletableFuture.completedFuture(Actions.renderThis());
 	}
 
-	public CompletableFuture<Action> postMeeting(/* @Param("mtg") MeetingDto mtg */) {
+	public CompletableFuture<Redirect> postMeeting(/* @Param("mtg") MeetingDto mtg */) {
 		
 		//if user is !valid {
 		if(isWantRedirect) {

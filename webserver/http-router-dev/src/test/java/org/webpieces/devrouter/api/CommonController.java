@@ -19,10 +19,6 @@ public class CommonController {
 		throw new IllegalStateException("fail this for testing");
 	}
 	
-	public Action postReturnsHtmlRender() {
-		return Actions.renderThis();
-	}
-	
 	public Action argsMismatch(@Param("id") int id, @Param("accId") String accId) {
 		return Actions.renderThis();
 	}

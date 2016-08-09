@@ -26,10 +26,10 @@ public class CLASSNAMERouteModule extends AbstractRouteModule {
 		addRoute(GET, "/async",         "CLASSNAMELocalController.myAsyncMethod", CLASSNAMERouteId.ASYNC_ROUTE); //for advanced users who want to release threads to do more work
 		
 		//basic crud example
-		//addRoute(GET, "/userform",      "ExampleController.userForm", ExampleRouteId.GET_USER_FORM);
-		//addRoute(POST, "/postuser",     "ExampleController.postUser", ExampleRouteId.POST_USER_FORM);
+		addRoute(GET,  "/userform",     "crud/ExampleController.userForm", ExampleRouteId.GET_USER_FORM);
+		addRoute(POST, "/postuser",     "crud/ExampleController.postUser", ExampleRouteId.POST_USER_FORM);
+		addRoute(GET,  "/listusers",    "crud/ExampleController.listUsers", ExampleRouteId.GET_LIST_USERS);
 		
-
 		setPageNotFoundRoute("CLASSNAMELocalController.notFound");
 		setInternalErrorRoute("CLASSNAMELocalController.internalError");
 	}

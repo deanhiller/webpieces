@@ -16,7 +16,6 @@ public class CommonRouteModule extends AbstractRouteModule {
 
 		addRoute(GET, "/user/{id}",  "org.webpieces.devrouter.api.CommonController.badRedirect", SOME_EXAMPLE);
 		addRoute(GET, "/something",  "org.webpieces.devrouter.api.CommonController.argsMismatch", ARGS_MISMATCH);
-		addRoute(POST, "/postroute",  "org.webpieces.devrouter.api.CommonController.postReturnsHtmlRender", POST_ROUTE);
 		
 		//addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		

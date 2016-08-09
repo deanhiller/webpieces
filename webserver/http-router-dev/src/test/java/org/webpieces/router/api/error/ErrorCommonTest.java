@@ -102,23 +102,6 @@ public class ErrorCommonTest {
 		verifyNotFoundRendered(mockResponseStream);
 	}
 	
-	@Test
-	public void testHTMLPostAndTryingToRenderInsteadOfRedirectFails() {
-		log.info("starting");
-		String moduleFileContents = CommonRoutesModules.class.getName();
-		RoutingService server = createServer(isProdTest, moduleFileContents);
-		
-		server.start();
-		
-		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.POST, "/postroute");
-		MockResponseStream mockResponseStream = new MockResponseStream();
-		
-		server.processHttpRequests(req, mockResponseStream);
-
-		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(IllegalStateException.class, e.getClass());
-	}
-	
 	/** 
 	 * Need to live test with browser to see if PRG is better or just returning 404 is better!!!
 	 * Current behavior is to return a 404

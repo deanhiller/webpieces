@@ -58,7 +58,6 @@ public class TagGen implements GroovyGen {
             
             //TODO: record the tag used and source location to be verified at build time(ie. test will verify)
         	while(tagArgs.contains("@")) {
-        		log.warn("need to record tag to file for testing validity at test time");
         		tagArgs = replaceRouteIds(token, tagArgs, indexOfSpace);
         	}
             
@@ -97,7 +96,6 @@ public class TagGen implements GroovyGen {
 		List<String> argNames = fetchArgNames(args, token);
 		callback.routeIdFound(route, argNames, token.getSourceLocation());
 		
-		log.warn("need to record the route here with argument names by splitting on : and , and can do some trivial validation on that as well and fail early");
 		String groovy = prefix + "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation()+"')" + leftover;
 		return groovy;
 	}
