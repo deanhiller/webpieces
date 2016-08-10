@@ -22,7 +22,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	
 	private EscapeCharactersFormatter formatter;
 	private HtmlTagLookup tagLookup;
-	private Map<Object, Object> templateProperties;
+	private Map<Object, Object> setTagProperties;
 	private String superTemplateFilePath;
 	private ReverseUrlLookup urlLookup;
 	
@@ -30,7 +30,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
     		Map<Object, Object> templateProps, ReverseUrlLookup urlLookup) {
     	formatter = f;
     	this.tagLookup = tagLookup;
-    	this.templateProperties = templateProps;
+    	this.setTagProperties = templateProps;
     	this.urlLookup = urlLookup;
     }
     
@@ -56,12 +56,12 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	}
     }
 
-	public void putTemplateProperty(Object key, Object val) {
-		templateProperties.put(key, val);
+	public void putSetTagProperty(Object key, Object val) {
+		setTagProperties.put(key, val);
 	}
 	
-	public Object getTemplateProperty(Object key) {
-		return templateProperties.get(key);
+	public Object getSetTagProperty(Object key) {
+		return setTagProperties.get(key);
 	}
 	
 	public void setSuperTemplateFilePath(String path) {
@@ -72,8 +72,8 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		return superTemplateFilePath;
 	}
 
-	public Map<Object, Object> getTemplateProperties() {
-		return templateProperties;
+	public Map<Object, Object> getSetTagProperties() {
+		return setTagProperties;
 	}
 	
 	public String fetchUrl(String routeId, Map<?, ?> args, String srcLocation) {

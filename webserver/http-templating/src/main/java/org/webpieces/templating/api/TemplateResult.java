@@ -8,6 +8,6 @@ public interface TemplateResult {
 
 	String getTemplateClassName();
 
-	Map<?, ?> getTemplateProperties();
+	Map<Object, Object> getSetTagProperties();
 
 }

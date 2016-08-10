@@ -31,8 +31,8 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 		String filePath = getFilePath(parentTemplate, tagArgs, body, srcLocation);
 		Template template = svc.loadTemplate(filePath);
 
-		Map<Object, Object> templateProps = parentTemplate.getTemplateProperties();
-		String s = svc.runTemplate(template, customTagArgs, templateProps, lookup);
+		Map<Object, Object> setTagProps = parentTemplate.getSetTagProperties();
+		String s = svc.runTemplate(template, customTagArgs, setTagProps, lookup);
 		out.print(s);
 	}
 	

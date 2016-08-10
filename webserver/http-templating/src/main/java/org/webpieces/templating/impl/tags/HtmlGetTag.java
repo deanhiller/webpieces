@@ -28,7 +28,7 @@ public class HtmlGetTag implements HtmlTag {
         	isFailFast = (Boolean)failFast;
         }
         
-        Object result = template.getTemplateProperty(name);
+        Object result = template.getSetTagProperty(name);
         if(result != null) {
         	out.print(result);
         } else if(isFailFast) {

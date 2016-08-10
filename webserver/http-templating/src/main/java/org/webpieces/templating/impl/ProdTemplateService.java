@@ -56,18 +56,17 @@ public class ProdTemplateService implements TemplateService {
 		out.write(result);
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> templateProps, ReverseUrlLookup urlLookup) {
+	public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
 		StringWriter out = new StringWriter();
 		PrintWriter writer = new PrintWriter(out);
 		copy.put(GroovyTemplateSuperclass.OUT_PROPERTY_NAME, writer);
-		TemplateResult info = template.run(copy, templateProps, urlLookup);
+		TemplateResult info = template.run(copy, setTagProps, urlLookup);
 
 		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
-		Map templateProperties = info.getTemplateProperties();
-		templateProperties.put("body", out.toString());
+		Map<Object, Object> setTagProperties = info.getSetTagProperties();
+		setTagProperties.put("body", out.toString());
 		
 		String className = info.getTemplateClassName();
 		String templatePath = TemplateUtil.convertTemplateClassToPath(className);
@@ -75,7 +74,7 @@ public class ProdTemplateService implements TemplateService {
 		try {
 			if(superTemplateFilePath != null) {
 				Template superTemplate = loadTemplate(superTemplateFilePath);
-				return runTemplate(superTemplate, pageArgs, templateProperties, urlLookup);
+				return runTemplate(superTemplate, pageArgs, setTagProperties, urlLookup);
 			} else
 				return out.toString();
 		} catch(Exception e) {

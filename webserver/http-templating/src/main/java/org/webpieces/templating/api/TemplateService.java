@@ -14,5 +14,5 @@ public interface TemplateService {
 
 	void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup lookup);
 	
-	String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> templateProps, ReverseUrlLookup urlLookup);
+	String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup);
 }

@@ -17,7 +17,7 @@ public class HtmlSetTag implements HtmlTag {
         Object name = args.get("_arg");
         if (name != null && body != null) {
         	String value = ClosureUtil.toString(body);
-            template.putTemplateProperty(name, value);
+            template.putSetTagProperty(name, value);
             return;
         }
         
@@ -30,7 +30,7 @@ public class HtmlSetTag implements HtmlTag {
             		val = template.useFormatter(val);
             	}
             	
-                template.putTemplateProperty(key, val);
+                template.putSetTagProperty(key, val);
             }
         }
 
