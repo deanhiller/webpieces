@@ -9,7 +9,7 @@ import groovy.lang.Closure;
 
 public interface HtmlTag {
 
-	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation);
+	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation);
 
 	public String getName();
 		

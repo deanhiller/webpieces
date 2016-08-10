@@ -12,7 +12,7 @@ import groovy.lang.Closure;
 public class HtmlGetTag implements HtmlTag {
 
 	@Override
-	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
+	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
         Object name = args.get("_arg");
         if(name == null)
         	name = args.get("key");

@@ -20,7 +20,7 @@ public class FormTag implements HtmlTag {
 	}
 
 	@Override
-	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
+	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
         Object action = args.get("action");
         if(action == null)
         	throw new IllegalArgumentException("#{form/}# tag must have an action argument like #{form action:@ROUTE[:]}#. "+srcLocation);

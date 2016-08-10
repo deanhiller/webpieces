@@ -11,7 +11,7 @@ import groovy.lang.Closure;
 public class ExtendsTag implements HtmlTag {
 
 	@Override
-	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
+	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
         Object name = args.get("_arg");
         if(name == null)
         	throw new IllegalArgumentException("#{extends/}# tag must contain a template name like #{extends '../template.html'/}#. "+srcLocation);

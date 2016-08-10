@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateConfig;
-import org.webpieces.templating.impl.tags.HtmlFileTag;
+import org.webpieces.templating.impl.tags.CustomTag;
 
 public class MyHtmlTagLookup extends HtmlTagLookup {
 
@@ -12,7 +12,7 @@ public class MyHtmlTagLookup extends HtmlTagLookup {
 	public MyHtmlTagLookup(TemplateConfig config) {
 		super(config);
 		//add any custom tags you like here...
-		put(new HtmlFileTag("/PACKAGE/example/tags/mytag.tag"));
+		put(new CustomTag("/PACKAGE/example/tags/mytag.tag"));
 	}
 
 }

@@ -57,7 +57,7 @@ public class ProdTemplateService implements TemplateService {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
+	public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> templateProps, ReverseUrlLookup urlLookup) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
 		StringWriter out = new StringWriter();

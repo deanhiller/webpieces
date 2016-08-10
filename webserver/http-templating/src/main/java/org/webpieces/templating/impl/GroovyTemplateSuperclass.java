@@ -22,13 +22,12 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	
 	private EscapeCharactersFormatter formatter;
 	private HtmlTagLookup tagLookup;
-	@SuppressWarnings("rawtypes")
-	private Map templateProperties;
+	private Map<Object, Object> templateProperties;
 	private String superTemplateFilePath;
 	private ReverseUrlLookup urlLookup;
 	
     public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, 
-    		Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
+    		Map<Object, Object> templateProps, ReverseUrlLookup urlLookup) {
     	formatter = f;
     	this.tagLookup = tagLookup;
     	this.templateProperties = templateProps;
@@ -47,7 +46,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	return formatter.format(val);
     }
 
-    protected void runTag(String tagName, Map<?, ?> args, Closure<?> closure, String srcLocation) {
+    protected void runTag(String tagName, Map<Object, Object> args, Closure<?> closure, String srcLocation) {
     	HtmlTag tag = tagLookup.lookup(tagName);
     	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
     	try {
@@ -57,7 +56,6 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	}
     }
 
-	@SuppressWarnings("unchecked")
 	public void putTemplateProperty(Object key, Object val) {
 		templateProperties.put(key, val);
 	}
@@ -74,7 +72,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		return superTemplateFilePath;
 	}
 
-	public Map<?, ?> getTemplateProperties() {
+	public Map<Object, Object> getTemplateProperties() {
 		return templateProperties;
 	}
 	

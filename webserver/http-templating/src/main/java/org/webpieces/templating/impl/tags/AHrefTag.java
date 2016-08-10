@@ -13,7 +13,7 @@ import groovy.lang.Closure;
 public class AHrefTag implements HtmlTag {
 
 	@Override
-	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
+	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
         Object url = args.get("href");
         if(url == null)
         	throw new IllegalArgumentException("#{a/}# tag must contain an href argument name like #{a href:@ROUTE[:]}#. "+srcLocation);

@@ -12,7 +12,7 @@ import groovy.lang.Closure;
 public class HtmlSetTag implements HtmlTag {
 
 	@Override
-	public void runTag(Map<?, ?> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
+	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
         // Body case.  Users should not be using _ as prefix to variable names so _arg only exists if it is just a body
         Object name = args.get("_arg");
         if (name != null && body != null) {

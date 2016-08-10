@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.webpieces.templating.impl.tags.AHrefTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FormTag;
-import org.webpieces.templating.impl.tags.HtmlFileTag;
+import org.webpieces.templating.impl.tags.CustomTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
 
@@ -44,8 +44,8 @@ public class HtmlTagLookup {
 	 */
 	public void initialize(TemplateService templateService) {
 		for(HtmlTag tag : tags.values()) {
-			if(tag instanceof HtmlFileTag) {
-				HtmlFileTag fileTag = (HtmlFileTag) tag;
+			if(tag instanceof CustomTag) {
+				CustomTag fileTag = (CustomTag) tag;
 				fileTag.initialize(templateService);
 			}
 		}

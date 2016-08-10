@@ -56,7 +56,7 @@ public class TemplateResultImpl implements TemplateResult {
 	}
 	
 	@Override
-	public Map<?,?> getTemplateProperties() {
+	public Map<Object, Object> getTemplateProperties() {
 		return t.getTemplateProperties();
 	}
 

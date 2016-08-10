@@ -46,8 +46,12 @@ public class TestCustomTag {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using Custom Tag");
 		response.assertContains("This is a custom tag which can also use tags in itself <a href=`/verbatim`>Some Link Here</a>".replace('`', '"'));
-		response.assertContains("The user is Dean Hiller and tag argument cool"); //using variable in custom tag
+		response.assertContains("The user is override and Dean Hiller tag argument cool"); //using variable in custom tag
 		response.assertContains("After Custom Tag");
+		response.assertContains("supertemplate BEGIN");
+		response.assertContains("supertemplate END");
+
+		
 	}
 	
 
