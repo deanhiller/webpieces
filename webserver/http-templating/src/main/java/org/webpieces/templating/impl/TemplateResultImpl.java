@@ -9,11 +9,9 @@ import org.webpieces.util.file.ClassUtil;
 public class TemplateResultImpl implements TemplateResult {
 
 	private GroovyTemplateSuperclass t;
-	private String result;
 
-	public TemplateResultImpl(GroovyTemplateSuperclass t, String result) {
+	public TemplateResultImpl(GroovyTemplateSuperclass t) {
 		this.t = t;
-		this.result = result;
 	}
 
 	@Override
@@ -60,11 +58,6 @@ public class TemplateResultImpl implements TemplateResult {
 	@Override
 	public Map<?,?> getTemplateProperties() {
 		return t.getTemplateProperties();
-	}
-
-	@Override
-	public String getResult() {
-		return result;
 	}
 
 }

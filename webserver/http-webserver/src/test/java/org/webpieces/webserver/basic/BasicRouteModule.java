@@ -22,7 +22,8 @@ public class BasicRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/setget",            "biz/BasicController.getTag", BasicRouteId.SETGET);
 		addRoute(GET , "/extends",           "biz/BasicController.extendsTag", BasicRouteId.EXTENDS);
 		addRoute(GET , "/ahref",             "biz/BasicController.aHrefTag", BasicRouteId.AHREF);
-
+		addRoute(GET , "/customtag",         "biz/BasicController.customTag", BasicRouteId.CUSTOM_TAG);
+		
 		addRoute(GET , "/urlencoding/{user}","biz/BasicController.urlEncoding", BasicRouteId.URLENCODE);
 
 		addRoute(GET , "/getuserform",       "biz/BasicController.formTag", BasicRouteId.GET_USER_FORM);

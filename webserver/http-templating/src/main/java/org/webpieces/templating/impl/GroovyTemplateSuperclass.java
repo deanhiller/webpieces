@@ -16,7 +16,6 @@ import groovy.lang.Script;
 
 public abstract class GroovyTemplateSuperclass extends Script {
 
-	public static String ESCAPER_PROPERTY_NAME = "__escaper";
 	public static String OUT_PROPERTY_NAME = "__out";
 	public static final EscapeHTMLFormatter ESCAPE_HTML_FORMATTER = new EscapeHTMLFormatter();
 	private static final NullFormatter NULL_FORMATTER = new NullFormatter();
@@ -102,7 +101,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
         try {
             return super.getProperty(property);
         } catch (MissingPropertyException e) {
-        	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes around it or you forgot to pass it in from the controller's return value(with the RouteId)", e);
+        	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes around it or you forgot to pass it in from the controller's return value(with the RouteId) OR lastly, if this is inside a custom tag, perhaps the tag did not pass in the correct arguments", e);
         }
     }
 

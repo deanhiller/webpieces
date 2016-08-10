@@ -1,5 +1,6 @@
 package org.webpieces.templating.impl;
 
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class ProdTemplateService implements TemplateService {
 	}
 
 	@Override
-	public void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup urlLookup) {
+	public final void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup urlLookup) {
 		String result = runTemplate(template, pageArgs, new HashMap<>(), urlLookup);
 		out.write(result);
 	}
@@ -59,11 +60,14 @@ public class ProdTemplateService implements TemplateService {
 	private String runTemplate(Template template, Map<String, Object> pageArgs, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
+		StringWriter out = new StringWriter();
+		PrintWriter writer = new PrintWriter(out);
+		copy.put(GroovyTemplateSuperclass.OUT_PROPERTY_NAME, writer);
 		TemplateResult info = template.run(copy, templateProps, urlLookup);
 
 		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
 		Map templateProperties = info.getTemplateProperties();
-		templateProperties.put("body", info.getResult());
+		templateProperties.put("body", out.toString());
 		
 		String className = info.getTemplateClassName();
 		String templatePath = TemplateUtil.convertTemplateClassToPath(className);
@@ -74,7 +78,7 @@ public class ProdTemplateService implements TemplateService {
 				Template superTemplate = loadTemplate(superTemplateFilePath);
 				return runTemplate(superTemplate, pageArgs, templateProperties, urlLookup);
 			} else
-				return info.getResult();
+				return out.toString();
 		} catch(Exception e) {
 			throw new RuntimeException("template failed="+superTemplateFilePath+" called from template="
 					+templatePath+" See below exception messages for more information", e);

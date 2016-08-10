@@ -10,6 +10,4 @@ public interface TemplateResult {
 
 	Map<?, ?> getTemplateProperties();
 
-	String getResult();
-
 }

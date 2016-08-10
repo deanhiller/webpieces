@@ -1,7 +1,5 @@
 package org.webpieces.templating.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Map;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
@@ -24,10 +22,7 @@ public class TemplateImpl implements Template {
 
 	@Override
 	public TemplateResult run(Map<String, Object> args, Map<?, ?> templateProps, ReverseUrlLookup urlLookup) {
-		StringWriter out = new StringWriter();
-		PrintWriter writer = new PrintWriter(out);
 		Binding binding = new Binding(args);
-		binding.setProperty(GroovyTemplateSuperclass.OUT_PROPERTY_NAME, writer);
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);		
 		
@@ -35,7 +30,7 @@ public class TemplateImpl implements Template {
 
 		t.run();
 		
-		return new TemplateResultImpl(t, out.toString());
+		return new TemplateResultImpl(t);
 	}
 
 }
