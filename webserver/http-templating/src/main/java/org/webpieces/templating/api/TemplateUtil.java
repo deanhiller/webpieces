@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.webpieces.templating.impl.GroovyTemplateSuperclass;
+import org.webpieces.util.file.ClassUtil;
+
 public class TemplateUtil {
 
 	public static String convertTemplateClassToPath(String fullClass) {
@@ -45,5 +48,43 @@ public class TemplateUtil {
         }
         return attrs.toString();
     }
-    
+
+	public static String translateToProperFilePath(GroovyTemplateSuperclass callingTemplate, String superTemplatePath) {
+		String className = translateToClassName(callingTemplate, superTemplatePath);
+		return TemplateUtil.convertTemplateClassToPath(className);
+	}
+	
+	private static String translateToClassName(GroovyTemplateSuperclass callingTemplate, String superTemplatePath) {
+		if(superTemplatePath == null)
+			return null;
+		else if(superTemplatePath.startsWith("/"))
+			return TemplateUtil.convertTemplatePathToClass(superTemplatePath);
+		
+		//get the package this template was in...
+		String name = callingTemplate.getClass().getName();
+		int lastIndexOf = name.lastIndexOf(".");
+		String packageCtx = "";
+		if(lastIndexOf > 0) {
+			packageCtx = name.substring(0, lastIndexOf);
+		}
+		
+		//had to do this since ClassUtil.translate deals in . and returns a classname so this makes it compatible..
+		String superTemplatePathWithClassName = removeUnderDotFromFileName(superTemplatePath);
+		String fullTempateClassName = ClassUtil.translate(packageCtx, superTemplatePathWithClassName);
+		return fullTempateClassName;
+	}
+
+	private static String removeUnderDotFromFileName(String superTemplatePath) {
+		int lastIndexOfSlash = superTemplatePath.lastIndexOf("/");
+		String pathWithNoFile = "";
+		String fileName = superTemplatePath;
+		if(lastIndexOfSlash > 0) {
+			pathWithNoFile = superTemplatePath.substring(0, lastIndexOfSlash);
+			fileName = superTemplatePath.substring(lastIndexOfSlash);
+		}
+		fileName = fileName.replace(".", "_");
+		
+		String superTemplatePathWithClassName = pathWithNoFile+fileName;
+		return superTemplatePathWithClassName;
+	}
 }

@@ -71,8 +71,7 @@ public class ProdTemplateService implements TemplateService {
 		
 		String className = info.getTemplateClassName();
 		String templatePath = TemplateUtil.convertTemplateClassToPath(className);
-		String superTemplateClassName = info.getSuperTemplateClassName();
-		String superTemplateFilePath = TemplateUtil.convertTemplateClassToPath(superTemplateClassName);
+		String superTemplateFilePath = info.getSuperTemplateClassName();
 		try {
 			if(superTemplateFilePath != null) {
 				Template superTemplate = loadTemplate(superTemplateFilePath);

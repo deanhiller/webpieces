@@ -22,7 +22,10 @@ public class BasicRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/setget",            "biz/BasicController.getTag", BasicRouteId.SETGET);
 		addRoute(GET , "/extends",           "biz/BasicController.extendsTag", BasicRouteId.EXTENDS);
 		addRoute(GET , "/ahref",             "biz/BasicController.aHrefTag", BasicRouteId.AHREF);
-		addRoute(GET , "/customtag",         "biz/BasicController.customTag", BasicRouteId.CUSTOM_TAG);
+		
+		addRoute(GET , "/customtag",         "includetags/IncludeTagController.customTag", BasicRouteId.CUSTOM_TAG);
+		addRoute(GET , "/renderTagArgs",     "includetags/IncludeTagController.renderTagArgsTag", BasicRouteId.RENDER_TAG_ARGS_TAG);
+		addRoute(GET , "/renderPageArgs",    "includetags/IncludeTagController.renderPageArgsTag", BasicRouteId.RENDER_PAGE_ARGS_TAG);
 		
 		addRoute(GET , "/urlencoding/{user}","biz/BasicController.urlEncoding", BasicRouteId.URLENCODE);
 

@@ -11,7 +11,7 @@ public class TestTagOverrideLookup extends HtmlTagLookup {
 	@Inject
 	public TestTagOverrideLookup(TemplateConfig config) {
 		super(config);
-		put(new CustomTag("/org/webpieces/webserver/tags/custom.tag"));
+		put(new CustomTag("/org/webpieces/webserver/basic/includetags/custom.tag"));
 	}
 
 }

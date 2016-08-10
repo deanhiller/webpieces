@@ -7,6 +7,7 @@ import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
+import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
 
 import groovy.lang.Binding;
@@ -27,7 +28,7 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 		
 		ReverseUrlLookup lookup = parentTemplate.getUrlLookup();
 		
-		String filePath = getFilePath(tagArgs, body, srcLocation);
+		String filePath = getFilePath(parentTemplate, tagArgs, body, srcLocation);
 		Template template = svc.loadTemplate(filePath);
 
 		Map<Object, Object> templateProps = parentTemplate.getTemplateProperties();
@@ -37,14 +38,15 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 	
 	protected abstract Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs);
 
-	protected String getFilePath(Map<Object, Object> args, Closure<?> body, String srcLocation) {
+	protected String getFilePath(GroovyTemplateSuperclass callingTemplate, Map<Object, Object> args, Closure<?> body, String srcLocation) {
         Object name = args.get("_arg");
         if(name == null)
         	throw new IllegalArgumentException("#{"+getName()+"/}# tag must contain a template name like #{"+getName()+" '../template.html'/}#. "+srcLocation);
         else if(body != null)
-        	throw new IllegalArgumentException("Only #{extends/}# can be used.  You cannot do #{extends}# #{/extends} as the body is not used with this tag");
+        	throw new IllegalArgumentException("Only #{"+getName()+"/}# can be used.  You cannot do #{"+getName()+"}# #{/"+getName()+"} as the body is not used with this tag");
         
-		return null;
+        String path = TemplateUtil.translateToProperFilePath(callingTemplate, name.toString());
+		return path;
 	}
 	
 	/**

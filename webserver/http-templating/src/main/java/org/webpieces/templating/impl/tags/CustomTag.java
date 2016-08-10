@@ -3,6 +3,7 @@ package org.webpieces.templating.impl.tags;
 import java.util.Map;
 
 import org.webpieces.templating.api.HtmlTag;
+import org.webpieces.templating.impl.GroovyTemplateSuperclass;
 
 import groovy.lang.Closure;
 
@@ -33,7 +34,7 @@ public class CustomTag extends RenderTagArgsTag implements HtmlTag {
 	}
 
 	@Override
-	protected String getFilePath(Map<Object, Object> args, Closure<?> body, String srcLocation) {
+	protected String getFilePath(GroovyTemplateSuperclass callingTemplate, Map<Object, Object> args, Closure<?> body, String srcLocation) {
 		return file;
 	}
 

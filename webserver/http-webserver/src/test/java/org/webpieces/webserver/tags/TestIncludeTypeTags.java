@@ -20,7 +20,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-public class TestCustomTag {
+public class TestIncludeTypeTags {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
 	private HttpRequestListener server;
@@ -50,9 +50,37 @@ public class TestCustomTag {
 		response.assertContains("After Custom Tag");
 		response.assertContains("supertemplate BEGIN");
 		response.assertContains("supertemplate END");
-
-		
 	}
 	
+	@Test
+	public void testRenderTagArgsTag() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderTagArgs");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
 
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Page Using renderTagArgs Tag");
+		response.assertContains("The user is override"); //using variable from tag args in the called template
+		response.assertContains("After renderTagArgs Tag");
+	}
+	
+	@Test
+	public void testRenderPageArgsTag() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderPageArgs");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Page Using renderPageArgs Tag");
+		response.assertContains("The user is Dean Hiller"); //using variable from page args in the called template
+		response.assertContains("After renderPageArgs Tag");
+	}
 }

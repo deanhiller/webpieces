@@ -8,9 +8,11 @@ import javax.inject.Inject;
 import org.webpieces.templating.impl.tags.AHrefTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FormTag;
-import org.webpieces.templating.impl.tags.CustomTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
+import org.webpieces.templating.impl.tags.RenderPageArgsTag;
+import org.webpieces.templating.impl.tags.RenderTagArgsTag;
+import org.webpieces.templating.impl.tags.TemplateLoaderTag;
 
 public class HtmlTagLookup {
 	
@@ -23,6 +25,8 @@ public class HtmlTagLookup {
 		put(new ExtendsTag());
 		put(new AHrefTag());
 		put(new FormTag(config.getDefaultFormAcceptEncoding()));
+		put(new RenderTagArgsTag());
+		put(new RenderPageArgsTag());
 	}
 
 	protected void put(HtmlTag tag) {
@@ -44,8 +48,8 @@ public class HtmlTagLookup {
 	 */
 	public void initialize(TemplateService templateService) {
 		for(HtmlTag tag : tags.values()) {
-			if(tag instanceof CustomTag) {
-				CustomTag fileTag = (CustomTag) tag;
+			if(tag instanceof TemplateLoaderTag) {
+				TemplateLoaderTag fileTag = (TemplateLoaderTag) tag;
 				fileTag.initialize(templateService);
 			}
 		}
