@@ -16,6 +16,7 @@ import org.webpieces.templating.api.TemplateUtil;
 public class ProdTemplateService implements TemplateService {
 
 	private HtmlTagLookup lookup;
+	private boolean isInitialized = false;
 
 	@Inject
 	public ProdTemplateService(HtmlTagLookup lookup) {
@@ -23,11 +24,17 @@ public class ProdTemplateService implements TemplateService {
 	}
 	
 	@Override
-	public Template loadTemplate(String templatePath) {
+	public final Template loadTemplate(String templatePath) {
 		if(!templatePath.startsWith("/"))
 			throw new IllegalArgumentException("templatePath must start with / and be absolute reference from base of classpath");
 		else if(templatePath.contains("_"))
 			throw new IllegalArgumentException("template names cannot contain _ in them(This is reserved for _extension in the classname).  name="+templatePath);
+		
+		if(!isInitialized) {
+			lookup.initialize(this);
+			isInitialized = true;
+		}
+		
 		String fullClassName = TemplateUtil.convertTemplatePathToClass(templatePath);
 		return loadTemplate(templatePath, fullClassName);
 	}

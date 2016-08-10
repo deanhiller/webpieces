@@ -10,7 +10,7 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ProdTemplateService.class)
 public interface TemplateService {
 
-	Template loadTemplate(String templateClass);
+	Template loadTemplate(String templatePath);
 
 	void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup lookup);
 	

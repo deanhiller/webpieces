@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.webpieces.templating.impl.tags.AHrefTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FormTag;
+import org.webpieces.templating.impl.tags.HtmlFileTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
 
@@ -34,5 +35,19 @@ public class HtmlTagLookup {
 	public HtmlTag lookup(String tagName) {
 		HtmlTag tag = tags.get(tagName);
 		return tag;
+	}
+
+	/**
+	 * A nasty circular dependency so we initialize it on the firstTemplate loaded in the application
+	 * 
+	 * @param templateService
+	 */
+	public void initialize(TemplateService templateService) {
+		for(HtmlTag tag : tags.values()) {
+			if(tag instanceof HtmlFileTag) {
+				HtmlFileTag fileTag = (HtmlFileTag) tag;
+				fileTag.initialize(templateService);
+			}
+		}
 	}
 }

@@ -10,8 +10,8 @@ public class DefaultTemplateSourceSet implements TemplateSourceSet {
     private final SourceDirectorySet groovy;
 
     public DefaultTemplateSourceSet(String displayName, SourceDirectorySetFactory sourceDirectorySetFactory) {
-        groovy = sourceDirectorySetFactory.create(displayName +  " Template(html/json) source");
-        groovy.getFilter().include("**/*.html", "**/*.json");
+        groovy = sourceDirectorySetFactory.create(displayName +  " Template(html/tag/json) source");
+        groovy.getFilter().include("**/*.html", "**/*.tag", "**/*.json");
     }
 
     public SourceDirectorySet getTemplatesSrc() {

@@ -23,6 +23,7 @@ public class ExampleController {
 	}
 	
 	public Action listUsers() {
+		service.fetchRemoteValue();
 		return Actions.renderThis();
 	}
 }

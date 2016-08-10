@@ -105,4 +105,8 @@ public abstract class GroovyTemplateSuperclass extends Script {
         	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes around it or you forgot to pass it in from the controller's return value(with the RouteId)", e);
         }
     }
+
+	public ReverseUrlLookup getUrlLookup() {
+		return urlLookup;
+	}
 }

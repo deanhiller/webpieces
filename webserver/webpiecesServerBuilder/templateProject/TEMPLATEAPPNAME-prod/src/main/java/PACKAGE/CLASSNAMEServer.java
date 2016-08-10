@@ -22,8 +22,10 @@ import org.webpieces.webserver.api.WebServerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 
 import PACKAGE.example.CLASSNAMERouteModule;
+import PACKAGE.example.tags.TagLookupOverride;
 
 /**
  * Except for changing CLASSNAMEMeta inner class, changes to this one bootstrap class
@@ -89,6 +91,9 @@ public class CLASSNAMEServer {
 		if(metaFile == null)
 			metaFile = new VirtualFileClasspath("appmeta.txt", CLASSNAMEServer.class.getClassLoader());
 		
+		//This override is only needed if you want to add your own Html Tags to re-use
+		Module allOverrides = Modules.combine(platformOverrides, new TagLookupOverride());
+		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
@@ -98,7 +103,7 @@ public class CLASSNAMEServer {
 											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
 											.setWebappOverrides(appOverrides);
 		WebServerConfig config = new WebServerConfig()
-										.setPlatformOverrides(platformOverrides)
+										.setPlatformOverrides(allOverrides)
 										.setHtmlResponsePayloadEncoding(ALL_FILE_ENCODINGS)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))

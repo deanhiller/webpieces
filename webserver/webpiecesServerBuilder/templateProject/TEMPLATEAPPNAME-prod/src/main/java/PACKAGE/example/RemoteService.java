@@ -9,6 +9,6 @@ public class RemoteService {
 		//service returns it's value unblocking this thread for others to use.
 		
 		//In this case we just return a completely future though.
-		return CompletableFuture.completedFuture(56);
+		return CompletableFuture.completedFuture(33);
 	}
 }
