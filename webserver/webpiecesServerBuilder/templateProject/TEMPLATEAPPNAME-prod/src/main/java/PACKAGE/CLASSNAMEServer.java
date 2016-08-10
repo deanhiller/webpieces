@@ -90,9 +90,12 @@ public class CLASSNAMEServer {
 		//Dev server has to override this
 		if(metaFile == null)
 			metaFile = new VirtualFileClasspath("appmeta.txt", CLASSNAMEServer.class.getClassLoader());
-		
+
 		//This override is only needed if you want to add your own Html Tags to re-use
-		Module allOverrides = Modules.combine(platformOverrides, new TagLookupOverride());
+		Module allOverrides = new TagLookupOverride();
+		if(platformOverrides != null) {
+			allOverrides = Modules.combine(platformOverrides, allOverrides);
+		}
 		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
