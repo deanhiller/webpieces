@@ -21,7 +21,7 @@ public class TemplateTokenizer {
 			TokenImpl left = tokens.get(i-1);
 			TokenImpl token = tokens.get(i);
 			TokenImpl right = tokens.get(i+1);
-			if(token.state != TemplateToken.PLAIN && left.state == TemplateToken.PLAIN && right.state == TemplateToken.PLAIN) {
+			if(isTagToken(token.state) && left.state == TemplateToken.PLAIN && right.state == TemplateToken.PLAIN) {
 				if("".equals(left.getValue().trim()) && "".equals(right.getValue().trim())) {
 					tokens.remove(i+1);
 					tokens.remove(i-1);
@@ -37,6 +37,17 @@ public class TemplateTokenizer {
 		//We could chain back together PLAIN tokens here as well...
 	
 		return tokens;
+	
 	}
 	
+	private boolean isTagToken(TemplateToken state) {
+		if(state == TemplateToken.START_TAG)
+			return true;
+		else if(state == TemplateToken.END_TAG)
+			return true;
+		else if(state == TemplateToken.START_END_TAG)
+			return true;
+		
+		return false;
+	}
 }
