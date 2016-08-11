@@ -59,7 +59,7 @@ public class TagGen implements GroovyGen {
         	tagArgs = expr.substring(indexOfSpace + 1).trim();
             if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
             	//this is for the form #{tag 'something'} or #{tag variable}
-                tagArgs = "_arg:" + tagArgs; 
+                tagArgs = "defaultArgument:" + tagArgs; 
             }
             
             //TODO: record the tag used and source location to be verified at build time(ie. test will verify)

@@ -12,7 +12,7 @@ public class ExtendsTag implements HtmlTag {
 
 	@Override
 	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
-        Object name = args.get("_arg");
+        Object name = args.get("defaultArgument");
         if(name == null)
         	throw new IllegalArgumentException("#{extends/}# tag must contain a template name like #{extends '../template.html'/}#. "+srcLocation);
         else if(body != null)

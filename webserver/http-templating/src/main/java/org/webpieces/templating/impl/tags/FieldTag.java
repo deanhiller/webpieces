@@ -35,8 +35,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		else if(tagArgs.get("field") != null)
 			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of 'field' as that is reserved and will be overwritten ");
 
-        String _arg = tagArgs.get("_arg").toString();
-		Map<String, Object> field = createFieldData(_arg, pageArgs);
+        String fieldName = tagArgs.get("defaultArgument").toString();
+		Map<String, Object> field = createFieldData(fieldName, pageArgs);
         
 		Map<String, Object> copy = new HashMap<>();
 		for(Map.Entry<Object, Object> entry : tagArgs.entrySet()) {
@@ -58,20 +58,26 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		return copy;
 	}
 
-	private Map<String, Object> createFieldData(String _arg, Map<String, Object> pageArgs) {
+	/**
+	 * 
+	 * @param fieldName Is the argument like 'user.account.name' 
+	 * @param pageArgs
+	 * @return
+	 */
+	private Map<String, Object> createFieldData(String fieldName, Map<String, Object> pageArgs) {
         Map<String, Object> field = new HashMap<String, Object>();
-        field.put("name", _arg);
-        field.put("id", _arg.replace('.', '_'));
-        //field.put("flash", Flash.current().get(_arg));
+        field.put("name", fieldName);
+        field.put("id", fieldName.replace('.', '_'));
+        //field.put("flash", Flash.current().get(fieldName));
         //field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash")
         //        .toString().split(",") : new String[0]);
-        //field.put("error", Validation.error(_arg));
+        //field.put("error", Validation.error(fieldName));
         //field.put("errorClass", field.get("error") != null ? "hasError" : "");
-        String[] pieces = _arg.split("\\.");
+        String[] pieces = fieldName.split("\\.");
         Object obj = pageArgs.get(pieces[0]);
         if (pieces.length > 1) {
             try {
-                String path = _arg.substring(_arg.indexOf(".") + 1);
+                String path = fieldName.substring(fieldName.indexOf(".") + 1);
                 Object value = PropertyUtils.getProperty(obj, path);
                 field.put("value", value);
             } catch (Exception e) {

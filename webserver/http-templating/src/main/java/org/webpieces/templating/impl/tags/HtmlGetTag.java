@@ -13,7 +13,7 @@ public class HtmlGetTag implements HtmlTag {
 
 	@Override
 	public void runTag(Map<Object, Object> args, Closure<?> body, PrintWriter out, GroovyTemplateSuperclass template, String srcLocation) {
-        Object name = args.get("_arg");
+        Object name = args.get("defaultArgument");
         if(name == null)
         	name = args.get("key");
         if (name == null) {

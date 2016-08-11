@@ -30,7 +30,7 @@ public class TemplateUtil {
 	
     public static String serialize(Map<?, ?> args, String... unless) {
     	Set<String> unlessSet = new HashSet<String>(Arrays.asList(unless));
-    	unlessSet.add("_arg");
+    	unlessSet.add("defaultArgument");
         StringBuilder attrs = new StringBuilder();
         for (Object key : args.keySet()) {
             String keyStr = key.toString();

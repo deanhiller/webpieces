@@ -39,7 +39,7 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 	protected abstract Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs, Closure<?> body, String srcLocation);
 
 	protected String getFilePath(GroovyTemplateSuperclass callingTemplate, Map<Object, Object> args, String srcLocation) {
-        Object name = args.get("_arg");
+        Object name = args.get("defaultArgument");
         if(name == null)
         	throw new IllegalArgumentException("#{"+getName()+"/}# tag must contain a template name like #{"+getName()+" '../template.html'/}#. "+srcLocation);
 
