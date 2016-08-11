@@ -60,6 +60,9 @@ public class TestIfGenerator {
 		response.assertContains("Else1");
 		response.assertContains("Else2");
 		response.assertContains("Else3");
+		
+		//add an assert for comments being taken out so this test will break as this can be nice for readability
+		response.assertContains("<body>\n    Testing for else");
 	}	
 
 	@Test
