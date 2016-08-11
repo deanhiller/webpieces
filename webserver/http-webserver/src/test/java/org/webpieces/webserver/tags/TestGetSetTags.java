@@ -42,6 +42,9 @@ public class TestGetSetTags {
 		response.assertContains("result=Jeff M");
 		response.assertContains("key not exist so body is printed 'COOL' and test failfast:false works");
 		response.assertContains("This is set body result='testing set body here Dean Hiller'");
+		
+		//tests whitespace cleaned up the line with #{set}# so these don't take up lines in the output
+		response.assertContains("<body>\n    The above line should be cleared");
 	}
 	
 
