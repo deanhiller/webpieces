@@ -1,6 +1,7 @@
 package org.webpieces.templating.impl.source;
 
 import org.webpieces.templating.api.Token;
+import org.webpieces.templating.impl.GroovyTemplateSuperclass;
 
 public class TokenImpl implements Token {
 
@@ -51,7 +52,7 @@ public class TokenImpl implements Token {
 		if(!dueToError)
 			return loc;
 		
-		return "\n\t"+loc+"\n";
+		return GroovyTemplateSuperclass.modifySourceLocation2(loc);
 	}
 	
 	@Override

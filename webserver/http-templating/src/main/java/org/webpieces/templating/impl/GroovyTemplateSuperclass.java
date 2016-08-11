@@ -25,6 +25,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private Map<Object, Object> setTagProperties;
 	private String superTemplateFilePath;
 	private ReverseUrlLookup urlLookup;
+	private ThreadLocal<String> sourceLocal = new ThreadLocal<>();
 	
     public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, 
     		Map<Object, Object> templateProps, ReverseUrlLookup urlLookup) {
@@ -47,13 +48,13 @@ public abstract class GroovyTemplateSuperclass extends Script {
     }
 
     protected void runTag(String tagName, Map<Object, Object> args, Closure<?> closure, String srcLocation) {
-    	srcLocation = "\n\t"+srcLocation+"\n";
+    	srcLocation = modifySourceLocation2(srcLocation);
     	HtmlTag tag = tagLookup.lookup(tagName);
     	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
     	try {
     		tag.runTag(args, closure, writer, this, srcLocation);
     	} catch(Exception e) {
-			throw new RuntimeException("Error running tag "+tagName+"("+e.getMessage()+").  "+srcLocation, e);
+			throw new RuntimeException("Error running tag #{"+tagName+"}#.  See exception cause below."+srcLocation, e);
     	}
     }
 
@@ -78,7 +79,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	}
 	
 	public String fetchUrl(String routeId, Map<?, ?> args, String srcLocation) {
-		srcLocation = "\n\t"+srcLocation+"\n";
+    	srcLocation = modifySourceLocation2(srcLocation);
 		try {
 			Map<String, String> urlParams = new HashMap<>();
 			for(Map.Entry<?, ?> entry : args.entrySet()) {
@@ -98,13 +99,28 @@ public abstract class GroovyTemplateSuperclass extends Script {
 
     @Override
     public Object getProperty(String property) {
+    	String srcLocation = sourceLocal.get();
+    	srcLocation = modifySourceLocation2(srcLocation);
         try {
             return super.getProperty(property);
         } catch (MissingPropertyException e) {
-        	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes around it or you forgot to pass it in from the controller's return value(with the RouteId) OR lastly, if this is inside a custom tag, perhaps the tag did not pass in the correct arguments", e);
+        	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes "
+        			+ "around it or you forgot to pass it in from the controller's return value(with the RouteId) OR "
+        			+ "lastly, if this is inside a custom tag, perhaps the tag did not pass in the correct arguments."+srcLocation, e);
         }
     }
 
+	public static String modifySourceLocation2(String srcLocation) {
+		return "\n\n\t"+srcLocation+"\n";
+	}
+
+    public void enterExpression(String srcLocation) {
+    	sourceLocal.set(srcLocation);
+    }
+    
+    public void exitExpression() {
+    	sourceLocal.set(null);
+    }
 	public ReverseUrlLookup getUrlLookup() {
 		return urlLookup;
 	}

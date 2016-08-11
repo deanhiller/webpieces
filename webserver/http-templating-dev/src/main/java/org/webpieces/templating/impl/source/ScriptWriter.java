@@ -99,12 +99,14 @@ public class ScriptWriter {
 
 	public void printExpression(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String expr = token.getValue().trim();
+		sourceCode.println(         "enterExpression('"+token.getSourceLocation(false)+"');"); //purely so we can add info to missing properties
 		if(expr.startsWith("_"))
 			sourceCode.print("      __out.print("+expr+");");
 		else
 			sourceCode.print("      __out.print(useFormatter("+expr+"));");
         sourceCode.appendTokenComment(token);
         sourceCode.println();
+		sourceCode.println(         "exitExpression();");
 	}
 
 	public void printMessage() {
