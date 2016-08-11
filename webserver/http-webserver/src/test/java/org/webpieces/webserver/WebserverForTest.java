@@ -43,6 +43,13 @@ public class WebserverForTest {
 		if(metaFile == null)
 			metaFile = new VirtualFileClasspath("basic.txt", WebserverForTest.class.getClassLoader());
 		
+		int httpPort = 8080;
+		int httpsPort = 8443;
+		if(usePortZero) {
+			httpPort = 0;
+			httpsPort = 0;
+		}
+		
 		HttpRouterConfig routerConfig = new HttpRouterConfig()
 											.setMetaFile(metaFile )
 											.setWebappOverrides(appOverrides)
@@ -50,8 +57,8 @@ public class WebserverForTest {
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
 										.setHtmlResponsePayloadEncoding(CHAR_SET_TO_USE)
-										.setHttpListenAddress(new InetSocketAddress(8080))
-										.setHttpsListenAddress(new InetSocketAddress(8443))
+										.setHttpListenAddress(new InetSocketAddress(httpPort))
+										.setHttpsListenAddress(new InetSocketAddress(httpsPort))
 										.setFunctionToConfigureServerSocket(s -> configure(s));
 		
 		webServer = WebServerFactory.create(config, routerConfig);

@@ -23,12 +23,12 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 		Binding binding = parentTemplate.getBinding();
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pageArgs = binding.getVariables();
-		
-		Map<String, Object> customTagArgs = convertTagArgs(tagArgs, pageArgs);
+
+		Map<String, Object> customTagArgs = convertTagArgs(tagArgs, pageArgs, body, srcLocation);
 		
 		ReverseUrlLookup lookup = parentTemplate.getUrlLookup();
 		
-		String filePath = getFilePath(parentTemplate, tagArgs, body, srcLocation);
+		String filePath = getFilePath(parentTemplate, tagArgs, srcLocation);
 		Template template = svc.loadTemplate(filePath);
 
 		Map<Object, Object> setTagProps = parentTemplate.getSetTagProperties();
@@ -36,15 +36,13 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 		out.print(s);
 	}
 	
-	protected abstract Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs);
+	protected abstract Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs, Closure<?> body, String srcLocation);
 
-	protected String getFilePath(GroovyTemplateSuperclass callingTemplate, Map<Object, Object> args, Closure<?> body, String srcLocation) {
+	protected String getFilePath(GroovyTemplateSuperclass callingTemplate, Map<Object, Object> args, String srcLocation) {
         Object name = args.get("_arg");
         if(name == null)
         	throw new IllegalArgumentException("#{"+getName()+"/}# tag must contain a template name like #{"+getName()+" '../template.html'/}#. "+srcLocation);
-        else if(body != null)
-        	throw new IllegalArgumentException("Only #{"+getName()+"/}# can be used.  You cannot do #{"+getName()+"}# #{/"+getName()+"} as the body is not used with this tag");
-        
+
         String path = TemplateUtil.translateToProperFilePath(callingTemplate, name.toString());
 		return path;
 	}

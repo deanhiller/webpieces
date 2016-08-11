@@ -1,10 +1,7 @@
 package org.webpieces.templating.impl;
 
-import java.util.function.Consumer;
-
 import javax.inject.Inject;
 
-import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.impl.source.GroovyScriptGenerator;
 import org.webpieces.templating.impl.source.ScriptOutputImpl;

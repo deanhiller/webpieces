@@ -9,6 +9,8 @@ public class TemplateTokenizer {
 		return optimize(tokens);
 	}
 
+	//This did not work as ${_body}$ on one line became not well formatted in #{field}
+	//instead just drop any pretty printing as it is not really worth the effort maybe(it would be nice though)
 	/*
 	 * Only when we have
 	 *  \n    #{tag}#    \n

@@ -1,6 +1,5 @@
 package org.webpieces.templating.api;
 
-import java.io.File;
 import java.util.List;
 
 import org.codehaus.groovy.tools.GroovyClass;

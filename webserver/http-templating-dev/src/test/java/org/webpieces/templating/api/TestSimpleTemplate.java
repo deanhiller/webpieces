@@ -1,7 +1,6 @@
 package org.webpieces.templating.api;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.templating.impl.DevTemplateService;
-import org.webpieces.templating.impl.GroovyTemplateSuperclass;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

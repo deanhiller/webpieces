@@ -47,6 +47,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
     }
 
     protected void runTag(String tagName, Map<Object, Object> args, Closure<?> closure, String srcLocation) {
+    	srcLocation = "\n\t"+srcLocation+"\n";
     	HtmlTag tag = tagLookup.lookup(tagName);
     	PrintWriter writer = (PrintWriter) getProperty(OUT_PROPERTY_NAME);
     	try {
@@ -77,6 +78,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	}
 	
 	public String fetchUrl(String routeId, Map<?, ?> args, String srcLocation) {
+		srcLocation = "\n\t"+srcLocation+"\n";
 		try {
 			Map<String, String> urlParams = new HashMap<>();
 			for(Map.Entry<?, ?> entry : args.entrySet()) {

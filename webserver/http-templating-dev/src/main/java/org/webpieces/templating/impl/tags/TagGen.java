@@ -3,8 +3,6 @@ package org.webpieces.templating.impl.tags;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.ScriptOutput;
@@ -12,7 +10,7 @@ import org.webpieces.templating.api.Token;
 
 public class TagGen implements GroovyGen {
 
-	private static final Logger log = LoggerFactory.getLogger(TagGen.class);
+	//private static final Logger log = LoggerFactory.getLogger(TagGen.class);
 	private String name;
 	private int uniqueId;
 	private Token startToken;
@@ -34,7 +32,7 @@ public class TagGen implements GroovyGen {
 	public void generateStartAndEnd(ScriptOutput sourceCode, Token token) {
 		String tagArgs = fetchArgs(token);
 		sourceCode.println("_attrs" + uniqueId + " = [" + tagArgs + "];");
-		sourceCode.println("runTag('" + name + "', _attrs" + uniqueId + ", null, '"+token.getSourceLocation()+"');");
+		sourceCode.println("runTag('" + name + "', _attrs" + uniqueId + ", null, '"+token.getSourceLocation(false)+"');");
 	}
 
 	@Override
@@ -42,7 +40,7 @@ public class TagGen implements GroovyGen {
 		String tagArgs = fetchArgs(token);
 		
 		sourceCode.println("_attrs" + uniqueId + " = [" + tagArgs + "];");
-		sourceCode.println("_body" + uniqueId + " = { // "+token.getSourceLocation());
+		sourceCode.println("_body" + uniqueId + " = { // "+token.getSourceLocation(false));
 	}
 
 	private String fetchArgs(Token token) {
@@ -94,9 +92,9 @@ public class TagGen implements GroovyGen {
 		String leftover = tagArgs.substring(indexOfRightParen+1);
 
 		List<String> argNames = fetchArgNames(args, token);
-		callback.routeIdFound(route, argNames, token.getSourceLocation());
+		callback.routeIdFound(route, argNames, token.getSourceLocation(false));
 		
-		String groovy = prefix + "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation()+"')" + leftover;
+		String groovy = prefix + "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation(false)+"')" + leftover;
 		return groovy;
 	}
 
@@ -109,7 +107,7 @@ public class TagGen implements GroovyGen {
 		String[] split = noBracketsArgs.split("[:,]");
 		if(split.length % 2 != 0)
 			throw new IllegalArgumentException("The groovy Map appears to be invalid as splitting on [:,] results in"
-					+ " an odd amount of elements and it shold be key:value,key2:value "+token.getSourceLocation());
+					+ " an odd amount of elements and it shold be key:value,key2:value "+token.getSourceLocation(true));
 		for(int i = 0; i < split.length; i+=2) {
 			names.add(split[i]);
 		}
@@ -119,13 +117,13 @@ public class TagGen implements GroovyGen {
 
 	private String getMessage(Token token, int atIndex, String errorMsg) {
 		return "Expression='"+token.getCleanValue()+"' has an error with @ token at position="
-				+atIndex+" in the expression in this msg.  Error='"+errorMsg+"'  "+token.getSourceLocation();
+				+atIndex+" in the expression in this msg.  Error='"+errorMsg+"'  "+token.getSourceLocation(true);
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token) {
-		String sourceLocation = startToken.getSourceLocation();
-		sourceCode.println("}; // "+token.getSourceLocation()); // close body closure
+		String sourceLocation = startToken.getSourceLocation(false);
+		sourceCode.println("}; // "+token.getSourceLocation(false)); // close body closure
 		sourceCode.println("runTag('" + name + "', _attrs" + uniqueId + ", _body" + uniqueId + ", '"+sourceLocation+"');");
 	}
 

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.webpieces.templating.impl.tags.AHrefTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
+import org.webpieces.templating.impl.tags.FieldTag;
 import org.webpieces.templating.impl.tags.FormTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
@@ -27,6 +28,7 @@ public class HtmlTagLookup {
 		put(new FormTag(config.getDefaultFormAcceptEncoding()));
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());
+		put(new FieldTag(config.getFieldTagTemplatePath()));
 	}
 
 	protected void put(HtmlTag tag) {

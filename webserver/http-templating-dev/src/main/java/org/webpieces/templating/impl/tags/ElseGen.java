@@ -13,12 +13,12 @@ public class ElseGen extends AbstractTag {
 
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token) {
-		sourceCode.println(" else { //"+token.getSourceLocation());
+		sourceCode.println(" else { //"+token.getSourceLocation(false));
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token) {
-		sourceCode.println("} //"+token.getSourceLocation());
+		sourceCode.println("} //"+token.getSourceLocation(false));
 	}
 
 	/*
@@ -53,12 +53,12 @@ public class ElseGen extends AbstractTag {
 					+ " spaces between the end if tag and begin else tag OR both #{/if}# and #{else}# must be on it's\n"
 					+ " own lines with no text(only whitespace) or both #{/elseif}# and #{else}# must be on it's\n"
 					+ " own lines with no text(only whitespace)\n"
-					+ " #{"+name+"} is in error.  location="+current.getSourceLocation());
+					+ " #{"+name+"} is in error. "+current.getSourceLocation(true));
 		
 		String previousTagName = prevous.getCleanValue();
 		if(!"if".equals(previousTagName) && !"elseif".equals(previousTagName)) {
 			throw new IllegalArgumentException(name+" tag is missing the previous #{/if}# or #{/elseif}# tag.  Instead we "
-					+ "found a #{/"+previousTagName+"}# tag before the else. location="+current.getSourceLocation());
+					+ "found a #{/"+previousTagName+"}# tag before the else. "+current.getSourceLocation(true));
 		}
 	}
 }

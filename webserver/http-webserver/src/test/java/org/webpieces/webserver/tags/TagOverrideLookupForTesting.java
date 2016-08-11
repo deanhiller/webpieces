@@ -6,10 +6,10 @@ import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.templating.impl.tags.CustomTag;
 
-public class TestTagOverrideLookup extends HtmlTagLookup {
+public class TagOverrideLookupForTesting extends HtmlTagLookup {
 
 	@Inject
-	public TestTagOverrideLookup(TemplateConfig config) {
+	public TagOverrideLookupForTesting(TemplateConfig config) {
 		super(config);
 		put(new CustomTag("/org/webpieces/webserver/basic/includetags/custom.tag"));
 	}

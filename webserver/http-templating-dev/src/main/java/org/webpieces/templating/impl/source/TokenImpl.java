@@ -41,10 +41,19 @@ public class TokenImpl implements Token {
 		return filePath;
 	}
 	
-	public String getSourceLocation() {
-		return "File="+filePath+" line number="+beginLineNumber;
+	public String getSourceLocation(boolean dueToError) {
+		String fileName = filePath;
+		int lastIndexOf = filePath.lastIndexOf("/");
+		if(lastIndexOf > 0) 
+			fileName = filePath.substring(lastIndexOf+1);
+		String filePathAsClassName = filePath.replace("/", ".");
+		String loc = "at "+filePathAsClassName+"("+fileName+":"+ beginLineNumber+")";
+		if(!dueToError)
+			return loc;
+		
+		return "\n\t"+loc+"\n";
 	}
-
+	
 	@Override
 	public boolean isEndTag() {
 		return state == TemplateToken.END_TAG;

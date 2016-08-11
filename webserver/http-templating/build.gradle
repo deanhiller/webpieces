@@ -1,6 +1,16 @@
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/java"]
+            includes = ["**/*.html", "**/*.tag", "**/*.txt", "**/*.xml"]
+        }
+    }
+}
+
 dependencies {
     compile deps['guice']
     compile deps['groovy']
+    compile deps['commons-beans']
     compile project(':core:core-util')
 }
 

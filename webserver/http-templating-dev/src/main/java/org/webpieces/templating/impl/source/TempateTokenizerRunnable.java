@@ -111,7 +111,9 @@ public class TempateTokenizerRunnable {
                     }
                     break;
                 case EOF:
+                case START_END_TAG:
                 	throw new RuntimeException("Should not reach here");
+                	
             }
             
             left = pageSource.length() - end;

@@ -16,14 +16,14 @@ public class IfGen extends AbstractTag {
 		int indexOf = cleanValue.indexOf(" ");
 		if(indexOf < 0)
 			throw new IllegalArgumentException("if statement is missing expression.  "
-					+ "It must be #{if expression}# to work.  location="+token.getSourceLocation());
+					+ "It must be #{if expression}# to work. "+token.getSourceLocation(true));
 		String expression = cleanValue.substring(indexOf+1);
-		sourceCode.println("if ("+expression+") { //"+token.getSourceLocation());
+		sourceCode.println("if ("+expression+") { //"+token.getSourceLocation(false));
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token) {
-		sourceCode.println("} // line "+token.getSourceLocation());
+		sourceCode.println("} // line "+token.getSourceLocation(false));
 	}
 
 }

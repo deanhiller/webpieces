@@ -26,7 +26,7 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
-* implement field tag next, error, errorClass, errors, field, ifError, ifErrors, include, jsAction, jsRoute, list, option, select,
+* implement field tag next, error, errorClass, errors, field, ifError, ifErrors, jsAction, jsRoute, list, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?

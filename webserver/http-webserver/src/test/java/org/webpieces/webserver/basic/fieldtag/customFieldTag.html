@@ -1,0 +1,15 @@
+<html>
+  <head>
+  </head>
+  <body>
+    Page Using Custom Tag
+
+#{field 'user'}#<input type="text" name="${field.name}$" value="${field.value}$" class="input-xlarge"/>#{/field}#
+    
+#{field 'user.phone'}#<textarea name="${field.name}$" rows="6" cols="150" style="width: 400px">${field.value}$</textarea>#{/field}#
+    
+#{field 'user.mix'}#<input type="text" name="${field.name}$" value="${field.value}$" class="input-xlarge" placeholder="Optional">#{/field}#
+    
+    After Custom Tag
+  </body>
+</html>

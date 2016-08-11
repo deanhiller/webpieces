@@ -34,6 +34,9 @@ ext {
     deps = [
        'junit':           'junit:junit:4.11',  
        'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+       //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
+       //instead of bringing in an entire jar?
+       'commons-beans':   'commons-beanutils:commons-beanutils:1.9.2',
        'javax-inject':    'javax.inject:javax.inject:1',
        'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
        //do we need this one...

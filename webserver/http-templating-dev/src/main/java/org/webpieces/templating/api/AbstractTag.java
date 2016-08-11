@@ -7,7 +7,7 @@ public abstract class AbstractTag implements GroovyGen {
 	public void generateStartAndEnd(ScriptOutput sourceCode, Token token) {
 		String name = getName();
 		throw new IllegalArgumentException(name+" tag can only be used with a body so"
-				+ " #{"+name+"/} is not usable.  location="+token.getSourceLocation());
+				+ " #{"+name+"/} is not usable. "+token.getSourceLocation(true));
 	}
 	
 	/**
