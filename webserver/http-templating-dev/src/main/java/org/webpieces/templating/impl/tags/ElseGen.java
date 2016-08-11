@@ -13,12 +13,16 @@ public class ElseGen extends AbstractTag {
 
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token) {
-		sourceCode.println(" else { //"+token.getSourceLocation(false));
+		sourceCode.print(" else {");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token) {
-		sourceCode.println("} //"+token.getSourceLocation(false));
+		sourceCode.print("}");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
 	}
 
 	/*

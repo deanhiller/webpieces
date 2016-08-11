@@ -31,16 +31,24 @@ public class TagGen implements GroovyGen {
 	@Override
 	public void generateStartAndEnd(ScriptOutput sourceCode, Token token) {
 		String tagArgs = fetchArgs(token);
-		sourceCode.println("_attrs" + uniqueId + " = [" + tagArgs + "];");
-		sourceCode.println("runTag('" + name + "', _attrs" + uniqueId + ", null, '"+token.getSourceLocation(false)+"');");
+		sourceCode.print("_attrs" + uniqueId + " = [" + tagArgs + "];");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
+		sourceCode.print("runTag('" + name + "', _attrs" + uniqueId + ", null, '"+token.getSourceLocation(false)+"');");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
 	}
 
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token) {
 		String tagArgs = fetchArgs(token);
 		
-		sourceCode.println("_attrs" + uniqueId + " = [" + tagArgs + "];");
-		sourceCode.println("_body" + uniqueId + " = { // "+token.getSourceLocation(false));
+		sourceCode.print("_attrs" + uniqueId + " = [" + tagArgs + "];");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
+		sourceCode.print("_body" + uniqueId + " = {");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
 	}
 
 	private String fetchArgs(Token token) {
@@ -123,8 +131,12 @@ public class TagGen implements GroovyGen {
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token) {
 		String sourceLocation = startToken.getSourceLocation(false);
-		sourceCode.println("}; // "+token.getSourceLocation(false)); // close body closure
-		sourceCode.println("runTag('" + name + "', _attrs" + uniqueId + ", _body" + uniqueId + ", '"+sourceLocation+"');");
+		sourceCode.print("};");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
+		sourceCode.print("runTag('" + name + "', _attrs" + uniqueId + ", _body" + uniqueId + ", '"+sourceLocation+"');");
+		sourceCode.appendTokenComment(token);
+		sourceCode.println();
 	}
 
 }

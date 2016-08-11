@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.templating.api.ScriptOutput;
+import org.webpieces.templating.api.Token;
 
 public class ScriptOutputImpl implements ScriptOutput {
 
@@ -23,7 +24,7 @@ public class ScriptOutputImpl implements ScriptOutput {
         println();
 	}
 
-	void println() {
+	public void println() {
 		scriptSourceCode.append("\n");
         currentLine++;
 	}
@@ -32,10 +33,11 @@ public class ScriptOutputImpl implements ScriptOutput {
 		scriptSourceCode.append(text);
 	}
 
-	public void appendTokenComment(TokenImpl token) {
+	public void appendTokenComment(Token t) {
+		TokenImpl token = (TokenImpl) t;
 		scriptSourceCode.append(" //htmlLine ").append(token.beginLineNumber).append(":").append(token.endLineNumber);
 		//we could have stored column info in the Token as well for here!! to append to comment
-        scriptLineNumToHtmlLineNum .put(currentLine, token.beginLineNumber);		
+        scriptLineNumToHtmlLineNum.put(currentLine, token.beginLineNumber);		
 	}
 
 	public String getScriptSourceCode() {

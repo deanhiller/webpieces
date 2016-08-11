@@ -30,8 +30,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 	
 	@Override
 	protected Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs, Closure<?> body, String srcLocation) {
-		if(tagArgs.get("body") != null)
-			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of 'body' as that is reserved and will be overwritten");
+		if(tagArgs.get("_body") != null)
+			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of '_body' as that is reserved and will be overwritten");
 		else if(tagArgs.get("field") != null)
 			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of 'field' as that is reserved and will be overwritten ");
 

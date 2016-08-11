@@ -39,7 +39,7 @@ public class TestFieldTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<div class=`controls`><input type=`text` name=`user` value=`Dean` class=`input-xlarge`/><span class=`error`></span></div>".replace('`', '"'));
+		response.assertContains("<div class=`controls`><input type=`text` name=`user` value=`Dean` class=`input-xlarge`/><span class=`errorMsg`></span></div>".replace('`', '"'));
 	}
 
 }
