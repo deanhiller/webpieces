@@ -23,6 +23,7 @@ import org.webpieces.router.impl.ctx.LocalContext;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.params.ArgumentTranslator;
 import org.webpieces.router.impl.params.ObjectToStringTranslator;
+import org.webpieces.router.impl.params.Validation;
 
 public class RouteInvoker {
 
@@ -91,6 +92,7 @@ public class RouteInvoker {
 
 			return invokeImpl(result, req, responseCb);
 		} catch (Throwable e) {
+			log.info("msg", e);
 			//http 500...
 			//return a completed future with the exception inside...
 			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
@@ -134,19 +136,24 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Validator validator = new Validator();
+		Validation validator = new Validation();
 		Object[] arguments = argumentTranslator.createArgs(result, req, validator);
 
-		Validation.setValidator(validator);
-		RequestLocal.setRequest(req);
 		ResponseProcessor processor = new ResponseProcessor(reverseRoutes, reverseTranslator, req, meta);
+		
+		//ThreadLocals...
 		LocalContext.setResponseProcessor(processor);
+		Validation.set(validator);
+		RequestLocal.setRequest(req);
+		
 		CompletableFuture<Object> response;
 		try {
 			response = invokeMethod(obj, method, arguments);
 		} finally {
+			//Clear ThreadLocals...
 			LocalContext.setResponseProcessor(null);
-			
+			Validation.set(null);
+			RequestLocal.setRequest(null);
 		}
 		
 		CompletableFuture<Object> future = response.thenApply(resp -> continueProcessing(processor, resp, responseCb));

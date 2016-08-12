@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,6 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.Validator;
 
 public class ArgumentTranslator {
 
@@ -48,7 +46,7 @@ public class ArgumentTranslator {
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
 	
-	public Object[] createArgs(MatchResult result, RouterRequest req, Validator validator) {
+	public Object[] createArgs(MatchResult result, RouterRequest req, Validation validator) {
 		RouteMeta meta = result.getMeta();
 		Parameter[] paramMetas = meta.getMethod().getParameters();
 		
@@ -57,11 +55,11 @@ public class ArgumentTranslator {
 		//For multipart AND for query params such as ?var=xxx&var=yyy&var2=xxx AND for url path params /mypath/{var1}/account/{id}
 		
 		//query params first
-		treeCreator.createTree(paramTree, req.queryParams);
-		//next multi-part overwrites query params (if duplicates which there should not be)
-		treeCreator.createTree(paramTree, req.multiPartFields);
-		//lastly path params overwrites multipart and query params (if duplicates which there should not be)
-		treeCreator.createTree(paramTree, createStruct(result.getPathParams()));
+		treeCreator.createTree(paramTree, req.queryParams, FromEnum.QUERY_PARAM);
+		//next multi-part params
+		treeCreator.createTree(paramTree, req.multiPartFields, FromEnum.FORM_MULTIPART);
+		//lastly path params
+		treeCreator.createTree(paramTree, createStruct(result.getPathParams()), FromEnum.URL_PATH);
 		
 		List<Object> args = new ArrayList<>();
 		for(Parameter paramMeta : paramMetas) {
@@ -79,11 +77,11 @@ public class ArgumentTranslator {
 		return args.toArray();
 	}
 
-	private Object translate(RouteMeta meta, ParamNode valuesToUse, Class<?> paramTypeToCreate, Validator validator, String name) {
+	private Object translate(RouteMeta meta, ParamNode valuesToUse, Class<?> paramTypeToCreate, Validation validator, String name) {
 
 		Function<String, Object> converter = primitiveConverter.getConverter(paramTypeToCreate);
 		if(converter != null) {
-			return convert(meta, name, valuesToUse, paramTypeToCreate, converter);
+			return convert(meta, name, valuesToUse, paramTypeToCreate, converter, validator);
 		} else if(paramTypeToCreate.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
 		} else if(paramTypeToCreate.isEnum()) {
@@ -107,7 +105,11 @@ public class ArgumentTranslator {
 			BiFunction<Object, Object, Void> applyBeanValueFunction = createFunction(bean.getClass(), field);
 			Class<?> fieldType = field.getType();
 			Object translatedValue = translate(meta, value, fieldType, validator, name);
-			applyBeanValueFunction.apply(bean, translatedValue);
+			//skip setting to null if it is a primitive(allow setting null on a String 
+			if(translatedValue != null)
+				applyBeanValueFunction.apply(bean, translatedValue);
+			else if(!fieldType.isPrimitive())
+				applyBeanValueFunction.apply(bean, translatedValue);
 		}
 		return bean;
 	}
@@ -181,7 +183,7 @@ public class ArgumentTranslator {
 		}
 	}
 
-	private Object convert(RouteMeta meta, String name, ParamNode valuesToUse, Class<?> paramTypeToCreate, Function<String, Object> converter) {
+	private Object convert(RouteMeta meta, String name, ParamNode valuesToUse, Class<?> paramTypeToCreate, Function<String, Object> converter, Validation validator) {
 		Method method = meta.getMethod();
 		if(paramTypeToCreate.isPrimitive()) {
 			if(valuesToUse == null)
@@ -207,9 +209,13 @@ public class ArgumentTranslator {
 		try {
 			return converter.apply(value);
 		} catch(Exception e) {
-			//This should be a 404 in production
-			throw new NotFoundException("The method='"+method+"' requires that the parameter named '"+name+"' or annotated with @Param("+name+") be of type="
-					+paramTypeToCreate+" but the request contained a value that could not be converted="+value);
+			if(node.getFrom() == FromEnum.FORM_MULTIPART) {
+				validator.addErrorInst(node.getFullKeyName(), "Could not convert value");
+				return null;
+			} else
+				//This should be a 404 in production if the url is bad...
+				throw new NotFoundException("The method='"+method+"' requires that the parameter named '"+name+"' or annotated with @Param("+name+") be of type="
+						+paramTypeToCreate+" but the request contained a value that could not be converted="+value);
 		}
 	}
 

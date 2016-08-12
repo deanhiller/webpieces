@@ -52,7 +52,7 @@ public class TestBeans {
 	}
 
 	@Test
-	public void testComplexBean() {
+	public void testComplexBeanSaved() {
 		HttpRequest req = Requests.createPostRequest("/postuser", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
@@ -70,6 +70,29 @@ public class TestBeans {
 		
 		UserDbo user = mockLib.getUser();
 		Assert.assertEquals(555, user.getAddress().getZipCode());
+		Assert.assertEquals("D&D", user.getFirstName());
+		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
+	}
+
+	@Test
+	public void testInvalidComplexBean() {
+		HttpRequest req = Requests.createPostRequest("/postuser", 
+				"user.firstName", "D&D", 
+				"user.lastName", "Hiller",
+				"user.fullName", "Dean Hiller",
+				"user.address.zipCode", "This test value invalid since not an int",
+				"user.address.street", "Coolness Dr.");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		UserDbo user = mockLib.getUser();
+		Assert.assertEquals(0, user.getAddress().getZipCode()); //this is not set since it was invalid
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
 	}

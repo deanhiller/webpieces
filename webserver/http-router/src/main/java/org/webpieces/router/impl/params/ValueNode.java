@@ -6,10 +6,20 @@ public class ValueNode extends ParamNode {
 
 	private List<String> value;
 	private String fullKeyName;
+	private FromEnum from;
 
-	public ValueNode(List<String> list, String fullKeyName) {
+	public ValueNode(List<String> list, String fullKeyName, FromEnum from) {
 		this.value = list;
 		this.fullKeyName = fullKeyName;
+		this.from = from;
+	}
+
+	public String getFullKeyName() {
+		return fullKeyName;
+	}
+
+	public FromEnum getFrom() {
+		return from;
 	}
 
 	public List<String> getValue() {
@@ -18,10 +28,12 @@ public class ValueNode extends ParamNode {
 
 	@Override
 	public String toString() {
-		return ""+value+":"+fullKeyName;
+		return ""+value+":"+fullKeyName+":"+from;
 	}
 
 	public String getFullName() {
 		return fullKeyName;
 	}
+	
+	
 }
