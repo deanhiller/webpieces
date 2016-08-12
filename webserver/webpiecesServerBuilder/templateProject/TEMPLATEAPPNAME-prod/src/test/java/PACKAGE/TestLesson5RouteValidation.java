@@ -18,6 +18,8 @@ public class TestLesson5RouteValidation {
 			return; //don't run test except in gradle build
 		
 		ServerConfig serverConfig = new ServerConfig();
+		serverConfig.setHttpPort(0); //bind to any port
+		serverConfig.setHttpsPort(0); //bind to any port
 		serverConfig.setValidateRouteIdsOnStartup(true);
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
 		CLASSNAMEServer server = new CLASSNAMEServer(null, null, serverConfig);

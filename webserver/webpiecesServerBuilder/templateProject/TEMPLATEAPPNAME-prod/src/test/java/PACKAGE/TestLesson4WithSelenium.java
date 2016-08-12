@@ -55,7 +55,7 @@ public class TestLesson4WithSelenium {
 		
 		String pageSource = driver.getPageSource();
 		
-		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is some raw index page"));
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("TagArgs from variable otherArgument=Dean Hiller"));
 		
 	}
 	

@@ -1,17 +1,21 @@
 <html>
   <head>
   </head>
-  <body> 
-    *{ In this case, if user object is null, it will not evaluate the if, if it has a value it will run }*
-    #{if user}# 
-        Hello there ${user}$
+  <body>
+    Here is an if statement based off the user variable from the controller...<br/>
+    If the user exists, it prints the first line 'Hello there {user}'</br>    
+    #{if user}#
+        Hello there ${user}$<br/>
     #{/if}#
     #{else}#
         Hi, we don't know you
     #{/else}#
     
-    #{mytag}#Some body#{/mytag}#
+    <br/>
+    This next one is a custom tag passing in two custom args and a body to be used by mytag.tag file<br/>
+    #{mytag someArgument:'something', otherArgument:user}#Some body#{/mytag}#
     
-    This is some raw index page
+    <br/><br/>
+    This is the end of the html page
   </body>
 </html>

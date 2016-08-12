@@ -4,7 +4,8 @@ This is a form
 
 #{form action:@POST_USER_FORM[:]}#
 
-   <input type="text" name="firstname">
+   #{field 'user'}#<input type="text" name="firstname">#{/field}#
+   
    <input type="submit" value="Submit">
 
 #{/form}#
