@@ -45,7 +45,7 @@ public class TestAsynchronousErrors {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("async.txt", WebserverForTest.class.getClassLoader());
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), new AppOverridesModule(), false, metaFile);
 		server = webserver.start();
 	}

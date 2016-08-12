@@ -13,27 +13,8 @@ public class BasicRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/myroute",           "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
 		addRoute(GET , "/throwNotFound",     "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
 		addRoute(GET , "/pageparam",         "biz/BasicController.pageParam", BasicRouteId.PAGE_PARAM);
-		addRoute(GET , "/verbatim",          "biz/BasicController.verbatimTag", BasicRouteId.VERBATIM);
 
-		addRoute(GET , "/if",                "biz/BasicController.ifTag", BasicRouteId.IF);
-		addRoute(GET , "/else",              "biz/BasicController.elseTag", BasicRouteId.ELSE);
-		addRoute(GET , "/elseif",            "biz/BasicController.elseIfTag", BasicRouteId.ELSEIF);
-
-		addRoute(GET , "/setget",            "biz/BasicController.getTag", BasicRouteId.SETGET);
-		addRoute(GET , "/extends",           "biz/BasicController.extendsTag", BasicRouteId.EXTENDS);
-		addRoute(GET , "/ahref",             "biz/BasicController.aHrefTag", BasicRouteId.AHREF);
-		
-		addRoute(GET , "/customtag",         "includetags/IncludeTagController.customTag", BasicRouteId.CUSTOM_TAG);
-		addRoute(GET , "/renderTagArgs",     "includetags/IncludeTagController.renderTagArgsTag", BasicRouteId.RENDER_TAG_ARGS_TAG);
-		addRoute(GET , "/renderPageArgs",    "includetags/IncludeTagController.renderPageArgsTag", BasicRouteId.RENDER_PAGE_ARGS_TAG);
-
-		addRoute(GET , "/customFieldTag",    "fieldtag/FieldTagController.customFieldTag", BasicRouteId.FIELD_TAG);
-		
 		addRoute(GET , "/urlencoding/{user}","biz/BasicController.urlEncoding", BasicRouteId.URLENCODE);
-
-		addRoute(GET , "/getuserform",       "biz/BasicController.formTag", BasicRouteId.GET_USER_FORM);
-		addRoute(POST, "/postuser",          "biz/BasicController.postSomething", BasicRouteId.POST_USER);
-
 		// #{form action:@POST_CATCH_ALL[:] id:'detailsForm'}#  ....   #{/form}#
 		//addPostRoute("/post/{_controller}/{_action}", "{_controller}.post{_action}", BasicRouteId.POST_CATCH_ALL); //catch all post route
 		

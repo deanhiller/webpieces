@@ -1,4 +1,4 @@
-package org.webpieces.webserver.tags;
+package org.webpieces.webserver.basic;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestUrlEncoding {
+public class TestPageParams {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
 	private HttpRequestListener server;
@@ -29,8 +29,8 @@ public class TestUrlEncoding {
 	}
 
 	@Test
-	public void testUrlEncoding() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/urlencoding/Dean+Hiller");
+	public void testPageParam() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 		
 		server.processHttpRequests(socket, req , false);
 		
@@ -39,8 +39,7 @@ public class TestUrlEncoding {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains(" Hi Dean Hiller, this is testing param");
+		response.assertContains("Hi Dean Hiller, this is testing");
 	}
 	
-
 }

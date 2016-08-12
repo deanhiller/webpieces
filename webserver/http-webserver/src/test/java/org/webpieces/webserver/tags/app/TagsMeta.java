@@ -1,4 +1,4 @@
-package org.webpieces.webserver.basic;
+package org.webpieces.webserver.tags.app;
 
 import java.util.List;
 
@@ -9,13 +9,13 @@ import org.webpieces.webserver.EmptyModule;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-public class BasicAppMeta implements WebAppMeta {
+public class TagsMeta implements WebAppMeta {
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new EmptyModule());
 	}
 	
 	public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new BasicRouteModule());
+		return Lists.newArrayList(new TagsRouteModule());
 	}
 	
 }

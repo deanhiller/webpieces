@@ -10,6 +10,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
@@ -24,7 +25,8 @@ public class TestAHrefTag {
 	@Before
 	public void setUp() {
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, null);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, metaFile);
 		server = webserver.start();
 	}
 
@@ -39,8 +41,8 @@ public class TestAHrefTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<a href=`/pageparam` id=`myid`>My link</a>".replace('`', '"'));
-		response.assertContains("<a href=`/myroute`>My render link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/verbatim` id=`myid`>My link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/if`>My render link</a>".replace('`', '"'));
 		response.assertContains("<a href=`/redirect/Dean+Hiller`>The link</a>".replace('`', '"'));
 	}
 	

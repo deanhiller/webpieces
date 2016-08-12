@@ -41,7 +41,7 @@ public class WebserverForTest {
 		
 		//Tests can override this...
 		if(metaFile == null)
-			metaFile = new VirtualFileClasspath("basic.txt", WebserverForTest.class.getClassLoader());
+			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
 		
 		int httpPort = 8080;
 		int httpsPort = 8443;

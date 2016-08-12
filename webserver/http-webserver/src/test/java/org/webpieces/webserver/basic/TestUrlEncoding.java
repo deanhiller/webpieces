@@ -1,4 +1,4 @@
-package org.webpieces.webserver.tags;
+package org.webpieces.webserver.basic;
 
 import java.util.List;
 
@@ -10,14 +10,13 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestFormTag {
+public class TestUrlEncoding {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
 	private HttpRequestListener server;
@@ -25,14 +24,13 @@ public class TestFormTag {
 	@Before
 	public void setUp() {
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, null);
 		server = webserver.start();
 	}
 
 	@Test
-	public void testFormTag() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuserform");
+	public void testUrlEncoding() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/urlencoding/Dean+Hiller");
 		
 		server.processHttpRequests(socket, req , false);
 		
@@ -41,7 +39,7 @@ public class TestFormTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<form action=`/postuser` method=`post` accept-charset=`utf-8` enctype=`application/x-www-form-urlencoded` id=`form1`>".replace('`', '"'));
+		response.assertContains(" Hi Dean Hiller, this is testing param");
 	}
 	
 
