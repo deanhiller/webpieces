@@ -1,5 +1,8 @@
 package org.webpieces.devrouter.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -107,7 +110,9 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			reason = e.getMessage();
 		
 		RouterRequest newRequest = new RouterRequest();
-		newRequest.urlPathParams.put("error", new String[] {"Exception message="+reason });
+		List<String> error = new ArrayList<>();
+		error.add("Exception message="+reason);
+		newRequest.multiPartFields.put("webpiecesError", error);
 		
 		return new NotFoundInfo(result, newRequest);
 	}

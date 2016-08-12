@@ -1,6 +1,7 @@
 package org.webpieces.router.api.dto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RouterRequest {
@@ -26,24 +27,19 @@ public class RouterRequest {
 	 * library will parse the path in the request to get that information and NOT put it in this Map so
 	 * the app developer can grab all 3 different cases uniquely if they need to
 	 */
-	public Map<String, String[]> queryParams = new HashMap<>();
+	public Map<String, List<String>> queryParams = new HashMap<>();
 	
 	/**
 	 * this will be the multi-part form
 	 * upload with fields such as user.id, user.name, user.email, user.address, etc. etc.
 	 */
-	public Map<String, String[]> multiPartFields = new HashMap<>();
+	public Map<String, List<String>> multiPartFields = new HashMap<>();
 	
-	/**
-	 * 
-	 */
-	public Map<String, String[]> urlPathParams = new HashMap<>();
-
 	@Override
 	public String toString() {
 		return "RouterRequest [isHttps=" + isHttps + ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
 				+ ", \nrelativePath=" + relativePath + ", \ndomain=" + domain + ", \nmethod=" + method + ", \nqueryParams=\n"
-				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + ", \nurlPathParams=\n" + urlPathParams + "]";
+				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + "\n]";
 	}
 	
 }

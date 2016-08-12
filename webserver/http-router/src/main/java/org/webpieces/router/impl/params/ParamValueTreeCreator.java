@@ -17,11 +17,11 @@ public class ParamValueTreeCreator {
 	
 	//  user.account = 111  #weird but ok, we could do this too, but on binding, what would that mean?
 	//  BUT we need N maps, one for user, one for color, etc. etc.
-	public void createTree(ParamTreeNode paramTree, Map<String, String[]> params) {
+	public void createTree(ParamTreeNode paramTree, Map<String, List<String>> params) {
 		List<String> listSubKeys = null;
 		try {
 			
-			for(Map.Entry<String, String[]> entry : params.entrySet()) {
+			for(Map.Entry<String, List<String>> entry : params.entrySet()) {
 				String[] subKeys = entry.getKey().split(".");
 				if(subKeys.length == 0) {
 					listSubKeys = new ArrayList<>(Arrays.asList(entry.getKey()));
@@ -35,7 +35,7 @@ public class ParamValueTreeCreator {
 		}
 	}
 	
-	private void createTree(ParamTreeNode trees, List<String> asList, String[] value) {
+	private void createTree(ParamTreeNode trees, List<String> asList, List<String> list) {
 		if(asList.size() == 0)
 			return;
 		
@@ -48,16 +48,16 @@ public class ParamValueTreeCreator {
 				throw new IllegalArgumentException("Bug, not enough subkeys...conflict in param list like user.account.id=5 "
 						+ "and user.account=99 which is not allowed(since user.account would be an object so we can't set it to 99)");
 			ParamTreeNode tree = (ParamTreeNode) node;
-			createTree(tree, asList, value);
+			createTree(tree, asList, list);
 			return;
 		} else if(asList.size() == 0) {
-			ValueNode vNode = new ValueNode(value);
+			ValueNode vNode = new ValueNode(list);
 			trees.put(firstKey, vNode);
 			return;
 		}
 
 		ParamTreeNode p = new ParamTreeNode();
 		trees.put(firstKey, p);
-		createTree(p, asList, value);
+		createTree(p, asList, list);
 	}
 }

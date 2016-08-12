@@ -3,6 +3,7 @@ package org.webpieces.router.impl.params;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,6 +34,7 @@ public class ArgumentTranslator {
 	//   3. /user/{var1}?var2=xx&var3=yyy&cat=dog  Controller.method(var1) and controller accesses RequestLocal.getRequest().getParams().get("var2");
 	//   4. /user/{var1}?var2=xx                   Controller.method(var2) and controller accesses RequestLocal.getRequest().getParams().get("var1");
     //   5. /user?var1=xxx&var1=yyy                Controller.method({xxx, yyy}) as an array
+	//   6. /user/{var1}/{var1}/{var1}             We don't allow this and last one wins if they are different since outgoing they all have to be the same
 	//
 	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 	//
@@ -43,7 +45,8 @@ public class ArgumentTranslator {
 		Parameter[] paramMetas = meta.getMethod().getParameters();
 		
 		ParamTreeNode paramTree = new ParamTreeNode();
-		//For multipart AND for query params such as ?var=xxx&var=yyy&var2=xxx
+		
+		//For multipart AND for query params such as ?var=xxx&var=yyy&var2=xxx AND for url path params /mypath/{var1}/account/{id}
 		
 		//query params first
 		treeCreator.createTree(paramTree, req.queryParams);
@@ -99,12 +102,12 @@ public class ArgumentTranslator {
 		if(!(valuesToUse instanceof ValueNode))
 			throw new IllegalArgumentException("method takes param type="+paramTypeToCreate+" but complex structure found");
 		ValueNode node = (ValueNode) valuesToUse;
-		String[] values = node.getValue();
-		if(values.length > 1)
+		List<String> values = node.getValue();
+		if(values.size() > 1)
 			throw new NotFoundException("There is an array of values when the method only takes one value of type="+paramTypeToCreate+" and not an array");
 		String value = null;
-		if(values.length == 1)
-			value = values[0];
+		if(values.size() == 1)
+			value = values.get(0);
 		if(paramTypeToCreate == String.class)
 			return value;
 		try {
@@ -123,10 +126,10 @@ public class ArgumentTranslator {
 		return false;
 	}
 
-	private Map<String, String[]> createStruct(Map<String, String> params) {
+	private Map<String, List<String>> createStruct(Map<String, String> params) {
 		//why is this not easy to do in jdk8 as this is pretty ugly...
 		return params.entrySet().stream()
-	            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> new String[] { entry.getValue() } ));
+	            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> Arrays.asList(entry.getValue()) ));
 	}
-
+	
 }

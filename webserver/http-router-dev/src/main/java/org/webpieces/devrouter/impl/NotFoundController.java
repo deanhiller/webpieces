@@ -9,7 +9,7 @@ public class NotFoundController {
 
 	public Action notFound() {
 		RouterRequest request = RequestLocal.getRequest();
-		String error = request.urlPathParams.get("error")[0];
+		String error = request.multiPartFields.get("webpiecesError").get(0);
 		return Actions.renderThis("error", error);
 	}
 }

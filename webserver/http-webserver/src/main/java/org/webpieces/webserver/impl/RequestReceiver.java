@@ -1,6 +1,9 @@
 package org.webpieces.webserver.impl;
 
+import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -8,11 +11,14 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.Headers;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.UrlInfo;
@@ -23,6 +29,8 @@ import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.webserver.api.WebServerConfig;
+import org.webpieces.webserver.impl.parsing.BodyParser;
+import org.webpieces.webserver.impl.parsing.BodyParsers;
 
 public class RequestReceiver implements HttpRequestListener {
 	
@@ -70,6 +78,7 @@ public class RequestReceiver implements HttpRequestListener {
 		if(method == null)
 			throw new UnsupportedOperationException("method not supported="+requestLine.getMethod().getMethodAsString());
 
+		parseBody(req, routerRequest);
 		routerRequest.method = method;
 		routerRequest.domain = value;
 		routerRequest.relativePath = uriInfo.getFullPath(); 
@@ -77,8 +86,30 @@ public class RequestReceiver implements HttpRequestListener {
 		routerRequest.isSendAheadNextResponses = false;
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
-				
+		
 		routingService.processHttpRequests(routerRequest, streamer );
+	}
+
+	private void parseBody(HttpRequest req, RouterRequest routerRequest) {
+		Headers headers = req.getHeaderLookupStruct();
+		Header lengthHeader = headers.getHeader(KnownHeaderName.CONTENT_LENGTH);
+		Header typeHeader = headers.getHeader(KnownHeaderName.CONTENT_TYPE);
+		if(lengthHeader == null)
+			return;
+		else if(typeHeader == null) {
+			log.error("Incoming content length was specified, but no contentType was(We will treat like there was no body at all).  req="+req);
+			return;
+		}
+		
+		BodyParser parser = BodyParsers.lookup(typeHeader.getValue());
+		if(parser == null) {
+			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will treat like there was no body at all).  req="+req);
+			return;			
+		}
+
+		DataWrapper body = req.getBody();
+		Charset encoding = config.getDefaultFormAcceptEncoding();
+		parser.parse(body, routerRequest, encoding);
 	}
 
 	@Override
@@ -87,7 +118,7 @@ public class RequestReceiver implements HttpRequestListener {
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
-		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName());
+		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 		ProxyResponse proxyResp = new ProxyResponse(channel);
 		proxyResp.sendFailure(exc);
 	}

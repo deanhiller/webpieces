@@ -1,8 +1,7 @@
 package org.webpieces.router.api.error.dev;
 
-import static org.webpieces.router.api.dto.HttpMethod.*;
+import static org.webpieces.router.api.dto.HttpMethod.GET;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.ARGS_MISMATCH;
-import static org.webpieces.router.api.simplesvr.MtgRouteId.POST_ROUTE;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;

@@ -1,15 +1,17 @@
 package org.webpieces.router.impl.params;
 
+import java.util.List;
+
 public class ValueNode extends ParamNode {
 
-	private String[] value;
+	private List<String> value;
 
-	public ValueNode(String[] value) {
-		this.value = value;
+	public ValueNode(List<String> list) {
+		this.value = list;
 	}
 
 
-	public String[] getValue() {
+	public List<String> getValue() {
 		return value;
 	}
 }

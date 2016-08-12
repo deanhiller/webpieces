@@ -52,7 +52,7 @@ public class GroovyScriptGenerator {
 		TokenImpl token = tokens.get(tokens.size()-1);
 		int lastLine = token.endLineNumber;
 		long total = System.currentTimeMillis() - start;
-		log.info(total+"ms source generation. class="+className+" from "+lastLine+" html lines of code to "+sourceCode.getLineNumber()+" lines of groovy code");
+		log.info(total+"ms (dev mode only) source generation. class="+className+" from "+lastLine+" html lines of code to "+sourceCode.getLineNumber()+" lines of groovy code");
 		
 		return sourceCode;
 	}
