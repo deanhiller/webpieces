@@ -1,4 +1,4 @@
-package org.webpieces.webserver.basic;
+package org.webpieces.webserver.beans;
 
 import java.util.List;
 
@@ -10,13 +10,14 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestPageParams {
+public class TestUrlEncoding {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
 	private HttpRequestListener server;
@@ -24,13 +25,14 @@ public class TestPageParams {
 	@Before
 	public void setUp() {
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, null);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, metaFile);
 		server = webserver.start();
 	}
 
 	@Test
-	public void testPageParam() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
+	public void testUrlEncoding() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/urlencoding/Dean+Hiller");
 		
 		server.processHttpRequests(socket, req , false);
 		
@@ -39,7 +41,8 @@ public class TestPageParams {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("Hi Dean Hiller, this is testing");
+		response.assertContains(" Hi Dean Hiller, this is testing param");
 	}
 	
+
 }

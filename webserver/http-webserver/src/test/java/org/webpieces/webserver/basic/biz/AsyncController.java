@@ -13,7 +13,7 @@ import org.webpieces.webserver.async.AsyncRouteId;
 public class AsyncController {
 
 	@Inject
-	private NotFoundLib notFoundLib;
+	private SomeOtherLib notFoundLib;
 	@Inject
 	private InternalSvrErrorLib errorLib;
 	

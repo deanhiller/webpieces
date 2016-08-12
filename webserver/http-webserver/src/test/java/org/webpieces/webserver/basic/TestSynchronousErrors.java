@@ -13,9 +13,9 @@ import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.biz.InternalSvrErrorLib;
-import org.webpieces.webserver.basic.biz.NotFoundLib;
+import org.webpieces.webserver.basic.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockErrorLib;
-import org.webpieces.webserver.mock.MockNotFoundLogic;
+import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
@@ -34,7 +34,7 @@ public class TestSynchronousErrors {
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
 	//any redirects in the application properly..
 	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
-	private MockNotFoundLogic mockNotFoundLib = new MockNotFoundLogic();
+	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockErrorLib mockInternalSvrErrorLib = new MockErrorLib();
 
 	@Before
@@ -194,7 +194,7 @@ public class TestSynchronousErrors {
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {
-			binder.bind(NotFoundLib.class).toInstance(mockNotFoundLib);
+			binder.bind(SomeOtherLib.class).toInstance(mockNotFoundLib);
 			binder.bind(InternalSvrErrorLib.class).toInstance(mockInternalSvrErrorLib);
 		}
 	}

@@ -4,8 +4,6 @@ import static org.webpieces.router.api.dto.HttpMethod.GET;
 import static org.webpieces.router.api.dto.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
-import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.Router;
 import org.webpieces.webserver.basic.BasicRouteId;
 
 public class TagsRouteModule extends AbstractRouteModule {

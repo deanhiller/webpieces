@@ -1,24 +1,32 @@
 package org.webpieces.router.impl.params;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.Validator;
 
 public class ArgumentTranslator {
 
+	private static final Logger log = LoggerFactory.getLogger(ArgumentTranslator.class);
 	private ParamValueTreeCreator treeCreator;
 	private PrimitiveTranslator primitiveConverter;
 
@@ -40,7 +48,7 @@ public class ArgumentTranslator {
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
 	
-	public Object[] createArgs(MatchResult result, RouterRequest req) {
+	public Object[] createArgs(MatchResult result, RouterRequest req, Validator validator) {
 		RouteMeta meta = result.getMeta();
 		Parameter[] paramMetas = meta.getMethod().getParameters();
 		
@@ -57,22 +65,22 @@ public class ArgumentTranslator {
 		
 		List<Object> args = new ArrayList<>();
 		for(Parameter paramMeta : paramMetas) {
-			Object arg = translate(meta, paramTree, paramMeta);
+			Class<?> paramTypeToCreate = paramMeta.getType();
+			Param annotation = paramMeta.getAnnotation(Param.class);
+			String name = paramMeta.getName();
+			if(annotation != null) {
+				name = annotation.value();
+			}
+			
+			ParamNode paramNode = paramTree.get(name);
+			Object arg = translate(meta, paramNode, paramTypeToCreate, validator, name);
 			args.add(arg);
 		}
 		return args.toArray();
 	}
 
-	private Object translate(RouteMeta meta, ParamTreeNode paramTree, Parameter paramMeta) {
-		Param annotation = paramMeta.getAnnotation(Param.class);
-		String name = paramMeta.getName();
-		if(annotation != null) {
-			name = annotation.value();
-		}
-		ParamNode valuesToUse = paramTree.get(name);
-		
-		Class<?> paramTypeToCreate = paramMeta.getType();
-		
+	private Object translate(RouteMeta meta, ParamNode valuesToUse, Class<?> paramTypeToCreate, Validator validator, String name) {
+
 		Function<String, Object> converter = primitiveConverter.getConverter(paramTypeToCreate);
 		if(converter != null) {
 			return convert(meta, name, valuesToUse, paramTypeToCreate, converter);
@@ -82,8 +90,94 @@ public class ArgumentTranslator {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
 		} else if(isPluginManaged(paramTypeToCreate)) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
-		} else {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
+		} else if(valuesToUse instanceof ValueNode) {
+			ValueNode v = (ValueNode) valuesToUse;
+			String fullName = v.getFullName();
+			throw new IllegalArgumentException("Could not convert incoming value="+v.getValue()+" of key name="+fullName);
+		} else if(!(valuesToUse instanceof ParamTreeNode)) {
+			throw new IllegalStateException("Bug, must be missing a case. v="+valuesToUse);
+		}
+		
+		Object bean = createBean(paramTypeToCreate);
+		ParamTreeNode tree = (ParamTreeNode) valuesToUse;
+		for(Map.Entry<String, ParamNode> entry: tree.entrySet()) {
+			String key = entry.getKey();
+			ParamNode value = entry.getValue();
+			Field field = findBeanFieldType(bean.getClass(), key, new ArrayList<>());
+			BiFunction<Object, Object, Void> applyBeanValueFunction = createFunction(bean.getClass(), field);
+			Class<?> fieldType = field.getType();
+			Object translatedValue = translate(meta, value, fieldType, validator, name);
+			applyBeanValueFunction.apply(bean, translatedValue);
+		}
+		return bean;
+	}
+
+	private BiFunction<Object, Object, Void> createFunction(Class<? extends Object> beanClass, Field field) {
+		String key = field.getName();
+		String cap = key.substring(0, 1).toUpperCase() + key.substring(1);
+		String methodName = "set"+cap;
+
+		//What is slower....throwing exceptions or looping over methods to not through exception?....
+		try {
+			Method method = beanClass.getMethod(methodName, field.getType());
+			return (bean, val) -> invokeMethod(method, bean, val);
+		} catch (NoSuchMethodException e) {
+			log.warn("performance penalty since method="+methodName+" does not exist on class="+beanClass.getName()+" using field instead to set data");
+			return (bean, val) -> setField(field, bean, val);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Void setField(Field field, Object bean, Object val) {
+		field.setAccessible(true);
+		try {
+			field.set(bean, val);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+		return null;
+	}
+
+	private Void invokeMethod(Method method, Object bean, Object val) {
+		try {
+			method.invoke(bean, val);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+		return null;
+	}
+
+	private Field findBeanFieldType(Class<?> beanType, String key, List<String> classList) {
+		classList.add(beanType.getName());
+		
+		Field[] fields = beanType.getDeclaredFields();
+		for(Field f : fields) {
+			if(key.equals(f.getName())) {
+				return f;
+			}
+		}
+		
+		Class<?> superclass = beanType.getSuperclass();
+		if(superclass == null)
+			throw new IllegalArgumentException("Field with name="+key+" not found in any of the classes="+classList);
+		
+		return findBeanFieldType(superclass, key, classList);
+	}
+
+	private Object createBean(Class<?> paramTypeToCreate) {
+		try {
+			return paramTypeToCreate.newInstance();
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

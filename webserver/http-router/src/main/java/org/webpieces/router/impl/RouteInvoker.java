@@ -134,8 +134,10 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Object[] arguments = argumentTranslator.createArgs(result, req);
+		Validator validator = new Validator();
+		Object[] arguments = argumentTranslator.createArgs(result, req, validator);
 
+		Validation.setValidator(validator);
 		RequestLocal.setRequest(req);
 		ResponseProcessor processor = new ResponseProcessor(reverseRoutes, reverseTranslator, req, meta);
 		LocalContext.setResponseProcessor(processor);
@@ -144,6 +146,7 @@ public class RouteInvoker {
 			response = invokeMethod(obj, method, arguments);
 		} finally {
 			LocalContext.setResponseProcessor(null);
+			
 		}
 		
 		CompletableFuture<Object> future = response.thenApply(resp -> continueProcessing(processor, resp, responseCb));

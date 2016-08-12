@@ -22,20 +22,21 @@ public class ParamValueTreeCreator {
 		try {
 			
 			for(Map.Entry<String, List<String>> entry : params.entrySet()) {
-				String[] subKeys = entry.getKey().split(".");
+				String key = entry.getKey();
+				String[] subKeys = key.split("\\.");
 				if(subKeys.length == 0) {
 					listSubKeys = new ArrayList<>(Arrays.asList(entry.getKey()));
 				} else {
 					listSubKeys = new ArrayList<>(Arrays.asList(subKeys));
 				}
-				createTree(paramTree, listSubKeys, entry.getValue());
+				createTree(paramTree, listSubKeys, entry.getValue(), key);
 			}
 		} catch (RuntimeException e) {
 			throw new RuntimeException("Something bad happened with key list="+listSubKeys, e);
 		}
 	}
 	
-	private void createTree(ParamTreeNode trees, List<String> asList, List<String> list) {
+	private void createTree(ParamTreeNode trees, List<String> asList, List<String> list, String fullKeyName) {
 		if(asList.size() == 0)
 			return;
 		
@@ -48,16 +49,16 @@ public class ParamValueTreeCreator {
 				throw new IllegalArgumentException("Bug, not enough subkeys...conflict in param list like user.account.id=5 "
 						+ "and user.account=99 which is not allowed(since user.account would be an object so we can't set it to 99)");
 			ParamTreeNode tree = (ParamTreeNode) node;
-			createTree(tree, asList, list);
+			createTree(tree, asList, list, fullKeyName);
 			return;
 		} else if(asList.size() == 0) {
-			ValueNode vNode = new ValueNode(list);
+			ValueNode vNode = new ValueNode(list, fullKeyName);
 			trees.put(firstKey, vNode);
 			return;
 		}
 
 		ParamTreeNode p = new ParamTreeNode();
 		trees.put(firstKey, p);
-		createTree(p, asList, list);
+		createTree(p, asList, list, fullKeyName);
 	}
 }

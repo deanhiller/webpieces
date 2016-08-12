@@ -1,9 +1,7 @@
 package org.webpieces.webserver.impl;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +13,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
-import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.Headers;
@@ -31,6 +28,7 @@ import org.webpieces.templating.api.TemplateService;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
+import org.webpieces.webserver.impl.parsing.FormUrlEncodedParser;
 
 public class RequestReceiver implements HttpRequestListener {
 	
@@ -41,8 +39,9 @@ public class RequestReceiver implements HttpRequestListener {
 	private TemplateService templatingService;
 	@Inject
 	private WebServerConfig config;
+
+	private FormUrlEncodedParser parser = new FormUrlEncodedParser();
 	private UrlLookup lookup = new UrlLookup();
-	
 	private Set<String> headersSupported = new HashSet<>();
 	
 	public RequestReceiver() {
@@ -50,7 +49,6 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.DATE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONNECTION.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.USER_AGENT.getHeaderName().toLowerCase());
-		
 	}
 	
 	@Override
@@ -81,7 +79,16 @@ public class RequestReceiver implements HttpRequestListener {
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
 		routerRequest.domain = value;
-		routerRequest.relativePath = uriInfo.getFullPath(); 
+		String fullPath = uriInfo.getFullPath();
+		int index = fullPath.indexOf("?");
+		if(index > 0) {
+			routerRequest.relativePath = fullPath.substring(0, index);
+			String postfix = fullPath.substring(index+1);
+			routerRequest.queryParams = parser.parse(postfix);
+		} else {
+			routerRequest.relativePath = fullPath;	
+		}
+		
 		//http1.1 so no...
 		routerRequest.isSendAheadNextResponses = false;
 		if(routerRequest.relativePath.contains("?"))

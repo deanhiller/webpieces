@@ -5,13 +5,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.webserver.basic.biz.NotFoundLib;
+import org.webpieces.webserver.basic.biz.SomeOtherLib;
+import org.webpieces.webserver.basic.biz.UserDbo;
 
-public class MockNotFoundLogic extends NotFoundLib {
+public class MockSomeOtherLib extends SomeOtherLib {
 
 	private boolean throwNotFound;
 	private boolean throwRuntime;
 	private List<CompletableFuture<Integer>> queueFuture = new ArrayList<>();
+	private UserDbo lastUser;
 
 	@Override
 	public CompletableFuture<Integer> someBusinessLogic() {
@@ -36,4 +38,14 @@ public class MockNotFoundLogic extends NotFoundLib {
 	public void queueFuture(CompletableFuture<Integer> future) {
 		this.queueFuture.add(future);
 	}
+
+	@Override
+	public void saveUser(UserDbo user) {
+		this.lastUser = user;
+	}
+	
+	public UserDbo getUser() {
+		return lastUser;
+	}
+	
 }

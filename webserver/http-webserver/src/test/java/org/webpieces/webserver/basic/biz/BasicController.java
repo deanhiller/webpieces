@@ -11,7 +11,7 @@ import org.webpieces.webserver.basic.BasicRouteId;
 public class BasicController {
 
 	@Inject
-	private NotFoundLib notFoundLib;
+	private SomeOtherLib notFoundLib;
 	@Inject
 	private InternalSvrErrorLib errorLib;
 	
@@ -50,12 +50,4 @@ public class BasicController {
 		return Actions.renderThis();
 	}
 	
-	public Action urlEncoding(String user) {
-		return Actions.renderThis("user", user);
-	}
-	
-	public Action pageParam() {
-		return Actions.renderThis("user", "Dean Hiller");
-	}
-
 }
