@@ -26,6 +26,7 @@ public class TemplateCompilerPlugin implements Plugin<ProjectInternal> {
     
     @Override
     public void apply(ProjectInternal project) {
+    	project.getExtensions().create("compileTemplateSetting", TemplateCompileOptions.class);
         project.getPluginManager().apply(JavaBasePlugin.class);
         JavaBasePlugin javaBasePlugin = project.getPlugins().getPlugin(JavaBasePlugin.class);
         configureSourceSetDefaults(project, javaBasePlugin);

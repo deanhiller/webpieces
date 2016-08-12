@@ -28,7 +28,7 @@ sourceSets {
     test {
         resources {
             srcDirs = ["src/main/java"]
-            includes = ["**/*.html"]
+            includes = ["**/*.html", "**/*.tag"]
         }
     }
 }
@@ -48,3 +48,9 @@ dependencies {
 }
 
 mainClassName = "PACKAGE.CLASSNAMEServer"
+
+compileTemplateSetting {
+  //Since the groovy plugin has no way of knowing about your custom tags, list them here or the compile will
+  //fail (This catches mispellings and such so you don't release a broken app to production)
+  customTags = [ "mytag", "anothertag" ]
+}

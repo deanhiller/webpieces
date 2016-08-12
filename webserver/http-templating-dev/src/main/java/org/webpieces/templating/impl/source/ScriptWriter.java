@@ -10,6 +10,8 @@ import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.templating.impl.tags.TagGen;
 
 public class ScriptWriter {
@@ -23,12 +25,14 @@ public class ScriptWriter {
 	private GenLookup generatorLookup;
 	private HtmlTagLookup htmlTagLookup;
 	private UniqueIdGenerator uniqueIdGen;
+	private TemplateCompileConfig config;
 
 	@Inject
-	public ScriptWriter(HtmlTagLookup htmlTagLookup, GenLookup lookup, UniqueIdGenerator generator) {
+	public ScriptWriter(HtmlTagLookup htmlTagLookup, GenLookup lookup, UniqueIdGenerator generator, TemplateCompileConfig config) {
 		this.htmlTagLookup = htmlTagLookup;
 		generatorLookup = lookup;
 		this.uniqueIdGen = generator;
+		this.config = config;
 	}
 	
 	public void printHead(ScriptOutputImpl sourceCode, String packageStr, String className) {
@@ -155,9 +159,10 @@ public class ScriptWriter {
 				//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
 				abstractTag.validatePreviousSibling(token, previousToken);
 			}
-		} else if(htmltag == null) {
-			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation(true));
 		} else {
+			if(htmltag == null && !config.getCustomTagsFromPlugin().contains(tagName))
+				throw new IllegalArgumentException("Unknown tag=#{"+tagName+"}# OR you didn't add '"
+							+tagName+"' to list of customTags in build.gradle file. "+token.getSourceLocation(true));
 			int id = uniqueIdGen.generateId();
 			generator = new TagGen(tagName, token, id, callbacks);
 		}

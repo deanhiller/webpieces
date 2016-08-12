@@ -12,10 +12,8 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
-import org.gradle.api.Action;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.LogLevel;
-import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
 import org.webpieces.templating.api.CompileCallback;
@@ -26,37 +24,39 @@ import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import groovy.lang.Closure;
-
 public class TemplateCompilerTask extends AbstractCompile {
 
-    private TemplateCompileOptions options = new TemplateCompileOptions();
-
-    @Nested
-    public TemplateCompileOptions getOptions() {
-        return options;
-    }
-
-    public void options(Action<TemplateCompileOptions> action) {
-        action.execute(getOptions());
-    }
-
-    public void options(Closure<?> closure) {
-        getProject().configure(getOptions(), closure);
-    }
+//    private TemplateCompileOptions options = new TemplateCompileOptions();
+//
+//    @Nested
+//    public TemplateCompileOptions getOptions() {
+//        return options;
+//    }
+//
+//    public void options(Action<TemplateCompileOptions> action) {
+//        action.execute(getOptions());
+//    }
+//
+//    public void options(Closure<?> closure) {
+//        getProject().configure(getOptions(), closure);
+//    }
     
 	@TaskAction
 	public void compile() {
 		try {
-			compileImpl();
+			TemplateCompileOptions options = getProject().getExtensions().findByType(TemplateCompileOptions.class);
+			compileImpl(options);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	public void compileImpl() throws IOException {
+
+	public void compileImpl(TemplateCompileOptions options) throws IOException {
 		Charset encoding = Charset.forName(options.getEncoding());
 		TemplateCompileConfig config = new TemplateCompileConfig(encoding);
+		config.setPluginClient(true);
+		System.out.println("custom tags="+options.getCustomTags());
+		config.setCustomTagsFromPlugin(options.getCustomTags());
     	Injector injector = Guice.createInjector(new DevTemplateModule(config));
     	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
     	
