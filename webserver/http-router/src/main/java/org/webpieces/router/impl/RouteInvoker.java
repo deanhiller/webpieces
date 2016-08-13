@@ -145,7 +145,7 @@ public class RouteInvoker {
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
 		RequestContext requestCtx = new RequestContext(validation, flash, session, req);
-		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta);
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb);
 		//ThreadLocals...
 		Request.setContext(requestCtx);
 		RequestLocalCtx.set(processor);
@@ -163,19 +163,16 @@ public class RouteInvoker {
 	}
 
 	public Object continueProcessing(ResponseProcessor processor, Object controllerResponse, ResponseStreamer responseCb) {
-		log.error("fix this comment");
-		//TODO: Call responseCb.sendRedirect and responseCb.sendRenderHtml on the caller thread instead
-		//this then gives a stack trace through the callers code which is much nicer to understand what error happend
 		if(controllerResponse instanceof RedirectResponse) {
-			responseCb.sendRedirect((RedirectResponse)controllerResponse);
+			//do nothing, it was called already in Actions.redirect so if there is an exception, the
+			//client code ends up in the stack trace making it easier to tell what the path was to failure
 		} else if(controllerResponse instanceof RenderResponse) {
-			responseCb.sendRenderHtml((RenderResponse)controllerResponse);
+			//do nothing, it was called already in Actions.redirect so if there is an exception, the
+			//client code ends up in the stack trace making it easier to tell what the path was to failure
 		} else if(controllerResponse instanceof RedirectImpl) {
-			RedirectResponse httpResponse = processor.createFullRedirect((RedirectImpl)controllerResponse);
-			responseCb.sendRedirect(httpResponse);
+			processor.createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderHtmlImpl) {
-			RenderResponse resp = processor.createRenderResponse((RenderHtmlImpl)controllerResponse);
-			responseCb.sendRenderHtml(resp);
+			processor.createRenderResponse((RenderHtmlImpl)controllerResponse);
 		} else {
 			throw new UnsupportedOperationException("Not yet done but could "
 					+ "call into the Action witht the responseCb to handle so apps can decide what to send back");

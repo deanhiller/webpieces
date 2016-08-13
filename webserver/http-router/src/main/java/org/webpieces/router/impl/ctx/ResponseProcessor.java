@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.ctx.Flash;
 import org.webpieces.router.api.ctx.RequestContext;
 import org.webpieces.router.api.ctx.Validation;
@@ -31,12 +32,14 @@ public class ResponseProcessor {
 	private RouteMeta matchedMeta;
 	private ObjectToStringTranslator reverseTranslator;
 	private RequestContext ctx;
+	private ResponseStreamer responseCb;
 
-	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, ObjectToStringTranslator reverseTranslator, RouteMeta meta) {
+	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, ObjectToStringTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.matchedMeta = meta;
+		this.responseCb = responseCb;
 	}
 
 	public RedirectResponse createFullRedirect(RedirectImpl action) {
@@ -71,7 +74,11 @@ public class ResponseProcessor {
 		
 		List<Cookie> cookies = createCookies();
 		
-		return new RedirectResponse(request.isHttps, request.domain, path, cookies);
+		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path, cookies);
+		
+		responseCb.sendRedirect(redirectResponse);
+		
+		return redirectResponse;
 	}
 
 	private List<Cookie> createCookies() {
@@ -107,6 +114,7 @@ public class ResponseProcessor {
 		
 		List<Cookie> cookies = createCookies();
 		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
+		responseCb.sendRenderHtml(resp);
 		return resp;
 	}
 }
