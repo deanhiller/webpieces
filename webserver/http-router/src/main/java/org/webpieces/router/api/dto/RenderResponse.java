@@ -1,32 +1,22 @@
 package org.webpieces.router.api.dto;
 
+import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.actions.RenderHtml;
 
 public class RenderResponse implements RenderHtml {
 
-	private View view;
-	private RouteType routeType;
-	private Map<String, Object> pageArgs;
+	public View view;
+	public RouteType routeType;
+	public Map<String, Object> pageArgs;
+	public List<Cookie> cookies;
 
-	public RenderResponse(View view2, Map<String, Object> pageArgs, RouteType routeType) {
+	public RenderResponse(View view2, Map<String, Object> pageArgs, RouteType routeType, List<Cookie> cookies) {
 		this.view = view2;
 		this.pageArgs = pageArgs;
 		this.routeType = routeType;
+		this.cookies = cookies;
 	}
 
-	public View getView() {
-		return view;
-	}
-
-	public RouteType getRouteType() {
-		return routeType;
-	}
-
-	public Map<String, Object> getPageArgs() {
-		return pageArgs;
-	}
-	
-	
 }

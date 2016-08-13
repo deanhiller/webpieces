@@ -3,8 +3,6 @@ package org.webpieces.webserver.tags.app;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.webserver.basic.BasicRouteId;
-import org.webpieces.webserver.beans.app.BeansRouteId;
 
 public class TagController {
 	public Action verbatimTag() {

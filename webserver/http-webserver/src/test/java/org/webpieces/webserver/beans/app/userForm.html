@@ -1,0 +1,20 @@
+<html>
+  <head>
+  </head>
+  <body>
+    Add User<br/>
+    
+#{form action:@POST_USER_ROUTE[:]}#
+
+#{field 'user.firstName'}#<input type="text" name="${field.name}$" value="${field.value}$" class="input-xlarge"/>#{/field}#
+    
+#{field 'user.address.zipCode'}#<input type="text" name="${field.name}$" value="${field.value}$" class="input-xlarge"/>#{/field}#
+
+#{field 'password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge"/>#{/field}#
+
+<input id="submit" type="submit" value="Submit">    
+    
+#{/form}#
+
+  </body>
+</html>

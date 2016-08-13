@@ -2,10 +2,12 @@ package org.webpieces.webserver.basic.biz;
 
 import java.util.concurrent.CompletableFuture;
 
-public class InternalSvrErrorLib {
+public class SomeLib {
 
 	public CompletableFuture<Integer> someBusinessLogic() {
 		return CompletableFuture.completedFuture(33);
 	}
 
+	public void validateUser(UserDbo user) {
+	}
 }

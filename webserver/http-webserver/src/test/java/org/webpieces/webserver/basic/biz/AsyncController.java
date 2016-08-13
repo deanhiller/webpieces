@@ -15,7 +15,7 @@ public class AsyncController {
 	@Inject
 	private SomeOtherLib notFoundLib;
 	@Inject
-	private InternalSvrErrorLib errorLib;
+	private SomeLib errorLib;
 	
 	public CompletableFuture<Action> someMethod() {
 		return notFoundLib.someBusinessLogic().thenApply(s -> Actions.redirect(AsyncRouteId.SOME_ROUTE));

@@ -1,10 +1,15 @@
 package org.webpieces.router.impl.ctx;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.webpieces.router.api.ctx.Flash;
+import org.webpieces.router.api.ctx.RequestContext;
+import org.webpieces.router.api.ctx.Validation;
+import org.webpieces.router.api.dto.Cookie;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
@@ -23,18 +28,19 @@ import org.webpieces.router.impl.params.ObjectToStringTranslator;
 public class ResponseProcessor {
 	
 	private ReverseRoutes reverseRoutes;
-	private RouterRequest request;
 	private RouteMeta matchedMeta;
 	private ObjectToStringTranslator reverseTranslator;
+	private RequestContext ctx;
 
-	public ResponseProcessor(ReverseRoutes reverseRoutes, ObjectToStringTranslator reverseTranslator, RouterRequest req, RouteMeta meta) {
+	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, ObjectToStringTranslator reverseTranslator, RouteMeta meta) {
+		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
-		this.request = req;
 		this.matchedMeta = meta;
 	}
 
 	public RedirectResponse createFullRedirect(RedirectImpl action) {
+		RouterRequest request = ctx.getRequest();
 		Method method = matchedMeta.getMethod();
 		RouteId id = action.getId();
 		RouteMeta nextRequestMeta = reverseRoutes.get(id);
@@ -63,10 +69,23 @@ public class ResponseProcessor {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		return new RedirectResponse(request.isHttps, request.domain, path);
+		List<Cookie> cookies = createCookies();
+		
+		return new RedirectResponse(request.isHttps, request.domain, path, cookies);
+	}
+
+	private List<Cookie> createCookies() {
+		List<Cookie> cookies = new ArrayList<>();
+		Flash flash = ctx.getFlash();
+		flash.addSelfAsCookie(cookies);
+		Validation validation = ctx.getValidation();
+		validation.addSelfAsCookie(cookies);
+		return cookies;
 	}
 
 	public RenderResponse createRenderResponse(RenderHtmlImpl controllerResponse) {
+		RouterRequest request = ctx.getRequest();
+
 		Method method = matchedMeta.getMethod();
 		//in the case where the POST route was found, the controller canNOT be returning RenderHtml and should follow PRG
 		//If the POST route was not found, just render the notFound page that controller sends us violating the
@@ -86,7 +105,8 @@ public class ResponseProcessor {
 			view = new View(controllerName, methodName);
 		}
 		
-		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType());
+		List<Cookie> cookies = createCookies();
+		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
 		return resp;
 	}
 }

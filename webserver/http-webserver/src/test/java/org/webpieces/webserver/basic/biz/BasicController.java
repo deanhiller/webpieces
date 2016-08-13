@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.BasicRouteId;
 
@@ -13,7 +12,7 @@ public class BasicController {
 	@Inject
 	private SomeOtherLib notFoundLib;
 	@Inject
-	private InternalSvrErrorLib errorLib;
+	private SomeLib errorLib;
 	
 	public Action someMethod() {
 		notFoundLib.someBusinessLogic();

@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.router.api.ctx.Validation;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Param;
@@ -210,7 +211,7 @@ public class ArgumentTranslator {
 			return converter.apply(value);
 		} catch(Exception e) {
 			if(node.getFrom() == FromEnum.FORM_MULTIPART) {
-				validator.addErrorInst(node.getFullKeyName(), "Could not convert value");
+				validator.addError(node.getFullKeyName(), "Could not convert value");
 				return null;
 			} else
 				//This should be a 404 in production if the url is bad...

@@ -71,6 +71,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         //field.put("flash", Flash.current().get(fieldName));
         //field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash")
         //        .toString().split(",") : new String[0]);
+        
         //field.put("error", Validation.error(fieldName));
         //field.put("errorClass", field.get("error") != null ? "hasError" : "");
         String[] pieces = fieldName.split("\\.");

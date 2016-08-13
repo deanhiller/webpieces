@@ -11,19 +11,22 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.ctx.Flash;
+import org.webpieces.router.api.ctx.Request;
+import org.webpieces.router.api.ctx.RequestContext;
+import org.webpieces.router.api.ctx.Session;
+import org.webpieces.router.api.ctx.Validation;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
-import org.webpieces.router.api.dto.RequestLocal;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderHtmlImpl;
-import org.webpieces.router.impl.ctx.LocalContext;
+import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.params.ArgumentTranslator;
 import org.webpieces.router.impl.params.ObjectToStringTranslator;
-import org.webpieces.router.impl.params.Validation;
 
 public class RouteInvoker {
 
@@ -136,24 +139,23 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Validation validator = new Validation();
-		Object[] arguments = argumentTranslator.createArgs(result, req, validator);
+		Validation validation = new Validation();
+		Session session = new Session();
+		Flash flash = new Flash();
+		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
-		ResponseProcessor processor = new ResponseProcessor(reverseRoutes, reverseTranslator, req, meta);
-		
+		RequestContext requestCtx = new RequestContext(validation, flash, session, req);
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta);
 		//ThreadLocals...
-		LocalContext.setResponseProcessor(processor);
-		Validation.set(validator);
-		RequestLocal.setRequest(req);
+		Request.setContext(requestCtx);
+		RequestLocalCtx.set(processor);
 		
 		CompletableFuture<Object> response;
 		try {
 			response = invokeMethod(obj, method, arguments);
 		} finally {
-			//Clear ThreadLocals...
-			LocalContext.setResponseProcessor(null);
-			Validation.set(null);
-			RequestLocal.setRequest(null);
+			Request.setContext(null);
+			RequestLocalCtx.set(null);
 		}
 		
 		CompletableFuture<Object> future = response.thenApply(resp -> continueProcessing(processor, resp, responseCb));
@@ -161,6 +163,9 @@ public class RouteInvoker {
 	}
 
 	public Object continueProcessing(ResponseProcessor processor, Object controllerResponse, ResponseStreamer responseCb) {
+		log.error("fix this comment");
+		//TODO: Call responseCb.sendRedirect and responseCb.sendRenderHtml on the caller thread instead
+		//this then gives a stack trace through the callers code which is much nicer to understand what error happend
 		if(controllerResponse instanceof RedirectResponse) {
 			responseCb.sendRedirect((RedirectResponse)controllerResponse);
 		} else if(controllerResponse instanceof RenderResponse) {

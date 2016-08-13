@@ -1,4 +1,4 @@
-package org.webpieces.router.api;
+package org.webpieces.router.api.exceptions;
 
 public class RouteNotFoundException extends RuntimeException {
 

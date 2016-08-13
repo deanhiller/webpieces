@@ -13,8 +13,10 @@ import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.basic.biz.SomeLib;
 import org.webpieces.webserver.basic.biz.SomeOtherLib;
 import org.webpieces.webserver.basic.biz.UserDbo;
+import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
@@ -27,7 +29,9 @@ public class TestBeans {
 
 	private HttpRequestListener server;
 	private MockFrontendSocket socket = new MockFrontendSocket();
-	private MockSomeOtherLib mockLib = new MockSomeOtherLib();
+	private MockSomeLib mockSomeLib = new MockSomeLib();
+	private MockSomeOtherLib mockSomeOtherLib = new MockSomeOtherLib();
+	
 
 	@Before
 	public void setUp() {
@@ -68,7 +72,7 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
-		UserDbo user = mockLib.getUser();
+		UserDbo user = mockSomeOtherLib.getUser();
 		Assert.assertEquals(555, user.getAddress().getZipCode());
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
@@ -81,7 +85,8 @@ public class TestBeans {
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
 				"user.address.zipCode", "This test value invalid since not an int",
-				"user.address.street", "Coolness Dr.");
+				"user.address.street", "Coolness Dr.",
+				"password", "should be hidden from flash");
 		
 		server.processHttpRequests(socket, req , false);
 		
@@ -91,7 +96,10 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
-		UserDbo user = mockLib.getUser();
+		UserDbo savedUser = mockSomeOtherLib.getUser();
+		Assert.assertEquals(null, savedUser); //user was not 
+
+		UserDbo user = mockSomeLib.getUser();
 		Assert.assertEquals(0, user.getAddress().getZipCode()); //this is not set since it was invalid
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
@@ -100,7 +108,8 @@ public class TestBeans {
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {
-			binder.bind(SomeOtherLib.class).toInstance(mockLib);
+			binder.bind(SomeOtherLib.class).toInstance(mockSomeOtherLib);
+			binder.bind(SomeLib.class).toInstance(mockSomeLib);
 		}
 	}
 }

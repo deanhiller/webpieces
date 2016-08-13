@@ -6,6 +6,11 @@ import java.util.Map;
 
 public class RouterRequest {
 
+	/**
+	 * Request in it's original form, but should not be relied upon really
+	 */
+	public Object orginalRequest;
+	
 	public boolean isHttps;
 	//true if http2 so we respond with not just the response but all other responses that the client
 	//will request next as well....
@@ -18,11 +23,10 @@ public class RouterRequest {
 	 */
 	public String domain;
 	public HttpMethod method;
+
+	public Map<String, Cookie> cookies = new HashMap<>();
 	
-	//Fill this in with the query parameters in the url (ie. the <pre> ?var1=xxx&var2=yyyy&var1=www&var3=999</pre>
 	/**
-	 * 
-	 * 
 	 * Let's not let this contain stuff from the path such as /user/{id}/account/{account}.  The
 	 * library will parse the path in the request to get that information and NOT put it in this Map so
 	 * the app developer can grab all 3 different cases uniquely if they need to

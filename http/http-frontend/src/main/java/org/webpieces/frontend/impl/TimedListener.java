@@ -89,7 +89,7 @@ public class TimedListener {
 		@Override
 		public void runImpl() {
 			socketToTimeout.remove(channel);
-			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket");
+			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket. channel="+channel);
 			
 			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time", KnownStatusCode.HTTP_408_REQUEST_TIMEOUT);
 			sendServerResponse(channel, exc);

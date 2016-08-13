@@ -12,9 +12,9 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
-import org.webpieces.webserver.basic.biz.InternalSvrErrorLib;
+import org.webpieces.webserver.basic.biz.SomeLib;
 import org.webpieces.webserver.basic.biz.SomeOtherLib;
-import org.webpieces.webserver.mock.MockErrorLib;
+import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
@@ -35,7 +35,7 @@ public class TestSynchronousErrors {
 	//any redirects in the application properly..
 	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
-	private MockErrorLib mockInternalSvrErrorLib = new MockErrorLib();
+	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
@@ -195,7 +195,7 @@ public class TestSynchronousErrors {
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(SomeOtherLib.class).toInstance(mockNotFoundLib);
-			binder.bind(InternalSvrErrorLib.class).toInstance(mockInternalSvrErrorLib);
+			binder.bind(SomeLib.class).toInstance(mockInternalSvrErrorLib);
 		}
 	}
 	

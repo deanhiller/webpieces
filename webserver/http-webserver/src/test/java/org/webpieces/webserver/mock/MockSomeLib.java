@@ -5,13 +5,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.webserver.basic.biz.InternalSvrErrorLib;
+import org.webpieces.webserver.basic.biz.SomeLib;
+import org.webpieces.webserver.basic.biz.UserDbo;
 
-public class MockErrorLib extends InternalSvrErrorLib {
+public class MockSomeLib extends SomeLib {
 
 	private boolean throwNotFound;
 	private boolean throwRuntime;
 	private List<CompletableFuture<Integer>> queuedFutures = new ArrayList<>();
+	private UserDbo lastUser;
 
 	@Override
 	public CompletableFuture<Integer> someBusinessLogic() {
@@ -35,5 +37,13 @@ public class MockErrorLib extends InternalSvrErrorLib {
 
 	public void queueFuture(CompletableFuture<Integer> future2) {
 		queuedFutures.add(future2);
+	}
+	
+	public void validateUser(UserDbo user) {
+		this.lastUser = user;
+	}
+	
+	public UserDbo getUser() {
+		return lastUser;
 	}
 }

@@ -83,7 +83,7 @@ public class ErrorCommonTest {
 	private void verifyNotFoundRendered(MockResponseStream mockResponseStream) {
 		List<RenderResponse> responses = mockResponseStream.getSendRenderHtmlList();
 		Assert.assertEquals(1, responses.size());
-		Assert.assertEquals(RouteType.NOT_FOUND, responses.get(0).getRouteType());
+		Assert.assertEquals(RouteType.NOT_FOUND, responses.get(0).routeType);
 	}
 	
 	@Test

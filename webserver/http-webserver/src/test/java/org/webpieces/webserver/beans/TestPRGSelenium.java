@@ -1,13 +1,16 @@
-package org.webpieces.webserver.basic;
+package org.webpieces.webserver.beans;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.SeleniumOverridesForTest;
@@ -15,7 +18,7 @@ import org.webpieces.webserver.test.SeleniumOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class SeleniumBasicTest {
+public class TestPRGSelenium {
 	
 	private static WebDriver driver;
 	
@@ -36,10 +39,8 @@ public class SeleniumBasicTest {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
-		//mocks after every test AND you can no longer run multi-threaded(tradeoffs, tradeoffs)
-		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config ), new AppOverridesModule(), true, null);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
+		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config), new AppOverridesModule(), true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
@@ -50,12 +51,27 @@ public class SeleniumBasicTest {
 	//@Ignore
 	@Test
 	public void testSomething() throws ClassNotFoundException {
-
-		driver.get("http://localhost:"+port);
+		driver.get("http://localhost:"+port+"/listusers");
 		
 		String pageSource = driver.getPageSource();
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("Add User"));
+
+		WebElement element = driver.findElement(By.id("addUser"));
+		element.click();
 		
-		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("This is the first raw html page"));
+		WebElement userInput = driver.findElement(By.name("user.firstName"));
+		userInput.sendKeys("Dean Hiller");
+		
+		WebElement zipCodeInput = driver.findElement(By.name("user.address.zipCode"));
+		zipCodeInput.sendKeys("Text instead of number");		
+
+		Assert.assertEquals("http://localhost:"+port+"/adduser", driver.getCurrentUrl());
+		
+		WebElement submit = driver.findElement(By.id("submit"));
+		submit.submit();
+
+		System.out.println("hi there");
+		//find the error element?...
 		
 	}
 	

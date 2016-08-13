@@ -96,7 +96,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
-		View view = resp.getView();
+		View view = resp.view;
 		String packageStr = view.getControllerPackage();
 		//For this type of View, the template is the name of the method..
 		String templateClassName = view.getMethodName();
@@ -111,9 +111,9 @@ public class ProxyResponse implements ResponseStreamer {
 		StringWriter out = new StringWriter();
 		
 		try {
-			templatingService.runTemplate(template, out, resp.getPageArgs(), lookup);
+			templatingService.runTemplate(template, out, resp.pageArgs, lookup);
 		} catch(MissingPropertyException e) {
-			Set<String> keys = resp.getPageArgs().keySet();
+			Set<String> keys = resp.pageArgs.keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
 					+ " return enough arguments for the template.  specifically, the method\nreturned these"
 					+ " arguments="+keys+"  There is a chance in your html you forgot the '' around a variable name\n"
@@ -124,7 +124,7 @@ public class ProxyResponse implements ResponseStreamer {
 		String content = out.toString();
 		
 		KnownStatusCode statusCode = KnownStatusCode.HTTP_200_OK;
-		switch(resp.getRouteType()) {
+		switch(resp.routeType) {
 		case BASIC:
 			statusCode = KnownStatusCode.HTTP_200_OK;
 			break;
@@ -135,12 +135,15 @@ public class ProxyResponse implements ResponseStreamer {
 			statusCode = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
 			break;
 		default:
-			throw new IllegalStateException("did add case for state="+resp.getRouteType());
+			throw new IllegalStateException("did add case for state="+resp.routeType);
 		}
 		
 		HttpResponse response = createResponse(statusCode, content);
 		
-		log.info("sending RENDERHTML response channel="+channel);
+		log.info("sending RENDERHTML response. code="+statusCode+" for path="+request.getRequestLine().getUri().getUri()+" channel="+channel);
+		if(log.isDebugEnabled())
+			log.debug("content sent back="+content);
+		
 		channel.write(response);
 		
 		closeIfNeeded();

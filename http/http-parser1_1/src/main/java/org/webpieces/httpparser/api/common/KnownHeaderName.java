@@ -46,6 +46,7 @@ public enum KnownHeaderName {
 	LOCATION("Location", HeaderType.RESPONSE),
 	PROXY_AUTHENTICATE("Proxy-Authenticate", HeaderType.RESPONSE),
 	RETRY_AFTER("Retry-After", HeaderType.RESPONSE),
+	SET_COOKIE("Set-Cookie", HeaderType.RESPONSE),
 	SERVER("Server", HeaderType.RESPONSE),
 	VARY("Vary", HeaderType.RESPONSE),
 	WWW_AUTHENTICATE("WWW-Authenticate", HeaderType.RESPONSE),
