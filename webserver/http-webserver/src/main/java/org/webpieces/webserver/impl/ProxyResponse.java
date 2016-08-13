@@ -2,6 +2,8 @@ package org.webpieces.webserver.impl;
 
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.joda.time.DateTime;
@@ -15,6 +17,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpparser.api.common.Cookie;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -25,6 +28,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RouterCookie;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.templating.api.ReverseUrlLookup;
@@ -86,7 +90,7 @@ public class ProxyResponse implements ResponseStreamer {
 		response.addHeader(location );
 		
 		//Firefox requires a content length of 0 (chrome doesn't)!!!...
-		addCommonHeaders(response, 0);
+		addCommonHeaders(response, 0, httpResponse.cookies);
 		
 		log.info("sending REDIRECT response channel="+channel);
 		channel.write(response);
@@ -138,7 +142,7 @@ public class ProxyResponse implements ResponseStreamer {
 			throw new IllegalStateException("did add case for state="+resp.routeType);
 		}
 		
-		HttpResponse response = createResponse(statusCode, content);
+		HttpResponse response = createResponse(statusCode, content, resp.cookies);
 		
 		log.info("sending RENDERHTML response. code="+statusCode+" for path="+request.getRequestLine().getUri().getUri()+" channel="+channel);
 		if(log.isDebugEnabled())
@@ -159,7 +163,7 @@ public class ProxyResponse implements ResponseStreamer {
 		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
-	private HttpResponse createResponse(KnownStatusCode statusCode, String content) {
+	private HttpResponse createResponse(KnownStatusCode statusCode, String content, List<RouterCookie> cookies) {
 		Charset encoding = config.getHtmlResponsePayloadEncoding();
 
 		byte[] bytes = content.getBytes(encoding);
@@ -178,11 +182,11 @@ public class ProxyResponse implements ResponseStreamer {
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		response.setBody(data);
 
-		addCommonHeaders(response, bytes.length);
+		addCommonHeaders(response, bytes.length, cookies);
 		return response;
 	}
 	
-	private void addCommonHeaders(HttpResponse response, int contentLength) {
+	private void addCommonHeaders(HttpResponse response, int contentLength, List<RouterCookie> cookies) {
 		
 		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+"");
 		response.addHeader(header);
@@ -199,6 +203,11 @@ public class ProxyResponse implements ResponseStreamer {
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
 //		response.addHeader(xFrame);
 		
+		for(RouterCookie c : cookies) {
+			Header cookieHeader = create(c);
+			response.addHeader(cookieHeader);
+		}
+		
 		//X-XSS-Protection: 1; mode=block
 		//X-Frame-Options: SAMEORIGIN
 		//Content-Type: image/gif\r\n
@@ -214,6 +223,18 @@ public class ProxyResponse implements ResponseStreamer {
 
 		//just re-use the connHeader from the request...
 		response.addHeader(connHeader);
+	}
+
+	private Header create(RouterCookie c) {
+		Cookie cookie = new Cookie();
+		cookie.setName(c.name);
+		cookie.setValue(c.value);
+		cookie.setDomain(c.domain);
+		cookie.setPath(c.path);
+		cookie.setMaxAgeSeconds(c.maxAgeSeconds);
+		cookie.setSecure(c.isSecure);
+		cookie.setHttpOnly(c.isHttpOnly);
+		return cookie.createHeader();
 	}
 
 	private void closeIfNeeded() {
@@ -239,7 +260,7 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
-		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html);
+		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, new ArrayList<>());
 		
 		channel.write(response);
 		

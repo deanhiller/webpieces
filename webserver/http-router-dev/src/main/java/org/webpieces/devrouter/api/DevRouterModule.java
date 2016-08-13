@@ -8,7 +8,7 @@ import org.webpieces.compiler.api.CompileOnDemandFactory;
 import org.webpieces.devrouter.impl.DevClassForName;
 import org.webpieces.devrouter.impl.DevLoader;
 import org.webpieces.devrouter.impl.DevRoutingService;
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
@@ -34,7 +34,7 @@ public class DevRouterModule implements Module {
 	
 	@Provides
 	@Singleton
-	public CompileOnDemand provideCompile(HttpRouterConfig routerConfig) {
+	public CompileOnDemand provideCompile(RouterConfig routerConfig) {
 		if(routerConfig.getOverridesModule() != null)
 			throw new IllegalArgumentException("In DEVELOPMENT server mode, when you provide"
 					+ " HttpRouterConfig, you cannot have a app OverridesModule set as "

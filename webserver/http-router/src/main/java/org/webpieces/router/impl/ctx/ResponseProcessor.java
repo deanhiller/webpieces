@@ -10,7 +10,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.ctx.Flash;
 import org.webpieces.router.api.ctx.RequestContext;
 import org.webpieces.router.api.ctx.Validation;
-import org.webpieces.router.api.dto.Cookie;
+import org.webpieces.router.api.dto.RouterCookie;
 import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
@@ -72,7 +72,7 @@ public class ResponseProcessor {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		List<Cookie> cookies = createCookies();
+		List<RouterCookie> cookies = createCookies();
 		
 		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path, cookies);
 		
@@ -81,8 +81,8 @@ public class ResponseProcessor {
 		return redirectResponse;
 	}
 
-	private List<Cookie> createCookies() {
-		List<Cookie> cookies = new ArrayList<>();
+	private List<RouterCookie> createCookies() {
+		List<RouterCookie> cookies = new ArrayList<>();
 		Flash flash = ctx.getFlash();
 		flash.addSelfAsCookie(cookies);
 		Validation validation = ctx.getValidation();
@@ -112,7 +112,7 @@ public class ResponseProcessor {
 			view = new View(controllerName, methodName);
 		}
 		
-		List<Cookie> cookies = createCookies();
+		List<RouterCookie> cookies = createCookies();
 		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
 		responseCb.sendRenderHtml(resp);
 		return resp;

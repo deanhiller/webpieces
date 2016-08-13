@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterFactory;
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.HttpMethod;
@@ -41,7 +41,7 @@ public class TestSimpleRoutes {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
 		TestModule module = new TestModule();
-		HttpRouterConfig config = new HttpRouterConfig()
+		RouterConfig config = new RouterConfig()
 										.setMetaFile(f)
 										.setWebappOverrides(module);
 		RoutingService prodSvc = RouterSvcFactory.create(config);

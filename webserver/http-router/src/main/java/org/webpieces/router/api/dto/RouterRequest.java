@@ -24,7 +24,7 @@ public class RouterRequest {
 	public String domain;
 	public HttpMethod method;
 
-	public Map<String, Cookie> cookies = new HashMap<>();
+	public Map<String, RouterCookie> cookies = new HashMap<>();
 	
 	/**
 	 * Let's not let this contain stuff from the path such as /user/{id}/account/{account}.  The

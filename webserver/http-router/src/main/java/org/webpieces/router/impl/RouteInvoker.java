@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.ctx.CookieFactory;
 import org.webpieces.router.api.ctx.Flash;
 import org.webpieces.router.api.ctx.Request;
 import org.webpieces.router.api.ctx.RequestContext;
@@ -35,11 +36,13 @@ public class RouteInvoker {
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToStringTranslator reverseTranslator;
+	private CookieFactory cookieFactory;
 	
 	@Inject
-	public RouteInvoker(ArgumentTranslator argumentTranslator, ObjectToStringTranslator translator) {
+	public RouteInvoker(ArgumentTranslator argumentTranslator, ObjectToStringTranslator translator, CookieFactory cookieFactory) {
 		this.argumentTranslator = argumentTranslator;
 		this.reverseTranslator = translator;
+		this.cookieFactory = cookieFactory;
 	}
 
 	public void invoke(
@@ -95,7 +98,6 @@ public class RouteInvoker {
 
 			return invokeImpl(result, req, responseCb);
 		} catch (Throwable e) {
-			log.info("msg", e);
 			//http 500...
 			//return a completed future with the exception inside...
 			CompletableFuture<Object> futExc = new CompletableFuture<Object>();
@@ -139,9 +141,9 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Validation validation = new Validation();
-		Session session = new Session();
-		Flash flash = new Flash();
+		Validation validation = new Validation(cookieFactory);
+		Session session = new Session(cookieFactory);
+		Flash flash = new Flash(cookieFactory);
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
 		RequestContext requestCtx = new RequestContext(validation, flash, session, req);

@@ -11,9 +11,9 @@ import com.google.inject.Module;
 
 public class ProdRouterModule implements Module {
 
-	private HttpRouterConfig config;
+	private RouterConfig config;
 
-	public ProdRouterModule(HttpRouterConfig config) {
+	public ProdRouterModule(RouterConfig config) {
 		this.config = config;
 	}
 	
@@ -23,7 +23,7 @@ public class ProdRouterModule implements Module {
 		binder.bind(MetaLoaderProxy.class).to(ProdLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(ProdClassForName.class).asEagerSingleton();
 		
-		binder.bind(HttpRouterConfig.class).toInstance(config);
+		binder.bind(RouterConfig.class).toInstance(config);
 	}
 	
 }

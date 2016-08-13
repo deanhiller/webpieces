@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.api.WebServer;
@@ -50,7 +50,7 @@ public class WebserverForTest {
 			httpsPort = 0;
 		}
 		
-		HttpRouterConfig routerConfig = new HttpRouterConfig()
+		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setWebappOverrides(appOverrides)
 											.setFileEncoding(CHAR_SET_TO_USE);

@@ -5,10 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.webpieces.router.api.dto.Cookie;
+import org.webpieces.router.api.dto.RouterCookie;
 
 public class Validation extends FlashScope {
 	
+	public Validation(CookieFactory creator) {
+		super(creator);
+	}
+
 	private Map<String, List<String>> fieldErrors = new HashMap<>();
 
 	public void addError(String name, String error) {
@@ -27,8 +31,8 @@ public class Validation extends FlashScope {
 	}
 
 	@Override
-	protected Cookie toCookie() {
-		return null;
+	protected RouterCookie toCookie() {
+		return creator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Errors", fieldErrors);
 	}
 
 }

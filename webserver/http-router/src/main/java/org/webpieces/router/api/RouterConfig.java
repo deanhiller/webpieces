@@ -7,7 +7,7 @@ import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Module;
 
-public class HttpRouterConfig {
+public class RouterConfig {
 
 	private VirtualFile metaFile;
 	
@@ -19,6 +19,10 @@ public class HttpRouterConfig {
 	 * an in-memory implementation such that tests can remain single threaded
 	 */
 	private Module webappOverrides;
+
+	private boolean isCookiesHttpOnly;
+
+	private boolean isCookiesSecure;
 	
 	public VirtualFile getMetaFile() {
 		return metaFile;
@@ -26,7 +30,7 @@ public class HttpRouterConfig {
 	public Module getOverridesModule() {
 		return webappOverrides;
 	}
-	public HttpRouterConfig setMetaFile(VirtualFile routersFile) {
+	public RouterConfig setMetaFile(VirtualFile routersFile) {
 		if(!routersFile.exists())
 			throw new IllegalArgumentException("path="+routersFile+" does not exist");
 		else if(routersFile.isDirectory())
@@ -34,19 +38,32 @@ public class HttpRouterConfig {
 		this.metaFile = routersFile;
 		return this;
 	}
-	public HttpRouterConfig setWebappOverrides(Module webappOverrides) {
+	public RouterConfig setWebappOverrides(Module webappOverrides) {
 		this.webappOverrides = webappOverrides;
 		return this;
 	}
 	public Charset getFileEncoding() {
 		return fileEncoding;
 	}
-	public HttpRouterConfig setFileEncoding(Charset fileEncoding) {
+	public RouterConfig setFileEncoding(Charset fileEncoding) {
 		this.fileEncoding = fileEncoding;
 		return this;
 	}
 	public Charset getUrlEncoding() {
 		return urlEncoding;
 	}
-
+	public boolean getIsCookiesHttpOnly() {
+		return isCookiesHttpOnly;
+	}
+	public boolean getIsCookiesSecure() {
+		return isCookiesSecure;
+	}
+	public RouterConfig setCookiesHttpOnly(boolean isCookiesHttpOnly) {
+		this.isCookiesHttpOnly = isCookiesHttpOnly;
+		return this;
+	}
+	public RouterConfig setCookiesSecure(boolean isCookiesSecure) {
+		this.isCookiesSecure = isCookiesSecure;
+		return this;
+	}
 }

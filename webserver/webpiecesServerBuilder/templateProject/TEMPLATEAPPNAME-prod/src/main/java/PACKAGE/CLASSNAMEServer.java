@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.file.VirtualFile;
@@ -101,7 +101,7 @@ public class CLASSNAMEServer {
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
 		//by a QA team
-		HttpRouterConfig routerConfig = new HttpRouterConfig()
+		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
 											.setWebappOverrides(appOverrides);

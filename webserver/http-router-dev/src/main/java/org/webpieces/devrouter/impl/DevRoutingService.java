@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouteType;
@@ -30,10 +30,10 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private RouteLoader routeLoader;
 	private DevClassForName classLoader;
 	private WebAppMeta routerModule;
-	private HttpRouterConfig config;
+	private RouterConfig config;
 
 	@Inject
-	public DevRoutingService(RouteLoader routeConfig, HttpRouterConfig config, DevClassForName loader) {
+	public DevRoutingService(RouteLoader routeConfig, RouterConfig config, DevClassForName loader) {
 		super(routeConfig);
 		this.routeLoader = routeConfig;
 		this.config = config;

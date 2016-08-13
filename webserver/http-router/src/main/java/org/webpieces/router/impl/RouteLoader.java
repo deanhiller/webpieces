@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteModule;
@@ -26,14 +26,14 @@ import com.google.inject.util.Modules;
 public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
-	private final HttpRouterConfig config;
+	private final RouterConfig config;
 	private final RouteInvoker invoker;
 	private final ControllerLoader controllerFinder;
 
 	protected RouterBuilder routerBuilder;
 	
 	@Inject
-	public RouteLoader(HttpRouterConfig config, 
+	public RouteLoader(RouterConfig config, 
 						RouteInvoker invoker,
 						ControllerLoader controllerFinder
 	) {

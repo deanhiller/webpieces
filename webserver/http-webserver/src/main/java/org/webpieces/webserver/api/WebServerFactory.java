@@ -1,6 +1,6 @@
 package org.webpieces.webserver.api;
 
-import org.webpieces.router.api.HttpRouterConfig;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
@@ -15,11 +15,11 @@ public abstract class WebServerFactory {
 	
     protected WebServerFactory() {}
 
-    public static WebServer create(HttpRouterConfig config) {
+    public static WebServer create(RouterConfig config) {
     	return create(new WebServerConfig(), config);
     }
     
-	public static WebServer create(WebServerConfig config, HttpRouterConfig routerConfig) {
+	public static WebServer create(WebServerConfig config, RouterConfig routerConfig) {
 		Module allModules = getModules(config, routerConfig);
 		
 		Module platformOverrides = config.getPlatformOverrides();
@@ -30,7 +30,7 @@ public abstract class WebServerFactory {
 		return injector.getInstance(WebServer.class);
 	}
 
-	private static Module getModules(WebServerConfig config, HttpRouterConfig routerConfig) {
+	private static Module getModules(WebServerConfig config, RouterConfig routerConfig) {
 		return Modules.combine(
 			new WebServerModule(config),
 			new ProdRouterModule(routerConfig),
