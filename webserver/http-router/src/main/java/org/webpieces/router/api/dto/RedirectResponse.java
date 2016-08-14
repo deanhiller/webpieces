@@ -16,6 +16,8 @@ public class RedirectResponse implements Redirect {
 		this.isHttps = isHttps;
 		this.domain = domain;
 		this.redirectToPath = redirectToPath;
+		this.cookies = cookies;
+		
 	}
 
 	@Override

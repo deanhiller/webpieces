@@ -1,6 +1,8 @@
 package org.webpieces.router.api.ctx;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.webpieces.router.api.dto.RouterCookie;
 
@@ -13,7 +15,8 @@ public class Session {
 	}
 	
 	public void addSelfAsCookie(List<RouterCookie> cookies) {
-		RouterCookie cookie = cookieCreator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Session", null); 
+		Map<String, List<String>> sessionData = new HashMap<>();
+		RouterCookie cookie = cookieCreator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Session", sessionData, null); 
 		cookies.add(cookie);
 	}
 	

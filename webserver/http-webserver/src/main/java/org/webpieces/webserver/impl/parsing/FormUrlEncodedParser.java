@@ -29,7 +29,9 @@ public class FormUrlEncodedParser implements BodyParser {
 		    for (int i = 0; i < pairs.length; i++) {
 		      String[] fields = pairs[i].split("=");
 		      String name = URLDecoder.decode(fields[0], "UTF-8");
-		      String value = URLDecoder.decode(fields[1], "UTF-8");
+		      String value = null;
+		      if(fields.length == 2)
+		    	  value = URLDecoder.decode(fields[1], "UTF-8");
 		      addToMap(keyToValues, name, value);
 		    }
 		    

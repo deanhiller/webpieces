@@ -24,20 +24,20 @@ public class CookieFactory {
 		log.error("rename HttpRouterConfig to RouterConfig");
 	}
 
-	public RouterCookie createCookie(String name, Map<String, List<String>> value) {
+	public RouterCookie createCookie(String name, Map<String, List<String>> value, Integer maxAge) {
 		try {
-			return createCookieImpl(name, value);
+			return createCookieImpl(name, value, maxAge);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private RouterCookie createCookieImpl(String name, Map<String, List<String>> value) throws UnsupportedEncodingException {
+	private RouterCookie createCookieImpl(String name, Map<String, List<String>> value, Integer maxAge) throws UnsupportedEncodingException {
 		RouterCookie cookie = new RouterCookie();
 		cookie.name= name;
     	cookie.domain = null;
     	cookie.path = "/";
-    	cookie.maxAgeSeconds = 0;
+    	cookie.maxAgeSeconds = maxAge;
 		cookie.isHttpOnly = config.getIsCookiesHttpOnly();
 		cookie.isSecure = config.getIsCookiesSecure();
 		

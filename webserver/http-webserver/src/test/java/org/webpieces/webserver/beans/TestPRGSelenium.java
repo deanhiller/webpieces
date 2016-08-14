@@ -28,6 +28,7 @@ public class TestPRGSelenium {
 	public static void staticSetup() {
 		driver = new FirefoxDriver();
 	}
+	
 	@AfterClass
 	public static void tearDown() {
 		driver.close();

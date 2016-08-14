@@ -20,9 +20,9 @@ public class RouterConfig {
 	 */
 	private Module webappOverrides;
 
-	private boolean isCookiesHttpOnly;
+	private boolean isCookiesHttpOnly = true;
 
-	private boolean isCookiesSecure;
+	private boolean isCookiesSecure = false;
 	
 	public VirtualFile getMetaFile() {
 		return metaFile;

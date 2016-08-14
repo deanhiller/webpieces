@@ -31,8 +31,8 @@ public class Validation extends FlashScope {
 	}
 
 	@Override
-	protected RouterCookie toCookie() {
-		return creator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Errors", fieldErrors);
+	protected RouterCookie toCookie(Integer maxAge) {
+		return creator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Errors", fieldErrors, maxAge);
 	}
 
 }

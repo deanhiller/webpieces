@@ -15,8 +15,8 @@ public class Flash extends FlashScope {
 	}
 	
 	@Override
-	protected RouterCookie toCookie() {
-		return creator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Flash", keysToValues);
+	protected RouterCookie toCookie(Integer maxAge) {
+		return creator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Flash", keysToValues, maxAge);
 	}
 
 	public void saveFormParams(Map<String, List<String>> fields) {

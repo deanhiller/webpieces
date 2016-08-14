@@ -18,12 +18,13 @@ public abstract class FlashScope {
 	}
 	
 	public void addSelfAsCookie(List<RouterCookie> cookies) {
-		if(!isKeep)
-			return;
+		Integer maxAgeSeconds = 0;
+		if(isKeep)
+			maxAgeSeconds = null;
 
-		RouterCookie cookie = toCookie();
+		RouterCookie cookie = toCookie(maxAgeSeconds);
 		cookies.add(cookie);
 	}
 
-	protected abstract RouterCookie toCookie();
+	protected abstract RouterCookie toCookie(Integer maxAge);
 }

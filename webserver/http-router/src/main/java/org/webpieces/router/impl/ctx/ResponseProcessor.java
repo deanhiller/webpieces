@@ -85,8 +85,8 @@ public class ResponseProcessor {
 		List<RouterCookie> cookies = new ArrayList<>();
 		Flash flash = ctx.getFlash();
 		flash.addSelfAsCookie(cookies);
-		Validation validation = ctx.getValidation();
-		validation.addSelfAsCookie(cookies);
+//		Validation validation = ctx.getValidation();
+//		validation.addSelfAsCookie(cookies);
 		return cookies;
 	}
 
