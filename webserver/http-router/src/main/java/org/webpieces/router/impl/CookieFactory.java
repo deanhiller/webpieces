@@ -1,7 +1,10 @@
 package org.webpieces.router.impl;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.CookieData;
 import org.webpieces.ctx.api.RouterCookie;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 
 public class CookieFactory {
@@ -48,7 +52,18 @@ public class CookieFactory {
 		cookie.isHttpOnly = config.getIsCookiesHttpOnly();
 		cookie.isSecure = config.getIsCookiesSecure();
 		
-        StringBuilder data = new StringBuilder();
+		//do not send data on cookie delete
+		if(maxAge != null && maxAge == 0) {
+			cookie.value = "";
+		} else {
+			StringBuilder data = translateValue(value);
+			cookie.value = data.toString();
+		}
+		return cookie;
+	}
+
+	private StringBuilder translateValue(Map<String, List<String>> value) throws UnsupportedEncodingException {
+		StringBuilder data = new StringBuilder();
         String separator = "";
         for (Map.Entry<String, List<String>> entry : value.entrySet()) {
             if (entry.getValue() != null) {
@@ -64,8 +79,7 @@ public class CookieFactory {
             	}
             }
         }
-        cookie.value = data.toString();
-		return cookie;
+		return data;
 	}
 
 	private String encodeValuePiece(Map.Entry<String, List<String>> entry) throws UnsupportedEncodingException {
@@ -98,6 +112,45 @@ public class CookieFactory {
 		if(builder.length() == 0)
 			return null;
 		return builder.toString();
+	}
+
+	public CookieData translateCookieToData(RouterRequest req, CookieData data, String cookieName) {
+		try {
+			return translateCookieToDataImpl(req, data, cookieName);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private CookieData translateCookieToDataImpl(RouterRequest req, CookieData data, String cookieName) throws UnsupportedEncodingException {
+		RouterCookie routerCookie = req.cookies.get(cookieName);
+		if(routerCookie == null) {
+			data.setExisted(false);
+			return data;
+		}
+		
+		data.setExisted(true);
+		Map<String, List<String>> dataMap = new HashMap<>();
+		String value = routerCookie.value;
+		String[] pieces = value.split("&");
+		for(String piece : pieces) {
+			String[] split = piece.split("=");
+			if(split.length == 2) {
+				String key = URLDecoder.decode(split[0], config.getUrlEncoding().name());
+				String val = URLDecoder.decode(split[1], config.getUrlEncoding().name());
+				if(val.contains(",")) {
+					String[] listElements = val.split(",");
+					List<String> list = Arrays.asList(listElements);
+					dataMap.put(key, list);
+				} else {
+					List<String> list = Arrays.asList(val);
+					dataMap.put(key, list);
+				}
+			}
+		}
+		
+		data.setMapData(dataMap);
+		return data;
 	}
 
 }

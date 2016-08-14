@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class Validation extends FlashScope implements CookieData {
 	
+	public static String COOKIE_NAME = FlashScope.COOKIE_NAME_PREFIX+"Errors";
+	
 	private Map<String, List<String>> fieldErrors = new HashMap<>();
 
 	public void addError(String name, String error) {
@@ -25,17 +27,17 @@ public class Validation extends FlashScope implements CookieData {
 	}
 
 	@Override
-	public boolean isNeedCreateCookie() {
-		return true;
-	}
-
-	@Override
 	public String getName() {
-		return FlashScope.COOKIE_NAME_PREFIX+"Errors";
+		return COOKIE_NAME;
 	}
 
 	@Override
 	public Map<String, List<String>> getMapData() {
 		return fieldErrors;
+	}
+
+	@Override
+	public void setMapData(Map<String, List<String>> dataMap) {
+		fieldErrors = dataMap;
 	}
 }

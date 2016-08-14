@@ -24,6 +24,7 @@ public enum KnownHeaderName {
 	ACCEPT_ENCODING("Accept-Encoding", HeaderType.REQUEST),
 	ACCEPT_LANGUAGE("Accept-Language", HeaderType.REQUEST),
 	AUTHORIZATION("Authorization", HeaderType.REQUEST),
+	COOKIE("Cookie", HeaderType.REQUEST),
 	EXPECT("Expect", HeaderType.REQUEST),
 	FROM("From", HeaderType.REQUEST),
 	HOST("Host", HeaderType.REQUEST),

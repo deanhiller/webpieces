@@ -3,11 +3,8 @@ package org.webpieces.httpparser.api.common;
 /**
  * See http://www.owasp.org/index.php/HttpOnly
  */
-public class Cookie {
+public class ResponseCookie extends RequestCookie {
 
-	private String name;
-    private String value;
-    
 	private String path;
 	private String domain;
 	
@@ -49,22 +46,6 @@ public class Cookie {
 
     	return new Header(KnownHeaderName.SET_COOKIE, headerVal);
     }
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 
 	public String getPath() {
 		return path;

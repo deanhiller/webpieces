@@ -2,6 +2,7 @@ package org.webpieces.webserver.impl;
 
 import java.nio.charset.Charset;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
@@ -17,6 +19,7 @@ import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.common.RequestCookie;
 import org.webpieces.httpparser.api.dto.Headers;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
@@ -76,6 +79,13 @@ public class RequestReceiver implements HttpRequestListener {
 		if(method == null)
 			throw new UnsupportedOperationException("method not supported="+requestLine.getMethod().getMethodAsString());
 
+		List<Header> cookieHeaders = req.getHeaderLookupStruct().getHeaders(KnownHeaderName.COOKIE);
+		for(Header cookieHeader: cookieHeaders) {
+			RequestCookie cookie = RequestCookie.createCookie(cookieHeader);
+			RouterCookie routerCookie = copy(cookie);
+			routerRequest.cookies.put(routerCookie.name, routerCookie);
+		}
+		
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
 		routerRequest.domain = value;
@@ -95,6 +105,13 @@ public class RequestReceiver implements HttpRequestListener {
 			throw new UnsupportedOperationException("not supported yet");
 		
 		routingService.processHttpRequests(routerRequest, streamer );
+	}
+
+	private RouterCookie copy(RequestCookie cookie) {
+		RouterCookie rCookie = new RouterCookie();
+		rCookie.name = cookie.getName();
+		rCookie.value = cookie.getValue();
+		return rCookie;
 	}
 
 	private void parseBody(HttpRequest req, RouterRequest routerRequest) {

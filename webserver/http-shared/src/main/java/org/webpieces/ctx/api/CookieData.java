@@ -13,4 +13,8 @@ public interface CookieData {
 
 	Integer getMaxAge();
 
+	void setExisted(boolean b);
+
+	void setMapData(Map<String, List<String>> dataMap);
+
 }

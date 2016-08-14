@@ -140,9 +140,10 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Validation validation = new Validation();
 		Session session = new Session();
-		Flash flash = new Flash();
+		Flash flash = (Flash) cookieFactory.translateCookieToData(req, new Flash(), Flash.COOKIE_NAME);
+		Validation validation = new Validation();
+		//Validation validation = (Validation) cookieFactory.translateCookieToData(req, new Validation(), Validation.COOKIE_NAME);
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
 		RequestContext requestCtx = new RequestContext(validation, flash, session, req);

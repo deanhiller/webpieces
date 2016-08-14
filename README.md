@@ -35,6 +35,8 @@ TODO:
 * refactor so templating has access to flash context, validation context, etc. so we can complete the loop of filling in form data user typed in and the errors
 * unit test arrays in multi-part form, query params! and test for flash working with arrays(not sure it will or not)
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param
+* need to test out cookie length and 150 cookies of certain length
+* verify password input does not end up flash
 * write an escapehtml tag
 * implement field tag next, error, errorClass, errors, field, ifError, ifErrors, jsAction, jsRoute, list, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}

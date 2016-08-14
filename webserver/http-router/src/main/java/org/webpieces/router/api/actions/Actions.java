@@ -1,5 +1,9 @@
 package org.webpieces.router.api.actions;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.actions.RedirectImpl;
@@ -39,8 +43,9 @@ public class Actions {
 		return redirect;
 	}
 
-	public static Redirect redirectFlashAll(RouteId routeId, RequestContext ctx) {
-		ctx.moveFormParamsToFlash();
+	public static Redirect redirectFlashAll(RouteId routeId, RequestContext ctx, String ... secureFieldNames) {
+		Set<String> mySet = new HashSet<>(Arrays.asList(secureFieldNames));
+		ctx.moveFormParamsToFlash(mySet);
 		ctx.getFlash().keep();
 		ctx.getValidation().keep();
 		return redirect(routeId);

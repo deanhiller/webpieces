@@ -18,7 +18,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.exception.HttpException;
-import org.webpieces.httpparser.api.common.Cookie;
+import org.webpieces.httpparser.api.common.ResponseCookie;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -226,7 +226,7 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	private Header create(RouterCookie c) {
-		Cookie cookie = new Cookie();
+		ResponseCookie cookie = new ResponseCookie();
 		cookie.setName(c.name);
 		cookie.setValue(c.value);
 		cookie.setDomain(c.domain);

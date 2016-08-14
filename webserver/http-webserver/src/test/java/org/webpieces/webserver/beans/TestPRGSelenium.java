@@ -66,11 +66,23 @@ public class TestPRGSelenium {
 		WebElement zipCodeInput = driver.findElement(By.name("user.address.zipCode"));
 		zipCodeInput.sendKeys("Text instead of number");		
 
+		WebElement passwordElem = driver.findElement(By.name("password"));
+		passwordElem.sendKeys("SomePassword");	
+		
 		Assert.assertEquals("http://localhost:"+port+"/adduser", driver.getCurrentUrl());
 		
 		WebElement submit = driver.findElement(By.id("submit"));
 		submit.submit();
 
+		//ensure flash scope worked and what the user typed in is still there
+		userInput = driver.findElement(By.name("user.firstName"));
+		String userName = userInput.getAttribute("value");
+		Assert.assertEquals("Dean Hiller", userName);
+		
+		passwordElem = driver.findElement(By.name("password"));
+		String password = passwordElem.getAttribute("value");
+		Assert.assertEquals("", password);
+		
 		System.out.println("hi there");
 		//find the error element?...
 		

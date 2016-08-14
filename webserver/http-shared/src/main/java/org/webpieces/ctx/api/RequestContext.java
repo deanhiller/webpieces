@@ -2,6 +2,7 @@ package org.webpieces.ctx.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class RequestContext {
 
@@ -33,9 +34,13 @@ public class RequestContext {
 		return session;
 	}
 
-	public void moveFormParamsToFlash() {
+	/**
+	 * 
+	 * @param secureFieldNames fieldNames that are secure and should NOT be transferred to flash
+	 */
+	public void moveFormParamsToFlash(Set<String> secureFieldNames) {
 		Map<String, List<String>> fields = request.multiPartFields;
-		flash.saveFormParams(fields);
+		flash.saveFormParams(fields, secureFieldNames);
 	}
 	
 }

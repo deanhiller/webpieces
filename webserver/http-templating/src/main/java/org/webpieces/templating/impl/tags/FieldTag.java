@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Flash;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
@@ -68,28 +70,38 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         Map<String, Object> field = new HashMap<String, Object>();
         field.put("name", fieldName);
         field.put("id", fieldName.replace('.', '_'));
-        //field.put("flash", Flash.current().get(fieldName));
+        Flash flash = Current.flash();
+        String flashValue = flash.get(fieldName);
+        field.put("flash", flashValue);
         //field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash")
         //        .toString().split(",") : new String[0]);
-        //field.put("flashOrValue", preferFirst(flashValue, pageArgValue);
-        //field.put("valueOrFlash", preferFirst(pageArgValue, flashValue);
         //field.put("error", Validation.error(fieldName));
         //field.put("errorClass", field.get("error") != null ? "hasError" : "");
         String[] pieces = fieldName.split("\\.");
+        Object pageArgValue = null;
         Object obj = pageArgs.get(pieces[0]);
         if (pieces.length > 1) {
             try {
                 String path = fieldName.substring(fieldName.indexOf(".") + 1);
-                Object value = PropertyUtils.getProperty(obj, path);
-                field.put("value", value);
+                pageArgValue = PropertyUtils.getProperty(obj, path);
             } catch (Exception e) {
                 // if there is a problem reading the field we dont set any
                 // value
             }
         } else {
-            field.put("value", obj);
+        	pageArgValue = obj;
         }
+        field.put("value", pageArgValue);
+        
+        field.put("flashOrValue", preferFirst(flashValue, pageArgValue));
+        field.put("valueOrFlash", preferFirst(pageArgValue, flashValue));
         
 		return field;
+	}
+
+	private Object preferFirst(Object first, Object last) {
+		if(first != null)
+			return first;
+		return last;
 	}
 }

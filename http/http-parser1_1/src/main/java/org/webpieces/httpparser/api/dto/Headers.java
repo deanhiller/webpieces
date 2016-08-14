@@ -16,7 +16,10 @@ public class Headers {
 		return getHeader(name.getHeaderName().toLowerCase());
 	}
 	public List<Header> getHeaders(KnownHeaderName name) {
-		return getHeaders(name.getHeaderName().toLowerCase());
+		List<Header> headers2 = getHeaders(name.getHeaderName().toLowerCase());
+		if(headers2 == null)
+			return new ArrayList<>();
+		return headers2;
 	}
 	public Header getLastInstanceOfHeader(KnownHeaderName name) {
 		List<Header> headers = getHeaders(name.getHeaderName().toLowerCase());

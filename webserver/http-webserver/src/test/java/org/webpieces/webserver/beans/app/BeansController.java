@@ -32,7 +32,7 @@ public class BeansController {
 		
 		RequestContext ctx = Current.getContext();
 		if(Current.validation().hasErrors()) {
-			return Actions.redirectFlashAll(BeansRouteId.USER_FORM_ROUTE, ctx);
+			return Actions.redirectFlashAll(BeansRouteId.USER_FORM_ROUTE, ctx, "password");
 		}
 		
 		lib.saveUser(user);
