@@ -41,7 +41,8 @@ public class TestFieldTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<div class=`controls`><input type=`text` name=`user` value=`Dean` class=`input-xlarge`/><span class=`errorMsg`></span></div>".replace('`', '"'));
+		//This can be a bit brittle if people change field.tag but we HAVE to verify this html was not escaped on accident as it was previously
+		response.assertContains("<div class=`controls`><input type=`text` name=`user` value=`Dean` class=`input-xlarge`/><span id=`user_errorMsg` class=`errorMsg`></span></div>".replace('`', '"'));
 	}
 
 }

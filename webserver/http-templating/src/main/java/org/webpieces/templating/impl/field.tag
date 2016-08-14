@@ -1,4 +1,4 @@
-<div class="control-group ${field.errorClass}$">
+<div id="${field.id}$_div" class="control-group ${field.errorClass}$">
         <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}&"><i class="icon-info-sign"></i></a>&{field.name}&</label>
-        <div class="controls">${_body}$<span class="errorMsg">${field.error}$</span></div>
+        <div class="controls">${_body}$<span id="${field.id}$_errorMsg" class="errorMsg">${field.error}$</span></div>
 </div>

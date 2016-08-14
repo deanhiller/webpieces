@@ -94,9 +94,9 @@ public class ResponseProcessor {
 	private List<RouterCookie> createCookies() {
 		List<RouterCookie> cookies = new ArrayList<>();
 		Flash flash = ctx.getFlash();
-		cookieFactory.addCookieIfExist(cookies, flash);
+		cookieFactory.addScopeToCookieIfExist(cookies, flash);
 		Validation validation = ctx.getValidation();
-		cookieFactory.addCookieIfExist(cookies, validation);
+		cookieFactory.addScopeToCookieIfExist(cookies, validation);
 		return cookies;
 	}
 

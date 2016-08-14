@@ -28,7 +28,7 @@ public class CookieTranslator {
 		log.error("rename HttpRouterConfig to RouterConfig");
 	}
 
-	public void addCookieIfExist(List<RouterCookie> cookies, CookieScope data) {
+	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScope data) {
 		if(data.isNeedCreateCookie()) {
 			RouterCookie cookie = translateScopeToCookie(data.getName(), data.getMapData(), data.getMaxAge());
 			cookies.add(cookie);

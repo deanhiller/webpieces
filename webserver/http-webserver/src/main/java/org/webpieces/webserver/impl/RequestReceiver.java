@@ -1,9 +1,11 @@
 package org.webpieces.webserver.impl;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -79,11 +81,11 @@ public class RequestReceiver implements HttpRequestListener {
 		if(method == null)
 			throw new UnsupportedOperationException("method not supported="+requestLine.getMethod().getMethodAsString());
 
-		List<Header> cookieHeaders = req.getHeaderLookupStruct().getHeaders(KnownHeaderName.COOKIE);
-		for(Header cookieHeader: cookieHeaders) {
-			RequestCookie cookie = RequestCookie.createCookie(cookieHeader);
-			RouterCookie routerCookie = copy(cookie);
-			routerRequest.cookies.put(routerCookie.name, routerCookie);
+		//http://stackoverflow.com/questions/16305814/are-multiple-cookie-headers-allowed-in-an-http-request
+		Header cookieHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.COOKIE);
+		if(cookieHeader != null) {
+			Map<String, RequestCookie> cookies = RequestCookie.createCookies(cookieHeader);
+			routerRequest.cookies = copy(cookies);
 		}
 		
 		parseBody(req, routerRequest);
@@ -105,6 +107,15 @@ public class RequestReceiver implements HttpRequestListener {
 			throw new UnsupportedOperationException("not supported yet");
 		
 		routingService.processHttpRequests(routerRequest, streamer );
+	}
+
+	private Map<String, RouterCookie> copy(Map<String, RequestCookie> cookies) {
+		Map<String, RouterCookie> map = new HashMap<>();
+		for(RequestCookie entry : cookies.values()) {
+			RouterCookie c = copy(entry);
+			map.put(c.name, c);
+		}
+		return map;
 	}
 
 	private RouterCookie copy(RequestCookie cookie) {

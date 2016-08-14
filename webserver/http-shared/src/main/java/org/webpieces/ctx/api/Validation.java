@@ -40,4 +40,12 @@ public class Validation extends FlashScope implements CookieScope {
 	public void setMapData(Map<String, List<String>> dataMap) {
 		fieldErrors = dataMap;
 	}
+
+	public Object getError(String fieldName) {
+		List<String> list = fieldErrors.get(fieldName);
+		if(list == null || list.size() == 0)
+			return null;
+		
+		return list.get(0);
+	}
 }

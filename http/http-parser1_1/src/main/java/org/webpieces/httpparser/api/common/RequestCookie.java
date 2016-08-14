@@ -1,19 +1,25 @@
 package org.webpieces.httpparser.api.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RequestCookie {
 	protected String name;
 	protected String value;
     
-    public static RequestCookie createCookie(Header header) {
-    	RequestCookie cookie = new RequestCookie();
+    public static Map<String, RequestCookie> createCookies(Header header) {
     	String value = header.getValue();
     	String[] split = value.trim().split(";");
-    	String keyValPair = split[0];
-    	//there are many = signs but the first one is the cookie name...the other are embedded key=value pairs
-    	int index = keyValPair.indexOf("=");
-    	cookie.name = keyValPair.substring(0, index);
-    	cookie.value = keyValPair.substring(index+1);
-    	return cookie;
+    	Map<String, RequestCookie> map = new HashMap<>();
+    	for(String keyValPair : split) {
+        	RequestCookie cookie = new RequestCookie();
+	    	//there are many = signs but the first one is the cookie name...the other are embedded key=value pairs
+	    	int index = keyValPair.indexOf("=");
+	    	cookie.name = keyValPair.substring(0, index).trim();
+	    	cookie.value = keyValPair.substring(index+1).trim();
+	    	map.put(cookie.name, cookie);
+    	}
+		return map;
     }
     
 

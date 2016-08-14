@@ -83,6 +83,10 @@ public class TestPRGSelenium {
 		String password = passwordElem.getAttribute("value");
 		Assert.assertEquals("", password);
 		
+		WebElement errorSpan = driver.findElement(By.id("user_address_zipCode_errorMsg"));
+		String errorMsg = errorSpan.getText();
+		Assert.assertEquals("Could not convert value", errorMsg);
+		
 		System.out.println("hi there");
 		//find the error element?...
 		

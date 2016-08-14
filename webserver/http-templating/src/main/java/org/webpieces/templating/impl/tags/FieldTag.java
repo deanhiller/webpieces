@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
@@ -67,16 +68,18 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 	 * @return
 	 */
 	private Map<String, Object> createFieldData(String fieldName, Map<String, Object> pageArgs) {
+        Flash flash = Current.flash();
+        Validation validation = Current.validation();
+        
         Map<String, Object> field = new HashMap<String, Object>();
         field.put("name", fieldName);
         field.put("id", fieldName.replace('.', '_'));
-        Flash flash = Current.flash();
         String flashValue = flash.get(fieldName);
         field.put("flash", flashValue);
         //field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash")
         //        .toString().split(",") : new String[0]);
-        //field.put("error", Validation.error(fieldName));
-        //field.put("errorClass", field.get("error") != null ? "hasError" : "");
+        field.put("error", validation.getError(fieldName));
+        field.put("errorClass", field.get("error") != null ? "hasError" : "");
         String[] pieces = fieldName.split("\\.");
         Object pageArgValue = null;
         Object obj = pageArgs.get(pieces[0]);
