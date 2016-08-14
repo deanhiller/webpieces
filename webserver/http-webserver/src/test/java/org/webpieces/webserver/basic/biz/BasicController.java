@@ -36,6 +36,9 @@ public class BasicController {
 		//myMethod.html which must be in the same directory as the Controller
 		return Actions.renderThis("hhhh", 86);
 	}
+	public Action badTemplate() {
+		return Actions.renderThis();
+	}
 	
 	public Action notFound() {
 		//we use this to mock and throw NotFoundException or some RuntimeException for testing notFound path failures

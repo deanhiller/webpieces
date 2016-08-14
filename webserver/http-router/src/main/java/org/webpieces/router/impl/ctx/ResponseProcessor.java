@@ -36,6 +36,7 @@ public class ResponseProcessor {
 	private RequestContext ctx;
 	private ResponseStreamer responseCb;
 	private CookieFactory cookieFactory;
+	private boolean responseSent = false;
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
 			ObjectToStringTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb,
@@ -49,6 +50,9 @@ public class ResponseProcessor {
 	}
 
 	public RedirectResponse createFullRedirect(RedirectImpl action) {
+		if(responseSent)
+			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
+		responseSent = true;
 		RouterRequest request = ctx.getRequest();
 		Method method = matchedMeta.getMethod();
 		RouteId id = action.getId();
@@ -97,6 +101,10 @@ public class ResponseProcessor {
 	}
 
 	public RenderResponse createRenderResponse(RenderHtmlImpl controllerResponse) {
+		if(responseSent)
+			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
+		responseSent = true;
+		
 		RouterRequest request = ctx.getRequest();
 
 		Method method = matchedMeta.getMethod();
