@@ -1,6 +1,6 @@
 package org.webpieces.ctx.api;
 
-public abstract class FlashScope implements CookieData {
+public abstract class FlashScope implements CookieScope {
 
 	//4 cookie states....
 	//did not exist, no need to create

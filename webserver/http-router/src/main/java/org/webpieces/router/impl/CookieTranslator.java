@@ -12,38 +12,38 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.CookieData;
+import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 
-public class CookieFactory {
+public class CookieTranslator {
 
-	private static final Logger log = LoggerFactory.getLogger(CookieFactory.class);
+	private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private RouterConfig config;
 	
 	@Inject
-	public CookieFactory(RouterConfig config) {
+	public CookieTranslator(RouterConfig config) {
 		this.config = config;
 		log.error("rename HttpRouterConfig to RouterConfig");
 	}
 
-	public void addCookieIfExist(List<RouterCookie> cookies, CookieData data) {
+	public void addCookieIfExist(List<RouterCookie> cookies, CookieScope data) {
 		if(data.isNeedCreateCookie()) {
-			RouterCookie cookie = createCookie(data.getName(), data.getMapData(), data.getMaxAge());
+			RouterCookie cookie = translateScopeToCookie(data.getName(), data.getMapData(), data.getMaxAge());
 			cookies.add(cookie);
 		}
 	}
 	
-	public RouterCookie createCookie(String name, Map<String, List<String>> value, Integer maxAge) {
+	public RouterCookie translateScopeToCookie(String name, Map<String, List<String>> value, Integer maxAge) {
 		try {
-			return createCookieImpl(name, value, maxAge);
+			return scopeToCookie(name, value, maxAge);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private RouterCookie createCookieImpl(String name, Map<String, List<String>> value, Integer maxAge) throws UnsupportedEncodingException {
+	private RouterCookie scopeToCookie(String name, Map<String, List<String>> value, Integer maxAge) throws UnsupportedEncodingException {
 		RouterCookie cookie = new RouterCookie();
 		cookie.name= name;
     	cookie.domain = null;
@@ -56,13 +56,13 @@ public class CookieFactory {
 		if(maxAge != null && maxAge == 0) {
 			cookie.value = "";
 		} else {
-			StringBuilder data = translateValue(value);
+			StringBuilder data = translateValuesToCookieFormat(value);
 			cookie.value = data.toString();
 		}
 		return cookie;
 	}
 
-	private StringBuilder translateValue(Map<String, List<String>> value) throws UnsupportedEncodingException {
+	private StringBuilder translateValuesToCookieFormat(Map<String, List<String>> value) throws UnsupportedEncodingException {
 		StringBuilder data = new StringBuilder();
         String separator = "";
         for (Map.Entry<String, List<String>> entry : value.entrySet()) {
@@ -114,16 +114,16 @@ public class CookieFactory {
 		return builder.toString();
 	}
 
-	public CookieData translateCookieToData(RouterRequest req, CookieData data, String cookieName) {
+	public CookieScope translateCookieToScope(RouterRequest req, CookieScope data) {
 		try {
-			return translateCookieToDataImpl(req, data, cookieName);
+			return cookieToScope(req, data);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private CookieData translateCookieToDataImpl(RouterRequest req, CookieData data, String cookieName) throws UnsupportedEncodingException {
-		RouterCookie routerCookie = req.cookies.get(cookieName);
+	private CookieScope cookieToScope(RouterRequest req, CookieScope data) throws UnsupportedEncodingException {
+		RouterCookie routerCookie = req.cookies.get(data.getName());
 		if(routerCookie == null) {
 			data.setExisted(false);
 			return data;

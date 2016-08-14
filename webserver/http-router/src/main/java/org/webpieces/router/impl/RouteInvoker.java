@@ -35,10 +35,10 @@ public class RouteInvoker {
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToStringTranslator reverseTranslator;
-	private CookieFactory cookieFactory;
+	private CookieTranslator cookieFactory;
 	
 	@Inject
-	public RouteInvoker(ArgumentTranslator argumentTranslator, ObjectToStringTranslator translator, CookieFactory cookieFactory) {
+	public RouteInvoker(ArgumentTranslator argumentTranslator, ObjectToStringTranslator translator, CookieTranslator cookieFactory) {
 		this.argumentTranslator = argumentTranslator;
 		this.reverseTranslator = translator;
 		this.cookieFactory = cookieFactory;
@@ -141,9 +141,8 @@ public class RouteInvoker {
 		Method method = meta.getMethod();
 
 		Session session = new Session();
-		Flash flash = (Flash) cookieFactory.translateCookieToData(req, new Flash(), Flash.COOKIE_NAME);
-		Validation validation = new Validation();
-		//Validation validation = (Validation) cookieFactory.translateCookieToData(req, new Validation(), Validation.COOKIE_NAME);
+		Flash flash = (Flash) cookieFactory.translateCookieToScope(req, new Flash());
+		Validation validation = (Validation) cookieFactory.translateCookieToScope(req, new Validation());
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
 		RequestContext requestCtx = new RequestContext(validation, flash, session, req);

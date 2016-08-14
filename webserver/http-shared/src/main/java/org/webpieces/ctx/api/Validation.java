@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Validation extends FlashScope implements CookieData {
+public class Validation extends FlashScope implements CookieScope {
 	
 	public static String COOKIE_NAME = FlashScope.COOKIE_NAME_PREFIX+"Errors";
 	

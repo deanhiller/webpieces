@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-public class Flash extends FlashScope implements CookieData {
+public class Flash extends FlashScope implements CookieScope {
 
 	public static String COOKIE_NAME = FlashScope.COOKIE_NAME_PREFIX+"Flash";
 	

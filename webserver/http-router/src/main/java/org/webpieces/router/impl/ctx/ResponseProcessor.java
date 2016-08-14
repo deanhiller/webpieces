@@ -20,7 +20,7 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routing.RouteId;
-import org.webpieces.router.impl.CookieFactory;
+import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
@@ -35,12 +35,12 @@ public class ResponseProcessor {
 	private ObjectToStringTranslator reverseTranslator;
 	private RequestContext ctx;
 	private ResponseStreamer responseCb;
-	private CookieFactory cookieFactory;
+	private CookieTranslator cookieFactory;
 	private boolean responseSent = false;
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
 			ObjectToStringTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb,
-			CookieFactory cookieFactory) {
+			CookieTranslator cookieFactory) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
