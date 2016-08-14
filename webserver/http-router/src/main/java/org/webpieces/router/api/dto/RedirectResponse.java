@@ -3,6 +3,7 @@ package org.webpieces.router.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.router.api.actions.Redirect;
 
 public class RedirectResponse implements Redirect {

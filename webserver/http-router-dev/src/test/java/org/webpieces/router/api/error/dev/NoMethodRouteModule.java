@@ -1,6 +1,6 @@
 package org.webpieces.router.api.error.dev;
 
-import static org.webpieces.router.api.dto.HttpMethod.getAll;
+import static org.webpieces.ctx.api.HttpMethod.getAll;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
 import org.webpieces.router.api.routing.RouteModule;

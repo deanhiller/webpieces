@@ -1,7 +1,7 @@
 package org.webpieces.webserver.beans.app;
 
-import static org.webpieces.router.api.dto.HttpMethod.GET;
-import static org.webpieces.router.api.dto.HttpMethod.POST;
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 

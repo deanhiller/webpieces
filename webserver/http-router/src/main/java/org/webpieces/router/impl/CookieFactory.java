@@ -1,4 +1,4 @@
-package org.webpieces.router.api.ctx;
+package org.webpieces.router.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -9,12 +9,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.CookieData;
+import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.dto.RouterCookie;
 
 public class CookieFactory {
 
-	public static String COOKIE_NAME_PREFIX = "webpieces";
 	private static final Logger log = LoggerFactory.getLogger(CookieFactory.class);
 	private RouterConfig config;
 	
@@ -24,6 +24,13 @@ public class CookieFactory {
 		log.error("rename HttpRouterConfig to RouterConfig");
 	}
 
+	public void addCookieIfExist(List<RouterCookie> cookies, CookieData data) {
+		if(data.isNeedCreateCookie()) {
+			RouterCookie cookie = createCookie(data.getName(), data.getMapData(), data.getMaxAge());
+			cookies.add(cookie);
+		}
+	}
+	
 	public RouterCookie createCookie(String name, Map<String, List<String>> value, Integer maxAge) {
 		try {
 			return createCookieImpl(name, value, maxAge);

@@ -10,17 +10,16 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Flash;
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Session;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.ctx.CookieFactory;
-import org.webpieces.router.api.ctx.Flash;
-import org.webpieces.router.api.ctx.Request;
-import org.webpieces.router.api.ctx.RequestContext;
-import org.webpieces.router.api.ctx.Session;
-import org.webpieces.router.api.ctx.Validation;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderHtmlImpl;
@@ -141,22 +140,22 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Validation validation = new Validation(cookieFactory);
-		Session session = new Session(cookieFactory);
-		Flash flash = new Flash(cookieFactory);
+		Validation validation = new Validation();
+		Session session = new Session();
+		Flash flash = new Flash();
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
 		RequestContext requestCtx = new RequestContext(validation, flash, session, req);
-		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb);
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, cookieFactory);
 		//ThreadLocals...
-		Request.setContext(requestCtx);
+		Current.setContext(requestCtx);
 		RequestLocalCtx.set(processor);
 		
 		CompletableFuture<Object> response;
 		try {
 			response = invokeMethod(obj, method, arguments);
 		} finally {
-			Request.setContext(null);
+			Current.setContext(null);
 			RequestLocalCtx.set(null);
 		}
 		

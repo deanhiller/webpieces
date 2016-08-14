@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.dto.RouterRequest;
 
 public interface Route {
 

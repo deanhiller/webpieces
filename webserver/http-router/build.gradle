@@ -1,6 +1,7 @@
 dependencies {
     compile deps['guice']
     compile project(':core:core-util')
+    compile project(':webserver:http-shared')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

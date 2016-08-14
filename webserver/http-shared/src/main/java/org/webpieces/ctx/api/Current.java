@@ -1,14 +1,16 @@
-package org.webpieces.router.api.ctx;
+package org.webpieces.ctx.api;
 
-import org.webpieces.router.api.dto.RouterRequest;
-
-public class Request {
+public class Current {
 
 	private static ThreadLocal<RequestContext> requestContext = new ThreadLocal<>();
 
 	public static void setContext(RequestContext requestCtx) {
 		requestContext.set(requestCtx);
 	}
+	public static boolean isContextSet() {
+		return requestContext.get() != null;
+	}
+	
 	public static RequestContext getContext() {
 		RequestContext ctx = requestContext.get();
 		if(ctx == null)

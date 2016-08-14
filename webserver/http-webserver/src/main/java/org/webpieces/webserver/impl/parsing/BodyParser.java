@@ -2,8 +2,8 @@ package org.webpieces.webserver.impl.parsing;
 
 import java.nio.charset.Charset;
 
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.router.api.dto.RouterRequest;
 
 public interface BodyParser {
 

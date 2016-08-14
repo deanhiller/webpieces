@@ -6,19 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Flash;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterCookie;
+import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.ctx.Flash;
-import org.webpieces.router.api.ctx.RequestContext;
-import org.webpieces.router.api.ctx.Validation;
-import org.webpieces.router.api.dto.RouterCookie;
-import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.impl.CookieFactory;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
@@ -33,13 +35,17 @@ public class ResponseProcessor {
 	private ObjectToStringTranslator reverseTranslator;
 	private RequestContext ctx;
 	private ResponseStreamer responseCb;
+	private CookieFactory cookieFactory;
 
-	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, ObjectToStringTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb) {
+	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
+			ObjectToStringTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb,
+			CookieFactory cookieFactory) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.matchedMeta = meta;
 		this.responseCb = responseCb;
+		this.cookieFactory = cookieFactory;
 	}
 
 	public RedirectResponse createFullRedirect(RedirectImpl action) {
@@ -84,9 +90,9 @@ public class ResponseProcessor {
 	private List<RouterCookie> createCookies() {
 		List<RouterCookie> cookies = new ArrayList<>();
 		Flash flash = ctx.getFlash();
-		flash.addSelfAsCookie(cookies);
-//		Validation validation = ctx.getValidation();
-//		validation.addSelfAsCookie(cookies);
+		cookieFactory.addCookieIfExist(cookies, flash);
+		Validation validation = ctx.getValidation();
+		cookieFactory.addCookieIfExist(cookies, validation);
 		return cookies;
 	}
 
@@ -114,7 +120,17 @@ public class ResponseProcessor {
 		
 		List<RouterCookie> cookies = createCookies();
 		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
-		responseCb.sendRenderHtml(resp);
+		
+		boolean wasSet = Current.isContextSet();
+		if(!wasSet)
+			Current.setContext(ctx); //Allow html tags to use the contexts
+		try {
+			responseCb.sendRenderHtml(resp);
+		} finally {
+			if(!wasSet) //then reset
+				Current.setContext(null);
+		}
+		
 		return resp;
 	}
 }

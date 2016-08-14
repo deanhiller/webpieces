@@ -9,6 +9,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
@@ -21,8 +23,6 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.webserver.api.WebServerConfig;

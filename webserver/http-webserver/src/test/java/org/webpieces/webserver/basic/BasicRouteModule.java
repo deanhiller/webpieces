@@ -1,6 +1,7 @@
 package org.webpieces.webserver.basic;
 
-import static org.webpieces.router.api.dto.HttpMethod.*;
+import static org.webpieces.ctx.api.HttpMethod.*;
+
 import org.webpieces.router.api.routing.AbstractRouteModule;
 
 public class BasicRouteModule extends AbstractRouteModule {

@@ -1,6 +1,6 @@
 package org.webpieces.webserver.async;
 
-import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.Router;
 

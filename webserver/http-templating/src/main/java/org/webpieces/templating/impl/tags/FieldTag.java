@@ -38,14 +38,14 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         String fieldName = tagArgs.get("defaultArgument").toString();
 		Map<String, Object> field = createFieldData(fieldName, pageArgs);
         
-		Map<String, Object> copy = new HashMap<>();
+		Map<String, Object> copyOfTagArgs = new HashMap<>();
 		for(Map.Entry<Object, Object> entry : tagArgs.entrySet()) {
 			String key = entry.getKey().toString();
-			copy.put(key, entry.getValue());
+			copyOfTagArgs.put(key, entry.getValue());
 			body.setProperty(key, entry.getValue());
 		}
 		
-		copy.put("field", field);
+		copyOfTagArgs.put("field", field);
 		
 		String bodyStr = "";
 		if(body != null) {
@@ -53,9 +53,9 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 			bodyStr = ClosureUtil.toString(body);
 		}
 		//variables starting with _ will not be html escaped so the body html won't be converted like other variables
-		copy.put("_body", bodyStr); 
+		copyOfTagArgs.put("_body", bodyStr); 
 		
-		return copy;
+		return copyOfTagArgs;
 	}
 
 	/**
@@ -71,7 +71,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         //field.put("flash", Flash.current().get(fieldName));
         //field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash")
         //        .toString().split(",") : new String[0]);
-        
+        //field.put("flashOrValue", preferFirst(flashValue, pageArgValue);
+        //field.put("valueOrFlash", preferFirst(pageArgValue, flashValue);
         //field.put("error", Validation.error(fieldName));
         //field.put("errorClass", field.get("error") != null ? "hasError" : "");
         String[] pieces = fieldName.split("\\.");

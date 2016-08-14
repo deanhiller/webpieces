@@ -1,6 +1,6 @@
 package org.webpieces.router.api.simplesvr;
 
-import static org.webpieces.router.api.dto.HttpMethod.*;
+import static org.webpieces.ctx.api.HttpMethod.*;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.*;
 
 import org.webpieces.router.api.routing.RouteModule;

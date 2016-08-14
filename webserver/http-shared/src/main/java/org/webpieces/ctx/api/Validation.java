@@ -1,18 +1,12 @@
-package org.webpieces.router.api.ctx;
+package org.webpieces.ctx.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.webpieces.router.api.dto.RouterCookie;
-
-public class Validation extends FlashScope {
+public class Validation extends FlashScope implements CookieData {
 	
-	public Validation(CookieFactory creator) {
-		super(creator);
-	}
-
 	private Map<String, List<String>> fieldErrors = new HashMap<>();
 
 	public void addError(String name, String error) {
@@ -31,8 +25,17 @@ public class Validation extends FlashScope {
 	}
 
 	@Override
-	protected RouterCookie toCookie(Integer maxAge) {
-		return creator.createCookie(CookieFactory.COOKIE_NAME_PREFIX+"Errors", fieldErrors, maxAge);
+	public boolean isNeedCreateCookie() {
+		return true;
 	}
 
+	@Override
+	public String getName() {
+		return FlashScope.COOKIE_NAME_PREFIX+"Errors";
+	}
+
+	@Override
+	public Map<String, List<String>> getMapData() {
+		return fieldErrors;
+	}
 }

@@ -2,7 +2,7 @@ package org.webpieces.router.api;
 
 import java.util.Map;
 
-import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.ctx.api.RouterRequest;
 
 public interface RoutingService {
 

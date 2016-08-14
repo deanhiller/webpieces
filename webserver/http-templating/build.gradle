@@ -12,6 +12,7 @@ dependencies {
     compile deps['groovy']
     compile deps['commons-beans']
     compile project(':core:core-util')
+    compile project(':webserver:http-shared')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

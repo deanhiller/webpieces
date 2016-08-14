@@ -1,0 +1,8 @@
+dependencies {
+    compile deps['guice']
+    compile project(':core:core-util')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Shared contexts between the router and templating system'
+}

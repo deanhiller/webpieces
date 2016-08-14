@@ -16,8 +16,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.ctx.Validation;
-import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.MatchResult;

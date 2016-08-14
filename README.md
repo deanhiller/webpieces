@@ -32,9 +32,13 @@ httpproxy - build on asyncserver and http client
 NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
 
 TODO: 
+* refactor so templating has access to flash context, validation context, etc. so we can complete the loop of filling in form data user typed in and the errors
+* unit test arrays in multi-part form, query params! and test for flash working with arrays(not sure it will or not)
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param
+* write an escapehtml tag
 * implement field tag next, error, errorClass, errors, field, ifError, ifErrors, jsAction, jsRoute, list, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
+* Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
 * AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)

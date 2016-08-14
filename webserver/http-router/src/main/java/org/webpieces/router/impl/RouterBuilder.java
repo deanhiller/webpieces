@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.HttpFilter;
-import org.webpieces.router.api.dto.HttpMethod;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;

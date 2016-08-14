@@ -1,6 +1,6 @@
 package org.webpieces.router.impl;
 
-import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.ctx.api.RouterRequest;
 
 public class NotFoundInfo {
 

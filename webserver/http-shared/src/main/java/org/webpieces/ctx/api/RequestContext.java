@@ -1,9 +1,7 @@
-package org.webpieces.router.api.ctx;
+package org.webpieces.ctx.api;
 
 import java.util.List;
 import java.util.Map;
-
-import org.webpieces.router.api.dto.RouterRequest;
 
 public class RequestContext {
 

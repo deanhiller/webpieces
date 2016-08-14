@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.ctx.api.RouterRequest;
 
 public class AllRoutingInfo {
 

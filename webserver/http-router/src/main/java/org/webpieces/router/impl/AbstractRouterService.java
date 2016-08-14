@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.dto.RouterRequest;
 
 public abstract class AbstractRouterService implements RoutingService {
 	

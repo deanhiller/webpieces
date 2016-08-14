@@ -1,6 +1,7 @@
 package PACKAGE.example;
 
-import static org.webpieces.router.api.dto.HttpMethod.*;
+import static org.webpieces.ctx.api.HttpMethod.*;
+
 import org.webpieces.router.api.routing.AbstractRouteModule;
 
 import PACKAGE.CLASSNAMERouteId;

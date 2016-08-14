@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.webpieces.router.api.dto.HttpMethod;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.dto.RouterRequest;
 import org.webpieces.router.api.routing.RouteId;
 
 import com.google.common.collect.Sets;

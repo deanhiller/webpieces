@@ -1,7 +1,7 @@
 package org.webpieces.router.api.error;
 
-import org.webpieces.router.api.dto.HttpMethod;
-import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RouterRequest;
 
 public class RequestCreation {
 	public static RouterRequest createHttpRequest(HttpMethod method, String path) {

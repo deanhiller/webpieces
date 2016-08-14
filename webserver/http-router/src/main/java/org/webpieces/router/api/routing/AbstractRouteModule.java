@@ -3,8 +3,8 @@ package org.webpieces.router.api.routing;
 import java.io.File;
 import java.util.Set;
 
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.HttpFilter;
-import org.webpieces.router.api.dto.HttpMethod;
 
 public abstract class AbstractRouteModule implements RouteModule {
 

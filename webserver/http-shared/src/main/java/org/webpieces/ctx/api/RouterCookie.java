@@ -1,4 +1,4 @@
-package org.webpieces.router.api.dto;
+package org.webpieces.ctx.api;
 
 public class RouterCookie {
 	public String name;

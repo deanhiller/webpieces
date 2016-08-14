@@ -2,11 +2,11 @@ package org.webpieces.webserver.beans.app;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.ctx.Request;
-import org.webpieces.router.api.ctx.RequestContext;
 import org.webpieces.webserver.basic.biz.SomeLib;
 import org.webpieces.webserver.basic.biz.SomeOtherLib;
 import org.webpieces.webserver.basic.biz.UserDbo;
@@ -30,8 +30,8 @@ public class BeansController {
 		//Validate any other stuff you need here adding errors and such
 		lib1.validateUser(user);
 		
-		RequestContext ctx = Request.getContext();
-		if(Request.validation().hasErrors()) {
+		RequestContext ctx = Current.getContext();
+		if(Current.validation().hasErrors()) {
 			return Actions.redirectFlashAll(BeansRouteId.USER_FORM_ROUTE, ctx);
 		}
 		

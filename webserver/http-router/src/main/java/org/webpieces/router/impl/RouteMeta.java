@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.webpieces.router.api.dto.RouterRequest;
+import org.webpieces.ctx.api.RouterRequest;
 
 import com.google.inject.Injector;
 
