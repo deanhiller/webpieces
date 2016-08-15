@@ -118,15 +118,17 @@ public class ResponseProcessor {
 					+ "users don't have a poor experience using your website with the browser back button.  "
 					+ "This means on a POST request, you cannot return RenderHtml object and must return Redirects");
 		}
+
+		String controllerName = matchedMeta.getControllerInstance().getClass().getName();
+		String methodName = matchedMeta.getMethod().getName();
 		
-		View view = controllerResponse.getView();
-		if(controllerResponse.getView() == null) {
-			String controllerName = matchedMeta.getControllerInstance().getClass().getName();
-			String methodName = matchedMeta.getMethod().getName();
-			view = new View(controllerName, methodName);
+		String relativeOrAbsolutePath = controllerResponse.getRelativeOrAbsolutePath();
+		if(relativeOrAbsolutePath == null) {
+			relativeOrAbsolutePath = methodName+".html";
 		}
 		
 		List<RouterCookie> cookies = createCookies();
+		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
 		
 		boolean wasSet = Current.isContextSet();
@@ -141,4 +143,5 @@ public class ResponseProcessor {
 		
 		return resp;
 	}
+	
 }

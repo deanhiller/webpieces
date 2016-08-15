@@ -7,6 +7,7 @@ import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.impl.tags.ElseIfGen;
 import org.webpieces.templating.impl.tags.ElseGen;
 import org.webpieces.templating.impl.tags.IfGen;
+import org.webpieces.templating.impl.tags.ListGen;
 import org.webpieces.templating.impl.tags.VerbatimGen;
 
 public class GenLookup {
@@ -18,6 +19,7 @@ public class GenLookup {
 		put(new IfGen());
 		put(new ElseIfGen());
 		put(new ElseGen());
+		put(new ListGen());
 	}
 	
 	protected void put(GroovyGen generator) {

@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.ReverseUrlLookup;
@@ -58,6 +59,15 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	}
     }
 
+    protected String runClosure(String tagName, Closure<?> closure, String srcLocation) {
+    	srcLocation = modifySourceLocation2(srcLocation);
+    	try {
+    		return ClosureUtil.toString(closure);
+    	} catch(Exception e) {
+			throw new RuntimeException("Error running tag #{"+tagName+"}#.  See exception cause below."+srcLocation, e);
+    	}
+    }    
+    
 	public void putSetTagProperty(Object key, Object val) {
 		setTagProperties.put(key, val);
 	}
@@ -110,10 +120,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
         }
     }
 
-	public static String modifySourceLocation2(String srcLocation) {
-		return "\n\n\t"+srcLocation+"\n";
-	}
-
+    //We should probably turn this into a ThreadLocal<Stack> ...
     public void enterExpression(String srcLocation) {
     	sourceLocal.set(srcLocation);
     }
@@ -123,5 +130,9 @@ public abstract class GroovyTemplateSuperclass extends Script {
     }
 	public ReverseUrlLookup getUrlLookup() {
 		return urlLookup;
+	}
+	
+	public static String modifySourceLocation2(String srcLocation) {
+		return "\n\n\t"+srcLocation+"\n";
 	}
 }

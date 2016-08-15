@@ -1,0 +1,24 @@
+<html>
+  <head>
+  </head>
+  <body>
+    
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Color</th>
+        </tr>
+      #{list items:accounts, as:'account'}#
+          <tr>
+             <td>${account.name}$</td><td>${account.value}$</td><td>${account.color}$</td>
+          </tr>
+      #{/list}#
+      #{else}#
+          <tr>
+              <td colspan="3">You have no accounts at this time</td>
+          </tr>
+      #{/else}#
+    </table>
+  </body>
+</html>

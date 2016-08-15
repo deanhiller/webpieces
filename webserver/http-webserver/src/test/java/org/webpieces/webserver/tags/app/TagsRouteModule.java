@@ -15,7 +15,9 @@ public class TagsRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/if",                "TagController.ifTag", TagsRouteId.IF_ROUTE_ID);
 		addRoute(GET , "/else",              "TagController.elseTag", TagsRouteId.ELSE_ROUTE_ID);
 		addRoute(GET , "/elseif",            "TagController.elseIfTag", TagsRouteId.ELSEIF);
-
+		addRoute(GET , "/list",              "TagController.listTag", TagsRouteId.LIST);
+		addRoute(GET , "/emptyList",         "TagController.emptyListTag", TagsRouteId.EMPTY_LIST);
+		
 		addRoute(GET , "/setget",            "TagController.getTag", TagsRouteId.SETGET);
 		addRoute(GET , "/extends",           "TagController.extendsTag", TagsRouteId.EXTENDS);
 		addRoute(GET , "/ahref",             "TagController.aHrefTag", TagsRouteId.AHREF);

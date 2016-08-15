@@ -4,19 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.router.api.actions.RenderHtml;
-import org.webpieces.router.api.dto.View;
 
 public class RenderHtmlImpl implements RenderHtml {
 
-	private View view;
+	private String relativeOrAbsoluteView;
 	private Map<String, Object> pageArgs = new HashMap<>();
 
-//	protected RenderHtml(String view, Object ... pageArgs) {
-//		this.view = view;
-//		this.pageArgs = pageArgs;
-//	}
-	
-	public RenderHtmlImpl(Object ... pageArgs) {
+	public RenderHtmlImpl(String view, Object ... pageArgs) {
+		this.relativeOrAbsoluteView = view;
 		if(pageArgs.length % 2 != 0)
 			throw new IllegalArgumentException("All arguments to render must be even with String, Object, String, Object (ie. key, value, key, value)");
 		
@@ -35,11 +30,11 @@ public class RenderHtmlImpl implements RenderHtml {
 		}
 	}
 	
-	public View getView() {
-		return view;
-	}
-
 	public Map<String, Object> getPageArgs() {
 		return pageArgs;
+	}
+
+	public String getRelativeOrAbsolutePath() {
+		return relativeOrAbsoluteView;
 	}
 }

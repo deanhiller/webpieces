@@ -1,6 +1,7 @@
 package org.webpieces.templating.impl.tags;
 
 import org.webpieces.templating.api.AbstractTag;
+import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 
@@ -12,14 +13,14 @@ public class ElseGen extends AbstractTag {
 	}
 
 	@Override
-	public void generateStart(ScriptOutput sourceCode, Token token) {
+	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
 		sourceCode.print(" else {");
 		sourceCode.appendTokenComment(token);
 		sourceCode.println();
 	}
 
 	@Override
-	public void generateEnd(ScriptOutput sourceCode, Token token) {
+	public void generateEnd(ScriptOutput sourceCode, Token token, int uniqueId) {
 		sourceCode.print("}");
 		sourceCode.appendTokenComment(token);
 		sourceCode.println();
@@ -60,8 +61,8 @@ public class ElseGen extends AbstractTag {
 					+ " #{"+name+"} is in error. "+current.getSourceLocation(true));
 		
 		String previousTagName = prevous.getCleanValue();
-		if(!"if".equals(previousTagName) && !"elseif".equals(previousTagName)) {
-			throw new IllegalArgumentException(name+" tag is missing the previous #{/if}# or #{/elseif}# tag.  Instead we "
+		if(!"if".equals(previousTagName) && !"elseif".equals(previousTagName) && !"list".equals(previousTagName)) {
+			throw new IllegalArgumentException(name+" tag is missing the previous #{/if}# or #{/elseif}# or #{/list}# tag.  Instead we "
 					+ "found a #{/"+previousTagName+"}# tag before the else. "+current.getSourceLocation(true));
 		}
 	}

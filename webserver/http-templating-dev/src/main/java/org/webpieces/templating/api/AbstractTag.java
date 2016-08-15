@@ -2,9 +2,8 @@ package org.webpieces.templating.api;
 
 public abstract class AbstractTag implements GroovyGen {
 
-
 	@Override
-	public void generateStartAndEnd(ScriptOutput sourceCode, Token token) {
+	public void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
 		String name = getName();
 		throw new IllegalArgumentException(name+" tag can only be used with a body so"
 				+ " #{"+name+"/} is not usable. "+token.getSourceLocation(true));

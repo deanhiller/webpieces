@@ -135,16 +135,16 @@ public class ScriptWriter {
 		if(indexOfSpace > 0) {
 			tagName = expr.substring(0, indexOfSpace);
 		}
-		
+
+		int id = uniqueIdGen.generateId();
 		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
-			generator.generateStartAndEnd(sourceCode, token);
+			generator.generateStartAndEnd(sourceCode, token, id, callbacks);
 		} else if(htmltag == null) {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation(true));
 		} else {
-			int id = uniqueIdGen.generateId();
-			new TagGen(tagName, token, id, callbacks).generateStartAndEnd(sourceCode, token);
+			new TagGen(tagName, token).generateStartAndEnd(sourceCode, token, id, callbacks);
 		}
 	}
 
@@ -163,12 +163,13 @@ public class ScriptWriter {
 			if(htmltag == null && !config.getCustomTagsFromPlugin().contains(tagName))
 				throw new IllegalArgumentException("Unknown tag=#{"+tagName+"}# OR you didn't add '"
 							+tagName+"' to list of customTags in build.gradle file. "+token.getSourceLocation(true));
-			int id = uniqueIdGen.generateId();
-			generator = new TagGen(tagName, token, id, callbacks);
+
+			generator = new TagGen(tagName, token);
 		}
 
-		generator.generateStart(sourceCode, token);
-		tagStack.get().push(new TagState(token, generator));
+		int id = uniqueIdGen.generateId();
+		generator.generateStart(sourceCode, token, id, callbacks);
+		tagStack.get().push(new TagState(token, generator, id));
 	}
 
 	public void printEndTag(TokenImpl token, ScriptOutputImpl sourceCode) {
@@ -182,7 +183,8 @@ public class ScriptWriter {
 			+"}# which does not match.  end tag location="+token.getSourceLocation(false)+" begin tag location="+currentToken.getSourceLocation(false));
 
 		GroovyGen generator = currentState.getGenerator();
-		generator.generateEnd(sourceCode, token);
+		int uniqueId = currentState.getUniqueId();
+		generator.generateEnd(sourceCode, token, uniqueId);
 	}
 
 	public void unprintUpToLastNewLine() {

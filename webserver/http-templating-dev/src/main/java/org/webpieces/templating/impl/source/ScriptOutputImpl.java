@@ -35,7 +35,7 @@ public class ScriptOutputImpl implements ScriptOutput {
 
 	public void appendTokenComment(Token t) {
 		TokenImpl token = (TokenImpl) t;
-		scriptSourceCode.append(" //htmlLine ").append(token.beginLineNumber).append(":").append(token.endLineNumber);
+		scriptSourceCode.append(" //htmlLine ").append(token.beginLineNumber).append(":").append(token.endLineNumber).append("\n");
 		//we could have stored column info in the Token as well for here!! to append to comment
         scriptLineNumToHtmlLineNum.put(currentLine, token.beginLineNumber);		
 	}

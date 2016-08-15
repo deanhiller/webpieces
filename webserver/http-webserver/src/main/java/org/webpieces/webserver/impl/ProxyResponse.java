@@ -101,15 +101,21 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
 		View view = resp.view;
-		String packageStr = view.getControllerPackage();
+		String packageStr = view.getPackageName();
 		//For this type of View, the template is the name of the method..
-		String templateClassName = view.getMethodName();
+		String templateClassName = view.getRelativeOrAbsolutePath();
+		int lastIndexOf = templateClassName.lastIndexOf(".");
+		String extension = null;
+		if(lastIndexOf > 0) {
+			extension = templateClassName.substring(lastIndexOf+1);
+			templateClassName = templateClassName.substring(0, lastIndexOf);
+		}
 		
-		String path = getTemplatePath(packageStr, templateClassName, "html");
+		String templatePath = getTemplatePath(packageStr, templateClassName, extension);
 		
 		//TODO: get html from the request such that we look up the correct template? AND if not found like they request only json, than
 		//we send back a 404 rather than a 500
-		Template template = templatingService.loadTemplate(path);
+		Template template = templatingService.loadTemplate(templatePath);
 
 		//TODO: stream this out with chunked response instead??....
 		StringWriter out = new StringWriter();
@@ -119,7 +125,7 @@ public class ProxyResponse implements ResponseStreamer {
 		} catch(MissingPropertyException e) {
 			Set<String> keys = resp.pageArgs.keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
-					+ " return enough arguments for the template.  specifically, the method\nreturned these"
+					+ " return enough arguments for the template ="+templatePath+".  specifically, the method\nreturned these"
 					+ " arguments="+keys+"  There is a chance in your html you forgot the '' around a variable name\n"
 							+ "such as #{set 'key'}# but you put #{set key}# which is 'usually' not the correct way\n"
 							+ "The missing properties are as follows....\n"+e.getMessage(), e);

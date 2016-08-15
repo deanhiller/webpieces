@@ -13,12 +13,16 @@ import org.webpieces.router.impl.ctx.ResponseProcessor;
 
 public class Actions {
 
-	public static RenderHtml renderView(String view, Object ... pageArgs) {
-		throw new UnsupportedOperationException("This is not quite supported yet");
-	}
-
-	public static RenderHtml renderThis(Object ... pageArgs) {
-		RenderHtmlImpl renderHtml = new RenderHtmlImpl(pageArgs);
+	/**
+	 * Renders the html file at templatePath which is relative to the controller or an 
+	 * absolute reference from the start of the classpath
+	 * 
+	 * @param templatePath
+	 * @param pageArgs
+	 * @return
+	 */
+	public static RenderHtml renderView(String templatePath, Object ... pageArgs) {
+		RenderHtmlImpl renderHtml = new RenderHtmlImpl(templatePath, pageArgs);
 		ResponseProcessor processor = RequestLocalCtx.get();
 		if(processor != null) {
 			//If there is a context (the controller method is synchronous), then we do all calculations on their thread so if there
@@ -26,6 +30,16 @@ public class Actions {
 			return processor.createRenderResponse(renderHtml);
 		}
 		return renderHtml;
+	}
+
+	/**
+	 * Renders an html file with the same name as the methodName.html
+	 * 
+	 * @param pageArgs
+	 * @return
+	 */
+	public static RenderHtml renderThis(Object ... pageArgs) {
+		return renderView(null, pageArgs);
 	}
 
 	public static Redirect redirect(RouteId routeId, Object ... args) {
@@ -51,7 +65,4 @@ public class Actions {
 		return redirect(routeId);
 	}
 	
-//	public static Redirect redirectWithErrors(RouteId routeId, RequestContext ctx) {
-//		
-//	}
 }

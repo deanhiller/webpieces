@@ -6,10 +6,12 @@ public class TagState {
 
 	private TokenImpl token;
 	private GroovyGen generator;
+	private int uniqueId;
 
-	public TagState(TokenImpl token, GroovyGen generator) {
+	public TagState(TokenImpl token, GroovyGen generator, int uniqueId) {
 		this.token = token;
 		this.generator = generator;
+		this.uniqueId = uniqueId;
 	}
 
 	public TokenImpl getToken() {
@@ -18,6 +20,10 @@ public class TagState {
 
 	public GroovyGen getGenerator() {
 		return generator;
+	}
+
+	public int getUniqueId() {
+		return uniqueId;
 	}
 
 }

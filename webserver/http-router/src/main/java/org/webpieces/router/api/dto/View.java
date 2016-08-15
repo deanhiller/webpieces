@@ -11,27 +11,32 @@ public class View {
 
 	private String controllerName;
 	private String methodName;
+	private String relativeOrAbsolutePath;
 
-	public View(String controllerName, String methodName) {
+	public View(String controllerName, String methodName, String relativeOrAbsolutePath) {
 		this.controllerName = controllerName;
 		this.methodName = methodName;
+		this.relativeOrAbsolutePath = relativeOrAbsolutePath;
 	}
 
 	public String getControllerName() {
 		return controllerName;
 	}
 
-	public String getMethodName() {
-		return methodName;
+	public String getRelativeOrAbsolutePath() {
+		return relativeOrAbsolutePath;
 	}
 
-	public String getControllerPackage() {
-		String name = controllerName;
-		int index = name.lastIndexOf(".");
+	public String getPackageName() {
+		int index = controllerName.lastIndexOf(".");
 		if(index < 0)
 			return "";
 		
-		String pack = name.substring(0, index);
+		String pack = controllerName.substring(0, index);
 		return pack;
+	}
+
+	public String getMethodName() {
+		return methodName;
 	}
 }

@@ -4,10 +4,10 @@ public interface GroovyGen {
 
 	String getName();
 	
-	void generateStartAndEnd(ScriptOutput sourceCode, Token token);
+	void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback);
 
-	void generateStart(ScriptOutput sourceCode, Token token);
+	void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback);
 
-	void generateEnd(ScriptOutput sourceCode, Token token);
+	void generateEnd(ScriptOutput sourceCode, Token token, int uniqueId);
 
 }

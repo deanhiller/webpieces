@@ -36,11 +36,11 @@ TODO:
 * unit test arrays in multi-part form, query params! and test for flash working with arrays(not sure it will or not)
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param
 * need to test out cookie length and 150 cookies of certain length
-* verify password input does not end up flash
 * write an escapehtml tag
 * implement field tag next, error, errorClass, errors, field, ifError, ifErrors, jsAction, jsRoute, list, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
+* Test out no such property/pageArg in an expression used in a tag argument and print the line number of the property not found
 * AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
