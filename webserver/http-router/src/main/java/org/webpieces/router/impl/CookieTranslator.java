@@ -25,7 +25,6 @@ public class CookieTranslator {
 	@Inject
 	public CookieTranslator(RouterConfig config) {
 		this.config = config;
-		log.error("rename HttpRouterConfig to RouterConfig");
 	}
 
 	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScope data) {

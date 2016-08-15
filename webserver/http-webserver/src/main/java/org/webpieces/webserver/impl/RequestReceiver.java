@@ -54,7 +54,10 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.DATE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONNECTION.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.USER_AGENT.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.CONTENT_LENGTH.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.CONTENT_TYPE.getHeaderName().toLowerCase());
 	}
+	
 	
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {

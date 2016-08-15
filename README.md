@@ -29,15 +29,12 @@ httpparser - an asynchronous http parser than can accept partial payloads (ie. n
 httpclient - http client built on above core components
 httpproxy - build on asyncserver and http client
 
-NOTE: There is a Recorder and Playback that if you wire in, you can record things that are going wrong and use the Playback to play it back into your system.  We use this for http parser and SSL Engine so that we can have an automated test suite against very real test cases.
-
 TODO: 
-* refactor so templating has access to flash context, validation context, etc. so we can complete the loop of filling in form data user typed in and the errors
 * unit test arrays in multi-part form, query params! and test for flash working with arrays(not sure it will or not)
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param
 * need to test out cookie length and 150 cookies of certain length
 * write an escapehtml tag
-* implement field tag next, error, errorClass, errors, field, ifError, ifErrors, jsAction, jsRoute, list, option, select,
+* implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
 * Test out no such property/pageArg in an expression used in a tag argument and print the line number of the property not found

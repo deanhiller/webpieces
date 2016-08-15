@@ -60,5 +60,5 @@ public class TestListGenerator {
 		response.assertNotContains("<td>dean</td><td>5</td><td>red</td>");
 		response.assertNotContains("<td>jeff</td><td>2</td><td>blue</td");
 		response.assertContains("You have no accounts at this time");
-	}	
+	}
 }
