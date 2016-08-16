@@ -104,6 +104,25 @@ public class TestBeans {
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
 	}
+
+	@Test
+	public void testArrayForm() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("value=`FirstAccName`".replace('`', '"'));
+		response.assertContains("value=`SecondAccName`".replace('`', '"'));
+		response.assertContains("value=`someStreet2-0`".replace('`', '"'));
+		response.assertContains("value=`someStreet2-1`".replace('`', '"'));
+
+	}
+	
 	
 	private class AppOverridesModule implements Module {
 		@Override

@@ -7,6 +7,7 @@ public class TemplateConfig {
 
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 	private String fieldTagTemplatePath = "/org/webpieces/templating/impl/field.tag";
+	private String arrayFieldTagTemplatePath = fieldTagTemplatePath;
 
 	public TemplateConfig() {
 	}
@@ -29,6 +30,10 @@ public class TemplateConfig {
 	
 	public String getFieldTagTemplatePath() {
 		return fieldTagTemplatePath;
+	}
+
+	public String getArrayFieldTagTemplatePath() {
+		return arrayFieldTagTemplatePath;
 	}
 
 }

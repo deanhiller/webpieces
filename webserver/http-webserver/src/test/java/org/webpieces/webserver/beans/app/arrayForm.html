@@ -1,0 +1,33 @@
+<html>
+  <head>
+  </head>
+  <body>
+    Add User<br/>
+    
+#{form action:@POST_USER_ROUTE[:]}#
+
+#{field 'user.firstName'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>#{/field}#
+
+#{list items: user.accounts, as: 'account'}#
+  
+   #{arrayfield 'user.accounts[account_index].name'}#
+       <input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>
+   #{/arrayfield}#
+   
+   #{list items: account.addresses, as: 'address'}#
+   
+      #{arrayfield 'user.accounts[account_index].addresses[address_index].street'}#
+          <input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>
+      #{/arrayfield}#
+        
+   #{/list}#
+
+#{/list}#
+
+
+<input id="submit" type="submit" value="Submit">    
+    
+#{/form}#
+
+  </body>
+</html>

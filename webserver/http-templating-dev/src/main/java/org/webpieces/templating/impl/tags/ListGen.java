@@ -26,7 +26,7 @@ public class ListGen extends ParseTagArgs {
         s.append("hasItemsXXX = false;\n");
         s.append("if(_attrsXXX['items']) {\n");
         s.append("   _iterXXX = _attrsXXX['items'].iterator();\n");
-        s.append("   for (_iXXX = 1; _iterXXX.hasNext(); _iXXX++) {\n");
+        s.append("   for (_iXXX = 0; _iterXXX.hasNext(); _iXXX++) {\n");
         s.append("      hasItemsXXX = true;\n");
         s.append("      _itemXXX = _iterXXX.next();\n");
         s.append("      setProperty(_attrsXXX['as'], _itemXXX);\n");

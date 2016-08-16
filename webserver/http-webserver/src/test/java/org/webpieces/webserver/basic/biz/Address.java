@@ -15,4 +15,13 @@ public class Address {
 	public int getZipCode() {
 		return zipCode;
 	}
+	public void setNumber(int number) {
+		this.number = number;
+	}
+	public void setStreet(String street) {
+		this.street = street;
+	}
+	public void setZipCode(int zipCode) {
+		this.zipCode = zipCode;
+	}
 }

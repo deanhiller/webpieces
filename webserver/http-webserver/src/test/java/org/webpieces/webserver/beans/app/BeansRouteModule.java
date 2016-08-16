@@ -17,6 +17,9 @@ public class BeansRouteModule extends AbstractRouteModule {
 		addRoute(POST, "/postuser",          "BeansController.postUser", BeansRouteId.POST_USER_ROUTE);
 		addRoute(GET , "/listusers",         "BeansController.listUsers", BeansRouteId.LIST_USERS_ROUTE);
 		
+		addRoute(GET , "/arrayForm",         "BeansController.arrayForm", BeansRouteId.ARRAY_FORM_ROUTE);
+		//addRoute(POST, "/postArray",         "BeansController.postArray", BeansRouteId.POST_ARRAY_ROUTE);
+		
 		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
 		setInternalErrorRoute("../../basic/biz/BasicController.internalError");
 	}
