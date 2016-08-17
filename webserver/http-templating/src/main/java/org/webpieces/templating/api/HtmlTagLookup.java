@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.webpieces.templating.impl.tags.AHrefTag;
-import org.webpieces.templating.impl.tags.ArrayFieldTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FieldTag;
 import org.webpieces.templating.impl.tags.FormTag;
@@ -30,7 +29,6 @@ public class HtmlTagLookup {
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());
 		put(new FieldTag(config.getFieldTagTemplatePath()));
-		put(new ArrayFieldTag(config.getFieldTagTemplatePath()));
 	}
 
 	protected void put(HtmlTag tag) {

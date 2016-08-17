@@ -10,15 +10,15 @@
 
 #{list items: user.accounts, as: 'account'}#
   
-   #{arrayfield 'user.accounts[account_index].name'}#
+   #{field 'user.accounts[account_index].name'}#
        <input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>
-   #{/arrayfield}#
+   #{/field}#
    
    #{list items: account.addresses, as: 'address'}#
    
-      #{arrayfield 'user.accounts[account_index].addresses[address_index].street'}#
+      #{field 'user.accounts[account_index].addresses[address_index].street'}#
           <input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>
-      #{/arrayfield}#
+      #{/field}#
         
    #{/list}#
 

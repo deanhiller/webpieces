@@ -8,15 +8,19 @@ import java.util.Map;
 public class ParamValueTreeCreator {
 
 	//A Map comes in like this (key on left and value on right)
+	//  user.name = dean
+	//  user.accounts[2].accName = this
+	//  user.accounts[2].priority = 1
+	//  user.accounts[2].addresses[0].street = MyStreet
+	//  user.accounts[2].roles[0] = 'admin'
+	//  user.accounts[2].roles[1] = 'manager'
 	//  user.account.company.address = xxxx
 	//  user.account.company.name = yyy
 	//  user.account.name = zzz
-	//  user.account.stuff = { 111, 222, 333 }
 	//  user.name = dean
 	//  color = blue
 	
-	//  user.account = 111  #weird but ok, we could do this too, but on binding, what would that mean?
-	//  BUT we need N maps, one for user, one for color, etc. etc.
+	//  user.account = 111  should blow up
 	public void createTree(ParamTreeNode paramTree, Map<String, String> params, FromEnum from) {
 		List<String> listSubKeys = null;
 		try {
