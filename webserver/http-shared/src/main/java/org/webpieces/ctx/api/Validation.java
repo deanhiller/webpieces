@@ -1,23 +1,16 @@
 package org.webpieces.ctx.api;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Validation extends FlashScope implements CookieScope {
 	
 	public static String COOKIE_NAME = FlashScope.COOKIE_NAME_PREFIX+"Errors";
 	
-	private Map<String, List<String>> fieldErrors = new HashMap<>();
+	private Map<String, String> fieldErrors = new HashMap<>();
 
 	public void addError(String name, String error) {
-		List<String> list = fieldErrors.get(name);
-		if(list == null) {
-			list = new ArrayList<>();
-			fieldErrors.put(name, list);
-		}
-		list.add(error);
+		fieldErrors.put(name, error);
 	}	
 	
 	public boolean hasErrors() {
@@ -32,20 +25,16 @@ public class Validation extends FlashScope implements CookieScope {
 	}
 
 	@Override
-	public Map<String, List<String>> getMapData() {
+	public Map<String, String> getMapData() {
 		return fieldErrors;
 	}
 
 	@Override
-	public void setMapData(Map<String, List<String>> dataMap) {
+	public void setMapData(Map<String, String> dataMap) {
 		fieldErrors = dataMap;
 	}
 
 	public Object getError(String fieldName) {
-		List<String> list = fieldErrors.get(fieldName);
-		if(list == null || list.size() == 0)
-			return null;
-		
-		return list.get(0);
+		return fieldErrors.get(fieldName);
 	}
 }

@@ -1,6 +1,5 @@
 package org.webpieces.ctx.api;
 
-import java.util.List;
 import java.util.Map;
 
 public interface CookieScope {
@@ -9,12 +8,12 @@ public interface CookieScope {
 
 	String getName();
 
-	Map<String, List<String>> getMapData();
+	Map<String, String> getMapData();
 
 	Integer getMaxAge();
 
 	void setExisted(boolean b);
 
-	void setMapData(Map<String, List<String>> dataMap);
+	void setMapData(Map<String, String> dataMap);
 
 }

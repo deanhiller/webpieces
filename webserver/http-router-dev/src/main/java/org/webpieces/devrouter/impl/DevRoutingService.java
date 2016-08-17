@@ -1,15 +1,12 @@
 package org.webpieces.devrouter.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -110,9 +107,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			reason = e.getMessage();
 		
 		RouterRequest newRequest = new RouterRequest();
-		List<String> error = new ArrayList<>();
-		error.add("Exception message="+reason);
-		newRequest.multiPartFields.put("webpiecesError", error);
+		newRequest.multiPartFields.put("webpiecesError", "Exception message="+reason);
 		
 		return new NotFoundInfo(result, newRequest);
 	}

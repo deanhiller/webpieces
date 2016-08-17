@@ -3,15 +3,12 @@ package org.webpieces.router.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -19,7 +16,7 @@ import org.webpieces.router.api.RouterConfig;
 
 public class CookieTranslator {
 
-	private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
+	//private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private RouterConfig config;
 	
 	@Inject
@@ -34,7 +31,7 @@ public class CookieTranslator {
 		}
 	}
 	
-	public RouterCookie translateScopeToCookie(String name, Map<String, List<String>> value, Integer maxAge) {
+	public RouterCookie translateScopeToCookie(String name, Map<String, String> value, Integer maxAge) {
 		try {
 			return scopeToCookie(name, value, maxAge);
 		} catch (UnsupportedEncodingException e) {
@@ -42,7 +39,7 @@ public class CookieTranslator {
 		}
 	}
 	
-	private RouterCookie scopeToCookie(String name, Map<String, List<String>> value, Integer maxAge) throws UnsupportedEncodingException {
+	private RouterCookie scopeToCookie(String name, Map<String, String> value, Integer maxAge) throws UnsupportedEncodingException {
 		RouterCookie cookie = new RouterCookie();
 		cookie.name= name;
     	cookie.domain = null;
@@ -61,56 +58,23 @@ public class CookieTranslator {
 		return cookie;
 	}
 
-	private StringBuilder translateValuesToCookieFormat(Map<String, List<String>> value) throws UnsupportedEncodingException {
+	private StringBuilder translateValuesToCookieFormat(Map<String, String> value) throws UnsupportedEncodingException {
 		StringBuilder data = new StringBuilder();
         String separator = "";
-        for (Map.Entry<String, List<String>> entry : value.entrySet()) {
-            if (entry.getValue() != null) {
+        for (Map.Entry<String, String> entry : value.entrySet()) {
+        	String val = entry.getValue();
+            if (val != null) {
     			String key = entry.getKey();
     			String encodedKey = URLEncoder.encode(key, config.getUrlEncoding().name());
-    			String encodedVal = encodeValuePiece(entry);
-            	if(encodedVal != null) {
+    			String encodedVal = URLEncoder.encode(val, config.getUrlEncoding().name());
 	                data.append(separator)
 	                        .append(encodedKey)
 	                        .append("=")
 	                        .append(encodedVal);
 	                separator = "&";
-            	}
             }
         }
 		return data;
-	}
-
-	private String encodeValuePiece(Map.Entry<String, List<String>> entry) throws UnsupportedEncodingException {
-		String encodedVal;
-		List<String> valueList = entry.getValue();
-		if(valueList.size() == 1) {
-			String val = valueList.get(0);
-			if(val == null)
-				encodedVal = null;
-			else
-				encodedVal = URLEncoder.encode(val, config.getUrlEncoding().name());
-		} else if(valueList.size() == 0) {
-			throw new IllegalStateException("This should never be possible.  we never add an empty list(only list with size=1 with null element maybe which is ok)");
-		} else {
-			encodedVal = encodeList(valueList);
-		}
-		return encodedVal;
-	}
-
-	private String encodeList(List<String> valueList) {
-		StringBuilder builder = new StringBuilder();
-		String separator = "";
-		for(String val : valueList) {
-			if(val != null) {
-				builder.append(separator)
-						.append(val);
-				separator = ",";
-			}
-		}
-		if(builder.length() == 0)
-			return null;
-		return builder.toString();
 	}
 
 	public CookieScope translateCookieToScope(RouterRequest req, CookieScope data) {
@@ -129,7 +93,7 @@ public class CookieTranslator {
 		}
 		
 		data.setExisted(true);
-		Map<String, List<String>> dataMap = new HashMap<>();
+		Map<String, String> dataMap = new HashMap<>();
 		String value = routerCookie.value;
 		String[] pieces = value.split("&");
 		for(String piece : pieces) {
@@ -137,14 +101,7 @@ public class CookieTranslator {
 			if(split.length == 2) {
 				String key = URLDecoder.decode(split[0], config.getUrlEncoding().name());
 				String val = URLDecoder.decode(split[1], config.getUrlEncoding().name());
-				if(val.contains(",")) {
-					String[] listElements = val.split(",");
-					List<String> list = Arrays.asList(listElements);
-					dataMap.put(key, list);
-				} else {
-					List<String> list = Arrays.asList(val);
-					dataMap.put(key, list);
-				}
+				dataMap.put(key, val);
 			}
 		}
 		

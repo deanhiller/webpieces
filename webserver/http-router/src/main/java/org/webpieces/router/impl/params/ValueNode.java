@@ -1,14 +1,12 @@
 package org.webpieces.router.impl.params;
 
-import java.util.List;
-
 public class ValueNode extends ParamNode {
 
-	private List<String> value;
+	private String value;
 	private String fullKeyName;
 	private FromEnum from;
 
-	public ValueNode(List<String> list, String fullKeyName, FromEnum from) {
+	public ValueNode(String list, String fullKeyName, FromEnum from) {
 		this.value = list;
 		this.fullKeyName = fullKeyName;
 		this.from = from;
@@ -22,7 +20,7 @@ public class ValueNode extends ParamNode {
 		return from;
 	}
 
-	public List<String> getValue() {
+	public String getValue() {
 		return value;
 	}
 

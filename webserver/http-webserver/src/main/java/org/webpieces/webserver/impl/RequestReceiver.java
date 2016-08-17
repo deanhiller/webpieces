@@ -1,8 +1,10 @@
 package org.webpieces.webserver.impl;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -97,7 +99,7 @@ public class RequestReceiver implements HttpRequestListener {
 		if(index > 0) {
 			routerRequest.relativePath = fullPath.substring(0, index);
 			String postfix = fullPath.substring(index+1);
-			routerRequest.queryParams = parser.parse(postfix);
+			parser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
 		} else {
 			routerRequest.relativePath = fullPath;	
 		}
@@ -109,6 +111,18 @@ public class RequestReceiver implements HttpRequestListener {
 		
 		routingService.processHttpRequests(routerRequest, streamer );
 	}
+
+	private String addToMap(String k, String v, Map<String, List<String>> queryParams) {
+		List<String> list = queryParams.get(k);
+		if(list == null) {
+			list = new ArrayList<>();
+			queryParams.put(k, list);
+		}
+		
+		list.add(v);
+		return null;
+	}
+
 
 	private Map<String, RouterCookie> copy(Map<String, RequestCookie> cookies) {
 		Map<String, RouterCookie> map = new HashMap<>();

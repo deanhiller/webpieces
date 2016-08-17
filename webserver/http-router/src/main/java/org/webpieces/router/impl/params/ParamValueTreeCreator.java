@@ -17,11 +17,11 @@ public class ParamValueTreeCreator {
 	
 	//  user.account = 111  #weird but ok, we could do this too, but on binding, what would that mean?
 	//  BUT we need N maps, one for user, one for color, etc. etc.
-	public void createTree(ParamTreeNode paramTree, Map<String, List<String>> params, FromEnum from) {
+	public void createTree(ParamTreeNode paramTree, Map<String, String> params, FromEnum from) {
 		List<String> listSubKeys = null;
 		try {
 			
-			for(Map.Entry<String, List<String>> entry : params.entrySet()) {
+			for(Map.Entry<String, String> entry : params.entrySet()) {
 				String key = entry.getKey();
 				String[] subKeys = key.split("\\.");
 				if(subKeys.length == 0) {
@@ -36,7 +36,7 @@ public class ParamValueTreeCreator {
 		}
 	}
 	
-	private void createTree(ParamTreeNode trees, List<String> asList, List<String> value, String fullKeyName, FromEnum from) {
+	private void createTree(ParamTreeNode trees, List<String> asList, String value, String fullKeyName, FromEnum from) {
 		if(asList.size() == 0)
 			return;
 		
@@ -68,7 +68,7 @@ public class ParamValueTreeCreator {
 		createTree(p, asList, value, fullKeyName, from);
 	}
 
-	private void createArray(ParamTreeNode trees, List<String> asList, List<String> value, String fullKeyName,
+	private void createArray(ParamTreeNode trees, List<String> asList, String value, String fullKeyName,
 			FromEnum from, String firstKey) {
 		int indexOf = firstKey.indexOf("[");
 		int nextIndex = firstKey.indexOf("]");

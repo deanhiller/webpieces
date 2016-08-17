@@ -6,16 +6,13 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
@@ -25,7 +22,7 @@ import org.webpieces.router.impl.RouteMeta;
 
 public class ArgumentTranslator {
 
-	private static final Logger log = LoggerFactory.getLogger(ArgumentTranslator.class);
+	//private static final Logger log = LoggerFactory.getLogger(ArgumentTranslator.class);
 	private ParamValueTreeCreator treeCreator;
 	private PrimitiveTranslator primitiveConverter;
 
@@ -56,11 +53,12 @@ public class ArgumentTranslator {
 		//For multipart AND for query params such as ?var=xxx&var=yyy&var2=xxx AND for url path params /mypath/{var1}/account/{id}
 		
 		//query params first
-		treeCreator.createTree(paramTree, req.queryParams, FromEnum.QUERY_PARAM);
+		Map<String, String> queryParams = translate(req.queryParams);
+		treeCreator.createTree(paramTree, queryParams, FromEnum.QUERY_PARAM);
 		//next multi-part params
 		treeCreator.createTree(paramTree, req.multiPartFields, FromEnum.FORM_MULTIPART);
 		//lastly path params
-		treeCreator.createTree(paramTree, createStruct(result.getPathParams()), FromEnum.URL_PATH);
+		treeCreator.createTree(paramTree, result.getPathParams(), FromEnum.URL_PATH);
 		
 		List<Object> args = new ArrayList<>();
 		for(Parameter paramMeta : paramMetas) {
@@ -71,6 +69,24 @@ public class ArgumentTranslator {
 			args.add(arg);
 		}
 		return args.toArray();
+	}
+
+	private Map<String, String> translate(Map<String, List<String>> queryParams) {
+		Map<String, String> newForm = new HashMap<>();
+		for(Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
+			String key = entry.getKey();
+			List<String> value = entry.getValue();
+			if(value.size() == 1) {
+				newForm.put(key, value.get(0));
+			} else {
+				for(int i = 0; i < value.size(); i++) {
+					//put in proper form such that invoking PropertyUtils works...
+					String newKey = key+"["+i+"]";
+					newForm.put(newKey, value.get(i));
+				}
+			}
+		}
+		return newForm;
 	}
 
 	private Object translate(RouterRequest req, RouteMeta meta, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
@@ -98,6 +114,7 @@ public class ArgumentTranslator {
 			ParameterizedType type = (ParameterizedType) fieldMeta.getParameterizedType();
 			Type[] actualTypeArguments = type.getActualTypeArguments();
 			Type type2 = actualTypeArguments[0];
+			@SuppressWarnings("rawtypes")
 			GenericMeta genMeta = new GenericMeta((Class) type2);
 			for(ParamNode node : paramNodes) {
 				Object bean = null;
@@ -174,12 +191,7 @@ public class ArgumentTranslator {
 		if(!(valuesToUse instanceof ValueNode))
 			throw new IllegalArgumentException("method takes param type="+paramTypeToCreate+" but complex structure found");
 		ValueNode node = (ValueNode) valuesToUse;
-		List<String> values = node.getValue();
-		if(values.size() > 1)
-			throw new NotFoundException("There is an array of values when the method only takes one value of type="+paramTypeToCreate+" and not an array");
-		String value = null;
-		if(values.size() == 1)
-			value = values.get(0);
+		String value = node.getValue();
 		if(paramTypeToCreate == String.class)
 			return value;
 		try {
@@ -221,10 +233,4 @@ public class ArgumentTranslator {
 		return false;
 	}
 
-	private Map<String, List<String>> createStruct(Map<String, String> params) {
-		//why is this not easy to do in jdk8 as this is pretty ugly...
-		return params.entrySet().stream()
-	            .collect(Collectors.toMap(entry -> entry.getKey(), entry -> Arrays.asList(entry.getValue()) ));
-	}
-	
 }

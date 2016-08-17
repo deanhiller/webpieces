@@ -37,7 +37,7 @@ public class RouterRequest {
 	 * this will be the multi-part form
 	 * upload with fields such as user.id, user.name, user.email, user.address, etc. etc.
 	 */
-	public Map<String, List<String>> multiPartFields = new HashMap<>();
+	public Map<String, String> multiPartFields = new HashMap<>();
 	
 	@Override
 	public String toString() {
