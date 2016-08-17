@@ -1,5 +1,7 @@
 package org.webpieces.webserver.beans.app;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.webpieces.ctx.api.Current;
@@ -69,9 +71,9 @@ public class BeansController {
 		return Actions.renderThis("user", user);
 	}
 	
-//	public Redirect postArray(UserDbo user) {
-//		lib1.validateUser(user);
-//		
-//		return Actions.redirect(routeId, args)
-//	}
+	public Redirect postArray(UserDbo user, List<UserDbo> users) {
+		lib1.validateUser(user);
+		
+		return Actions.redirect(BeansRouteId.ARRAY_FORM_ROUTE);
+	}
 }

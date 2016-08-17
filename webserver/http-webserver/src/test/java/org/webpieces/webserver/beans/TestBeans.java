@@ -123,6 +123,31 @@ public class TestBeans {
 
 	}
 	
+	@Test
+	public void testArraySaved() {
+		HttpRequest req = Requests.createPostRequest("/postArray", 
+				"user.accounts[1].name", "Account2Name",
+				"user.accounts[1].color", "green",
+				"user.accounts[2].addresses[0].number", "56",
+				"user.firstName", "D&D", 
+				"user.lastName", "Hiller",
+				"user.fullName", "Dean Hiller"
+				);
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		UserDbo user = mockSomeLib.getUser();
+		Assert.assertEquals("D&D", user.getFirstName());
+		Assert.assertEquals(3, user.getAccounts().size());
+		Assert.assertEquals("Account2Name", user.getAccounts().get(1).getName());
+		Assert.assertEquals(56, user.getAccounts().get(2).getAddresses().get(0).getNumber());
+	}
 	
 	private class AppOverridesModule implements Module {
 		@Override

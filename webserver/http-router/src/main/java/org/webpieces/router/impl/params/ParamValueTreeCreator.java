@@ -36,11 +36,17 @@ public class ParamValueTreeCreator {
 		}
 	}
 	
-	private void createTree(ParamTreeNode trees, List<String> asList, List<String> list, String fullKeyName, FromEnum from) {
+	private void createTree(ParamTreeNode trees, List<String> asList, List<String> value, String fullKeyName, FromEnum from) {
 		if(asList.size() == 0)
 			return;
 		
 		String firstKey = asList.remove(0);
+		if(firstKey.contains("[")) {
+			createArray(trees, asList, value, fullKeyName, from, firstKey);
+			return;
+		}
+		
+		
 		ParamNode node = trees.get(firstKey);
 		if(node != null) {
 			if(!(node instanceof ParamTreeNode))
@@ -49,16 +55,45 @@ public class ParamValueTreeCreator {
 				throw new IllegalArgumentException("Bug, not enough subkeys...conflict in param list like user.account.id=5 "
 						+ "and user.account=99 which is not allowed(since user.account would be an object so we can't set it to 99)");
 			ParamTreeNode tree = (ParamTreeNode) node;
-			createTree(tree, asList, list, fullKeyName, from);
+			createTree(tree, asList, value, fullKeyName, from);
 			return;
 		} else if(asList.size() == 0) {
-			ValueNode vNode = new ValueNode(list, fullKeyName, from);
+			ValueNode vNode = new ValueNode(value, fullKeyName, from);
 			trees.put(firstKey, vNode);
 			return;
 		}
 
 		ParamTreeNode p = new ParamTreeNode();
 		trees.put(firstKey, p);
-		createTree(p, asList, list, fullKeyName, from);
+		createTree(p, asList, value, fullKeyName, from);
+	}
+
+	private void createArray(ParamTreeNode trees, List<String> asList, List<String> value, String fullKeyName,
+			FromEnum from, String firstKey) {
+		int indexOf = firstKey.indexOf("[");
+		int nextIndex = firstKey.indexOf("]");
+		String key = firstKey.substring(0, indexOf);
+		String number = firstKey.substring(indexOf+1, nextIndex);
+		int arrayIndex = Integer.parseInt(number);
+		
+		ArrayNode n;
+		ParamNode paramNode = trees.get(key);
+		if(paramNode != null) {
+			if(!(paramNode instanceof ArrayNode))
+				throw new IllegalStateException("Encountered name="+fullKeyName+" but there was another key being posted that conflicts as the original one wasn't an array");
+			n = (ArrayNode) paramNode;
+		} else {
+			n = new ArrayNode();
+			trees.put(key, n);
+		}
+		
+		if(asList.size() > 0) {
+			//complex bean
+			ParamTreeNode treeNode = n.setOrGetTree(arrayIndex);
+			createTree(treeNode, asList, value, fullKeyName, from);
+		} else {
+			//primitive String, int, etc.
+			n.setElement(arrayIndex, new ValueNode(value, fullKeyName, from));
+		}
 	}
 }

@@ -1,14 +1,14 @@
 package org.webpieces.router.impl.params;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -16,10 +16,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
 
@@ -64,97 +64,73 @@ public class ArgumentTranslator {
 		
 		List<Object> args = new ArrayList<>();
 		for(Parameter paramMeta : paramMetas) {
-			Class<?> paramTypeToCreate = paramMeta.getType();
-			Param annotation = paramMeta.getAnnotation(Param.class);
-			String name = paramMeta.getName();
-			if(annotation != null) {
-				name = annotation.value();
-			}
-			
+			ParamMeta fieldMeta = new ParamMeta(paramMeta);
+			String name = fieldMeta.getName();
 			ParamNode paramNode = paramTree.get(name);
-			Object arg = translate(meta, paramNode, paramTypeToCreate, validator, name);
+			Object arg = translate(req, meta, paramNode, fieldMeta, validator);
 			args.add(arg);
 		}
 		return args.toArray();
 	}
 
-	private Object translate(RouteMeta meta, ParamNode valuesToUse, Class<?> paramTypeToCreate, Validation validator, String name) {
+	private Object translate(RouterRequest req, RouteMeta meta, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
-		Function<String, Object> converter = primitiveConverter.getConverter(paramTypeToCreate);
+		Class<?> fieldClass = fieldMeta.getFieldClass();
+		Function<String, Object> converter = primitiveConverter.getConverter(fieldClass);
 		if(converter != null) {
-			return convert(meta, name, valuesToUse, paramTypeToCreate, converter, validator);
-		} else if(paramTypeToCreate.isArray()) {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
-		} else if(paramTypeToCreate.isEnum()) {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
-		} else if(isPluginManaged(paramTypeToCreate)) {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it");
+			return convert(req, meta, valuesToUse, fieldMeta, converter, validator);
+		} else if(fieldClass.isArray()) {
+			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
+		} else if(fieldClass.isEnum()) {
+			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
+		} else if(isPluginManaged(fieldClass)) {
+			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
+		} else if(List.class.isAssignableFrom(fieldClass)) {
+			if(valuesToUse == null)
+				return null;
+			else if(!(valuesToUse instanceof ArrayNode)) {
+				throw new IllegalArgumentException("Found List on field or param="+fieldMeta+" but did not find ArrayNode type");
+			}
+
+			List<Object> list = new ArrayList<>();
+			ArrayNode n = (ArrayNode) valuesToUse;
+			List<ParamNode> paramNodes = n.getList();
+			ParameterizedType type = (ParameterizedType) fieldMeta.getParameterizedType();
+			Type[] actualTypeArguments = type.getActualTypeArguments();
+			Type type2 = actualTypeArguments[0];
+			GenericMeta genMeta = new GenericMeta((Class) type2);
+			for(ParamNode node : paramNodes) {
+				Object bean = null;
+				if(node != null)
+					bean = translate(req, meta, node, genMeta, validator);
+					
+				list.add(bean);
+			}
+			return list;
+			
+		} else if(valuesToUse instanceof ArrayNode) {
+			throw new IllegalArgumentException("Incoming array need a type List but instead found type="+fieldClass+" on field="+fieldMeta);
 		} else if(valuesToUse instanceof ValueNode) {
 			ValueNode v = (ValueNode) valuesToUse;
 			String fullName = v.getFullName();
-			throw new IllegalArgumentException("Could not convert incoming value="+v.getValue()+" of key name="+fullName);
+			throw new IllegalArgumentException("Could not convert incoming value="+v.getValue()+" of key name="+fullName+" field="+fieldMeta);
 		} else if(!(valuesToUse instanceof ParamTreeNode)) {
-			throw new IllegalStateException("Bug, must be missing a case. v="+valuesToUse);
+			throw new IllegalStateException("Bug, must be missing a case. v="+valuesToUse+" type to field="+fieldMeta);
 		}
 		
-		Object bean = createBean(paramTypeToCreate);
+		Object bean = createBean(fieldClass);
 		ParamTreeNode tree = (ParamTreeNode) valuesToUse;
 		for(Map.Entry<String, ParamNode> entry: tree.entrySet()) {
 			String key = entry.getKey();
 			ParamNode value = entry.getValue();
 			Field field = findBeanFieldType(bean.getClass(), key, new ArrayList<>());
-			BiFunction<Object, Object, Void> applyBeanValueFunction = createFunction(bean.getClass(), field);
-			Class<?> fieldType = field.getType();
-			Object translatedValue = translate(meta, value, fieldType, validator, name);
-			//skip setting to null if it is a primitive(allow setting null on a String 
-			if(translatedValue != null)
-				applyBeanValueFunction.apply(bean, translatedValue);
-			else if(!fieldType.isPrimitive())
-				applyBeanValueFunction.apply(bean, translatedValue);
+			
+			FieldMeta nextFieldMeta = new FieldMeta(field);
+			Object translatedValue = translate(req, meta, value, nextFieldMeta, validator);
+			
+			nextFieldMeta.setValueOnBean(bean, translatedValue);
 		}
 		return bean;
-	}
-
-	private BiFunction<Object, Object, Void> createFunction(Class<? extends Object> beanClass, Field field) {
-		String key = field.getName();
-		String cap = key.substring(0, 1).toUpperCase() + key.substring(1);
-		String methodName = "set"+cap;
-
-		//What is slower....throwing exceptions or looping over methods to not through exception?....
-		try {
-			Method method = beanClass.getMethod(methodName, field.getType());
-			return (bean, val) -> invokeMethod(method, bean, val);
-		} catch (NoSuchMethodException e) {
-			log.warn("performance penalty since method="+methodName+" does not exist on class="+beanClass.getName()+" using field instead to set data");
-			return (bean, val) -> setField(field, bean, val);
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private Void setField(Field field, Object bean, Object val) {
-		field.setAccessible(true);
-		try {
-			field.set(bean, val);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-		return null;
-	}
-
-	private Void invokeMethod(Method method, Object bean, Object val) {
-		try {
-			method.invoke(bean, val);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
-		}
-		return null;
 	}
 
 	private Field findBeanFieldType(Class<?> beanType, String key, List<String> classList) {
@@ -184,14 +160,13 @@ public class ArgumentTranslator {
 		}
 	}
 
-	private Object convert(RouteMeta meta, String name, ParamNode valuesToUse, Class<?> paramTypeToCreate, Function<String, Object> converter, Validation validator) {
-		Method method = meta.getMethod();
-		if(paramTypeToCreate.isPrimitive()) {
-			if(valuesToUse == null)
-				//This should be a 404 NotFound in production (in cases where user types a non-int value in the query param)
-				throw new NotFoundException("The method='"+method+"' requires that @Param("+name+") be of type="
-						+paramTypeToCreate+" but the request did not contain any value in query params, path "
-								+ "params nor multi-part form fields with a value and we can't convert null to a primitive");
+	private Object convert(RouterRequest req, RouteMeta routeMeta, ParamNode valuesToUse, Meta fieldMeta, Function<String, Object> converter, Validation validator) {
+		Class<?> paramTypeToCreate = fieldMeta.getFieldClass();
+		Method method = routeMeta.getMethod();
+		if(fieldMeta instanceof ParamMeta) {
+			//for params only not fields as with fields, we just don't set the field and skip it...before we call a method,
+			//we MUST have a value to set
+			checkForBadNullToPrimitiveConversion(req, valuesToUse, fieldMeta, method);
 		}
 		
 		if(valuesToUse == null)
@@ -215,8 +190,27 @@ public class ArgumentTranslator {
 				return null;
 			} else
 				//This should be a 404 in production if the url is bad...
-				throw new NotFoundException("The method='"+method+"' requires that the parameter named '"+name+"' or annotated with @Param("+name+") be of type="
+				throw new NotFoundException("The method='"+method+"' requires that the parameter or field '"+fieldMeta+"' be of type="
 						+paramTypeToCreate+" but the request contained a value that could not be converted="+value);
+		}
+	}
+
+	private void checkForBadNullToPrimitiveConversion(RouterRequest req, ParamNode valuesToUse, Meta fieldMeta,
+			Method method) {
+		Class<?> paramTypeToCreate2 = fieldMeta.getFieldClass();
+		if(paramTypeToCreate2.isPrimitive()) {
+			if(valuesToUse == null) {
+				String s = "The method='"+method+"' requires that "+fieldMeta+" be of type="
+						+paramTypeToCreate2+" but the request did not contain any value in query params, path "
+						+ "params nor multi-part form fields with a value and we can't convert null to a primitive";
+				if(req.method == HttpMethod.GET) {
+					//For GET with query params or path urls, if we can't convert, it should be a 404...
+					throw new NotFoundException(s);
+				} else {
+					//For POST with multipart, this should be a 500
+					throw new IllegalArgumentException(s);
+				}
+			}
 		}
 	}
 
