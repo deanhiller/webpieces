@@ -30,8 +30,9 @@ httpclient - http client built on above core components
 httpproxy - build on asyncserver and http client
 
 TODO: 
+* get i18n working and then get it working with field.tag then getting it working with arrays and field.tag(which is harder)
 * unit test arrays in multi-part form, query params! and test for flash working with arrays(not sure it will or not)
-* unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param
+* unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
 * need to test out cookie length and 150 cookies of certain length
 * write an escapehtml tag
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
