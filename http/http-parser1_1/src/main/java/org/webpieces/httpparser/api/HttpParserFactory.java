@@ -3,7 +3,9 @@ package org.webpieces.httpparser.api;
 import java.nio.charset.Charset;
 
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.httpparser.impl.HttpParserImpl;
+import org.webpieces.httpparser.impl.subparsers.HeaderPriorityParserImpl;
 
 public class HttpParserFactory {
 
@@ -20,4 +22,7 @@ public class HttpParserFactory {
 		return new HttpParserImpl(pool);
 	}
 	
+	public static HeaderPriorityParser createHeaderParser() {
+		return new HeaderPriorityParserImpl();
+	}
 }

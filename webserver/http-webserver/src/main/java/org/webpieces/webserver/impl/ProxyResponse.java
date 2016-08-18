@@ -18,20 +18,22 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.exception.HttpException;
-import org.webpieces.httpparser.api.common.ResponseCookie;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.common.ResponseCookie;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
-import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
@@ -44,16 +46,18 @@ public class ProxyResponse implements ResponseStreamer {
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
 	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private static final HeaderPriorityParser cookieParser = HttpParserFactory.createHeaderParser();
+	
 	private FrontendSocket channel;
 	private HttpRequest request;
 	private TemplateService templatingService;
 	private WebServerConfig config;
-	private ReverseUrlLookup lookup;
+	private RoutingService urlLookup;
 
-	public ProxyResponse(HttpRequest req, FrontendSocket channel, ReverseUrlLookup lookup, TemplateService templatingService, WebServerConfig config) {
+	public ProxyResponse(HttpRequest req, FrontendSocket channel, RoutingService lookup, TemplateService templatingService, WebServerConfig config) {
 		this.request = req;
 		this.channel = channel;
-		this.lookup = lookup;
+		this.urlLookup = lookup;
 		this.templatingService = templatingService;
 		this.config = config;
 	}
@@ -121,7 +125,7 @@ public class ProxyResponse implements ResponseStreamer {
 		StringWriter out = new StringWriter();
 		
 		try {
-			templatingService.runTemplate(template, out, resp.pageArgs, lookup);
+			templatingService.runTemplate(template, out, resp.pageArgs, (id, args) -> urlLookup.convertToUrl(id, args));
 		} catch(MissingPropertyException e) {
 			Set<String> keys = resp.pageArgs.keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"
@@ -240,7 +244,7 @@ public class ProxyResponse implements ResponseStreamer {
 		cookie.setMaxAgeSeconds(c.maxAgeSeconds);
 		cookie.setSecure(c.isSecure);
 		cookie.setHttpOnly(c.isHttpOnly);
-		return cookie.createHeader();
+		return cookieParser.createHeader(cookie);
 	}
 
 	private void closeIfNeeded() {

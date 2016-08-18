@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,16 +21,16 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.common.RequestCookie;
 import org.webpieces.httpparser.api.dto.Headers;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.UrlInfo;
+import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.templating.api.ReverseUrlLookup;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
@@ -38,15 +40,17 @@ import org.webpieces.webserver.impl.parsing.FormUrlEncodedParser;
 public class RequestReceiver implements HttpRequestListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(RequestReceiver.class);
+	private static final HeaderPriorityParser headerParser = HttpParserFactory.createHeaderParser();
+	
 	@Inject
 	private RoutingService routingService;
 	@Inject
 	private TemplateService templatingService;
 	@Inject
 	private WebServerConfig config;
-
+	@Inject
 	private FormUrlEncodedParser parser = new FormUrlEncodedParser();
-	private UrlLookup lookup = new UrlLookup();
+	
 	private Set<String> headersSupported = new HashSet<>();
 	
 	public RequestReceiver() {
@@ -56,13 +60,14 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.USER_AGENT.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONTENT_LENGTH.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONTENT_TYPE.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.ACCEPT_LANGUAGE.getHeaderName().toLowerCase());
 	}
 	
 	
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
-		ResponseStreamer streamer = new ProxyResponse(req, channel, lookup, templatingService, config);
+		ResponseStreamer streamer = new ProxyResponse(req, channel, routingService, templatingService, config);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
@@ -84,12 +89,8 @@ public class RequestReceiver implements HttpRequestListener {
 		if(method == null)
 			throw new UnsupportedOperationException("method not supported="+requestLine.getMethod().getMethodAsString());
 
-		//http://stackoverflow.com/questions/16305814/are-multiple-cookie-headers-allowed-in-an-http-request
-		Header cookieHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.COOKIE);
-		if(cookieHeader != null) {
-			Map<String, RequestCookie> cookies = RequestCookie.createCookies(cookieHeader);
-			routerRequest.cookies = copy(cookies);
-		}
+		parseCookies(req, routerRequest);
+		parseAcceptLang(req, routerRequest);
 		
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
@@ -112,6 +113,23 @@ public class RequestReceiver implements HttpRequestListener {
 		routingService.processHttpRequests(routerRequest, streamer );
 	}
 
+
+	private void parseAcceptLang(HttpRequest req, RouterRequest routerRequest) {
+		List<Locale> headerItems = headerParser.parseAcceptLangFromRequest(req);
+		
+		//tack on DefaultLocale if not there..
+		if(!headerItems.contains(config.getDefaultLocale()))
+			headerItems.add(config.getDefaultLocale());
+		
+		routerRequest.preferredLocales = headerItems;
+	}
+
+	private void parseCookies(HttpRequest req, RouterRequest routerRequest) {
+		//http://stackoverflow.com/questions/16305814/are-multiple-cookie-headers-allowed-in-an-http-request
+		Map<String, String> cookies = headerParser.parseCookiesFromRequest(req);
+		routerRequest.cookies = copy(cookies);
+	}
+
 	private String addToMap(String k, String v, Map<String, List<String>> queryParams) {
 		List<String> list = queryParams.get(k);
 		if(list == null) {
@@ -124,19 +142,19 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 
 
-	private Map<String, RouterCookie> copy(Map<String, RequestCookie> cookies) {
+	private Map<String, RouterCookie> copy(Map<String, String> cookies) {
 		Map<String, RouterCookie> map = new HashMap<>();
-		for(RequestCookie entry : cookies.values()) {
-			RouterCookie c = copy(entry);
+		for(Entry<String, String> entry : cookies.entrySet()) {
+			RouterCookie c = copy(entry.getKey(), entry.getValue());
 			map.put(c.name, c);
 		}
 		return map;
 	}
 
-	private RouterCookie copy(RequestCookie cookie) {
+	private RouterCookie copy(String name, String val) {
 		RouterCookie rCookie = new RouterCookie();
-		rCookie.name = cookie.getName();
-		rCookie.value = cookie.getValue();
+		rCookie.name = name;
+		rCookie.value = val;
 		return rCookie;
 	}
 
@@ -191,10 +209,4 @@ public class RequestReceiver implements HttpRequestListener {
 	public void releaseBackPressure(FrontendSocket channel) {
 	}
 
-	private class UrlLookup implements ReverseUrlLookup {
-		@Override
-		public String fetchUrl(String routeId, Map<String, String> args) {
-			return routingService.convertToUrl(routeId, args);
-		}
-	}
 }

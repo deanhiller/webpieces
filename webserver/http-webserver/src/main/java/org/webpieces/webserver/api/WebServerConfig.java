@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
@@ -34,6 +35,7 @@ public class WebServerConfig {
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
 	private Charset htmlResponsePayloadEncoding = StandardCharsets.UTF_8;
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
+	private Locale defaultLocale = Locale.getDefault();
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -115,6 +117,13 @@ public class WebServerConfig {
 		this.validateRouteIdsOnStartup = validateRouteIdsOnStartup;
 		return this;
 	}
-	
+
+	public Locale getDefaultLocale() {
+		return defaultLocale;
+	}
+
+	public void setDefaultLocale(Locale defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
 	
 }

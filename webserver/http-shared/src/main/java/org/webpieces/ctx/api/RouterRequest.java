@@ -2,6 +2,7 @@ package org.webpieces.ctx.api;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RouterRequest {
@@ -38,6 +39,8 @@ public class RouterRequest {
 	 * upload with fields such as user.id, user.name, user.email, user.address, etc. etc.
 	 */
 	public Map<String, String> multiPartFields = new HashMap<>();
+
+	public List<Locale> preferredLocales;
 	
 	@Override
 	public String toString() {
