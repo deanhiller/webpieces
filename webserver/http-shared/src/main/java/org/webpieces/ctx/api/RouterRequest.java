@@ -1,5 +1,6 @@
 package org.webpieces.ctx.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -40,7 +41,9 @@ public class RouterRequest {
 	 */
 	public Map<String, String> multiPartFields = new HashMap<>();
 
-	public List<Locale> preferredLocales;
+	public List<Locale> preferredLocales = new ArrayList<>();
+	
+	public List<AcceptMediaType> acceptedTypes = new ArrayList<>();
 	
 	@Override
 	public String toString() {

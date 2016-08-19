@@ -8,15 +8,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.common.ResponseCookie;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderItem;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 
 public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 	
+	private static final Logger log = LoggerFactory.getLogger(HeaderPriorityParserImpl.class);
 	
 	@Override
 	public List<Locale> parseAcceptLangFromRequest(HttpRequest req) {
@@ -47,6 +51,8 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 		    String[] arr = str.trim().replace("-", "_").split(";");
 
 		    T item = parseFunction.apply(arr[0]);
+		    if(item == null)
+		    	continue;
 		    
 		  //Parse the q-value
 		    Double q = 1.0D;
@@ -59,7 +65,6 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 		    }
 
 		  //Print the Locale and associated q-value
-		    System.out.println(q + " - " + arr[0] + "\t " + item);
 		    HeaderItem<T> headerItem = new HeaderItem<>(q, item);
 		    headerItems.add(headerItem);
 		}
@@ -134,4 +139,36 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 
     	return new Header(KnownHeaderName.SET_COOKIE, headerVal);
     }
+
+	@Override
+	public List<AcceptType> parseAcceptFromRequest(HttpRequest req) {
+		List<AcceptType> list = new ArrayList<>();
+		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.ACCEPT);
+		if(header == null)
+			return list;
+		
+		String value = header.getValue();
+		return parsePriorityItems(value, s -> parseAcceptSubitem(s));
+	}
+	
+	private AcceptType parseAcceptSubitem(String subItem) {
+		String[] pieces = subItem.trim().split("/");
+		if(pieces.length != 2) {
+			log.warn("subItem not valid since missing / item="+subItem+". we are skipping it");
+			return null;
+		}
+		
+		if("*".equals(pieces[0])) {
+			if("*".equals(pieces[1])) {
+				return new AcceptType();
+			} else {
+				log.warn("subItem not valid since missing */"+pieces[1]+" is not allowed in spec.  item="+subItem+". we are skipping it");
+				return null;
+			}
+		} else if("*".equals(pieces[1])) {
+			return new AcceptType(pieces[1]);
+		}
+		
+		return new AcceptType(pieces[0], pieces[1]);
+	}
 }

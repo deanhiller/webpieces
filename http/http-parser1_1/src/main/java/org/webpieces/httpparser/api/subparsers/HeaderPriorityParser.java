@@ -15,6 +15,8 @@ public interface HeaderPriorityParser {
 
 	Map<String, String> parseCookiesFromRequest(HttpRequest req);
 
+	List<AcceptType> parseAcceptFromRequest(HttpRequest req);
+	
 	Header createHeader(ResponseCookie cookie);
 	
 	<T> List<T> parsePriorityItems(String value, Function<String, T> parseFunction);

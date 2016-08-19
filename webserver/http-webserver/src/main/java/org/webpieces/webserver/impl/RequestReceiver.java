@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.AcceptMediaType;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -28,6 +29,7 @@ import org.webpieces.httpparser.api.dto.Headers;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.UrlInfo;
+import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
@@ -61,6 +63,7 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.CONTENT_LENGTH.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONTENT_TYPE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.ACCEPT_LANGUAGE.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.ACCEPT.getHeaderName().toLowerCase());
 	}
 	
 	
@@ -91,6 +94,7 @@ public class RequestReceiver implements HttpRequestListener {
 
 		parseCookies(req, routerRequest);
 		parseAcceptLang(req, routerRequest);
+		parseAccept(req, routerRequest);
 		
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
@@ -102,6 +106,7 @@ public class RequestReceiver implements HttpRequestListener {
 			String postfix = fullPath.substring(index+1);
 			parser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
 		} else {
+			routerRequest.queryParams = new HashMap<>();
 			routerRequest.relativePath = fullPath;	
 		}
 		
@@ -113,6 +118,22 @@ public class RequestReceiver implements HttpRequestListener {
 		routingService.processHttpRequests(routerRequest, streamer );
 	}
 
+
+	private void parseAccept(HttpRequest req, RouterRequest routerRequest) {
+		List<AcceptType> types = headerParser.parseAcceptFromRequest(req);
+		List<AcceptMediaType> acceptedTypes = new ArrayList<>();
+		
+		for(AcceptType t : types) {
+			if(t.isMatchesAllTypes())
+				acceptedTypes.add(new AcceptMediaType());
+			else if(t.isMatchesAllSubtypes())
+				acceptedTypes.add(new AcceptMediaType(t.getMainType()));
+			else
+				acceptedTypes.add(new AcceptMediaType(t.getMainType(), t.getSubType()));
+		}
+		
+		routerRequest.acceptedTypes = acceptedTypes;
+	}
 
 	private void parseAcceptLang(HttpRequest req, RouterRequest routerRequest) {
 		List<Locale> headerItems = headerParser.parseAcceptLangFromRequest(req);
@@ -140,7 +161,6 @@ public class RequestReceiver implements HttpRequestListener {
 		list.add(v);
 		return null;
 	}
-
 
 	private Map<String, RouterCookie> copy(Map<String, String> cookies) {
 		Map<String, RouterCookie> map = new HashMap<>();
