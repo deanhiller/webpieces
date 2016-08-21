@@ -10,8 +10,8 @@ public enum TemplateToken {
     END_TAG("#{/", "}#"),       // #{/...}#
     START_END_TAG("#{", "/}#"), // #{.../}#
     MESSAGE("&{", "}&"),        // &{...}&
-    ACTION("@{", "}@"),         // @{...}@
-    ABSOLUTE_ACTION("@@{", "}@@"), // @@{...}@@
+    ACTION("@[", "]@"),         // @[...]@
+    ABSOLUTE_ACTION("@@[", "]@@"), // @@[...]@@
     COMMENT("*{", "}*");          // *{...}*
     
     private String start;

@@ -2,11 +2,11 @@
   <head>
   </head>
   <body>
-    #{a href:@VERBATIM_ROUTE_ID[:], id:'myid'}#My link#{/a}#
-    #{a href:@TagsRouteId.IF_ROUTE_ID[:]}#My render link#{/a}#  
-    #{a href:@org.webpieces.webserver.tags.app.TagsRouteId.ELSE_ROUTE_ID[:]}#My link#{/a}#
+    #{a href:@[VERBATIM_ROUTE_ID]@, id:'myid'}#My link#{/a}#
+    #{a href:@[TagsRouteId.IF_ROUTE_ID]@}#My render link#{/a}#  
+    #{a href:@[org.webpieces.webserver.tags.app.TagsRouteId.ELSE_ROUTE_ID]@}#My link#{/a}#
     
-    #{a href:@REDIRECT_PAGE[id:user]}#The link#{/a}#
+    #{a href:@[REDIRECT_PAGE, id:user]@}#The link#{/a}#
     
   </body>
 </html>

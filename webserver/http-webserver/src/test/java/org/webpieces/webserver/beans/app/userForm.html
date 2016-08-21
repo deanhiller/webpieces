@@ -4,7 +4,7 @@
   <body>
     Add User<br/>
     
-#{form action:@POST_USER_ROUTE[:]}#
+#{form action:@[POST_USER_ROUTE]@}#
 
 #{field 'user.firstName'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>#{/field}#
     

@@ -29,7 +29,7 @@ public abstract class ParseTagArgs implements GroovyGen {
             }
             
             //TODO: record the tag used and source location to be verified at build time(ie. test will verify)
-        	while(tagArgs.contains("@")) {
+        	while(tagArgs.contains("@[")) {
         		tagArgs = replaceRouteIds(token, tagArgs, indexOfSpace, callback);
         	}
             
@@ -40,31 +40,26 @@ public abstract class ParseTagArgs implements GroovyGen {
 	}
 
 	private String replaceRouteIds(Token token, String tagArgs, int indexOfSpace, CompileCallback callback) {
-		int atIndex = tagArgs.indexOf("@");
-		int indexOfLeftParen = tagArgs.indexOf("[", atIndex);
-		int indexOfRightParen = tagArgs.indexOf("]", indexOfLeftParen);
-		int indexOfColon = tagArgs.indexOf(":", indexOfLeftParen);
-		int nextAtIndex = tagArgs.indexOf("@", atIndex+1);
+		int atIndex = tagArgs.indexOf("@[");
+		int nextAtIndex = tagArgs.indexOf("]@");
+		if(nextAtIndex < 0)
+			throw new IllegalArgumentException("Missing closing ]@ on the route."+token.getSourceLocation(true));
 
-		int atLocation = atIndex+ 1 + indexOfSpace+1;
-		if(indexOfLeftParen < 0) 
-			throw new IllegalArgumentException(getMessage(token, atLocation, "Missing Left Bracket after @ROUTE"));
-		else if(indexOfRightParen < 0)
-			throw new IllegalArgumentException(getMessage(token, atLocation, "Missing Right Bracket after @ROUTE"));
-		else if(indexOfColon < 0) 
-			throw new IllegalArgumentException(getMessage(token, atLocation, "Missing : as you must have @{route}{groovymap} where an empty groovy map is [:] in the expression"));
-		else if(nextAtIndex > 0) {
-			if(indexOfLeftParen > nextAtIndex)
-				throw new IllegalArgumentException(getMessage(token, atLocation, "Missing Left Bracket after @ROUTE"));
-			else if(indexOfRightParen > nextAtIndex)
-				throw new IllegalArgumentException(getMessage(token, atLocation, "Missing Right Bracket after @ROUTE"));
-		}
-
+		int firstCommaLocation = tagArgs.indexOf(",", atIndex);
 		String prefix = tagArgs.substring(0, atIndex);
-		String route = tagArgs.substring(atIndex+1, indexOfLeftParen).trim();
-		String args = tagArgs.substring(indexOfLeftParen, indexOfRightParen+1);
-		String leftover = tagArgs.substring(indexOfRightParen+1);
-
+		String leftover = tagArgs.substring(nextAtIndex+2);
+		String route;
+		String args;
+		if(firstCommaLocation > 0 && firstCommaLocation < nextAtIndex) {
+			route = tagArgs.substring(atIndex+2, firstCommaLocation);
+			args = tagArgs.substring(firstCommaLocation+1, nextAtIndex);
+			args = "["+args+"]";
+		} else {
+			route = tagArgs.substring(atIndex+2, nextAtIndex);
+			args = "[:]";
+		}
+		
+		//TODO: This is not proper as it will break if there is a Map in a Map...but it works for now on validating the key names
 		List<String> argNames = fetchArgNames(args, token);
 		callback.routeIdFound(route, argNames, token.getSourceLocation(false));
 		
