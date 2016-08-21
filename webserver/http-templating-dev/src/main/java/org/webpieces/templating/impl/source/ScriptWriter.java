@@ -11,7 +11,6 @@ import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.templating.impl.tags.TagGen;
 
 public class ScriptWriter {
@@ -97,8 +96,9 @@ public class ScriptWriter {
         return text;
 	}
 
-	public void printScript() {
-		
+	public void printScript(TokenImpl token, ScriptOutputImpl sourceCode) {
+		sourceCode.print(token.getValue().trim());
+		sourceCode.appendTokenComment(token);
 	}
 
 	public void printExpression(TokenImpl token, ScriptOutputImpl sourceCode) {
@@ -113,7 +113,7 @@ public class ScriptWriter {
 		sourceCode.println(         "exitExpression();");
 	}
 
-	public void printMessage() {
+	public void printMessage(TokenImpl token, ScriptOutputImpl sourceCode) {
 		
 	}
 

@@ -55,3 +55,27 @@ TODO:
 
 
 * ALPN is next!!!! 
+
+Examples.....
+
+${user.account.address}$
+*{ comment ${user.account.address}$ is not executed }*
+&{'This is account %1', 'i18nkey', user.account.name}&  // Default text, key, arguments
+%{  user = SomeLogic.getUser(); }%
+#{if user}#User does exist#{/if}#{elseif}#User does not exist#{/if}#
+@[ROUTE_ID, user:account.user.name, arg:'flag']@
+@@[ROUTE_ID, user:account.user.name, arg:'flag']@@
+
+The last two are specia and can be used between tag tokens and between i18n tokens like so...
+ 
+In an href tag..                                                     #{a href:@[ROUTE, user:user, arg:'flag']@}#Some Link#{/a}# 
+In text..                                                     This is some text @[ROUTE, user:user, arg:'flag']@
+In basic i18n tag                       &{'Hi, this link is text %1', 'key1', @[ROUTE, user:user, arg:'flag']@}&
+In i18n tag...    &{'Hi %1, some text points to %2', 'key', arg1, '<a href="'+@[ROUTE, user:user, arg:'flag']@"+'>&{link}&</a>'}&
+
+generates.....
+__getMessage(args)
+
+
+
+

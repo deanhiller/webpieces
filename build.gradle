@@ -47,6 +47,7 @@ ext {
        'guava':           'com.google.guava:guava:19.0',
        'eclipse-compiler':'org.eclipse.jdt.core.compiler:ecj:4.5.1',
        'apache-commons-io': 'org.apache.commons:commons-io:1.3.2',
+       'metrics':         'io.dropwizard.metrics:metrics-core:3.1.0',
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
     ]   
 

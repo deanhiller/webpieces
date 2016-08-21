@@ -73,13 +73,13 @@ public class GroovyScriptGenerator {
 				creator.printPlain(token, sourceCode);
 				break;
 			case SCRIPT:
-				creator.printScript();
+				creator.printScript(token, sourceCode);
 				break;
 			case EXPR:
 				creator.printExpression(token, sourceCode);
 				break;
 			case MESSAGE:
-				creator.printMessage();
+				creator.printMessage(token, sourceCode);
 				break;
 			case ACTION:
 				creator.printAction(false);
