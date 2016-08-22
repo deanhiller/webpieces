@@ -12,8 +12,7 @@ public abstract class ParseTagArgs implements GroovyGen {
 	
 	protected void generateStartAttrs(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
 		String tagArgs = fetchArgs(token, callback);
-		sourceCode.print("_attrs" + uniqueId + " = [" + tagArgs + "];");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println("_attrs" + uniqueId + " = [" + tagArgs + "];", token);
 		sourceCode.println();
 	}
 
@@ -84,8 +83,4 @@ public abstract class ParseTagArgs implements GroovyGen {
 		return names;
 	}
 
-	private String getMessage(Token token, int atIndex, String errorMsg) {
-		return "Expression='"+token.getCleanValue()+"' has an error with @ token at position="
-				+atIndex+" in the expression in this msg.  Error='"+errorMsg+"'  "+token.getSourceLocation(true);
-	}
 }

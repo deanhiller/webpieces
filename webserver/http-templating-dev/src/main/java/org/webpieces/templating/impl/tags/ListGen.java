@@ -37,32 +37,28 @@ public class ListGen extends ParseTagArgs {
         
         String result = s.toString().replaceAll("XXX", ""+uniqueId);
         
-        sourceCode.print(result);
-		sourceCode.appendTokenComment(token);
+        sourceCode.println(result, token);
 		sourceCode.println();
 		
-		sourceCode.print("      _body" + uniqueId + " = {");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println("      _body" + uniqueId + " = {", token);
 		sourceCode.println();
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token, int uniqueId) {
 		String srcLocation = token.getSourceLocation(false);
-		sourceCode.print("      };"); //close _body closure
-		sourceCode.appendTokenComment(token);
-		sourceCode.println("      String bodyStr = runClosure('list', _body"+uniqueId+", '"+srcLocation+"');");
-		sourceCode.println("      __out.print(bodyStr);");
+		sourceCode.println("      };", token); //close _body closure
+		sourceCode.println("      String bodyStr = runClosure('list', _body"+uniqueId+", '"+srcLocation+"');", token);
+		sourceCode.println("      __out.print(bodyStr);", token);
 		sourceCode.println();
 		
-		sourceCode.println("   }"); //close for loop
-		sourceCode.println("}"); //close if statement
+		sourceCode.println("   }", token); //close for loop
+		sourceCode.println("}", token); //close if statement
 		
 		//This is only here so it connects to the #{else} tag seamlesslessly 
 		//as in if(hasItems){} else {.....} so the else tag works with the list tag
-		sourceCode.println("if(hasItems"+uniqueId+") {");  
-		sourceCode.print("}");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println("if(hasItems"+uniqueId+") {", token);  
+		sourceCode.println("}", token);
 		sourceCode.println();
 	}
 

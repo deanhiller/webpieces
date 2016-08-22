@@ -1,4 +1,4 @@
-package org.webpieces.webserver.tags;
+package org.webpieces.webserver.i18n;
 
 import java.util.List;
 
@@ -17,22 +17,22 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestFieldTag {
+public class TestI18n {
 
-	private MockFrontendSocket socket = new MockFrontendSocket();
 	private HttpRequestListener server;
-	
+	private MockFrontendSocket socket = new MockFrontendSocket();
+
 	@Before
 	public void setUp() {
 		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("i18nMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, metaFile);
 		server = webserver.start();
 	}
 
 	@Test
-	public void testBasic() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/customFieldTag");
+	public void testDefaultText() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		
 		server.processHttpRequests(socket, req , false);
 		
@@ -41,10 +41,21 @@ public class TestFieldTag {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		//This can be a bit brittle if people change field.tag but we HAVE to verify this html was not escaped on accident as it was previously
-		response.assertContains("<div class=`controls`>".replace('`', '"'));
-		response.assertContains("<input type=`text` name=`user` value=`Dean` class=`input-xlarge`/>".replace('`', '"'));
-		response.assertContains("<span id=`user_errorMsg` class=`errorMsg`></span>".replace('`', '"'));
+		response.assertContains("This is the default text that would go here and can be quite a long\n      version");
+		response.assertContains("Hi Dean, we would like to take you to Italy");
 	}
 
+//	@Test
+//	public void testChineseText() {
+//		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
+//		
+//		server.processHttpRequests(socket, req , false);
+//		
+//		List<FullResponse> responses = socket.getResponses();
+//		Assert.assertEquals(1, responses.size());
+//
+//		FullResponse response = responses.get(0);
+//		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+//		response.assertContains("Hi Dean Hiller, this is testing");
+//	}
 }

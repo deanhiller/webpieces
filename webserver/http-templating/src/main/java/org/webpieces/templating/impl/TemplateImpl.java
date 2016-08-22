@@ -1,6 +1,9 @@
 package org.webpieces.templating.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.webpieces.templating.api.HtmlTagLookup;
@@ -26,7 +29,8 @@ public class TemplateImpl implements Template {
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);		
 		
-		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, urlLookup);
+		List<ResourceBundle> bundles = new ArrayList<>();
+		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, urlLookup, bundles);
 
 		t.run();
 		

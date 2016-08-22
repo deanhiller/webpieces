@@ -1,8 +1,12 @@
 package org.webpieces.templating.impl;
 
 import java.io.PrintWriter;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
@@ -27,13 +31,15 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private String superTemplateFilePath;
 	private ReverseUrlLookup urlLookup;
 	private ThreadLocal<String> sourceLocal = new ThreadLocal<>();
+	private List<ResourceBundle> resourceBundles;
 	
     public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, 
-    		Map<Object, Object> templateProps, ReverseUrlLookup urlLookup) {
+    		Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup, List<ResourceBundle> resourceBundles) {
     	formatter = f;
     	this.tagLookup = tagLookup;
-    	this.setTagProperties = templateProps;
+    	this.setTagProperties = setTagProps;
     	this.urlLookup = urlLookup;
+    	this.resourceBundles = resourceBundles;
     }
     
     protected void installNullFormatter() {
@@ -107,10 +113,17 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		}
 	}
 
+	public Object optional(String property) {
+		try {
+			return super.getProperty(property);
+		} catch(MissingPropertyException e) {
+			return null;
+		}
+	}
+	
     @Override
     public Object getProperty(String property) {
-    	String srcLocation = sourceLocal.get();
-    	srcLocation = modifySourceLocation2(srcLocation);
+    	String srcLocation = modifySourceLocation2(sourceLocal.get());
         try {
             return super.getProperty(property);
         } catch (MissingPropertyException e) {
@@ -119,7 +132,49 @@ public abstract class GroovyTemplateSuperclass extends Script {
         			+ "lastly, if this is inside a custom tag, perhaps the tag did not pass in the correct arguments."+srcLocation, e);
         }
     }
+    
+    public String getMessage(Object ... args) {
+    	String srcLocation = modifySourceLocation2(sourceLocal.get());
+    	if(args.length < 2)
+    		throw new IllegalArgumentException("&{...}& must include two arguments separated by a comma and did not."+srcLocation);
+    	else if(args[0] == null)
+    		throw new IllegalArgumentException("The first argument in &{...}& evaluated to null...did you forget quotes or "
+    				+ "you forgot to pass in a valid value to that variable?"+srcLocation);
+    	else if(args[1] == null)
+    		throw new IllegalArgumentException("The first argument in &{...}& evaluated to null...did you forget quotes or "
+    				+ "you forgot to pass in a valid value to that variable?"+srcLocation);
+    	
+    	String defaultText = args[0].toString();
+    	String key = args[1].toString();
 
+    	Object[] newArgs = createArgsArray(args);
+    	
+    	String msg = getMessage(defaultText, key);
+    	String result = MessageFormat.format(msg, newArgs);
+    	
+    	return result;
+    }
+
+	private Object[] createArgsArray(Object... args) {
+		List<Object> argsList = new ArrayList<>();
+    	for(int i = 2; i < args.length; i++) {
+    		argsList.add(args[i]);
+    	}
+    	Object[] newArgs = argsList.toArray();
+		return newArgs;
+	}
+    
+    public String getMessage(String defaultText, String key) {
+    	
+    	for(ResourceBundle bundle : resourceBundles) {
+    		String msg = bundle.getString(key);
+    		if(msg != null)
+    			return msg;
+    	}
+    	
+    	return defaultText;
+    }
+    
     //We should probably turn this into a ThreadLocal<Stack> ...
     public void enterExpression(String srcLocation) {
     	sourceLocal.set(srcLocation);

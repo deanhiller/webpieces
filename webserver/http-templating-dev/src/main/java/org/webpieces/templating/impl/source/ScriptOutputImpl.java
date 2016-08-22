@@ -19,9 +19,12 @@ public class ScriptOutputImpl implements ScriptOutput {
 		this.className = className;
 	}
 
-	public void println(String text) {
+	public void println(String text, Token forLineNumberComment) {
 		scriptSourceCode.append(text);
-        println();
+		if(forLineNumberComment == null)
+			println();
+		else
+			appendTokenComment(forLineNumberComment);
 	}
 
 	public void println() {
@@ -33,7 +36,7 @@ public class ScriptOutputImpl implements ScriptOutput {
 		scriptSourceCode.append(text);
 	}
 
-	public void appendTokenComment(Token t) {
+	private void appendTokenComment(Token t) {
 		TokenImpl token = (TokenImpl) t;
 		scriptSourceCode.append(" //htmlLine ").append(token.beginLineNumber).append(":").append(token.endLineNumber).append("\n");
 		//we could have stored column info in the Token as well for here!! to append to comment
@@ -56,6 +59,11 @@ public class ScriptOutputImpl implements ScriptOutput {
 		if(packageStr != null)
 			return packageStr+"."+className;
 		return className;
+	}
+
+	@Override
+	public String toString() {
+		return "ScriptOutputImpl.scriptSourceCode=\n\n" + scriptSourceCode;
 	}
 	
 }

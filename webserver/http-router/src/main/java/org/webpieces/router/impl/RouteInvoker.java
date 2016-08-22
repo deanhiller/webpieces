@@ -25,20 +25,20 @@ import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderHtmlImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
-import org.webpieces.router.impl.params.ArgumentTranslator;
-import org.webpieces.router.impl.params.ObjectToStringTranslator;
+import org.webpieces.router.impl.params.ParamToObjectTranslator;
+import org.webpieces.router.impl.params.ObjectToParamTranslator;
 
 public class RouteInvoker {
 
 	private static final Logger log = LoggerFactory.getLogger(RouteInvoker.class);
-	private ArgumentTranslator argumentTranslator;
+	private ParamToObjectTranslator argumentTranslator;
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
-	private ObjectToStringTranslator reverseTranslator;
+	private ObjectToParamTranslator reverseTranslator;
 	private CookieTranslator cookieFactory;
 	
 	@Inject
-	public RouteInvoker(ArgumentTranslator argumentTranslator, ObjectToStringTranslator translator, CookieTranslator cookieFactory) {
+	public RouteInvoker(ParamToObjectTranslator argumentTranslator, ObjectToParamTranslator translator, CookieTranslator cookieFactory) {
 		this.argumentTranslator = argumentTranslator;
 		this.reverseTranslator = translator;
 		this.cookieFactory = cookieFactory;

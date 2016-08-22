@@ -2,6 +2,7 @@
   <head>
   </head>
   <body>
-    Hi ${user}$, this is testing param
+    Hi ${user}$, this is testing param or ${optional('nothing')?.arg}$ 
+    or we can get the user with getProperty ${getProperty('user')}$
   </body>
 </html>

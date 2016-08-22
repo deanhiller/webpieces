@@ -38,7 +38,8 @@ public class ScriptWriter {
 		tagStack.set(new Stack<>());
 
 		if(packageStr != null && !"".equals(packageStr.trim())) {
-			sourceCode.println("package "+packageStr);
+			sourceCode.println("package "+packageStr, null);
+			sourceCode.println();
 		}
 		
         sourceCode.print("class ");
@@ -48,9 +49,9 @@ public class ScriptWriter {
         //cleanStackTrace is looking in TemplateLoader.templates
 
         sourceCode.print(className);
-        sourceCode.println(" extends org.webpieces.templating.impl.GroovyTemplateSuperclass {");
-        sourceCode.println("  public Object run() {");
-        sourceCode.println("    use(org.webpieces.templating.impl.source.GroovyExtensions) {");
+        sourceCode.println(" extends org.webpieces.templating.impl.GroovyTemplateSuperclass {", null);
+        sourceCode.println("  public Object run() {", null);
+        sourceCode.println("    use(org.webpieces.templating.impl.source.GroovyExtensions) {", null);
         
 //        for (String n : extensionsClassnames) {
 //            println("use(_('" + n + "')) {");
@@ -58,9 +59,9 @@ public class ScriptWriter {
 	}
 
 	public void printEnd(ScriptOutputImpl sourceCode) {
-		sourceCode.println("    }");
-		sourceCode.println("  }");
-		sourceCode.println("}");
+		sourceCode.println("    }", null);
+		sourceCode.println("  }", null);
+		sourceCode.println("}", null);
 		
 		if(tagStack.get().size() > 0) {
 			TagState state = tagStack.get().pop();
@@ -73,7 +74,7 @@ public class ScriptWriter {
 		String srcText = token.getValue();
 		if(srcText.length() < maxLineLength) {
 			String text = addEscapesToSrc(srcText);
-			sourceCode.println("      __out.print(\""+text+"\");");
+			sourceCode.println("      __out.print(\""+text+"\");", token);
 			return;
 		}
 
@@ -85,7 +86,7 @@ public class ScriptWriter {
 			String prefix = srcText.substring(0, cutpoint);
 			srcText = srcText.substring(cutpoint);
 			String text = addEscapesToSrc(prefix);
-			sourceCode.println("      __out.print(\""+text+"\");");
+			sourceCode.println("       __out.print(\""+text+"\");", token);
 		}
 	}
 
@@ -97,24 +98,58 @@ public class ScriptWriter {
 	}
 
 	public void printScript(TokenImpl token, ScriptOutputImpl sourceCode) {
-		sourceCode.print(token.getValue().trim());
-		sourceCode.appendTokenComment(token);
+		sourceCode.println(token.getValue().trim(), token);
 	}
 
 	public void printExpression(TokenImpl token, ScriptOutputImpl sourceCode) {
-		String expr = token.getValue().trim();
-		sourceCode.println(         "enterExpression('"+token.getSourceLocation(false)+"');"); //purely so we can add info to missing properties
-		if(expr.startsWith("_"))
-			sourceCode.print("      __out.print("+expr+");");
+		String expr = token.getCleanValue();
+		sourceCode.println();
+		sourceCode.println("       enterExpression('"+token.getSourceLocation(false)+"');", token); //purely so we can add info to missing properties
+		if(expr.startsWith("_")) //variables starting with underscore do not get html escaped so they can return html to put in the page like _body
+			sourceCode.println("       __out.print("+expr+");", token);
 		else
-			sourceCode.print("      __out.print(useFormatter("+expr+"));");
-        sourceCode.appendTokenComment(token);
-        sourceCode.println();
-		sourceCode.println(         "exitExpression();");
+			sourceCode.println("       __out.print(useFormatter("+expr+"));", token);
+		sourceCode.println("       exitExpression();", token);
+		sourceCode.println();
 	}
 
 	public void printMessage(TokenImpl token, ScriptOutputImpl sourceCode) {
+		String value = token.getValue().replaceAll("\r", "");
+		String withValidNewLines = replaceNewLinesBetweenQuotes(value, token); 
 		
+		//any newlines left, we can remove
+		withValidNewLines = withValidNewLines.replace("\n", " ");
+		
+		sourceCode.println();
+		//This is here so when groovy calls getProperty() to resolve variables, there is info on what line had the issue if not there
+		sourceCode.println("       enterExpression('"+token.getSourceLocation(false)+"');", token); //purely so we can add info to missing properties
+		sourceCode.println("       __out.print(getMessage("+withValidNewLines+"));", token);
+		sourceCode.println("       exitExpression();", token);
+		sourceCode.println();		
+	}
+
+	private String replaceNewLinesBetweenQuotes(String value, TokenImpl token) {
+		int currentIndex = 0;
+		
+		while(true) {
+			int indexOf = value.indexOf("'", currentIndex);
+			if(indexOf < 0)
+				return value;
+			
+			int secondQuote = value.indexOf("'", indexOf+1);
+			if(secondQuote < 0)
+				throw new IllegalArgumentException("unbalanced quote in &{...}&. "+token.getSourceLocation(true));
+			
+			String before = value.substring(0, indexOf);
+			String middle = value.substring(indexOf, secondQuote+1);
+			middle = middle.replaceAll("\n", "\\\\n");
+			String after = value.substring(secondQuote+1);
+			
+			String firstPartWithQuotes = before+middle;
+			currentIndex = firstPartWithQuotes.length(); //set current index to after the quote
+			
+			value = firstPartWithQuotes + after;
+		}
 	}
 
 	public void printAction(boolean b) {

@@ -20,14 +20,14 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
 
-public class ArgumentTranslator {
+public class ParamToObjectTranslator {
 
 	//private static final Logger log = LoggerFactory.getLogger(ArgumentTranslator.class);
 	private ParamValueTreeCreator treeCreator;
-	private PrimitiveTranslator primitiveConverter;
+	private ObjectTranslator primitiveConverter;
 
 	@Inject
-	public ArgumentTranslator(ParamValueTreeCreator treeCreator, PrimitiveTranslator primitiveConverter) {
+	public ParamToObjectTranslator(ParamValueTreeCreator treeCreator, ObjectTranslator primitiveConverter) {
 		this.treeCreator = treeCreator;
 		this.primitiveConverter = primitiveConverter;
 	}
@@ -92,7 +92,7 @@ public class ArgumentTranslator {
 	private Object translate(RouterRequest req, RouteMeta meta, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
 		Class<?> fieldClass = fieldMeta.getFieldClass();
-		Function<String, Object> converter = primitiveConverter.getConverter(fieldClass);
+		Function<String, Object> converter = primitiveConverter.getUnmarshaller(fieldClass);
 		if(converter != null) {
 			return convert(req, meta, valuesToUse, fieldMeta, converter, validator);
 		} else if(fieldClass.isArray()) {

@@ -20,15 +20,13 @@ public class ElseIfGen extends AbstractTag {
 			throw new IllegalArgumentException("elseif statement is missing expression.  "
 					+ "It must be #{elseif expression}# to work. "+token.getSourceLocation(true));
 		String expression = cleanValue.substring(indexOf+1);
-		sourceCode.print(" else if ("+expression+") {");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println(" else if ("+expression+") {", token);
 		sourceCode.println();
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token, int uniqueId) {
-		sourceCode.print("}");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println("}", token);
 		sourceCode.println();
 	}
 

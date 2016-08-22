@@ -68,13 +68,32 @@ ${user.account.address}$
 
 The last two are specia and can be used between tag tokens and between i18n tokens like so...
  
-In an href tag..                                                     #{a href:@[ROUTE, user:user, arg:'flag']@}#Some Link#{/a}# 
-In text..                                                     This is some text @[ROUTE, user:user, arg:'flag']@
-In basic i18n tag                       &{'Hi, this link is text %1', 'key1', @[ROUTE, user:user, arg:'flag']@}&
-In i18n tag...    &{'Hi %1, some text points to %2', 'key', arg1, '<a href="'+@[ROUTE, user:user, arg:'flag']@"+'>&{link}&</a>'}&
+In an href tag..                                                  #{a href:@[ROUTE, user:user, arg:'flag']@}#Some Link#{/a}# 
+In text..                                                This is some text @[ROUTE, user:user, arg:'flag']@
+In basic i18n tag                    &{'Hi, this link is text %1', 'key1', @[ROUTE, user:user, arg:'flag']@}&
+In i18n tag...    &{'Hi %1, <a href="%2">Some link text</a>', 'key', arg1, @[ROUTE, user:user, arg:'flag']@}&
 
 generates.....
 __getMessage(args)
+
+
+
+DOCUMENTATION Notes:
+
+* Section on Generator Tags and RuntimeTags and html.tag files
+* Section on object to string and string to object bindings
+* Section on overriding platform
+* Section on overriding web application classes
+* Section on i18n
+* Section on escaping html and not escaping html (variable names with _xxx are not escaped) and the verbatim or noescape tag
+* Section on testing
+* Section on field tag and how to create more of these as your own
+* Section on variable scopes... tag arguments, template properties and page arguments (how template props are global)
+* Section on PRG pattern (point to flash/Validation)
+* Section on Arrays and array based forms
+* Section on tab state vs. session vs. flash (Validation, Flash)
+* Section on filters
+* don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
 
 
 

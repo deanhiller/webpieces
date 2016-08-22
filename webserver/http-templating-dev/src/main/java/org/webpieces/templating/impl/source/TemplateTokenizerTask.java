@@ -9,9 +9,15 @@ import java.util.List;
 * case 2: Hi there, my name is ${user.name}$\n and this is my story (preserve all)
 * case 3: #{if}#\nShow this\n#{/if}\n  should rewrite as "Show this\n" so two \n are removed
 * case 4: #{if}#Show this#{/if}# should preserve all as "Show this\n"
-* case 5:
+* case 5: (really breaks stuff) #{form ..}#\n.....#{/form}# In this case, we really don't want to strip anything since
+*         the <form> will replace the first line perfectly unlike #{if}# AND if they tab/space of #{form}# element, we
+*         want to maintain those spaces, tabs so it looks like the user wrote it when rendered
+* 
+* Anotherwords, to be perfect, we really need methods on the tags to tell if we should remove lines and whitespace or not
+* 
+* To get this correct, we will really need to write a few test cases for this
 */  
-public class TempateTokenizerRunnable {
+public class TemplateTokenizerTask {
 
 	private String pageSource;
 	private TemplateToken state = TemplateToken.PLAIN;
@@ -21,8 +27,9 @@ public class TempateTokenizerRunnable {
 	private List<Integer> newLineMarks = new ArrayList<>();
 	private List<TokenImpl> tokens = new ArrayList<>();
 	private String filePath;
+	private int startTokenCount;
 	
-	public TempateTokenizerRunnable(String filePath, String source) {
+	public TemplateTokenizerTask(String filePath, String source) {
 		this.filePath = filePath;
 		if(source.contains("\r"))
 			throw new IllegalArgumentException("We rely on source input never containing \\r and only containing \\n for newlines");
@@ -106,8 +113,13 @@ public class TempateTokenizerRunnable {
                     }
                     break;
                 case MESSAGE:
-                    if (c == '}' && c1 == '&') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
+                	if (c == '&' && c1 == '{') {
+                		startTokenCount++; //For nested i18n tags
+                	} else if (c == '}' && c1 == '&') {
+                		if(startTokenCount == 0) {                		
+                			found(TemplateToken.PLAIN, 2, lineNumber);
+                		} else
+                			startTokenCount--;
                     }
                     break;
                 case EOF:

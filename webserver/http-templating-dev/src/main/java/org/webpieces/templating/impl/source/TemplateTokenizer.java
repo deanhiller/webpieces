@@ -16,7 +16,7 @@ public class TemplateTokenizer {
 	}
 	
 	public List<TokenImpl> tokenize(String filePath, String source) {
-		List<TokenImpl> tokens = new TempateTokenizerRunnable(filePath, source).parseSource();
+		List<TokenImpl> tokens = new TemplateTokenizerTask(filePath, source).parseSource();
 		return optimize(tokens);
 	}
 
@@ -35,6 +35,9 @@ public class TemplateTokenizer {
 			if(tagsToCleanWhitespace.contains(token.state) && left.state == TemplateToken.PLAIN && right.state == TemplateToken.PLAIN) {
 				if("".equals(left.getValue().trim()) && "".equals(right.getValue().trim())) {
 					tokens.remove(i+1);
+					if(token.state == TemplateToken.COMMENT) {
+						tokens.remove(i); //remove the actual token as well 
+					}
 					tokens.remove(i-1);
 					if(i >= tokens.size())
 						i--;

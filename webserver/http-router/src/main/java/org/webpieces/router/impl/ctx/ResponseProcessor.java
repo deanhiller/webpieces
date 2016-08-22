@@ -26,20 +26,20 @@ import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderHtmlImpl;
-import org.webpieces.router.impl.params.ObjectToStringTranslator;
+import org.webpieces.router.impl.params.ObjectToParamTranslator;
 
 public class ResponseProcessor {
 	
 	private ReverseRoutes reverseRoutes;
 	private RouteMeta matchedMeta;
-	private ObjectToStringTranslator reverseTranslator;
+	private ObjectToParamTranslator reverseTranslator;
 	private RequestContext ctx;
 	private ResponseStreamer responseCb;
 	private CookieTranslator cookieFactory;
 	private boolean responseSent = false;
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToStringTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb,
+			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb,
 			CookieTranslator cookieFactory) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;

@@ -14,15 +14,13 @@ public class VerbatimGen extends AbstractTag {
 	
 	@Override
 	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
-		sourceCode.print("      installNullFormatter();");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println("      installNullFormatter();", token);
 		sourceCode.println();
 	}
 
 	@Override
 	public void generateEnd(ScriptOutput sourceCode, Token token, int uniqueId) {
-		sourceCode.print("      installHtmlFormatter();");
-		sourceCode.appendTokenComment(token);
+		sourceCode.println("      installHtmlFormatter();", token);
 		sourceCode.println();
 	}
 
