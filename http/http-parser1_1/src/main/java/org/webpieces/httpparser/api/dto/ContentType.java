@@ -66,7 +66,7 @@ public class ContentType {
 		Map<String, String> params = new HashMap<>();
 		for(String s : split) {
 			String[] nameValue = s.split("=");
-			params.put(nameValue[0], nameValue[1]);
+			params.put(nameValue[0].trim(), nameValue[1].trim());
 		}
 		
 		ContentType ct = new ContentType(type, subtype, params);

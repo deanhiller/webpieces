@@ -9,12 +9,14 @@ public class RequestContext {
 	private Flash flash;
 	private Session session;
 	private RouterRequest request;
+	private Messages messages;
 
-	public RequestContext(Validation validation, Flash flash, Session session, RouterRequest request) {
+	public RequestContext(Validation validation, Flash flash, Session session, RouterRequest request, Messages messages) {
 		this.validation = validation;
 		this.flash = flash;
 		this.request = request;
 		this.session = session;
+		this.messages = messages;
 	}
 	
 	public RouterRequest getRequest() {
@@ -33,6 +35,10 @@ public class RequestContext {
 		return session;
 	}
 
+	public Messages getMessages() {
+		return messages;
+	}
+	
 	/**
 	 * 
 	 * @param secureFieldNames fieldNames that are secure and should NOT be transferred to flash

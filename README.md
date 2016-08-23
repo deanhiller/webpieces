@@ -4,9 +4,11 @@ To try the webserver
 
 1. Download the release, unzip
 2. run ./createProject.sh
-3. 
+3. cd projectDir
+4. ./gradlew test # runs all the tests and verify everything is working
+5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
 
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter)
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
 This project is essentially pieces that can be used to build any http related software and full stacks as well.  
 
@@ -16,23 +18,19 @@ Some HTTP/2 features
  * Data compression of HTTP headers
  * Multiplexing multiple requests over TCP connection
 
-Pieces with HTTP/2 support
- * async-http parser - feel free to use with any nio library that you like
+Pieces
  * embeddablehttpproxy - a proxy with http 2 support
- * embeddablewebserver - a webserver with http 2 support
- * httpclient - An http client with http 2 support
-
-channelmanager - a very thin layer on nio for speed
-asyncserver - a thin wrapper on channelmanager to create a one call tcp server
-
-httpparser - an asynchronous http parser than can accept partial payloads (ie. nio payloads don't have full message)
-httpclient - http client built on above core components
-httpproxy - build on asyncserver and http client
+ * webserver/http-webserver - a webserver with http 2 support
+ * http/http-client - An http client built on channelmanager and http parser
+ * http/http-frontend - An very thin http library.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end)
+ * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths
+ * channelmanager - a very thin layer on nio for speed
+ * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers)
+ * http/http-parser1_1 - an asynchronous http parser than can accept partial payloads (ie. nio payloads don't have full message).  Can be used with ANY nio library.
+ * httpclient - http client built on above core components
+ * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* get i18n working and then get it working with field.tag then getting it working with arrays and field.tag(which is harder)
-* unit test arrays in multi-part form, query params! and test for flash working with arrays(not sure it will or not)
-* unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
 * need to test out cookie length and 150 cookies of certain length
 * write an escapehtml tag
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
@@ -84,7 +82,7 @@ DOCUMENTATION Notes:
 * Section on object to string and string to object bindings
 * Section on overriding platform
 * Section on overriding web application classes
-* Section on i18n
+* Section on i18n (need to explain, do NOT define message.properties since there is a list of Locales and that would create a match on any language)
 * Section on escaping html and not escaping html (variable names with _xxx are not escaped) and the verbatim or noescape tag
 * Section on testing
 * Section on field tag and how to create more of these as your own
@@ -94,7 +92,8 @@ DOCUMENTATION Notes:
 * Section on tab state vs. session vs. flash (Validation, Flash)
 * Section on filters
 * don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
+* resource bundles are complex needing to provide one for some tags if there is a provider of tags
 
 
-
-
+* unit test arrays in multi-part form, along with conflicting query params? and test for flash working with arrays(not sure it will or not)
+* unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.

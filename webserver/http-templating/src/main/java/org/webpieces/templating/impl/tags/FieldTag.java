@@ -70,9 +70,10 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 	 * @param pageArgs
 	 * @return
 	 */
-	private Map<String, Object> createFieldData(String fieldName, Map<String, Object> pageArgs) {
+	private Map<String, Object> createFieldData(String fieldName2, Map<String, Object> pageArgs) {
 		
-		fieldName = reworkNameForArrayOnly(fieldName, pageArgs);
+		Result result = reworkNameForArrayOnly(fieldName2, pageArgs);
+		String fieldName = result.fieldName;
 		
         Flash flash = Current.flash();
         Validation validation = Current.validation();
@@ -82,6 +83,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         String id = makeValidHtml4Id(fieldName);
         field.put("id", id);
         String flashValue = flash.get(fieldName);
+        field.put("i18nKey", result.i18nName); //different from fieldName only for Arrays
         field.put("flash", flashValue);
         field.put("error", validation.getError(fieldName));
         field.put("errorClass", field.get("error") != null ? "hasError" : "");
@@ -107,20 +109,25 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		return field;
 	}
 
-	protected String reworkNameForArrayOnly(String fieldName, Map<String, Object> pageArgs) {
+	protected Result reworkNameForArrayOnly(String fieldName, Map<String, Object> pageArgs) {
 		if(!fieldName.contains("["))
-			return fieldName;
+			return new Result(fieldName, fieldName);
 		
 		//modify field name to be array format with real index
 		//go from user.accounts[account_index].addresses[address_index].street to
 		//        user.accounts[0].addresses[1].street such that PropertyUtils.getProperty(bean, fieldName) works 
+		//i18n name will be 'user.accounts.addresses.street';
+		
+		String i18nName = fieldName;
 		Matcher m = pattern.matcher(fieldName);
 		while(m.find()) {
 		    String indexName = m.group(1);
 		    Object index = pageArgs.get(indexName);
 		    fieldName = fieldName.replace(indexName, index+"");
+		    i18nName = i18nName.replace("["+indexName+"]", "");
 		}
-		return fieldName;
+		
+		return new Result(fieldName, i18nName);
 	}
 
 	private String makeValidHtml4Id(String fieldName) {
@@ -131,5 +138,15 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		if(first != null)
 			return first;
 		return last;
+	}
+	
+	private static class Result {
+		public String fieldName;
+		public String i18nName;
+
+		public Result(String fieldName, String i18nName) {
+			this.fieldName = fieldName;
+			this.i18nName = i18nName;
+		}
 	}
 }

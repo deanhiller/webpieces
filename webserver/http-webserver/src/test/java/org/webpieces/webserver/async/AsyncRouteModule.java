@@ -19,4 +19,9 @@ public class AsyncRouteModule implements RouteModule {
 		router.setInternalErrorRoute("../basic/biz/AsyncController.internalError");
 	}
 
+	@Override
+	public String getI18nBundleName() {
+		return null;
+	}
+
 }

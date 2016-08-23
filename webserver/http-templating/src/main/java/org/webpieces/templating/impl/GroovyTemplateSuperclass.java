@@ -5,9 +5,12 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Messages;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
@@ -31,15 +34,13 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private String superTemplateFilePath;
 	private ReverseUrlLookup urlLookup;
 	private ThreadLocal<String> sourceLocal = new ThreadLocal<>();
-	private List<ResourceBundle> resourceBundles;
 	
     public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, 
-    		Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup, List<ResourceBundle> resourceBundles) {
+    		Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup) {
     	formatter = f;
     	this.tagLookup = tagLookup;
     	this.setTagProperties = setTagProps;
     	this.urlLookup = urlLookup;
-    	this.resourceBundles = resourceBundles;
     }
     
     protected void installNullFormatter() {
@@ -165,11 +166,12 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	}
     
     public String getMessage(String defaultText, String key) {
+    	List<Locale> locales = Current.request().preferredLocales;
     	
-    	for(ResourceBundle bundle : resourceBundles) {
-    		String msg = bundle.getString(key);
-    		if(msg != null)
-    			return msg;
+    	for(Locale l : locales) {
+    		String message = Current.messages().get(key, l);
+    		if(message != null)
+    			return message;
     	}
     	
     	return defaultText;

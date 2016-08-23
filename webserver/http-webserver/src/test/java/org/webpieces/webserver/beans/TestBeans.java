@@ -121,6 +121,9 @@ public class TestBeans {
 		response.assertContains("value=`someStreet2-0`".replace('`', '"'));
 		response.assertContains("value=`someStreet2-1`".replace('`', '"'));
 
+		//default labels are there...
+		response.assertContains("First NameX");
+		response.assertContains("StreetX");
 	}
 	
 	@Test

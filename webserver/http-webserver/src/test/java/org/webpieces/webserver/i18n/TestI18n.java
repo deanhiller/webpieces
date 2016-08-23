@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -45,17 +47,19 @@ public class TestI18n {
 		response.assertContains("Hi Dean, we would like to take you to Italy");
 	}
 
-//	@Test
-//	public void testChineseText() {
-//		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
-//		
-//		server.processHttpRequests(socket, req , false);
-//		
-//		List<FullResponse> responses = socket.getResponses();
-//		Assert.assertEquals(1, responses.size());
-//
-//		FullResponse response = responses.get(0);
-//		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-//		response.assertContains("Hi Dean Hiller, this is testing");
-//	}
+	@Test
+	public void testChineseText() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
+		req.addHeader(new Header(KnownHeaderName.ACCEPT_LANGUAGE, "zh-CN"));
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("你好， 这个是一个比较长的一个东西 我可以写比较多。  我在北京师范大学学了中文。 我喜欢完冰球");
+		response.assertContains("你好Dean，我们要去Italy");
+	}
 }

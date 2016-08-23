@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
@@ -86,7 +87,7 @@ public class ResponseProcessor {
 		
 		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path, cookies);
 		
-		responseCb.sendRedirect(redirectResponse);
+		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
 		
 		return redirectResponse;
 	}
@@ -131,17 +132,21 @@ public class ResponseProcessor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
 		
+		wrapFunctionInContext(s -> responseCb.sendRenderHtml(resp));
+		
+		return resp;
+	}
+
+	private void wrapFunctionInContext(Consumer<Void> function) {
 		boolean wasSet = Current.isContextSet();
 		if(!wasSet)
 			Current.setContext(ctx); //Allow html tags to use the contexts
 		try {
-			responseCb.sendRenderHtml(resp);
+			function.accept(null);
 		} finally {
 			if(!wasSet) //then reset
 				Current.setContext(null);
 		}
-		
-		return resp;
 	}
 	
 }

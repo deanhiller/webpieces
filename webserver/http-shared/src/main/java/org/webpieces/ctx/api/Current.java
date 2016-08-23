@@ -31,5 +31,8 @@ public class Current {
 	public static Session session() {
 		return getContext().getSession();
 	}
+	public static Messages messages() {
+		return getContext().getMessages();
+	}
 	
 }

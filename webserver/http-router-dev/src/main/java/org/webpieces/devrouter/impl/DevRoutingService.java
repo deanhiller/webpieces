@@ -18,6 +18,7 @@ import org.webpieces.router.impl.NotFoundInfo;
 import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.RouteModuleInfo;
 import org.webpieces.util.file.VirtualFile;
 
 public class DevRoutingService extends AbstractRouterService implements RoutingService {
@@ -95,7 +96,8 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteMeta origMeta = origResult.getMeta();
 
 		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
-		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), "", config.getUrlEncoding());
+		RouteModuleInfo info = new RouteModuleInfo("", null);
+		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
 		MatchResult result = new MatchResult(meta);
 		
 		if(meta.getControllerInstance() == null) {

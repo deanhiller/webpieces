@@ -19,7 +19,7 @@ public class RouterBuilder implements Router {
 
 	private static final Logger log = LoggerFactory.getLogger(RouterBuilder.class);
 	
-	public static ThreadLocal<String> currentPackage = new ThreadLocal<>();
+	public static ThreadLocal<RouteModuleInfo> currentPackage = new ThreadLocal<>();
 	public static ThreadLocal<Injector> injector = new ThreadLocal<>();
 	
 	private final AllRoutingInfo info;

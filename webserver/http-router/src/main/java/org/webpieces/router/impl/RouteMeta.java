@@ -19,14 +19,13 @@ public class RouteMeta {
 	private Object controllerInstance;
 	private Method method;
 	private List<String> methodParamNames;
-	//The package for the RouteModule for context(so controllers are relative to that module)
-	private String packageContext;
+	private RouteModuleInfo routeModuleInfo;
 	private Injector injector;
 	private Charset urlEncoding;
 
-	public RouteMeta(Route r, Injector injector, String packageContext, Charset urlEncoding) {
+	public RouteMeta(Route r, Injector injector, RouteModuleInfo routerInfo, Charset urlEncoding) {
 		this.route = r;
-		this.packageContext = packageContext;
+		this.routeModuleInfo = routerInfo;
 		this.injector = injector;
 		this.urlEncoding = urlEncoding;
 	}
@@ -85,9 +84,13 @@ public class RouteMeta {
 	}
 
 	public String getPackageContext() {
-		return packageContext;
+		return routeModuleInfo.packageName;
 	}
 
+	public String getI18nBundleName() {
+		return routeModuleInfo.i18nBundleName;
+	}
+	
 	public Injector getInjector() {
 		return injector;
 	}

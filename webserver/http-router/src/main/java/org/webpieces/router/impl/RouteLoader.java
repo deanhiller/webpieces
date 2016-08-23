@@ -9,9 +9,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
@@ -96,9 +96,9 @@ public class RouteLoader {
 		invoker.init(reverseRoutes);
 		
 		for(RouteModule module : rm.getRouteModules()) {
-			Class<?> clazz = module.getClass();
-			String packageName = getPackage(clazz);
-			RouterBuilder.currentPackage.set(packageName);
+			String packageName = getPackage(module.getClass());
+			RouteModuleInfo info = new RouteModuleInfo(packageName, module.getI18nBundleName());
+			RouterBuilder.currentPackage.set(info);
 			RouterBuilder.injector.set(injector);
 			module.configure(routerBuilder, packageName);
 			RouterBuilder.currentPackage.set(null);

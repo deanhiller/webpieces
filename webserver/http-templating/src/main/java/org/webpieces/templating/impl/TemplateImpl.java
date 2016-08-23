@@ -29,8 +29,7 @@ public class TemplateImpl implements Template {
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);		
 		
-		List<ResourceBundle> bundles = new ArrayList<>();
-		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, urlLookup, bundles);
+		t.initialize(GroovyTemplateSuperclass.ESCAPE_HTML_FORMATTER, tagLookup, templateProps, urlLookup);
 
 		t.run();
 		

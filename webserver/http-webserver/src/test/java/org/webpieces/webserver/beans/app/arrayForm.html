@@ -6,17 +6,17 @@
     
 #{form action:@[POST_USER_ROUTE]@}#
 
-#{field 'user.firstName'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>#{/field}#
+#{field 'user.firstName', label:'First NameX'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>#{/field}#
 
 #{list items: user.accounts, as: 'account'}#
   
-   #{field 'user.accounts[account_index].name'}#
+   #{field 'user.accounts[account_index].name', label:'Name'}#
        <input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>
    #{/field}#
    
    #{list items: account.addresses, as: 'address'}#
    
-      #{field 'user.accounts[account_index].addresses[address_index].street'}#
+      #{field 'user.accounts[account_index].addresses[address_index].street', label:'StreetX'}#
           <input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>
       #{/field}#
         

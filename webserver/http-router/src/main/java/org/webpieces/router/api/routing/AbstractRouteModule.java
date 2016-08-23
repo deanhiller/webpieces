@@ -18,6 +18,23 @@ public abstract class AbstractRouteModule implements RouteModule {
 
 	protected abstract void configure(String currentPackage);
 
+	/**
+	 * This is the bundle name as in something like org.webpieces.messages where
+	 * that will use org/webpieces/messages.properties on the classpath for the default
+	 * local or another one for another language
+	 */
+	@Override
+	public String getI18nBundleName() {
+		Class<? extends AbstractRouteModule> clazz = getClass();
+		String name = clazz.getName();
+		int lastIndexOf = name.lastIndexOf(".");
+		if(lastIndexOf < 0)
+			return "messages";
+		
+		String packageName = name.substring(0, lastIndexOf);
+		return packageName+".messages";
+	}
+	
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		router.addRoute(method, path, controllerMethod, routeId);
 	}
@@ -52,7 +69,6 @@ public abstract class AbstractRouteModule implements RouteModule {
 
 	public Router getScopedRouter(String path, boolean isSecure) {
 		return router.getScopedRouter(path, isSecure);
-	}
-
+	}	
 	
 }

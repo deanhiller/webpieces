@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
+import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
@@ -143,9 +144,10 @@ public class RouteInvoker {
 		Session session = new Session();
 		Flash flash = (Flash) cookieFactory.translateCookieToScope(req, new Flash());
 		Validation validation = (Validation) cookieFactory.translateCookieToScope(req, new Validation());
+		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
-		RequestContext requestCtx = new RequestContext(validation, flash, session, req);
+		RequestContext requestCtx = new RequestContext(validation, flash, session, req, messages);
 		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, cookieFactory);
 		//ThreadLocals...
 		Current.setContext(requestCtx);
