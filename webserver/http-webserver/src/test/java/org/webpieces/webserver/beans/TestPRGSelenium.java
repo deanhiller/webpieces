@@ -92,46 +92,40 @@ public class TestPRGSelenium {
 		
 	}
 	
-//	//You must have firefox installed to run this test...
-//	//@Ignore
-//	@Test
-//	public void testArrayFieldInForm() throws ClassNotFoundException {
-//		driver.get("http://localhost:"+port+"/arrayForm");
-//		
-//		String pageSource = driver.getPageSource();
-//		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("Add User"));
-//
-//		WebElement userInput = driver.findElement(By.name("user.firstName"));
-//		userInput.sendKeys("Dean Hiller");
-//		
-//		WebElement zipCodeInput = driver.findElement(By.name("user.address.zipCode"));
-//		zipCodeInput.sendKeys("Text instead of number");		
-//
-//		WebElement passwordElem = driver.findElement(By.name("password"));
-//		passwordElem.sendKeys("SomePassword");	
-//		
-//		Assert.assertEquals("http://localhost:"+port+"/adduser", driver.getCurrentUrl());
-//		
-//		WebElement submit = driver.findElement(By.id("submit"));
-//		submit.submit();
-//
-//		//ensure flash scope worked and what the user typed in is still there
-//		userInput = driver.findElement(By.name("user.firstName"));
-//		String userName = userInput.getAttribute("value");
-//		Assert.assertEquals("Dean Hiller", userName);
-//		
-//		passwordElem = driver.findElement(By.name("password"));
-//		String password = passwordElem.getAttribute("value");
-//		Assert.assertEquals("", password);
-//		
-//		WebElement errorSpan = driver.findElement(By.id("user_address_zipCode_errorMsg"));
-//		String errorMsg = errorSpan.getText();
-//		Assert.assertEquals("Could not convert value", errorMsg);
-//		
-//		System.out.println("hi there");
-//		//find the error element?...
-//		
-//	}
+	//You must have firefox installed to run this test...
+	//@Ignore
+	@Test
+	public void testArrayFieldInForm() throws ClassNotFoundException {
+		driver.get("http://localhost:"+port+"/arrayForm");
+		
+		String pageSource = driver.getPageSource();
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("Add User"));
+
+		WebElement userInput = driver.findElement(By.name("user.accounts[0].addresses[0].street"));
+		userInput.sendKeys("Dean Hiller Street");
+		
+		WebElement zipCodeInput = driver.findElement(By.name("user.accounts[0].addresses[1].street"));
+		zipCodeInput.clear();
+		zipCodeInput.sendKeys("Street2");		
+		
+		WebElement submit = driver.findElement(By.id("submit"));
+		submit.submit();
+
+		//ensure flash scope worked and what the user typed in is still there
+		userInput = driver.findElement(By.name("user.accounts[0].addresses[0].street"));
+		String userName = userInput.getAttribute("value");
+		Assert.assertEquals("Dean Hiller Street", userName);
+		
+		zipCodeInput = driver.findElement(By.name("user.accounts[0].addresses[1].street"));
+		String password = zipCodeInput.getAttribute("value");
+		Assert.assertEquals("Street2", password);
+
+		Assert.assertEquals("http://localhost:"+port+"/arrayForm", driver.getCurrentUrl());
+
+		WebElement errorSpan = driver.findElement(By.id("user_accounts:0:_addresses:0:_street_errorMsg"));
+		String errorMsg = errorSpan.getText();
+		Assert.assertEquals("This is too ugly a street name", errorMsg);
+	}
 	
 	private class AppOverridesModule implements Module {
 		@Override

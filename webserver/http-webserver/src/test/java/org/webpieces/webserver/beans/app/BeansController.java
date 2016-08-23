@@ -73,6 +73,11 @@ public class BeansController {
 	
 	public Redirect postArray(UserDbo user, List<UserDbo> users) {
 		lib1.validateUser(user);
+		Current.validation().addError("user.accounts[0].addresses[0].street", "This is too ugly a street name");
+		if(Current.validation().hasErrors()) {
+			RequestContext ctx = Current.getContext();
+			return Actions.redirectFlashAll(BeansRouteId.ARRAY_FORM_ROUTE, ctx, "password");
+		}
 		
 		return Actions.redirect(BeansRouteId.ARRAY_FORM_ROUTE);
 	}
