@@ -4,7 +4,6 @@ import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
-import org.webpieces.router.api.routing.Router;
 
 public class BeansRouteModule extends AbstractRouteModule {
 

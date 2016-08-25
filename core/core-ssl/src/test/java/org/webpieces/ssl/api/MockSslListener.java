@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.ssl.api.SslListener;
-
 public class MockSslListener implements SslListener {
 
 	public boolean connected;

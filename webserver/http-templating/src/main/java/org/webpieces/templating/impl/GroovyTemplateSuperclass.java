@@ -7,10 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.Messages;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
@@ -138,19 +136,18 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	String srcLocation = modifySourceLocation2(sourceLocal.get());
     	if(args.length < 2)
     		throw new IllegalArgumentException("&{...}& must include two arguments separated by a comma and did not."+srcLocation);
-    	else if(args[0] == null)
-    		throw new IllegalArgumentException("The first argument in &{...}& evaluated to null...did you forget quotes or "
-    				+ "you forgot to pass in a valid value to that variable?"+srcLocation);
     	else if(args[1] == null)
-    		throw new IllegalArgumentException("The first argument in &{...}& evaluated to null...did you forget quotes or "
+    		throw new IllegalArgumentException("The second argument in &{...}& evaluated to null...did you forget quotes or "
     				+ "you forgot to pass in a valid value to that variable?"+srcLocation);
     	
-    	String defaultText = args[0].toString();
+    	String defaultText = "";
+    	if(args[0] != null)
+    		defaultText = args[0].toString();
     	String key = args[1].toString();
 
     	Object[] newArgs = createArgsArray(args);
     	
-    	String msg = getMessage(defaultText, key);
+    	String msg = getMessageImpl(defaultText, key);
     	String result = MessageFormat.format(msg, newArgs);
     	
     	return result;
@@ -165,7 +162,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		return newArgs;
 	}
     
-    public String getMessage(String defaultText, String key) {
+    private String getMessageImpl(String defaultText, String key) {
     	List<Locale> locales = Current.request().preferredLocales;
     	
     	for(Locale l : locales) {

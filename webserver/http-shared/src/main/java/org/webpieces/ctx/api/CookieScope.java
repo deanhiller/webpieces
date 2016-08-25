@@ -1,19 +1,29 @@
 package org.webpieces.ctx.api;
 
-import java.util.Map;
-
 public interface CookieScope {
-
-	boolean isNeedCreateCookie();
 
 	String getName();
 
-	Map<String, String> getMapData();
+	/**
+	 * Uses the platform's ObjectTranslator(which you can override) to translate the value
+	 * from Object to String to be put in the session cookie
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	void put(String key, Object value);
 
-	Integer getMaxAge();
+	<T> T remove(String key, Class<T> type);
+	
+	<T> T get(String key, Class<T> type);
 
-	void setExisted(boolean b);
-
-	void setMapData(Map<String, String> dataMap);
-
+	/**
+	 * Gets the raw value in the map with no translation
+	 * 
+	 * @param key
+	 * @return
+	 */
+	String get(String key);
+	
+	String remove(String key);
 }

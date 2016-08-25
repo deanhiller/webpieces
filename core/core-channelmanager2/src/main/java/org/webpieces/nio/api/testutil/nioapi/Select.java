@@ -1,6 +1,5 @@
 package org.webpieces.nio.api.testutil.nioapi;
 
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Set;

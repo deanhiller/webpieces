@@ -13,6 +13,7 @@ import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.impl.ctx.CookieScopeImpl;
 
 public class CookieTranslator {
 
@@ -24,22 +25,35 @@ public class CookieTranslator {
 		this.config = config;
 	}
 
-	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScope data) {
-		if(data.isNeedCreateCookie()) {
-			RouterCookie cookie = translateScopeToCookie(data.getName(), data.getMapData(), data.getMaxAge());
+	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScopeImpl data) {
+		if(data.isNeedCreateSetCookie()) {
+			RouterCookie cookie = translateScopeToCookie(data);
+			cookies.add(cookie);
+		} else if(data.isNeedCreateDeleteCookie()) {
+			RouterCookie cookie = createBase(data.getName(), 0);
 			cookies.add(cookie);
 		}
 	}
 	
-	public RouterCookie translateScopeToCookie(String name, Map<String, String> value, Integer maxAge) {
+	public RouterCookie translateScopeToCookie(CookieScopeImpl data) {
 		try {
-			return scopeToCookie(name, value, maxAge);
+			return scopeToCookie(data);
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private RouterCookie scopeToCookie(String name, Map<String, String> value, Integer maxAge) throws UnsupportedEncodingException {
+	private RouterCookie scopeToCookie(CookieScopeImpl scopeData) throws UnsupportedEncodingException {
+		Map<String, String> mapData = scopeData.getMapData();
+		RouterCookie cookie = createBase(scopeData.getName(), null);
+		
+		StringBuilder data = translateValuesToCookieFormat(mapData);
+		cookie.value = data.toString();
+		
+		return cookie;
+	}
+
+	private RouterCookie createBase(String name, Integer maxAge) {
 		RouterCookie cookie = new RouterCookie();
 		cookie.name= name;
     	cookie.domain = null;
@@ -47,14 +61,7 @@ public class CookieTranslator {
     	cookie.maxAgeSeconds = maxAge;
 		cookie.isHttpOnly = config.getIsCookiesHttpOnly();
 		cookie.isSecure = config.getIsCookiesSecure();
-		
-		//do not send data on cookie delete
-		if(maxAge != null && maxAge == 0) {
-			cookie.value = "";
-		} else {
-			StringBuilder data = translateValuesToCookieFormat(value);
-			cookie.value = data.toString();
-		}
+		cookie.value = "";
 		return cookie;
 	}
 
@@ -77,7 +84,7 @@ public class CookieTranslator {
 		return data;
 	}
 
-	public CookieScope translateCookieToScope(RouterRequest req, CookieScope data) {
+	public CookieScope translateCookieToScope(RouterRequest req, CookieScopeImpl data) {
 		try {
 			return cookieToScope(req, data);
 		} catch (UnsupportedEncodingException e) {
@@ -85,7 +92,7 @@ public class CookieTranslator {
 		}
 	}
 	
-	private CookieScope cookieToScope(RouterRequest req, CookieScope data) throws UnsupportedEncodingException {
+	private CookieScope cookieToScope(RouterRequest req, CookieScopeImpl data) throws UnsupportedEncodingException {
 		RouterCookie routerCookie = req.cookies.get(data.getName());
 		if(routerCookie == null) {
 			data.setExisted(false);

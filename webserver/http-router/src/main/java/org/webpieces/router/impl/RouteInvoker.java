@@ -7,16 +7,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
-import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
@@ -24,11 +23,16 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderHtmlImpl;
+import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
-import org.webpieces.router.impl.params.ParamToObjectTranslator;
+import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
+import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.router.impl.params.ParamToObjectTranslator;
 
+@Singleton
 public class RouteInvoker {
 
 	private static final Logger log = LoggerFactory.getLogger(RouteInvoker.class);
@@ -37,12 +41,17 @@ public class RouteInvoker {
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
 	private CookieTranslator cookieFactory;
+	private ObjectTranslator objectTranslator;
 	
 	@Inject
-	public RouteInvoker(ParamToObjectTranslator argumentTranslator, ObjectToParamTranslator translator, CookieTranslator cookieFactory) {
+	public RouteInvoker(ParamToObjectTranslator argumentTranslator, 
+						ObjectToParamTranslator reverseTranslator, 
+						CookieTranslator cookieFactory,
+						ObjectTranslator objectTranslator) {
 		this.argumentTranslator = argumentTranslator;
-		this.reverseTranslator = translator;
+		this.reverseTranslator = reverseTranslator;
 		this.cookieFactory = cookieFactory;
+		this.objectTranslator = objectTranslator;
 	}
 
 	public void invoke(
@@ -141,9 +150,9 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Session session = new Session();
-		Flash flash = (Flash) cookieFactory.translateCookieToScope(req, new Flash());
-		Validation validation = (Validation) cookieFactory.translateCookieToScope(req, new Validation());
+		Session session = (Session) cookieFactory.translateCookieToScope(req, new SessionImpl(objectTranslator));
+		FlashImpl flash = (FlashImpl) cookieFactory.translateCookieToScope(req, new FlashImpl(objectTranslator));
+		ValidationImpl validation = (ValidationImpl) cookieFactory.translateCookieToScope(req, new ValidationImpl(objectTranslator));
 		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 

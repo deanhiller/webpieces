@@ -8,12 +8,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
@@ -94,10 +92,13 @@ public class ResponseProcessor {
 
 	private List<RouterCookie> createCookies() {
 		List<RouterCookie> cookies = new ArrayList<>();
-		Flash flash = ctx.getFlash();
+		FlashImpl flash = (FlashImpl) ctx.getFlash();
 		cookieFactory.addScopeToCookieIfExist(cookies, flash);
-		Validation validation = ctx.getValidation();
+		ValidationImpl validation = (ValidationImpl) ctx.getValidation();
 		cookieFactory.addScopeToCookieIfExist(cookies, validation);
+		SessionImpl session = (SessionImpl) ctx.getSession();
+		cookieFactory.addScopeToCookieIfExist(cookies, session);
+		
 		return cookies;
 	}
 

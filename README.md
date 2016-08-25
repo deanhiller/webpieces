@@ -32,6 +32,8 @@ Pieces
 
 TODO: 
 * need to test out cookie length and 150 cookies of certain length
+* make session and tab cookies secure
+* make forms secure (authenticityToken)
 * write an escapehtml tag
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
@@ -41,9 +43,8 @@ TODO:
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
-* Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
+* Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
-* language
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
 * Need to add tests for changing the guice modules and router modules in the main server class while dev server is running and then hit website again to make sure it changed
 * cookie hpttOnly and the other key as well
@@ -94,6 +95,5 @@ DOCUMENTATION Notes:
 * don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
 * resource bundles are complex needing to provide one for some tags if there is a provider of tags
 
-
-* unit test arrays in multi-part form, along with conflicting query params? and test for flash working with arrays(not sure it will or not)
+* unit test arrays in multi-part form, along with conflicting query params?
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.

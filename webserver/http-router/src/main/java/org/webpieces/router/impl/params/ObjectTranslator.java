@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.inject.Singleton;
+
+@Singleton
 public class ObjectTranslator {
 
 	private Map<Class<?>, Function<String, Object>> classToUnmarshaller = new HashMap<>();

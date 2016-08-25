@@ -1,7 +1,5 @@
 package org.webpieces.nio.api.channels;
 
-import java.io.IOException;
-
 /**
  * @author Dean Hiller
  */

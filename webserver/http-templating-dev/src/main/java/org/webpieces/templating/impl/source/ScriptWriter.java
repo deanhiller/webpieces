@@ -42,6 +42,9 @@ public class ScriptWriter {
 			sourceCode.println();
 		}
 		
+		sourceCode.println("import org.webpieces.ctx.api.Current", null);
+		sourceCode.println();
+		
         sourceCode.print("class ");
         //This generated classname is parsed when creating cleanStackTrace.
         //The part after "Template_" is used as key when

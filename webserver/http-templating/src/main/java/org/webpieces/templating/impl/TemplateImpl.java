@@ -1,9 +1,6 @@
 package org.webpieces.templating.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.webpieces.templating.api.HtmlTagLookup;

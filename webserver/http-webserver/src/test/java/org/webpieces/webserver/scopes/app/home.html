@@ -1,0 +1,15 @@
+<html>
+  <head>
+  </head>
+  <body>
+
+    age=${Current.session().get('age')}$
+    <br/>
+    result=${Current.session().get('boolean')}$
+    <br/>
+    name=${Current.session().get('name')}$
+    <br/>
+    #{a href:@[DISPLAY_SESSION]@, id:'link'}#Link to display session#{/a}#
+        
+  </body>
+</html>

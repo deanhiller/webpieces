@@ -1,7 +1,6 @@
 package org.webpieces.ctx.api;
 
-public class Session {
+public interface Session extends CookieScope {
+	
 
-	
-	
 }

@@ -69,6 +69,9 @@ public class TestPRGSelenium {
 		WebElement passwordElem = driver.findElement(By.name("password"));
 		passwordElem.sendKeys("SomePassword");	
 		
+		String pageSource2 = driver.getPageSource();
+		Assert.assertFalse("pageSource="+pageSource2, pageSource2.contains("null"));
+		
 		Assert.assertEquals("http://localhost:"+port+"/adduser", driver.getCurrentUrl());
 		
 		WebElement submit = driver.findElement(By.id("submit"));
@@ -87,8 +90,8 @@ public class TestPRGSelenium {
 		String errorMsg = errorSpan.getText();
 		Assert.assertEquals("Could not convert value", errorMsg);
 		
-		System.out.println("hi there");
-		//find the error element?...
+		String pageSource3 = driver.getPageSource();
+		Assert.assertFalse("pageSource="+pageSource3, pageSource3.contains("null"));
 		
 	}
 	

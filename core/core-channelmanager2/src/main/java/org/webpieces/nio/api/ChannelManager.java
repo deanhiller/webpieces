@@ -1,7 +1,5 @@
 package org.webpieces.nio.api;
 
-import java.io.IOException;
-
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.channels.DatagramChannel;

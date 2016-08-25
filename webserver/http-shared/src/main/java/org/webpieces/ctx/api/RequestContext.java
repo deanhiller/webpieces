@@ -6,12 +6,12 @@ import java.util.Set;
 public class RequestContext {
 
 	private Validation validation;
-	private Flash flash;
+	private FlashSub flash;
 	private Session session;
 	private RouterRequest request;
 	private Messages messages;
 
-	public RequestContext(Validation validation, Flash flash, Session session, RouterRequest request, Messages messages) {
+	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, Messages messages) {
 		this.validation = validation;
 		this.flash = flash;
 		this.request = request;

@@ -1,40 +1,11 @@
 package org.webpieces.ctx.api;
 
-import java.util.HashMap;
-import java.util.Map;
+public interface Validation extends FlashScope {
 
-public class Validation extends FlashScope implements CookieScope {
-	
-	public static String COOKIE_NAME = FlashScope.COOKIE_NAME_PREFIX+"Errors";
-	
-	private Map<String, String> fieldErrors = new HashMap<>();
+	void addError(String fullKeyName, String string);
 
-	public void addError(String name, String error) {
-		fieldErrors.put(name, error);
-	}	
-	
-	public boolean hasErrors() {
-		if(fieldErrors.size() > 0)
-			return true;
-		return false;
-	}
+	String getError(String fieldName);
 
-	@Override
-	public String getName() {
-		return COOKIE_NAME;
-	}
+	boolean hasErrors();
 
-	@Override
-	public Map<String, String> getMapData() {
-		return fieldErrors;
-	}
-
-	@Override
-	public void setMapData(Map<String, String> dataMap) {
-		fieldErrors = dataMap;
-	}
-
-	public Object getError(String fieldName) {
-		return fieldErrors.get(fieldName);
-	}
 }
