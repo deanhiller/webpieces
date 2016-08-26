@@ -41,7 +41,8 @@ public class TestProdRouter {
 		TestModule module = new TestModule();
 		RouterConfig config = new RouterConfig()
 										.setMetaFile(f)
-										.setWebappOverrides(module);
+										.setWebappOverrides(module)
+										.setSecretKey("xxx");
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 		
 		return Arrays.asList(new Object[][] {

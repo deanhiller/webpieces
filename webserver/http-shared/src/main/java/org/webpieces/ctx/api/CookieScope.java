@@ -4,6 +4,8 @@ public interface CookieScope {
 
 	String getName();
 
+	boolean containsKey(String key);
+	
 	/**
 	 * Uses the platform's ObjectTranslator(which you can override) to translate the value
 	 * from Object to String to be put in the session cookie

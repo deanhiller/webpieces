@@ -31,7 +31,7 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* need to test out cookie length and 150 cookies of certain length
+* TestScopesSelenium - one cookie too large
 * make session and tab cookies secure
 * make forms secure (authenticityToken)
 * write an escapehtml tag

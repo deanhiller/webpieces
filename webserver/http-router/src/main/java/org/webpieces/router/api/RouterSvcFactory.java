@@ -14,7 +14,7 @@ public class RouterSvcFactory {
     protected RouterSvcFactory() {}
 
     public static RoutingService create(VirtualFile routersFile) {
-    	return create(new RouterConfig().setMetaFile(routersFile));
+    	return create(new RouterConfig().setMetaFile(routersFile).setSecretKey("xxx"));
     }
     
 	public static RoutingService create(RouterConfig config) {

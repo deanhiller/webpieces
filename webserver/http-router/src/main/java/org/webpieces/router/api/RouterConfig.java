@@ -14,6 +14,8 @@ public class RouterConfig {
 	private Charset fileEncoding = StandardCharsets.UTF_8;
 	private Charset urlEncoding = StandardCharsets.UTF_8;
 	
+	private String secretKey;
+	
 	/**
 	 * WebApps can override remote services to mock them out for testing or swap prod classes with
 	 * an in-memory implementation such that tests can remain single threaded
@@ -66,4 +68,13 @@ public class RouterConfig {
 		this.isCookiesSecure = isCookiesSecure;
 		return this;
 	}
+	public String getSecretKey() {
+		return secretKey;
+	}
+	public RouterConfig setSecretKey(String secretKey) {
+		this.secretKey = secretKey;
+		return this;
+	}
+	
+	
 }

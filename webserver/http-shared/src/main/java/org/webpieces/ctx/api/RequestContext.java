@@ -11,12 +11,11 @@ public class RequestContext {
 	private RouterRequest request;
 	private Messages messages;
 
-	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, Messages messages) {
+	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request) {
 		this.validation = validation;
 		this.flash = flash;
 		this.request = request;
 		this.session = session;
-		this.messages = messages;
 	}
 	
 	public RouterRequest getRequest() {
@@ -46,6 +45,10 @@ public class RequestContext {
 	public void moveFormParamsToFlash(Set<String> secureFieldNames) {
 		Map<String, String> fields = request.multiPartFields;
 		flash.saveFormParams(fields, secureFieldNames);
+	}
+
+	public void setMessages(Messages messages) {
+		this.messages = messages;
 	}
 	
 }

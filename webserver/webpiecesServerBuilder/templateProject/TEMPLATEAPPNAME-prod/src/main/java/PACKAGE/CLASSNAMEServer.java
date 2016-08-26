@@ -104,7 +104,8 @@ public class CLASSNAMEServer {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
-											.setWebappOverrides(appOverrides);
+											.setWebappOverrides(appOverrides)
+											.setSecretKey("_SECRETKEYHERE_");
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
 										.setHtmlResponsePayloadEncoding(ALL_FILE_ENCODINGS)

@@ -15,7 +15,7 @@ public class DevRouterFactory {
     protected DevRouterFactory() {}
 
     public static RoutingService create(VirtualFile routersFile, CompileConfig compileConfig) {
-    	return create(new RouterConfig().setMetaFile(routersFile), compileConfig);
+    	return create(new RouterConfig().setMetaFile(routersFile).setSecretKey("xxx"), compileConfig);
     }
     
 	public static RoutingService create(RouterConfig config, CompileConfig compileConfig) {

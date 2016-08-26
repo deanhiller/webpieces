@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -48,7 +50,36 @@ public class TestScopes {
 
 	@Test
 	public void testSessionScopeModificationByClient() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
 
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("age=30");
+		
+		socket.clear();
+		
+		Header cookie = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
+		String value = cookie.getValue();
+		value = value.replace("age=30", "age=60");
+		value = value.replace("; path=/; HttpOnly", "");
+		
+		//modify cookie and rerequest...
+		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
+		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
+		
+		server.processHttpRequests(socket, req2, false);
+		
+		responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertNotContains("age=60");
 	}
 
 }

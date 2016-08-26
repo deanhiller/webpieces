@@ -13,16 +13,25 @@ import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
+import org.webpieces.router.impl.ctx.SecureCookie;
+import org.webpieces.util.security.Security;
 
 public class CookieTranslator {
 
+	private static String VERSION = "1";
 	//private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private RouterConfig config;
+	private Security security;
 	
 	@Inject
-	public CookieTranslator(RouterConfig config) {
+	public CookieTranslator(RouterConfig config, Security security) {
 		this.config = config;
+		this.security = security;
+		String secretKey = config.getSecretKey();
+		if(secretKey == null)
+			throw new IllegalArgumentException("secret key must be set");
 	}
 
 	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScopeImpl data) {
@@ -48,7 +57,15 @@ public class CookieTranslator {
 		RouterCookie cookie = createBase(scopeData.getName(), null);
 		
 		StringBuilder data = translateValuesToCookieFormat(mapData);
-		cookie.value = data.toString();
+		
+		String value = data.toString();
+		if(scopeData instanceof SecureCookie) {
+			String key = config.getSecretKey();
+			String sign = security.sign(key, value);
+			cookie.value = VERSION+"-"+sign+":"+value;
+		} else {		
+			cookie.value = VERSION+":"+value;
+		}
 		
 		return cookie;
 	}
@@ -102,7 +119,23 @@ public class CookieTranslator {
 		data.setExisted(true);
 		Map<String, String> dataMap = new HashMap<>();
 		String value = routerCookie.value;
-		String[] pieces = value.split("&");
+		int colonIndex = value.indexOf(":");
+		String version = value.substring(0, colonIndex);
+		String keyValuePairs = value.substring(colonIndex+1);
+		
+		if(data instanceof SecureCookie) {
+			String[] pair = version.split("-");
+			version = pair[0];
+			String expectedHash = pair[1];
+			String hash = security.sign(config.getSecretKey(), keyValuePairs);
+			if(!hash.equals(expectedHash))
+				throw new BadCookieException("hashes don't match...render internal server to user as this only happens if hacked(NOTE: possibly change to BadRequestException so we don't log these when hackers try to hack us)");
+		}
+		
+		if(!VERSION.equals(version))
+			throw new BadCookieException("versions don't match...render internal server to user as this only happens if hacked");
+		
+		String[] pieces = keyValuePairs.split("&");
 		for(String piece : pieces) {
 			String[] split = piece.split("=");
 			if(split.length == 2) {

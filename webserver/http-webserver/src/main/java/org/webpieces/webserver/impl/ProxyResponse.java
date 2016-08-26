@@ -264,6 +264,9 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void failureRenderingInternalServerErrorPage(Throwable e) {
+		
+		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
+		
 		//This is a final failure so we send a webpieces page next (in the future, we should just use a customer static html file if set)
 		//This is only if the webapp 500 html page fails as many times it is a template and they could have another bug in that template.
 		String html = "<html><head></head><body>This website had a bug, "

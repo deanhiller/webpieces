@@ -1,10 +1,14 @@
 package org.webpieces.router.impl.ctx;
 
+import java.util.UUID;
+
 import org.webpieces.ctx.api.Session;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.util.security.Security;
 
-public class SessionImpl extends CookieScopeImpl implements Session {
+public class SessionImpl extends CookieScopeImpl implements Session, SecureCookie {
 
+	private static final String SECURE_TOKEN_KEY = "__ST";
 	public static String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Session";
 	
 	public SessionImpl(ObjectTranslator objectTranslator) {
@@ -20,4 +24,13 @@ public class SessionImpl extends CookieScopeImpl implements Session {
 		return COOKIE_NAME;
 	}
 
+	@Override
+	public String getAuthenticityToken()  {
+        if (!containsKey(SECURE_TOKEN_KEY)) {
+        	String secureToken = UUID.randomUUID().toString()+UUID.randomUUID().toString();
+            put(SECURE_TOKEN_KEY, secureToken);
+        }
+        return get(SECURE_TOKEN_KEY);
+    }
+	
 }

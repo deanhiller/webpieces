@@ -65,4 +65,9 @@ public class MockFrontendSocket implements FrontendSocket {
 		return payloads;
 	}
 
+	public void clear() {
+		payloads.clear();
+		waitingResponseStart = true;
+	}
+
 }

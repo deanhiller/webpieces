@@ -12,10 +12,12 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
@@ -56,12 +58,21 @@ public class RouteInvoker {
 
 	public void invoke(
 			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
-		//We convert all exceptions from invokeAsync into CompletableFuture..
-		CompletableFuture<Object> future = invokeAsync(result, req, responseCb, errorRoutes);
-		future.exceptionally(e -> processException(responseCb, req, e, errorRoutes, result.getMeta()));
+		try {
+			Session session = (Session) cookieFactory.translateCookieToScope(req, new SessionImpl(objectTranslator));
+			FlashImpl flash = (FlashImpl) cookieFactory.translateCookieToScope(req, new FlashImpl(objectTranslator));
+			ValidationImpl validation = (ValidationImpl) cookieFactory.translateCookieToScope(req, new ValidationImpl(objectTranslator));
+			RequestContext requestCtx = new RequestContext(validation, flash, session, req);
+			
+			//We convert all exceptions from invokeAsync into CompletableFuture..
+			CompletableFuture<Object> future = invokeAsync(result, requestCtx, responseCb, errorRoutes);
+			future.exceptionally(e -> processException(responseCb, requestCtx, e, errorRoutes, result.getMeta()));
+		} catch(Throwable e) {
+			responseCb.failureRenderingInternalServerErrorPage(e);
+		}
 	}
 	
-	private Object processException(ResponseStreamer responseCb, RouterRequest req, Throwable e, ErrorRoutes errorRoutes, RouteMeta meta) {
+	private Object processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, RouteMeta meta) {
 		if(e instanceof CompletionException) {
 			//unwrap the exception to deliver the 'real' exception that occurred
 			e = e.getCause();
@@ -72,15 +83,17 @@ public class RouteInvoker {
 			NotFoundInfo notFoundInfo = errorRoutes.fetchNotfoundRoute(exc);
 			MatchResult notFoundResult = notFoundInfo.getResult();
 			RouterRequest overridenRequest = notFoundInfo.getReq();
+			RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest);
+			
 			//http 404...(unless an exception happens in calling this code and that then goes to 500)
-			CompletableFuture<Object> future = notFound(notFoundResult, exc, overridenRequest, responseCb);
+			CompletableFuture<Object> future = notFound(notFoundResult, exc, overridenCtx, responseCb);
 			//If not found fails with sync or async exception, we processException and wrap in new Runtime to process as 500 next
-			future.exceptionally(exception -> processException(responseCb, overridenRequest, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult.getMeta()));
+			future.exceptionally(exception -> processException(responseCb, overridenCtx, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult.getMeta()));
 			return null;
 		}
 
 		//If this fails, then the users 5xx page is messed up and we then render our own 5xx page
-		CompletableFuture<Object> future = internalServerError(errorRoutes, e, req, responseCb, meta);
+		CompletableFuture<Object> future = internalServerError(errorRoutes, e, requestCtx, responseCb, meta);
 		future.exceptionally(finalExc -> finalFailure(responseCb, finalExc));
 		
 		return null;
@@ -93,7 +106,7 @@ public class RouteInvoker {
 	}
 	
 	public CompletableFuture<Object> invokeAsync(
-		MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
+		MatchResult result, RequestContext req, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
 		try {
 			//This makes us consistent with other NotFoundExceptions and without the cost of 
 			//throwing an exception and filling in stack trace...
@@ -115,9 +128,9 @@ public class RouteInvoker {
 		}
 	}
 	
-	private CompletableFuture<Object> notFound(MatchResult notFoundResult, NotFoundException exc, RouterRequest req, ResponseStreamer responseCb) {
+	private CompletableFuture<Object> notFound(MatchResult notFoundResult, NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
 		try {
-			return invokeImpl(notFoundResult, req, responseCb);
+			return invokeImpl(notFoundResult, requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -128,12 +141,12 @@ public class RouteInvoker {
 	}
 
 	private CompletableFuture<Object> internalServerError(
-			ErrorRoutes errorRoutes, Throwable exc, RouterRequest req, ResponseStreamer responseCb, RouteMeta failedRoute) {
+			ErrorRoutes errorRoutes, Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, RouteMeta failedRoute) {
 		try {
 			log.error("There is three parts to this error message... request, route found, and the exception "
-					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"+req+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
+					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
-			return invokeImpl(result, req, responseCb);
+			return invokeImpl(result, requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -143,20 +156,20 @@ public class RouteInvoker {
 		}
 	}
 	
-	public CompletableFuture<Object> invokeImpl(MatchResult result, RouterRequest req, ResponseStreamer responseCb) {
+	public CompletableFuture<Object> invokeImpl(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
 		RouteMeta meta = result.getMeta();
 		Object obj = meta.getControllerInstance();
 		if(obj == null)
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Session session = (Session) cookieFactory.translateCookieToScope(req, new SessionImpl(objectTranslator));
-		FlashImpl flash = (FlashImpl) cookieFactory.translateCookieToScope(req, new FlashImpl(objectTranslator));
-		ValidationImpl validation = (ValidationImpl) cookieFactory.translateCookieToScope(req, new ValidationImpl(objectTranslator));
+		Validation validation = requestCtx.getValidation();
+		RouterRequest req = requestCtx.getRequest();
 		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
+		requestCtx.setMessages(messages);
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
-		RequestContext requestCtx = new RequestContext(validation, flash, session, req, messages);
+
 		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, cookieFactory);
 		//ThreadLocals...
 		Current.setContext(requestCtx);

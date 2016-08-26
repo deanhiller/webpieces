@@ -59,7 +59,11 @@ public abstract class CookieScopeImpl implements CookieScope {
 		this.cookie = dataMap;
 	}
 	
-	
+	@Override
+	public boolean containsKey(String key) {
+		return cookie.containsKey(key);
+	}
+
 	@Override
 	public void put(String key, Object value) {
 		if(value == null) {

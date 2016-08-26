@@ -53,7 +53,8 @@ public class WebserverForTest {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setWebappOverrides(appOverrides)
-											.setFileEncoding(CHAR_SET_TO_USE);
+											.setFileEncoding(CHAR_SET_TO_USE)
+											.setSecretKey("xxx");
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(platformOverrides)
 										.setHtmlResponsePayloadEncoding(CHAR_SET_TO_USE)
