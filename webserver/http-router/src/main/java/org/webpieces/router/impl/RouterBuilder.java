@@ -58,7 +58,7 @@ public class RouterBuilder implements Router {
 	}
 
 	@Override
-	public void addPostApiRoute(String path, String controllerMethod, RouteId routeId) {
+	public void postRoute(String path, String controllerMethod, RouteId routeId) {
 		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, routeId, false, false);
 		addRoute(route, routeId);		
 	}

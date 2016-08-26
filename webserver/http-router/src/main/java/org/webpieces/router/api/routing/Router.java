@@ -15,7 +15,12 @@ import org.webpieces.router.api.HttpFilter;
 public interface Router {
 
 	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
-	void addPostApiRoute(String path, String controllerMethod, RouteId routeId);
+	/**
+	 * This is a POST route for apis OR forms that do NOT want to use the secureToken and want
+	 * no security from attacks.  addRoute(POST) is better for secure form pages and html.  Typically
+	 * only use this for apis to avoid the secure token check. 
+	 */
+	void postRoute(String path, String controllerMethod, RouteId routeId);
 
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
