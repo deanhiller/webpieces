@@ -5,6 +5,8 @@ import java.util.Set;
 
 public class RequestContext {
 
+	public static final String SECURE_TOKEN_FORM_NAME = "__secureToken";
+	
 	private Validation validation;
 	private FlashSub flash;
 	private Session session;

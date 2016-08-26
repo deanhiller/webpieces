@@ -13,7 +13,9 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterConfig;
@@ -22,6 +24,9 @@ import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
+import org.webpieces.router.impl.ctx.FlashImpl;
+import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
@@ -84,6 +89,7 @@ public class TestSimpleRoutes {
 	public void testBasicRoute() {
 		RouterRequest req = createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.processHttpRequests(req, mockResponseStream);
 		
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
@@ -99,6 +105,7 @@ public class TestSimpleRoutes {
 	public void testOneParamRoute() {
 		RouterRequest req = createHttpRequest(HttpMethod.POST, "/meeting");
 		MockResponseStream mockResponseStream = new MockResponseStream();
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.processHttpRequests(req, mockResponseStream);
 		
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();

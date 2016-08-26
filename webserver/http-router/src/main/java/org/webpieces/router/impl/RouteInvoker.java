@@ -16,22 +16,19 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderHtmlImpl;
-import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
-import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
-import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslator;
 
 @Singleton
@@ -42,27 +39,18 @@ public class RouteInvoker {
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
-	private CookieTranslator cookieFactory;
-	private ObjectTranslator objectTranslator;
 	
 	@Inject
 	public RouteInvoker(ParamToObjectTranslator argumentTranslator, 
-						ObjectToParamTranslator reverseTranslator, 
-						CookieTranslator cookieFactory,
-						ObjectTranslator objectTranslator) {
+						ObjectToParamTranslator reverseTranslator) {
 		this.argumentTranslator = argumentTranslator;
 		this.reverseTranslator = reverseTranslator;
-		this.cookieFactory = cookieFactory;
-		this.objectTranslator = objectTranslator;
 	}
 
 	public void invoke(
 			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
 		try {
-			Session session = (Session) cookieFactory.translateCookieToScope(req, new SessionImpl(objectTranslator));
-			FlashImpl flash = (FlashImpl) cookieFactory.translateCookieToScope(req, new FlashImpl(objectTranslator));
-			ValidationImpl validation = (ValidationImpl) cookieFactory.translateCookieToScope(req, new ValidationImpl(objectTranslator));
-			RequestContext requestCtx = new RequestContext(validation, flash, session, req);
+			RequestContext requestCtx = Current.getContext();
 			
 			//We convert all exceptions from invokeAsync into CompletableFuture..
 			CompletableFuture<Object> future = invokeAsync(result, requestCtx, responseCb, errorRoutes);
@@ -94,14 +82,15 @@ public class RouteInvoker {
 
 		//If this fails, then the users 5xx page is messed up and we then render our own 5xx page
 		CompletableFuture<Object> future = internalServerError(errorRoutes, e, requestCtx, responseCb, meta);
-		future.exceptionally(finalExc -> finalFailure(responseCb, finalExc));
+		future.exceptionally(finalExc -> finalFailure(responseCb, finalExc, requestCtx));
 		
 		return null;
 	}
 	
-	public Object finalFailure(ResponseStreamer responseCb, Throwable e) {
+	public Object finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
 		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e); 
-		responseCb.failureRenderingInternalServerErrorPage(e);
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, null, responseCb);
+		processor.failureRenderingInternalServerErrorPage(e);
 		return null;
 	}
 	
@@ -169,17 +158,23 @@ public class RouteInvoker {
 		requestCtx.setMessages(messages);
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
+		if(meta.getRoute().isCheckSecureToken()) {
+			String token = requestCtx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
+			String formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);
+			if(formToken == null)
+				throw new BadRequestException("missing form token...someone posting form without getting it first(hacker or otherwise) OR "
+						+ "you are not using the #{form}# tag or the #{secureToken}# tag to secure your forms");
+			else if(!formToken.equals(token))
+				throw new BadRequestException("bad form token...someone posting form with invalid token(hacker or otherwise)");
+		}
 
-		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, cookieFactory);
-		//ThreadLocals...
-		Current.setContext(requestCtx);
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb);
+
 		RequestLocalCtx.set(processor);
-		
 		CompletableFuture<Object> response;
 		try {
 			response = invokeMethod(obj, method, arguments);
 		} finally {
-			Current.setContext(null);
 			RequestLocalCtx.set(null);
 		}
 		

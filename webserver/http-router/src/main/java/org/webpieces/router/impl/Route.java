@@ -25,4 +25,6 @@ public interface Route {
 	RouteType getRouteType();
 
 	boolean isPostOnly();
+
+	boolean isCheckSecureToken();
 }

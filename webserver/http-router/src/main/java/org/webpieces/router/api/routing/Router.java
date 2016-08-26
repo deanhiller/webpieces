@@ -15,7 +15,8 @@ import org.webpieces.router.api.HttpFilter;
 public interface Router {
 
 	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
-	
+	void addPostApiRoute(String path, String controllerMethod, RouteId routeId);
+
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
 	void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);

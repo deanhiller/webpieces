@@ -12,7 +12,9 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterSvcFactory;
@@ -22,6 +24,9 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
+import org.webpieces.router.impl.ctx.FlashImpl;
+import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 
@@ -58,6 +63,7 @@ public class ErrorCommonTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/user/5553");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.processHttpRequests(req, mockResponseStream);
 			
 		Exception e = mockResponseStream.getOnlyException();
@@ -75,6 +81,7 @@ public class ErrorCommonTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.processHttpRequests(req, mockResponseStream);
 
 		verifyNotFoundRendered(mockResponseStream);
@@ -97,6 +104,7 @@ public class ErrorCommonTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.processHttpRequests(req, mockResponseStream);
 
 		verifyNotFoundRendered(mockResponseStream);

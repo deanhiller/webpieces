@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.impl.RouteMeta;
@@ -66,7 +67,21 @@ public class MetaLoader {
 				if(!Redirect.class.isAssignableFrom(type))
 					throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
 			} else if(!Redirect.class.isAssignableFrom(clazz))
-				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not '"+clazz.getSimpleName()+"'for this method="+controllerMethod);
+				throw new IllegalArgumentException("Since this route="+meta+" is for POST, the method MUST return a type 'Redirect' or 'CompletableFuture<Redirect>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
+		} else {
+			Class<?> clazz = controllerMethod.getReturnType();
+			if(CompletableFuture.class.isAssignableFrom(clazz)) {
+				Type genericReturnType = controllerMethod.getGenericReturnType();
+				ParameterizedType t = (ParameterizedType) genericReturnType;
+				Type type2 = t.getActualTypeArguments()[0];
+				if(!(type2 instanceof Class))
+					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' for this method(and did not)="+controllerMethod);
+				@SuppressWarnings("rawtypes")
+				Class<?> type = (Class) type2;
+				if(!Action.class.isAssignableFrom(type))
+					throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not 'CompletableFuture<"+type.getSimpleName()+">'for this method="+controllerMethod);
+			} else if(!Action.class.isAssignableFrom(clazz))
+				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		}
 		
 		meta.setMethodParamNames(paramNames);

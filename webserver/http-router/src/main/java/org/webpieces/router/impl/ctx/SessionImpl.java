@@ -8,7 +8,7 @@ import org.webpieces.util.security.Security;
 
 public class SessionImpl extends CookieScopeImpl implements Session, SecureCookie {
 
-	private static final String SECURE_TOKEN_KEY = "__ST";
+	public static final String SECURE_TOKEN_KEY = "__ST";
 	public static String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Session";
 	
 	public SessionImpl(ObjectTranslator objectTranslator) {
@@ -25,9 +25,9 @@ public class SessionImpl extends CookieScopeImpl implements Session, SecureCooki
 	}
 
 	@Override
-	public String getAuthenticityToken()  {
+	public String getSecureToken()  {
         if (!containsKey(SECURE_TOKEN_KEY)) {
-        	String secureToken = UUID.randomUUID().toString()+UUID.randomUUID().toString();
+        	String secureToken = UUID.randomUUID().toString().replaceAll("-", "");
             put(SECURE_TOKEN_KEY, secureToken);
         }
         return get(SECURE_TOKEN_KEY);

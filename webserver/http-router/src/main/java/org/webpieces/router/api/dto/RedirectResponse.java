@@ -1,9 +1,5 @@
 package org.webpieces.router.api.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.router.api.actions.Redirect;
 
 public class RedirectResponse implements Redirect {
@@ -11,13 +7,11 @@ public class RedirectResponse implements Redirect {
 	public Boolean isHttps;
 	public String domain;
 	public String redirectToPath;
-	public List<RouterCookie> cookies = new ArrayList<>();
 
-	public RedirectResponse(Boolean isHttps, String domain, String redirectToPath, List<RouterCookie> cookies) {
+	public RedirectResponse(Boolean isHttps, String domain, String redirectToPath) {
 		this.isHttps = isHttps;
 		this.domain = domain;
 		this.redirectToPath = redirectToPath;
-		this.cookies = cookies;
 		
 	}
 

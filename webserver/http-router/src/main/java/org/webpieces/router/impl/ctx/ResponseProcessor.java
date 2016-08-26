@@ -1,7 +1,6 @@
 package org.webpieces.router.impl.ctx;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,7 +9,6 @@ import java.util.function.Consumer;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
@@ -19,7 +17,6 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.routing.RouteId;
-import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
@@ -34,18 +31,16 @@ public class ResponseProcessor {
 	private ObjectToParamTranslator reverseTranslator;
 	private RequestContext ctx;
 	private ResponseStreamer responseCb;
-	private CookieTranslator cookieFactory;
+
 	private boolean responseSent = false;
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb,
-			CookieTranslator cookieFactory) {
+			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.matchedMeta = meta;
 		this.responseCb = responseCb;
-		this.cookieFactory = cookieFactory;
 	}
 
 	public RedirectResponse createFullRedirect(RedirectImpl action) {
@@ -81,25 +76,11 @@ public class ResponseProcessor {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		List<RouterCookie> cookies = createCookies();
-		
-		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path, cookies);
+		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path);
 		
 		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
 		
 		return redirectResponse;
-	}
-
-	private List<RouterCookie> createCookies() {
-		List<RouterCookie> cookies = new ArrayList<>();
-		FlashImpl flash = (FlashImpl) ctx.getFlash();
-		cookieFactory.addScopeToCookieIfExist(cookies, flash);
-		ValidationImpl validation = (ValidationImpl) ctx.getValidation();
-		cookieFactory.addScopeToCookieIfExist(cookies, validation);
-		SessionImpl session = (SessionImpl) ctx.getSession();
-		cookieFactory.addScopeToCookieIfExist(cookies, session);
-		
-		return cookies;
 	}
 
 	public RenderResponse createRenderResponse(RenderHtmlImpl controllerResponse) {
@@ -129,9 +110,8 @@ public class ResponseProcessor {
 			relativeOrAbsolutePath = methodName+".html";
 		}
 		
-		List<RouterCookie> cookies = createCookies();
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
-		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType(), cookies);
+		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType());
 		
 		wrapFunctionInContext(s -> responseCb.sendRenderHtml(resp));
 		
@@ -148,6 +128,10 @@ public class ResponseProcessor {
 			if(!wasSet) //then reset
 				Current.setContext(null);
 		}
+	}
+
+	public void failureRenderingInternalServerErrorPage(Throwable e) {
+		wrapFunctionInContext(s -> responseCb.failureRenderingInternalServerErrorPage(e));
 	}
 	
 }

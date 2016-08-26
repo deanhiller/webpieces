@@ -13,7 +13,7 @@ import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.exceptions.BadCookieException;
+import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
 import org.webpieces.util.security.Security;
@@ -34,7 +34,11 @@ public class CookieTranslator {
 			throw new IllegalArgumentException("secret key must be set");
 	}
 
-	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScopeImpl data) {
+	public void addScopeToCookieIfExist(List<RouterCookie> cookies, CookieScope cookie1) {
+		if(!(cookie1 instanceof CookieScopeImpl))
+			throw new IllegalArgumentException("Cookie is not the right data type="+cookie1.getClass()+" needs to be of type "+CookieScopeImpl.class);
+		
+		CookieScopeImpl data = (CookieScopeImpl) cookie1;
 		if(data.isNeedCreateSetCookie()) {
 			RouterCookie cookie = translateScopeToCookie(data);
 			cookies.add(cookie);
@@ -129,11 +133,11 @@ public class CookieTranslator {
 			String expectedHash = pair[1];
 			String hash = security.sign(config.getSecretKey(), keyValuePairs);
 			if(!hash.equals(expectedHash))
-				throw new BadCookieException("hashes don't match...render internal server to user as this only happens if hacked(NOTE: possibly change to BadRequestException so we don't log these when hackers try to hack us)");
+				throw new BadRequestException("hashes don't match...render internal server to user as this only happens if hacked(NOTE: possibly change to BadRequestException so we don't log these when hackers try to hack us)");
 		}
 		
 		if(!VERSION.equals(version))
-			throw new BadCookieException("versions don't match...render internal server to user as this only happens if hacked");
+			throw new BadRequestException("versions don't match...render internal server to user as this only happens if hacked");
 		
 		String[] pieces = keyValuePairs.split("&");
 		for(String piece : pieces) {

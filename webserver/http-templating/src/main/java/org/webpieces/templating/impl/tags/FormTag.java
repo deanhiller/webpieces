@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.TemplateUtil;
@@ -38,10 +40,16 @@ public class FormTag implements HtmlTag {
         String enctype = (String) args.get("enctype");
         if (enctype == null)
             enctype = "application/x-www-form-urlencoded";
-
-        out.println("<form action=\"" + url + "\" method=\"" + method.toLowerCase() + "\" accept-charset=\"" + encoding.toLowerCase()
-                + "\" enctype=\"" + enctype + "\"" + TemplateUtil.serialize(args, "action", "method", "accept-charset", "enctype")
-                + ">");
+        
+        String secureToken = Current.session().getSecureToken();
+        String tokenKeyName = RequestContext.SECURE_TOKEN_FORM_NAME;
+        
+        String formHeader = "<form action=`" + url + "` method=`" + method.toLowerCase() + "` accept-charset=`" + encoding.toLowerCase()
+        	+ "` enctype=`" + enctype + "`" + TemplateUtil.serialize(args, "action", "method", "accept-charset", "enctype") + ">";
+        String secureInputElement = "    <input type=`hidden` name=`"+tokenKeyName+"` value=`"+secureToken+"`>";
+        
+        out.println(formHeader.replaceAll("`", "\""));
+        out.println(secureInputElement.replaceAll("`", "\""));
         out.println(ClosureUtil.toString(body));
         out.print("</form>");
 	}

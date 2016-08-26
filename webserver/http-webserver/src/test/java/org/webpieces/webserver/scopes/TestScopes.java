@@ -78,7 +78,7 @@ public class TestScopes {
 		Assert.assertEquals(1, responses.size());
 		
 		response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
 		response.assertNotContains("age=60");
 	}
 

@@ -12,7 +12,10 @@ public class BeansRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/pageparam",         "BeansController.pageParam", BeansRouteId.PAGE_PARAM);
 
 		addRoute(GET , "/urlencoding/{user}","BeansController.urlEncoding", BeansRouteId.URLENCODE);
-		
+
+		addPostApiRoute("/postuser2",        "BeansController.postUser", BeansRouteId.POST_USER2_ROUTE);
+		addPostApiRoute("/postArray2",        "BeansController.postArray", BeansRouteId.POST_ARRAY2_ROUTE);
+
 		addRoute(GET , "/adduser",           "BeansController.userForm", BeansRouteId.USER_FORM_ROUTE);
 		addRoute(POST, "/postuser",          "BeansController.postUser", BeansRouteId.POST_USER_ROUTE);
 		addRoute(GET , "/listusers",         "BeansController.listUsers", BeansRouteId.LIST_USERS_ROUTE);

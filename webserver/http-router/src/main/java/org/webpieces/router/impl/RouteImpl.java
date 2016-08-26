@@ -23,12 +23,13 @@ public class RouteImpl implements Route {
 	private final boolean isSecure;
 	private final RouteType routeType;
 	private String controllerMethodString;
+	private boolean checkSecureToken;
 
-	public RouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isSecure) {
-		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure);
+	public RouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
+		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure, checkSecureToken);
 	}
 	
-	public RouteImpl(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId, boolean isSecure) {
+	public RouteImpl(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
 		this.path = path;
 		this.methods = methods;
 		RegExResult result = RegExUtil.parsePath(path);
@@ -37,6 +38,7 @@ public class RouteImpl implements Route {
 		this.isSecure = isSecure;
 		this.controllerMethodString = controllerMethod;
 		this.routeType = RouteType.BASIC;
+		this.checkSecureToken = checkSecureToken;
 	}
 
 	public RouteImpl(String controllerMethod, RouteType routeType) {
@@ -106,6 +108,11 @@ public class RouteImpl implements Route {
 			return true;
 		
 		return false;
+	}
+
+	@Override
+	public boolean isCheckSecureToken() {
+		return checkSecureToken;
 	}
 	
 }

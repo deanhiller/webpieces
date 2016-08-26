@@ -11,13 +11,20 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.AcceptMediaType;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Flash;
+import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Session;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
@@ -28,11 +35,17 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.Headers;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.exceptions.BadRequestException;
+import org.webpieces.router.impl.CookieTranslator;
+import org.webpieces.router.impl.ctx.FlashImpl;
+import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
@@ -47,11 +60,18 @@ public class RequestReceiver implements HttpRequestListener {
 	@Inject
 	private RoutingService routingService;
 	@Inject
-	private TemplateService templatingService;
-	@Inject
 	private WebServerConfig config;
 	@Inject
 	private FormUrlEncodedParser parser = new FormUrlEncodedParser();
+	@Inject
+	private CookieTranslator cookieTranslator;
+	@Inject
+	private ObjectTranslator objectTranslator;
+	
+	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
+	//it keeps the code a bit more simple.  We could fix this later
+	@Inject
+	private Provider<ProxyResponse> responseProvider;
 	
 	private Set<String> headersSupported = new HashSet<>();
 	
@@ -70,7 +90,8 @@ public class RequestReceiver implements HttpRequestListener {
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
-		ResponseStreamer streamer = new ProxyResponse(req, channel, routingService, templatingService, config);
+		ProxyResponse streamer = responseProvider.get();
+		streamer.init(req, channel);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
@@ -115,7 +136,30 @@ public class RequestReceiver implements HttpRequestListener {
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
 		
-		routingService.processHttpRequests(routerRequest, streamer );
+		try {
+			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(objectTranslator));
+			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(objectTranslator));
+			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(objectTranslator));
+			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
+			
+			processRequest(streamer, routerRequest, requestCtx);
+		} catch(BadRequestException e) {
+			log.warn("Exception that only happens if hacker or you the developer messed something up", e);
+			streamer.sendFailure(new HttpException(KnownStatusCode.HTTP_400_BADREQUEST));
+		} catch(Exception e) {
+			log.warn("Exception", e);
+			streamer.sendFailure(new HttpException(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR));
+		}
+	}
+
+	private void processRequest(ProxyResponse streamer, RouterRequest routerRequest, RequestContext requestCtx) {
+		//ThreadLocal...
+		Current.setContext(requestCtx);
+		try {
+			routingService.processHttpRequests(routerRequest, streamer );
+		} finally {
+			Current.setContext(null);
+		}
 	}
 
 
@@ -207,7 +251,8 @@ public class RequestReceiver implements HttpRequestListener {
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
-		ProxyResponse proxyResp = new ProxyResponse(channel);
+		ProxyResponse proxyResp = responseProvider.get();
+		proxyResp.init(null, channel);
 		proxyResp.sendFailure(exc);
 	}
 

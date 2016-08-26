@@ -50,25 +50,37 @@ public class RouterBuilder implements Router {
 
 	@Override
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(method, path, controllerMethod, routeId, false);
+		boolean checkSecureToken = false;
+		if(method == HttpMethod.POST)
+			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
+		Route route = new RouteImpl(method, path, controllerMethod, routeId, false, checkSecureToken);
 		addRoute(route, routeId);
 	}
 
 	@Override
+	public void addPostApiRoute(String path, String controllerMethod, RouteId routeId) {
+		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, routeId, false, false);
+		addRoute(route, routeId);		
+	}
+	
+	@Override
 	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(methods, path, controllerMethod, routeId, false);
+		Route route = new RouteImpl(methods, path, controllerMethod, routeId, false, false);
 		addRoute(route, routeId);
 	}
 
 	@Override
 	public void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(method, path, controllerMethod, routeId, true);
+		boolean checkSecureToken = false;
+		if(method == HttpMethod.POST)
+			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
+		Route route = new RouteImpl(method, path, controllerMethod, routeId, true, checkSecureToken);
 		addRoute(route, routeId);
 	}
 
 	@Override
 	public void addSecureRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(methods, path, controllerMethod, routeId, true);
+		Route route = new RouteImpl(methods, path, controllerMethod, routeId, true, false);
 		addRoute(route, routeId);
 	}
 
@@ -125,4 +137,5 @@ public class RouterBuilder implements Router {
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setInternalSvrErrorRoute(meta);
 	}
+
 }

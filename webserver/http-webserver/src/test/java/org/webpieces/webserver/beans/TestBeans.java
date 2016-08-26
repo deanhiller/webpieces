@@ -56,8 +56,27 @@ public class TestBeans {
 	}
 
 	@Test
-	public void testComplexBeanSaved() {
+	public void testPostFailDueToSecureTokenCheck() {
 		HttpRequest req = Requests.createPostRequest("/postuser", 
+				"user.firstName", "D&D", 
+				"user.lastName", "Hiller",
+				"user.fullName", "Dean Hiller",
+				"user.address.zipCode", "555",
+				"user.address.street", "Coolness Dr.");
+		
+		server.processHttpRequests(socket, req , false);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		//We should change this to a 400 bad request
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+	}
+	
+	@Test
+	public void testComplexBeanSaved() {
+		HttpRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -80,7 +99,7 @@ public class TestBeans {
 
 	@Test
 	public void testInvalidComplexBean() {
-		HttpRequest req = Requests.createPostRequest("/postuser", 
+		HttpRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -128,7 +147,7 @@ public class TestBeans {
 	
 	@Test
 	public void testArraySaved() {
-		HttpRequest req = Requests.createPostRequest("/postArray", 
+		HttpRequest req = Requests.createPostRequest("/postArray2", 
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",

@@ -39,6 +39,10 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addRoute(method, path, controllerMethod, routeId);
 	}
 
+	public void addPostApiRoute(String path, String controllerMethod, RouteId routeId) {
+		router.addPostApiRoute(path, controllerMethod, routeId);
+	}
+
 	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
 		router.addRoute(methods, path, controllerMethod, routeId);
 	}

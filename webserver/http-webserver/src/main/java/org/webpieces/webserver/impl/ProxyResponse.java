@@ -6,12 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -34,6 +38,7 @@ import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
@@ -48,24 +53,23 @@ public class ProxyResponse implements ResponseStreamer {
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final HeaderPriorityParser cookieParser = HttpParserFactory.createHeaderParser();
 	
+	@Inject
+	private RoutingService urlLookup;
+	@Inject
+	private TemplateService templatingService;
+	@Inject
+	private WebServerConfig config;
+	@Inject
+	private CookieTranslator cookieTranslator;
+	
 	private FrontendSocket channel;
 	private HttpRequest request;
-	private TemplateService templatingService;
-	private WebServerConfig config;
-	private RoutingService urlLookup;
 
-	public ProxyResponse(HttpRequest req, FrontendSocket channel, RoutingService lookup, TemplateService templatingService, WebServerConfig config) {
+	public void init(HttpRequest req, FrontendSocket channel) {
 		this.request = req;
 		this.channel = channel;
-		this.urlLookup = lookup;
-		this.templatingService = templatingService;
-		this.config = config;
 	}
 
-	public ProxyResponse(FrontendSocket channel) {
-		this.channel = channel;
-	}
-	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
 		HttpResponseStatus status = new HttpResponseStatus();
@@ -94,7 +98,7 @@ public class ProxyResponse implements ResponseStreamer {
 		response.addHeader(location );
 		
 		//Firefox requires a content length of 0 (chrome doesn't)!!!...
-		addCommonHeaders(response, 0, httpResponse.cookies);
+		addCommonHeaders(response, 0);
 		
 		log.info("sending REDIRECT response channel="+channel);
 		channel.write(response);
@@ -152,7 +156,7 @@ public class ProxyResponse implements ResponseStreamer {
 			throw new IllegalStateException("did add case for state="+resp.routeType);
 		}
 		
-		HttpResponse response = createResponse(statusCode, content, resp.cookies);
+		HttpResponse response = createResponse(statusCode, content);
 		
 		log.info("sending RENDERHTML response. code="+statusCode+" for path="+request.getRequestLine().getUri().getUri()+" channel="+channel);
 		if(log.isDebugEnabled())
@@ -163,6 +167,17 @@ public class ProxyResponse implements ResponseStreamer {
 		closeIfNeeded();
 	}
 
+	private List<RouterCookie> createCookies() {
+		if(!Current.isContextSet())
+			return new ArrayList<>(); //in some exceptional cases like incoming cookies failing to parse, there will be no cookies
+		
+		List<RouterCookie> cookies = new ArrayList<>();
+		cookieTranslator.addScopeToCookieIfExist(cookies, Current.flash());
+		cookieTranslator.addScopeToCookieIfExist(cookies, Current.validation());
+		cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
+		return cookies;
+	}
+	
 	private String getTemplatePath(String packageStr, String templateClassName, String extension) {
 		String className = templateClassName;
 		if(!"".equals(packageStr))
@@ -173,7 +188,7 @@ public class ProxyResponse implements ResponseStreamer {
 		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
-	private HttpResponse createResponse(KnownStatusCode statusCode, String content, List<RouterCookie> cookies) {
+	private HttpResponse createResponse(KnownStatusCode statusCode, String content) {
 		Charset encoding = config.getHtmlResponsePayloadEncoding();
 
 		byte[] bytes = content.getBytes(encoding);
@@ -192,11 +207,11 @@ public class ProxyResponse implements ResponseStreamer {
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		response.setBody(data);
 
-		addCommonHeaders(response, bytes.length, cookies);
+		addCommonHeaders(response, bytes.length);
 		return response;
 	}
 	
-	private void addCommonHeaders(HttpResponse response, int contentLength, List<RouterCookie> cookies) {
+	private void addCommonHeaders(HttpResponse response, int contentLength) {
 		
 		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+"");
 		response.addHeader(header);
@@ -213,6 +228,7 @@ public class ProxyResponse implements ResponseStreamer {
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
 //		response.addHeader(xFrame);
 		
+		List<RouterCookie> cookies = createCookies();
 		for(RouterCookie c : cookies) {
 			Header cookieHeader = create(c);
 			response.addHeader(cookieHeader);
@@ -273,7 +289,7 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
-		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, new ArrayList<>());
+		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html);
 		
 		channel.write(response);
 		
@@ -281,17 +297,9 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	public void sendFailure(HttpException exc) {
-		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(exc.getStatusCode());
-		
-		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
-		statusLine.setStatus(status);
-		HttpResponse response = new HttpResponse();
-		response.setStatusLine(statusLine);
-		
-		response.addHeader(new Header("Failure", exc.getMessage()));
-		
+		HttpResponse response = createResponse(exc.getStatusCode(), "Something went wrong(are you hacking the system?)");
 		channel.write(response);
+		closeIfNeeded();
 	}
 
 }

@@ -30,7 +30,7 @@ public class MtgRouteModule implements RouteModule {
 		
 		router.addRoute(getAll(), "/something",    "MeetingController.someExample",     SOME_EXAMPLE);
 //		router.addRoute(GET,      "/listuser",     "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
-		router.addRoute(POST,     "/meeting",      "MeetingController.postMeeting", POST_MEETING);
+		router.addPostApiRoute(   "/meeting",      "MeetingController.postMeeting", POST_MEETING);
 		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",    GET_SHOW_MTG);
 		router.addRoute(GET,      "/async",        "MeetingController.asyncMethod",     ASYNC_ROUTE);
 		
