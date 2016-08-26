@@ -58,8 +58,8 @@ public class RouterBuilder implements Router {
 	}
 
 	@Override
-	public void postRoute(String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(HttpMethod.POST, path, controllerMethod, routeId, false, false);
+	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
+		Route route = new RouteImpl(method, path, controllerMethod, routeId, false, checkToken);
 		addRoute(route, routeId);		
 	}
 	
@@ -70,7 +70,7 @@ public class RouterBuilder implements Router {
 	}
 
 	@Override
-	public void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
+	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		boolean checkSecureToken = false;
 		if(method == HttpMethod.POST)
 			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
@@ -79,7 +79,14 @@ public class RouterBuilder implements Router {
 	}
 
 	@Override
-	public void addSecureRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
+	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId,
+			boolean checkToken) {
+		Route route = new RouteImpl(method, path, controllerMethod, routeId, true, checkToken);
+		addRoute(route, routeId);
+	}
+	
+	@Override
+	public void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
 		Route route = new RouteImpl(methods, path, controllerMethod, routeId, true, false);
 		addRoute(route, routeId);
 	}

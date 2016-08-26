@@ -16,16 +16,21 @@ public interface Router {
 
 	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
 	/**
-	 * This is a POST route for apis OR forms that do NOT want to use the secureToken and want
-	 * no security from attacks.  addRoute(POST) is better for secure form pages and html.  Typically
-	 * only use this for apis to avoid the secure token check. 
+	 * Use this route to add POST routes with no token check(for apis generally or to turn of the security IF you really
+	 * want to).  Also, use this route to add form that use the GET method so the token is checked as well.
 	 */
-	void postRoute(String path, String controllerMethod, RouteId routeId);
+	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
 
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
-	void addSecureRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
-	void addSecureRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
+	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
+	
+	/**
+	 * Allows you to add POST route with checkToken=false(other addRoutes are defaulted to true) AND allows a GET route
+	 * that does a secure token check(IF you post with GET method which is highly NOT recommended)
+	 */
+	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
+	void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
 	//if f.isDirectory, verify path endsWith("/") then
 	void addStaticGetRoute(String path, File f);

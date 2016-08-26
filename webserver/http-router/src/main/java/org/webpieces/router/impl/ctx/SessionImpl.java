@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.webpieces.ctx.api.Session;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.util.security.Security;
 
 public class SessionImpl extends CookieScopeImpl implements Session, SecureCookie {
 

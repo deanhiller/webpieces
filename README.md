@@ -32,8 +32,6 @@ Pieces
 
 TODO: 
 * TestScopesSelenium - one cookie too large
-* make session and tab cookies secure
-* make forms secure (authenticityToken)
 * write an escapehtml tag
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
