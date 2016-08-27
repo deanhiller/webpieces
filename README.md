@@ -2,11 +2,13 @@
 
 To try the webserver
 
-1. Download the release, unzip
+1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
 3. cd projectDir
 4. ./gradlew test # runs all the tests and verify everything is working
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
+6. ./gradlew eclipse or ./gradlew idea to generate eclipse or idea project
+7. Run the dev server which compiles your code as it changes so you don't need to restart the webserver
 
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
