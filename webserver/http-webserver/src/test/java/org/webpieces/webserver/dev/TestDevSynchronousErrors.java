@@ -60,12 +60,10 @@ public class TestDevSynchronousErrors {
 				new DevTemplateModule(templateConfig),
 				new ForTestingStaticDevelopmentModeModule());
 		
-		VirtualFileImpl metaFile = new VirtualFileImpl(filePath1+"/src/test/java/basicMeta.txt");
-		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, null);
 		server = webserver.start();
 	}
 	

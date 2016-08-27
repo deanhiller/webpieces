@@ -1,8 +1,14 @@
 sourceSets {
-    main {
+    extra {
         resources {
             srcDirs = ["src/main/java"]
-            includes = ["**/*.html", "**/*.tag", "**/*.txt", "**/*.xml", "**/*.properties"]
+            includes = ["**/*.html", "**/*.tag"]
+        }
+    }
+    main {
+        resources {
+            //This ADDS src/main/java/**/*.html and we still read in src/main/resources/**
+            source extra.resources
         }
     }
 }

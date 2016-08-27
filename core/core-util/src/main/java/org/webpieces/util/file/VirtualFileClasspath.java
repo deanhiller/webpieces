@@ -59,7 +59,7 @@ public class VirtualFileClasspath implements VirtualFile {
 
 	@Override
 	public long lastModified() {
-		throw new UnsupportedOperationException("not yet");
+		return -1;
 	}
 
 	@Override
