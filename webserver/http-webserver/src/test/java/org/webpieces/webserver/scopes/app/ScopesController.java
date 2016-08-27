@@ -7,6 +7,8 @@ import org.webpieces.router.api.actions.Actions;
 
 public class ScopesController {
 
+	private static String longString;
+
 	public Action home() {
 		Session session = Current.session();
 		session.put("age", 30);
@@ -24,6 +26,39 @@ public class ScopesController {
 		
 		return Actions.renderThis("age", age, "result", b, "name", name);
 	}
+	
+	public Action sessionTooLarge() {
+		Session session = Current.session();
+		
+		String someValue = create50LongString();
+		
+		for(int i = 0; i < 100; i++) {
+			session.put("someKey"+i, someValue);
+		}
+		return Actions.renderThis();
+	}
+
+	private static String create50LongString() {
+		if(longString != null)
+			return longString;
+		
+		longString = "";
+		for(int i = 0; i < 50; i++) {
+			longString += i%10;
+		}
+		return longString;
+	}
+	
+	public Action receiveLongSession() {
+		Session session = Current.session();
+
+		for(int i = 0; i < 100; i++) {
+			String someValue = session.get("someKey"+i);
+			System.out.println(someValue);
+		}
+		return Actions.renderThis();
+	}
+	
 //	addRoute(GET , "/home",               "ScopesController.home", ScopesRouteId.HOME);
 //
 //	addRoute(GET , "/displaysession",     "ScopesController.displaySession", ScopesRouteId.DISPLAY_SESSION);

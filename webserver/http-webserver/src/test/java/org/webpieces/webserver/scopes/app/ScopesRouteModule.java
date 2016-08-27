@@ -12,6 +12,9 @@ public class ScopesRouteModule extends AbstractRouteModule {
 
 		addRoute(GET , "/displaysession",     "ScopesController.displaySession", ScopesRouteId.DISPLAY_SESSION);
 		
+		addRoute(GET , "/sessionTooLarge",    "ScopesController.sessionTooLarge", ScopesRouteId.SESSION_TOO_LARGE);
+		addRoute(GET , "/receiveTooLarge",    "ScopesController.receiveLongSession", ScopesRouteId.RECEIVE_TOO_LARGE);
+		
 		//Tab state starts when TabState.start() is called in the code
 		//Tab state ends when TabState.end() is called in the code
 		//Tab id is either 

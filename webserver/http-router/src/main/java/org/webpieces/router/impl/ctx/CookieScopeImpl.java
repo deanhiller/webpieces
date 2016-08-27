@@ -38,7 +38,7 @@ public abstract class CookieScopeImpl implements CookieScope {
 	//true                 true     false            no-op, let browser keep cookie(no need to reset it)
 	//true                 true     true             ***create update cookie***
 	public boolean isNeedCreateSetCookie() {
-		if(!previouslyExisted && isKeep() && hasModifiedData)
+		if(isKeep() && hasModifiedData)
 			return true;
 		return false;
 	}

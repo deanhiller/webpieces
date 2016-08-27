@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -20,6 +22,7 @@ import org.webpieces.util.security.Security;
 
 public class CookieTranslator {
 
+	private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private static String VERSION = "1";
 	//private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private RouterConfig config;
@@ -70,6 +73,11 @@ public class CookieTranslator {
 		} else {		
 			cookie.value = VERSION+":"+value;
 		}
+		
+		if(cookie.value.length() > 4050)
+			throw new IllegalStateException("Your webserver has put too many things into the session cookie and"
+					+ " browser will end up ignoring the cookie so we exception here to let you "
+					+ "know.  Length of JUST the value(not whole cookie)="+cookie.value.length()+"\ncookie value="+cookie.value);
 		
 		return cookie;
 	}

@@ -63,6 +63,15 @@ public class TestScopesSelenium {
 	
 	@Test
 	public void testSessionTooBig() {
+		driver.get("http://localhost:"+port+"/home");
 		
+		String pageSource = driver.getPageSource();
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("age=30"));
+		
+		WebElement link1 = driver.findElement(By.id("sessionTooLarge"));
+		link1.click();
+		
+		String pageSource1 = driver.getPageSource();
+		Assert.assertTrue("pageSource="+pageSource1, pageSource1.contains("There was a bug in our software"));
 	}
 }

@@ -97,7 +97,7 @@ public class ProxyResponse implements ResponseStreamer {
 		response.addHeader(location );
 		
 		//Firefox requires a content length of 0 (chrome doesn't)!!!...
-		addCommonHeaders(response, 0);
+		addCommonHeaders(status.getKnownStatus(), response, 0);
 		
 		log.info("sending REDIRECT response channel="+channel);
 		channel.write(response);
@@ -166,15 +166,22 @@ public class ProxyResponse implements ResponseStreamer {
 		closeIfNeeded();
 	}
 
-	private List<RouterCookie> createCookies() {
+	private List<RouterCookie> createCookies(KnownStatusCode statusCode) {
 		if(!Current.isContextSet())
 			return new ArrayList<>(); //in some exceptional cases like incoming cookies failing to parse, there will be no cookies
 		
-		List<RouterCookie> cookies = new ArrayList<>();
-		cookieTranslator.addScopeToCookieIfExist(cookies, Current.flash());
-		cookieTranslator.addScopeToCookieIfExist(cookies, Current.validation());
-		cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
-		return cookies;
+		try {
+			List<RouterCookie> cookies = new ArrayList<>();
+			cookieTranslator.addScopeToCookieIfExist(cookies, Current.flash());
+			cookieTranslator.addScopeToCookieIfExist(cookies, Current.validation());
+			cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
+			return cookies;
+		} catch(IllegalStateException e) {
+			if(statusCode != KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR)
+				throw e;
+			//ignore as this happened just a second ago for http 500 OR it doesn't matter as it's a 500 anyways
+			return new ArrayList<>();
+		}
 	}
 	
 	private String getTemplatePath(String packageStr, String templateClassName, String extension) {
@@ -206,16 +213,18 @@ public class ProxyResponse implements ResponseStreamer {
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		response.setBody(data);
 
-		addCommonHeaders(response, bytes.length);
+		addCommonHeaders(statusCode, response, bytes.length);
 		return response;
 	}
 	
-	private void addCommonHeaders(HttpResponse response, int contentLength) {
+	private void addCommonHeaders(KnownStatusCode statusCode, HttpResponse response, int contentLength) {
 		
 		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+"");
 		response.addHeader(header);
 		
-		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
+		Header connHeader = null;
+		if(request != null)
+			connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
 		String dateStr = formatter.print(now)+" GMT";
@@ -227,7 +236,7 @@ public class ProxyResponse implements ResponseStreamer {
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
 //		response.addHeader(xFrame);
 		
-		List<RouterCookie> cookies = createCookies();
+		List<RouterCookie> cookies = createCookies(statusCode);
 		for(RouterCookie c : cookies) {
 			Header cookieHeader = create(c);
 			response.addHeader(cookieHeader);
