@@ -95,3 +95,28 @@ DOCUMENTATION Notes:
 
 * unit test arrays in multi-part form, along with conflicting query params?
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
+
+
+Checklist of Release testing (This would be good to automate)
+* ./gradle release # release locally
+*  cd webserver/output/webpiecesServerBuilder
+* ./createProject.sh
+* cd {app directory}
+* ./gradlew test # verify all tests pass as they should because they did when running ./gradlew release(though the environment differs just slightly)
+* ./gradlew assembleDist
+* cd {appname}-prod/output/distributions
+* unzip zip file
+* cd {appname}-prod/bin
+* run {appname}-prod script
+* hit http://localhost:8080 and then click the link
+
+* import into eclipse or intellij
+* open up project {appname}-dev and go into src/main/java and run the dev server
+* hit the webpage
+* refactor a bunch of code
+* hit the webpage (no need to stop dev server) 
+
+
+
+
+

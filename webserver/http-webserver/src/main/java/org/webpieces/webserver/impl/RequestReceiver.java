@@ -250,7 +250,8 @@ public class RequestReceiver implements HttpRequestListener {
 		
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 		ProxyResponse proxyResp = responseProvider.get();
-		proxyResp.init(null, channel);
+		HttpRequest req = new HttpRequest();
+		proxyResp.init(req, channel);
 		proxyResp.sendFailure(exc);
 	}
 

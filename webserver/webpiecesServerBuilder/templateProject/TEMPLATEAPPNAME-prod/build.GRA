@@ -15,20 +15,26 @@ apply plugin: 'application'
 apply plugin: 'org.webpieces.templatecompiler'
 
 sourceSets {
-    main {
-        resources {
-            //include appmeta.txt in the jar file as a resource
-            //TODO: figure out what broke when we had this in src/main/resources and try to fix that so we
-            //can move appmeta.txt and logback.xml to src/main/resources
-            srcDirs = ["src/main/java"]
-            includes = ["**/*.txt", "**/*.xml"]
-        }
-    }
+    //main {
+    //    resources {
+    //        //include appmeta.txt in the jar file as a resource
+    //        //TODO: figure out what broke when we had this in src/main/resources and try to fix that so we
+    //        //can move appmeta.txt and logback.xml to src/main/resources
+    //        srcDirs = ["src/main/java"]
+    //        includes = ["**/*.txt", "**/*.xml"]
+    //    }
+    //}
     //For testing, we need to put the html files on the classpath
-    test {
+    extraTest {
         resources {
             srcDirs = ["src/main/java"]
             includes = ["**/*.html", "**/*.tag"]
+        }
+    }
+    test {
+        resources {
+            //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
+            source extraTest.resources
         }
     }
 }

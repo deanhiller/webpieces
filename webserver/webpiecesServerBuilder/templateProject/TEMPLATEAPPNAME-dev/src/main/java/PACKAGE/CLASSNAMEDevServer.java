@@ -43,7 +43,7 @@ public class CLASSNAMEDevServer {
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME-prod/src/main/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(filePath1 + "/../TEMPLATEAPPNAME-prod/src/main/java/appmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(filePath1 + "/../TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...

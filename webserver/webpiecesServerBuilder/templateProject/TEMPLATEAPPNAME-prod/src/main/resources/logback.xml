@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds" debug="true">
+
+  <!-- TODO: We need to change this to a FileAppender!!! -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!--  TODO: Fix the %X{txId} so webpieces frontend fills that in on
+       each request and client apps have to do nothing to get it for free
+       Client apps must fill in the %X{user} themselves with MDC.put call -->
+    <encoder>
+      <pattern>%-4level %date{ISO8601} [%X{txId}-%X{user}] [%thread]: %message%n</pattern>
+    </encoder>
+  </appender>
+
+    <!-- TBD for later use for apps that use log4jdbc 
+       it doesn't hurt apps that don't use it -->
+  <logger name="jdbc.sqlonly" level="INFO" />
+  <logger name="jdbc.sqltiming" level="WARN" />
+  <logger name="jdbc.audit" level="WARN" />
+  <logger name="jdbc.resultset" level="WARN" />
+  <logger name="jdbc.connection" level="WARN" />
+
+  <root>
+    <level value="INFO" />
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

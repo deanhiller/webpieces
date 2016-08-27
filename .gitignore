@@ -19,4 +19,6 @@
 #Do I need these too...
 #*.iws
 #*.ipr
-#.DS_Store
+
+# What is this.  it popped up on mac (not using intellij)
+.DS_Store

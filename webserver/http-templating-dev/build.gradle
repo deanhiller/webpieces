@@ -7,7 +7,7 @@ sourceSets {
     }
     test {
         resources {
-            //This ADDS src/test/java/**/*.html and we still read in src/main/resources/**
+            //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
             source extraTest.resources
         }
     }

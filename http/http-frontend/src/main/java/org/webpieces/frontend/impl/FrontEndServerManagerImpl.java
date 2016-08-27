@@ -35,7 +35,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
-		log.info("not listening for incoming http requests");
+		log.info("now listening for incoming http requests");
 		return frontend;
 	}
 
@@ -55,7 +55,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
-		log.info("not listening for incoming https requests");
+		log.info("now listening for incoming https requests");
 		return frontend;
 	}
 
