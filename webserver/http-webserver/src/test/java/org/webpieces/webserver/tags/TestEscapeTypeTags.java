@@ -17,7 +17,7 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestVerbatimGenerator {
+public class TestEscapeTypeTags {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
 	private HttpRequestListener server;
@@ -44,4 +44,5 @@ public class TestVerbatimGenerator {
 		response.assertContains("'''escaped by default &amp;'''");
 		response.assertContains("'''verbatim & so do not escape'''");
 	}
+	
 }

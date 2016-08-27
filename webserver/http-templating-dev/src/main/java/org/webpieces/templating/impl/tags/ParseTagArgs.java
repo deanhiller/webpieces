@@ -12,7 +12,10 @@ public abstract class ParseTagArgs implements GroovyGen {
 	
 	protected void generateStartAttrs(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
 		String tagArgs = fetchArgs(token, callback);
+		
+		sourceCode.println("enterExpression('"+token.getSourceLocation(false)+"');", token); //purely so we can add info to missing properties
 		sourceCode.println("_attrs" + uniqueId + " = [" + tagArgs + "];", token);
+		sourceCode.println("exitExpression();", token);
 		sourceCode.println();
 	}
 

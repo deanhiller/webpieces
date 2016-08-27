@@ -31,27 +31,22 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* TestScopesSelenium - one cookie too large
-* write an escapehtml tag
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
-* Test out no such property/pageArg in an expression used in a tag argument and print the line number of the property not found
-* AFTER have session and cookies add authenticityToken to make more secure
 * gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
-* Need to add tests for changing the guice modules and router modules in the main server class while dev server is running and then hit website again to make sure it changed
-* cookie hpttOnly and the other key as well
-* add a lot of pretty print objects/json stuff in the toString so when debugging, there is many less clicks to see the data!!!  it is just right there
 * have the dev server display it's OWN 404 page and then in a frame below dispay the webapps actual 404 page.  The dev server's page will have much more detail on what went wrong and why it was a 404 like type translation, etc.  The frame can be a redirect to GET the 404 page directly OR it could render inline maybe.....which one is better..not sure?  rendering inline is probably better so the notFound does not have a direct url to get to that page?  But only if the PRG holds true above!!!!
-
-
+* write an escapehtml tag
 
 * ALPN is next!!!! 
+
+* start createing a real website!!!! AND on https
+
 
 Examples.....
 
@@ -115,8 +110,4 @@ Checklist of Release testing (This would be good to automate)
 * hit the webpage
 * refactor a bunch of code
 * hit the webpage (no need to stop dev server) 
-
-
-
-
 

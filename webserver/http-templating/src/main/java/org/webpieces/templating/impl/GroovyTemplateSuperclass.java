@@ -41,6 +41,9 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	this.urlLookup = urlLookup;
     }
     
+    //TODO: Make formatter a ThreadLocal<Stack> such that if you nest verbatims with tags
+    //then uninstallNullFormatter only means pop the stack such that you are still in verbatim
+    //ie. this won't work well with nested verbatim right now
     protected void installNullFormatter() {
     	formatter = NULL_FORMATTER;
     }

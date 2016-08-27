@@ -14,7 +14,7 @@ public class CLASSNAMELocalController {
 	@Inject
 	private RemoteService service;
 	
-	public Action someMethod() {
+	public Action home() {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 	
