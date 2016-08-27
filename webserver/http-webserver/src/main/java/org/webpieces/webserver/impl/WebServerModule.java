@@ -37,16 +37,17 @@ public class WebServerModule implements Module {
 		binder.bind(WebServerConfig.class).toInstance(config);
 	}
 
-	@Provides
-	@Singleton
-	public ScheduledExecutorService provideTimer() {
-		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
-	}
+//  Firefox keeps connecting pre-emptively with no requests for seconds (maybe so it is ready to just send one when needed)	
+//	@Provides
+//	@Singleton
+//	public ScheduledExecutorService provideTimer() {
+//		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
+//	}
 	
 	@Provides
 	@Singleton
-	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config, ScheduledExecutorService timer) {
-		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), timer);
+	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config) {
+		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), null);
 	}
 	
 }

@@ -11,13 +11,10 @@ public class FrontendConfig {
 	
 	/**
 	 * When a client connects, they must send a request in this amount of timer.  null means disabled.
+	 * Firefox connects pre-emptively ALL the time without making requests which is annoying so we default
+	 * this to null
 	 */
-	public Integer maxConnectToRequestTimeoutMs = 4000;
-	
-	/**
-	 * null means keep alive will be disabled
-	 */
-	public Integer keepAliveTimeoutMs = 15000;
+	public Integer maxConnectToRequestTimeoutMs = null;
 	
 	/**
 	 * The max size a client may send.  I advise not too large a limit here or DOS attacks become easier in that

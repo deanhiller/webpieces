@@ -40,9 +40,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	private void preconditionCheck(FrontendConfig config) {
-		if(config.keepAliveTimeoutMs != null && timer == null)
-			throw new IllegalArgumentException("keepAliveTimeoutMs must be null since no timer was given when HttpFrontendFactory.createFrontEnd was called");
-		else if(config.maxConnectToRequestTimeoutMs != null && timer == null)
+		if(config.maxConnectToRequestTimeoutMs != null && timer == null)
 			throw new IllegalArgumentException("keepAliveTimeoutMs must be null since no timer was given when HttpFrontendFactory.createFrontEnd was called");
 	}
 
