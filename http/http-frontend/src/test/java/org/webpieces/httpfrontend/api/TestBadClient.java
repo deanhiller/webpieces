@@ -42,6 +42,7 @@ public class TestBadClient {
 	@Test
 	public void testTimeoutTimerCancelled() throws InterruptedException, ExecutionException {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
+		config.maxConnectToRequestTimeoutMs = 5000;
 		mgr.createHttpServer(config , mockRequestListener );
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
@@ -69,6 +70,7 @@ public class TestBadClient {
 	@Test
 	public void testMaxSizeExceeded() throws InterruptedException, ExecutionException {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
+		config.maxConnectToRequestTimeoutMs = 5000;
 		mgr.createHttpServer(config , mockRequestListener );
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();

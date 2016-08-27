@@ -68,7 +68,7 @@ public class TimedListener {
 	}
 
 	private void scheduleTimeout(FrontendSocket channel) {
-		if(timer == null)
+		if(timer == null || config.maxConnectToRequestTimeoutMs == null)
 			return;
 		
 		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(channel), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
