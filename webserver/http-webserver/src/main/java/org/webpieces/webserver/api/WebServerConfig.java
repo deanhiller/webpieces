@@ -33,7 +33,7 @@ public class WebServerConfig {
 	private SSLEngineFactory sslEngineFactory;
 	
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
-	private Charset htmlResponsePayloadEncoding = StandardCharsets.UTF_8;
+	private Charset defaultResponseBodyEncoding = StandardCharsets.UTF_8;
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 	private Locale defaultLocale = Locale.getDefault();
 	
@@ -91,12 +91,12 @@ public class WebServerConfig {
 		return this;
 	}
 
-	public Charset getHtmlResponsePayloadEncoding() {
-		return htmlResponsePayloadEncoding;
+	public Charset getDefaultResponseBodyEncoding() {
+		return defaultResponseBodyEncoding;
 	}
 
-	public WebServerConfig setHtmlResponsePayloadEncoding(Charset htmlResponsePayloadEncoding) {
-		this.htmlResponsePayloadEncoding = htmlResponsePayloadEncoding;
+	public WebServerConfig setDefaultResponseBodyEncoding(Charset htmlResponsePayloadEncoding) {
+		this.defaultResponseBodyEncoding = htmlResponsePayloadEncoding;
 		return this;
 	}
 

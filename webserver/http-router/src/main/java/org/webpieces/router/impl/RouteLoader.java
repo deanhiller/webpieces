@@ -79,8 +79,8 @@ public class RouteLoader {
 		List<Module> guiceModules = routerModule.getGuiceModules();
 		
 		Module module = Modules.combine(guiceModules);
-		if(config.getOverridesModule() != null)
-			module = Modules.override(module).with(config.getOverridesModule());
+		if(config.getWebappOverrides() != null)
+			module = Modules.override(module).with(config.getWebappOverrides());
 		
 		Injector injector = Guice.createInjector(module);
 		return injector;

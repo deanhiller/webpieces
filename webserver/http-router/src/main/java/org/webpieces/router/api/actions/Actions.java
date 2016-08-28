@@ -7,7 +7,7 @@ import java.util.Set;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.actions.RedirectImpl;
-import org.webpieces.router.impl.actions.RenderHtmlImpl;
+import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 
@@ -21,8 +21,8 @@ public class Actions {
 	 * @param pageArgs
 	 * @return
 	 */
-	public static RenderHtml renderView(String templatePath, Object ... pageArgs) {
-		RenderHtmlImpl renderHtml = new RenderHtmlImpl(templatePath, pageArgs);
+	public static Render renderView(String templatePath, Object ... pageArgs) {
+		RenderImpl renderHtml = new RenderImpl(templatePath, pageArgs);
 		ResponseProcessor processor = RequestLocalCtx.get();
 		if(processor != null) {
 			//If there is a context (the controller method is synchronous), then we do all calculations on their thread so if there
@@ -38,7 +38,7 @@ public class Actions {
 	 * @param pageArgs
 	 * @return
 	 */
-	public static RenderHtml renderThis(Object ... pageArgs) {
+	public static Render renderThis(Object ... pageArgs) {
 		return renderView(null, pageArgs);
 	}
 

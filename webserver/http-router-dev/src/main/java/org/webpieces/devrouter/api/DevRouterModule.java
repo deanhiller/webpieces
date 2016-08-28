@@ -35,7 +35,7 @@ public class DevRouterModule implements Module {
 	@Provides
 	@Singleton
 	public CompileOnDemand provideCompile(RouterConfig routerConfig) {
-		if(routerConfig.getOverridesModule() != null)
+		if(routerConfig.getWebappOverrides() != null)
 			throw new IllegalArgumentException("In DEVELOPMENT server mode, when you provide"
 					+ " HttpRouterConfig, you cannot have a app OverridesModule set as "
 					+ "this would be a classloader headache foor you.  Check our tests to see for another possible method ");

@@ -52,4 +52,7 @@ public class BasicController {
 		return Actions.renderThis();
 	}
 	
+	public Action jsonFile() {
+		return Actions.renderView("basic.json");
+	}
 }

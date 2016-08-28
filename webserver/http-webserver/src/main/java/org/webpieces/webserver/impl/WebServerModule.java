@@ -1,5 +1,9 @@
 package org.webpieces.webserver.impl;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.data.api.BufferCreationPool;
@@ -7,6 +11,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -17,6 +22,7 @@ import com.google.inject.util.Providers;
 
 public class WebServerModule implements Module {
 
+	static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	private WebServerConfig config;
 
 	public WebServerModule(WebServerConfig config) {
@@ -35,6 +41,13 @@ public class WebServerModule implements Module {
 		binder.bind(WebServerConfig.class).toInstance(config);
 	}
 
+	@Provides
+	@Singleton
+	@Named(FILE_READ_EXECUTOR)
+	public ExecutorService provideExecutor() {
+		return Executors.newFixedThreadPool(10, new NamedThreadFactory("fileReadCallbacks"));
+	}
+	
 //  Firefox keeps connecting pre-emptively with no requests for seconds (maybe so it is ready to just send one when needed)	
 //	@Provides
 //	@Singleton

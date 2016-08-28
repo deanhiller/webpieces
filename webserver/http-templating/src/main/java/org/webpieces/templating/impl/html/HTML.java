@@ -75,7 +75,7 @@ public class HTML {
         static final String HEX_REFERENCE_START = "&#x";
         static final char REFERENCE_END = ';';
         static final char CHAR_NULL = (char) -1;
-        private static final String PROPERTIES_FILE = "htmlentities.properties";
+        private static final String PROPERTIES_FILE = "/htmlentities.properties";
         private final String[] characterToEntityReferenceMap = new String[3000];
         private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<String, Character>(252);
 
@@ -89,7 +89,7 @@ public class HTML {
             InputStream is = HtmlCharacterEntityReferences.class.getResourceAsStream(PROPERTIES_FILE);
             if (is == null) {
                 throw new IllegalStateException(
-                        "Cannot find reference definition file [htmlentities.properties] as class path resource");
+                        "Cannot find reference definition file ["+PROPERTIES_FILE+"] as class path resource");
             }
             try {
                 try {

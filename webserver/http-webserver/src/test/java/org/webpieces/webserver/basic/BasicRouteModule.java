@@ -14,6 +14,7 @@ public class BasicRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/myroute",           "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
 		addRoute(GET , "/throwNotFound",     "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
 		addRoute(GET , "/badtemplate",       "biz/BasicController.badTemplate", BasicRouteId.BAD_TEMPLATE);
+		addRoute(GET , "/somejson",          "biz/BasicController.jsonFile", BasicRouteId.JSON_ROUTE);
 
 		// #{form action:@POST_CATCH_ALL[:] id:'detailsForm'}#  ....   #{/form}#
 		//addPostRoute("/post/{_controller}/{_action}", "{_controller}.post{_action}", BasicRouteId.POST_CATCH_ALL); //catch all post route

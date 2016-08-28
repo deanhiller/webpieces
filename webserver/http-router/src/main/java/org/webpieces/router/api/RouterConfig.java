@@ -13,6 +13,7 @@ public class RouterConfig {
 	
 	private Charset fileEncoding = StandardCharsets.UTF_8;
 	private Charset urlEncoding = StandardCharsets.UTF_8;
+	private Charset defaultResponseBodyEncoding = StandardCharsets.UTF_8;
 	
 	private String secretKey;
 	
@@ -29,9 +30,6 @@ public class RouterConfig {
 	public VirtualFile getMetaFile() {
 		return metaFile;
 	}
-	public Module getOverridesModule() {
-		return webappOverrides;
-	}
 	public RouterConfig setMetaFile(VirtualFile routersFile) {
 		if(!routersFile.exists())
 			throw new IllegalArgumentException("path="+routersFile+" does not exist");
@@ -40,10 +38,15 @@ public class RouterConfig {
 		this.metaFile = routersFile;
 		return this;
 	}
+	
+	public Module getWebappOverrides() {
+		return webappOverrides;
+	}
 	public RouterConfig setWebappOverrides(Module webappOverrides) {
 		this.webappOverrides = webappOverrides;
 		return this;
 	}
+
 	public Charset getFileEncoding() {
 		return fileEncoding;
 	}
@@ -51,23 +54,31 @@ public class RouterConfig {
 		this.fileEncoding = fileEncoding;
 		return this;
 	}
+	
 	public Charset getUrlEncoding() {
 		return urlEncoding;
 	}
+	public RouterConfig setUrlEncoding(Charset urlEncoding) {
+		this.urlEncoding = urlEncoding;
+		return this;
+	}
+	
 	public boolean getIsCookiesHttpOnly() {
 		return isCookiesHttpOnly;
-	}
-	public boolean getIsCookiesSecure() {
-		return isCookiesSecure;
 	}
 	public RouterConfig setCookiesHttpOnly(boolean isCookiesHttpOnly) {
 		this.isCookiesHttpOnly = isCookiesHttpOnly;
 		return this;
 	}
+	
+	public boolean getIsCookiesSecure() {
+		return isCookiesSecure;
+	}
 	public RouterConfig setCookiesSecure(boolean isCookiesSecure) {
 		this.isCookiesSecure = isCookiesSecure;
 		return this;
 	}
+	
 	public String getSecretKey() {
 		return secretKey;
 	}
@@ -76,5 +87,12 @@ public class RouterConfig {
 		return this;
 	}
 	
-	
+	public Charset getDefaultResponseBodyEncoding() {
+		return defaultResponseBodyEncoding;
+	}
+	public RouterConfig setDefaultResponseBodyEncoding(Charset defaultResponseBodyEncoding) {
+		this.defaultResponseBodyEncoding = defaultResponseBodyEncoding;
+		return this;
+	}
+
 }

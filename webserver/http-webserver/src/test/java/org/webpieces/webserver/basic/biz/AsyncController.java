@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.RenderHtml;
+import org.webpieces.router.api.actions.Render;
 import org.webpieces.webserver.async.AsyncRouteId;
 
 public class AsyncController {
@@ -34,7 +34,7 @@ public class AsyncController {
 	public CompletableFuture<Action> myMethod() {
 		//renderThis assumes the view is the <methodName>.html file so in this case
 		//myMethod.html which must be in the same directory as the Controller
-		RenderHtml renderThis = Actions.renderThis("hhhh", 86);
+		Render renderThis = Actions.renderThis("hhhh", 86);
 		return CompletableFuture.completedFuture(renderThis);
 	}
 	

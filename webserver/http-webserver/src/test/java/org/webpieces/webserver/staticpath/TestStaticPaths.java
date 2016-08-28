@@ -36,12 +36,13 @@ public class TestStaticPaths {
 		
 //		server.processHttpRequests(socket, req , false);
 //		
-//		List<FullResponse> responses = socket.getResponses();
+//		List<FullResponse> responses = socket.getResponses(2000, 1);
 //		Assert.assertEquals(1, responses.size());
 //
 //		FullResponse response = responses.get(0);
 //		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 //		response.assertContains("Hi Dean Hiller, this is testing");
+//		response.assertContentType("some text");
 	}
 
 //	@Test

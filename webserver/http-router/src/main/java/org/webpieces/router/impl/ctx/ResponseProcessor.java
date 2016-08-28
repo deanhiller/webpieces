@@ -23,7 +23,7 @@ import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.actions.RedirectImpl;
-import org.webpieces.router.impl.actions.RenderHtmlImpl;
+import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 
 public class ResponseProcessor {
@@ -85,7 +85,7 @@ public class ResponseProcessor {
 		return redirectResponse;
 	}
 
-	public RenderResponse createRenderResponse(RenderHtmlImpl controllerResponse) {
+	public RenderResponse createRenderResponse(RenderImpl controllerResponse) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;

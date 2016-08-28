@@ -25,7 +25,7 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.RedirectImpl;
-import org.webpieces.router.impl.actions.RenderHtmlImpl;
+import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
@@ -200,8 +200,8 @@ public class RouteInvoker {
 			//client code ends up in the stack trace making it easier to tell what the path was to failure
 		} else if(controllerResponse instanceof RedirectImpl) {
 			processor.createFullRedirect((RedirectImpl)controllerResponse);
-		} else if(controllerResponse instanceof RenderHtmlImpl) {
-			processor.createRenderResponse((RenderHtmlImpl)controllerResponse);
+		} else if(controllerResponse instanceof RenderImpl) {
+			processor.createRenderResponse((RenderImpl)controllerResponse);
 		} else {
 			throw new UnsupportedOperationException("Not yet done but could "
 					+ "call into the Action witht the responseCb to handle so apps can decide what to send back");

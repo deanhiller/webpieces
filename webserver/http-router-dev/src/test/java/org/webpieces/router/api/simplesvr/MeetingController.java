@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.router.api.actions.RenderHtml;
+import org.webpieces.router.api.actions.Render;
 import org.webpieces.router.api.routing.Param;
 
 public class MeetingController {
@@ -19,11 +19,11 @@ public class MeetingController {
 	@Inject
 	private SomeService service;
 	
-	public RenderHtml notFound() {
+	public Render notFound() {
 		return Actions.renderThis();
 	}
 	
-	public RenderHtml internalError() {
+	public Render internalError() {
 		return Actions.renderThis();
 	}
 	

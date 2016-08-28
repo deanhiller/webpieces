@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
@@ -15,7 +16,7 @@ public class MockFrontendSocket implements FrontendSocket {
 
 	private static final Logger log = LoggerFactory.getLogger(MockFrontendSocket.class);
 	private List<FullResponse> payloads = new ArrayList<>();
-	private boolean waitingResponseStart = true;
+	private FullResponse chunkedResponse;
 	
 	@Override
 	public CompletableFuture<FrontendSocket> close() {
@@ -23,30 +24,33 @@ public class MockFrontendSocket implements FrontendSocket {
 	}
 
 	@Override
-	public CompletableFuture<FrontendSocket> write(HttpPayload payload) {
-		if(waitingResponseStart) {
+	public synchronized CompletableFuture<FrontendSocket> write(HttpPayload payload) {
+		if(chunkedResponse == null) {
 			HttpResponse response = payload.getHttpResponse();
 			if(response == null) {
 				log.warn("should be receiving http response but received="+payload);
 				return null;
 			}
-			payloads.add(new FullResponse(response));
-			waitingResponseStart = false;
+			FullResponse nextResp = new FullResponse(response);
+			if(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null)
+				payloads.add(nextResp);
+			else
+				chunkedResponse = nextResp;
+			
 			return null;
 		} else if(payloads.size() == 0) {
 			log.error("Should get HttpResponse first but instead received something else="+payload);
 			return null;
 		}
 		
-		FullResponse fullResponse = payloads.get(payloads.size()-1);
-		
 		switch (payload.getMessageType()) {
 		case CHUNK:
-			fullResponse.addChunk(payload.getHttpChunk());
+			chunkedResponse.addChunk(payload.getHttpChunk());
 			break;
 		case LAST_CHUNK:
-			fullResponse.setLastChunk(payload.getLastHttpChunk());
-			waitingResponseStart = true;
+			chunkedResponse.setLastChunk(payload.getLastHttpChunk());
+			payloads.add(chunkedResponse);
+			chunkedResponse = null;
 			break;
 		default:
 			log.error("expecting chunk but received payload="+payload);
@@ -65,9 +69,29 @@ public class MockFrontendSocket implements FrontendSocket {
 		return payloads;
 	}
 
+	public synchronized List<FullResponse> getResponses(long waitTimeMs, int count) {
+		try {
+			return getResponsesImpl(waitTimeMs, count);
+		} catch (InterruptedException e) {
+			throw new RuntimeException("failed waiting", e);
+		}
+	}
+	
+	public synchronized List<FullResponse> getResponsesImpl(long waitTimeMs, int count) throws InterruptedException {
+		long start = System.currentTimeMillis();
+		while(payloads.size() < count) {
+			this.wait(waitTimeMs+500);
+			long time = System.currentTimeMillis() - start;
+			if(time > waitTimeMs)
+				throw new IllegalStateException("While waiting for "+count+" responses, some or all never came.  count that came="+payloads.size());
+		}
+		
+		return payloads;
+	}
+	
 	public void clear() {
 		payloads.clear();
-		waitingResponseStart = true;
+		chunkedResponse = null;
 	}
 
 }

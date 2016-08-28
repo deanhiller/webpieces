@@ -42,7 +42,7 @@ public class Headers {
 	}
 
 	public List<Header> getHeaders(String key) {
-		return headers.get(key);
+		return headers.get(key.toLowerCase());
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class Headers {
 	 * user would think that it would be marshalled out
 	 */
 	protected void addHeader(Header header) {
-		List<Header> list = headers.get(header.getName());
+		List<Header> list = headers.get(header.getName().toLowerCase());
 		if(list == null) {
 			list = new ArrayList<>();
 			//Header names are not case sensitive while values are

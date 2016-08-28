@@ -88,4 +88,11 @@ public class FullResponse {
 			throw new IllegalStateException("Expected body to NOT contain='"+text+"' but body was="+bodyAsString);		
 	}
 
+	public void assertContentType(String mimeType) {
+		Header type = getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_TYPE);
+		String value = type.getValue();
+		if(!mimeType.equals(value))
+			throw new IllegalStateException("Expected mimeType="+mimeType+" but found type="+value);
+	}
+
 }

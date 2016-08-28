@@ -6,15 +6,19 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -54,6 +58,7 @@ import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.webserver.api.WebServerConfig;
+import org.webpieces.webserver.impl.MimeTypes.MimeTypeResult;
 
 import groovy.lang.MissingPropertyException;
 
@@ -69,14 +74,25 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	private TemplateService templatingService;
 	@Inject
-	private WebServerConfig config;
-	@Inject
 	private CookieTranslator cookieTranslator;
+	@Inject
+	@Named(WebServerModule.FILE_READ_EXECUTOR)
+	private ExecutorService fileExecutor;
+	@Inject
+	private MimeTypes mimeTypes;
+	@Inject
+	private WebServerConfig config;
 	
+	private Set<OpenOption> options = new HashSet<>();
+
 	private FrontendSocket channel;
 	private HttpRequest request;
 	private BufferPool pool;
 
+	public ProxyResponse() {
+	    options.add(StandardOpenOption.READ);
+	}
+	
 	public void init(HttpRequest req, FrontendSocket channel, BufferPool pool) {
 		this.request = req;
 		this.channel = channel;
@@ -136,7 +152,7 @@ public class ProxyResponse implements ResponseStreamer {
 	    Path file = Paths.get(renderStatic.getAbsolutePath());
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
-    	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file,StandardOpenOption.READ);
+    	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
     	
     	RequestContext ctx = Current.getContext();
     	try {
@@ -264,8 +280,15 @@ public class ProxyResponse implements ResponseStreamer {
 			throw new IllegalStateException("did add case for state="+resp.routeType);
 		}
 		
-		HttpResponse response = createResponse(statusCode, content);
+		//NOTE: These are ALL String templates, so default the mimeType to text/plain
+		if(extension == null) {
+			extension = "txt";
+		}
 		
+		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, "text/plain");
+		
+		HttpResponse response = createResponse(statusCode, content, mimeType);
+				
 		log.info("sending RENDERHTML response. code="+statusCode+" for path="+request.getRequestLine().getUri().getUri()+" channel="+channel);
 		if(log.isDebugEnabled())
 			log.debug("content sent back="+content);
@@ -303,9 +326,11 @@ public class ProxyResponse implements ResponseStreamer {
 		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
-	private HttpResponse createResponse(KnownStatusCode statusCode, String content) {
-		Charset encoding = config.getHtmlResponsePayloadEncoding();
+	private HttpResponse createResponse(KnownStatusCode statusCode, String content, MimeTypeResult mimeType) {
 
+		Charset encoding = mimeType.htmlResponsePayloadEncoding;
+		if(encoding == null)
+			encoding = config.getDefaultResponseBodyEncoding();
 		byte[] bytes = content.getBytes(encoding);
 		
 		HttpResponseStatus status = new HttpResponseStatus();
@@ -316,8 +341,7 @@ public class ProxyResponse implements ResponseStreamer {
 		HttpResponse response = new HttpResponse();
 		response.setStatusLine(statusLine);
 		
-		Header contentType = new Header(KnownHeaderName.CONTENT_TYPE, "text/html; charset="+encoding.name().toLowerCase());
-		response.addHeader(contentType);
+		response.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, mimeType.mime));
 		
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		response.setBody(data);
@@ -408,7 +432,9 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "then when rendering the page explaining the bug, well, they hit another bug.  "
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
-		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html);
+		
+		MimeTypeResult mimeType = mimeTypes.extensionToContentType("txt", "text/plain");
+		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, mimeType);
 		
 		channel.write(response);
 		
@@ -416,7 +442,8 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	public void sendFailure(HttpException exc) {
-		HttpResponse response = createResponse(exc.getStatusCode(), "Something went wrong(are you hacking the system?)");
+		MimeTypeResult mimeType = mimeTypes.extensionToContentType("txt", "text/plain");
+		HttpResponse response = createResponse(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", mimeType);
 		channel.write(response);
 		closeIfNeeded();
 	}

@@ -3,14 +3,14 @@ package org.webpieces.router.impl.actions;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.webpieces.router.api.actions.RenderHtml;
+import org.webpieces.router.api.actions.Render;
 
-public class RenderHtmlImpl implements RenderHtml {
+public class RenderImpl implements Render {
 
 	private String relativeOrAbsoluteView;
 	private Map<String, Object> pageArgs = new HashMap<>();
 
-	public RenderHtmlImpl(String view, Object ... pageArgs) {
+	public RenderImpl(String view, Object ... pageArgs) {
 		this.relativeOrAbsoluteView = view;
 		if(pageArgs.length % 2 != 0)
 			throw new IllegalArgumentException("All arguments to render must be even with String, Object, String, Object (ie. key, value, key, value)");

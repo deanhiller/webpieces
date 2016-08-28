@@ -116,7 +116,7 @@ public class CLASSNAMEServer {
 											.setSecretKey("_SECRETKEYHERE_");
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
-										.setHtmlResponsePayloadEncoding(ALL_FILE_ENCODINGS)
+										.setDefaultResponseBodyEncoding(ALL_FILE_ENCODINGS)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
 										.setFunctionToConfigureServerSocket(s -> configure(s))
