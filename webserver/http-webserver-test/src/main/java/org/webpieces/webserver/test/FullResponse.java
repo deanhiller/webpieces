@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.ContentType;
@@ -20,6 +22,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 public class FullResponse {
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpResponse response;
 	private List<HttpChunk> chunks = new ArrayList<>();
 	private HttpLastChunk lastChunk;
@@ -51,7 +54,15 @@ public class FullResponse {
 	public DataWrapper getBody() {
 		if(chunks.size() == 0)
 			return response.getBodyNonNull();
-		throw new UnsupportedOperationException("Need to implement with DataGen to chain all chunks together");
+
+		HttpChunk chunk = chunks.get(0);
+		DataWrapper data = chunk.getBodyNonNull();
+		for(int i = 1; i < chunks.size(); i++) {
+			HttpChunk next = chunks.get(i);
+			data = dataGen.chainDataWrappers(data, next.getBodyNonNull());
+		}
+
+		return data;
 	}
 
 	public String getBodyAsString() {

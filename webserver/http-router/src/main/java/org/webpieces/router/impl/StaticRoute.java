@@ -111,4 +111,11 @@ public class StaticRoute implements Route {
 		return fileSystemPath+relativeUrlPathLeft;
 	}
 
+	@Override
+	public String toString() {
+		return "StaticRoute [\n      urlPath=" + urlPath + ",\n      fileSystemPath=" + fileSystemPath + ",\n      isFile=" + isFile
+				+ ",\n      patternToMatch=" + patternToMatch + ",\n      isOnClassPath=" + isOnClassPath + ",\n      pathParamNames="
+				+ pathParamNames + "]";
+	}
+
 }

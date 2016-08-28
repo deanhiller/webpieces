@@ -1,5 +1,6 @@
 package org.webpieces.webserver.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
@@ -40,6 +41,8 @@ import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.common.ResponseCookie;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpResponseStatus;
@@ -53,6 +56,7 @@ import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
@@ -149,7 +153,22 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 	
 	private CompletableFuture<Void> runAsyncFileRead(RenderStaticResponse renderStatic) throws IOException {
-	    Path file = Paths.get(renderStatic.getAbsolutePath());
+		String fileName = renderStatic.getAbsolutePath();
+	    Path file = Paths.get(fileName);
+	    
+	    File f = file.toFile();
+	    if(!f.exists() || !f.isFile())
+	    	throw new NotFoundException("File="+file+" was not found");
+	    
+	    String extension = null;
+	    int lastDirIndex = fileName.lastIndexOf("/");
+	    int lastDot = fileName.lastIndexOf(".");
+	    if(lastDot > lastDirIndex) {
+	    	extension = fileName.substring(lastDot+1);
+	    }
+	    
+	    HttpResponse response = createResponse(KnownStatusCode.HTTP_200_OK, null, extension, "application/octet-stream");
+	    channel.write(response);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
     	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
@@ -203,9 +222,19 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private void sendBuffer(RequestContext ctx, ByteBuffer buf) {
 		if(buf.remaining() == 0) {
+			HttpLastChunk last = new HttpLastChunk();
 			pool.releaseBuffer(buf);
+			channel.write(last);
+			log.info("last chunk.  empty of course meeting spec");
+			return;
 		}
+		
 		log.info("wanting to send buffer size="+buf.remaining());
+
+		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
+		HttpChunk chunk = new HttpChunk();
+		chunk.setBody(data);
+		channel.write(chunk);		
 	}
 
 	private CompletableFuture<ByteBuffer> run(Path file, AsynchronousFileChannel asyncFile, long position) {
@@ -285,9 +314,7 @@ public class ProxyResponse implements ResponseStreamer {
 			extension = "txt";
 		}
 		
-		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, "text/plain");
-		
-		HttpResponse response = createResponse(statusCode, content, mimeType);
+		HttpResponse response = createResponse(statusCode, content, extension, "text/plain");
 				
 		log.info("sending RENDERHTML response. code="+statusCode+" for path="+request.getRequestLine().getUri().getUri()+" channel="+channel);
 		if(log.isDebugEnabled())
@@ -326,12 +353,9 @@ public class ProxyResponse implements ResponseStreamer {
 		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
-	private HttpResponse createResponse(KnownStatusCode statusCode, String content, MimeTypeResult mimeType) {
-
-		Charset encoding = mimeType.htmlResponsePayloadEncoding;
-		if(encoding == null)
-			encoding = config.getDefaultResponseBodyEncoding();
-		byte[] bytes = content.getBytes(encoding);
+	private HttpResponse createResponse(KnownStatusCode statusCode, String content, String extension, String defaultMime) {
+		
+		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
 		HttpResponseStatus status = new HttpResponseStatus();
 		status.setKnownStatus(statusCode);
@@ -343,17 +367,28 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		response.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, mimeType.mime));
 		
-		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
-		response.setBody(data);
+		Integer length = null;
+		if(content != null) {
+			Charset encoding = mimeType.htmlResponsePayloadEncoding;
+			if(encoding == null)
+				encoding = config.getDefaultResponseBodyEncoding();
+			byte[] bytes = content.getBytes(encoding);
+			DataWrapper data = wrapperFactory.wrapByteArray(bytes);
+			response.setBody(data);
+			length = bytes.length;
+		}
 
-		addCommonHeaders(statusCode, response, bytes.length);
+		addCommonHeaders(statusCode, response, length);
 		return response;
 	}
 	
-	private void addCommonHeaders(KnownStatusCode statusCode, HttpResponse response, int contentLength) {
+	private void addCommonHeaders(KnownStatusCode statusCode, HttpResponse response, Integer contentLength) {
 		
-		Header header = new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+"");
-		response.addHeader(header);
+		if(contentLength != null) {
+			response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+""));
+		} else {
+			response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		}
 		
 		Header connHeader = null;
 		if(request != null)
@@ -377,7 +412,6 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		//X-XSS-Protection: 1; mode=block
 		//X-Frame-Options: SAMEORIGIN
-		//Content-Type: image/gif\r\n
 	    //Expires: Mon, 20 Jun 2016 02:33:52 GMT\r\n
 	    //Cache-Control: private, max-age=31536000\r\n
 	    //Last-Modified: Mon, 02 Apr 2012 02:13:37 GMT\r\n
@@ -433,8 +467,7 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
 		
-		MimeTypeResult mimeType = mimeTypes.extensionToContentType("txt", "text/plain");
-		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, mimeType);
+		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "txt", "text/plain");
 		
 		channel.write(response);
 		
@@ -442,8 +475,7 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	public void sendFailure(HttpException exc) {
-		MimeTypeResult mimeType = mimeTypes.extensionToContentType("txt", "text/plain");
-		HttpResponse response = createResponse(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", mimeType);
+		HttpResponse response = createResponse(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", "txt", "text/plain");
 		channel.write(response);
 		closeIfNeeded();
 	}

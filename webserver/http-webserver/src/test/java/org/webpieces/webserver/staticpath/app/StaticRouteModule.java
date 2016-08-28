@@ -12,10 +12,10 @@ public class StaticRouteModule extends AbstractRouteModule {
 		
 		String property = System.getProperty("user.dir");
 		
-		//relative path(to user.dir)
-		addStaticDir("/public/", "src/test/resources/", false);
 		//absolute path...
 		addStaticFile("/public/myfile", property + "/src/test/resources/tagsMeta.txt", false);
+		//relative path(to user.dir)
+		addStaticDir("/public/", "src/test/resources/", false);
 		
 		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
 		setInternalErrorRoute("../../basic/biz/BasicController.internalError");

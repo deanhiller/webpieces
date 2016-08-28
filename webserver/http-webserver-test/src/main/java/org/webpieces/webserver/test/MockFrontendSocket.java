@@ -32,14 +32,12 @@ public class MockFrontendSocket implements FrontendSocket {
 				return null;
 			}
 			FullResponse nextResp = new FullResponse(response);
-			if(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null)
+			if(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
 				payloads.add(nextResp);
-			else
+				this.notifyAll();
+			} else
 				chunkedResponse = nextResp;
 			
-			return null;
-		} else if(payloads.size() == 0) {
-			log.error("Should get HttpResponse first but instead received something else="+payload);
 			return null;
 		}
 		
@@ -50,6 +48,7 @@ public class MockFrontendSocket implements FrontendSocket {
 		case LAST_CHUNK:
 			chunkedResponse.setLastChunk(payload.getLastHttpChunk());
 			payloads.add(chunkedResponse);
+			this.notifyAll();
 			chunkedResponse = null;
 			break;
 		default:
@@ -81,6 +80,9 @@ public class MockFrontendSocket implements FrontendSocket {
 		long start = System.currentTimeMillis();
 		while(payloads.size() < count) {
 			this.wait(waitTimeMs+500);
+			if(payloads.size() >= count)
+				return payloads;
+			
 			long time = System.currentTimeMillis() - start;
 			if(time > waitTimeMs)
 				throw new IllegalStateException("While waiting for "+count+" responses, some or all never came.  count that came="+payloads.size());
