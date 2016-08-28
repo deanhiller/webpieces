@@ -1,6 +1,7 @@
 package org.webpieces.router.api.mocks;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,13 +12,13 @@ import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RenderStaticResponse;
 
 public class MockResponseStream extends MockSuperclass implements ResponseStreamer{
 
 	private static enum MockMethod implements MethodEnum {
-		SEND_REDIRECT, FAILURE, SEND_RENDER_HTML;
+		SEND_REDIRECT, FAILURE, SEND_RENDER_HTML, SEND_STATIC_HTML;
 	}
-	
 	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
@@ -54,6 +55,12 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 		Stream<ParametersPassedIn> params = super.getCalledMethods(MockMethod.SEND_RENDER_HTML);
 		Stream<RenderResponse> responseStr = params.map(p -> (RenderResponse)p.getArgs()[0]);
 		return responseStr.collect(Collectors.toList());		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
+		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_STATIC_HTML, renderStatic);
 	}
 
 

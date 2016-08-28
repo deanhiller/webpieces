@@ -31,7 +31,8 @@ public class TestIntegTimeoutConnection {
 	@Test
 	public void testIntegrationOfTimeoutAfterConnection() throws InterruptedException, ExecutionException, TimeoutException {
 		ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(2);
-		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer);
+		BufferCreationPool pool = new BufferCreationPool();
+		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
 		
 		FrontendConfig config = new FrontendConfig("tcpServer", new InetSocketAddress(0));
 		config.maxConnectToRequestTimeoutMs = 1000;
@@ -63,7 +64,8 @@ public class TestIntegTimeoutConnection {
 	@Test
 	public void testIntegrationOfTimeoutAfterSslConnection() throws InterruptedException, ExecutionException, TimeoutException {
 		ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(2);
-		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer);
+		BufferCreationPool pool = new BufferCreationPool();
+		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
 		
 		FrontendConfig config = new FrontendConfig("tcpServer", new InetSocketAddress(0));
 		config.maxConnectToRequestTimeoutMs = 1000;

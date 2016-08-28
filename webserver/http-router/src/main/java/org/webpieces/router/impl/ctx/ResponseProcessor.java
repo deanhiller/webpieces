@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import org.webpieces.ctx.api.Current;
@@ -13,6 +14,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
@@ -132,6 +134,18 @@ public class ResponseProcessor {
 
 	public void failureRenderingInternalServerErrorPage(Throwable e) {
 		wrapFunctionInContext(s -> responseCb.failureRenderingInternalServerErrorPage(e));
+	}
+
+	public CompletableFuture<Void> renderStaticResponse(RenderStaticResponse renderStatic) {
+		boolean wasSet = Current.isContextSet();
+		if(!wasSet)
+			Current.setContext(ctx); //Allow html tags to use the contexts
+		try {
+			return responseCb.sendRenderStatic(renderStatic);
+		} finally {
+			if(!wasSet) //then reset
+				Current.setContext(null);
+		}
 	}
 	
 }

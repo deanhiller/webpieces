@@ -39,28 +39,28 @@ public class AllRoutingInfo {
 		return routerInfo;
 	}
 
-	public MatchResult fetchRoute(RouterRequest request, String path) {
-		if(!path.startsWith("/"))
+	public MatchResult fetchRoute(RouterRequest request, String subPath) {
+		if(!subPath.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 
-		String prefix = path;
-		int index = path.indexOf("/", 1);
+		String prefix = subPath;
+		int index = subPath.indexOf("/", 1);
 		if(index == 1) {
 			throw new IllegalArgumentException("path cannot start with //");
 		} else if(index > 1) {
-			prefix = path.substring(0, index);
+			prefix = subPath.substring(0, index);
 		}
 
 		AllRoutingInfo routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
-			String newRelativePath = path.substring(index, path.length());
+			String newRelativePath = subPath.substring(index, subPath.length());
 			MatchResult route = routeInfo.fetchRoute(request, newRelativePath);
 			if(route != null)
 				return route;
 		}
 
 		for(RouteMeta meta : routes) {
-			MatchResult result = meta.matches(request, path);
+			MatchResult result = meta.matches(request, subPath);
 			if(result != null)
 				return result;
 		}

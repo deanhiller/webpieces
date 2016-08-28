@@ -1,10 +1,18 @@
 package org.webpieces.webserver.impl;
 
+import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
@@ -15,7 +23,10 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterCookie;
+import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -35,6 +46,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.impl.CookieTranslator;
@@ -63,10 +75,12 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	private FrontendSocket channel;
 	private HttpRequest request;
+	private BufferPool pool;
 
-	public void init(HttpRequest req, FrontendSocket channel) {
+	public void init(HttpRequest req, FrontendSocket channel, BufferPool pool) {
 		this.request = req;
 		this.channel = channel;
+		this.pool = pool;
 	}
 
 	@Override
@@ -103,6 +117,101 @@ public class ProxyResponse implements ResponseStreamer {
 		channel.write(response);
 
 		closeIfNeeded();
+	}
+
+	@Override
+	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
+
+		if(renderStatic.isOnClassPath())
+			throw new UnsupportedOperationException("not implemented yet");
+		
+		try {
+			return runAsyncFileRead(renderStatic);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private CompletableFuture<Void> runAsyncFileRead(RenderStaticResponse renderStatic) throws IOException {
+	    Path file = Paths.get(renderStatic.getAbsolutePath());
+	    
+	    //NOTE: try with resource is synchronous and won't work here :(
+    	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file,StandardOpenOption.READ);
+    	
+    	RequestContext ctx = Current.getContext();
+    	try {
+    		return read(file, asyncFile, ctx, 0)
+    			.handle((s, exc) -> handleClose(s, exc)) //our finally block for failures
+    			.thenApply(s -> null);
+    	} catch(Throwable e) {
+    		//cannot do this on success since it is completing on another thread...
+    		handleClose(true, null);
+    		throw new RuntimeException(e);
+    	}
+	}
+
+	private Boolean handleClose(Boolean s, Throwable exc) {
+
+		//now we close if needed
+		closeIfNeeded();
+		
+		if(s != null)
+			return s;
+		else if(exc != null)
+			throw new RuntimeException(exc);
+		else {
+			log.error("oh crap, big bug");
+			throw new RuntimeException("This is really bizarre to get here");
+		}		
+	}
+	
+	private CompletableFuture<Boolean> read(Path file, AsynchronousFileChannel asyncFile, RequestContext ctx, int position) {
+		//must be async since it is recursive(prevents stackoverflow)
+		return run(file, asyncFile, position)
+					.thenApplyAsync(buf -> {
+							buf.flip();
+							int read = buf.remaining();
+							sendBuffer(ctx, buf);
+							
+							if(read == 0) {
+								return null; //we are done reading
+							}
+							
+							int newPosition = position + read;
+							//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
+							read(file, asyncFile, ctx, newPosition);
+							return null;
+					})
+					.thenApply(s -> true);
+	}
+
+	private void sendBuffer(RequestContext ctx, ByteBuffer buf) {
+		if(buf.remaining() == 0) {
+			pool.releaseBuffer(buf);
+		}
+		log.info("wanting to send buffer size="+buf.remaining());
+	}
+
+	private CompletableFuture<ByteBuffer> run(Path file, AsynchronousFileChannel asyncFile, long position) {
+		CompletableFuture<ByteBuffer> future = new CompletableFuture<ByteBuffer>();
+    
+		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
+
+		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
+			@Override
+			public void completed(Integer result, String attachment) {
+				future.complete(buf);
+			}
+
+			@Override
+			public void failed(Throwable exc, String attachment) {
+				log.error("Failed to read file="+file, exc);
+				future.completeExceptionally(exc);
+			}
+		};
+		asyncFile.read(buf, position, "attachment", handler);
+		
+		return future;
 	}
 
 	@Override
@@ -271,7 +380,7 @@ public class ProxyResponse implements ResponseStreamer {
 		return cookieParser.createHeader(cookie);
 	}
 
-	private void closeIfNeeded() {
+	private Void closeIfNeeded() {
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		boolean close = false;
 		if(connHeader != null) {
@@ -284,6 +393,8 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		if(close)
 			channel.close();
+		
+		return null;
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.webpieces.router.impl;
 
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.HttpMethod;
@@ -14,13 +13,11 @@ public interface Route {
 
 	boolean matchesMethod(HttpMethod method);
 	
-	Matcher matches(RouterRequest request, String path);
+	Matcher matches(RouterRequest request, String subPath);
 
 	String getControllerMethodString();
 
 	List<String> getPathParamNames();
-
-	Set<HttpMethod> getHttpMethods();
 
 	RouteType getRouteType();
 

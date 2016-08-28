@@ -1,5 +1,6 @@
 package org.webpieces.regex;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
@@ -9,6 +10,16 @@ import org.webpieces.router.impl.RegExUtil;
 
 public class TestRegEx {
 
+	@Test
+	public void testGroupMatch() {
+		Pattern pattern = Pattern.compile("^/public/(?<resource>.*)$");
+		Matcher matcher = pattern.matcher("/public/some/other/path.txt");
+		matcher.matches();
+		String group = matcher.group("resource");
+		
+		Assert.assertEquals("some/other/path.txt", group);
+	}
+	
 	@Test
 	public void testRegEx() {
 		String path = "/path/{id}/user";
@@ -22,6 +33,11 @@ public class TestRegEx {
 		Assert.assertFalse(pattern.matcher("/path/my/id/user").matches());
 		Assert.assertFalse(pattern.matcher("/path//myid/user").matches());
 		Assert.assertFalse(pattern.matcher("/path/asdf/myid/user").matches());
+		
+		Matcher matcher = pattern.matcher("/path/myid/user");
+		matcher.matches(); //must run matching operation first
+		String group = matcher.group("id");
+		Assert.assertEquals("myid", group);
 		
 		Assert.assertEquals("id", parsePath.argNames.get(0));
 	}

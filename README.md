@@ -33,6 +33,9 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
+* implement serving static pages
+* add mime types mapping file so extension to mime-type mapping can be found.....ie. as we go through text/html=html or xx/asdf=xdi, we would lookup to see if there is a class _html.class or _xdi.class each time for each type?
+* SSL 
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly

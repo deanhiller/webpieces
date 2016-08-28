@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
-import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend.impl.FrontEndServerManagerImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
@@ -24,10 +24,8 @@ public abstract class HttpFrontendFactory {
 	 * 
 	 * @return
 	 */
-	public static HttpFrontendManager createFrontEnd(String id, int threadPoolSize, ScheduledExecutorService timeout) {
+	public static HttpFrontendManager createFrontEnd(String id, int threadPoolSize, ScheduledExecutorService timeout, BufferPool pool) {
 		Executor executor = Executors.newFixedThreadPool(threadPoolSize, new NamedThreadFactory(id));
-		BufferCreationPool pool = new BufferCreationPool();
-		HttpParserFactory.createParser(pool);
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, executor);

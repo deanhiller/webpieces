@@ -1,7 +1,9 @@
 package org.webpieces.util.futures;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class TestFutures {
@@ -91,6 +93,52 @@ public class TestFutures {
 	private String translate(Integer p) {
 		System.out.println("(translate)thread="+Thread.currentThread());
 		return p+"str";
+	}
+	
+	/**
+	 * Some times you want code to run success or fail and to propagate so here is how
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 */
+	@Test
+	public void testAFinallyMethodWithCompletableFutures() throws InterruptedException, ExecutionException {
+		CompletableFuture<Integer> myFuture = new CompletableFuture<>();
+		CompletableFuture<Integer> newFuture = myFuture.thenApply(intResult -> throwException());
+		
+		myFuture.complete(5);
+
+		Assert.assertFalse(myFuture.isCompletedExceptionally());
+		Assert.assertTrue(newFuture.isCompletedExceptionally());
+		
+		CompletableFuture<Integer> future2 = newFuture.handle((r, e) -> {
+			if(r != null)
+				return r;
+			else if(e != null)
+				throw new RuntimeException(e);
+			else
+				throw new RuntimeException("weird");
+		});
+		
+		Assert.assertTrue(future2.isCompletedExceptionally());
+		
+		
+		CompletableFuture<Object> future = newFuture.handle((r, e) -> {
+			if(r != null)
+				return r;
+			else if(e != null)
+				return e;
+			else
+				return new RuntimeException("Asdf");			
+		});
+		
+		Assert.assertTrue(future.get() instanceof RuntimeException);
+		Assert.assertFalse(future.isCompletedExceptionally());
+
+		
+	}
+	
+	public Integer throwException() {
+		throw new RuntimeException("hit here");
 	}
 	
 //	@Test

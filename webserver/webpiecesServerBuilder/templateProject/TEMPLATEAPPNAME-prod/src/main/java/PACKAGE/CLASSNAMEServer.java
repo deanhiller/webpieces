@@ -14,6 +14,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.api.WebServer;
@@ -36,10 +37,6 @@ import PACKAGE.example.tags.TagLookupOverride;
  *
  */
 public class CLASSNAMEServer {
-	
-	private static final Logger log = LoggerFactory.getLogger(CLASSNAMEServer.class);
-	
-	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
 	
 	//This is where the list of Guice Modules go as well as the list of RouterModules which is the
 	//core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -67,6 +64,17 @@ public class CLASSNAMEServer {
 		//in this inner class.  Then there are platform plugins which are plugged in using the main methods below
 	}
 	
+	
+	/*******************************************************************************
+	 * When running the dev server, changes below this line require a server restart(you can try not to but it won't work)
+	 * Changes above this line in the CLASSNAMEMeta inner class WILL work....those changes will be recompiled and
+	 * loaded
+	 *******************************************************************************/
+	
+	private static final Logger log = LoggerFactory.getLogger(CLASSNAMEServer.class);
+	
+	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
+	
 	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
@@ -75,7 +83,7 @@ public class CLASSNAMEServer {
 		server.start();
 		
 		synchronized (CLASSNAMEServer.class) {
-			//wait forever for now so server doesn't shut down..
+			//wait forever so server doesn't shut down..
 			CLASSNAMEServer.class.wait();
 		}	
 	}
@@ -100,7 +108,7 @@ public class CLASSNAMEServer {
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
-		//by a QA team
+		//by a QA team.  We leave most of these properties right here.
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
@@ -113,10 +121,16 @@ public class CLASSNAMEServer {
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
 										.setFunctionToConfigureServerSocket(s -> configure(s))
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
+		TemplateConfig templateConfig = new TemplateConfig();
 		
-		webServer = WebServerFactory.create(config, routerConfig);
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
+	/**
+	 * This is a bit clunky BUT if jdk authors add methods that you can configure, we do not have
+	 * to change our platform every time so you can easily set the new properties rather than waiting for
+	 * us to release a new version 
+	 */
 	public void configure(ServerSocketChannel channel) throws SocketException {
 		channel.socket().setReuseAddress(true);
 		//channel.socket().setSoTimeout(timeout);

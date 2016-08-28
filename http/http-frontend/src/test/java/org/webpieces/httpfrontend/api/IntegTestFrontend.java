@@ -1,6 +1,7 @@
 package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
 
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpFrontendFactory;
@@ -12,7 +13,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 public class IntegTestFrontend {
 
 	public static void main(String[] args) {
-		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, null);
+		BufferCreationPool pool = new BufferCreationPool();
+		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, null, pool);
 		FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(8080));
 		frontEndMgr.createHttpServer(config, new OurListener());
 	}

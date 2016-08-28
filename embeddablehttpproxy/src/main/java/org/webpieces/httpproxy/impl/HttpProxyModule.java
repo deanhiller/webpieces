@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.inject.Singleton;
 
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpclient.api.HttpClient;
@@ -40,7 +41,8 @@ public class HttpProxyModule implements Module {
 	@Provides
 	@Singleton
 	public HttpFrontendManager providesAsyncServerMgr(ProxyConfig config, ScheduledExecutorService timer) {
-		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), timer);
+		BufferCreationPool pool = new BufferCreationPool();
+		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), timer, pool);
 	}
 	
 	@Provides

@@ -84,11 +84,6 @@ public class RouteImpl implements Route {
 		return argNames;
 	}
 
-	@Override
-	public Set<HttpMethod> getHttpMethods() {
-		return methods;
-	}
-	
 	public RouteType getRouteType() {
 		return routeType;
 	}

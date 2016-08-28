@@ -1,6 +1,5 @@
 package org.webpieces.router.api.routing;
 
-import java.io.File;
 import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
@@ -59,10 +58,14 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addHttpsRoute(methods, path, controllerMethod, routeId);
 	}
 
-	public void addStaticGetRoute(String path, File f) {
-		router.addStaticGetRoute(path, f);
+	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		router.addStaticDir(urlPath, fileSystemPath, isOnClassPath);
 	}
-
+	
+	public void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		router.addStaticFile(urlPath, fileSystemPath, isOnClassPath);
+	}
+	
 	public void addFilter(String path, HttpFilter securityFilter) {
 		router.addFilter(path, securityFilter);
 	}

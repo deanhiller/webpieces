@@ -1,6 +1,5 @@
 package org.webpieces.router.api.routing;
 
-import java.io.File;
 import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
@@ -32,8 +31,19 @@ public interface Router {
 	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
 	void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
-	//if f.isDirectory, verify path endsWith("/") then
-	void addStaticGetRoute(String path, File f);
+	/**
+	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
+	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
+	 * work until the completionListener callback using AsynchronousFileChannel
+	 */
+	void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath);
+
+	/**
+	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
+	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
+	 * work until the completionListener callback using AsynchronousFileChannel
+	 */
+	void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath);
 	
 	void addFilter(String path, HttpFilter securityFilter);
 

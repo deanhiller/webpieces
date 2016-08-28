@@ -54,16 +54,14 @@ public class RouteMeta {
 		this.methodParamNames = paramNames;
 	}
 
-	public MatchResult matches(RouterRequest request, String path) {
-		Matcher matcher = route.matches(request, path);
+	public MatchResult matches(RouterRequest request, String subPath) {
+		Matcher matcher = route.matches(request, subPath);
 		if(matcher == null)
 			return null;
 		else if(!matcher.matches())
 			return null;
-		
-		
-		List<String> names = route.getPathParamNames();
 
+		List<String> names = route.getPathParamNames();
 		Map<String, String> namesToValues = new HashMap<>();
 		for(String name : names) {
 			String value = matcher.group(name);

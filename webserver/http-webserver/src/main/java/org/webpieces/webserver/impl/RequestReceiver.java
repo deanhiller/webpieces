@@ -24,6 +24,7 @@ import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
@@ -65,6 +66,8 @@ public class RequestReceiver implements HttpRequestListener {
 	private CookieTranslator cookieTranslator;
 	@Inject
 	private ObjectTranslator objectTranslator;
+	@Inject
+	private BufferPool bufferPool;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
@@ -89,7 +92,7 @@ public class RequestReceiver implements HttpRequestListener {
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
 		ProxyResponse streamer = responseProvider.get();
-		streamer.init(req, channel);
+		streamer.init(req, channel, bufferPool);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
@@ -251,7 +254,7 @@ public class RequestReceiver implements HttpRequestListener {
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 		ProxyResponse proxyResp = responseProvider.get();
 		HttpRequest req = new HttpRequest();
-		proxyResp.init(req, channel);
+		proxyResp.init(req, channel, bufferPool);
 		proxyResp.sendFailure(exc);
 	}
 

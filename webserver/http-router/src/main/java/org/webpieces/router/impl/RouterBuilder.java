@@ -1,6 +1,5 @@
 package org.webpieces.router.impl;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Set;
 
@@ -92,9 +91,32 @@ public class RouterBuilder implements Router {
 	}
 
 	@Override
-	public void addStaticGetRoute(String path, File f) {
+	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(!urlPath.endsWith("/"))
+			throw new IllegalArgumentException("Static directory so urlPath must end with a /");
+		else if(!fileSystemPath.endsWith("/"))
+			throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
+		addStaticRoute(urlPath, fileSystemPath, isOnClassPath);
 	}
 
+	@Override
+	public void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(urlPath.endsWith("/"))
+			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
+		else if(fileSystemPath.endsWith("/"))
+			throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
+		addStaticRoute(urlPath, fileSystemPath, isOnClassPath);
+	}
+
+	private void addStaticRoute(String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		if(isOnClassPath)
+			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
+		
+		Route route = new StaticRoute(urlPath, fileSystemPath, isOnClassPath);
+		RouteMeta meta = new RouteMeta(route, injector.get(), currentPackage.get(), urlEncoding);
+		info.addRoute(meta);
+	}
+	
 	@Override
 	public void addFilter(String path, HttpFilter securityFilter) {
 	}

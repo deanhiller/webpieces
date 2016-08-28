@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.api.WebServer;
@@ -50,19 +51,21 @@ public class WebserverForTest {
 			httpsPort = 0;
 		}
 		
+		//3 pieces to the webserver so a configuration for each piece
+		WebServerConfig config = new WebServerConfig()
+				.setPlatformOverrides(platformOverrides)
+				.setHtmlResponsePayloadEncoding(CHAR_SET_TO_USE)
+				.setHttpListenAddress(new InetSocketAddress(httpPort))
+				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
+				.setFunctionToConfigureServerSocket(s -> configure(s));
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setWebappOverrides(appOverrides)
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setSecretKey("xxx");
-		WebServerConfig config = new WebServerConfig()
-										.setPlatformOverrides(platformOverrides)
-										.setHtmlResponsePayloadEncoding(CHAR_SET_TO_USE)
-										.setHttpListenAddress(new InetSocketAddress(httpPort))
-										.setHttpsListenAddress(new InetSocketAddress(httpsPort))
-										.setFunctionToConfigureServerSocket(s -> configure(s));
+		TemplateConfig templateConfig = new TemplateConfig();
 		
-		webServer = WebServerFactory.create(config, routerConfig);
+		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
 	public void configure(ServerSocketChannel channel) throws SocketException {

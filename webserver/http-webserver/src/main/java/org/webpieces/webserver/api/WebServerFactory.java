@@ -14,13 +14,9 @@ import com.google.inject.util.Modules;
 public abstract class WebServerFactory {
 	
     protected WebServerFactory() {}
-
-    public static WebServer create(RouterConfig config) {
-    	return create(new WebServerConfig(), config);
-    }
     
-	public static WebServer create(WebServerConfig config, RouterConfig routerConfig) {
-		Module allModules = getModules(config, routerConfig);
+	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
+		Module allModules = getModules(config, routerConfig, templateConfig);
 		
 		Module platformOverrides = config.getPlatformOverrides();
 		if(platformOverrides != null) 
@@ -30,11 +26,11 @@ public abstract class WebServerFactory {
 		return injector.getInstance(WebServer.class);
 	}
 
-	private static Module getModules(WebServerConfig config, RouterConfig routerConfig) {
+	private static Module getModules(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
 		return Modules.combine(
 			new WebServerModule(config),
 			new ProdRouterModule(routerConfig),
-			new ProdTemplateModule(new TemplateConfig(config.getDefaultFormAcceptEncoding()))
+			new ProdTemplateModule(templateConfig)
 		);
 	}
 }
