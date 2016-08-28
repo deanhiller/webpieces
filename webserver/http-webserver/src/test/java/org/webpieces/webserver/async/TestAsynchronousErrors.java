@@ -223,6 +223,26 @@ public class TestAsynchronousErrors {
 		httpPayload.assertContains("The webpieces platform saved them");	
 	}
 
+	@Test
+	public void testCompletePromiseAnotherThreadAndPageParamMissing() {
+		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		mockNotFoundLib.queueFuture(future );
+		
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
+		
+		server.processHttpRequests(mockResponseSocket, req , false);
+
+		//now have the server complete processing
+		future.complete(5);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("There was a bug in our software");
+	}
+	
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {

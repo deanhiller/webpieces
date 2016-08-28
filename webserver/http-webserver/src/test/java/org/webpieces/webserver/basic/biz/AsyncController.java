@@ -4,10 +4,14 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.impl.ctx.RequestLocalCtx;
+import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.webserver.async.AsyncRouteId;
 
 public class AsyncController {
@@ -36,6 +40,20 @@ public class AsyncController {
 		//myMethod.html which must be in the same directory as the Controller
 		Render renderThis = Actions.renderThis("hhhh", 86);
 		return CompletableFuture.completedFuture(renderThis);
+	}
+	
+	public CompletableFuture<Action> asyncMyMethod() {
+		ResponseProcessor processor = RequestLocalCtx.get();
+		return notFoundLib.someBusinessLogic().thenApply(s -> {
+			return Actions.renderView(processor, "userParamPage.html", "user", "Dean Hiller");
+		});
+	}
+	
+	public CompletableFuture<Action> asyncFail() {
+		ResponseProcessor processor = RequestLocalCtx.get();
+		return notFoundLib.someBusinessLogic().thenApply(s -> {
+			return Actions.renderView(processor, "userParamPage.html");
+		});
 	}
 	
 	public CompletableFuture<Action> throwNotFound() {

@@ -14,7 +14,9 @@ public class AsyncRouteModule implements RouteModule {
 		router.addRoute(HttpMethod.GET, "/redirectint/{id}", "../basic/biz/AsyncController.redirectWithInt", AsyncRouteId.REDIRECT2);
 		router.addRoute(HttpMethod.GET, "/myroute",          "../basic/biz/AsyncController.myMethod", AsyncRouteId.RENDER_PAGE);
 		router.addRoute(HttpMethod.GET, "/throwNotFound",    "../basic/biz/AsyncController.throwNotFound", AsyncRouteId.THROW_NOT_FOUND);
-		
+		router.addRoute(HttpMethod.GET, "/asyncSuccessRoute","../basic/biz/AsyncController.asyncMyMethod", AsyncRouteId.ASYNC_SUCCESS);
+		router.addRoute(HttpMethod.GET, "/asyncFailRoute",   "../basic/biz/AsyncController.asyncFail", AsyncRouteId.ASYNC_FAIL);
+
 		router.setPageNotFoundRoute("../basic/biz/AsyncController.notFound");
 		router.setInternalErrorRoute("../basic/biz/AsyncController.internalError");
 	}
