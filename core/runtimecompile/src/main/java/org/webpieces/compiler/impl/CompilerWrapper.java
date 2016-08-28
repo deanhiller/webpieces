@@ -233,7 +233,12 @@ public class CompilerWrapper {
                         }
                         CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
                         VirtualFile javaFile = applicationClass.javaFile;
-                        throw new CompilationException(javaFile, config.getFileEncoding(), message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+                        
+                        String msg = "Compile Error. file="+javaFile.getAbsolutePath()
+                        	+" line="+problem.getSourceLineNumber()+" start="+problem.getSourceStart()+" end="
+                        		+problem.getSourceEnd()+" error msg="+message;
+                        
+                        throw new CompilationException(javaFile, config.getFileEncoding(), msg, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
                     }
                 }
                 // Something has been compiled

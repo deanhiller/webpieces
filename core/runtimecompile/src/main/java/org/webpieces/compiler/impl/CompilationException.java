@@ -26,7 +26,8 @@ public class CompilationException extends RuntimeException {
     }
 
     public CompilationException(VirtualFile source, Charset charset, String problem, int line, int start, int end) {
-        super(problem);
+        super("Compile Error. file="+source.getAbsolutePath() +" line="+line+" start="+start+" end="
+        		+end+" error msg="+problem);
         this.problem = problem;
         this.charset = charset;
         this.line = line;
