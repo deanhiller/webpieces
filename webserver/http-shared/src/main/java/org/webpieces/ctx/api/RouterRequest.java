@@ -44,6 +44,8 @@ public class RouterRequest {
 	public List<Locale> preferredLocales = new ArrayList<>();
 	
 	public List<AcceptMediaType> acceptedTypes = new ArrayList<>();
+
+	public String referrer;
 	
 	@Override
 	public String toString() {

@@ -86,6 +86,10 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.ACCEPT_LANGUAGE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.ACCEPT.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.COOKIE.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.REFERER.getHeaderName().toLowerCase());
+		
+		//we don't do redirects or anything like that yet...
+		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());
 	}
 	
 	@Override
@@ -117,6 +121,8 @@ public class RequestReceiver implements HttpRequestListener {
 		parseCookies(req, routerRequest);
 		parseAcceptLang(req, routerRequest);
 		parseAccept(req, routerRequest);
+		
+		routerRequest.referrer = req.getHeaderLookupStruct().getHeader(KnownHeaderName.REFERER).getValue().trim();
 		
 		parseBody(req, routerRequest);
 		routerRequest.method = method;

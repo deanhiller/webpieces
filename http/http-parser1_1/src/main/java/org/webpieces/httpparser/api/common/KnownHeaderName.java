@@ -39,6 +39,7 @@ public enum KnownHeaderName {
 	REFERER("Referer", HeaderType.REQUEST),
 	TE("TE", HeaderType.REQUEST),
 	USER_AGENT("User-Agent", HeaderType.REQUEST),
+	UPGRADE_INSECURE_REQUESTS("Upgrade-Insecure-Requests", HeaderType.REQUEST),
 	
 	//Per RFC, these are the Response Header types
 	ACCEPT_RANGES("Accept-Ranges", HeaderType.RESPONSE),
