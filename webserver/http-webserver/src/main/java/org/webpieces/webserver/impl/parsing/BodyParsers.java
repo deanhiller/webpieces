@@ -3,15 +3,18 @@ package org.webpieces.webserver.impl.parsing;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 public class BodyParsers {
 
-	private static Map<String, BodyParser> typeToParser = new HashMap<>();
+	private Map<String, BodyParser> typeToParser = new HashMap<>();
 	
-	static {
-		typeToParser.put("application/x-www-form-urlencoded", new FormUrlEncodedParser());
+	@Inject
+	public BodyParsers(FormUrlEncodedParser formUrl) {
+		typeToParser.put("application/x-www-form-urlencoded", formUrl);
 	}
 	
-	public static BodyParser lookup(String typeHeader) {
+	public BodyParser lookup(String typeHeader) {
 		return typeToParser.get(typeHeader);
 	}
 }

@@ -39,6 +39,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
+import org.webpieces.httpparser.api.subparsers.UrlEncodedParser;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.impl.CookieTranslator;
@@ -49,7 +50,6 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
-import org.webpieces.webserver.impl.parsing.FormUrlEncodedParser;
 
 public class RequestReceiver implements HttpRequestListener {
 	
@@ -61,11 +61,13 @@ public class RequestReceiver implements HttpRequestListener {
 	@Inject
 	private WebServerConfig config;
 	@Inject
-	private FormUrlEncodedParser parser = new FormUrlEncodedParser();
-	@Inject
 	private CookieTranslator cookieTranslator;
 	@Inject
 	private ObjectTranslator objectTranslator;
+	@Inject
+	private UrlEncodedParser urlEncodedParser;
+	@Inject
+	private BodyParsers requestBodyParsers;
 	@Inject
 	private BufferPool bufferPool;
 	
@@ -132,7 +134,7 @@ public class RequestReceiver implements HttpRequestListener {
 		if(index > 0) {
 			routerRequest.relativePath = fullPath.substring(0, index);
 			String postfix = fullPath.substring(index+1);
-			parser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
+			urlEncodedParser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
 		} else {
 			routerRequest.queryParams = new HashMap<>();
 			routerRequest.relativePath = fullPath;	
@@ -240,7 +242,7 @@ public class RequestReceiver implements HttpRequestListener {
 			return;
 		}
 		
-		BodyParser parser = BodyParsers.lookup(typeHeader.getValue());
+		BodyParser parser = requestBodyParsers.lookup(typeHeader.getValue());
 		if(parser == null) {
 			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will treat like there was no body at all).  req="+req);
 			return;			

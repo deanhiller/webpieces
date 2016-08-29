@@ -33,12 +33,13 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
+* gzip/deflate/sdch compression?
+* Better template generation for logback.xml being outside official webapp release AND html files in that release as well(need to learn the release task to add to it)
 * SSL 
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
-* gzip/deflate/sdch compression?
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
@@ -92,7 +93,6 @@ DOCUMENTATION Notes:
 * don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
 * resource bundles are complex needing to provide one for some tags if there is a provider of tags
 
-* unit test arrays in multi-part form, along with conflicting query params?
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
 
 
