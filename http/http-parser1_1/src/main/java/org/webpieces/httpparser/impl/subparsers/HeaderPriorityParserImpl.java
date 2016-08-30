@@ -21,6 +21,16 @@ import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 	
 	private static final Logger log = LoggerFactory.getLogger(HeaderPriorityParserImpl.class);
+
+	@Override
+	public List<String> parseAcceptEncoding(HttpRequest req) {
+		Header langHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.ACCEPT_ENCODING);
+		if(langHeader == null)
+			return new ArrayList<>();
+		
+		List<String> headerItems = parsePriorityItems(langHeader.getValue(), s -> s);
+		return headerItems;
+	}
 	
 	@Override
 	public List<Locale> parseAcceptLangFromRequest(HttpRequest req) {

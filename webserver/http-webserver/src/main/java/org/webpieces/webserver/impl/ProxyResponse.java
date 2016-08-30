@@ -69,9 +69,10 @@ import groovy.lang.MissingPropertyException;
 public class ProxyResponse implements ResponseStreamer {
 
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
+	//TODO: Actually should inject ALL of these so they are swappable.... (never have statics)...
 	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private static final HeaderPriorityParser cookieParser = HttpParserFactory.createHeaderParser();
+	private static final HeaderPriorityParser httpSubParser = HttpParserFactory.createHeaderParser();
 	
 	@Inject
 	private RoutingService urlLookup;
@@ -92,15 +93,19 @@ public class ProxyResponse implements ResponseStreamer {
 	private FrontendSocket channel;
 	private HttpRequest request;
 	private BufferPool pool;
+	private Compression compression;
+	private String compressionType;
 
 	public ProxyResponse() {
 	    options.add(StandardOpenOption.READ);
 	}
 	
-	public void init(HttpRequest req, FrontendSocket channel, BufferPool pool) {
+	public void init(HttpRequest req, FrontendSocket channel, BufferPool pool, Compression compression, String compressionType) {
 		this.request = req;
 		this.channel = channel;
 		this.pool = pool;
+		this.compression = compression;
+		this.compressionType = compressionType;
 	}
 
 	@Override
@@ -168,6 +173,11 @@ public class ProxyResponse implements ResponseStreamer {
 	    }
 	    
 	    HttpResponse response = createResponse(KnownStatusCode.HTTP_200_OK, null, extension, "application/octet-stream");
+	    
+	    if(compressionType != null) {
+	    	response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compressionType));
+	    }
+	    
 	    channel.write(response);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
@@ -188,7 +198,12 @@ public class ProxyResponse implements ResponseStreamer {
 	private Boolean handleClose(Boolean s, Throwable exc) {
 
 		//now we close if needed
-		closeIfNeeded();
+		try {
+			closeIfNeeded();
+		} catch(Throwable e) {
+			if(exc == null) //Previous exception more important so only log if no previous exception
+				log.error("Exception closing if needed", e);
+		}
 		
 		if(s != null)
 			return s;
@@ -232,6 +247,12 @@ public class ProxyResponse implements ResponseStreamer {
 		log.info("wanting to send buffer size="+buf.remaining());
 
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
+		if(compression != null) {
+			byte[] bytes = data.createByteArray();
+			byte[] compressed = compression.compress(bytes);
+			data = wrapperFactory.wrapByteArray(compressed);
+		}
+		
 		HttpChunk chunk = new HttpChunk();
 		chunk.setBody(data);
 		channel.write(chunk);		
@@ -373,6 +394,10 @@ public class ProxyResponse implements ResponseStreamer {
 			if(encoding == null)
 				encoding = config.getDefaultResponseBodyEncoding();
 			byte[] bytes = content.getBytes(encoding);
+			if(compression != null && compressionType != null) {
+				response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compressionType));
+				bytes = compression.compress(bytes);
+			}
 			DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 			response.setBody(data);
 			length = bytes.length;
@@ -381,7 +406,7 @@ public class ProxyResponse implements ResponseStreamer {
 		addCommonHeaders(statusCode, response, length);
 		return response;
 	}
-	
+
 	private void addCommonHeaders(KnownStatusCode statusCode, HttpResponse response, Integer contentLength) {
 		
 		if(contentLength != null) {
@@ -435,7 +460,7 @@ public class ProxyResponse implements ResponseStreamer {
 		cookie.setMaxAgeSeconds(c.maxAgeSeconds);
 		cookie.setSecure(c.isSecure);
 		cookie.setHttpOnly(c.isHttpOnly);
-		return cookieParser.createHeader(cookie);
+		return httpSubParser.createHeader(cookie);
 	}
 
 	private Void closeIfNeeded() {

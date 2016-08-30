@@ -4,8 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
-import org.webpieces.ctx.api.Current;
-import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;

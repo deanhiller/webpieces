@@ -33,7 +33,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* gzip/deflate/sdch compression?
 * Better template generation for logback.xml being outside official webapp release AND html files in that release as well(need to learn the release task to add to it)
 * SSL 
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl

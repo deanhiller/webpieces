@@ -21,4 +21,6 @@ public interface HeaderPriorityParser {
 	
 	<T> List<T> parsePriorityItems(String value, Function<String, T> parseFunction);
 
+	List<String> parseAcceptEncoding(HttpRequest req);
+
 }

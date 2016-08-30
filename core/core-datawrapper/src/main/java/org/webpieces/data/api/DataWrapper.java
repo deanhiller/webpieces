@@ -21,12 +21,11 @@ public interface DataWrapper {
 	public String createStringFrom(int offset, int length, Charset charSet);
 
 	/**
-	 * This may or may not copy all the underlying data and is only meant to be used in
-	 * debugging scenarios.  This can be a costly operation.  It is deprecated from day 1
-     *
-	 * @deprecated
+	 * This may or may not copy all the underlying data and is mostly for
+	 * debugging scenarios, or in some cases where you are using an api that 
+	 * takes a byte[]  (NOTE: you probably have worse places in your code on performance so 
+	 * it's not really that big of a deal)
 	 */
-	@Deprecated
 	public byte[] createByteArray();
 	
 	@Deprecated

@@ -77,7 +77,6 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		
 		int offset = 0;
 		for(DataWrapper wrapper : wrappers) {
-			@SuppressWarnings("deprecation")
 			byte[] data = wrapper.createByteArray();
 			int size = wrapper.getReadableSize();
 			System.arraycopy(data, 0, copy, offset, size);

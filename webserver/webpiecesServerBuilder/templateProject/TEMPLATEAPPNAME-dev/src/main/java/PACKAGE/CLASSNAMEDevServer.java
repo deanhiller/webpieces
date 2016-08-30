@@ -38,12 +38,19 @@ public class CLASSNAMEDevServer {
 		String filePath1 = System.getProperty("user.dir");
 		log.info("running from dir="+filePath1);
 		
+        String directory = filePath1;
+        //intellij and eclipse use different user directories... :( :(
+        if(filePath1.contains("TEMPLATEAPPNAME-dev")) {
+            //eclipse starts in TEMPLATEAPPNAME-dev so move one directory back
+            directory = directory+"/..";
+        }
+        
 		//list all source paths here as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(new VirtualFileImpl(filePath1+"/../TEMPLATEAPPNAME-prod/src/main/java"));
+		srcPaths.add(new VirtualFileImpl(directory+"/TEMPLATEAPPNAME-prod/src/main/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(filePath1 + "/../TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(directory + "/TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...

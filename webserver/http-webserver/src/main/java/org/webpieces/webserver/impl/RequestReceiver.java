@@ -70,6 +70,8 @@ public class RequestReceiver implements HttpRequestListener {
 	private BodyParsers requestBodyParsers;
 	@Inject
 	private BufferPool bufferPool;
+	@Inject
+	private CompressionLookup compressionLookup;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
@@ -85,6 +87,7 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.USER_AGENT.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONTENT_LENGTH.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONTENT_TYPE.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.ACCEPT_ENCODING.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.ACCEPT_LANGUAGE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.ACCEPT.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.COOKIE.getHeaderName().toLowerCase());
@@ -96,9 +99,20 @@ public class RequestReceiver implements HttpRequestListener {
 	
 	@Override
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+		List<String> encodings = headerParser.parseAcceptEncoding(req);
+		
+		Compression compression = null;
+		String compressionType = null;
+		for(String type : encodings) {
+			compression = compressionLookup.lookup(type);
+			compressionType = type;
+			if(compression != null)
+				break;
+		}
+		
 		//log.info("request received on channel="+channel);
 		ProxyResponse streamer = responseProvider.get();
-		streamer.init(req, channel, bufferPool);
+		streamer.init(req, channel, bufferPool, compression, compressionType);
 		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
@@ -124,7 +138,9 @@ public class RequestReceiver implements HttpRequestListener {
 		parseAcceptLang(req, routerRequest);
 		parseAccept(req, routerRequest);
 		
-		routerRequest.referrer = req.getHeaderLookupStruct().getHeader(KnownHeaderName.REFERER).getValue().trim();
+		Header referHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.REFERER);
+		if(referHeader != null)
+			routerRequest.referrer = referHeader.getValue().trim();
 		
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
@@ -262,7 +278,7 @@ public class RequestReceiver implements HttpRequestListener {
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 		ProxyResponse proxyResp = responseProvider.get();
 		HttpRequest req = new HttpRequest();
-		proxyResp.init(req, channel, bufferPool);
+		proxyResp.init(req, channel, bufferPool, null, null);
 		proxyResp.sendFailure(exc);
 	}
 
