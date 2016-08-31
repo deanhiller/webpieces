@@ -15,7 +15,7 @@ import org.webpieces.util.file.VirtualFileImpl;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-public class CLASSNAMEDevServer {
+public class CLASSNAMESemiProdServer {
 
 	private static final Logger log = LoggerFactory.getLogger(CLASSNAMEServer.class);
 	
@@ -25,21 +25,21 @@ public class CLASSNAMEDevServer {
 	//webserver classes to put in a place a runtime compiler so we can compiler your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
-		new CLASSNAMEDevServer(false).start();
+		new CLASSNAMESemiProdServer(false).start();
 		
-		synchronized(CLASSNAMEDevServer.class) {
-			CLASSNAMEDevServer.class.wait();
+		synchronized(CLASSNAMESemiProdServer.class) {
+			CLASSNAMESemiProdServer.class.wait();
 		}
 	}
 	
 	private CLASSNAMEServer server;
 
-	public CLASSNAMEDevServer(boolean usePortZero) {
+	public CLASSNAMESemiProdServer(boolean usePortZero) {
 		String filePath1 = System.getProperty("user.dir");
 		log.info("running from dir="+filePath1);
 		
-        String directory = modifyForIDE(filePath1);
-        
+        String directory = CLASSNAMEDevServer.modifyForIDE(filePath1);
+		
 		//list all source paths here as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under
 		List<VirtualFile> srcPaths = new ArrayList<>();
@@ -50,13 +50,8 @@ public class CLASSNAMEDevServer {
 		
 		//html and json template file encoding...
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(CLASSNAMEServer.ALL_FILE_ENCODINGS);
-		
-		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths)
-										.setFileEncoding(CLASSNAMEServer.ALL_FILE_ENCODINGS);
-		Module platformOverrides = Modules.combine(
-										new DevRouterModule(devConfig),
-										new DevTemplateModule(templateConfig));
+		//Use overrides from DevTemplateModule which compiles html files on-demand...
+		Module platformOverrides = new DevTemplateModule(templateConfig);
 		
 		ServerConfig config = new ServerConfig();
 		if(usePortZero) {
@@ -66,21 +61,6 @@ public class CLASSNAMEDevServer {
 		
 		config.setMetaFile(metaFile);
 		server = new CLASSNAMEServer(platformOverrides, null, config);
-	}
-	
-	public static String modifyForIDE(String filePath1) {
-		String directory = filePath1;
-        //intellij and eclipse use different user directories... :( :(
-        if(filePath1.contains("TEMPLATEAPPNAME-dev")) {
-            //eclipse starts in TEMPLATEAPPNAME-dev so move one directory back
-            directory = directory+"/..";
-        }
-        
-		//we are in an IDE so we need to set user.dir to TEMPLATEAPPNAME-prod/src/dist so
-        //the static file route works just fine... (and we still load js, css, etc. files)
-		System.setProperty("user.dir", directory+"/TEMPLATEAPPNAME-prod/src/dist");
-        
-		return directory;
 	}
 	
 	public void start() throws InterruptedException {

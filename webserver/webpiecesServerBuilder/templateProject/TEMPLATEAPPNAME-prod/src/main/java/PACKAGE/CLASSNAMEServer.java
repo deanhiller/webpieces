@@ -2,6 +2,7 @@ package PACKAGE;
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.URL;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -52,7 +53,7 @@ public class CLASSNAMEServer {
 		//production is very very clean and the code for this non-dev server is very easy to step through
 		//if you have a production issue
 		public List<Module> getGuiceModules() {
-			return Lists.newArrayList(new CLASSNAMEModule());
+			return Lists.newArrayList(new CLASSNAMEGuiceModule());
 		}
 		
 		public List<RouteModule> getRouteModules() {
@@ -94,6 +95,18 @@ public class CLASSNAMEServer {
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 
+		URL resource = CLASSNAMEServer.class.getResource("/logback.xml");
+		if(resource == null) {
+			//Because the gradle application plugin doesn't set user.dir correctly, we have to do some stuff
+			//here to run in an IDE
+			if(!filePath.endsWith("/APPNAME-prod"))
+				throw new IllegalStateException("Server script must be run from APPNAME-prod directory as in run ./bin/APPNAME-prod");
+		} else if(platformOverrides == null) {
+			throw new IllegalStateException("This class only runs in production.  Use CLASSNAMESemiProdServer instead and"
+					+ " it will use production router with a on-demand template compile engine OR "
+					+ "use CLASSNAMEDevServer and it will recompile all your code on-demand as you change it");
+		}
+
 		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
 		if(metaFile == null)
@@ -126,6 +139,8 @@ public class CLASSNAMEServer {
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
+
+	
 	/**
 	 * This is a bit clunky BUT if jdk authors add methods that you can configure, we do not have
 	 * to change our platform every time so you can easily set the new properties rather than waiting for

@@ -33,7 +33,7 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* Better template generation for logback.xml being outside official webapp release AND html files in that release as well(need to learn the release task to add to it)
+* fix this...ERROR 2016-08-30 18:41:58,568 [-] [httpFrontEnd7]: This webserver has not thought about supporting header=Cache-Control quite yet.  value=max-age=0 Please let us know and we can quickly add support
 * SSL 
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,

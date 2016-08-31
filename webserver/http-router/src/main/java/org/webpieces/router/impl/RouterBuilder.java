@@ -112,7 +112,8 @@ public class RouterBuilder implements Router {
 		if(isOnClassPath)
 			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
 		
-		Route route = new StaticRoute(urlPath, fileSystemPath, isOnClassPath);
+		StaticRoute route = new StaticRoute(urlPath, fileSystemPath, isOnClassPath);
+		log.info("scope:'"+routerPath+"' adding static route="+route.getPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, injector.get(), currentPackage.get(), urlEncoding);
 		info.addRoute(meta);
 	}

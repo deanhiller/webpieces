@@ -31,6 +31,9 @@ public class CLASSNAMERouteModule extends AbstractRouteModule {
 		addRoute(POST, "/postuser",     "crud/ExampleController.postUser", ExampleRouteId.POST_USER_FORM);
 		addRoute(GET,  "/listusers",    "crud/ExampleController.listUsers", ExampleRouteId.GET_LIST_USERS);
 		
+		String workingDir = System.getProperty("user.dir");
+		addStaticDir("/public/", workingDir+"/public/", false);
+		
 		setPageNotFoundRoute("CLASSNAMELocalController.notFound");
 		setInternalErrorRoute("CLASSNAMELocalController.internalError");
 	}

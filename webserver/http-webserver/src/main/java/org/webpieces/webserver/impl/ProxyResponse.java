@@ -179,6 +179,7 @@ public class ProxyResponse implements ResponseStreamer {
 	    }
 	    
 	    channel.write(response);
+	    log.info("opening async file for read.  executor="+fileExecutor);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
     	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
@@ -240,11 +241,8 @@ public class ProxyResponse implements ResponseStreamer {
 			HttpLastChunk last = new HttpLastChunk();
 			pool.releaseBuffer(buf);
 			channel.write(last);
-			log.info("last chunk.  empty of course meeting spec");
 			return;
 		}
-		
-		log.info("wanting to send buffer size="+buf.remaining());
 
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		if(compression != null) {
@@ -252,6 +250,9 @@ public class ProxyResponse implements ResponseStreamer {
 			byte[] compressed = compression.compress(bytes);
 			data = wrapperFactory.wrapByteArray(compressed);
 		}
+		
+		if(log.isTraceEnabled())
+			log.trace("sending chunk with body size="+data.getReadableSize());
 		
 		HttpChunk chunk = new HttpChunk();
 		chunk.setBody(data);

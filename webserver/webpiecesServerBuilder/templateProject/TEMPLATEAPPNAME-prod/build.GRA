@@ -15,16 +15,7 @@ apply plugin: 'application'
 apply plugin: 'org.webpieces.templatecompiler'
 
 sourceSets {
-    //main {
-    //    resources {
-    //        //include appmeta.txt in the jar file as a resource
-    //        //TODO: figure out what broke when we had this in src/main/resources and try to fix that so we
-    //        //can move appmeta.txt and logback.xml to src/main/resources
-    //        srcDirs = ["src/main/java"]
-    //        includes = ["**/*.txt", "**/*.xml"]
-    //    }
-    //}
-    //For testing, we need to put the html files on the classpath
+    //For testing, we need to put the html files on the classpath which are co-located with the controllers
     extraTest {
         resources {
             srcDirs = ["src/main/java"]
@@ -35,6 +26,7 @@ sourceSets {
         resources {
             //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
             source extraTest.resources
+            excludes = ["logback.xml"]
         }
     }
 }
@@ -42,18 +34,19 @@ sourceSets {
 dependencies {
   //add maven dependencies here
   compile deps['web-webserver']
-  //compile deps['javax-inject']
 
   //IF you add dependencies on other projects locally, you need to modify CLASSNAMEDevServer.java to include those
-  //source paths or it will not recompile that code as it changes
+  //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
 
   //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
-  //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code.
+  //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code. For 
+  //production jars, the html files are compiled to *.class files
   testCompile deps['web-webserver-test']
   testCompile deps['selenium']
 }
 
 mainClassName = "PACKAGE.CLASSNAMEServer"
+applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 
 compileTemplateSetting {
   //Since the groovy plugin has no way of knowing about your custom tags, list them here or the compile will

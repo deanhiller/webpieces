@@ -3,7 +3,7 @@ package PACKAGE;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class CLASSNAMEModule implements Module {
+public class CLASSNAMEGuiceModule implements Module {
 
 	//This is where you would put the guice bindings you need though generally if done
 	//right, you won't have much in this file.
