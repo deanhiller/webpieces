@@ -104,8 +104,9 @@ public class ProxyResponse implements ResponseStreamer {
 		this.request = req;
 		this.channel = channel;
 		this.pool = pool;
-		this.compression = compression;
-		this.compressionType = compressionType;
+		
+		this.compression = null;
+		this.compressionType = null;
 	}
 
 	@Override
@@ -247,8 +248,11 @@ public class ProxyResponse implements ResponseStreamer {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		if(compression != null) {
 			byte[] bytes = data.createByteArray();
+			log.info("sending size="+bytes.length+" data="+translate(bytes));
 			byte[] compressed = compression.compress(bytes);
 			data = wrapperFactory.wrapByteArray(compressed);
+			log.info("compressed size="+compressed.length+" data="+translate(compressed));
+
 		}
 		
 		if(log.isTraceEnabled())
@@ -259,6 +263,14 @@ public class ProxyResponse implements ResponseStreamer {
 		channel.write(chunk);		
 	}
 
+	private String translate(byte[] bytes) {
+		StringBuffer result = new StringBuffer();
+		for (byte b : bytes) {
+		    result.append(String.format("%02X ", b));
+		}
+		return result.toString();
+	}
+	
 	private CompletableFuture<ByteBuffer> run(Path file, AsynchronousFileChannel asyncFile, long position) {
 		CompletableFuture<ByteBuffer> future = new CompletableFuture<ByteBuffer>();
     
@@ -378,6 +390,7 @@ public class ProxyResponse implements ResponseStreamer {
 	private HttpResponse createResponse(KnownStatusCode statusCode, String content, String extension, String defaultMime) {
 		
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
+		//filesTypesToCompress.isShouldCompress(extension);
 		
 		HttpResponseStatus status = new HttpResponseStatus();
 		status.setKnownStatus(statusCode);
@@ -485,6 +498,7 @@ public class ProxyResponse implements ResponseStreamer {
 	public void failureRenderingInternalServerErrorPage(Throwable e) {
 		
 		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
+		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
 		
 		//This is a final failure so we send a webpieces page next (in the future, we should just use a customer static html file if set)
 		//This is only if the webapp 500 html page fails as many times it is a template and they could have another bug in that template.
@@ -493,7 +507,7 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
 		
-		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "txt", "text/plain");
+		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
 		
 		channel.write(response);
 		

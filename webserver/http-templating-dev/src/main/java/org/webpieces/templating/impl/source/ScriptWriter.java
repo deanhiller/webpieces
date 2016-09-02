@@ -96,7 +96,8 @@ public class ScriptWriter {
 	private String addEscapesToSrc(String srcText) {
         String text = srcText.replace("\\", "\\\\");
         text = pattern.matcher(text).replaceAll("\\\\\"");
-        text = text.replaceAll("\n", "\\\\n");
+        text = text.replace("\n", "\\n");
+        text = text.replace("$", "\\$");
         return text;
 	}
 

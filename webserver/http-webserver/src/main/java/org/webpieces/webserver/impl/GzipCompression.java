@@ -6,6 +6,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class GzipCompression implements Compression {
 
+
 	@Override
 	public byte[] compress(byte[] bytes) {
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(bytes.length);

@@ -101,7 +101,7 @@ public class CLASSNAMEServer {
 			//here to run in an IDE
 			if(!filePath.endsWith("/APPNAME-prod"))
 				throw new IllegalStateException("Server script must be run from APPNAME-prod directory as in run ./bin/APPNAME-prod");
-		} else if(platformOverrides == null) {
+		} else if(platformOverrides == null && svrConfig.getHttpPort() != 0) {
 			throw new IllegalStateException("This class only runs in production.  Use CLASSNAMESemiProdServer instead and"
 					+ " it will use production router with a on-demand template compile engine OR "
 					+ "use CLASSNAMEDevServer and it will recompile all your code on-demand as you change it");

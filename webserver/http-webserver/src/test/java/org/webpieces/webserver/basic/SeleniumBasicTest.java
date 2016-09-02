@@ -23,7 +23,11 @@ public class SeleniumBasicTest {
 
 	@BeforeClass
 	public static void staticSetup() {
+		try {
 		driver = new FirefoxDriver();
+		} catch(Throwable e) {
+			throw new RuntimeException("You must have firefox 47.0 :(", e);
+		}
 	}
 	@AfterClass
 	public static void tearDown() {

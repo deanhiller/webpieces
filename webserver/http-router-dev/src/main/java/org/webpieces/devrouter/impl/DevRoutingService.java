@@ -63,7 +63,8 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			routeLoader.loadControllerIntoMetaObject(meta, false);
+			if(meta.getRoute().getRouteType() != RouteType.STATIC)
+				routeLoader.loadControllerIntoMetaObject(meta, false);
 		}
 		
 		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 

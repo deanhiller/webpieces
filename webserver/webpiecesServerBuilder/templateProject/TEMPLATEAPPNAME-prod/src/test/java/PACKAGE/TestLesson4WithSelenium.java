@@ -51,7 +51,7 @@ public class TestLesson4WithSelenium {
 	@Test
 	public void testSomething() throws ClassNotFoundException {
 
-		driver.get("http://localhost:"+port);
+		driver.get("http://localhost:"+port+"/examples");
 		
 		String pageSource = driver.getPageSource();
 		

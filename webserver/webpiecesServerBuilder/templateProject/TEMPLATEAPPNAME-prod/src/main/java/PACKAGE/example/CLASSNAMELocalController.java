@@ -13,8 +13,12 @@ public class CLASSNAMELocalController {
 
 	@Inject
 	private RemoteService service;
+
+	public Action index() {
+		return Actions.renderThis();
+	}
 	
-	public Action home() {
+	public Action exampleList() {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 	

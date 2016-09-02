@@ -21,10 +21,9 @@ public class ScriptOutputImpl implements ScriptOutput {
 
 	public void println(String text, Token forLineNumberComment) {
 		scriptSourceCode.append(text);
-		if(forLineNumberComment == null)
-			println();
-		else
+		if(forLineNumberComment != null)
 			appendTokenComment(forLineNumberComment);
+		println();
 	}
 
 	public void println() {
@@ -38,7 +37,8 @@ public class ScriptOutputImpl implements ScriptOutput {
 
 	private void appendTokenComment(Token t) {
 		TokenImpl token = (TokenImpl) t;
-		scriptSourceCode.append(" //htmlLine ").append(token.beginLineNumber).append(":").append(token.endLineNumber).append("\n");
+		scriptSourceCode.append(" //htmlLine ").append(token.beginLineNumber).append(":").append(token.endLineNumber)
+			.append("  groovyLine=").append(currentLine);
 		//we could have stored column info in the Token as well for here!! to append to comment
         scriptLineNumToHtmlLineNum.put(currentLine, token.beginLineNumber);		
 	}

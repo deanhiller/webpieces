@@ -18,7 +18,9 @@ public class CLASSNAMERouteModule extends AbstractRouteModule {
 		//That path is a semi-regular expression that we match on
 		//The controller.method is a relative or absolute path with ClassName.method at the end
 		//RouteIds are used to redirect in the webapp itself and must be unique
-		addRoute(GET, "/",              "CLASSNAMELocalController.home", CLASSNAMERouteId.SOME_ROUTE);      //local controller(same package as your RouteModule!!!!)
+		addRoute(GET, "/",              "CLASSNAMELocalController.index", CLASSNAMERouteId.MAIN_ROUTE);
+		
+		addRoute(GET, "/examples",      "CLASSNAMELocalController.exampleList", CLASSNAMERouteId.SOME_ROUTE);      //local controller(same package as your RouteModule!!!!)
 		addRoute(GET, "/nextexample",   "extra/ExtraController.relativeController", CLASSNAMERouteId.EXTRA_ROUTE); //shows a controller relative to THIS module
 		addRoute(GET, "/another",       "../CLASSNAMEController.anotherMethod", CLASSNAMERouteId.ANOTHER);  //relative path from THIS module to Controller going down
 		addRoute(GET, "/absolute",      "/PACKAGE/CLASSNAMEController.myMethod", CLASSNAMERouteId.ABSOLUTE);    //absolute path from root of classpath...

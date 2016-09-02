@@ -34,6 +34,7 @@ Pieces
 
 TODO: 
 * fix this...ERROR 2016-08-30 18:41:58,568 [-] [httpFrontEnd7]: This webserver has not thought about supporting header=Cache-Control quite yet.  value=max-age=0 Please let us know and we can quickly add support
+* compression should be done by file extension type html, yes, txt, yes, jpg no, etc. and we should whitelist compressed files...enable once we get compression working again
 * SSL 
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
