@@ -1,5 +1,6 @@
 package PACKAGE;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.URL;
@@ -93,27 +94,17 @@ public class CLASSNAMEServer {
 
 	public CLASSNAMEServer(Module platformOverrides, Module appOverrides, ServerConfig svrConfig) {
 		String filePath = System.getProperty("user.dir");
-		log.info("property user.dir="+filePath);
+		log.info("original user.dir before modification="+filePath);
 
-		URL resource = CLASSNAMEServer.class.getResource("/logback.xml");
-		if(resource == null) {
-			if(!filePath.endsWith("/APPNAME-prod"))
-				throw new IllegalStateException("Server script must be run from APPNAME-prod directory as in run ./bin/APPNAME-prod");
-		} else if(platformOverrides == null && svrConfig.getHttpPort() != 0) {
-			//TODO: perhaps we can do a test here and throw exception saying, please do step 1, run gradle to generate production
-			//class files for templates and then you may step through the exact code used in production? and make sure generated
-			//class file location is mounted(may need to modify gradle builds for this to put template class files in new location
-			throw new IllegalStateException("This class only runs in production.  Use CLASSNAMESemiProdServer instead and"
-					+ " it will use production router with a on-demand template compile engine OR "
-					+ "use CLASSNAMEDevServer and it will recompile all your code on-demand as you change it");
-		}
-
+		modifyUserDirForManyEnvironments(filePath);
+				
 		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
 		if(metaFile == null)
 			metaFile = new VirtualFileClasspath("appmeta.txt", CLASSNAMEServer.class.getClassLoader());
 
 		//This override is only needed if you want to add your own Html Tags to re-use
+		//you can delete this code if you are not adding your own html tags
 		Module allOverrides = new TagLookupOverride();
 		if(platformOverrides != null) {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
@@ -124,9 +115,7 @@ public class CLASSNAMEServer {
 		//randomly changing those properties and restarting the server without going through some testing
 		//by a QA team.  We leave most of these properties right here.
 		RouterConfig routerConfig = new RouterConfig()
-											.setMetaFile(metaFile )
-											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
-											.setDefaultResponseBodyEncoding(ALL_FILE_ENCODINGS)
+											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
 											.setSecretKey("_SECRETKEYHERE_");
 		WebServerConfig config = new WebServerConfig()
@@ -140,8 +129,74 @@ public class CLASSNAMEServer {
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
+	private void modifyUserDirForManyEnvironments(String filePath) {
+		String finalUserDir = modifyUserDirForManyEnvironmentsImpl(filePath);
+		System.setProperty("user.dir", finalUserDir);
+		log.info("RECONFIGURED user.dir="+finalUserDir);
+	}
 
-	
+	/**
+	 * I like things to work seamlessly but user.dir is a huge issue in multiple environments I am working in.
+	 * main server has to work in N configurations that should be tested and intellij is a PITA since
+	 * it is inconsistent.  PP means runs in the project the file is in and eclipse is consistent with
+	 * gradle while intellij is only half the time....
+	 * 
+	 * app dev - The environment when you generate a project and import it into an IDE
+	 * webpieces - The environment where you test the template directly when bringing in webpieces into an IDE
+	 * 
+	 * 
+	 * * app dev / eclipse -
+	 *    * PP - running myapp/src/tests - user.dir=myapp-all/myapp
+	 *    * PP - DevServer - user.dir=myapp-all/myapp-dev
+	 *    * PP - SemiProductionServer - user.dir=myapp-all/myapp-dev
+	 *    * PP - ProdServer - user.dir=myapp-all/myapp
+	 * * app dev / intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
+	 *    * PP - running myapp/src/tests - myapp-all/myapp
+	 *    * NO - DevServer - user.dir=myapp-all :( what the hell!  different from running tests
+	 *    * NO - SemiProductionServer - user.dir=myapp-all
+	 *    * NO - ProdServer - user.dir=myapp-all
+	 * * webpieces / eclipse - should be same as app dev I think
+	 * * webpieces / intellij - should be same as app dev I think
+	 * * PP - tests in webpieces gradle - myapp-all/myapp
+	 * * PP - tests in myapp's gradle run - myapp-all/myapp
+	 * * NO - production - user.dir=from distribution myapp directory which has subdirs bin, lib, config, public
+	 * * Future? - run DevSvr,SemiProdSvr,ProdSvr from gradle?....screw that for now..it's easy to run from IDE so why bother(it may just work though too)
+	 * 
+	 * - so in production, the relative paths work from myapp so 'public/' is a valid location for html files resolving to myapp/public
+	 * - in testing, IF we want myapp-all/myapp/src/dist/public involved, it would be best to run from myapp-all/myapp/src/dist so 'public/' is still a valid location
+	 * - in devserver, semiprodserver, and prod server, the same idea follows where myapp-all/myapp/src/dist should be the user.dir!!!
+	 * 
+	 * - sooooo, algorithm is this
+	 * - if user.dir=myapp-all, modify user.dir to myapp-all/myapp/src/dist (you are in intellij)
+	 * - else if user.dir=myapp-dev, modify to ../myapp/src/dist
+	 * - else if myapp has directories bin, lib, config, public then do nothing
+	 * - else modify user.dir=myapp to myapp/src/dist
+	 */
+	private String modifyUserDirForManyEnvironmentsImpl(String filePath) {
+		File f = new File(filePath);
+		String name = f.getName();
+		if("TEMPLATEAPPNAME-all".equals(name)) {
+			return new File(filePath, "TEMPLATEAPPNAME/src/dist").getAbsolutePath();
+		} else if("TEMPLATEAPPNAME-dev".equals(name)) {
+			File parent = f.getParentFile();
+			return new File(parent, "src/dist").getAbsolutePath();
+		} else if(!"TEMPLATEAPPNAME".equals(name)) {
+			if(filePath.endsWith("TEMPLATEAPPNAME/src/dist"))
+				return filePath; //This occurs when a previous test ran already and set user.dir
+			throw new IllegalStateException("bug, we must have missed an environment="+name);
+		}
+		
+		File bin = new File(f, "bin");
+		File lib = new File(f, "lib");
+		File config = new File(f, "config");
+		File publicFile = new File(f, "public");
+		if(bin.exists() && lib.exists() && config.exists() && publicFile.exists()) {
+			return filePath;
+		}
+		
+		return new File(f, "src/dist").getAbsolutePath();
+	}
+
 	/**
 	 * This is a bit clunky BUT if jdk authors add methods that you can configure, we do not have
 	 * to change our platform every time so you can easily set the new properties rather than waiting for
