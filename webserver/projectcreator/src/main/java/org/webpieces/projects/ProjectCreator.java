@@ -22,7 +22,9 @@ public class ProjectCreator {
 	
 		    // get their input as a String
 		    String appClassName = scanner.next();
-		    String appName = appClassName.toLowerCase();
+		    String justAppName = appClassName.toLowerCase();
+		    
+		    String appDirectoryName = justAppName+"-all";
 		    
 		    System.out.println("Enter your package with . separating each package(ie. org.webpieces.myapp): ");
 		    String packageStr = scanner.next();
@@ -31,7 +33,7 @@ public class ProjectCreator {
 		    String currentDir = System.getProperty("user.dir");
 		    System.out.println("your current directory is '"+currentDir+"'");
 		    System.out.println("Enter the path relative to the above directory or use an absolute directory for where");
-		    System.out.println("we will create a directory called="+appName+" OR will re-use an existing directory called "+ appName+" to fill it in");
+		    System.out.println("we will create a directory called="+appDirectoryName+" OR will re-use an existing directory called "+ appDirectoryName+" to fill it in");
 		    String directory = scanner.next();
 		    
 			//we only allow execution from the jar file right now due to this...(so running this in the IDE probably won't work)
@@ -48,10 +50,10 @@ public class ProjectCreator {
 			File dirTheUserTypedIn = new File(directory);
 			setupDirectory(dirTheUserTypedIn);
 
-			File appDir = new File(dirTheUserTypedIn, appName);
+			File appDir = new File(dirTheUserTypedIn, appDirectoryName);
 			setupDirectory(appDir);
 			
-		    new FileCopy(webpiecesDir, appClassName, appName, packageStr, appDir, version).createProject();
+		    new FileCopy(webpiecesDir, appClassName, justAppName, packageStr, appDir, version).createProject();
 		}
 	}
 

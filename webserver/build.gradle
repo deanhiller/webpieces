@@ -5,7 +5,7 @@ project.ext {
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod') {
+project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME') {
     sourceSets {
         extraTest {
             resources {
@@ -37,7 +37,7 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
         compile project(':webserver:http-webserver')
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
-        compile project(':webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod')
+        compile project(':webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME')
     }
     
     //task uploadArchives(overwrite: true) << {
@@ -57,11 +57,11 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/.project'
     exclude stagingDirName + '/templateProject/.settings'
     exclude stagingDirName + '/templateProject/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-prod/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-prod/bin'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-prod/.classpath'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-prod/.project'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-prod/.settings'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/output'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/bin'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.classpath'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.project'
+    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.settings'
     exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/output'
     exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/bin'
     exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/.classpath'

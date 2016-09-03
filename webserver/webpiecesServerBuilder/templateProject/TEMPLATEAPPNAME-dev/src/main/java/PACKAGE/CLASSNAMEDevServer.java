@@ -43,9 +43,9 @@ public class CLASSNAMEDevServer {
 		//list all source paths here as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(new VirtualFileImpl(directory+"/TEMPLATEAPPNAME-prod/src/main/java"));
+		srcPaths.add(new VirtualFileImpl(directory+"/TEMPLATEAPPNAME/src/main/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(directory + "/TEMPLATEAPPNAME-prod/src/main/resources/appmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(directory + "/TEMPLATEAPPNAME/src/main/resources/appmeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...
@@ -76,9 +76,9 @@ public class CLASSNAMEDevServer {
             directory = directory+"/..";
         }
         
-		//we are in an IDE so we need to set user.dir to TEMPLATEAPPNAME-prod/src/dist so
+		//we are in an IDE so we need to set user.dir to TEMPLATEAPPNAME/src/dist so
         //the static file route works just fine... (and we still load js, css, etc. files)
-		System.setProperty("user.dir", directory+"/TEMPLATEAPPNAME-prod/src/dist");
+		System.setProperty("user.dir", directory+"/TEMPLATEAPPNAME/src/dist");
         
 		return directory;
 	}

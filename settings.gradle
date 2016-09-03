@@ -21,7 +21,7 @@ include 'webserver:http-webserver-test'
 include 'webserver:projectcreator'
 include 'webserver:gradle-plugin-htmlcompiler'
 include 'webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev'
-include 'webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-prod'
+include 'webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME'
 include 'embeddablehttpproxy'
 include 'full-httpproxy'
 

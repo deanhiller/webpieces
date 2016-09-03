@@ -1,2 +1,2 @@
-include 'APPNAME-prod'
+include 'APPNAME'
 include 'APPNAME-dev'
