@@ -119,15 +119,22 @@ Checklist of Release testing (This would be good to automate)
 * hit the webpage (no need to stop dev server) 
 
 
-main server has to work in 5 configurations that should be tested
-* production - user.dir=myapp-prod
+main server has to work in N configurations that should be tested and intellij is a PITA since 
+it is inconsistent.  PP means runs in the project the file is in and eclipse is consistent with
+gradle while intellij is only half the time....
+
+* production - user.dir='where the user runs the script from :('
 * eclipse -
-   * running myapp-prod/src/tests/java - user.dir=myapp/myapp-prod
-   * SemiProductionServer - user.dir=myapp/myapp-dev
-   * DevServer - user.dir=myapp/myapp-dev
+   * PP - running myapp-prod/src/tests/java - user.dir=myapp/myapp-prod
+   * PP - SemiProductionServer - user.dir=myapp/myapp-dev
+   * PP - DevServer - user.dir=myapp/myapp-dev
+   * PP - ProdServer - user.dir=myapp/myapp-prod
 * intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
-   * running tests - 
-   * SemiProductionServer - user.dir=
-   * DevServer 
-* tests in webpieces gradle - 
-* tests in myapp's gradle run - 
+   * PP - running tests - myapp/myapp-prod
+   * NO - SemiProductionServer - user.dir=
+   * NO - DevServer - user.dir=myapp :( what the hell!  different from running tests
+   * NO - ProdServer - user.dir=myapp
+* PP - tests in webpieces gradle - myapp/myapp-prod
+* PP - tests in myapp's gradle run - myapp/myapp-prod
+
+
