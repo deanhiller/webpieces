@@ -1,7 +1,9 @@
 package org.webpieces.webserver.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterCookie;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
@@ -50,27 +53,33 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.View;
+import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.CookieTranslator;
+import org.webpieces.router.impl.compression.Compression;
+import org.webpieces.router.impl.compression.CompressionLookup;
+import org.webpieces.router.impl.compression.MimeTypes;
+import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.webserver.api.WebServerConfig;
-import org.webpieces.webserver.impl.MimeTypes.MimeTypeResult;
 
 import groovy.lang.MissingPropertyException;
 
 public class ProxyResponse implements ResponseStreamer {
 
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
-	//TODO: Actually should inject ALL of these so they are swappable.... (never have statics)...
 	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
+	
+	//TODO: Actually should inject ALL of these so they are swappable.... (never have statics...it's annoying as hell when customizing)...
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final HeaderPriorityParser httpSubParser = HttpParserFactory.createHeaderParser();
 	
@@ -88,25 +97,30 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	private WebServerConfig config;
 	
+	//TODO: RouterConfig doesn't really belong here but this class is sneaking past the router api to access some stuff it shouldn't right
+	//now because I was lazy (and should really use verify design to prevent things like that).
+	@Inject
+	private RouterConfig routerConfig;
+	@Inject
+	private CompressionLookup compressionLookup;
+	
 	private Set<OpenOption> options = new HashSet<>();
 
 	private FrontendSocket channel;
-	private HttpRequest request;
+	//private HttpRequest request;
 	private BufferPool pool;
-	private Compression compression;
-	private String compressionType;
+	private RouterRequest routerRequest;
+	private HttpRequest request;
 
 	public ProxyResponse() {
 	    options.add(StandardOpenOption.READ);
 	}
 	
-	public void init(HttpRequest req, FrontendSocket channel, BufferPool pool, Compression compression, String compressionType) {
-		this.request = req;
+	public void init(RouterRequest req, FrontendSocket channel, BufferPool pool) {
+		this.routerRequest = req;
+		this.request = (HttpRequest) req.orginalRequest;
 		this.channel = channel;
 		this.pool = pool;
-		
-		this.compression = null;
-		this.compressionType = null;
 	}
 
 	@Override
@@ -136,161 +150,15 @@ public class ProxyResponse implements ResponseStreamer {
 		Header location = new Header(KnownHeaderName.LOCATION, url);
 		response.addHeader(location );
 		
-		//Firefox requires a content length of 0 (chrome doesn't)!!!...
-		addCommonHeaders(status.getKnownStatus(), response, 0);
-		
+		addCommonHeaders(status.getKnownStatus(), response);
+
+		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
+		response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, 0+""));
+
 		log.info("sending REDIRECT response channel="+channel);
 		channel.write(response);
 
 		closeIfNeeded();
-	}
-
-	@Override
-	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
-
-		if(renderStatic.isOnClassPath())
-			throw new UnsupportedOperationException("not implemented yet");
-		
-		try {
-			return runAsyncFileRead(renderStatic);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private CompletableFuture<Void> runAsyncFileRead(RenderStaticResponse renderStatic) throws IOException {
-		String fileName = renderStatic.getAbsolutePath();
-	    Path file = Paths.get(fileName);
-	    
-	    File f = file.toFile();
-	    if(!f.exists() || !f.isFile())
-	    	throw new NotFoundException("File="+file+" was not found");
-	    
-	    String extension = null;
-	    int lastDirIndex = fileName.lastIndexOf("/");
-	    int lastDot = fileName.lastIndexOf(".");
-	    if(lastDot > lastDirIndex) {
-	    	extension = fileName.substring(lastDot+1);
-	    }
-	    
-	    HttpResponse response = createResponse(KnownStatusCode.HTTP_200_OK, null, extension, "application/octet-stream");
-	    
-	    if(compressionType != null) {
-	    	response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compressionType));
-	    }
-	    
-	    channel.write(response);
-	    log.info("opening async file for read.  executor="+fileExecutor);
-	    
-	    //NOTE: try with resource is synchronous and won't work here :(
-    	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
-    	
-    	RequestContext ctx = Current.getContext();
-    	try {
-    		return read(file, asyncFile, ctx, 0)
-    			.handle((s, exc) -> handleClose(s, exc)) //our finally block for failures
-    			.thenApply(s -> null);
-    	} catch(Throwable e) {
-    		//cannot do this on success since it is completing on another thread...
-    		handleClose(true, null);
-    		throw new RuntimeException(e);
-    	}
-	}
-
-	private Boolean handleClose(Boolean s, Throwable exc) {
-
-		//now we close if needed
-		try {
-			closeIfNeeded();
-		} catch(Throwable e) {
-			if(exc == null) //Previous exception more important so only log if no previous exception
-				log.error("Exception closing if needed", e);
-		}
-		
-		if(s != null)
-			return s;
-		else if(exc != null)
-			throw new RuntimeException(exc);
-		else {
-			log.error("oh crap, big bug");
-			throw new RuntimeException("This is really bizarre to get here");
-		}		
-	}
-	
-	private CompletableFuture<Boolean> read(Path file, AsynchronousFileChannel asyncFile, RequestContext ctx, int position) {
-		//must be async since it is recursive(prevents stackoverflow)
-		return run(file, asyncFile, position)
-					.thenApplyAsync(buf -> {
-							buf.flip();
-							int read = buf.remaining();
-							sendBuffer(ctx, buf);
-							
-							if(read == 0) {
-								return null; //we are done reading
-							}
-							
-							int newPosition = position + read;
-							//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
-							read(file, asyncFile, ctx, newPosition);
-							return null;
-					})
-					.thenApply(s -> true);
-	}
-
-	private void sendBuffer(RequestContext ctx, ByteBuffer buf) {
-		if(buf.remaining() == 0) {
-			HttpLastChunk last = new HttpLastChunk();
-			pool.releaseBuffer(buf);
-			channel.write(last);
-			return;
-		}
-
-		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
-		if(compression != null) {
-			byte[] bytes = data.createByteArray();
-			log.info("sending size="+bytes.length+" data="+translate(bytes));
-			byte[] compressed = compression.compress(bytes);
-			data = wrapperFactory.wrapByteArray(compressed);
-			log.info("compressed size="+compressed.length+" data="+translate(compressed));
-
-		}
-		
-		if(log.isTraceEnabled())
-			log.trace("sending chunk with body size="+data.getReadableSize());
-		
-		HttpChunk chunk = new HttpChunk();
-		chunk.setBody(data);
-		channel.write(chunk);		
-	}
-
-	private String translate(byte[] bytes) {
-		StringBuffer result = new StringBuffer();
-		for (byte b : bytes) {
-		    result.append(String.format("%02X ", b));
-		}
-		return result.toString();
-	}
-	
-	private CompletableFuture<ByteBuffer> run(Path file, AsynchronousFileChannel asyncFile, long position) {
-		CompletableFuture<ByteBuffer> future = new CompletableFuture<ByteBuffer>();
-    
-		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
-
-		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
-			@Override
-			public void completed(Integer result, String attachment) {
-				future.complete(buf);
-			}
-
-			@Override
-			public void failed(Throwable exc, String attachment) {
-				log.error("Failed to read file="+file, exc);
-				future.completeExceptionally(exc);
-			}
-		};
-		asyncFile.read(buf, position, "attachment", handler);
-		
-		return future;
 	}
 
 	@Override
@@ -347,16 +215,171 @@ public class ProxyResponse implements ResponseStreamer {
 		if(extension == null) {
 			extension = "txt";
 		}
+
+		createResponseAndSend(statusCode, content, extension, "text/plain");
+	}
+	
+	@Override
+	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
+
+		if(renderStatic.isOnClassPath())
+			throw new UnsupportedOperationException("not implemented yet");
 		
-		HttpResponse response = createResponse(statusCode, content, extension, "text/plain");
-				
-		log.info("sending RENDERHTML response. code="+statusCode+" for path="+request.getRequestLine().getUri().getUri()+" channel="+channel);
-		if(log.isDebugEnabled())
-			log.debug("content sent back="+content);
+		try {
+			return runAsyncFileRead(renderStatic);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private CompletableFuture<Void> runAsyncFileRead(RenderStaticResponse renderStatic) throws IOException {
+		boolean isFile = true;
+		String fullFilePath = renderStatic.getFilePath();
+		if(fullFilePath == null) {
+			isFile = false;
+			fullFilePath = renderStatic.getDirectory()+"/"+renderStatic.getRelativePath();
+		}
+	    
+	    String extension = null;
+	    int lastDirIndex = fullFilePath.lastIndexOf("/");
+	    int lastDot = fullFilePath.lastIndexOf(".");
+	    if(lastDot > lastDirIndex) {
+	    	extension = fullFilePath.substring(lastDot+1);
+	    }
+	    	    
+	    ResponseEncodingTuple tuple = createResponse(KnownStatusCode.HTTP_200_OK, extension, "application/octet-stream");
+	    HttpResponse response = tuple.response; 
+	    
+		response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 		
-		channel.write(response);
+		Path file;
+		Compression compr = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
+		//since we do compression of all text files on server startup, we only support the compression that was used
+		//during startup as I don't feel like paying a cpu penalty for compressing while live
+	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {
+	    	response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compr.getCompressionType()));
+	    	File dir = routerConfig.getCachedCompressedDirectory();
+	    	File routesCache = new File(dir, renderStatic.getStaticRouteId()+"");
+	    	
+	    	File fileReference;
+	    	if(isFile) {
+	    	    String fileName = fullFilePath.substring(lastDirIndex+1);
+	    	    fileReference = new File(routesCache, fileName);
+	    	} else {
+	    		fileReference = new File(routesCache, renderStatic.getRelativePath());
+	    	}
+	    	
+	    	fullFilePath = fileReference.getAbsolutePath();
+	    	file = Paths.get(fullFilePath);
+		    File f = file.toFile();
+		    if(!f.exists() || !f.isFile())
+		    	throw new NotFoundException("Compressed File from cache="+file+" was not found");
+	    } else {
+	    	file = Paths.get(fullFilePath);
+		    File f = file.toFile();
+		    if(!f.exists() || !f.isFile())
+		    	throw new NotFoundException("File="+file+" was not found");
+	    }
+
+	    channel.write(response);
+	    log.info("opening async file for read.  executor="+fileExecutor);
+	    
+	    //NOTE: try with resource is synchronous and won't work here :(
+    	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
+    	
+    	RequestContext ctx = Current.getContext();
+    	try {
+    		return read(file, asyncFile, ctx, 0)
+    			.handle((s, exc) -> handleClose(s, exc)) //our finally block for failures
+    			.thenApply(s -> null);
+    	} catch(Throwable e) {
+    		//cannot do this on success since it is completing on another thread...
+    		handleClose(true, null);
+    		throw new RuntimeException(e);
+    	}
+	}
+
+	private Boolean handleClose(Boolean s, Throwable exc) {
+
+		//now we close if needed
+		try {
+			closeIfNeeded();
+		} catch(Throwable e) {
+			if(exc == null) //Previous exception more important so only log if no previous exception
+				log.error("Exception closing if needed", e);
+		}
 		
-		closeIfNeeded();
+		if(s != null)
+			return s;
+		else if(exc != null)
+			throw new RuntimeException(exc);
+		else {
+			log.error("oh crap, big bug");
+			throw new RuntimeException("This is really bizarre to get here");
+		}		
+	}
+	
+	private CompletableFuture<Boolean> read(Path file, AsynchronousFileChannel asyncFile, RequestContext ctx, int position) {
+		//must be async since it is recursive(prevents stackoverflow)
+		CompletableFuture<ByteBuffer> future = asyncRead(file, asyncFile, position);
+		//NOTE: I don't like inlining code BUT this is recursive and I HATE recurions between multiple methods so
+		//this method ONLY calles itself below as it continues to read and send chunks (no stackoverflow since it is
+		//with async futures)
+		return future.thenApplyAsync(buf -> {
+							buf.flip();
+							int read = buf.remaining();
+							if(read == 0) {
+								sendLastChunk(buf);
+								return null;
+							}
+
+							sendBufferIsDone(ctx, buf);
+
+							int newPosition = position + read;
+							//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
+							read(file, asyncFile, ctx, newPosition);
+							return null;
+					})
+					.thenApply(s -> true);
+	}
+
+	private void sendLastChunk(ByteBuffer buf) {
+		HttpLastChunk last = new HttpLastChunk();
+		pool.releaseBuffer(buf);
+		channel.write(last);
+	}
+
+	private CompletableFuture<ByteBuffer> asyncRead(Path file, AsynchronousFileChannel asyncFile, long position) {
+		CompletableFuture<ByteBuffer> future = new CompletableFuture<ByteBuffer>();
+    
+		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
+
+		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
+			@Override
+			public void completed(Integer result, String attachment) {
+				future.complete(buf);
+			}
+
+			@Override
+			public void failed(Throwable exc, String attachment) {
+				log.error("Failed to read file="+file, exc);
+				future.completeExceptionally(exc);
+			}
+		};
+		asyncFile.read(buf, position, "attachment", handler);
+		
+		return future;
+	}
+	
+	private void sendBufferIsDone(RequestContext ctx, ByteBuffer buf) {
+		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
+		
+		if(log.isTraceEnabled())
+			log.trace("sending chunk with body size="+data.getReadableSize());
+		
+		HttpChunk chunk = new HttpChunk();
+		chunk.setBody(data);
+		channel.write(chunk);
 	}
 
 	private List<RouterCookie> createCookies(KnownStatusCode statusCode) {
@@ -369,10 +392,15 @@ public class ProxyResponse implements ResponseStreamer {
 			cookieTranslator.addScopeToCookieIfExist(cookies, Current.validation());
 			cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
 			return cookies;
-		} catch(IllegalStateException e) {
+		} catch(CookieTooLargeException e) {
 			if(statusCode != KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR)
 				throw e;
-			//ignore as this happened just a second ago for http 500 OR it doesn't matter as it's a 500 anyways
+			//ELSE this is the second time we are rendering a response AND it was MOST likely caused by the same
+			//thing when we tried to marshal out cookies to strings and they were too big, sooooooooooo in this
+			//case, clear the cookie that failed.  One log of this should have already occurred but just in case
+			//add one more log here but not with stack trace(so we don't get the annoying double stack trace on
+			//failing. (The throws above is logged in catch statement elsewhere)
+			log.error("Could not marshal cookie on http 500.  msg="+e.getMessage());
 			return new ArrayList<>();
 		}
 	}
@@ -387,10 +415,75 @@ public class ProxyResponse implements ResponseStreamer {
 		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
-	private HttpResponse createResponse(KnownStatusCode statusCode, String content, String extension, String defaultMime) {
+	private void createResponseAndSend(KnownStatusCode statusCode, String content, String extension, String defaultMime) {
+		if(content == null)
+			throw new IllegalArgumentException("content cannot be null");
 		
+		ResponseEncodingTuple tuple = createResponse(statusCode, extension, defaultMime);
+		HttpResponse resp = tuple.response;
+
+		if(log.isDebugEnabled())
+			log.debug("content about to be sent back="+content);
+		
+		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
+		byte[] bytes = content.getBytes(encoding);
+		
+		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
+		
+		if(bytes.length < config.getMaxBodySize()) {
+			sendFullResponse(resp, bytes, compression);
+			return;
+		}
+
+		sendChunkedResponse(resp, bytes, compression);
+	}
+
+	private void sendChunkedResponse(HttpResponse resp, byte[] bytes, Compression compression) {
+		
+		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+"code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" channel="+channel);
+
+		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		
+		OutputStream chunkedStream = new ChunkedStream(channel, config.getMaxBodySize());
+		
+		if(compression == null) {
+			compression = new NoCompression();
+		} else {
+			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compression.getCompressionType()));
+		}
+
+		channel.write(resp);
+
+		try(OutputStream chainStream = compression.createCompressionStream(chunkedStream)) {
+			//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
+			//pieces that get sent out as it is being compressed
+			//and http chunks are sent under the covers(in ChunkedStream)
+			chainStream.write(bytes);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}		
+	}
+
+	private void sendFullResponse(HttpResponse resp, byte[] bytes, Compression compression) {
+		if(compression != null) {
+			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compression.getCompressionType()));
+			bytes = synchronousCompress(compression, bytes);
+		}
+
+		resp.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, bytes.length+""));
+
+		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
+		resp.setBody(data);
+
+		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" channel="+channel);
+		
+		channel.write(resp);
+		
+		closeIfNeeded();
+	}
+	
+	private ResponseEncodingTuple createResponse(KnownStatusCode statusCode, String extension, String defaultMime) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
-		//filesTypesToCompress.isShouldCompress(extension);
 		
 		HttpResponseStatus status = new HttpResponseStatus();
 		status.setKnownStatus(statusCode);
@@ -401,37 +494,35 @@ public class ProxyResponse implements ResponseStreamer {
 		response.setStatusLine(statusLine);
 		
 		response.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, mimeType.mime));
-		
-		Integer length = null;
-		if(content != null) {
-			Charset encoding = mimeType.htmlResponsePayloadEncoding;
-			if(encoding == null)
-				encoding = config.getDefaultResponseBodyEncoding();
-			byte[] bytes = content.getBytes(encoding);
-			if(compression != null && compressionType != null) {
-				response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compressionType));
-				bytes = compression.compress(bytes);
-			}
-			DataWrapper data = wrapperFactory.wrapByteArray(bytes);
-			response.setBody(data);
-			length = bytes.length;
-		}
 
-		addCommonHeaders(statusCode, response, length);
-		return response;
+		addCommonHeaders(statusCode, response);
+		return new ResponseEncodingTuple(response, mimeType);
 	}
 
-	private void addCommonHeaders(KnownStatusCode statusCode, HttpResponse response, Integer contentLength) {
+	private static class ResponseEncodingTuple {
+		public HttpResponse response;
+		public MimeTypeResult mimeType;
+
+		public ResponseEncodingTuple(HttpResponse response, MimeTypeResult mimeType) {
+			this.response = response;
+			this.mimeType = mimeType;
+		}	
+	}
+	
+	private byte[] synchronousCompress(Compression compression, byte[] bytes) {
+		ByteArrayOutputStream str = new ByteArrayOutputStream(bytes.length);
 		
-		if(contentLength != null) {
-			response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, contentLength+""));
-		} else {
-			response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		try(OutputStream stream = compression.createCompressionStream(str)) {
+			stream.write(bytes);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
 		}
 		
-		Header connHeader = null;
-		if(request != null)
-			connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
+		return str.toByteArray();
+	}
+
+	private void addCommonHeaders(KnownStatusCode statusCode, HttpResponse response) {		
+		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
 		String dateStr = formatter.print(now)+" GMT";
@@ -496,7 +587,6 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void failureRenderingInternalServerErrorPage(Throwable e) {
-		
 		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
 		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
 		
@@ -507,17 +597,11 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
 		
-		HttpResponse response = createResponse(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
-		
-		channel.write(response);
-		
-		closeIfNeeded();
+		createResponseAndSend(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
 	}
 
 	public void sendFailure(HttpException exc) {
-		HttpResponse response = createResponse(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", "txt", "text/plain");
-		channel.write(response);
-		closeIfNeeded();
+		createResponseAndSend(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", "txt", "text/plain");
 	}
 
 }

@@ -33,6 +33,9 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
+* Test out template compression with very large template.  unit test!!!!! and uncompress on receive and verify!!
+* compression is about streaming it through the gzip outputstream.  now need to decide how/when to cache files on filesystem and compress them all on startup and use timestamp as caching mechanism so new files modify cache and finally extension type list as well file!!!!
+* 
 * fix this...ERROR 2016-08-30 18:41:58,568 [-] [httpFrontEnd7]: This webserver has not thought about supporting header=Cache-Control quite yet.  value=max-age=0 Please let us know and we can quickly add support
 * compression should be done by file extension type html, yes, txt, yes, jpg no, etc. and we should whitelist compressed files...enable once we get compression working again
 * SSL 
@@ -115,3 +118,16 @@ Checklist of Release testing (This would be good to automate)
 * refactor a bunch of code
 * hit the webpage (no need to stop dev server) 
 
+
+main server has to work in 5 configurations that should be tested
+* production - user.dir=myapp-prod
+* eclipse -
+   * running myapp-prod/src/tests/java - user.dir=myapp/myapp-prod
+   * SemiProductionServer - user.dir=myapp/myapp-dev
+   * DevServer - user.dir=myapp/myapp-dev
+* intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
+   * running tests - 
+   * SemiProductionServer - user.dir=
+   * DevServer 
+* tests in webpieces gradle - 
+* tests in myapp's gradle run - 

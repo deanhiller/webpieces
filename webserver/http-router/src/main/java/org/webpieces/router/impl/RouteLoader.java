@@ -14,6 +14,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.util.file.VirtualFile;
@@ -29,17 +30,20 @@ public class RouteLoader {
 	private final RouterConfig config;
 	private final RouteInvoker invoker;
 	private final ControllerLoader controllerFinder;
+	private CompressionCacheSetup compressionCacheSetup;
 
 	protected RouterBuilder routerBuilder;
 	
 	@Inject
 	public RouteLoader(RouterConfig config, 
 						RouteInvoker invoker,
-						ControllerLoader controllerFinder
+						ControllerLoader controllerFinder,
+						CompressionCacheSetup compressionCacheSetup
 	) {
 		this.config = config;
 		this.invoker = invoker;
 		this.controllerFinder = controllerFinder;
+		this.compressionCacheSetup = compressionCacheSetup;
 	}
 	
 	public WebAppMeta load(ClassForName loader) {
@@ -112,8 +116,9 @@ public class RouteLoader {
 		else if(!routerBuilder.getRouterInfo().isInternalSvrErrorRouteSet())
 			throw new IllegalStateException("None of the RouteModule implementations called top level router.setInternalSvrErrorRoute.  Modules="+rm.getRouteModules());
 			
-		
 		log.info("added all routes to router");
+		
+		compressionCacheSetup.setupCache(routerBuilder.getStaticRoutes());
 	}
 	
 	private String getPackage(Class<?> clazz) {

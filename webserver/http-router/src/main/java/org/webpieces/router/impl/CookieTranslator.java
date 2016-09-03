@@ -16,6 +16,7 @@ import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.BadRequestException;
+import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
 import org.webpieces.util.security.Security;
@@ -81,7 +82,7 @@ public class CookieTranslator {
 		}
 		
 		if(cookie.value.length() > 4050)
-			throw new IllegalStateException("Your webserver has put too many things into the session cookie and"
+			throw new CookieTooLargeException("Your webserver has put too many things into the session cookie and"
 					+ " browser will end up ignoring the cookie so we exception here to let you "
 					+ "know.  Length of JUST the value(not whole cookie)="+cookie.value.length()+"\ncookie value="+cookie.value);
 		

@@ -46,6 +46,8 @@ public class RouterRequest {
 	public List<AcceptMediaType> acceptedTypes = new ArrayList<>();
 
 	public String referrer;
+
+	public List<String> encodings = new ArrayList<>();
 	
 	@Override
 	public String toString() {

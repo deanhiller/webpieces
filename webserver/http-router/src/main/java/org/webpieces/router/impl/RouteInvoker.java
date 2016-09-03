@@ -154,8 +154,16 @@ public class RouteInvoker {
 		if(meta.getRoute().getRouteType() == RouteType.STATIC) {
 			StaticRoute route = (StaticRoute) meta.getRoute();
 			boolean isOnClassPath = route.getIsOnClassPath();
-			String absolutePath = route.transform(result.getPathParams());
-			return processor.renderStaticResponse(new RenderStaticResponse(absolutePath, isOnClassPath));
+			
+			RenderStaticResponse resp = new RenderStaticResponse(route.getStaticRouteId(), isOnClassPath);
+			if(route.isFile()) {
+				resp.setFilePath(route.getFileSystemPath());
+			} else {
+				String relativeUrl = result.getPathParams().get("resource");
+				resp.setRelativeFile(route.getFileSystemPath(), relativeUrl);
+			}
+			
+			return processor.renderStaticResponse(resp);
 		}
 		
 		Object obj = meta.getControllerInstance();

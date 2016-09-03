@@ -54,7 +54,6 @@ public class WebserverForTest {
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(platformOverrides)
-				.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 				.setHttpListenAddress(new InetSocketAddress(httpPort))
 				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
 				.setFunctionToConfigureServerSocket(s -> configure(s));
@@ -62,6 +61,7 @@ public class WebserverForTest {
 											.setMetaFile(metaFile )
 											.setWebappOverrides(appOverrides)
 											.setFileEncoding(CHAR_SET_TO_USE)
+											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 											.setSecretKey("xxx");
 		TemplateConfig templateConfig = new TemplateConfig();
 		

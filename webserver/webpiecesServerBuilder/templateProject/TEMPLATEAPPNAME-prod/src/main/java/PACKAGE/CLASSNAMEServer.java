@@ -97,11 +97,12 @@ public class CLASSNAMEServer {
 
 		URL resource = CLASSNAMEServer.class.getResource("/logback.xml");
 		if(resource == null) {
-			//Because the gradle application plugin doesn't set user.dir correctly, we have to do some stuff
-			//here to run in an IDE
 			if(!filePath.endsWith("/APPNAME-prod"))
 				throw new IllegalStateException("Server script must be run from APPNAME-prod directory as in run ./bin/APPNAME-prod");
 		} else if(platformOverrides == null && svrConfig.getHttpPort() != 0) {
+			//TODO: perhaps we can do a test here and throw exception saying, please do step 1, run gradle to generate production
+			//class files for templates and then you may step through the exact code used in production? and make sure generated
+			//class file location is mounted(may need to modify gradle builds for this to put template class files in new location
 			throw new IllegalStateException("This class only runs in production.  Use CLASSNAMESemiProdServer instead and"
 					+ " it will use production router with a on-demand template compile engine OR "
 					+ "use CLASSNAMEDevServer and it will recompile all your code on-demand as you change it");
@@ -125,11 +126,11 @@ public class CLASSNAMEServer {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setFileEncoding(ALL_FILE_ENCODINGS) //appmeta.txt file encoding
+											.setDefaultResponseBodyEncoding(ALL_FILE_ENCODINGS)
 											.setWebappOverrides(appOverrides)
 											.setSecretKey("_SECRETKEYHERE_");
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
-										.setDefaultResponseBodyEncoding(ALL_FILE_ENCODINGS)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
 										.setFunctionToConfigureServerSocket(s -> configure(s))

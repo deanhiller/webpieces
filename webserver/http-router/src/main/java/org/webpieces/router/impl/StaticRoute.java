@@ -1,8 +1,9 @@
 package org.webpieces.router.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,8 +20,10 @@ public class StaticRoute implements Route {
 	private Pattern patternToMatch;
 	private boolean isOnClassPath;
 	private List<String> pathParamNames = new ArrayList<>();
+	private int uniqueStaticRouteId;
 
-	public StaticRoute(String urlPath, String fileSystemPath, boolean isOnClassPath) {
+	public StaticRoute(int staticRouteId, String urlPath, String fileSystemPath, boolean isOnClassPath) {
+		this.uniqueStaticRouteId = staticRouteId;
 		this.fileSystemPath = fileSystemPath;
 		this.isOnClassPath = isOnClassPath;
 		
@@ -36,15 +39,31 @@ public class StaticRoute implements Route {
 				this.fileSystemPath = path + "/"+fileSystemPath;
 			}
 		}
-		
+
+		File f = new File(fileSystemPath);
+		if(!f.exists())
+			throw new IllegalArgumentException("File="+getCanonicalPath(f)+" does not exist");
+
 		this.urlPath = urlPath;
 		if(urlPath.endsWith("/")) {
 			this.isFile = false;
+			if(!f.isDirectory())
+				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a directory and must be for static directories");
 			this.patternToMatch = Pattern.compile("^"+urlPath+"(?<resource>.*)$");
 			this.pathParamNames.add("resource");
 		} else {
 			this.isFile = true;
+			if(!f.isFile())
+				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a file and must be for static file route");
 			this.patternToMatch = Pattern.compile("^"+urlPath+"$");
+		}
+	}
+
+	private String getCanonicalPath(File f) {
+		try {
+			return f.getCanonicalPath();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -103,19 +122,19 @@ public class StaticRoute implements Route {
 		return fileSystemPath;
 	}
 
-	public String transform(Map<String, String> pathParams) {
-		if(isFile)
-			return fileSystemPath;
-
-		String relativeUrlPathLeft = pathParams.get("resource");
-		return fileSystemPath+relativeUrlPathLeft;
-	}
-
 	@Override
 	public String toString() {
 		return "StaticRoute [\n      urlPath=" + urlPath + ",\n      fileSystemPath=" + fileSystemPath + ",\n      isFile=" + isFile
 				+ ",\n      patternToMatch=" + patternToMatch + ",\n      isOnClassPath=" + isOnClassPath + ",\n      pathParamNames="
 				+ pathParamNames + "]";
+	}
+
+	public boolean isFile() {
+		return isFile;
+	}
+
+	public int getStaticRouteId() {
+		return this.uniqueStaticRouteId;
 	}
 
 }

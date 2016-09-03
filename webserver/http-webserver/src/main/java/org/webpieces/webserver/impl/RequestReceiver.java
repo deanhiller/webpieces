@@ -70,8 +70,6 @@ public class RequestReceiver implements HttpRequestListener {
 	private BodyParsers requestBodyParsers;
 	@Inject
 	private BufferPool bufferPool;
-	@Inject
-	private CompressionLookup compressionLookup;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
@@ -98,22 +96,8 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 	
 	@Override
-	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
-		List<String> encodings = headerParser.parseAcceptEncoding(req);
-		
-		Compression compression = null;
-		String compressionType = null;
-		for(String type : encodings) {
-			compression = compressionLookup.lookup(type);
-			compressionType = type;
-			if(compression != null)
-				break;
-		}
-		
+	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {		
 		//log.info("request received on channel="+channel);
-		ProxyResponse streamer = responseProvider.get();
-		streamer.init(req, channel, bufferPool, compression, compressionType);
-		
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
 				log.error("This webserver has not thought about supporting header="
@@ -121,6 +105,7 @@ public class RequestReceiver implements HttpRequestListener {
 		}
 		
 		RouterRequest routerRequest = new RouterRequest();
+		routerRequest.orginalRequest = req;
 		routerRequest.isHttps = isHttps;
 		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.HOST);
 		if(header == null) {
@@ -137,7 +122,8 @@ public class RequestReceiver implements HttpRequestListener {
 		parseCookies(req, routerRequest);
 		parseAcceptLang(req, routerRequest);
 		parseAccept(req, routerRequest);
-		
+		routerRequest.encodings = headerParser.parseAcceptEncoding(req);
+
 		Header referHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.REFERER);
 		if(referHeader != null)
 			routerRequest.referrer = referHeader.getValue().trim();
@@ -161,7 +147,10 @@ public class RequestReceiver implements HttpRequestListener {
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
 		
+		ProxyResponse streamer = responseProvider.get();
 		try {
+			streamer.init(routerRequest, channel, bufferPool);
+
 			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(objectTranslator));
 			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(objectTranslator));
 			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(objectTranslator));
@@ -169,11 +158,8 @@ public class RequestReceiver implements HttpRequestListener {
 			
 			processRequest(streamer, routerRequest, requestCtx);
 		} catch(BadRequestException e) {
-			log.warn("Exception that only happens if hacker or you the developer messed something up", e);
+			log.warn("Exception that only happens if hacker hacking or you the developer messed something up", e);
 			streamer.sendFailure(new HttpException(KnownStatusCode.HTTP_400_BADREQUEST));
-		} catch(Exception e) {
-			log.warn("Exception", e);
-			streamer.sendFailure(new HttpException(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR));
 		}
 	}
 
@@ -278,7 +264,9 @@ public class RequestReceiver implements HttpRequestListener {
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 		ProxyResponse proxyResp = responseProvider.get();
 		HttpRequest req = new HttpRequest();
-		proxyResp.init(req, channel, bufferPool, null, null);
+		RouterRequest routerReq = new RouterRequest();
+		routerReq.orginalRequest = req;
+		proxyResp.init(routerReq, channel, bufferPool);
 		proxyResp.sendFailure(exc);
 	}
 

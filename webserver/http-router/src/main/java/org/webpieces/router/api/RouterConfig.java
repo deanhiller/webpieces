@@ -1,5 +1,6 @@
 package org.webpieces.router.api;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -14,7 +15,7 @@ public class RouterConfig {
 	private Charset fileEncoding = StandardCharsets.UTF_8;
 	private Charset urlEncoding = StandardCharsets.UTF_8;
 	private Charset defaultResponseBodyEncoding = StandardCharsets.UTF_8;
-	
+
 	private String secretKey;
 	
 	/**
@@ -26,7 +27,12 @@ public class RouterConfig {
 	private boolean isCookiesHttpOnly = true;
 
 	private boolean isCookiesSecure = false;
-	
+
+	//location of precompressed static files(css, js, html, etc. etc....no jpg, png compressed)
+	private File cachedCompressedDirectory = new File(System.getProperty("java.io.tmpdir")+"/webpiecesCache");
+	//compression type to put in cachedCompressedDirectory
+	private String startupCompression = "gzip";
+
 	public VirtualFile getMetaFile() {
 		return metaFile;
 	}
@@ -94,5 +100,22 @@ public class RouterConfig {
 		this.defaultResponseBodyEncoding = defaultResponseBodyEncoding;
 		return this;
 	}
+	
+	public File getCachedCompressedDirectory() {
+		return cachedCompressedDirectory;
+	}
 
+	public RouterConfig setCachedCompressedDirectory(File cachedCompressedDirectory) {
+		this.cachedCompressedDirectory = cachedCompressedDirectory;
+		return this;
+	}
+	
+	public String getStartupCompression() {
+		return startupCompression;
+	}
+
+	public RouterConfig setStartupCompression(String startupCompression) {
+		this.startupCompression = startupCompression;
+		return this;
+	}
 }

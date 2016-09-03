@@ -1,4 +1,4 @@
-package org.webpieces.webserver.impl;
+package org.webpieces.router.impl.compression;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,15 +7,15 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import org.webpieces.webserver.api.WebServerConfig;
+import org.webpieces.router.api.RouterConfig;
 
 public class MimeTypes {
 
 	private Properties mimetypes;
-	private WebServerConfig config;
+	private RouterConfig config;
 
 	@Inject
-	public MimeTypes(WebServerConfig config) {
+	public MimeTypes(RouterConfig config) {
 		this.config = config;
         InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("mime-types.properties");
         mimetypes = new Properties();
@@ -45,7 +45,9 @@ public class MimeTypes {
             String mime = contentType + "; charset=" + config.getDefaultResponseBodyEncoding().name().toLowerCase();
             return new MimeTypeResult(mime, config.getDefaultResponseBodyEncoding());
         }
-        return new MimeTypeResult(contentType, null);
+        
+        //otherwise default the encoding...
+        return new MimeTypeResult(contentType, config.getDefaultResponseBodyEncoding());
     }
     
     public static class MimeTypeResult {

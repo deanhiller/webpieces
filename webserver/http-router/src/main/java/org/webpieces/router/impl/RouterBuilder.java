@@ -1,6 +1,8 @@
 package org.webpieces.router.impl;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -23,11 +25,14 @@ public class RouterBuilder implements Router {
 	
 	private final AllRoutingInfo info;
 	private ReverseRoutes reverseRoutes;
+	private List<StaticRoute> staticRoutes = new ArrayList<>();
 	private ControllerLoader finder;
 
 	private String routerPath;
 
 	private Charset urlEncoding;
+
+	private int staticRouteIdCounter;
 
 	public RouterBuilder(String path, AllRoutingInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder, Charset urlEncoding) {
 		this.routerPath = path;
@@ -112,10 +117,15 @@ public class RouterBuilder implements Router {
 		if(isOnClassPath)
 			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
 		
-		StaticRoute route = new StaticRoute(urlPath, fileSystemPath, isOnClassPath);
+		StaticRoute route = new StaticRoute(getUniqueId(), urlPath, fileSystemPath, isOnClassPath);
+		staticRoutes.add(route);
 		log.info("scope:'"+routerPath+"' adding static route="+route.getPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, injector.get(), currentPackage.get(), urlEncoding);
 		info.addRoute(meta);
+	}
+	
+	private synchronized int getUniqueId() {
+		return staticRouteIdCounter++;
 	}
 	
 	@Override
@@ -166,6 +176,10 @@ public class RouterBuilder implements Router {
 		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setInternalSvrErrorRoute(meta);
+	}
+
+	public List<StaticRoute> getStaticRoutes() {
+		return staticRoutes;
 	}
 
 }

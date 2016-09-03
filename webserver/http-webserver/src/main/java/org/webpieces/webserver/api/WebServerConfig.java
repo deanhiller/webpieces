@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 
@@ -33,9 +34,12 @@ public class WebServerConfig {
 	private SSLEngineFactory sslEngineFactory;
 	
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
-	private Charset defaultResponseBodyEncoding = StandardCharsets.UTF_8;
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 	private Locale defaultLocale = Locale.getDefault();
+	//The max size of body for dynamic pages for Full responses and chunked responses.  This
+	//is used to determine send chunks instead of full response as well since it won't fit
+	//in full response sometimes
+	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -91,15 +95,6 @@ public class WebServerConfig {
 		return this;
 	}
 
-	public Charset getDefaultResponseBodyEncoding() {
-		return defaultResponseBodyEncoding;
-	}
-
-	public WebServerConfig setDefaultResponseBodyEncoding(Charset htmlResponsePayloadEncoding) {
-		this.defaultResponseBodyEncoding = htmlResponsePayloadEncoding;
-		return this;
-	}
-
 	public Charset getDefaultFormAcceptEncoding() {
 		return defaultFormAcceptEncoding;
 	}
@@ -122,8 +117,18 @@ public class WebServerConfig {
 		return defaultLocale;
 	}
 
-	public void setDefaultLocale(Locale defaultLocale) {
+	public WebServerConfig setDefaultLocale(Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
+		return this;
 	}
-	
+
+	public int getMaxBodySize() {
+		return maxBodySize;
+	}
+
+	public WebServerConfig setMaxBodySize(int fullResponseMaxSize) {
+		this.maxBodySize = fullResponseMaxSize;
+		return this;
+	}
+
 }
