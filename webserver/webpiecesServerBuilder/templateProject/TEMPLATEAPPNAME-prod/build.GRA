@@ -46,7 +46,23 @@ dependencies {
 }
 
 mainClassName = "PACKAGE.CLASSNAMEServer"
-applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
+applicationDefaultJvmArgs = ['JVM_ARGS_TRICK']
+
+//Here, we must modify the start scripts to set user.dir property correctly
+//so no matter where the script is run from, the user.dir will point to APPNAME directory
+//it's too bad they don't do this one by default(they really should)..thank god for gradle flexibility
+CreateStartScripts startScripts = project.startScripts
+startScripts.with {
+    doLast {
+        //A slash in groovy allows us to not escape double quotes AND single quotes
+        def slashString = /'"JVM_ARGS_TRICK"'/
+        //for some reason, gradle prints '"jvm args"'  why?  I don't know but must swap quote and double quote
+        unixScript.text = unixScript.text.replace(slashString, 
+                   '"-Dlogback.configurationFile=config/logback.xml -Duser.dir=$APP_HOME"')
+        windowsScript.text = windowsScript.text.replace('"JVM_ARGS_TRICK"', 
+                   '"-Dlogback.configurationFile=config/logback.xml -Duser.dir=%APP_HOME%"')
+    }
+}
 
 compileTemplateSetting {
   //Since the groovy plugin has no way of knowing about your custom tags, list them here or the compile will
