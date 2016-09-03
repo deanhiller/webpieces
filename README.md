@@ -118,23 +118,36 @@ Checklist of Release testing (This would be good to automate)
 * refactor a bunch of code
 * hit the webpage (no need to stop dev server) 
 
-
+I like things to work seamlessly but user.dir is a huge issue in multiple environments I am working in.
 main server has to work in N configurations that should be tested and intellij is a PITA since 
 it is inconsistent.  PP means runs in the project the file is in and eclipse is consistent with
 gradle while intellij is only half the time....
 
-* production - user.dir='where the user runs the script from :('
-* eclipse -
+app dev - The environment when you generate a project and import it into an IDE
+webpieces - The environment where you test the template directly when bringing in webpieces into an IDE
+
+* app dev / eclipse -
    * PP - running myapp-prod/src/tests/java - user.dir=myapp/myapp-prod
    * PP - SemiProductionServer - user.dir=myapp/myapp-dev
    * PP - DevServer - user.dir=myapp/myapp-dev
    * PP - ProdServer - user.dir=myapp/myapp-prod
-* intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
+* app dev / intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
    * PP - running tests - myapp/myapp-prod
-   * NO - SemiProductionServer - user.dir=
+   * NO - SemiProductionServer - user.dir=myapp
    * NO - DevServer - user.dir=myapp :( what the hell!  different from running tests
    * NO - ProdServer - user.dir=myapp
+* webpieces / eclipse - should be same as app dev I think
+* webpieces / intellij - should be same as app dev I think
 * PP - tests in webpieces gradle - myapp/myapp-prod
 * PP - tests in myapp's gradle run - myapp/myapp-prod
+* NO - production - user.dir=from distribution myapp-prod directory which has subdirs bin, lib, config, public
+* Future? - run DevSvr,SemiProdSvr,ProdSvr from gradle?....screw that for now..it's easy to run from IDE so why bother
 
+* so in production, the relative paths work from myapp so 'public/' is a valid location for html files resolving to myapp/public
+* in testing, IF we want myapp/myapp-prod/src/dist/public involved, it would be best to run from myapp/myapp-prod/src/dist so 'public/' is still a valid location
+* in devserver, semiprodserver, and prod server, the same idea follows where myapp/myapp-prod/src/dist should be the user.dir!!!
 
+//sooooo, algorithm is this
+//if user.dir=myapp, modify user.dir to myapp/myapp-prod/src/dist (you are in intellij)
+//else if myapp-prod has directories bin, lib, config, public, then do nothing
+//else modify user.dir=myapp-prod to myapp-prod/src/dist
