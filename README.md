@@ -33,15 +33,17 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* version 1.9-developer showing up in bootstrap.js file :( so need to fix templating there
 * Solve -parameters not working into eclipse and intellij?  
-* Redo gradle to only use resources from src/main/java and src/test/java and screw resource directories as the plugins do not handle it well???  in eclipse, must do ./gradle eclipse then gradle plugin as they each have weird issues....try to solve this
-* go see if it works in intellij again
-* Test out template compression with very large template.  unit test!!!!! and uncompress on receive and verify!!
-* compression is about streaming it through the gzip outputstream.  now need to decide how/when to cache files on filesystem and compress them all on startup and use timestamp as caching mechanism so new files modify cache and finally extension type list as well file!!!!
-* 
+   * ./gradlew eclipse - import general projects separately
+   * import eclipse with eclipse gradle plugin
+   * ./gradlew idea - new projects from existing source
+   * import project with intellij gradle plugin
+   * Redo gradle to only use resources from src/main/java and src/test/java and screw resource directories as the plugins do not handle it well???  in eclipse, must do ./gradle eclipse then gradle plugin as they each have weird issues....try to solve this
+* Unit Test out template compression with very large template.  unit test!!!!! and uncompress on receive and verify!!
+* use timestamp in startup file compression to see if file cache needs to be overwritten.  
+* NEXT up, implement caching
 * fix this...ERROR 2016-08-30 18:41:58,568 [-] [httpFrontEnd7]: This webserver has not thought about supporting header=Cache-Control quite yet.  value=max-age=0 Please let us know and we can quickly add support
-* compression should be done by file extension type html, yes, txt, yes, jpg no, etc. and we should whitelist compressed files...enable once we get compression working again
+* implement logging in and SSL page redirection to login page and back again
 * SSL 
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
@@ -55,7 +57,7 @@ TODO:
 * have the dev server display it's OWN 404 page and then in a frame below dispay the webapps actual 404 page.  The dev server's page will have much more detail on what went wrong and why it was a 404 like type translation, etc.  The frame can be a redirect to GET the 404 page directly OR it could render inline maybe.....which one is better..not sure?  rendering inline is probably better so the notFound does not have a direct url to get to that page?  But only if the PRG holds true above!!!!
 * write an escapehtml tag
 
-* ALPN is next!!!! 
+* ALPN is next????
 
 * start createing a real website!!!! AND on https
 
@@ -99,7 +101,6 @@ DOCUMENTATION Notes:
 * Section on filters
 * don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
 * resource bundles are complex needing to provide one for some tags if there is a provider of tags
-
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
 
 
@@ -116,42 +117,9 @@ Checklist of Release testing (This would be good to automate)
 * run {appname}-prod script
 * hit http://localhost:8080 and then click the link
 
-* import into eclipse or intellij
+* import into eclipse or intellij  (2 ways to import into eclipse and 2 ways to import in intellij and all 4 need to be tested :( )
 * open up project {appname}-dev and go into src/main/java and run the dev server
 * hit the webpage
 * refactor a bunch of code
 * hit the webpage (no need to stop dev server) 
 
-I like things to work seamlessly but user.dir is a huge issue in multiple environments I am working in.
-main server has to work in N configurations that should be tested and intellij is a PITA since 
-it is inconsistent.  PP means runs in the project the file is in and eclipse is consistent with
-gradle while intellij is only half the time....
-
-app dev - The environment when you generate a project and import it into an IDE
-webpieces - The environment where you test the template directly when bringing in webpieces into an IDE
-
-* app dev / eclipse -
-   * PP - running myapp-prod/src/tests/java - user.dir=myapp/myapp-prod
-   * PP - SemiProductionServer - user.dir=myapp/myapp-dev
-   * PP - DevServer - user.dir=myapp/myapp-dev
-   * PP - ProdServer - user.dir=myapp/myapp-prod
-* app dev / intellij (it's different paths than eclipse :( ).  user.dir starts as myapp directory
-   * PP - running tests - myapp/myapp-prod
-   * NO - SemiProductionServer - user.dir=myapp
-   * NO - DevServer - user.dir=myapp :( what the hell!  different from running tests
-   * NO - ProdServer - user.dir=myapp
-* webpieces / eclipse - should be same as app dev I think
-* webpieces / intellij - should be same as app dev I think
-* PP - tests in webpieces gradle - myapp/myapp-prod
-* PP - tests in myapp's gradle run - myapp/myapp-prod
-* NO - production - user.dir=from distribution myapp-prod directory which has subdirs bin, lib, config, public
-* Future? - run DevSvr,SemiProdSvr,ProdSvr from gradle?....screw that for now..it's easy to run from IDE so why bother
-
-* so in production, the relative paths work from myapp so 'public/' is a valid location for html files resolving to myapp/public
-* in testing, IF we want myapp/myapp-prod/src/dist/public involved, it would be best to run from myapp/myapp-prod/src/dist so 'public/' is still a valid location
-* in devserver, semiprodserver, and prod server, the same idea follows where myapp/myapp-prod/src/dist should be the user.dir!!!
-
-//sooooo, algorithm is this
-//if user.dir=myapp, modify user.dir to myapp/myapp-prod/src/dist (you are in intellij)
-//else if myapp-prod has directories bin, lib, config, public, then do nothing
-//else modify user.dir=myapp-prod to myapp-prod/src/dist
