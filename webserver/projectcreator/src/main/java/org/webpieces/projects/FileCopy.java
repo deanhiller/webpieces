@@ -38,7 +38,7 @@ public class FileCopy {
 
 		//we have 
 		//   - ZAPPCLASS
-		//   - CLASSNAME
+		//   - WEBPIECESxCLASS
 		//   - PACKAGE
 		// and need to replace those three things in file names, or file text
 		//ALSO, must rename all *.GRA files to *.GRADLE so the build is in place
@@ -78,14 +78,13 @@ public class FileCopy {
 			String contents = new String(out.toByteArray(), Charset.defaultCharset());
 			String original = contents;
 
-			contents = contents.replace("/PACKAGE/", "/"+packageDir+"/");
-			contents = contents.replace("PACKAGE", packageStr);
-			contents = contents.replace("TEMPLATE", "");
-			contents = contents.replace("CLASSNAME", appClassName);
-			contents = contents.replace("APPNAME", appName);
+			contents = contents.replace("/WEBPIECESxPACKAGE/", "/"+packageDir+"/");
+			contents = contents.replace("WEBPIECESxPACKAGE", packageStr);
+			contents = contents.replace("WEBPIECESxCLASS", appClassName);
+			contents = contents.replace("WEBPIECESxAPPNAME", appName);
 			contents = contents.replace("//@Ignore", "@Ignore");
 			contents = contents.replace("//import org.junit.Ignore;", "import org.junit.Ignore;");
-			contents = contents.replace("VERSION", version);
+			contents = contents.replace("WEBPIECESxVERSION", version);
 			
 			if(contents.equals(original))
 				return;
@@ -104,7 +103,7 @@ public class FileCopy {
 		String name = getFileName(f);
 		
 		String[] pieces = new String[] { name };
-		if("PACKAGE".equals(name)) {
+		if("WEBPIECESxPACKAGE".equals(name)) {
 			pieces = packagePieces;
 		}
 		
@@ -125,11 +124,11 @@ public class FileCopy {
 		if(name.contains("APPNAME"))
 			name = name.replace("APPNAME", appName);
 		
-		if(name.contains("GRA"))
+		if(name.endsWith("GRA"))
 			name = name.replace("GRA", "gradle");
 		
-		if(name.contains("CLASSNAME"))
-			name = name.replace("CLASSNAME", appClassName);
+		if(name.contains("WEBPIECESxCLASS"))
+			name = name.replace("WEBPIECESxCLASS", appClassName);
 		
 		return name;
 	}

@@ -33,6 +33,10 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
+* version 1.9-developer showing up in bootstrap.js file :( so need to fix templating there
+* Solve -parameters not working into eclipse and intellij?  
+* Redo gradle to only use resources from src/main/java and src/test/java and screw resource directories as the plugins do not handle it well???  in eclipse, must do ./gradle eclipse then gradle plugin as they each have weird issues....try to solve this
+* go see if it works in intellij again
 * Test out template compression with very large template.  unit test!!!!! and uncompress on receive and verify!!
 * compression is about streaming it through the gzip outputstream.  now need to decide how/when to cache files on filesystem and compress them all on startup and use timestamp as caching mechanism so new files modify cache and finally extension type list as well file!!!!
 * 

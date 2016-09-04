@@ -5,7 +5,7 @@ project.ext {
   outputStagingDir = new File(buildDir, stagingDirName)
 }
 
-project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME') {
+project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
     sourceSets {
         extraTest {
             resources {
@@ -32,12 +32,12 @@ project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME') {
     //}
 }
 
-project('webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME-dev') {
+project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev') {
     dependencies {
         compile project(':webserver:http-webserver')
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
-        compile project(':webserver:webpiecesServerBuilder:templateProject:TEMPLATEAPPNAME')
+        compile project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
     }
     
     //task uploadArchives(overwrite: true) << {
@@ -57,16 +57,16 @@ task stageTemplate(type: Copy) {
     exclude stagingDirName + '/templateProject/.project'
     exclude stagingDirName + '/templateProject/.settings'
     exclude stagingDirName + '/templateProject/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/bin'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.classpath'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.project'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME/.settings'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/output'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/bin'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/.classpath'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/.project'
-    exclude stagingDirName + '/templateProject/TEMPLATEAPPNAME-dev/.settings'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/output'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/bin'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.classpath'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.project'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME/.settings'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/output'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/bin'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.classpath'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.project'
+    exclude stagingDirName + '/templateProject/WEBPIECESxAPPNAME-dev/.settings'
 }
 
 task copyGradleTemplate(type: Copy, dependsOn: 'stageTemplate') {

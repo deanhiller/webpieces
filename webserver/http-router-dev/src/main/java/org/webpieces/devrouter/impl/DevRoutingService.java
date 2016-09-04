@@ -1,5 +1,7 @@
 package org.webpieces.devrouter.impl;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -66,6 +68,10 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			if(meta.getRoute().getRouteType() != RouteType.STATIC)
 				routeLoader.loadControllerIntoMetaObject(meta, false);
 		}
+		
+		//RESET the encodings to known so we don't try to go the compressed cache which doesn't
+		//exist in dev server since we want the latest files always
+		req.encodings = new ArrayList<>();
 		
 		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 
 	}

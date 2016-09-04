@@ -1,0 +1,7 @@
+dependencies {
+  //add dev-server only dependencies here if you have any(you shouldn't most likely)
+  compile project(':WEBPIECESxAPPNAME')
+  //This contains development overrides that pulls in the eclipse compiler...
+  compile deps['web-devrouter']
+  compile deps['web-devtemplating']
+}

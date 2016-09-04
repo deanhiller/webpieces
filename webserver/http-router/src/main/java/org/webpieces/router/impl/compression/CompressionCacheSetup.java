@@ -79,7 +79,7 @@ public class CompressionCacheSetup {
 
 	private void maybeAddFileToCache(File src, File destination) {
 		String name = src.getName();
-		int indexOf = name.indexOf(".");
+		int indexOf = name.lastIndexOf(".");
 		if(indexOf < 0)
 			return; //do nothing
 		String extension = name.substring(indexOf+1);

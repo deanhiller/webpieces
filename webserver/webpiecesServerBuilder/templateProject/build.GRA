@@ -5,7 +5,7 @@
 
 ext {
 
-    webpiecesVersion = 'VERSION'
+    webpiecesVersion = 'WEBPIECESxVERSION'
 
     /*
      * Dependencies can be named so that sub-projects can reference consistent version of them.

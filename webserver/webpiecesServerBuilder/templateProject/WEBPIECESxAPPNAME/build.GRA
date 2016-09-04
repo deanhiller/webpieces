@@ -1,0 +1,73 @@
+buildscript {
+    repositories {
+       mavenCentral()
+       //For testing and to be removed...
+       maven {
+         url uri('/tmp/myRepo/')
+       }
+    }
+    dependencies {
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:WEBPIECESxVERSION'
+    }
+}
+
+apply plugin: 'application'
+apply plugin: 'org.webpieces.templatecompiler'
+
+sourceSets {
+    //For testing, we need to put the html files on the classpath which are co-located with the controllers
+    extraTest {
+        resources {
+            srcDirs = ["src/main/java"]
+            includes = ["**/*.html", "**/*.tag"]
+        }
+    }
+    test {
+        resources {
+            //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
+            source extraTest.resources
+        }
+    }
+    main {
+    	resources {
+            excludes = ["logback.xml"]
+        }
+    }
+}
+
+dependencies {
+  //add maven dependencies here
+  compile deps['web-webserver']
+
+  //IF you add dependencies on other projects locally, you need to modify WEBPIECESxCLASSDevServer.java to include those
+  //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
+
+  //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
+  //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code. For 
+  //production jars, the html files are compiled to *.class files
+  testCompile deps['web-webserver-test']
+  testCompile deps['selenium']
+}
+
+mainClassName = "PACKAGE.WEBPIECESxCLASSServer"
+applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
+
+//Here, we must modify the start scripts to set cd to user.dir correctly as setting user.dir does NOT work
+//as new File("relative") ignores user.dir and uses something else.  We do this such that user.dir IS
+//the app directory AND new File("relative") will work as well (found issue on mac running from different
+//directories)
+CreateStartScripts startScripts = project.startScripts
+startScripts.with {
+    doLast {
+        unixScript.text = unixScript.text.replace('DEFAULT_JVM_OPTS=', 
+                              'cd $APP_HOME\necho running from $APP_HOME\nDEFAULT_JVM_OPTS=')
+        windowsScript.text = windowsScript.text.replace('set DEFAULT_JVM_OPTS=', 
+                              'cd %APP_HOME%\r\necho running from %APP_HOME%\r\nset DEFAULT_JVM_OPTS=')
+    }
+}
+
+compileTemplateSetting {
+  //Since the groovy plugin has no way of knowing about your custom tags, list them here or the compile will
+  //fail (This catches mispellings and such so you don't release a broken app to production)
+  customTags = [ "mytag", "anothertag" ]
+}

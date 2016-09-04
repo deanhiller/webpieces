@@ -1,2 +1,2 @@
-include 'APPNAME'
-include 'APPNAME-dev'
+include 'WEBPIECESxAPPNAME'
+include 'WEBPIECESxAPPNAME-dev'

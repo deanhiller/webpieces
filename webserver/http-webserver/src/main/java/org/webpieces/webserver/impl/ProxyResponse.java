@@ -237,7 +237,7 @@ public class ProxyResponse implements ResponseStreamer {
 		String fullFilePath = renderStatic.getFilePath();
 		if(fullFilePath == null) {
 			isFile = false;
-			fullFilePath = renderStatic.getDirectory()+"/"+renderStatic.getRelativePath();
+			fullFilePath = renderStatic.getDirectory()+renderStatic.getRelativePath();
 		}
 	    
 	    String extension = null;
@@ -282,7 +282,7 @@ public class ProxyResponse implements ResponseStreamer {
 	    }
 
 	    channel.write(response);
-	    log.info("opening async file for read.  executor="+fileExecutor);
+	    log.info("opening file="+file+" for async read.  executor="+fileExecutor);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
     	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
@@ -475,7 +475,7 @@ public class ProxyResponse implements ResponseStreamer {
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		resp.setBody(data);
 
-		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" channel="+channel);
+		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" channel="+channel);
 		
 		channel.write(resp);
 		
