@@ -40,7 +40,7 @@ public class StaticRoute implements Route {
 			}
 		}
 
-		File f = new File(fileSystemPath);
+		File f = new File(this.fileSystemPath);
 		if(!f.exists())
 			throw new IllegalArgumentException("File="+getCanonicalPath(f)+" does not exist");
 

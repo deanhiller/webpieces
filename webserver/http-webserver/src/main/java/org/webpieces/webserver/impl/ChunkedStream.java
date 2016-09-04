@@ -22,11 +22,16 @@ public class ChunkedStream extends OutputStream {
 
 	private FrontendSocket channel;
 	private int size;
+	private String type;
 
-	public ChunkedStream(FrontendSocket channel, int size) {
+	public ChunkedStream(FrontendSocket channel, int size, boolean compressed) {
 		this.channel = channel;
 		this.size = size;
 		this.str = new ByteArrayOutputStream(size);
+		if(compressed)
+			this.type = "compressed";
+		else
+			this.type = "not compressed";
 	}
 
 	@Override
@@ -62,7 +67,8 @@ public class ChunkedStream extends OutputStream {
 		str = new ByteArrayOutputStream();
 		DataWrapper body = wrapperFactory.wrapByteArray(data);
 		HttpChunk chunk = new HttpChunk();
-		log.info("writing compressed data="+body.getReadableSize());
+		//if(log.isDebugEnabled())
+			log.info("writing "+type+" data="+body.getReadableSize());
 		chunk.setBody(body);
 		channel.write(chunk);
 	}

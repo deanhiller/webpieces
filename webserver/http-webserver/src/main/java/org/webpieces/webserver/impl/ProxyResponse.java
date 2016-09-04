@@ -359,7 +359,6 @@ public class ProxyResponse implements ResponseStreamer {
 		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
 			@Override
 			public void completed(Integer result, String attachment) {
-				log.info("read completed some reading size(which thread)="+result);
 				future.complete(buf);
 			}
 
@@ -376,8 +375,6 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	private void sendHttpChunk(RequestContext ctx, ByteBuffer buf) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
-		
-		log.info("temporary send chunk. size(which thread)="+data.getReadableSize());
 		
 		if(log.isTraceEnabled())
 			log.trace("sending chunk with body size="+data.getReadableSize());
@@ -435,6 +432,9 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
 		
+		//This is a cheat sort of since compression can go from 28235 to 4,785 and we are looking at the
+		//non-compressed size so stuff like 16k may be sent chunked even though it is only 3k on the outbound path
+		//(not really a big deal though)
 		if(bytes.length < config.getMaxBodySize()) {
 			sendFullResponse(resp, bytes, compression);
 			return;
@@ -445,17 +445,21 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private void sendChunkedResponse(HttpResponse resp, byte[] bytes, Compression compression) {
 		
-		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+"code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" channel="+channel);
+		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" channel="+channel);
 
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
-		
-		OutputStream chunkedStream = new ChunkedStream(channel, config.getMaxBodySize());
-		
+
+		boolean compressed = false;
 		if(compression == null) {
 			compression = new NoCompression();
 		} else {
+			compressed = true;
 			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compression.getCompressionType()));
 		}
+		
+		OutputStream chunkedStream = new ChunkedStream(channel, config.getMaxBodySize(), compressed);
+		
+
 
 		channel.write(resp);
 

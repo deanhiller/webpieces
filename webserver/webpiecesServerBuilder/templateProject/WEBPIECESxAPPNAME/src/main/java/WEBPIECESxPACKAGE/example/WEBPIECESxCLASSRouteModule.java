@@ -33,6 +33,7 @@ public class WEBPIECESxCLASSRouteModule extends AbstractRouteModule {
 		addRoute(POST, "/postuser",     "crud/ExampleController.postUser", ExampleRouteId.POST_USER_FORM);
 		addRoute(GET,  "/listusers",    "crud/ExampleController.listUsers", ExampleRouteId.GET_LIST_USERS);
 		
+		addStaticFile("/favicon.ico", "public/favicon.ico", false);
 		String workingDir = System.getProperty("user.dir");
 		addStaticDir("/public/", workingDir+"/public/", false);
 		

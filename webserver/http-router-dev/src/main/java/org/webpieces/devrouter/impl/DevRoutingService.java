@@ -64,14 +64,13 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		MatchResult result = routeLoader.fetchRoute(req);
 		
 		RouteMeta meta = result.getMeta();
-		if(meta.getControllerInstance() == null) {
-			if(meta.getRoute().getRouteType() != RouteType.STATIC)
-				routeLoader.loadControllerIntoMetaObject(meta, false);
+		if(meta.getRoute().getRouteType() == RouteType.STATIC) {
+			//RESET the encodings to known so we don't try to go the compressed cache which doesn't
+			//exist in dev server since we want the latest files always
+			req.encodings = new ArrayList<>();
+		} else if(meta.getControllerInstance() == null) {
+			routeLoader.loadControllerIntoMetaObject(meta, false);
 		}
-		
-		//RESET the encodings to known so we don't try to go the compressed cache which doesn't
-		//exist in dev server since we want the latest files always
-		req.encodings = new ArrayList<>();
 		
 		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 
 	}
