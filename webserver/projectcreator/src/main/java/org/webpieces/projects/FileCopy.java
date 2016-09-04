@@ -37,12 +37,10 @@ public class FileCopy {
 	public void createProject() throws IOException {
 
 		//we have 
-		//   - ZAPPCLASS
 		//   - WEBPIECESxCLASS
-		//   - PACKAGE
+		//   - WEBPIECESxPACKAGE
 		// and need to replace those three things in file names, or file text
 		//ALSO, must rename all *.GRA files to *.GRADLE so the build is in place
-		//LASTLY, need to replace "TEMPLATE" with "" to make it disappear
 
 		//currently, just the one template...
 		File template = new File(webpiecesDir, "templateProject");
@@ -118,11 +116,8 @@ public class FileCopy {
 
 	private String getFileName(File f) {
 		String name = f.getName();
-		if(name.contains("TEMPLATE"))
-			name = name.replace("TEMPLATE", "");
-		
-		if(name.contains("APPNAME"))
-			name = name.replace("APPNAME", appName);
+		if(name.contains("WEBPIECESxAPPNAME"))
+			name = name.replace("WEBPIECESxAPPNAME", appName);
 		
 		if(name.endsWith("GRA"))
 			name = name.replace("GRA", "gradle");

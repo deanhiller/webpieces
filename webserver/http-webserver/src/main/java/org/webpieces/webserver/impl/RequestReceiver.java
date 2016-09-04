@@ -90,6 +90,7 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.ACCEPT.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.COOKIE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.REFERER.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.ORIGIN.getHeaderName().toLowerCase());
 		
 		//we don't do redirects or anything like that yet...
 		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());

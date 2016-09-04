@@ -282,14 +282,16 @@ public class ProxyResponse implements ResponseStreamer {
 	    }
 
 	    channel.write(response);
-	    log.info("opening file="+file+" for async read.  executor="+fileExecutor);
+	    if(log.isDebugEnabled())
+	    	log.debug("sending chunked file via async read="+file);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
+	    //Use fileExecutor for the callback so we control threadpool configuration...
     	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
     	
     	RequestContext ctx = Current.getContext();
     	try {
-    		return read(file, asyncFile, ctx, 0)
+    		return readLoop(file, asyncFile, ctx, 0)
     			.handle((s, exc) -> handleClose(s, exc)) //our finally block for failures
     			.thenApply(s -> null);
     	} catch(Throwable e) {
@@ -319,13 +321,13 @@ public class ProxyResponse implements ResponseStreamer {
 		}		
 	}
 	
-	private CompletableFuture<Boolean> read(Path file, AsynchronousFileChannel asyncFile, RequestContext ctx, int position) {
-		//must be async since it is recursive(prevents stackoverflow)
+	private CompletableFuture<Boolean> readLoop(Path file, AsynchronousFileChannel asyncFile, RequestContext ctx, int position) {
+		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
+		//to use future.thenApplyAsync to avoid a stackoverflow
 		CompletableFuture<ByteBuffer> future = asyncRead(file, asyncFile, position);
-		//NOTE: I don't like inlining code BUT this is recursive and I HATE recurions between multiple methods so
-		//this method ONLY calles itself below as it continues to read and send chunks (no stackoverflow since it is
-		//with async futures)
-		return future.thenApplyAsync(buf -> {
+		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
+		//this method ONLY calls itself below as it continues to read and send chunks
+		return future.thenApply(buf -> {
 							buf.flip();
 							int read = buf.remaining();
 							if(read == 0) {
@@ -333,11 +335,11 @@ public class ProxyResponse implements ResponseStreamer {
 								return null;
 							}
 
-							sendBufferIsDone(ctx, buf);
+							sendHttpChunk(ctx, buf);
 
 							int newPosition = position + read;
 							//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
-							read(file, asyncFile, ctx, newPosition);
+							readLoop(file, asyncFile, ctx, newPosition);
 							return null;
 					})
 					.thenApply(s -> true);
@@ -357,6 +359,7 @@ public class ProxyResponse implements ResponseStreamer {
 		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
 			@Override
 			public void completed(Integer result, String attachment) {
+				log.info("read completed some reading size(which thread)="+result);
 				future.complete(buf);
 			}
 
@@ -371,8 +374,10 @@ public class ProxyResponse implements ResponseStreamer {
 		return future;
 	}
 	
-	private void sendBufferIsDone(RequestContext ctx, ByteBuffer buf) {
+	private void sendHttpChunk(RequestContext ctx, ByteBuffer buf) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
+		
+		log.info("temporary send chunk. size(which thread)="+data.getReadableSize());
 		
 		if(log.isTraceEnabled())
 			log.trace("sending chunk with body size="+data.getReadableSize());

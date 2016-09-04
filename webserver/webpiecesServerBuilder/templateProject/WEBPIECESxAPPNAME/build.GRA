@@ -49,7 +49,7 @@ dependencies {
   testCompile deps['selenium']
 }
 
-mainClassName = "PACKAGE.WEBPIECESxCLASSServer"
+mainClassName = "WEBPIECESxPACKAGE.WEBPIECESxCLASSServer"
 applicationDefaultJvmArgs = ["-Dlogback.configurationFile=config/logback.xml"]
 
 //Here, we must modify the start scripts to set cd to user.dir correctly as setting user.dir does NOT work

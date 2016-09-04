@@ -34,6 +34,7 @@ public enum KnownHeaderName {
 	IF_RANGE("If-Range", HeaderType.REQUEST),
 	IF_UNMODIFIED_SINCE("If-Unmodified-Since", HeaderType.REQUEST),
 	MAX_FORWARDS("Max-Forwards", HeaderType.REQUEST),
+	ORIGIN("Origin", HeaderType.REQUEST),
 	PROXY_AUTHORIZATION("Proxy-Authorization", HeaderType.REQUEST),
 	RANGE("Range", HeaderType.REQUEST),
 	REFERER("Referer", HeaderType.REQUEST),
