@@ -7,8 +7,16 @@ To try the webserver
 3. cd projectDir
 4. ./gradlew test # runs all the tests and verify everything is working
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
-6. ./gradlew eclipse or ./gradlew idea to generate eclipse or idea project
-7. Run the dev server which compiles your code as it changes so you don't need to restart the webserver
+6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
+    A. ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle bug)
+    B. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew did so you have to
+       go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
+       'Store information about method parameters'
+6. IF Intellij
+    A.
+7. From the IDE, expand mycool-all/mycool-dev/src/main/java/{yourpackage}
+8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
+     the webserver (even in debug mode)
 
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
