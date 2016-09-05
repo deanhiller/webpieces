@@ -136,10 +136,10 @@ public class WEBPIECESxCLASSServer {
 		//This is purely so it works before template creation
 		//NOTE: our build runs all template tests that are generated to make sure we don't break template 
 		//generation but for that to work pre-generation, we need this code but you are free to delete it...
-		String hexKey = "__SECRETKEYHERE__";  //This gets replaced
-		if(hexKey.startsWith("__SECRETKEY"))  //This does not get replaced (user can remove it from template)
-			return hexKey.getBytes();
-		return Base64.getDecoder().decode(hexKey);
+		String base64Key = "__SECRETKEYHERE__";  //This gets replaced
+		if(base64Key.startsWith("__SECRETKEY"))  //This does not get replaced (user can remove it from template)
+			return base64Key.getBytes();
+		return Base64.getDecoder().decode(base64Key);
 	}
 
 	private void modifyUserDirForManyEnvironments(String filePath) {

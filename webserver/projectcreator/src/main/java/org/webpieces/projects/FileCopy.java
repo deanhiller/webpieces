@@ -23,7 +23,7 @@ public class FileCopy {
 	private File webpiecesDir;
 	private String packageDir;
 	private String version;
-	private String secretKeyHex;
+	private String secretKeyBase64;
 
 	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory, String version) {
 		this.webpiecesDir = webpiecesDir;
@@ -39,7 +39,7 @@ public class FileCopy {
 			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA1");
 			SecretKey key = keyGen.generateKey();
 			byte[] encoded = key.getEncoded();
-			secretKeyHex = Base64.getEncoder().encodeToString(encoded);
+			secretKeyBase64 = Base64.getEncoder().encodeToString(encoded);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
@@ -98,7 +98,7 @@ public class FileCopy {
 			contents = contents.replace("//@Ignore", "@Ignore");
 			contents = contents.replace("//import org.junit.Ignore;", "import org.junit.Ignore;");
 			contents = contents.replace("WEBPIECESxVERSION", version);
-			contents = contents.replace("_SECRETKEYHERE_", secretKeyHex);
+			contents = contents.replace("_SECRETKEYHERE_", secretKeyBase64);
 			
 			if(contents.equals(original))
 				return;
