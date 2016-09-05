@@ -93,6 +93,12 @@ public class StaticFileReader {
 	    HttpResponse response = tuple.response; 
 	    
 		response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		//On startup, we protect developers from breaking clients.  In http, all files that change
+		//must also change names/url so that clients automatically get the new version right away.
+		//This also means, we set the cache time to one year and browsers will automatically evict 
+		//when cache size is too large.  We only protect on text file changes not images so expire
+		//the cache monthly in case images change without changing names.
+		response.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "max-age=2592000"));
 		
 		Path file;
 		Compression compr = compressionLookup.createCompressionStream(info.getRouterRequest().encodings, extension, tuple.mimeType);
@@ -112,15 +118,9 @@ public class StaticFileReader {
 	    	}
 	    	
 	    	fullFilePath = fileReference.getAbsolutePath();
-	    	file = Paths.get(fullFilePath);
-		    File f = file.toFile();
-		    if(!f.exists() || !f.isFile())
-		    	throw new NotFoundException("Compressed File from cache="+file+" was not found");
+	    	file = fetchFile("Compressed File from cache=", fullFilePath+".gz");
 	    } else {
-	    	file = Paths.get(fullFilePath);
-		    File f = file.toFile();
-		    if(!f.exists() || !f.isFile())
-		    	throw new NotFoundException("File="+file+" was not found");
+	    	file = fetchFile("File=", fullFilePath);
 	    }
 
 	    info.getChannel().write(response);
@@ -140,6 +140,14 @@ public class StaticFileReader {
     		handleClose(info, true, null);
     		throw new RuntimeException(e);
     	}
+	}
+
+	private Path fetchFile(String msg, String fullFilePath) {
+		Path file = Paths.get(fullFilePath);
+		File f = file.toFile();
+		if(!f.exists() || !f.isFile())
+			throw new NotFoundException(msg+file+" was not found");
+		return file;
 	}
 
 	private Boolean handleClose(RequestInfo info, Boolean s, Throwable exc) {

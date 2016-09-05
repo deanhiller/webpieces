@@ -60,9 +60,18 @@ public class Security {
 	}
 
 	public static String passwordHash(String input, Hash hashType) {
+		byte[] bytes = input.getBytes();
+		return hash(hashType, bytes);
+	}
+
+	public static String hash(byte[] data) {
+		return hash(DEFAULT_HASH_TYPE, data);
+	}
+	
+	private static String hash(Hash hashType, byte[] bytes) {
 		try {
 			MessageDigest m = MessageDigest.getInstance(hashType.toString());
-			byte[] out = m.digest(input.getBytes());
+			byte[] out = m.digest(bytes);
 			return Base64.getEncoder().encodeToString(out);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);

@@ -99,8 +99,6 @@ public class RouterBuilder implements Router {
 	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {
 		if(!urlPath.endsWith("/"))
 			throw new IllegalArgumentException("Static directory so urlPath must end with a /");
-		else if(!fileSystemPath.endsWith("/"))
-			throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
 		addStaticRoute(urlPath, fileSystemPath, isOnClassPath);
 	}
 
@@ -108,8 +106,7 @@ public class RouterBuilder implements Router {
 	public void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath) {
 		if(urlPath.endsWith("/"))
 			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
-		else if(fileSystemPath.endsWith("/"))
-			throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
+		
 		addStaticRoute(urlPath, fileSystemPath, isOnClassPath);
 	}
 

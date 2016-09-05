@@ -9,6 +9,8 @@ public interface DataWrapperGenerator {
 	
 	public DataWrapper wrapByteArray(byte[] data);
 	
+	public DataWrapper wrapByteArray(byte[] data, int i, int read);
+
 	public DataWrapper wrapByteBuffer(ByteBuffer buffer);
 	
 	/**

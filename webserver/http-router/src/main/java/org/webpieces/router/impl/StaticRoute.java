@@ -47,13 +47,17 @@ public class StaticRoute implements Route {
 		this.urlPath = urlPath;
 		if(urlPath.endsWith("/")) {
 			this.isFile = false;
-			if(!f.isDirectory())
+			if(!fileSystemPath.endsWith("/"))
+				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
+			else if(!f.isDirectory())
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a directory and must be for static directories");
 			this.patternToMatch = Pattern.compile("^"+urlPath+"(?<resource>.*)$");
 			this.pathParamNames.add("resource");
 		} else {
 			this.isFile = true;
-			if(!f.isFile())
+			if(fileSystemPath.endsWith("/"))
+				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
+			else if(!f.isFile())
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a file and must be for static file route");
 			this.patternToMatch = Pattern.compile("^"+urlPath+"$");
 		}

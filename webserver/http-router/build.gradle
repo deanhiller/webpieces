@@ -1,7 +1,10 @@
 dependencies {
     compile deps['guice']
     compile project(':core:core-util')
+    compile project(':core:core-datawrapper')
     compile project(':webserver:http-shared')
+
+    testCompile deps['apache-commons-io']
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

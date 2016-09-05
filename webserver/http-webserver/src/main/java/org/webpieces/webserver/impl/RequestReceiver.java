@@ -79,6 +79,8 @@ public class RequestReceiver implements HttpRequestListener {
 	private Set<String> headersSupported = new HashSet<>();
 	
 	public RequestReceiver() {
+		//We keep this list in place to log out what we have not implemented yet.  This allows us to see if
+		//we missed anything on the request side.
 		headersSupported.add(KnownHeaderName.HOST.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.DATE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CONNECTION.getHeaderName().toLowerCase());
@@ -91,6 +93,7 @@ public class RequestReceiver implements HttpRequestListener {
 		headersSupported.add(KnownHeaderName.COOKIE.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.REFERER.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.ORIGIN.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.CACHE_CONTROL.getHeaderName().toLowerCase());
 		
 		//we don't do redirects or anything like that yet...
 		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());

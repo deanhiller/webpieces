@@ -17,6 +17,12 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 	}
 
 	@Override
+	public DataWrapper wrapByteArray(byte[] data, int offset, int length) {
+		ByteBuffer buf = ByteBuffer.wrap(data, offset, length);
+		return new ByteBufferDataWrapper(buf);
+	}
+	
+	@Override
 	public DataWrapper wrapByteBuffer(ByteBuffer buffer) {
 		if(buffer.position() != 0)
 			throw new IllegalArgumentException("You probably forgot to call buffer.flip() so the buffer is made readable after writing to it.  position must be 0");

@@ -20,9 +20,11 @@ HUGE WINS in using this webserver
 12. Debug one of the tests after creating the example project and you step right into the platform code making it easier to quickly understand the underlying platform you are using and how componentized it is.
 13. Selenium starting test case provided as part of the template
 14. Route files are not in yml but are in java so you can have for loops, dynamic routes and anything you can dream up
-15. Full form support for arrays(which is hard and play1.3.x line never got right and made easy)
-16. TODO - saving page and seamless logging in
-17. TODO: seamless creation of CRUD
+15. Full form support for arrays(which is hard and play1.3.x line never got right to make it dead simple )
+16. Protects developers from the frequent caching screwup.  ie. you should not change any static js/css files without also renaming them so that the browser cache is avoided and it loads the new one as soon as a new version is deployed.  Nearly all webservers just let developers screw this up and then customers wonder why things are not working(and it's only specific customers that have old versions)
+17. supports multiple domains over SSL with multiple certificats but only for advanced users
+18. TODO - saving page and seamless logging in
+19. TODO: seamless creation of CRUD
 
 To try the webserver
 
@@ -69,9 +71,7 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* use timestamp in startup file compression to see if file cache needs to be overwritten.  
-* NEXT up, implement caching
-* fix this...ERROR 2016-08-30 18:41:58,568 [-] [httpFrontEnd7]: This webserver has not thought about supporting header=Cache-Control quite yet.  value=max-age=0 Please let us know and we can quickly add support
+* generate the secret key properly and put into the template when created
 * implement logging in and SSL page redirection to login page and back again
 * SSL 
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
