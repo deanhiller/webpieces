@@ -1,5 +1,7 @@
 package WEBPIECESxPACKAGE;
 
+import java.util.concurrent.TimeUnit;
+
 import org.webpieces.util.file.VirtualFile;
 
 public class ServerConfig {
@@ -8,7 +10,8 @@ public class ServerConfig {
 	private boolean validateRouteIdsOnStartup = false;
 	private int httpPort = 8080;
 	private int httpsPort = 8443;
-	
+	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
+
 	public ServerConfig(int httpPort, int httpsPort) {
 		this.httpPort = httpPort;
 		this.httpsPort = httpsPort;
@@ -41,5 +44,11 @@ public class ServerConfig {
 	public void setHttpsPort(int httpsPort) {
 		this.httpsPort = httpsPort;
 	}
-	
+	public Long getStaticFileCacheTimeSeconds() {
+		return staticFileCacheTimeSeconds ;
+	}
+
+	public void setStaticFileCacheTimeSeconds(Long staticFileCacheTimeSeconds) {
+		this.staticFileCacheTimeSeconds = staticFileCacheTimeSeconds;
+	}
 }

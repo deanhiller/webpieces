@@ -25,6 +25,8 @@ HUGE WINS in using this webserver
 17. supports multiple domains over SSL with multiple certificats but only for advanced users
 18. TODO - saving page and seamless logging in
 19. TODO: seamless creation of CRUD
+20. Security - cookie is hashed so can't be modified without failing next request
+21. Security - Form auth token in play1.3.x line can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it harder to not put the auth token AND check that token in forms (putting is automatic in play 1.3 but checking it is not)
 
 To try the webserver
 
@@ -71,9 +73,8 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* generate the secret key properly and put into the template when created
-* implement logging in and SSL page redirection to login page and back again
 * SSL 
+* implement logging in and SSL page redirection to login page and back again
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}

@@ -35,6 +35,7 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
+import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 @Singleton
@@ -43,10 +44,14 @@ public class StaticFileReader {
 	private static final Logger log = LoggerFactory.getLogger(StaticFileReader.class);
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	//TODO: RouterConfig doesn't really belong here but this class is sneaking past the router api to access some stuff it shouldn't right
-	//now because I was lazy (and should really use verify design to prevent things like that).
+	//TODO: RouterConfig doesn't really belong here but this class is sneaking past
+	//the router api to access some stuff it shouldn't right now because I was 
+	//lazy (and should really use verify design to prevent things like that).  router also uses the same state this
+	//class needs
 	@Inject
 	private RouterConfig routerConfig;
+	@Inject
+	private WebServerConfig config;
 	@Inject
 	@Named(WebServerModule.FILE_READ_EXECUTOR)
 	private ExecutorService fileExecutor;
@@ -98,7 +103,10 @@ public class StaticFileReader {
 		//This also means, we set the cache time to one year and browsers will automatically evict 
 		//when cache size is too large.  We only protect on text file changes not images so expire
 		//the cache monthly in case images change without changing names.
-		response.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "max-age=2592000"));
+		
+		Long timeMs = config.getStaticFileCacheTimeSeconds();
+		if(timeMs != null)
+			response.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "max-age="+timeMs));
 		
 		Path file;
 		Compression compr = compressionLookup.createCompressionStream(info.getRouterRequest().encodings, extension, tuple.mimeType);

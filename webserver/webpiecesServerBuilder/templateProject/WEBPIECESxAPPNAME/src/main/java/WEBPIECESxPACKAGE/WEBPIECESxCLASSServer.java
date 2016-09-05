@@ -126,7 +126,8 @@ public class WEBPIECESxCLASSServer {
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
 										.setFunctionToConfigureServerSocket(s -> configure(s))
-										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup());
+										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
+										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);

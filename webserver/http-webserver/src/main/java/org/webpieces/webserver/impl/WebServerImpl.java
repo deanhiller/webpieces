@@ -77,6 +77,8 @@ public class WebServerImpl implements WebServer {
 	
 	private void validateRouteIdsFromHtmlFilesImpl() throws IOException {
 		if(!config.isValidateRouteIdsOnStartup()) {
+			//This should be done in one unit test that boots the server to verify
+			//all routes in all pages exist and have no typos
 			log.info("Not validating routeIds");
 			return;
 		}

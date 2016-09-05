@@ -6,10 +6,13 @@ import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.compiler.api.CompileOnDemandFactory;
 import org.webpieces.devrouter.impl.DevClassForName;
+import org.webpieces.devrouter.impl.DevCompressionCacheSetup;
 import org.webpieces.devrouter.impl.DevLoader;
 import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.impl.compression.CompressionCacheSetup;
+import org.webpieces.router.impl.compression.ProdCompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 
@@ -30,6 +33,7 @@ public class DevRouterModule implements Module {
 		binder.bind(RoutingService.class).to(DevRoutingService.class).asEagerSingleton();;
 		binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();
+		binder.bind(CompressionCacheSetup.class).to(DevCompressionCacheSetup.class).asEagerSingleton();
 	}
 	
 	@Provides

@@ -5,6 +5,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -40,6 +41,7 @@ public class WebServerConfig {
 	//is used to determine send chunks instead of full response as well since it won't fit
 	//in full response sometimes
 	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
+	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -131,4 +133,13 @@ public class WebServerConfig {
 		return this;
 	}
 
+	public Long getStaticFileCacheTimeSeconds() {
+		return staticFileCacheTimeSeconds ;
+	}
+
+	public WebServerConfig setStaticFileCacheTimeSeconds(Long staticFileCacheTimeSeconds) {
+		this.staticFileCacheTimeSeconds = staticFileCacheTimeSeconds;
+		return this;
+	}
+	
 }
