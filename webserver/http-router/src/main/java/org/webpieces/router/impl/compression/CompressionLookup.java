@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 
+@Singleton
 public class CompressionLookup {
 
 	private CompressionDecider toCompressOrNotToCompress;
