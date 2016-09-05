@@ -29,6 +29,7 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -49,7 +50,7 @@ public class TestSimpleRoutes {
 		RouterConfig config = new RouterConfig()
 										.setMetaFile(f)
 										.setWebappOverrides(module)
-										.setSecretKey("xxx");
+										.setSecretKey(SecretKeyInfo.generateForTest());
 		
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 

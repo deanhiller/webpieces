@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 public class FileCopy {
 
@@ -18,6 +23,7 @@ public class FileCopy {
 	private File webpiecesDir;
 	private String packageDir;
 	private String version;
+	private String secretKeyHex;
 
 	public FileCopy(File webpiecesDir, String appClassName, String appName, String packageStr, File newAppDirectory, String version) {
 		this.webpiecesDir = webpiecesDir;
@@ -28,6 +34,15 @@ public class FileCopy {
 		this.packageDir = convert(packageStr);
 		this.packagePieces = packageStr.split("\\.");
 		this.version = version;
+		
+		try {
+			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA1");
+			SecretKey key = keyGen.generateKey();
+			byte[] encoded = key.getEncoded();
+			secretKeyHex = Base64.getEncoder().encodeToString(encoded);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private String convert(String packageStr2) {
@@ -83,6 +98,7 @@ public class FileCopy {
 			contents = contents.replace("//@Ignore", "@Ignore");
 			contents = contents.replace("//import org.junit.Ignore;", "import org.junit.Ignore;");
 			contents = contents.replace("WEBPIECESxVERSION", version);
+			contents = contents.replace("_SECRETKEYHERE_", secretKeyHex);
 			
 			if(contents.equals(original))
 				return;

@@ -19,6 +19,7 @@ import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
+import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 
 public class CookieTranslator {
@@ -33,8 +34,7 @@ public class CookieTranslator {
 	public CookieTranslator(RouterConfig config, Security security) {
 		this.config = config;
 		this.security = security;
-		String secretKey = config.getSecretKey();
-		if(secretKey == null)
+		if(config.getSecretKey() == null)
 			throw new IllegalArgumentException("secret key must be set");
 	}
 
@@ -74,7 +74,7 @@ public class CookieTranslator {
 		
 		String value = data.toString();
 		if(scopeData instanceof SecureCookie) {
-			String key = config.getSecretKey();
+			SecretKeyInfo key = config.getSecretKey();
 			String sign = security.sign(key, value);
 			cookie.value = VERSION+"-"+sign+":"+value;
 		} else {		

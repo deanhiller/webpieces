@@ -14,6 +14,7 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -62,7 +63,7 @@ public class WebserverForTest {
 											.setWebappOverrides(appOverrides)
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
-											.setSecretKey("xxx");
+											.setSecretKey(SecretKeyInfo.generateForTest());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);

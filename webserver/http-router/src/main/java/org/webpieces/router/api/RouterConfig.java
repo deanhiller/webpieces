@@ -4,7 +4,10 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import javax.crypto.SecretKey;
+
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Module;
 
@@ -16,7 +19,7 @@ public class RouterConfig {
 	private Charset urlEncoding = StandardCharsets.UTF_8;
 	private Charset defaultResponseBodyEncoding = StandardCharsets.UTF_8;
 
-	private String secretKey;
+	private SecretKeyInfo secretKey;
 	
 	/**
 	 * WebApps can override remote services to mock them out for testing or swap prod classes with
@@ -85,11 +88,11 @@ public class RouterConfig {
 		return this;
 	}
 	
-	public String getSecretKey() {
+	public SecretKeyInfo getSecretKey() {
 		return secretKey;
 	}
-	public RouterConfig setSecretKey(String secretKey) {
-		this.secretKey = secretKey;
+	public RouterConfig setSecretKey(SecretKeyInfo signingKey) {
+		this.secretKey = signingKey;
 		return this;
 	}
 	

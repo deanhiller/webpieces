@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
@@ -109,6 +111,8 @@ public class WEBPIECESxCLASSServer {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
+		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
+		
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
@@ -116,7 +120,7 @@ public class WEBPIECESxCLASSServer {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
-											.setSecretKey("_SECRETKEYHERE_");
+											.setSecretKey(signingKey);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
@@ -126,6 +130,16 @@ public class WEBPIECESxCLASSServer {
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
+	}
+
+	private byte[] fetchKey() {
+		//This is purely so it works before template creation
+		//NOTE: our build runs all template tests that are generated to make sure we don't break template 
+		//generation but for that to work pre-generation, we need this code but you are free to delete it...
+		String hexKey = "__SECRETKEYHERE__";  //This gets replaced
+		if(hexKey.startsWith("__SECRETKEY"))  //This does not get replaced (user can remove it from template)
+			return hexKey.getBytes();
+		return Base64.getDecoder().decode(hexKey);
 	}
 
 	private void modifyUserDirForManyEnvironments(String filePath) {

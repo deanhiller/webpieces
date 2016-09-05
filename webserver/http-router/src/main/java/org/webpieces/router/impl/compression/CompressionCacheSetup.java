@@ -78,7 +78,7 @@ public class CompressionCacheSetup {
 	private void store(File metaFile, Properties p) {
 		try {
 			FileOutputStream out = new FileOutputStream(metaFile);
-			p.store(out, "file hashes for next time");
+			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), dir(key:urlPath+relativeFilePath, value:hash)");
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -21,6 +21,7 @@ import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -42,7 +43,7 @@ public class TestProdRouter {
 		RouterConfig config = new RouterConfig()
 										.setMetaFile(f)
 										.setWebappOverrides(module)
-										.setSecretKey("xxx");
+										.setSecretKey(SecretKeyInfo.generateForTest());
 		RoutingService prodSvc = RouterSvcFactory.create(config);
 		
 		return Arrays.asList(new Object[][] {

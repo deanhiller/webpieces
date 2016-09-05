@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 public class Security {
 
@@ -27,20 +26,13 @@ public class Security {
 
 	private static final Hash DEFAULT_HASH_TYPE = Hash.MD5;
 
-	public String sign(String secret, String message) {
-		return sign(secret.getBytes(), message);
-	}
-
-	public String sign(byte[] key, String message) {
-
-		if (key.length == 0) {
-			return message;
-		}
+	public String sign(SecretKeyInfo keyInfo, String message) {
+		if(keyInfo == null || keyInfo.getAlgorithm() == null || keyInfo.getKeyData() == null)
+			throw new IllegalArgumentException("key must be fully specified");
 
 		try {
-			Mac mac = Mac.getInstance("HmacSHA1");
-			SecretKeySpec signingKey = new SecretKeySpec(key, "HmacSHA1");
-			mac.init(signingKey);
+			Mac mac = Mac.getInstance(keyInfo.getAlgorithm());
+			mac.init(keyInfo.getKey());
 			byte[] messageBytes = message.getBytes("utf-8");
 			byte[] result = mac.doFinal(messageBytes);
 

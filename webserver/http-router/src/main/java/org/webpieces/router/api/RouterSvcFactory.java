@@ -3,6 +3,7 @@ package org.webpieces.router.api;
 import java.util.List;
 
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -14,7 +15,8 @@ public class RouterSvcFactory {
     protected RouterSvcFactory() {}
 
     public static RoutingService create(VirtualFile routersFile) {
-    	return create(new RouterConfig().setMetaFile(routersFile).setSecretKey("xxx"));
+    	
+    	return create(new RouterConfig().setMetaFile(routersFile).setSecretKey(SecretKeyInfo.generateForTest()));
     }
     
 	public static RoutingService create(RouterConfig config) {
