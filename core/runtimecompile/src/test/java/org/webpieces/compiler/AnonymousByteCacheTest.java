@@ -57,6 +57,8 @@ public class AnonymousByteCacheTest extends AbstractCompileTest {
 		Callable<ForTestRouteId> callable = (Callable<ForTestRouteId>) invokeMethod(c, "getRunnable");
 		ForTestRouteId value = callable.call();
 		
+		log.info("test route id="+value);
+		
 		CompileConfig config = createCompileConfig();
 		//now create a new compileOnDemand which will use the bytecode cache...
 		compiler = CompileOnDemandFactory.createCompileOnDemand(config);

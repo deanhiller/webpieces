@@ -1,5 +1,28 @@
 # webpieces
 
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
+
+This project is essentially pieces that can be used to build any http related software and full stacks as well.  
+
+HUGE WINS in using this webserver
+1. look ma, no restarting the server in development mode with complete refactoring
+2. no erasing users input from forms which many websites do....soooo annoying
+3. holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win
+4. one liner for declaring a form field which does #2 for you, as well as i18n as well as error handling and decorating ALL your fields with your delcared field template
+5. custom tags can be created in any myhtml.tag file to be re-used very easily(much like playframework 1.3.x+
+6. production server does not contain a compiler (this was a mistake I believe in the play 1.3.x+ framework)
+7. production server creates a compressed static file cache on startup and server pre-compressed files
+8. production server has no need to compile templates as they are precompiled in production mode
+9. You should find, we were so anal, we cover way more developer mistakes and way more error messages on what the developer did wrong so they don't have to wonder why something is not working and waste time.
+10. Override ANY component in your web application for testing to mock remote endpoints
+11. Override ANY component in the platform server just by binding a subclass of the component(fully customizable server)
+12. Debug one of the tests after creating the example project and you step right into the platform code making it easier to quickly understand the underlying platform you are using and how componentized it is.
+13. Selenium starting test case provided as part of the template
+14. Route files are not in yml but are in java so you can have for loops, dynamic routes and anything you can dream up
+15. Full form support for arrays(which is hard and play1.3.x line never got right and made easy)
+16. TODO - saving page and seamless logging in
+17. TODO: seamless creation of CRUD
+
 To try the webserver
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
@@ -25,10 +48,6 @@ To try the webserver
      the webserver (even in debug mode)
 9. In a browser go to http://localhost:8080
 10. refactor your code like crazy and hit the website again(no restart needed)
-
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
-
-This project is essentially pieces that can be used to build any http related software and full stacks as well.  
 
 Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
