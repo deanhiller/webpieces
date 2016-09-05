@@ -9,16 +9,17 @@ To try the webserver
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
     NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
-    A. ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle bug)
-    B. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew did so you have to
+    A. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
        go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
        'Store information about method parameters'
-6. IF Intellij, I think you are screwed unless you do something like this
+    NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle bug)
+6. IF Intellij, you will have a bit more pain during development.  The first steps are to
     A. rewrite the example build.gradle files to just use src/main/resources
     B. duplicate all java packages from src/main/java in src/main/resources
     C. move over all *.html files and *.tag files from src/main/java to src/main/resources to the correct package location
-    D. Endure the pain of duplicating package heirarchies every time you add a package
+    D. Endure the pain of duplicating package heirarchies every time you add a package (and viewing html files and controllers together is no longer possible and was quite useful in our experience)
     E. import into intellij (it should work then)
+    F. (maybe, not sure)...add -parameters to the Java Compiler options
 7. From the IDE, expand mycool-all/mycool-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
      the webserver (even in debug mode)
@@ -48,12 +49,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* Solve -parameters not working into eclipse and intellij?  
-   * ./gradlew eclipse - import general projects separately
-   * import eclipse with eclipse gradle plugin
-   * ./gradlew idea - new projects from existing source
-   * import project with intellij gradle plugin
-   * Redo gradle to only use resources from src/main/java and src/test/java and screw resource directories as the plugins do not handle it well???  in eclipse, must do ./gradle eclipse then gradle plugin as they each have weird issues....try to solve this
 * Unit Test out template compression with very large template.  unit test!!!!! and uncompress on receive and verify!!
 * use timestamp in startup file compression to see if file cache needs to be overwritten.  
 * NEXT up, implement caching
