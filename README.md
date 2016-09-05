@@ -8,15 +8,22 @@ To try the webserver
 4. ./gradlew test # runs all the tests and verify everything is working
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
+    NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
     A. ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle bug)
     B. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew did so you have to
        go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
        'Store information about method parameters'
-6. IF Intellij
-    A.
+6. IF Intellij, I think you are screwed unless you do something like this
+    A. rewrite the example build.gradle files to just use src/main/resources
+    B. duplicate all java packages from src/main/java in src/main/resources
+    C. move over all *.html files and *.tag files from src/main/java to src/main/resources to the correct package location
+    D. Endure the pain of duplicating package heirarchies every time you add a package
+    E. import into intellij (it should work then)
 7. From the IDE, expand mycool-all/mycool-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
      the webserver (even in debug mode)
+9. In a browser go to http://localhost:8080
+10. refactor your code like crazy and hit the website again(no restart needed)
 
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
