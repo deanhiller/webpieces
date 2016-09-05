@@ -125,6 +125,7 @@ public class WEBPIECESxCLASSServer {
 										.setPlatformOverrides(allOverrides)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
+										.setSslEngineFactory(new WEBPIECESxCLASSSSLFactory())
 										.setFunctionToConfigureServerSocket(s -> configure(s))
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
 										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());
@@ -137,7 +138,7 @@ public class WEBPIECESxCLASSServer {
 		//This is purely so it works before template creation
 		//NOTE: our build runs all template tests that are generated to make sure we don't break template 
 		//generation but for that to work pre-generation, we need this code but you are free to delete it...
-		String base64Key = "__SECRETKEYHERE__";  //This gets replaced
+		String base64Key = "__SECRETKEYHERE__";  //This gets replaced with a unique key each generated project which you need to keep or replace with your own!!!
 		if(base64Key.startsWith("__SECRETKEY"))  //This does not get replaced (user can remove it from template)
 			return base64Key.getBytes();
 		return Base64.getDecoder().decode(base64Key);

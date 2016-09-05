@@ -197,7 +197,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		
 		@Override
 		public void farEndClosed(Channel channel) {
-			clientDataListener.farEndClosed(SslTCPChannel.this);
+			if(clientDataListener != null)
+				clientDataListener.farEndClosed(SslTCPChannel.this);
 		}
 	
 		@Override

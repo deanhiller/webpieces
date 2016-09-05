@@ -52,7 +52,7 @@ To try the webserver
 7. From the IDE, expand mycool-all/mycool-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
      the webserver (even in debug mode)
-9. In a browser go to http://localhost:8080
+9. In a browser go to http://localhost:9000
 10. refactor your code like crazy and hit the website again(no restart needed)
 
 Some HTTP/2 features
@@ -74,7 +74,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* SSL 
 * implement logging in and SSL page redirection to login page and back again
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
