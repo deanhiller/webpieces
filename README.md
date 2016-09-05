@@ -49,7 +49,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* Unit Test out template compression with very large template.  unit test!!!!! and uncompress on receive and verify!!
 * use timestamp in startup file compression to see if file cache needs to be overwritten.  
 * NEXT up, implement caching
 * fix this...ERROR 2016-08-30 18:41:58,568 [-] [httpFrontEnd7]: This webserver has not thought about supporting header=Cache-Control quite yet.  value=max-age=0 Please let us know and we can quickly add support

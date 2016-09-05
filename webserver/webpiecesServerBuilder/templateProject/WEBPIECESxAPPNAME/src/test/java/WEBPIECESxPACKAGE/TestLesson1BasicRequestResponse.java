@@ -71,6 +71,8 @@ public class TestLesson1BasicRequestResponse {
 	}
 	
 	/**
+	 * It is highly suggested you step through this test in debug mode to understand the description below...
+	 * 
 	 * This is a single threaded test that actually allows the webserver thread to return back to the test before 
 	 * the response comes.  (in production the thread would process other requests while waiting for remote system response).  
 	 * Then the test simulates the response coming in from remote system and makes sure we send a response back
@@ -101,6 +103,25 @@ public class TestLesson1BasicRequestResponse {
 		httpPayload.assertContains("This is a page with value="+value);
 	}
 
+	/**
+	 * For the heck of it, test out chunked compressed response...
+	 */
+	@Test
+	public void testChunkedCompression() {
+		HttpRequest req = createRequest("/");
+		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		Assert.assertTrue(httpPayload.getChunks().size() > 0);
+		httpPayload.uncompressBodyAndAssertContainsString("Webpieces");
+	}
+	
 	static HttpRequest createRequest(String uri) {
 		HttpRequestLine requestLine = new HttpRequestLine();;
 		requestLine.setMethod(KnownHttpMethod.GET);

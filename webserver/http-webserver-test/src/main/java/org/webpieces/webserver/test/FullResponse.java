@@ -1,8 +1,12 @@
 package org.webpieces.webserver.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -66,6 +70,16 @@ public class FullResponse {
 	}
 
 	public String getBodyAsString() {
+		Charset charset = extractCharset();
+		
+		//get charset from headers?
+		DataWrapper body = getBody();
+		if(body == null)
+			return null;
+		return body.createStringFrom(0, body.getReadableSize(), charset);
+	}
+
+	private Charset extractCharset() {
 		Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_TYPE);
 		if(header == null)
 			throw new IllegalArgumentException("no ContentType header could be found");
@@ -73,12 +87,7 @@ public class FullResponse {
 		Charset charset = DEFAULT_CHARSET;
 		if(ct.getCharSet() != null)
 			charset = Charset.forName(ct.getCharSet());
-		
-		//get charset from headers?
-		DataWrapper body = getBody();
-		if(body == null)
-			return null;
-		return body.createStringFrom(0, body.getReadableSize(), charset);
+		return charset;
 	}
 
 	public void assertStatusCode(KnownStatusCode status) {
@@ -104,6 +113,36 @@ public class FullResponse {
 		String value = type.getValue();
 		if(!mimeType.equals(value))
 			throw new IllegalStateException("Expected mimeType="+mimeType+" but found type="+value);
+	}
+
+	public void uncompressBodyAndAssertContainsString(String text) {
+		Header header = getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_ENCODING);
+		if(header == null)
+			throw new IllegalStateException("Body is not compressed as no CONTENT_ENCODING header field exists");
+		else if(!"gzip".equals(header.getValue()))
+			throw new IllegalStateException("Body has wrong compression type="+header.getValue()+" in CONTENT_ENCODING header field");
+
+		DataWrapper wrapper = getBody();
+		byte[] compressed = wrapper.createByteArray();
+		ByteArrayInputStream in = new ByteArrayInputStream(compressed);
+		byte[] out = new byte[10000];
+		DataWrapper output = dataGen.emptyWrapper();
+		try (GZIPInputStream str = new GZIPInputStream(in)) {
+			int read = 0;
+			while((read = str.read(out)) > 0) {
+				ByteBuffer buffer = ByteBuffer.wrap(out, 0, read);
+				DataWrapper byteWrapper = dataGen.wrapByteBuffer(buffer);
+				output = dataGen.chainDataWrappers(output, byteWrapper);
+				out = new byte[10000];
+			}
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		Charset charset = extractCharset();
+		String bodyAsString = output.createStringFrom(0, output.getReadableSize(), charset);
+		if(!bodyAsString.contains(text))
+			throw new IllegalStateException("Expected compressed body to contain='"+text+"' but body was="+bodyAsString);
 	}
 
 }
