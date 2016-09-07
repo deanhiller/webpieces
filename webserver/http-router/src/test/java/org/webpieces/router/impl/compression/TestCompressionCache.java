@@ -9,9 +9,12 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.StaticRoute;
+import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Binder;
 import com.google.inject.Guice;
@@ -21,6 +24,8 @@ import com.google.inject.util.Modules;
 
 public class TestCompressionCache {
 
+	private static final Logger log = LoggerFactory.getLogger(TestCompressionCache.class);
+	
 	private CompressionCacheSetup cache;
 	private TestFileUtilProxy proxy = new TestFileUtilProxy();
 
@@ -28,8 +33,12 @@ public class TestCompressionCache {
 	public void setUp() throws IOException {
 		File cacheDir = new File(System.getProperty("java.io.tmpdir")+"/cacheForTesting");
 		FileUtils.deleteDirectory(cacheDir);
+		log.info("deleting dir="+cacheDir);
+		File stagingDir = new File("output/staging");
+		FileUtils.deleteDirectory(stagingDir);
 		
 		RouterConfig config = new RouterConfig();
+		config.setSecretKey(SecretKeyInfo.generateForTest());
 		config.setCachedCompressedDirectory(cacheDir);
 		Module allMods = Modules.override(new ProdRouterModule(config)).with(new TestModule());
 		Injector injector = Guice.createInjector(allMods);

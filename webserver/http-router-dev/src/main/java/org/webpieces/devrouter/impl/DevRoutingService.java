@@ -94,13 +94,22 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 	
 	public NotFoundInfo fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
-		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
-				+ " something needs a'fixin.  req="+req, e);
-
 		//Production app's notFound route TBD and used in iframe later
 		MatchResult origResult = routeLoader.fetchNotFoundRoute();
 		RouteMeta origMeta = origResult.getMeta();
 
+		if(req.queryParams.containsKey("webpiecesShowPage")) {
+			//This is actually a callback from the below code's iframe!!!
+			if(origMeta.getControllerInstance() == null)
+				routeLoader.loadControllerIntoMetaObject(origMeta, false);
+
+			MatchResult result = new MatchResult(origMeta);
+			return new NotFoundInfo(result, req);
+		}
+
+		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
+				+ " something needs a'fixin.  req="+req, e);
+		
 		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
 		RouteModuleInfo info = new RouteModuleInfo("", null);
 		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
@@ -116,6 +125,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		RouterRequest newRequest = new RouterRequest();
 		newRequest.multiPartFields.put("webpiecesError", "Exception message="+reason);
+		newRequest.multiPartFields.put("url", req.relativePath);
 		
 		return new NotFoundInfo(result, newRequest);
 	}

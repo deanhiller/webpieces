@@ -10,6 +10,13 @@ public class NotFoundController {
 	public Action notFound() {
 		RouterRequest request = Current.request();
 		String error = request.multiPartFields.get("webpiecesError");
-		return Actions.renderThis("error", error);
+		String url = request.multiPartFields.get("url");
+		
+		if(url.contains("?")) {
+			url += "&webpiecesShowPage=true";
+		} else {
+			url += "?webpiecesShowPage=true";
+		}
+		return Actions.renderThis("error", error, "url", url);
 	}
 }

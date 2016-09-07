@@ -61,10 +61,6 @@ public class RequestReceiver implements HttpRequestListener {
 	@Inject
 	private WebServerConfig config;
 	@Inject
-	private CookieTranslator cookieTranslator;
-	@Inject
-	private ObjectTranslator objectTranslator;
-	@Inject
 	private UrlEncodedParser urlEncodedParser;
 	@Inject
 	private BodyParsers requestBodyParsers;
@@ -154,27 +150,16 @@ public class RequestReceiver implements HttpRequestListener {
 		ProxyResponse streamer = responseProvider.get();
 		try {
 			streamer.init(routerRequest, channel, bufferPool);
-
-			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(objectTranslator));
-			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(objectTranslator));
-			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(objectTranslator));
-			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
 			
-			processRequest(streamer, routerRequest, requestCtx);
+			processRequest(streamer, routerRequest);
 		} catch(BadRequestException e) {
 			log.warn("Exception that only happens if hacker hacking or you the developer messed something up", e);
 			streamer.sendFailure(new HttpException(KnownStatusCode.HTTP_400_BADREQUEST));
 		}
 	}
 
-	private void processRequest(ProxyResponse streamer, RouterRequest routerRequest, RequestContext requestCtx) {
-		//ThreadLocal...
-		Current.setContext(requestCtx);
-		try {
+	private void processRequest(ProxyResponse streamer, RouterRequest routerRequest) {
 			routingService.processHttpRequests(routerRequest, streamer );
-		} finally {
-			Current.setContext(null);
-		}
 	}
 
 

@@ -9,14 +9,23 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.FlashSub;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Session;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
+import org.webpieces.router.impl.ctx.FlashImpl;
+import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Guice;
@@ -31,19 +40,25 @@ public class RouteLoader {
 	private final RouteInvoker invoker;
 	private final ControllerLoader controllerFinder;
 	private CompressionCacheSetup compressionCacheSetup;
-
+	private CookieTranslator cookieTranslator;
+	private ObjectTranslator objectTranslator;
+	
 	protected RouterBuilder routerBuilder;
 	
 	@Inject
 	public RouteLoader(RouterConfig config, 
 						RouteInvoker invoker,
 						ControllerLoader controllerFinder,
-						CompressionCacheSetup compressionCacheSetup
+						CompressionCacheSetup compressionCacheSetup,
+						CookieTranslator cookieTranslator,
+						ObjectTranslator objectTranslator
 	) {
 		this.config = config;
 		this.invoker = invoker;
 		this.controllerFinder = controllerFinder;
 		this.compressionCacheSetup = compressionCacheSetup;
+		this.cookieTranslator = cookieTranslator;
+		this.objectTranslator = objectTranslator;
 	}
 	
 	public WebAppMeta load(ClassForName loader) {
@@ -146,9 +161,14 @@ public class RouteLoader {
 		return meta;
 	}
 	
-	public void invokeRoute(MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
+	public void invokeRoute(MatchResult result, RouterRequest routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+		Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(objectTranslator));
+		FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(objectTranslator));
+		Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(objectTranslator));
+		RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
+
 		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
-		invoker.invoke(result, req, responseCb, notFoundRoute);
+		invoker.invoke(result, routerRequest, responseCb, errorRoutes, requestCtx);
 	}
 
 	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {

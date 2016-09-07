@@ -49,10 +49,8 @@ public class RouteInvoker {
 	}
 
 	public void invoke(
-			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes, RequestContext requestCtx) {
 		try {
-			RequestContext requestCtx = Current.getContext();
-			
 			//We convert all exceptions from invokeAsync into CompletableFuture..
 			CompletableFuture<Void> future = invokeAsync(result, requestCtx, responseCb, errorRoutes);
 			future.exceptionally(e -> processException(responseCb, requestCtx, e, errorRoutes, result.getMeta()));
@@ -96,7 +94,7 @@ public class RouteInvoker {
 	}
 	
 	public CompletableFuture<Void> invokeAsync(
-		MatchResult result, RequestContext req, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
+		MatchResult result, RequestContext reqCtx, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
 		try {
 			//This makes us consistent with other NotFoundExceptions and without the cost of 
 			//throwing an exception and filling in stack trace...
@@ -104,12 +102,12 @@ public class RouteInvoker {
 			//can get very annoying
 			RouteType routeType = result.getMeta().getRoute().getRouteType();
 			if(routeType == RouteType.NOT_FOUND) {
-				processException(responseCb, req, null, notFoundRoute, null);
+				processException(responseCb, reqCtx, null, notFoundRoute, null);
 				//This is a special case....check the NotFound tests
 				return CompletableFuture.completedFuture(null);
 			}
 
-			return invokeImpl(result, req, responseCb);
+			return invokeImpl(result, reqCtx, responseCb);
 		} catch (Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -188,11 +186,13 @@ public class RouteInvoker {
 		}
 
 		RequestLocalCtx.set(processor);
+		Current.setContext(requestCtx);
 		CompletableFuture<Object> response;
 		try {
 			response = invokeMethod(obj, method, arguments);
 		} finally {
 			RequestLocalCtx.set(null);
+			Current.setContext(null);
 		}
 		
 		CompletableFuture<Void> future = response.thenApply(resp -> continueProcessing(processor, resp, responseCb));
