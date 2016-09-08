@@ -41,6 +41,8 @@ public class WebServerConfig {
 	//is used to determine send chunks instead of full response as well since it won't fit
 	//in full response sometimes
 	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
+	
+	//what gets put in the cache header for static files...
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
 	
 	public int getNumFrontendServerThreads() {

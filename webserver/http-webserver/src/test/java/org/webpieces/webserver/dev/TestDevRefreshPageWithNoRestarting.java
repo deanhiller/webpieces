@@ -1,0 +1,125 @@
+package org.webpieces.webserver.dev;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.compiler.api.CompileConfig;
+import org.webpieces.devrouter.api.DevRouterModule;
+import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.templating.api.DevTemplateModule;
+import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.webserver.Requests;
+import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.Asserts;
+import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.MockFrontendSocket;
+
+import com.google.inject.Module;
+import com.google.inject.util.Modules;
+
+public class TestDevRefreshPageWithNoRestarting {
+
+	private static final Logger log = LoggerFactory.getLogger(TestDevSynchronousErrors.class);
+	private HttpRequestListener server;
+	private MockFrontendSocket socket = new MockFrontendSocket();
+	private File stashedExistingCodeDir;
+	private File existingCodeLoc;
+	private String userDir;
+	
+	@Before
+	public void setUp() throws ClassNotFoundException, IOException {
+		Asserts.assertWasCompiledWithParamNames("test");
+		userDir = System.getProperty("user.dir");
+		log.info("running from dir="+userDir);
+		
+		//cache existing code for use by teardown...
+		existingCodeLoc = new File(userDir+"/src/test/java/org/webpieces/webserver/dev/app");
+		stashedExistingCodeDir = new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestDevServer/app");
+		FileUtils.copyDirectory(existingCodeLoc, stashedExistingCodeDir);
+		
+		//list all source paths here as you add them(or just create for loop)
+		//These are the list of directories that we detect java file changes under
+		List<VirtualFile> srcPaths = new ArrayList<>();
+		srcPaths.add(new VirtualFileImpl(userDir+"/src/test/java"));
+		
+		VirtualFile metaFile = new VirtualFileImpl(userDir + "/src/test/resources/devmeta.txt");
+		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
+		
+		//html and json template file encoding...
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
+		
+		//java source files encoding...
+		CompileConfig devConfig = new CompileConfig(srcPaths)
+										.setFileEncoding(WebserverForTest.CHAR_SET_TO_USE);
+		Module platformOverrides = Modules.combine(
+										new DevRouterModule(devConfig),
+										new DevTemplateModule(templateConfig));
+		
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
+		server = webserver.start();
+	}
+	
+	@After
+	public void tearDown() throws IOException {
+		//delete any modifications and restore the original code...
+		FileUtils.deleteDirectory(existingCodeLoc);
+		FileUtils.copyDirectory(stashedExistingCodeDir, existingCodeLoc);
+	}
+	
+	@Test
+	public void testGuiceModuleAddAndControllerChange() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		server.processHttpRequests(socket, req , false);
+		verifyPageContents("user=Dean Hiller");
+		
+		simulateDeveloperMakesChanges("src/test/resources/guiceModule");
+		
+		server.processHttpRequests(socket, req, false);
+		verifyPageContents("user=Jeff");
+	}
+
+	private void simulateDeveloperMakesChanges(String directory) throws IOException {
+		File srcDir = new File(userDir+"/"+directory);
+		FileUtils.copyDirectory(srcDir, existingCodeLoc, null);
+	}
+
+	private void verifyPageContents(String contents) {
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains(contents);
+	}
+	
+	@Test
+	public void testDevMetaTxtFileModifyAndControllerChange() {
+	}
+
+	@Test
+	public void testRouteAdditionWithNewControllerPath() {
+	}
+	
+	@Test
+	public void testNotFoundRouteModifiedAndControllerModified() {
+	}
+	
+	@Test
+	public void testInternalErrorModifiedAndControllerModified() {
+	}
+	
+}
