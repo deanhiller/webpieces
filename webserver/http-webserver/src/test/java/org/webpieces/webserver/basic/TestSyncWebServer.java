@@ -25,7 +25,7 @@ public class TestSyncWebServer {
 	
 	@Before
 	public void setUp() {
-		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
+		TemplateCompileConfig config = new TemplateCompileConfig();
 		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, null);
 		server = webserver.start();		
 	}

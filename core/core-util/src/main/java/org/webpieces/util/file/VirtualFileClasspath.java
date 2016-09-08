@@ -20,6 +20,11 @@ public class VirtualFileClasspath implements VirtualFile {
 		this.path = path;
 	}
 
+	public VirtualFileClasspath(String path, Class<?> clazz) {
+		resource = clazz.getResource(path);
+		this.path = path;
+	}
+	
 	@Override
 	public boolean isDirectory() {
 		return false;

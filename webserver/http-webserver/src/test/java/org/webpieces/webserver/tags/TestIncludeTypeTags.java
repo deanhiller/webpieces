@@ -28,7 +28,7 @@ public class TestIncludeTypeTags {
 	
 	@Before
 	public void setUp() {
-		TemplateCompileConfig config = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
+		TemplateCompileConfig config = new TemplateCompileConfig();
 		Module allOverrides = Modules.combine(new PlatformOverridesForTest(config), new TagOverridesModule(TagOverrideLookupForTesting.class));
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(allOverrides, null, false, metaFile);

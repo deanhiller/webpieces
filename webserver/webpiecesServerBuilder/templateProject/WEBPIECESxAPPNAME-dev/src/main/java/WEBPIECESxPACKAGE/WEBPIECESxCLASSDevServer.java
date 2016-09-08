@@ -43,8 +43,9 @@ public class WEBPIECESxCLASSDevServer {
 		
         String directory = modifyForIDE(filePath1);
         
-		//list all source paths here as you add them(or just create for loop)
-		//These are the list of directories that we detect java file changes under
+		//list all source paths here(DYNAMIC html files and java) as you add them(or just create for loop)
+		//These are the list of directories that we detect java file changes under.  static source files(html, css, etc) do
+        //not need to be recompiled each change so don't need to be listed here.
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(directory+"/WEBPIECESxAPPNAME/src/main/java"));
 		
@@ -52,7 +53,8 @@ public class WEBPIECESxCLASSDevServer {
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...
-		TemplateCompileConfig templateConfig = new TemplateCompileConfig(WEBPIECESxCLASSServer.ALL_FILE_ENCODINGS);
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths)
+														.setFileEncoding(WEBPIECESxCLASSServer.ALL_FILE_ENCODINGS);
 		
 		//java source files encoding...
 		CompileConfig devConfig = new CompileConfig(srcPaths)

@@ -15,6 +15,8 @@ import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.impl.source.ScriptOutputImpl;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileClasspath;
 
 import groovy.lang.GroovyClassLoader;
 
@@ -44,15 +46,29 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 	}
 	
 	private Template loadTemplateImpl(String fullTemplatePath, String templateFullClassName) throws IOException, ClassNotFoundException {
-		InputStream resource = DevTemplateService.class.getResourceAsStream(fullTemplatePath);
-		if(resource == null)
+		VirtualFile theResource = null;
+		List<VirtualFile> srcPaths = config.getSrcPaths();
+		for(VirtualFile f : srcPaths) {
+			VirtualFile child = f.child(fullTemplatePath.substring(1));//take off the leading '/' so it is a relative path
+			if(child.exists()) {
+				theResource = child;
+				break;
+			}
+		}
+
+		if(theResource == null) 
+			theResource = new VirtualFileClasspath(fullTemplatePath, DevTemplateService.class);
+		
+		if(!theResource.exists())
 			throw new FileNotFoundException("resource="+fullTemplatePath+" was not found in classpath");
 		
-		String viewSource = IOUtils.toString(resource, config.getFileEncoding().name());
-
-		Class<?> compiledTemplate = createTemplate(templateFullClassName, viewSource);
-		
-		return new TemplateImpl(htmlTagLookup, compiledTemplate);
+		try(InputStream resource = theResource.openInputStream()) {
+			String viewSource = IOUtils.toString(resource, config.getFileEncoding().name());
+	
+			Class<?> compiledTemplate = createTemplate(templateFullClassName, viewSource);
+			
+			return new TemplateImpl(htmlTagLookup, compiledTemplate);
+		}
 	}
 
 	private Class<?> createTemplate(String fullClassName, String source) throws ClassNotFoundException {

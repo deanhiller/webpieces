@@ -45,9 +45,16 @@ public class TestDevRefreshPageWithNoRestarting {
 		Asserts.assertWasCompiledWithParamNames("test");
 		userDir = System.getProperty("user.dir");
 		log.info("running from dir="+userDir);
+
+		existingCodeLoc = new File(userDir+"/src/test/java/org/webpieces/webserver/dev/app");
+		
+		//developers tend to exit their test leaving the code in a bad state so if they run it again, restore the original
+		//version for them(if we change the original version, we have to copy it to this directory as well though :(
+		File original = new File(userDir+"/src/test/devServerTest/devServerOriginal");
+		FileUtils.copyDirectory(original, existingCodeLoc, null);
 		
 		//cache existing code for use by teardown...
-		existingCodeLoc = new File(userDir+"/src/test/java/org/webpieces/webserver/dev/app");
+
 		stashedExistingCodeDir = new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestDevServer/app");
 		FileUtils.copyDirectory(existingCodeLoc, stashedExistingCodeDir);
 		
@@ -60,14 +67,14 @@ public class TestDevRefreshPageWithNoRestarting {
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...
-		TemplateCompileConfig templateConfig = new TemplateCompileConfig(WebserverForTest.CHAR_SET_TO_USE);
-		
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
 		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths)
-										.setFileEncoding(WebserverForTest.CHAR_SET_TO_USE);
+		CompileConfig devConfig = new CompileConfig(srcPaths);
+		
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
-										new DevTemplateModule(templateConfig));
+										new DevTemplateModule(templateConfig),
+										new MockFrontEndModule());
 		
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		server = webserver.start();
@@ -86,24 +93,23 @@ public class TestDevRefreshPageWithNoRestarting {
 		server.processHttpRequests(socket, req , false);
 		verifyPageContents("user=Dean Hiller");
 		
-		simulateDeveloperMakesChanges("src/test/resources/guiceModule");
+		simulateDeveloperMakesChanges("src/test/devServerTest/guiceModule");
 		
 		server.processHttpRequests(socket, req, false);
-		verifyPageContents("user=Jeff");
+		verifyPageContents("newuser=Joseph");
 	}
 
-	private void simulateDeveloperMakesChanges(String directory) throws IOException {
-		File srcDir = new File(userDir+"/"+directory);
-		FileUtils.copyDirectory(srcDir, existingCodeLoc, null);
-	}
-
-	private void verifyPageContents(String contents) {
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains(contents);
+	//Different than swapping out meta 
+	@Test
+	public void testJustControllerChanged() throws IOException {
+//		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+//		server.processHttpRequests(socket, req , false);
+//		verifyPageContents("user=Dean Hiller");
+//		
+//		simulateDeveloperMakesChanges("src/test/devServerTest/guiceModule");
+//		
+//		server.processHttpRequests(socket, req, false);
+//		verifyPageContents("newuser=Joseph");
 	}
 	
 	@Test
@@ -122,4 +128,18 @@ public class TestDevRefreshPageWithNoRestarting {
 	public void testInternalErrorModifiedAndControllerModified() {
 	}
 	
+	private void simulateDeveloperMakesChanges(String directory) throws IOException {
+		File srcDir = new File(userDir+"/"+directory);
+		FileUtils.copyDirectory(srcDir, existingCodeLoc, null, false);
+	}
+
+	private void verifyPageContents(String contents) {
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains(contents);
+		socket.clear();
+	}
 }
