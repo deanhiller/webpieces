@@ -95,6 +95,16 @@ TODO:
 
 * start createing a real website!!!! AND on https
 
+Other longterm TODO:
+* playing with channel manager, add testing maybe? OR maybe asyncserver project
+* using the webserver and creating examples in the example app (may actually need some tags as well like render as is)
+   * escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
+* tab state
+* http2
+* metrics
+* dynamic JMX
+* turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2)
+
 
 Examples.....
 
