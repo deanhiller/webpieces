@@ -17,7 +17,11 @@ public class DevController {
 		return Actions.renderThis("value", "something2");
 	}
 	
+	public Action causeError() {
+		throw new RuntimeException("testing");
+	}
+	
 	public Action internalError() {
-		return Actions.renderThis();
+		return Actions.renderThis("error", "error1");
 	}
 }

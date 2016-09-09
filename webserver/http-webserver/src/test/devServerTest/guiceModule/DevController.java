@@ -20,10 +20,14 @@ public class DevController {
 	}
 	
 	public Action notFound() {
-		return Actions.renderThis();
+		return Actions.renderThis("value", "something1");
+	}
+	
+	public Action causeError() {
+		throw new RuntimeException("testing");
 	}
 	
 	public Action internalError() {
-		return Actions.renderThis();
+		return Actions.renderThis("error", "error1");
 	}
 }

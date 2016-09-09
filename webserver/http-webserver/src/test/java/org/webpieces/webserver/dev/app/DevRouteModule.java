@@ -9,6 +9,8 @@ public class DevRouteModule extends AbstractRouteModule {
 	@Override
 	public void configure(String currentPackage) {
 		addRoute(GET , "/home",               "DevController.home", DevRouteId.HOME);
+		
+		addRoute(GET , "/causeError",         "DevController.causeError", DevRouteId.CAUSE_ERROR);
 
 		setPageNotFoundRoute("DevController.notFound");
 		setInternalErrorRoute("DevController.internalError");
