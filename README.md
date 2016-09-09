@@ -74,10 +74,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* implement test on dev server of guice module added AND controller injects new library from module and returns new value(hit server before change and after change)
-* impement test on dev server of the not found page logic changing to show something new/different
-* implement test on dev server of the internal error page logic changing to show something different
-* implement test on new RoutesModule and make sure it then appears just fine as well
 * implement logging in and SSL page redirection to login page and back again(nearly there but became blocked on previous tests
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
