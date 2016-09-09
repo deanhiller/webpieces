@@ -142,8 +142,15 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 	
 	@Test
-	public void testInternalErrorModifiedAndControllerModified() {
+	public void testInternalErrorModifiedAndControllerModified() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
+		server.processHttpRequests(socket, req , false);
+		verify500PageContents("InternalError1=error1");
 		
+		simulateDeveloperMakesChanges("src/test/devServerTest/internalError");
+		
+		server.processHttpRequests(socket, req, false);
+		verify500PageContents("InternalError2=error2");		
 	}
 	
 	private void simulateDeveloperMakesChanges(String directory) throws IOException {
@@ -167,6 +174,16 @@ public class TestDevRefreshPageWithNoRestarting {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains(contents);
+		socket.clear();
+	}
+	
+	private void verify500PageContents(String contents) {
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains(contents);
 		socket.clear();
 	}
