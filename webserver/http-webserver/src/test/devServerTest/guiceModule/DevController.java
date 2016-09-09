@@ -15,4 +15,15 @@ public class DevController {
 		return Actions.renderThis("user", user);
 	}
 
+	public Action existingRoute() {
+		return Actions.renderThis();
+	}
+	
+	public Action notFound() {
+		return Actions.renderThis();
+	}
+	
+	public Action internalError() {
+		return Actions.renderThis();
+	}
 }

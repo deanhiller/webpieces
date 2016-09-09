@@ -113,16 +113,37 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 
 	@Test
-	public void testRouteAdditionWithNewControllerPath() {
+	public void testRouteAdditionWithNewControllerPath() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
+		server.processHttpRequests(socket, req , false);
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		socket.clear();
 		
+		simulateDeveloperMakesChanges("src/test/devServerTest/routeChange");
+		
+		server.processHttpRequests(socket, req, false);
+		verifyPageContents("Existing Route Page");
 	}
 	
 	@Test
-	public void testNotFoundRouteModifiedAndControllerModified() {
+	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notfound/notfound?webpiecesShowPage=true");
+		server.processHttpRequests(socket, req , false);
+		verify404PageContents("value1=something1");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
+		
+		server.processHttpRequests(socket, req, false);
+		verify404PageContents("value2=something2");
 	}
 	
 	@Test
 	public void testInternalErrorModifiedAndControllerModified() {
+		
 	}
 	
 	private void simulateDeveloperMakesChanges(String directory) throws IOException {
@@ -136,6 +157,16 @@ public class TestDevRefreshPageWithNoRestarting {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains(contents);
+		socket.clear();
+	}
+	
+	private void verify404PageContents(String contents) {
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains(contents);
 		socket.clear();
 	}

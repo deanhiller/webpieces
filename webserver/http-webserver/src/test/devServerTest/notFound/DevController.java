@@ -6,8 +6,7 @@ import org.webpieces.router.api.actions.Actions;
 public class DevController {
 
 	public Action home() {
-		String user = "CoolJeff";
-		return Actions.renderThis("user", user);
+		return Actions.renderThis("user", "Dean Hiller");
 	}
 
 	public Action existingRoute() {
@@ -15,7 +14,7 @@ public class DevController {
 	}
 	
 	public Action notFound() {
-		return Actions.renderThis();
+		return Actions.renderThis("value", "something2");
 	}
 	
 	public Action internalError() {

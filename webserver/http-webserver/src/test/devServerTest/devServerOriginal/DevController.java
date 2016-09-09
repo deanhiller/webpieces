@@ -12,4 +12,12 @@ public class DevController {
 	public Action existingRoute() {
 		return Actions.renderThis();
 	}
+	
+	public Action notFound() {
+		return Actions.renderThis("value", "something1");
+	}
+	
+	public Action internalError() {
+		return Actions.renderThis();
+	}
 }
