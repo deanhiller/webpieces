@@ -9,4 +9,7 @@ public class DevController {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 
+	public Action existingRoute() {
+		return Actions.renderThis();
+	}
 }

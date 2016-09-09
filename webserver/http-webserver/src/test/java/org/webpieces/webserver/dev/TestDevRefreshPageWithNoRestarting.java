@@ -102,22 +102,19 @@ public class TestDevRefreshPageWithNoRestarting {
 	//Different than swapping out meta 
 	@Test
 	public void testJustControllerChanged() throws IOException {
-//		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-//		server.processHttpRequests(socket, req , false);
-//		verifyPageContents("user=Dean Hiller");
-//		
-//		simulateDeveloperMakesChanges("src/test/devServerTest/guiceModule");
-//		
-//		server.processHttpRequests(socket, req, false);
-//		verifyPageContents("newuser=Joseph");
-	}
-	
-	@Test
-	public void testDevMetaTxtFileModifyAndControllerChange() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		server.processHttpRequests(socket, req , false);
+		verifyPageContents("user=Dean Hiller");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/controllerChange");
+		
+		server.processHttpRequests(socket, req, false);
+		verifyPageContents("user=CoolJeff");
 	}
 
 	@Test
 	public void testRouteAdditionWithNewControllerPath() {
+		
 	}
 	
 	@Test

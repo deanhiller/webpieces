@@ -6,10 +6,8 @@ import org.webpieces.router.api.actions.Actions;
 public class DevController {
 
 	public Action home() {
-		return Actions.renderThis("user", "Dean Hiller");
+		String user = "CoolJeff";
+		return Actions.renderThis("user", user);
 	}
 
-	public Action existingRoute() {
-		return Actions.renderThis();
-	}
 }
