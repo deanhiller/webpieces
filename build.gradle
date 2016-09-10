@@ -220,9 +220,10 @@ subprojects {
    uploadArchives {
       repositories {
         mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
             if(project.hasProperty('projVersion')) {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
                 if("".equals(project.projVersion.trim())) {
                     throw new InvalidUserDataException("-PprojVersion property was not defined and must be when uploadArchives is run");
                 }
