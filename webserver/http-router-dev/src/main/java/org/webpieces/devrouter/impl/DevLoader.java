@@ -31,6 +31,11 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 
 	@SuppressWarnings("unchecked")
 	protected <T> RouteFilter<T> createFilterImpl(Injector injector, FilterInfo<T> info) {
+		//NOTE: This is a bit ironic.  I did all this work but then found out, on reloading the modules, it uses the new
+		//{appfilter}.class files from the neew classloader so info.getFilter returns the right ones so we should refactor
+		//the crap out of this and have it only exist in the production line basically.  We do have a test to make sure
+		//it keeps working so we are safe in refactoring this
+		
 		Class<? extends RouteFilter<T>> filterClass = info.getFilter();
 		//Must get the string as the Class here will be WRONG if it got recompiled as it will be a new instance
 		//coming from a different classloader

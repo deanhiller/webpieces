@@ -141,10 +141,16 @@ public class TestDevRefreshPageWithNoRestarting {
 		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
 		socket.clear();
 		
-//		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
-//		
-//		server.processHttpRequests(socket, req, false);
-//		verifyPageContents("Existing Route Page");
+		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
+		
+		server.processHttpRequests(socket, req, false);
+		
+		responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals("http://myhost.com/causeError", response.getRedirectUrl());
 	}
 	
 	@Test
