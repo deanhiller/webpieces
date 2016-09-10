@@ -77,7 +77,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* tset that returns null for CompletableFuture AND Action
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}

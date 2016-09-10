@@ -208,6 +208,21 @@ public class TestSynchronousErrors {
 
 	}
 	
+	@Test
+	public void testReturnNull() {
+		mockNotFoundLib.throwRuntime();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/null");
+		
+		server.processHttpRequests(mockResponseSocket, req, false);
+		
+		List<FullResponse> responses = mockResponseSocket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse httpPayload = responses.get(0);
+		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		httpPayload.assertContains("There was a bug in our software...sorry about that");		
+	}
+	
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {

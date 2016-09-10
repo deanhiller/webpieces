@@ -36,7 +36,9 @@ public class ServiceProxy extends Service<MethodMeta, Action> {
 		Object[] arguments = meta.getArguments();
 		
 		Object retVal = m.invoke(obj, arguments);
-		if(retVal instanceof CompletableFuture) {
+		if(retVal == null) {
+			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+m);
+		} else if(retVal instanceof CompletableFuture) {
 			return (CompletableFuture<Action>) retVal;
 		} else {
 			Action action = (Action) retVal;
