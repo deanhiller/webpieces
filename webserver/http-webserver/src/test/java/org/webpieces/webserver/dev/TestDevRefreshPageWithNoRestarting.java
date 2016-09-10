@@ -152,6 +152,28 @@ public class TestDevRefreshPageWithNoRestarting {
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/causeError", response.getRedirectUrl());
 	}
+
+	@Test
+	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound?webpiecesShowPage");
+		server.processHttpRequests(socket, req , false);
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
+		socket.clear();
+		
+		server.processHttpRequests(socket, req, false);
+		
+		responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
+	}
 	
 	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {

@@ -30,7 +30,6 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		loader.loadInstIntoMeta(meta, controllerInst, methodStr);
 	}
 
-	protected abstract <T> RouteFilter<T> createFilterImpl(Injector injector, FilterInfo<T> info);
 
 	protected abstract Object createController(Injector injector, String controllerStr);
 
@@ -56,7 +55,11 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 	}
 	
 	protected <T> RouteFilter<T> createFilter2(Injector injector, FilterInfo<T> info) {
-		RouteFilter<T> f = createFilterImpl(injector, info);
+		//This is a bit crazy in Development Server(production server is straightforward!!!).  In Dev Server
+		//If the Filter java file changed, this filterClass was reloaded from a different classloader to
+		//blow away the previous filter.  That was done upstream in the DevRoutingService
+		Class<? extends RouteFilter<T>> filterClass = info.getFilter();
+		RouteFilter<T> f = injector.getInstance(filterClass);
 		f.initialize(info.getInitialConfig());
 		return f;
 	}

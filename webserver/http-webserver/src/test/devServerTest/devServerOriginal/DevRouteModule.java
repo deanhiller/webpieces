@@ -17,6 +17,8 @@ public class DevRouteModule extends AbstractRouteModule {
 		
 		addFilter("/filter", MyFilter.class, null, PortType.ALL_FILTER);
 		
+		addFilter("/notFound", NotFoundFilter.class, null, PortType.ALL_FILTER);
+		
 		setPageNotFoundRoute("DevController.notFound");
 		setInternalErrorRoute("DevController.internalError");
 	}

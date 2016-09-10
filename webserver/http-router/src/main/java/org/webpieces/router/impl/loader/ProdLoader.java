@@ -28,11 +28,6 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 		Class<?> clazz = classForName.clazzForName(controllerClassFullName);
 		return injector.getInstance(clazz);
 	}
-	
-	protected <T> RouteFilter<T> createFilterImpl(Injector injector, FilterInfo<T> info) {
-		Class<? extends RouteFilter<T>> filterClass = info.getFilter();
-		return injector.getInstance(filterClass);
-	}
 
 	@Override
 	public void loadControllerIntoMeta(RouteMeta meta, ResolvedMethod method,
