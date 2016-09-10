@@ -1,5 +1,6 @@
 package org.webpieces.webserver;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.channels.ServerSocketChannel;
@@ -52,6 +53,8 @@ public class WebserverForTest {
 			httpsPort = 0;
 		}
 		
+		
+		File cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestCache");
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(platformOverrides)
@@ -64,6 +67,7 @@ public class WebserverForTest {
 											.setWebappOverrides(appOverrides)
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
+											.setCachedCompressedDirectory(cacheDir)
 											.setSecretKey(SecretKeyInfo.generateForTest());
 		TemplateConfig templateConfig = new TemplateConfig();
 		

@@ -1,11 +1,11 @@
-package org.webpieces.webserver.basic.biz;
+package org.webpieces.webserver.basic.app.biz;
 
 import javax.inject.Inject;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.webserver.basic.BasicRouteId;
+import org.webpieces.webserver.basic.app.BasicRouteId;
 
 public class BasicController {
 

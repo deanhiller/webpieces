@@ -17,8 +17,8 @@ public class StaticRouteModule extends AbstractRouteModule {
 		//relative path(to user.dir)
 		addStaticDir("/public/", "src/test/resources/", false);
 		
-		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
-		setInternalErrorRoute("../../basic/biz/BasicController.internalError");
+		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

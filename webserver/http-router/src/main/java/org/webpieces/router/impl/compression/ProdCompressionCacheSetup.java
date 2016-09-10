@@ -52,9 +52,9 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private void createCache(StaticRoute route) {
-		int id = route.getStaticRouteId();
+		String id = route.getStaticRouteId();
 		File dir = config.getCachedCompressedDirectory();
-		File routeCache = new File(dir, id+"");
+		File routeCache = new File(dir, id);
 		createDirectory(routeCache);
 		
 		File metaFile = new File(routeCache, "webpiecesMeta.properties");
@@ -132,9 +132,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		if(lastModified > lastModifiedSrc && previousHash != null)
 			return; //no need to check anything as destination was written after this source file
 		
-		try (FileOutputStream out = new FileOutputStream(destination);
-			 OutputStream compressionOut = compression.createCompressionStream(out);
-			 FileInputStream in = new FileInputStream(src)) {
+		try (FileInputStream in = new FileInputStream(src)) {
 				byte[] allData = fileUtil.readFileContents(in, urlPath, src);
 				String hash = Security.hash(allData);
 				
@@ -142,19 +140,30 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 					if(!hash.equals(previousHash))
 						throw new IllegalStateException("Your app modified the file="+src.getAbsolutePath()+" from the last release BUT"
 								+ " you did not change the name of the fil nor url path meaning your customer will never get the new version"
-								+ " until the cache expires which can be a month out.  (Modify the names of files/url path when changing them)");
+								+ " until the cache expires which can be a month out.  (Modify the names of files/url path when changing them)\n"
+								+ "existing compressed file="+destination);
 					log.info("Previous file is the same, no need to compress to="+destination);
 					return;
 				}
-				
+
+				//open, write, and close file with new data
+				writeFile(destination, compression, allData, urlPath, src);
+				//if file writing succeeded, set the hash
 				p.setProperty(urlPath, hash);
-				fileUtil.writeFile(compressionOut, allData, urlPath, src);
+
 				log.info("compressed "+src.length()+" bytes to="+destination.length()+" to file="+destination);
 				
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	private void writeFile(File destination, Compression compression, byte[] allData, String urlPath, File src) throws FileNotFoundException, IOException {
+		try(FileOutputStream out = new FileOutputStream(destination);
+			 OutputStream compressionOut = compression.createCompressionStream(out);) {
+			fileUtil.writeFile(compressionOut, allData, urlPath, src);			
 		}
 	}
 

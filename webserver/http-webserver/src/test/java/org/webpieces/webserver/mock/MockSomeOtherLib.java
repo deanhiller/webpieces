@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.webserver.basic.biz.SomeOtherLib;
-import org.webpieces.webserver.basic.biz.UserDbo;
+import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
+import org.webpieces.webserver.basic.app.biz.UserDbo;
 
 public class MockSomeOtherLib extends SomeOtherLib {
 

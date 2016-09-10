@@ -20,10 +20,9 @@ public class StaticRoute implements Route {
 	private Pattern patternToMatch;
 	private boolean isOnClassPath;
 	private List<String> pathParamNames = new ArrayList<>();
-	private int uniqueStaticRouteId;
+	private String uniqueStaticRouteId;
 
 	public StaticRoute(int staticRouteId, String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		this.uniqueStaticRouteId = staticRouteId;
 		this.fileSystemPath = fileSystemPath;
 		this.isOnClassPath = isOnClassPath;
 		
@@ -61,6 +60,9 @@ public class StaticRoute implements Route {
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a file and must be for static file route");
 			this.patternToMatch = Pattern.compile("^"+urlPath+"$");
 		}
+		
+		String postFix = urlPath.replace("/", "-");
+		this.uniqueStaticRouteId = staticRouteId+postFix;
 	}
 
 	private String getCanonicalPath(File f) {
@@ -128,7 +130,7 @@ public class StaticRoute implements Route {
 
 	@Override
 	public String toString() {
-		return "StaticRoute [\n      urlPath=" + urlPath + ",\n      fileSystemPath=" + fileSystemPath + ",\n      isFile=" + isFile
+		return "\nStaticRoute [\n      urlPath=" + urlPath + ",\n      fileSystemPath=" + fileSystemPath + ",\n      isFile=" + isFile
 				+ ",\n      patternToMatch=" + patternToMatch + ",\n      isOnClassPath=" + isOnClassPath + ",\n      pathParamNames="
 				+ pathParamNames + "]";
 	}
@@ -137,7 +139,7 @@ public class StaticRoute implements Route {
 		return isFile;
 	}
 
-	public int getStaticRouteId() {
+	public String getStaticRouteId() {
 		return this.uniqueStaticRouteId;
 	}
 

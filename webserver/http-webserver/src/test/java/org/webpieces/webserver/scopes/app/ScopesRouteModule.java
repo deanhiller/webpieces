@@ -28,8 +28,8 @@ public class ScopesRouteModule extends AbstractRouteModule {
 //		//This one should result in using the hidden field from #{form} tag
 //		addRoute(POST, "/postpage3",        "ScopesController.postPage3Form", ScopesRouteId.POST_PAGE3_FORM);
 		
-		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
-		setInternalErrorRoute("../../basic/biz/BasicController.internalError");
+		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

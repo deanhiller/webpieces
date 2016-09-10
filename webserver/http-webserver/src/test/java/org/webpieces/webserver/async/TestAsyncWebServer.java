@@ -14,7 +14,7 @@ import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
-import org.webpieces.webserver.basic.biz.SomeOtherLib;
+import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockFrontendSocket;

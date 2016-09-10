@@ -3,7 +3,7 @@ package org.webpieces.webserver.tags.app;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.webserver.basic.biz.Address;
+import org.webpieces.webserver.basic.app.biz.Address;
 
 public class Account {
 

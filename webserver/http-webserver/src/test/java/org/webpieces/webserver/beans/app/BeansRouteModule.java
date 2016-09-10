@@ -23,8 +23,8 @@ public class BeansRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/arrayForm",         "BeansController.arrayForm", BeansRouteId.ARRAY_FORM_ROUTE);
 		addRoute(POST, "/postArray",         "BeansController.postArray", BeansRouteId.POST_ARRAY_ROUTE);
 		
-		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
-		setInternalErrorRoute("../../basic/biz/BasicController.internalError");
+		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

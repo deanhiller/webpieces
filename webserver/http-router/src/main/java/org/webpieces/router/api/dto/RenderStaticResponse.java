@@ -2,14 +2,14 @@ package org.webpieces.router.api.dto;
 
 public class RenderStaticResponse {
 
-	private int staticRouteId;
+	private String staticRouteId;
 	private boolean isOnClassPath;
 	//This is one or the other....(need an Either in java)
 	private String filePath;
 	private String directory;
 	private String relativePath;
 
-	public RenderStaticResponse(int staticRouteId, boolean isOnClassPath) {
+	public RenderStaticResponse(String staticRouteId, boolean isOnClassPath) {
 		this.staticRouteId = staticRouteId;
 		this.isOnClassPath = isOnClassPath;
 	}
@@ -39,7 +39,7 @@ public class RenderStaticResponse {
 		return relativePath;
 	}
 
-	public int getStaticRouteId() {
+	public String getStaticRouteId() {
 		return staticRouteId;
 	}
 	

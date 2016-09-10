@@ -32,8 +32,8 @@ public class HttpsRouteModule extends AbstractRouteModule {
 		addFilter("/secure/.*", HttpLoginFilter.class, new LoginInfo("userId", HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
 		addFilter("/backend/.*", HttpLoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), PortType.HTTPS_FILTER);
 		
-		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
-		setInternalErrorRoute("../../basic/biz/BasicController.internalError");
+		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

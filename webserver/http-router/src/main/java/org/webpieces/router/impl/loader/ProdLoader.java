@@ -5,7 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.hooks.ClassForName;

@@ -1,4 +1,4 @@
-package org.webpieces.webserver.async;
+package org.webpieces.webserver.basic.app;
 
 import java.util.List;
 
@@ -9,12 +9,13 @@ import org.webpieces.webserver.EmptyModule;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-public class AsyncAppMeta implements WebAppMeta {
+public class BasicAppMeta implements WebAppMeta {
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new EmptyModule());
 	}
 	
 	public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new AsyncRouteModule());
+		return Lists.newArrayList(new BasicRouteModule());
 	}
+	
 }

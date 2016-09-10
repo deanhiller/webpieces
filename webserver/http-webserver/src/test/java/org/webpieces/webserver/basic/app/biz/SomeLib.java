@@ -1,4 +1,4 @@
-package org.webpieces.webserver.basic.biz;
+package org.webpieces.webserver.basic.app.biz;
 
 import java.util.concurrent.CompletableFuture;
 

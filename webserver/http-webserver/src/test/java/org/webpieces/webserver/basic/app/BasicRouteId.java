@@ -1,4 +1,4 @@
-package org.webpieces.webserver.basic;
+package org.webpieces.webserver.basic.app;
 
 import org.webpieces.router.api.routing.RouteId;
 

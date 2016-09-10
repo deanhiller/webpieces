@@ -1,4 +1,4 @@
-package org.webpieces.webserver.basic.biz;
+package org.webpieces.webserver.basic.app.biz;
 
 public class Address {
 

@@ -10,8 +10,8 @@ public class I18nRouteModule extends AbstractRouteModule {
 	public void configure(String currentPackage) {
 		addRoute(GET , "/i18nBasic",         "I18nController.i18nBasic", I18nRouteId.I18N_BASIC);
 		
-		setPageNotFoundRoute("../../basic/biz/BasicController.notFound");
-		setInternalErrorRoute("../../basic/biz/BasicController.internalError");
+		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

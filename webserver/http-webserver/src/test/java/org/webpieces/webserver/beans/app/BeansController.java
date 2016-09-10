@@ -9,10 +9,10 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.webserver.basic.biz.Address;
-import org.webpieces.webserver.basic.biz.SomeLib;
-import org.webpieces.webserver.basic.biz.SomeOtherLib;
-import org.webpieces.webserver.basic.biz.UserDbo;
+import org.webpieces.webserver.basic.app.biz.Address;
+import org.webpieces.webserver.basic.app.biz.SomeLib;
+import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
+import org.webpieces.webserver.basic.app.biz.UserDbo;
 import org.webpieces.webserver.tags.app.Account;
 
 public class BeansController {
