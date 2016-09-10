@@ -24,4 +24,8 @@ public class DevController {
 	public Action internalError() {
 		return Actions.renderThis("error", "error1");
 	}
+	
+	public Action filter() {
+		return Actions.renderThis();
+	}
 }

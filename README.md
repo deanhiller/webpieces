@@ -30,7 +30,7 @@ HUGE WINS in using this webserver
 * Security - cookie is hashed so can't be modified without failing next request
 * Security - Form auth token in play1.3.x line can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it harder to not put the auth token AND check that token in forms (putting is automatic in play 1.3 but checking it is not)
 * State per tab rather than just per session.  All web frameworks have a location to store session state but if you go to buy a plane ticket in 3 different tabs, the three tabs can step on each other.  A location to store information for each tab is needed
-* login and authorization to pages much lik Seam Frameworks method such that we can redirect the user to a login page and back to the page he requested(our advantage over seam though...when a user is logging out, he doesn't come back to realize his session times out which can be annoying for users)
+* login and authorization to pages much lik Seam Frameworks method such that we can redirect the user to a login page and back to the page he requested(our advantage over seam though...when a user is logging in, he doesn't come back to realize his session times out which can be annoying for users)
 
 To try the webserver
 
@@ -77,9 +77,8 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* implement logging in and SSL page redirection to login page and back again
-* test from dev webserver that hits page, modifies adding guice module and controller, and hits page returning result from new library
 * test from dev webserver that hits filter, modifies filter, hits page
+* tset that returns null for CompletableFuture AND Action
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}

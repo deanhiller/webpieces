@@ -145,4 +145,11 @@ public class FullResponse {
 			throw new IllegalStateException("Expected compressed body to contain='"+text+"' but body was="+bodyAsString);
 	}
 
+	public String getRedirectUrl() {
+		Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
+		if(header == null)
+			return null;
+		return header.getValue();
+	}
+
 }

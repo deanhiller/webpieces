@@ -130,6 +130,24 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 	
 	@Test
+	public void testFilterChanged() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
+		server.processHttpRequests(socket, req , false);
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
+		socket.clear();
+		
+//		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
+//		
+//		server.processHttpRequests(socket, req, false);
+//		verifyPageContents("Existing Route Page");
+	}
+	
+	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notfound/notfound?webpiecesShowPage=true");
 		server.processHttpRequests(socket, req , false);
