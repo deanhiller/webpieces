@@ -2,16 +2,19 @@ package org.webpieces.router.impl;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.HttpFilter;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.loader.ControllerLoader;
 
 import com.google.inject.Injector;
@@ -26,6 +29,7 @@ public class RouterBuilder implements Router {
 	private final AllRoutingInfo info;
 	private ReverseRoutes reverseRoutes;
 	private List<StaticRoute> staticRoutes = new ArrayList<>();
+	private List<FilterInfo<?>> routeFilters = new ArrayList<>();
 	private ControllerLoader finder;
 
 	private String routerPath;
@@ -126,9 +130,17 @@ public class RouterBuilder implements Router {
 	}
 	
 	@Override
-	public void addFilter(String path, HttpFilter securityFilter) {
+	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
+		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, false);
+		routeFilters.add(info);
 	}
 
+	@Override
+	public <T> void addHttpsFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
+		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, true);
+		routeFilters.add(info);
+	}
+	
 	@Override
 	public Router getScopedRouter(String path, boolean isSecure) {
 		if(path == null || path.length() == 0)
@@ -177,6 +189,24 @@ public class RouterBuilder implements Router {
 
 	public List<StaticRoute> getStaticRoutes() {
 		return staticRoutes;
+	}
+
+	public void applyFilters() {
+		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
+		for(RouteMeta meta : metas) {
+			addFilters(meta);
+		}
+	}
+
+	private void addFilters(RouteMeta meta) {
+		for(FilterInfo<?> info : routeFilters) {
+			Pattern patternToMatch = info.getPatternToMatch();
+			String path = meta.getRoute().getPath();
+			Matcher matcher = patternToMatch.matcher(path);
+			if(matcher.matches()) {
+				meta.addFilter(info);
+			}
+		}
 	}
 
 }

@@ -21,6 +21,7 @@ import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RouteModuleInfo;
+import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.util.file.VirtualFile;
 
 public class DevRoutingService extends AbstractRouterService implements RoutingService {
@@ -31,13 +32,15 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private DevClassForName classLoader;
 	private WebAppMeta routerModule;
 	private RouterConfig config;
+	private ControllerLoader finder;
 
 	@Inject
-	public DevRoutingService(RouteLoader routeConfig, RouterConfig config, DevClassForName loader) {
+	public DevRoutingService(RouteLoader routeConfig, RouterConfig config, DevClassForName loader, ControllerLoader finder) {
 		super(routeConfig);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.classLoader = loader;
+		this.finder = finder;
 		this.lastFileTimestamp = config.getMetaFile().lastModified();
 	}
 
@@ -69,7 +72,8 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			//exist in dev server since we want the latest files always
 			req.encodings = new ArrayList<>();
 		} else if(meta.getControllerInstance() == null) {
-			routeLoader.loadControllerIntoMetaObject(meta, false);
+			finder.loadControllerIntoMetaObject(meta, false);
+			finder.loadFiltersIntoMeta(meta, false);
 		}
 		
 		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 
@@ -100,11 +104,12 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 		if(req.queryParams.containsKey("webpiecesShowPage")) {
 			//This is actually a callback from the below code's iframe!!!
-			if(origMeta.getControllerInstance() == null)
-				routeLoader.loadControllerIntoMetaObject(origMeta, false);
+			if(origMeta.getControllerInstance() == null) {
+				finder.loadControllerIntoMetaObject(origMeta, false);
+				finder.loadFiltersIntoMeta(origMeta, false);
+			}
 
-			MatchResult result = new MatchResult(origMeta);
-			return new NotFoundInfo(result, req);
+			return new NotFoundInfo(origResult, req);
 		}
 
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
@@ -113,10 +118,11 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
 		RouteModuleInfo info = new RouteModuleInfo("", null);
 		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
-		MatchResult result = new MatchResult(meta);
+		MatchResult result = new MatchResult(meta, meta.getService222());
 		
 		if(meta.getControllerInstance() == null) {
-			routeLoader.loadControllerIntoMetaObject(meta, false);
+			finder.loadControllerIntoMetaObject(meta, false);
+			finder.loadFiltersIntoMeta(meta, false);
 		}
 		
 		String reason = "Your route was not found in routes table";
@@ -135,7 +141,8 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
-			routeLoader.loadControllerIntoMetaObject(meta, false);
+			finder.loadControllerIntoMetaObject(meta, false);
+			finder.loadFiltersIntoMeta(meta, false);
 		}
 		
 		return result;

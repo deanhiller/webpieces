@@ -7,5 +7,7 @@ public interface MetaLoaderProxy {
 
 	void loadControllerIntoMeta(RouteMeta meta, ResolvedMethod method,
 			boolean isInitializingAllControllers);
+
+	void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters);
 	
 }

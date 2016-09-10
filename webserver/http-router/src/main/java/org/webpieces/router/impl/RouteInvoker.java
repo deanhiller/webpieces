@@ -1,6 +1,5 @@
 package org.webpieces.router.impl;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +17,8 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
@@ -31,6 +32,7 @@ import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslator;
+import org.webpieces.util.filters.Service;
 
 @Singleton
 public class RouteInvoker {
@@ -169,6 +171,10 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
+		Service<MethodMeta, Action> service = meta.getService222();
+		if(service == null)
+			throw new IllegalStateException("Bug, service should never be null at this point");
+		
 		Validation validation = requestCtx.getValidation();
 		RouterRequest req = requestCtx.getRequest();
 		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
@@ -187,9 +193,9 @@ public class RouteInvoker {
 
 		RequestLocalCtx.set(processor);
 		Current.setContext(requestCtx);
-		CompletableFuture<Object> response;
+		CompletableFuture<Action> response;
 		try {
-			response = invokeMethod(obj, method, arguments);
+			response = invokeMethod(service, obj, method, arguments);
 		} finally {
 			RequestLocalCtx.set(null);
 			Current.setContext(null);
@@ -199,7 +205,7 @@ public class RouteInvoker {
 		return future;
 	}
 
-	public Void continueProcessing(ResponseProcessor processor, Object controllerResponse, ResponseStreamer responseCb) {
+	public Void continueProcessing(ResponseProcessor processor, Action controllerResponse, ResponseStreamer responseCb) {
 		if(controllerResponse instanceof RedirectResponse) {
 			//do nothing, it was called already in Actions.redirect so if there is an exception, the
 			//client code ends up in the stack trace making it easier to tell what the path was to failure
@@ -217,31 +223,9 @@ public class RouteInvoker {
 		return null;
 	}
 	
-	private CompletableFuture<Object> invokeMethod(Object obj, Method m, Object[] arguments) {
-		try {
-			return invokeMethodImpl(obj, m, arguments);
-		} catch(InvocationTargetException e) {
-			Throwable cause = e.getCause();
-			if(cause instanceof RuntimeException) {
-				throw (RuntimeException)cause;
-			} else {
-				throw new InvokeException(e);
-			}
-		} catch (IllegalAccessException | IllegalArgumentException e) {
-			throw new InvokeException(e);
-		}
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private CompletableFuture<Object> invokeMethodImpl(Object obj, Method m, Object[] arguments) 
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		
-		Object retVal = m.invoke(obj, arguments);
-		if(retVal instanceof CompletableFuture) {
-			return (CompletableFuture) retVal;
-		} else {
-			return CompletableFuture.completedFuture(retVal);
-		}
+	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, Object[] arguments) {
+			MethodMeta meta = new MethodMeta(obj, m, arguments, Current.getContext());
+			return service.invoke(meta);
 	}
 
 	public void init(ReverseRoutes reverseRoutes) {

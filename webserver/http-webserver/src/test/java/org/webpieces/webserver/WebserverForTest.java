@@ -57,6 +57,7 @@ public class WebserverForTest {
 				.setPlatformOverrides(platformOverrides)
 				.setHttpListenAddress(new InetSocketAddress(httpPort))
 				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
+				.setSslEngineFactory(new SSLEngineFactoryWebServerTesting())
 				.setFunctionToConfigureServerSocket(s -> configure(s));
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )

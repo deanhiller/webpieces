@@ -2,6 +2,7 @@ package org.webpieces.router.impl;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +10,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
@@ -126,6 +126,13 @@ public class RouteLoader {
 		
 		reverseRoutes.finalSetup();
 		
+		routerBuilder.applyFilters();
+		
+		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
+		for(RouteMeta m : metas) {
+			controllerFinder.loadFiltersIntoMeta(m, true);
+		}
+		
 		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
 			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouteModules());
 		else if(!routerBuilder.getRouterInfo().isInternalSvrErrorRouteSet())
@@ -171,20 +178,16 @@ public class RouteLoader {
 		invoker.invoke(result, routerRequest, responseCb, errorRoutes, requestCtx);
 	}
 
-	public void loadControllerIntoMetaObject(RouteMeta meta, boolean isInitializingAllControllers) {
-		controllerFinder.loadControllerIntoMetaObject(meta, isInitializingAllControllers);
-	}
-
 	public MatchResult fetchNotFoundRoute() {
 		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
-		return new MatchResult(notfoundRoute);
+		return new MatchResult(notfoundRoute, notfoundRoute.getService222());
 	}
 
 	public MatchResult fetchInternalErrorRoute() {
 		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
-		return new MatchResult(internalErrorRoute);
+		return new MatchResult(internalErrorRoute, internalErrorRoute.getService222());
 	}
 
 	public String convertToUrl(String routeId, Map<String, String> args) {

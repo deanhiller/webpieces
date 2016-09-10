@@ -15,7 +15,7 @@ public class Actions {
 
 	/*
 	 * For better stack traces to see which controller was involved, use this (only because java
-	 * does not support a FutureContext where we could pass state through the customer code
+	 * does not support a FutureContext where we could pass state through the customer code :( )
 	 */
 	public static Render renderView(ResponseProcessor processor, String templatePath, Object ... pageArgs) {
 		RenderImpl renderHtml = new RenderImpl(templatePath, pageArgs);
@@ -43,7 +43,9 @@ public class Actions {
 	}
 
 	/**
-	 * Renders an html file with the same name as the methodName.html
+	 * Renders an html file with the same name as the methodName.html that is being invoked on the controller
+	 * but beware when called from filter, it still refers to the same html file.  Filters should generally
+	 * be redirecting anyways not rendering.
 	 * 
 	 * @param pageArgs
 	 * @return
@@ -67,12 +69,25 @@ public class Actions {
 		return redirect;
 	}
 
+	/**
+	 * 
+	 * @param routeId
+	 * @param ctx
+	 * @param secureFieldNames Fields that are secure should be listed so we don't transfer them to flash cookie as they
+	 * are visible then in the browser for some amount of time.
+	 * 
+	 * @return
+	 */
 	public static Redirect redirectFlashAll(RouteId routeId, RequestContext ctx, String ... secureFieldNames) {
 		Set<String> mySet = new HashSet<>(Arrays.asList(secureFieldNames));
 		ctx.moveFormParamsToFlash(mySet);
 		ctx.getFlash().keep();
 		ctx.getValidation().keep();
 		return redirect(routeId);
+	}
+
+	public static Redirect redirectToUrl(String url) {
+		throw new UnsupportedOperationException("not done here yet");
 	}
 	
 }

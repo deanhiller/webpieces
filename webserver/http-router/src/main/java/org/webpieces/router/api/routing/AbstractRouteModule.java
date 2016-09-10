@@ -3,7 +3,6 @@ package org.webpieces.router.api.routing;
 import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.HttpFilter;
 
 public abstract class AbstractRouteModule implements RouteModule {
 
@@ -66,10 +65,14 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addStaticFile(urlPath, fileSystemPath, isOnClassPath);
 	}
 	
-	public void addFilter(String path, HttpFilter securityFilter) {
-		router.addFilter(path, securityFilter);
+	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
+		router.addFilter(path, filter, initialConfig);
 	}
 
+	public <T> void addHttpsFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
+		router.addHttpsFilter(path, filter, initialConfig);
+	}
+	
 	public void setPageNotFoundRoute(String controllerMethod) {
 		router.setPageNotFoundRoute(controllerMethod);
 	}

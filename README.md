@@ -6,6 +6,7 @@ This project is essentially pieces that can be used to build any http related so
 
 HUGE WINS in using this webserver
 
+* unlike Seam/JSF and heavyweight servers, you can slap down 1000 of these as it is built for clustering and scale and being stateless!!!
 * look ma, no restarting the server in development mode with complete java refactoring
 * prod server runs on :8080, dev server on :9000 all locally such that unlike play, dev server never caches files so cached files from :8080 don't interfere with development mode and dev server never caches files making development seamless(modify css file and it's up to date)
 * no erasing users input from forms which many websites do....soooo annoying
@@ -28,6 +29,8 @@ HUGE WINS in using this webserver
 * TODO: seamless creation of CRUD
 * Security - cookie is hashed so can't be modified without failing next request
 * Security - Form auth token in play1.3.x line can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it harder to not put the auth token AND check that token in forms (putting is automatic in play 1.3 but checking it is not)
+* State per tab rather than just per session.  All web frameworks have a location to store session state but if you go to buy a plane ticket in 3 different tabs, the three tabs can step on each other.  A location to store information for each tab is needed
+* login and authorization to pages much lik Seam Frameworks method such that we can redirect the user to a login page and back to the page he requested(our advantage over seam though...when a user is logging out, he doesn't come back to realize his session times out which can be annoying for users)
 
 To try the webserver
 
@@ -74,12 +77,14 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* implement logging in and SSL page redirection to login page and back again(nearly there but became blocked on previous tests
+* implement logging in and SSL page redirection to login page and back again
+* test from dev webserver that hits page, modifies adding guice module and controller, and hits page returning result from new library
+* test from dev webserver that hits filter, modifies filter, hits page
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
-* response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Content-Encoding gzip, Transfer-Encoding chunked, Cache-Control, Expires -1 (http/google.com), Content-Range(range requests)
+* response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)

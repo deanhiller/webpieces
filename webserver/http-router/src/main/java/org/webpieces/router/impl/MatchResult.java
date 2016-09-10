@@ -3,6 +3,10 @@ package org.webpieces.router.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.util.filters.Service;
+
 public class MatchResult {
 
 	private final Map<String, String> pathParams;
@@ -13,7 +17,7 @@ public class MatchResult {
 		this.pathParams = pathParams;
 	}
 
-	public MatchResult(RouteMeta meta) {
+	public MatchResult(RouteMeta meta, Service<MethodMeta, Action> service) {
 		this.meta = meta;
 		this.pathParams = new HashMap<>();
 	}

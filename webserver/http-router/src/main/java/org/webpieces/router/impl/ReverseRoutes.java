@@ -3,6 +3,7 @@ package org.webpieces.router.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -158,5 +159,9 @@ public class ReverseRoutes {
 		} catch(UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public Collection<RouteMeta> getAllRouteMetas() {
+		return routeIdToRoute.values();
 	}
 }

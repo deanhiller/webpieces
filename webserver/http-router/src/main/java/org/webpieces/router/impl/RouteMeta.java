@@ -4,25 +4,32 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.util.filters.Service;
 
 import com.google.inject.Injector;
 
 public class RouteMeta {
 
 	private final Route route;
-	private Object controllerInstance;
-	private Method method;
-	private List<String> methodParamNames;
 	private RouteModuleInfo routeModuleInfo;
 	private Injector injector;
 	private Charset urlEncoding;
+	private List<FilterInfo<?>> filtersToApply = new ArrayList<>();
 
+	private Service<MethodMeta, Action> filtersAndMethodToCall;
+	private Object controllerInstance;
+	private Method method;
+	private List<String> methodParamNames;
+	
 	public RouteMeta(Route r, Injector injector, RouteModuleInfo routerInfo, Charset urlEncoding) {
 		this.route = r;
 		this.routeModuleInfo = routerInfo;
@@ -101,4 +108,19 @@ public class RouteMeta {
 		}
 	}
 	
+	public void addFilter(FilterInfo<?> info) {
+		this.filtersToApply.add(info);
+	}
+
+	public List<FilterInfo<?>> getFilters() {
+		return filtersToApply;
+	}
+
+	public void setService(Service<MethodMeta, Action> svc) {
+		this.filtersAndMethodToCall = svc;
+	}
+
+	public Service<MethodMeta, Action> getService222() {
+		return filtersAndMethodToCall;
+	}
 }

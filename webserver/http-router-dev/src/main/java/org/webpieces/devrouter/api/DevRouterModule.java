@@ -12,7 +12,6 @@ import org.webpieces.devrouter.impl.DevRoutingService;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
-import org.webpieces.router.impl.compression.ProdCompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 

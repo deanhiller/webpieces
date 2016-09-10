@@ -65,7 +65,7 @@ public class AllRoutingInfo {
 				return result;
 		}
 
-		return new MatchResult(pageNotFoundRoute);
+		return new MatchResult(pageNotFoundRoute, pageNotFoundRoute.getService222());
 	}
 
 	public boolean isPageNotFoundRouteSet() {

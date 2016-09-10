@@ -3,7 +3,6 @@ package org.webpieces.router.api.routing;
 import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.HttpFilter;
 
 /**
  * You can override this implementation if you like
@@ -44,8 +43,10 @@ public interface Router {
 	 * work until the completionListener callback using AsynchronousFileChannel
 	 */
 	void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath);
-	
-	void addFilter(String path, HttpFilter securityFilter);
+
+	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig);
+
+	<T> void addHttpsFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig);
 
 	/**
 	 * This is the controller for 404's where the path was not found AND this MUST be set

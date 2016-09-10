@@ -1,10 +1,12 @@
 package org.webpieces.router.impl.loader;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 
+@Singleton
 public class ControllerLoader {
 
 	private MetaLoaderProxy loader;
@@ -29,5 +31,9 @@ public class ControllerLoader {
 		//This is a hook for the dev server with auto-compile (if isInitializing, dev server skips this piece)
 		//if not initializing, dev server does this piece.  Production does the opposite.
 		loader.loadControllerIntoMeta(meta, method, isInitializingAllControllers);
+	}
+
+	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
+		loader.loadFiltersIntoMeta(m, isInitializingAllFilters);
 	}
 }
