@@ -224,8 +224,8 @@ public class RouteInvoker {
 	}
 	
 	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, Object[] arguments) {
-			MethodMeta meta = new MethodMeta(obj, m, arguments, Current.getContext());
-			return service.invoke(meta);
+		MethodMeta meta = new MethodMeta(obj, m, arguments, Current.getContext());
+		return service.invoke(meta);
 	}
 
 	public void init(ReverseRoutes reverseRoutes) {

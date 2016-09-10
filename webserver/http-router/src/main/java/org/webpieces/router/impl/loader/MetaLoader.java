@@ -16,6 +16,7 @@ import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.routing.RouteFilter;
+import org.webpieces.router.impl.ChainFilters;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.util.filters.Service;
 
@@ -124,7 +125,7 @@ public class MetaLoader {
 	public Service<MethodMeta, Action> loadFilters(List<RouteFilter<?>> filters) {
 		Service<MethodMeta, Action> svc = new ServiceProxy();
 		for(RouteFilter<?> f : filters) {
-			 svc = svc.addOnTop(f);
+			svc = ChainFilters.addOnTop(svc, f);
 		}
 		return svc;
 	}
