@@ -1,5 +1,7 @@
 package org.webpieces.devrouter.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.webpieces.router.api.routing.RouteFilter;
@@ -46,10 +48,10 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
+	public void loadFiltersIntoMeta(RouteMeta m, List<FilterInfo<?>> filters, boolean isInitializingAllFilters) {
 		if(isInitializingAllFilters)
 			return; //skip on startup
 		
-		super.loadFiltersIntoMeta(m);
+		super.loadFiltersIntoMeta(m, filters);
 	}
 }

@@ -141,4 +141,9 @@ public class StaticRoute implements Route {
 		return this.uniqueStaticRouteId;
 	}
 
+	@Override
+	public boolean isHttpsRoute() {
+		throw new UnsupportedOperationException("This method is not necessary as there are no filters for static routes at this time");
+	}
+
 }

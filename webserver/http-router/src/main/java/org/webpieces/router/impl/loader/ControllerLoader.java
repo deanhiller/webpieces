@@ -1,10 +1,16 @@
 package org.webpieces.router.impl.loader;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
+import org.webpieces.util.filters.Service;
 
 @Singleton
 public class ControllerLoader {
@@ -33,7 +39,11 @@ public class ControllerLoader {
 		loader.loadControllerIntoMeta(meta, method, isInitializingAllControllers);
 	}
 
-	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
-		loader.loadFiltersIntoMeta(m, isInitializingAllFilters);
+	public void loadFiltersIntoMeta(RouteMeta m, List<FilterInfo<?>> filters, boolean isInitializingAllFilters) {
+		loader.loadFiltersIntoMeta(m, filters, isInitializingAllFilters);
+	}
+
+	public Service<MethodMeta, Action> createNotFoundService(RouteMeta m, List<FilterInfo<?>> filterInfos) {
+		return loader.createServiceFromFilters(m, filterInfos);
 	}
 }

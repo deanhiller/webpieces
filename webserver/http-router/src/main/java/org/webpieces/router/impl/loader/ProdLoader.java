@@ -1,5 +1,7 @@
 package org.webpieces.router.impl.loader;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -45,8 +47,8 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
-		super.loadFiltersIntoMeta(m);
+	public void loadFiltersIntoMeta(RouteMeta m, List<FilterInfo<?>> filters, boolean isInitializingAllFilters) {
+		super.loadFiltersIntoMeta(m, filters);
 	}
 
 }

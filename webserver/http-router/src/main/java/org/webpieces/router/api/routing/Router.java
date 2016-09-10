@@ -44,9 +44,7 @@ public interface Router {
 	 */
 	void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath);
 
-	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig);
-
-	<T> void addHttpsFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig);
+	<T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type);
 
 	/**
 	 * This is the controller for 404's where the path was not found AND this MUST be set
@@ -63,6 +61,6 @@ public interface Router {
 	 * @param isSecure true if only available over https otherwise available over http and https
 	 * @return
 	 */
-	Router getScopedRouter(String path, boolean isSecure);
+	Router getScopedRouter(String path);
 
 }

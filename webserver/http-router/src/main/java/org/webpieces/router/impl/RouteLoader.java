@@ -17,6 +17,8 @@ import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
@@ -27,6 +29,7 @@ import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.filters.Service;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -130,7 +133,7 @@ public class RouteLoader {
 		
 		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
 		for(RouteMeta m : metas) {
-			controllerFinder.loadFiltersIntoMeta(m, true);
+			controllerFinder.loadFiltersIntoMeta(m, m.getFilters(), true);
 		}
 		
 		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
@@ -192,6 +195,11 @@ public class RouteLoader {
 
 	public String convertToUrl(String routeId, Map<String, String> args) {
 		return invoker.convertToUrl(routeId, args);
+	}
+
+	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
+		List<FilterInfo<?>> filterInfos = routerBuilder.findMatchingFilters(req.relativePath, req.isHttps);
+		return controllerFinder.createNotFoundService(m, filterInfos);
 	}
 	
 }

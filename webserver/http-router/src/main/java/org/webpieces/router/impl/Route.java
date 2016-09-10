@@ -24,4 +24,6 @@ public interface Route {
 	boolean isPostOnly();
 
 	boolean isCheckSecureToken();
+
+	boolean isHttpsRoute();
 }

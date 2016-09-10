@@ -6,6 +6,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
@@ -35,9 +37,13 @@ public class HttpLoginFilter implements RouteFilter<LoginInfo> {
 		Session session = Current.session();
 		if(session.containsKey(token))
 			return next.invoke(meta);
-		
-		//store url requested in flash so after logging in, we can redirect the user there...
-		Current.flash().put("url", Current.request().relativePath);
+
+		RouterRequest request = Current.request();
+		if(request.method == HttpMethod.GET) {
+			//store url requested in flash so after logging in, we can redirect the user
+			//back to the original page
+			Current.flash().put("url", Current.request().relativePath);
+		}
 		
 		//redirect to login page..
 		return CompletableFuture.completedFuture(Actions.redirect(loginRoute));

@@ -26,4 +26,13 @@ public class HttpsController {
 		}
 		return Actions.redirect(HttpsRouteId.HOME); //base login page
 	}
+	
+	public Action httpRoute() {
+		return Actions.renderThis();
+	}
+	public Action httpsRoute() {
+		return Actions.renderThis();
+	}
+	
+	
 }

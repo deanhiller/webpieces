@@ -75,7 +75,7 @@ public class RouteInvoker {
 			RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest);
 			
 			//http 404...(unless an exception happens in calling this code and that then goes to 500)
-			CompletableFuture<Void> future = notFound(notFoundResult, exc, overridenCtx, responseCb);
+			CompletableFuture<Void> future = notFound(notFoundResult, notFoundInfo.getService(), exc, overridenCtx, responseCb);
 			//If not found fails with sync or async exception, we processException and wrap in new Runtime to process as 500 next
 			future.exceptionally(exception -> processException(responseCb, overridenCtx, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult.getMeta()));
 			return null;
@@ -109,7 +109,7 @@ public class RouteInvoker {
 				return CompletableFuture.completedFuture(null);
 			}
 
-			return invokeImpl(result, reqCtx, responseCb);
+			return invokeImpl(result, result.getMeta().getService222(), reqCtx, responseCb);
 		} catch (Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -119,9 +119,9 @@ public class RouteInvoker {
 		}
 	}
 	
-	private CompletableFuture<Void> notFound(MatchResult notFoundResult, NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
+	private CompletableFuture<Void> notFound(MatchResult notFoundResult, Service<MethodMeta, Action> service, NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
 		try {
-			return invokeImpl(notFoundResult, requestCtx, responseCb);
+			return invokeImpl(notFoundResult, service, requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -137,7 +137,7 @@ public class RouteInvoker {
 			log.error("There is three parts to this error message... request, route found, and the exception "
 					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
-			return invokeImpl(result, requestCtx, responseCb);
+			return invokeImpl(result, result.getMeta().getService222(), requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -147,7 +147,7 @@ public class RouteInvoker {
 		}
 	}
 	
-	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> invokeImpl(MatchResult result, Service<MethodMeta, Action> service, RequestContext requestCtx, ResponseStreamer responseCb) {
 		RouteMeta meta = result.getMeta();
 		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb);
 		
@@ -171,9 +171,9 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-		Service<MethodMeta, Action> service = meta.getService222();
-		if(service == null)
-			throw new IllegalStateException("Bug, service should never be null at this point");
+//		Service<MethodMeta, Action> service = meta.getService222();
+//		if(service == null)
+//			throw new IllegalStateException("Bug, service should never be null at this point");
 		
 		Validation validation = requestCtx.getValidation();
 		RouterRequest req = requestCtx.getRequest();

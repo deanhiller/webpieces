@@ -14,6 +14,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.loader.ControllerLoader;
 
@@ -130,19 +131,13 @@ public class RouterBuilder implements Router {
 	}
 	
 	@Override
-	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
-		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, false);
+	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type) {
+		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, type);
 		routeFilters.add(info);
 	}
 
 	@Override
-	public <T> void addHttpsFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
-		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, true);
-		routeFilters.add(info);
-	}
-	
-	@Override
-	public Router getScopedRouter(String path, boolean isSecure) {
+	public Router getScopedRouter(String path) {
 		if(path == null || path.length() == 0)
 			throw new IllegalArgumentException("path must be non-null and length must be greater than 0");
 		AllRoutingInfo subInfo = info.addScope(path);
@@ -194,19 +189,25 @@ public class RouterBuilder implements Router {
 	public void applyFilters() {
 		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
 		for(RouteMeta meta : metas) {
-			addFilters(meta);
+			String path = meta.getRoute().getPath();
+			List<FilterInfo<?>> filters = findMatchingFilters(path, meta.getRoute().isHttpsRoute());
+			meta.setFilters(filters);
 		}
 	}
 
-	private void addFilters(RouteMeta meta) {
+	public List<FilterInfo<?>> findMatchingFilters(String path, boolean isHttps) {
+		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
 		for(FilterInfo<?> info : routeFilters) {
+			if(!info.securityMatch(isHttps))
+				continue; //skip this filter
+			
 			Pattern patternToMatch = info.getPatternToMatch();
-			String path = meta.getRoute().getPath();
 			Matcher matcher = patternToMatch.matcher(path);
 			if(matcher.matches()) {
-				meta.addFilter(info);
+				matchingFilters.add(info);
 			}
 		}
+		return matchingFilters;
 	}
 
 }

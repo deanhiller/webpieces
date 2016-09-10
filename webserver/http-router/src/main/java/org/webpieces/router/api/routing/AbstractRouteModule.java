@@ -65,14 +65,10 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addStaticFile(urlPath, fileSystemPath, isOnClassPath);
 	}
 	
-	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
-		router.addFilter(path, filter, initialConfig);
+	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type) {
+		router.addFilter(path, filter, initialConfig, type);
 	}
 
-	public <T> void addHttpsFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig) {
-		router.addHttpsFilter(path, filter, initialConfig);
-	}
-	
 	public void setPageNotFoundRoute(String controllerMethod) {
 		router.setPageNotFoundRoute(controllerMethod);
 	}
@@ -81,8 +77,8 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.setInternalErrorRoute(controllerMethod);
 	}
 
-	public Router getScopedRouter(String path, boolean isSecure) {
-		return router.getScopedRouter(path, isSecure);
+	public Router getScopedRouter(String path) {
+		return router.getScopedRouter(path);
 	}	
 	
 }

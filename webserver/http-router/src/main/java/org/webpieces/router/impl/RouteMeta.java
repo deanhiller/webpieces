@@ -108,10 +108,10 @@ public class RouteMeta {
 		}
 	}
 	
-	public void addFilter(FilterInfo<?> info) {
-		this.filtersToApply.add(info);
+	public void setFilters(List<FilterInfo<?>> filters) {
+		this.filtersToApply = filters;
 	}
-
+	
 	public List<FilterInfo<?>> getFilters() {
 		return filtersToApply;
 	}

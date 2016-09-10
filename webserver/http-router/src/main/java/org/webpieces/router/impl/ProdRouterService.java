@@ -8,9 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
+import org.webpieces.util.filters.Service;
 
 @Singleton
 public class ProdRouterService extends AbstractRouterService implements RoutingService {
@@ -61,7 +64,12 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 		public NotFoundInfo fetchNotfoundRoute(NotFoundException e) {
 			//not found is normal in prod mode so we don't log that and only log warnings in dev mode
 			MatchResult result = routeLoader.fetchNotFoundRoute();
-			return new NotFoundInfo(result, req);
+
+			//every request for not found route must apply filters(unlike other routes).  There are tests
+			//for this use case with the LoginFitler in TestHttps
+			Service<MethodMeta, Action> svc = routeLoader.createNotFoundService(result.getMeta(), req);
+			
+			return new NotFoundInfo(result, svc, req);
 		}
 		
 		public MatchResult fetchInternalServerErrorRoute() {

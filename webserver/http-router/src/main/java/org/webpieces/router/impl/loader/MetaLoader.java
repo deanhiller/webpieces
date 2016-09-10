@@ -96,7 +96,8 @@ public class MetaLoader {
 		//meta.setService(svc);
 		RouteType routeType = meta.getRoute().getRouteType();
 		if(routeType == RouteType.INTERNAL_SERVER_ERROR || routeType == RouteType.NOT_FOUND) {
-			//internal server error route and not found routes have not filters so set the service...
+			//internal server error route and not found routes do not have 'fixed' filters.
+			//instead, filters are applied to every request in the case of not found 
 			meta.setService(new ServiceProxy());
 		}
 	}
@@ -120,12 +121,12 @@ public class MetaLoader {
 		return true;
 	}
 
-	public void loadFilters(RouteMeta meta, List<RouteFilter<?>> filters) {
+	public Service<MethodMeta, Action> loadFilters(List<RouteFilter<?>> filters) {
 		Service<MethodMeta, Action> svc = new ServiceProxy();
 		for(RouteFilter<?> f : filters) {
 			 svc = svc.addOnTop(f);
 		}
-		meta.setService(svc);
+		return svc;
 	}
 
 }

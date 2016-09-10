@@ -10,6 +10,8 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
@@ -23,6 +25,7 @@ import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RouteModuleInfo;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.filters.Service;
 
 public class DevRoutingService extends AbstractRouterService implements RoutingService {
 
@@ -73,7 +76,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			req.encodings = new ArrayList<>();
 		} else if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
-			finder.loadFiltersIntoMeta(meta, false);
+			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
 		}
 		
 		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 
@@ -106,10 +109,10 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			//This is actually a callback from the below code's iframe!!!
 			if(origMeta.getControllerInstance() == null) {
 				finder.loadControllerIntoMetaObject(origMeta, false);
-				finder.loadFiltersIntoMeta(origMeta, false);
 			}
 
-			return new NotFoundInfo(origResult, req);
+			Service<MethodMeta, Action> svc = routeLoader.createNotFoundService(origMeta, req);
+			return new NotFoundInfo(origResult, svc, req);
 		}
 
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
@@ -122,7 +125,6 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
-			finder.loadFiltersIntoMeta(meta, false);
 		}
 		
 		String reason = "Your route was not found in routes table";
@@ -133,7 +135,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		newRequest.multiPartFields.put("webpiecesError", "Exception message="+reason);
 		newRequest.multiPartFields.put("url", req.relativePath);
 		
-		return new NotFoundInfo(result, newRequest);
+		return new NotFoundInfo(result, result.getMeta().getService222(), newRequest);
 	}
 
 	public MatchResult fetchInternalErrorRoute(RouterRequest req) {
@@ -142,7 +144,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
-			finder.loadFiltersIntoMeta(meta, false);
+			finder.loadFiltersIntoMeta(meta, new ArrayList<>(), false);
 		}
 		
 		return result;

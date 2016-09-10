@@ -20,7 +20,7 @@ public class RouteImpl implements Route {
 	private final Pattern patternToMatch;
 	private final Set<HttpMethod> methods;
 	private final List<String> argNames;
-	private final boolean isSecure;
+	private final boolean isHttpsRoute;
 	private final RouteType routeType;
 	private String controllerMethodString;
 	private boolean checkSecureToken;
@@ -35,7 +35,7 @@ public class RouteImpl implements Route {
 		RegExResult result = RegExUtil.parsePath(path);
 		this.patternToMatch = Pattern.compile(result.regExToMatch);
 		this.argNames = result.argNames;
-		this.isSecure = isSecure;
+		this.isHttpsRoute = isSecure;
 		this.controllerMethodString = controllerMethod;
 		this.routeType = RouteType.BASIC;
 		this.checkSecureToken = checkSecureToken;
@@ -47,7 +47,7 @@ public class RouteImpl implements Route {
 		this.patternToMatch = null;
 		this.methods = new HashSet<>();
 		this.argNames = new ArrayList<String>();
-		this.isSecure = false;
+		this.isHttpsRoute = false;
 		this.controllerMethodString = controllerMethod;
 	}
 
@@ -59,7 +59,7 @@ public class RouteImpl implements Route {
 	}
 	
 	public Matcher matches(RouterRequest request, String path) {
-		if(isSecure) {
+		if(isHttpsRoute) {
 			if(!request.isHttps)
 				return null;
 		} else if(!methods.contains(request.method)) {
@@ -91,7 +91,7 @@ public class RouteImpl implements Route {
 	@Override
 	public String toString() {
 		return "RouteImpl [\n      path=" + path + ", \n      patternToMatch=" + patternToMatch + ", \n      methods=" + methods + ", \n      argNames="
-				+ argNames + ", \n      isSecure=" + isSecure + ", \n      routeType="+routeType+"\n      controllerMethodString=" + controllerMethodString + "]";
+				+ argNames + ", \n      isSecure=" + isHttpsRoute + ", \n      routeType="+routeType+"\n      controllerMethodString=" + controllerMethodString + "]";
 	}
 
 	@Override
@@ -108,6 +108,11 @@ public class RouteImpl implements Route {
 	@Override
 	public boolean isCheckSecureToken() {
 		return checkSecureToken;
+	}
+
+	@Override
+	public boolean isHttpsRoute() {
+		return isHttpsRoute;
 	}
 	
 }
