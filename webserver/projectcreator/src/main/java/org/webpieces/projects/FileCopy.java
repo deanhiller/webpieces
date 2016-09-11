@@ -104,7 +104,7 @@ public class FileCopy {
 			contents = contents.replace("//@Ignore", "@Ignore");
 			contents = contents.replace("//import org.junit.Ignore;", "import org.junit.Ignore;");
 			contents = contents.replace("WEBPIECESxVERSION", version);
-			contents = contents.replace("_SECRETKEYHERE_", secretKeyBase64);
+			contents = contents.replace("__SECRETKEYHERE__", secretKeyBase64);
 			
 			if(contents.equals(original))
 				return;
