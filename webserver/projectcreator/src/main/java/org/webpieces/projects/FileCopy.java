@@ -40,6 +40,12 @@ public class FileCopy {
 			SecretKey key = keyGen.generateKey();
 			byte[] encoded = key.getEncoded();
 			secretKeyBase64 = Base64.getEncoder().encodeToString(encoded);
+			
+			//Run test of decoding to make sure it will decode when server is started..
+			byte[] decoded = Base64.getDecoder().decode(secretKeyBase64);
+			
+			System.out.println("secret Key="+secretKeyBase64+" bytes length="+decoded.length);
+			
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
