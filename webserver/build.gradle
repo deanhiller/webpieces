@@ -7,16 +7,12 @@ project.ext {
 
 project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
     sourceSets {
-        extraTest {
-            resources {
-                srcDirs = ["src/main/java"]
-                includes = ["**/*.html", "**/*.tag"]
-            }
-        }
+        //For testing, we need to put the html files on the classpath which are co-located with the controllers
         test {
             resources {
-                //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
-                source extraTest.resources
+                //This ADDS src/main/java/**/*.html
+                srcDirs = ["src/main/java"]
+                excludes = ["**/*.java"]
             }
         }
     }

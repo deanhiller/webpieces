@@ -16,20 +16,17 @@ apply plugin: 'org.webpieces.templatecompiler'
 
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
-    extraTest {
-        resources {
-            srcDirs = ["src/main/java"]
-            includes = ["**/*.html", "**/*.tag"]
-        }
-    }
     test {
         resources {
-            //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
-            source extraTest.resources
+            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
+            srcDirs = ["src/main/java", "src/test/resources"]
+            excludes = ["**/*.java"]
         }
     }
     main {
     	resources {
+            //This is so we don't put this in production as it is really only for running prod server in 
+            //the IDE and luckily some IDE's ignore this piece and don't exclude it
             excludes = ["logback.xml"]
         }
     }

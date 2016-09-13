@@ -41,18 +41,19 @@ To try the webserver
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
     NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
-    A. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
+    A. eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
+       eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
        go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
        'Store information about method parameters'
-    NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle bug)
+    B. gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
+       NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
 6. IF Intellij, you will have a bit more pain during development.  The first steps are to
-    A. rewrite the example build.gradle files to just use src/main/resources
-    B. duplicate all java packages from src/main/java in src/main/resources
-    C. move over all *.html files and *.tag files from src/main/java to src/main/resources to the correct package location
-    D. Endure the pain of duplicating package heirarchies every time you add a package (and viewing html files and controllers together is no longer possible and was quite useful in our experience)
-    E. import into intellij (it should work then)
-    F. (maybe, not sure)...add -parameters to the Java Compiler options
-7. From the IDE, expand mycool-all/mycool-dev/src/main/java/{yourpackage}
+    A. From Welcome screen, choose Import Project
+    B. Select your folder {yourapp}-all and click ok
+    C. Choose 'Import project from external model' and choose gradle and click next
+    D. Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
+    E. Open Preferences, expand "Build, Execution, and Deployment", expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
      the webserver (even in debug mode)
 9. In a browser go to http://localhost:9000
@@ -77,6 +78,9 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
+* get working in intellij
+* test on other mac computer releasing project and signing issue
+* test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}

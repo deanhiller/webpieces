@@ -90,8 +90,13 @@ public class WEBPIECESxCLASSDevServer {
         //intellij and eclipse use different user directories... :( :(
         if(filePath1.contains("WEBPIECESxAPPNAME-dev")) {
             //eclipse starts in WEBPIECESxAPPNAME-dev so move one directory back
+			//THIS works in BOTH webpieces/..../template and in the code generated for webapp projects
             directory = directory+"/..";
-        }
+        } else if(filePath1.endsWith("webpieces")) {
+        	//intellij is more annoying since it runs in webpieces for the template project we use to generate
+			//AND THEN runs in the webapp directory which is way different path than the template directory
+			directory = directory+"/webserver/webpiecesServerBuilder/templateProject";
+		}
         
 		return directory;
 	}

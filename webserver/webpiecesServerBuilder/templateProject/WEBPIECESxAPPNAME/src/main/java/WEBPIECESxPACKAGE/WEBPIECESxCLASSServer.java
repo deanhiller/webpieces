@@ -170,8 +170,8 @@ public class WEBPIECESxCLASSServer {
 	 *    * NO - DevServer - user.dir=myapp-all :( what the hell!  different from running tests
 	 *    * NO - SemiProductionServer - user.dir=myapp-all
 	 *    * NO - ProdServer - user.dir=myapp-all
-	 * * webpieces / eclipse - should be same as app dev I think
-	 * * webpieces / intellij - should be same as app dev I think
+	 * * webpieces / eclipse - same as app dev because eclipse is nice in this aspect
+	 * * webpieces / intellij - ANNOYING and completely different.  Runs out of webpieces a few levels down from actual subproject
 	 * * PP - tests in webpieces gradle - myapp-all/myapp
 	 * * PP - tests in myapp's gradle run - myapp-all/myapp
 	 * * NO - production - user.dir=from distribution myapp directory which has subdirs bin, lib, config, public
@@ -198,6 +198,8 @@ public class WEBPIECESxCLASSServer {
 		} else if(!"WEBPIECESxAPPNAME".equals(name)) {
 			if(filePath.endsWith("WEBPIECESxAPPNAME/src/dist"))
 				return filePath; //This occurs when a previous test ran already and set user.dir
+			else if(filePath.endsWith("webpieces")) //
+				return filePath+"/webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist";
 			throw new IllegalStateException("bug, we must have missed an environment="+name);
 		}
 		
