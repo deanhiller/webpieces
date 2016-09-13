@@ -78,8 +78,6 @@ Pieces
  * embeddablehttpproxy - build on http-frontend and http client
 
 TODO: 
-* get working in intellij
-* test on other mac computer releasing project and signing issue
 * test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
