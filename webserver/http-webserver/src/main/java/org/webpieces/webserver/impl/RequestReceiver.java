@@ -30,13 +30,12 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.Headers;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.httpparser.api.subparsers.UrlEncodedParser;
 import org.webpieces.router.api.RoutingService;
-import org.webpieces.router.api.exceptions.BadRequestException;
+import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
@@ -140,18 +139,13 @@ public class RequestReceiver implements HttpRequestListener {
 		ProxyResponse streamer = responseProvider.get();
 		try {
 			streamer.init(routerRequest, channel, bufferPool);
-			
-			processRequest(streamer, routerRequest);
-		} catch(BadRequestException e) {
-			log.warn("Exception that only happens if hacker hacking or you the developer messed something up", e);
-			streamer.sendFailure(new HttpException(KnownStatusCode.HTTP_400_BADREQUEST));
+
+			routingService.processHttpRequests(routerRequest, streamer );
+		} catch(BadCookieException e) {
+			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
+			streamer.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 		}
 	}
-
-	private void processRequest(ProxyResponse streamer, RouterRequest routerRequest) {
-			routingService.processHttpRequests(routerRequest, streamer );
-	}
-
 
 	private void parseAccept(HttpRequest req, RouterRequest routerRequest) {
 		List<AcceptType> types = headerParser.parseAcceptFromRequest(req);

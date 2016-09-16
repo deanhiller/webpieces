@@ -78,8 +78,14 @@ public class TestScopes {
 		Assert.assertEquals(1, responses.size());
 		
 		response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
-		response.assertNotContains("age=60");
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		Header cookie2 = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
+		String deleteCookie = cookie2.getValue();
+		Assert.assertEquals("webSession=; Max-Age=0; path=/; HttpOnly", deleteCookie);
+		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
+		String url = header.getValue();
+		Assert.assertEquals("http://myhost.com/displaySession", url);
 	}
 
 }

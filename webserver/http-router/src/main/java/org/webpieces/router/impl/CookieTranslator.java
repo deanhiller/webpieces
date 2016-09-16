@@ -15,7 +15,7 @@ import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.exceptions.BadRequestException;
+import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
@@ -51,7 +51,7 @@ public class CookieTranslator {
 		} else if(data.isNeedCreateDeleteCookie()) {
 			if(log.isDebugEnabled())
 				log.debug("creating delete cookie for "+cookie1.getName()+" to send to browser");
-			RouterCookie cookie = createBase(data.getName(), 0);
+			RouterCookie cookie = createDeleteCookie(data.getName());
 			cookies.add(cookie);
 		} else if(log.isDebugEnabled()) {
 			log.debug("not sending any cookie to browser for cookie="+cookie1.getName());
@@ -89,6 +89,10 @@ public class CookieTranslator {
 		return cookie;
 	}
 
+	public RouterCookie createDeleteCookie(String name) {
+		return createBase(name, 0);
+	}
+	
 	private RouterCookie createBase(String name, Integer maxAge) {
 		RouterCookie cookie = new RouterCookie();
 		cookie.name= name;
@@ -148,11 +152,15 @@ public class CookieTranslator {
 			String expectedHash = pair[1];
 			String hash = security.sign(config.getSecretKey(), keyValuePairs);
 			if(!hash.equals(expectedHash))
-				throw new BadRequestException("hashes don't match...render internal server to user as this only happens if hacked(NOTE: possibly change to BadRequestException so we don't log these when hackers try to hack us)");
+				throw new BadCookieException("hashes don't match...This occurs if secret key"
+						+ " was switched, or loaded different webapp on same port or someone"
+						+ " created an invalid cookie and sent to your webserver", data.getName());
 		}
 		
 		if(!VERSION.equals(version))
-			throw new BadRequestException("versions don't match...render internal server to user as this only happens if hacked");
+			throw new BadCookieException("versions don't match...This occurs if secret key"
+						+ " was switched, or loaded different webapp on same port or someone"
+						+ " created an invalid cookie and sent to your webserver", data.getName());
 		
 		String[] pieces = keyValuePairs.split("&");
 		for(String piece : pieces) {

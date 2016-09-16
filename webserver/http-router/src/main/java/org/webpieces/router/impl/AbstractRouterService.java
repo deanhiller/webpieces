@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.BadRequestException;
 
 public abstract class AbstractRouterService implements RoutingService {
@@ -26,7 +27,7 @@ public abstract class AbstractRouterService implements RoutingService {
 				throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 			
 			processHttpRequestsImpl(req, responseCb);
-		} catch(BadRequestException e) {
+		} catch(BadCookieException e) {
 			throw e;
 		} catch (Throwable e) {
 			log.warn("uncaught exception", e);
