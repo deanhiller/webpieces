@@ -12,10 +12,12 @@ public class RenderImpl implements Render {
 	private Map<String, Object> pageArgs = new HashMap<>();
 
 	private void addCurrentObjectsToPageArgs() {
-		this.pageArgs.put("_flash", Current.flash());
-		this.pageArgs.put("_session", Current.session());
-		this.pageArgs.put("_messages", Current.messages());
-		this.pageArgs.put("_validation", Current.validation());
+		if(Current.isContextSet()) {
+			this.pageArgs.put("_flash", Current.flash());
+			this.pageArgs.put("_session", Current.session());
+			this.pageArgs.put("_messages", Current.messages());
+			this.pageArgs.put("_validation", Current.validation());
+		}
 	}
 
 	public RenderImpl(String view, Object ... pageArgs) {
