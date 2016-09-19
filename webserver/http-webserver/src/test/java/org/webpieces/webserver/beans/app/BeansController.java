@@ -27,6 +27,7 @@ public class BeansController {
 	}
 	
 	public Action pageParam() {
+		Current.flash().put("testkey", "testflashvalue");
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 

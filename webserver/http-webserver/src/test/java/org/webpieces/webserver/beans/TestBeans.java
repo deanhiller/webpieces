@@ -53,6 +53,7 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Hi Dean Hiller, this is testing");
+		response.assertContains("Or we can try to get a flash: testflashvalue");
 	}
 
 	@Test
