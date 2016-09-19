@@ -31,6 +31,16 @@ public class BeansController {
 		return Actions.renderThis("user", "Dean Hiller");
 	}
 
+	public Action flashSuccess() {
+		Current.flash().setSuccess("it worked");
+		return Actions.renderThis();
+	}
+
+	public Action flashError() {
+		Current.flash().setError("it failed");
+		return Actions.renderThis();
+	}
+
 	public Action userForm() {
 		return Actions.renderThis();
 	}

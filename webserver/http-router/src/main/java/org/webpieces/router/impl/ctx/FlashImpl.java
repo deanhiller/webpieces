@@ -27,4 +27,28 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 		return COOKIE_NAME;
 	}
 
+	public Boolean isSuccess() {
+		return containsKey("successMsg");
+	}
+
+	public Boolean isError() {
+		return containsKey("errorMsg");
+	}
+
+	public void setSuccess(String msg) {
+		put("successMsg", msg);
+	}
+
+	public void setError(String msg) {
+		put("errorMsg", msg);
+	}
+
+	public String success() {
+		return get("successMsg");
+	}
+
+	public String error() {
+		return get("errorMsg");
+	}
+
 }

@@ -57,6 +57,32 @@ public class TestBeans {
 	}
 
 	@Test
+    public void testFlashSuccess() {
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashsuccess");
+        server.processHttpRequests(socket, req, false);
+
+        List<FullResponse> responses = socket.getResponses();
+        Assert.assertEquals(1, responses.size());
+
+        FullResponse response = responses.get(0);
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        response.assertContains("Msg: it worked");
+    }
+
+    @Test
+    public void testFlashError() {
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flasherror");
+        server.processHttpRequests(socket, req, false);
+
+        List<FullResponse> responses = socket.getResponses();
+        Assert.assertEquals(1, responses.size());
+
+        FullResponse response = responses.get(0);
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        response.assertContains("Err: it failed");
+    }
+
+	@Test
 	public void testPostFailDueToSecureTokenCheck() {
 		HttpRequest req = Requests.createPostRequest("/postuser", 
 				"user.firstName", "D&D", 
