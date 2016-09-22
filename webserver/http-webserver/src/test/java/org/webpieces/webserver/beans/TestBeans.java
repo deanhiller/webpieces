@@ -42,12 +42,29 @@ public class TestBeans {
 	}
 
 	@Test
-	public void testPageParam() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
-		
+    public void testPageParam() {
+        pageParamAux(false);
+    }
+
+    @Test
+    public void testPageParamAsync() {
+        pageParamAux(true);
+    }
+
+	private void pageParamAux(Boolean async) {
+        String uri;
+        if(async) {
+            uri = "/pageparam_async";
+        } else {
+            uri = "/pageparam";
+        }
+
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, uri);
+
 		server.processHttpRequests(socket, req , false);
-		
-		List<FullResponse> responses = socket.getResponses();
+
+        // In case we are async, wait up to 500msg
+		List<FullResponse> responses = socket.getResponses(500, 1);
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
@@ -55,6 +72,7 @@ public class TestBeans {
 		response.assertContains("Hi Dean Hiller, this is testing");
 		response.assertContains("Or we can try to get a flash: testflashvalue");
 	}
+
 
 	@Test
     public void testFlashSuccess() {

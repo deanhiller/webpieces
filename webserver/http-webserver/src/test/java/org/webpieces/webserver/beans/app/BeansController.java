@@ -1,6 +1,10 @@
 package org.webpieces.webserver.beans.app;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -21,7 +25,9 @@ public class BeansController {
 	private SomeLib lib1;
 	@Inject
 	private SomeOtherLib lib;
-	
+
+	private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
 	public Action urlEncoding(String user) {
 		return Actions.renderThis("user", user);
 	}
@@ -29,6 +35,21 @@ public class BeansController {
 	public Action pageParam() {
 		Current.flash().put("testkey", "testflashvalue");
 		return Actions.renderThis("user", "Dean Hiller");
+	}
+
+	public CompletableFuture<Action> pageParamAsync() {
+		CompletableFuture<Action> future = new CompletableFuture<>();
+		RequestContext ctx = Current.getContext();
+
+		executor.schedule(new Runnable() {
+			@Override
+			public void run() {
+				ctx.getFlash().put("testkey", "testflashvalue");
+				future.complete(Actions.renderThis("user", "Dean Hiller"));
+			}
+		}, 2, TimeUnit.MILLISECONDS);
+
+		return future;
 	}
 
 	public Action flashSuccess() {

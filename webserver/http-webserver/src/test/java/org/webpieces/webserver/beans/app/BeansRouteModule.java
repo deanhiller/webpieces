@@ -10,6 +10,9 @@ public class BeansRouteModule extends AbstractRouteModule {
 	@Override
 	public void configure(String currentPackage) {
 		addRoute(GET , "/pageparam",         "BeansController.pageParam", BeansRouteId.PAGE_PARAM);
+		addRoute(GET , "/pageparam_async",   "BeansController.pageParamAsync", BeansRouteId.PAGE_PARAM_ASYNC);
+
+
 		addRoute(GET , "/flashsuccess",      "BeansController.flashSuccess", BeansRouteId.FLASH_SUCCESS);
 		addRoute(GET , "/flasherror",        "BeansController.flashError", BeansRouteId.FLASH_ERROR);
 
