@@ -75,8 +75,8 @@ public class TestBeans {
 
 
 	@Test
-    public void testFlashSuccess() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashsuccess");
+    public void testFlasMessage() {
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         server.processHttpRequests(socket, req, false);
 
         List<FullResponse> responses = socket.getResponses();
@@ -88,8 +88,8 @@ public class TestBeans {
     }
 
     @Test
-    public void testFlashError() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flasherror");
+    public void testValidationError() {
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/validationerror");
         server.processHttpRequests(socket, req, false);
 
         List<FullResponse> responses = socket.getResponses();

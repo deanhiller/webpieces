@@ -13,8 +13,8 @@ public class BeansRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/pageparam_async",   "BeansController.pageParamAsync", BeansRouteId.PAGE_PARAM_ASYNC);
 
 
-		addRoute(GET , "/flashsuccess",      "BeansController.flashSuccess", BeansRouteId.FLASH_SUCCESS);
-		addRoute(GET , "/flasherror",        "BeansController.flashError", BeansRouteId.FLASH_ERROR);
+		addRoute(GET , "/flashmessage",      "BeansController.flashMessage", BeansRouteId.FLASH_MESSAGE);
+		addRoute(GET , "/validationerror",   "BeansController.validationError", BeansRouteId.VALIDATION_ERROR);
 
 		addRoute(GET , "/urlencoding/{user}","BeansController.urlEncoding", BeansRouteId.URLENCODE);
 

@@ -52,13 +52,13 @@ public class BeansController {
 		return future;
 	}
 
-	public Action flashSuccess() {
-		Current.flash().setSuccess("it worked");
+	public Action flashMessage() {
+		Current.flash().setMessage("it worked");
 		return Actions.renderThis();
 	}
 
-	public Action flashError() {
-		Current.flash().setError("it failed");
+	public Action validationError() {
+		Current.validation().setGlobalError("it failed");
 		return Actions.renderThis();
 	}
 

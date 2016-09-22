@@ -9,7 +9,7 @@ import org.webpieces.router.impl.params.ObjectTranslator;
 
 public class FlashImpl extends FlashScopeImpl implements FlashSub {
 	public static String COOKIE_NAME = CookieScopeImpl.COOKIE_NAME_PREFIX+"Flash";
-	
+
 	public FlashImpl(ObjectTranslator objectTranslator) {
 		super(objectTranslator);
 	}
@@ -27,28 +27,15 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 		return COOKIE_NAME;
 	}
 
-	public Boolean isSuccess() {
-		return containsKey("successMsg");
+	public boolean hasMessage() {
+		return containsKey("_message");
 	}
 
-	public Boolean isError() {
-		return containsKey("errorMsg");
+	public void setMessage(String msg) {
+		put("_message", msg);
 	}
 
-	public void setSuccess(String msg) {
-		put("successMsg", msg);
+	public String message() {
+		return get("_message");
 	}
-
-	public void setError(String msg) {
-		put("errorMsg", msg);
-	}
-
-	public String success() {
-		return get("successMsg");
-	}
-
-	public String error() {
-		return get("errorMsg");
-	}
-
 }

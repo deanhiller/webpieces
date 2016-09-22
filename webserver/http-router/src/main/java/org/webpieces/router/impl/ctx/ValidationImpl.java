@@ -28,4 +28,10 @@ public class ValidationImpl extends FlashScopeImpl implements Validation {
 	public String getError(String fieldName) {
 		return get(fieldName);
 	}
+
+	public void setGlobalError(String error) { put("_global", error); }
+
+	public boolean hasGlobalError() { return containsKey("_global"); }
+
+	public String globalError() { return get("_global"); }
 }

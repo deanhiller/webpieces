@@ -1,12 +1,9 @@
 package org.webpieces.ctx.api;
 
 public interface Flash extends FlashScope {
-    public Boolean isSuccess();
-    public Boolean isError();
+    public boolean hasMessage();
 
-    public String success();
-    public String error();
+    public String message();
 
-    public void setSuccess(String msg);
-    public void setError(String msg);
+    public void setMessage(String msg);
 }

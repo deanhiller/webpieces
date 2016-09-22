@@ -5,6 +5,6 @@
     <title>Title</title>
 </head>
     <body>
-        #{if _context.getFlash().isError()}#Err: ${_context.getFlash().error()}$#{/if}#
+        #{if _context.getValidation().hasGlobalError()}#Err: ${_context.getValidation().globalError()}$#{/if}#
     </body>
 </html>
