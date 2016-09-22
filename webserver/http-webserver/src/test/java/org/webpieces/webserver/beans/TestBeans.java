@@ -63,7 +63,7 @@ public class TestBeans {
 
 		server.processHttpRequests(socket, req , false);
 
-        // In case we are async, wait up to 500msg
+        // In case we are async, wait up to 500ms
 		List<FullResponse> responses = socket.getResponses(500, 1);
 		Assert.assertEquals(1, responses.size());
 
