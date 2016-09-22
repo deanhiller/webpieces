@@ -111,9 +111,14 @@ public class ResponseProcessor {
 		if(relativeOrAbsolutePath == null) {
 			relativeOrAbsolutePath = methodName+".html";
 		}
-		
+
+		Map<String, Object> pageArgs = controllerResponse.getPageArgs();
+
+        // Add context as a page arg:
+        pageArgs.put("_context", ctx);
+
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
-		RenderResponse resp = new RenderResponse(view, controllerResponse.getPageArgs(), matchedMeta.getRoute().getRouteType());
+		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRoute().getRouteType());
 		
 		wrapFunctionInContext(s -> responseCb.sendRenderHtml(resp));
 		

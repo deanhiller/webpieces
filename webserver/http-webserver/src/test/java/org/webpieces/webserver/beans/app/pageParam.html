@@ -5,6 +5,6 @@
     Hi ${user}$, this is testing param or ${optional('nothing')?.arg}$ 
     or we can get the user with getProperty ${getProperty('user')}$
 
-    Or we can try to get a flash: ${_flash.get('testkey')}$
+    Or we can try to get a flash: ${_context.getFlash().get('testkey')}$
   </body>
 </html>

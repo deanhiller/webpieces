@@ -11,15 +11,6 @@ public class RenderImpl implements Render {
 	private String relativeOrAbsoluteView;
 	private Map<String, Object> pageArgs = new HashMap<>();
 
-	private void addCurrentObjectsToPageArgs() {
-		if(Current.isContextSet()) {
-			this.pageArgs.put("_flash", Current.flash());
-			this.pageArgs.put("_session", Current.session());
-			this.pageArgs.put("_messages", Current.messages());
-			this.pageArgs.put("_validation", Current.validation());
-		}
-	}
-
 	public RenderImpl(String view, Object ... pageArgs) {
 		this.relativeOrAbsoluteView = view;
 		if(pageArgs.length % 2 != 0)
@@ -38,7 +29,6 @@ public class RenderImpl implements Render {
 				this.pageArgs.put(key, obj);
 			}
 		}
-		addCurrentObjectsToPageArgs();
 	}
 	
 	public Map<String, Object> getPageArgs() {
