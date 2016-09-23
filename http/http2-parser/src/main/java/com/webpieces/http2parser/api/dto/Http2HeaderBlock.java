@@ -1,5 +1,12 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2HeaderBlock {
+import java.util.List;
 
+class Http2HeaderBlock {
+    class Header {
+        public String header;
+        public String value;
+    }
+
+    private List<Header> headers;
 }
