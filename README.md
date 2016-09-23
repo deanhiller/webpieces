@@ -73,7 +73,7 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths
  * channelmanager - a very thin layer on nio for speed
  * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers)
- * http/http-parser1_1 - an asynchronous http parser than can accept partial payloads (ie. nio payloads don't have full message).  Can be used with ANY nio library.
+ * http/http1_1-parser - an asynchronous http parser than can accept partial payloads (ie. nio payloads don't have full message).  Can be used with ANY nio library.
  * httpclient - http client built on above core components
  * embeddablehttpproxy - build on http-frontend and http client
 

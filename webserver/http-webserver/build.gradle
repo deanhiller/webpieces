@@ -10,7 +10,7 @@ sourceSets {
 
 dependencies {
     compile deps['guice']
-    compile project(':http:http-frontend'), project(':http:http-parser1_1')
+    compile project(':http:http-frontend'), project(':http:http1_1-parser')
     compile project(':webserver:http-templating'), project(':webserver:http-router')
 
     testCompile project(':webserver:http-webserver-test')
