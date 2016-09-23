@@ -23,3 +23,5 @@
 
 # What is this.  it popped up on mac (not using intellij)
 .DS_Store
+
+build/
