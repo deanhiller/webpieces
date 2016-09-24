@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2Headers extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -35,17 +38,13 @@ public class Http2Headers extends Http2Frame {
 	private byte[] padding;
 
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] prelude = new byte[5];
-		prelude[0] = (byte) (streamDependency >> 24);
-		prelude[1] = (byte) (streamDependency >> 16);
-		prelude[2] = (byte) (streamDependency >> 8);
-		prelude[3] = (byte) streamDependency;
-
-		if(streamDependencyIsExclusive) prelude[0] |= 0x8;
-		prelude[4] = (byte) weight;
+		ByteBuffer prelude = ByteBuffer.allocate(5);
+		prelude.putInt(streamDependency);
+		if(streamDependencyIsExclusive) prelude.put(0, (byte) (prelude.get(0) | 0x8));
+		prelude.put((byte) weight);
 
 		DataWrapper unpadded = dataGen.chainDataWrappers(
-				dataGen.wrapByteArray(prelude),
+				new ByteBufferDataWrapper(prelude),
 				headerBlock.getDataWrapper());
 		if(!padded) {
 			return unpadded;

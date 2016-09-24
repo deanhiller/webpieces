@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2Ping extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -21,15 +24,8 @@ public class Http2Ping extends Http2Frame {
 	/* payload */
 	private long opaqueData;
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] ret = new byte[8];
-		ret[0] = (byte) (opaqueData >> 56);
-		ret[1] = (byte) (opaqueData >> 48);
-		ret[2] = (byte) (opaqueData >> 40);
-		ret[3] = (byte) (opaqueData >> 32);
-		ret[4] = (byte) (opaqueData >> 24);
-		ret[5] = (byte) (opaqueData >> 16);
-		ret[6] = (byte) (opaqueData >> 8);
-		ret[7] = (byte) opaqueData;
-		return dataGen.wrapByteArray(ret);
+		ByteBuffer ret = ByteBuffer.allocate(8);
+		ret.putLong(opaqueData);
+		return new ByteBufferDataWrapper(ret);
 	}
 }

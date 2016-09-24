@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2PushPromise extends Http2Frame {
 
@@ -24,20 +27,17 @@ public class Http2PushPromise extends Http2Frame {
 
 	/* payload */
 	// reserved - 1bit
-	private long promisedStreamId; //31bits
+	private int promisedStreamId; //31bits
 	private Http2HeaderBlock headerBlock;
 	private byte[] padding;
 
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] prelude = new byte[4];
-		prelude[0] = (byte) (promisedStreamId >> 24);
-		prelude[1] = (byte) (promisedStreamId >> 16);
-		prelude[2] = (byte) (promisedStreamId >> 8);
-		prelude[3] = (byte) promisedStreamId;
+		ByteBuffer prelude = ByteBuffer.allocate(4);
+		prelude.putInt(promisedStreamId);
 
 		DataWrapper headersDW = headerBlock.getDataWrapper();
 		DataWrapper finalDW = dataGen.chainDataWrappers(
-				dataGen.wrapByteArray(prelude),
+				new ByteBufferDataWrapper(prelude),
 				headersDW);
 		if(padded)
 			return finalDW;

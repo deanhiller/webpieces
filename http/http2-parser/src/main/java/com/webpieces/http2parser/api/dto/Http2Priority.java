@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2Priority extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -19,14 +22,11 @@ public class Http2Priority extends Http2Frame {
 	private short weight; //8
 
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] payload = new byte[5];
-		payload[0] = (byte) (streamDependency >> 24);
-		payload[1] = (byte) (streamDependency >> 16);
-		payload[2] = (byte) (streamDependency >> 8);
-		payload[3] = (byte) streamDependency;
-		if(streamDependencyIsExclusive) payload[0] |= 0x8;
-		payload[4] = (byte) weight;
-		return dataGen.wrapByteArray(payload);
+		ByteBuffer payload = ByteBuffer.allocate(5);
+		payload.putInt(streamDependency);
+		if(streamDependencyIsExclusive) payload.put(0, (byte) (payload.get(0) | 0x8));
+		payload.put((byte) weight);
+		return new ByteBufferDataWrapper(payload);
 	}
 	
 }

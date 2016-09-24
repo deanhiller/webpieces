@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2RstStream extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -13,15 +16,12 @@ public class Http2RstStream extends Http2Frame {
 	public void setFlags(byte flags) {}
 
 	/* payload */
-	private long errorCode; //32 bits
+	private Http2ErrorCode errorCode; //32 bits
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] payload = new byte[4];
-		payload[0] = (byte) (errorCode >> 24);
-		payload[1] = (byte) (errorCode >> 16);
-		payload[2] = (byte) (errorCode >> 8);
-		payload[3] = (byte) errorCode;
+		ByteBuffer payload = ByteBuffer.allocate(4);
+		payload.putInt(errorCode.getCode());
 
-		return dataGen.wrapByteArray(payload);
+		return new ByteBufferDataWrapper(payload);
 	}
 	
 }

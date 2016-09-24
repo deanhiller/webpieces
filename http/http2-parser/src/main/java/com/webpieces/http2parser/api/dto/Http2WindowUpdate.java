@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2WindowUpdate extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -16,12 +19,8 @@ public class Http2WindowUpdate extends Http2Frame {
 	//1bit reserved
 	private int windowSizeIncrement; //31 bits
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] ret = new byte[4];
-		ret[0] = (byte) (windowSizeIncrement >> 24);
-		ret[1] = (byte) (windowSizeIncrement >> 16);
-		ret[2] = (byte) (windowSizeIncrement >> 8);
-		ret[3] = (byte) windowSizeIncrement;
-		return dataGen.wrapByteArray(ret);
+		ByteBuffer payload = ByteBuffer.allocate(4).putInt(windowSizeIncrement);
+		return new ByteBufferDataWrapper(payload);
 	}
 	
 }

@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public class Http2GoAway extends Http2Frame {
 
@@ -21,19 +24,11 @@ public class Http2GoAway extends Http2Frame {
 	private DataWrapper debugData;
 
 	protected DataWrapper getPayloadDataWrapper() {
-		byte[] prelude = new byte[8];
-		prelude[0] = (byte) (lastStreamId >> 24);
-		prelude[1] = (byte) (lastStreamId >> 16);
-		prelude[2] = (byte) (lastStreamId >> 8);
-		prelude[3] = (byte) lastStreamId;
-		long code = errorCode.getCode();
-		prelude[4] = (byte) (code >> 24);
-		prelude[5] = (byte) (code >> 16);
-		prelude[6] = (byte) (code >> 8);
-		prelude[7] = (byte) code;
+		ByteBuffer prelude = ByteBuffer.allocate(8);
+		prelude.putInt(lastStreamId).putInt(errorCode.getCode());
 
 		return dataGen.chainDataWrappers(
-				dataGen.wrapByteArray(prelude),
+				new ByteBufferDataWrapper(prelude),
 				debugData
 		);
 	}
