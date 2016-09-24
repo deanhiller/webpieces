@@ -15,7 +15,7 @@ public class Http2WindowUpdate extends Http2Frame {
 	/* payload */
 	//1bit reserved
 	private int windowSizeIncrement; //31 bits
-	public DataWrapper getPayloadDataWrapper() {
+	protected DataWrapper getPayloadDataWrapper() {
 		byte[] ret = new byte[4];
 		ret[0] = (byte) (windowSizeIncrement >> 24);
 		ret[1] = (byte) (windowSizeIncrement >> 16);

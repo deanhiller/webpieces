@@ -21,7 +21,7 @@ public class Http2Continuation extends Http2Frame {
 
 	/* payload */
 	private Http2HeaderBlock headerBlock;
-	public DataWrapper getPayloadDataWrapper() {
+	protected DataWrapper getPayloadDataWrapper() {
 		return headerBlock.getDataWrapper();
 	}
 

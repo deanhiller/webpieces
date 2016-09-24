@@ -20,7 +20,7 @@ public class Http2GoAway extends Http2Frame {
 	private Http2ErrorCode errorCode; //32bits
 	private DataWrapper debugData;
 
-	public DataWrapper getPayloadDataWrapper() {
+	protected DataWrapper getPayloadDataWrapper() {
 		byte[] prelude = new byte[8];
 		prelude[0] = (byte) (lastStreamId >> 24);
 		prelude[1] = (byte) (lastStreamId >> 16);

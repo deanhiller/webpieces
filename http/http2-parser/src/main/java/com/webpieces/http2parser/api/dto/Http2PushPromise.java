@@ -28,7 +28,7 @@ public class Http2PushPromise extends Http2Frame {
 	private Http2HeaderBlock headerBlock;
 	private byte[] padding;
 
-	public DataWrapper getPayloadDataWrapper() {
+	protected DataWrapper getPayloadDataWrapper() {
 		byte[] prelude = new byte[4];
 		prelude[0] = (byte) (promisedStreamId >> 24);
 		prelude[1] = (byte) (promisedStreamId >> 16);

@@ -20,7 +20,7 @@ public class Http2Ping extends Http2Frame {
 
 	/* payload */
 	private long opaqueData;
-	public DataWrapper getPayloadDataWrapper() {
+	protected DataWrapper getPayloadDataWrapper() {
 		byte[] ret = new byte[8];
 		ret[0] = (byte) (opaqueData >> 56);
 		ret[1] = (byte) (opaqueData >> 48);
