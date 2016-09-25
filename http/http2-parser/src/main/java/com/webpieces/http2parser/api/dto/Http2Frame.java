@@ -3,6 +3,9 @@ package com.webpieces.http2parser.api.dto;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.data.impl.ByteBufferDataWrapper;
+
+import java.nio.ByteBuffer;
 
 public abstract class Http2Frame {
 	protected DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -13,21 +16,19 @@ public abstract class Http2Frame {
 	private int streamId; //31 bits unsigned
 
 	public DataWrapper getDataWrapper() {
-		byte[] header = new byte[9];
+		ByteBuffer header = ByteBuffer.allocate(9);
 		DataWrapper payload = getPayloadDataWrapper();
 
 		int length = payload.getReadableSize();
-		header[0] = (byte) (length >> 16);
-		header[1] = (byte) (length >> 8);
-		header[2] = (byte) length;
-		header[3] = getFrameTypeByte();
-		header[4] = getFlagsByte();
-		header[5] = (byte) (streamId >> 24);
-		header[6] = (byte) (streamId >> 16);
-		header[7] = (byte) streamId;
+        header.put((byte) (length >> 16));
+        header.putShort((short) length);
+        
+        header.put(getFrameTypeByte());
+		header.put(getFlagsByte());
+        // 1 bit reserved, clear MSB of streamId first;
+        header.putInt(streamId & 0x7FFFFFFF);
 
-		DataWrapper headerDW = dataGen.wrapByteArray(header);
-		return dataGen.chainDataWrappers(headerDW, payload);
+		return dataGen.chainDataWrappers(new ByteBufferDataWrapper(header), payload);
 	}
 
 	public byte[] getBytes() {
