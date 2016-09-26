@@ -34,7 +34,12 @@ class Util {
     }
 
     static Http2Frame frameFromHex(String frameHex) {
-        return Http2Frame.getDataWrapper(dataWrapperFromHex(frameHex));
+        return Http2Frame.setFromDataWrapper(dataWrapperFromHex(frameHex));
+    }
+
+    static boolean isReservedBitZero(DataWrapper frame) {
+        byte b = frame.readByteAt(6);
+        return (b & 0x80) == 0x00;
     }
 
 }

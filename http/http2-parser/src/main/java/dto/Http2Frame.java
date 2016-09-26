@@ -22,7 +22,7 @@ public abstract class Http2Frame {
         this.streamId = streamId & 0x7FFFFFFF;
     }
 
-	private DataWrapper getDataWrapper() {
+	public DataWrapper getDataWrapper() {
 		ByteBuffer header = ByteBuffer.allocate(9);
 		DataWrapper payload = getPayloadDataWrapper();
 
@@ -51,7 +51,7 @@ public abstract class Http2Frame {
     }
 
     // Ignores what's left over at the end of the datawrapper
-	static public Http2Frame getDataWrapper(DataWrapper data) {
+	static public Http2Frame setFromDataWrapper(DataWrapper data) {
         ByteBuffer headerByteBuffer = ByteBuffer.wrap(data.readBytesAt(0, 9));
         int length = headerByteBuffer.getShort() << 8;
         length |= headerByteBuffer.get();

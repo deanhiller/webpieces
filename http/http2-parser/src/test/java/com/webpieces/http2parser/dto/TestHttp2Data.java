@@ -70,6 +70,7 @@ public class TestHttp2Data{
         frame.setData(Util.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(unpaddedDataFrame));
+        Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
     }
 
     @Test public void testCreateDataFramePadded() {
@@ -78,6 +79,7 @@ public class TestHttp2Data{
         frame.setStreamId(1);
         frame.setPadding(Util.toByteArray("00 00"));
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(paddedDataFrame));
+        Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
     }
 
     @Test
@@ -87,6 +89,7 @@ public class TestHttp2Data{
         frame.setStreamId(1);
         frame.setEndStream();
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(endStreamDataFrame));
+        Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
     }
 
     @Test
@@ -97,5 +100,6 @@ public class TestHttp2Data{
         frame.setEndStream();
         frame.setPadding(Util.toByteArray("00 00"));
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(paddedEndStreamDataFrame));
+        Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
     }
 }
