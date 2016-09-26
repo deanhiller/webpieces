@@ -5,7 +5,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 
-public class Http2WindowUpdate extends Http2Frame {
+class Http2WindowUpdate extends Http2Frame {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.WINDOW_UPDATE;
 	}
@@ -20,6 +20,8 @@ public class Http2WindowUpdate extends Http2Frame {
 	private int windowSizeIncrement; //31 bits
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer payload = ByteBuffer.allocate(4).putInt(windowSizeIncrement);
+		payload.flip();
+
 		return new ByteBufferDataWrapper(payload);
 	}
 

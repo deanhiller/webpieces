@@ -5,7 +5,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 
-public class Http2RstStream extends Http2Frame {
+class Http2RstStream extends Http2Frame {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.RST_STREAM;
 	}
@@ -20,6 +20,7 @@ public class Http2RstStream extends Http2Frame {
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer payload = ByteBuffer.allocate(4);
 		payload.putInt(errorCode.getCode());
+		payload.flip();
 
 		return new ByteBufferDataWrapper(payload);
 	}

@@ -6,7 +6,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class Http2PushPromise extends Http2Frame {
+class Http2PushPromise extends Http2Frame {
 
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.PUSH_PROMISE;
@@ -35,6 +35,7 @@ public class Http2PushPromise extends Http2Frame {
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer prelude = ByteBuffer.allocate(4);
 		prelude.putInt(promisedStreamId);
+		prelude.flip();
 
 		DataWrapper headersDW = headerBlock.getDataWrapper();
 		DataWrapper finalDW = dataGen.chainDataWrappers(

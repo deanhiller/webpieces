@@ -6,7 +6,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class Http2Headers extends Http2Frame {
+class Http2Headers extends Http2Frame {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.HEADERS;
 	}
@@ -42,7 +42,8 @@ public class Http2Headers extends Http2Frame {
 		ByteBuffer prelude = ByteBuffer.allocate(5);
 		prelude.putInt(streamDependency);
 		if(streamDependencyIsExclusive) prelude.put(0, (byte) (prelude.get(0) | 0x8));
-		prelude.put((byte) weight);
+		prelude.put(weight);
+		prelude.flip();
 
 		DataWrapper unpadded = dataGen.chainDataWrappers(
 				new ByteBufferDataWrapper(prelude),

@@ -6,7 +6,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class Http2GoAway extends Http2Frame {
+class Http2GoAway extends Http2Frame {
 
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.GOAWAY;
@@ -24,17 +24,18 @@ public class Http2GoAway extends Http2Frame {
 	private Http2ErrorCode errorCode; //32bits
 	private DataWrapper debugData;
 
-	public void setLastStreamId(int lastStreamId) {
+	private void setLastStreamId(int lastStreamId) {
 		this.lastStreamId = lastStreamId & 0x7FFFFFFF; // clear the MSB for reserved
 	}
 
-	public void setErrorCode(Http2ErrorCode errorCode) {
+	private void setErrorCode(Http2ErrorCode errorCode) {
 		this.errorCode = errorCode;
 	}
 
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer prelude = ByteBuffer.allocate(8);
 		prelude.putInt(lastStreamId).putInt(errorCode.getCode());
+		prelude.flip();
 
 		return dataGen.chainDataWrappers(
 				new ByteBufferDataWrapper(prelude),

@@ -5,7 +5,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 
-public class Http2Priority extends Http2Frame {
+class Http2Priority extends Http2Frame {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.PRIORITY;
 	}
@@ -26,6 +26,8 @@ public class Http2Priority extends Http2Frame {
 		payload.putInt(streamDependency);
 		if(streamDependencyIsExclusive) payload.put(0, (byte) (payload.get(0) | 0x8));
 		payload.put(weight);
+		payload.flip();
+
 		return new ByteBufferDataWrapper(payload);
 	}
 

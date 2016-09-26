@@ -5,7 +5,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 
-public class Http2Ping extends Http2Frame {
+class Http2Ping extends Http2Frame {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.PING;
 	}
@@ -24,9 +24,11 @@ public class Http2Ping extends Http2Frame {
 	/* payload */
 	private long opaqueData;
 	protected DataWrapper getPayloadDataWrapper() {
-		ByteBuffer ret = ByteBuffer.allocate(8);
-		ret.putLong(opaqueData);
-		return new ByteBufferDataWrapper(ret);
+		ByteBuffer payload = ByteBuffer.allocate(8);
+		payload.putLong(opaqueData);
+		payload.flip();
+
+		return new ByteBufferDataWrapper(payload);
 	}
 
 	protected void setPayload(DataWrapper payload) {

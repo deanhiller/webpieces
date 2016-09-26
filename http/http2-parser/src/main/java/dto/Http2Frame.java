@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public abstract class Http2Frame {
-	protected static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	//24 bits unsigned length
 	public abstract Http2FrameType getFrameType(); //8bits
@@ -21,7 +21,7 @@ public abstract class Http2Frame {
         this.streamId = streamId & 0x7FFFFFFF;
     }
 
-	public DataWrapper getDataWrapper() {
+	private DataWrapper getDataWrapper() {
 		ByteBuffer header = ByteBuffer.allocate(9);
 		DataWrapper payload = getPayloadDataWrapper();
 
@@ -33,6 +33,7 @@ public abstract class Http2Frame {
 		header.put(getFlagsByte());
         // 1 bit reserved, streamId MSB is always 0, see setStreamId()
         header.putInt(streamId);
+        header.flip();
 
 		return dataGen.chainDataWrappers(new ByteBufferDataWrapper(header), payload);
 	}
@@ -85,7 +86,7 @@ public abstract class Http2Frame {
 		return getDataWrapper().createByteArray();
 	}
 
-	protected byte getFrameTypeByte() {
+	private byte getFrameTypeByte() {
 		return getFrameType().getId();
 	}
 
@@ -94,7 +95,7 @@ public abstract class Http2Frame {
 
 	abstract protected DataWrapper getPayloadDataWrapper();
 
-	protected DataWrapper pad(byte[] padding, DataWrapper data) {
+	DataWrapper pad(byte[] padding, DataWrapper data) {
 		byte[] length = { (byte) padding.length };
 		DataWrapper lengthDW = dataGen.wrapByteArray(length);
 		DataWrapper paddingDW = dataGen.wrapByteArray(padding);

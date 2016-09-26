@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Http2Settings extends Http2Frame {
+class Http2Settings extends Http2Frame {
 	public Http2FrameType getFrameType() {
         return Http2FrameType.SETTINGS;
     }
@@ -57,14 +57,16 @@ public class Http2Settings extends Http2Frame {
     // value 32bits
 	private Map<Parameter, Integer> settings;
     protected DataWrapper getPayloadDataWrapper() {
-        ByteBuffer ret = ByteBuffer.allocate(6 * settings.size());
+        ByteBuffer payload = ByteBuffer.allocate(6 * settings.size());
 
         for(Map.Entry<Parameter, Integer> setting: settings.entrySet()) {
             short id = setting.getKey().getId();
             Integer value = setting.getValue();
-            ret.putShort(id).putInt(value);
+            payload.putShort(id).putInt(value);
         }
-        return new ByteBufferDataWrapper(ret);
+        payload.flip();
+
+        return new ByteBufferDataWrapper(payload);
     }
 
     protected void setPayload(DataWrapper payload) {
