@@ -3,6 +3,7 @@ package org.webpieces.data.impl;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.webpieces.data.api.BufferPool;
@@ -12,13 +13,18 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	private List<SliceableDataWrapper> wrappers = new ArrayList<>();
 
-	public ChainedDataWrapper(SliceableDataWrapper wrapper1, SliceableDataWrapper wrapper2) {
+	ChainedDataWrapper(SliceableDataWrapper wrapper1, SliceableDataWrapper wrapper2) {
 		wrappers.add(wrapper1);
 		wrappers.add(wrapper2);
 	}
 
-	public ChainedDataWrapper(List<SliceableDataWrapper> wrappers) {
+	ChainedDataWrapper(List<SliceableDataWrapper> wrappers) {
 		this.wrappers = wrappers;
+	}
+
+	public ChainedDataWrapper(SliceableDataWrapper wrapper) {
+		this.wrappers = new ArrayList<>();
+		wrappers.add(wrapper);
 	}
 	
 	@Override
@@ -86,7 +92,7 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		return copy;
 	}
 
-	public void addMoreData(DataWrapper secondData) {
+	void addMoreData(DataWrapper secondData) {
 		if(secondData instanceof ChainedDataWrapper) {
 			ChainedDataWrapper wrap = (ChainedDataWrapper) secondData;
 			wrappers.addAll(wrap.getAllWrappers());
@@ -122,7 +128,7 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		}
 	}
 
-	public List<SliceableDataWrapper> getWrappers() {
+	List<SliceableDataWrapper> getWrappers() {
 		return wrappers;
 	}
 

@@ -10,30 +10,44 @@ public class Http2Data extends Http2Frame {
 	}
 
 	/* flags */
-	private boolean endStream; /* 0x1 */
-	private boolean padded;    /* 0x8 */
+	private boolean endStream = false; /* 0x1 */
+	private boolean padded = false;    /* 0x8 */
 	protected byte getFlagsByte() {
 		byte value = (byte) 0x0;
 		if(endStream) value |= 0x1;
 		if(padded) value |= 0x8;
 		return value;
 	}
-	public void setFlags(byte flags) {
+
+	protected void setFlags(byte flags) {
 		endStream = (flags & 0x1) == 0x1;
 		padded = (flags & 0x8) == 0x8;
 	}
 
 
 	/* payload */
-	private DataWrapper data;
-	private byte[] padding;
+	private DataWrapper data = null;
+	private byte[] padding = null;
 
 	public DataWrapper getData() {
 		return data;
 	}
 
+	public void setData(DataWrapper data) {
+		this.data = data;
+	}
+
+	public void setPadding(byte[] padding) {
+		this.padding = padding;
+		this.padded = true;
+	}
+
 	public boolean isEndStream() {
 		return endStream;
+	}
+
+	public void setEndStream() {
+		this.endStream = true;
 	}
 
 	protected DataWrapper getPayloadDataWrapper() {
@@ -48,12 +62,12 @@ public class Http2Data extends Http2Frame {
 		if(padded) {
 			byte padLength = payload.readByteAt(0);
 			List<? extends DataWrapper> split = dataGen.split(payload, 1);
-			List<? extends DataWrapper> split2 = dataGen.split(split.get(1), payload.getReadableSize() - padLength);
-			data = split2.get(0);
-			padding = split2.get(1).createByteArray();
+
+			List<? extends DataWrapper> split2 = dataGen.split(split.get(1), split.get(1).getReadableSize() - padLength);
+			setData(split2.get(0));
+			setPadding(split2.get(1).createByteArray());
 		} else {
-			padding = new byte[0];
-			data = payload;
+			setData(payload);
 		}
 	}
 }

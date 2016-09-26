@@ -4,6 +4,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
+import org.webpieces.data.impl.ChainedDataWrapper;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -16,7 +17,7 @@ public abstract class Http2Frame {
 	//1bit reserved
 	private int streamId; //31 bits unsigned
 
-    private void setStreamId(int streamId) {
+    public void setStreamId(int streamId) {
         // Clear the MSB because streamId can only be 31 bits
         this.streamId = streamId & 0x7FFFFFFF;
     }
@@ -35,7 +36,10 @@ public abstract class Http2Frame {
         header.putInt(streamId);
         header.flip();
 
-		return dataGen.chainDataWrappers(new ByteBufferDataWrapper(header), payload);
+        // The payload might be a chained datawrapper, and we can't stick a chained datawrapper on the end
+        // of a non-chained datawrapper, so we wrap the new bytebufferdatawrapper into a chained datawrapper
+        // here.
+		return dataGen.chainDataWrappers(new ChainedDataWrapper(new ByteBufferDataWrapper(header)), payload);
 	}
 
 	// includes header length
@@ -47,7 +51,7 @@ public abstract class Http2Frame {
     }
 
     // Ignores what's left over at the end of the datawrapper
-	static public Http2Frame createFromDataWrapper(DataWrapper data) {
+	static public Http2Frame getDataWrapper(DataWrapper data) {
         ByteBuffer headerByteBuffer = ByteBuffer.wrap(data.readBytesAt(0, 9));
         int length = headerByteBuffer.getShort() << 8;
         length |= headerByteBuffer.get();
