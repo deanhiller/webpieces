@@ -4,6 +4,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class Http2Headers extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -33,7 +34,7 @@ public class Http2Headers extends Http2Frame {
 	/* payload */
 	private boolean streamDependencyIsExclusive; //1 bit
 	private int streamDependency; //31 bits
-	private short weight; //8 bits
+	private byte weight; //8 bits
 	private Http2HeaderBlock headerBlock;
 	private byte[] padding;
 
@@ -51,6 +52,26 @@ public class Http2Headers extends Http2Frame {
 		}
 		else {
 			return pad(padding, unpadded);
+		}
+	}
+
+	protected void setPayload(DataWrapper payload) {
+		List<? extends DataWrapper> split = dataGen.split(payload, 5);
+		ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
+		int firstInt = prelude.getInt();
+		streamDependencyIsExclusive = firstInt >> 31 == 0x1;
+		streamDependency = firstInt & 0x7FFFFFFF;
+		weight = prelude.get();
+
+		if(padded) {
+			byte padLength = split.get(1).readByteAt(0);
+			List<? extends DataWrapper> split1 = dataGen.split(split.get(1), 1);
+			List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), payload.getReadableSize() - padLength);
+			headerBlock = new Http2HeaderBlock(split2.get(0));
+			padding = split2.get(1).createByteArray();
+		} else {
+			padding = new byte[0];
+			headerBlock = new Http2HeaderBlock(split.get(1));
 		}
 	}
 }

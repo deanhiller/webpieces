@@ -22,5 +22,9 @@ public class Http2WindowUpdate extends Http2Frame {
 		ByteBuffer payload = ByteBuffer.allocate(4).putInt(windowSizeIncrement);
 		return new ByteBufferDataWrapper(payload);
 	}
-	
+
+	protected void setPayload(DataWrapper payload) {
+		ByteBuffer payloadByteByffer = ByteBuffer.wrap(payload.createByteArray());
+		windowSizeIncrement = payloadByteByffer.getInt() & 0x7FFFFFFF;
+	}
 }

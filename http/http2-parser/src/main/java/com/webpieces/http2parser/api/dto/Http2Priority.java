@@ -19,14 +19,22 @@ public class Http2Priority extends Http2Frame {
 	/* payload */
 	private boolean streamDependencyIsExclusive; //1 bit
 	private int streamDependency; //31 bits
-	private short weight; //8
+	private byte weight; //8
 
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer payload = ByteBuffer.allocate(5);
 		payload.putInt(streamDependency);
 		if(streamDependencyIsExclusive) payload.put(0, (byte) (payload.get(0) | 0x8));
-		payload.put((byte) weight);
+		payload.put(weight);
 		return new ByteBufferDataWrapper(payload);
+	}
+
+	protected void setPayload(DataWrapper payload) {
+		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
+		int firstInt = payloadByteBuffer.getInt();
+		streamDependencyIsExclusive = firstInt >> 31 == 0x1;
+		streamDependency = payloadByteBuffer.getInt() & 0x7FFFFFFF;
+		weight = payloadByteBuffer.get();
 	}
 	
 }

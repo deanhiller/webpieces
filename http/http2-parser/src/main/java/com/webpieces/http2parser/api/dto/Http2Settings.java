@@ -6,6 +6,7 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Http2Settings extends Http2Frame {
@@ -41,18 +42,43 @@ public class Http2Settings extends Http2Frame {
         public short getId() {
             return id;
         }
+        static public Parameter fromId(short id) {
+            switch(id) {
+                case 0x1: return SETTINGS_HEADER_TABLE_SIZE;
+                case 0x2: return SETTINGS_ENABLE_PUSH;
+                case 0x3: return SETTINGS_MAX_CONCURRENT_STREAMS;
+                case 0x4: return SETTINGS_INITIAL_WINDOW_SIZE;
+                case 0x5: return SETTINGS_MAX_FRAME_SIZE;
+                case 0x6: return SETTINGS_MAX_HEADER_LIST_SIZE;
+                default: return SETTINGS_HEADER_TABLE_SIZE; // TODO: throw here
+            }
+        }
 	}
+
 	// id 16bits
     // value 32bits
-	private Map<Parameter, Long> settings;
+	private Map<Parameter, Integer> settings;
     protected DataWrapper getPayloadDataWrapper() {
         ByteBuffer ret = ByteBuffer.allocate(6 * settings.size());
 
-        for(Map.Entry<Parameter, Long> setting: settings.entrySet()) {
+        for(Map.Entry<Parameter, Integer> setting: settings.entrySet()) {
             short id = setting.getKey().getId();
-            Long value = setting.getValue();
-            ret.putShort(id).putInt(value.intValue());
+            Integer value = setting.getValue();
+            ret.putShort(id).putInt(value);
         }
         return new ByteBufferDataWrapper(ret);
+    }
+
+    protected void setPayload(DataWrapper payload) {
+        ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
+        while(payloadByteBuffer.hasRemaining()) {
+            settings.put(
+                    Parameter.fromId(payloadByteBuffer.getShort()),
+                    payloadByteBuffer.getInt());
+        }
+    }
+
+    public Http2Settings() {
+        settings = new HashMap<>();
     }
 }

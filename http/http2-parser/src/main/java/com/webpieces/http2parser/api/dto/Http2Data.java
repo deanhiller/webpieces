@@ -4,6 +4,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import javax.xml.crypto.Data;
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 public class Http2Data extends Http2Frame {
 	public Http2FrameType getFrameType() {
@@ -34,6 +35,19 @@ public class Http2Data extends Http2Frame {
 			return data;
 		} else {
 			return pad(padding, data);
+		}
+	}
+
+	protected void setPayload(DataWrapper payload) {
+		if(padded) {
+			byte padLength = payload.readByteAt(0);
+			List<? extends DataWrapper> split = dataGen.split(payload, 1);
+			List<? extends DataWrapper> split2 = dataGen.split(split.get(1), payload.getReadableSize() - padLength);
+			data = split2.get(0);
+			padding = split2.get(1).createByteArray();
+		} else {
+			padding = new byte[0];
+			data = payload;
 		}
 	}
 }

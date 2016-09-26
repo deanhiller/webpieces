@@ -2,6 +2,8 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
+import javax.xml.crypto.Data;
+
 public class Http2Continuation extends Http2Frame {
 
 	public Http2FrameType getFrameType() {
@@ -23,6 +25,11 @@ public class Http2Continuation extends Http2Frame {
 	private Http2HeaderBlock headerBlock;
 	protected DataWrapper getPayloadDataWrapper() {
 		return headerBlock.getDataWrapper();
+	}
+
+	protected void setPayload(DataWrapper payload)
+	{
+		headerBlock = new Http2HeaderBlock(payload);
 	}
 
 }
