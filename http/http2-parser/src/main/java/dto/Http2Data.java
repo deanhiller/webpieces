@@ -28,6 +28,14 @@ public class Http2Data extends Http2Frame {
 	private DataWrapper data;
 	private byte[] padding;
 
+	public DataWrapper getData() {
+		return data;
+	}
+
+	public boolean isEndStream() {
+		return endStream;
+	}
+
 	protected DataWrapper getPayloadDataWrapper() {
 		if(!padded) {
 			return data;
