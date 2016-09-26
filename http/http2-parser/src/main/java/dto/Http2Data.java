@@ -1,9 +1,7 @@
-package com.webpieces.http2parser.api.dto;
+package dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import javax.xml.crypto.Data;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 public class Http2Data extends Http2Frame {

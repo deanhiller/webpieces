@@ -1,8 +1,4 @@
-package com.webpieces.http2parser.api.dto;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.jar.Pack200;
+package dto;
 
 public enum Http2FrameType {
     DATA(0x0),

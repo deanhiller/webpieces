@@ -1,4 +1,4 @@
-package com.webpieces.http2parser.api.dto;
+package dto;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;

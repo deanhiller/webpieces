@@ -1,8 +1,6 @@
-package com.webpieces.http2parser.api.dto;
+package dto;
 
 import org.webpieces.data.api.DataWrapper;
-
-import javax.xml.crypto.Data;
 
 public class Http2Continuation extends Http2Frame {
 
