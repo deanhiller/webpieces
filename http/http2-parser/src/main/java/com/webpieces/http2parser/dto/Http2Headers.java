@@ -114,7 +114,7 @@ class Http2Headers extends Http2Frame {
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer prelude = ByteBuffer.allocate(5);
 		prelude.putInt(streamDependency);
-		if(streamDependencyIsExclusive) prelude.put(0, (byte) (prelude.get(0) | 0x8));
+		if(streamDependencyIsExclusive) prelude.put(0, (byte) (prelude.get(0) | 0x80));
 		prelude.put(weight);
 		prelude.flip();
 
@@ -133,7 +133,7 @@ class Http2Headers extends Http2Frame {
 		List<? extends DataWrapper> split = dataGen.split(payload, 5);
 		ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
 		int firstInt = prelude.getInt();
-		streamDependencyIsExclusive = firstInt >> 31 == 0x1;
+		streamDependencyIsExclusive = firstInt >>> 31 == 0x1;
 		streamDependency = firstInt & 0x7FFFFFFF;
 		weight = prelude.get();
 

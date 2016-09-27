@@ -27,7 +27,7 @@ public abstract class Http2Frame {
 		DataWrapper payload = getPayloadDataWrapper();
 
 		int length = payload.getReadableSize();
-        header.put((byte) (length >> 16));
+        header.put((byte) (length >>> 16));
         header.putShort((short) length);
 
         header.put(getFrameTypeByte());
