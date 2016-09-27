@@ -69,7 +69,7 @@ class Http2Settings extends Http2Frame {
         return new ByteBufferDataWrapper(payload);
     }
 
-    protected void setPayload(DataWrapper payload) {
+    protected void setFromPayload(DataWrapper payload) {
         ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
         while(payloadByteBuffer.hasRemaining()) {
             settings.put(

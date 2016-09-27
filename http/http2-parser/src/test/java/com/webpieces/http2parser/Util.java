@@ -1,6 +1,7 @@
 package com.webpieces.http2parser;
 
 import com.webpieces.http2parser.dto.Http2Frame;
+import org.junit.Assert;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -34,12 +35,16 @@ public class Util {
     }
 
     public static Http2Frame frameFromHex(String frameHex) {
-        return Http2Frame.setFromDataWrapper(dataWrapperFromHex(frameHex));
+        return Http2Frame.getFromDataWrapper(dataWrapperFromHex(frameHex));
     }
 
     public static boolean isReservedBitZero(DataWrapper frame) {
         byte b = frame.readByteAt(6);
         return (b & 0x80) == 0x00;
+    }
+
+    public static void testBidiFromBytes(String hexFrame) {
+        Assert.assertArrayEquals(frameFromHex(hexFrame).getBytes(), toByteArray(hexFrame));
     }
 
 }

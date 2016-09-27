@@ -25,7 +25,7 @@ class Http2RstStream extends Http2Frame {
 		return new ByteBufferDataWrapper(payload);
 	}
 
-	protected void setPayload(DataWrapper payload) {
+	protected void setFromPayload(DataWrapper payload) {
 		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
 		errorCode = Http2ErrorCode.fromInteger(payloadByteBuffer.getInt());
 	}

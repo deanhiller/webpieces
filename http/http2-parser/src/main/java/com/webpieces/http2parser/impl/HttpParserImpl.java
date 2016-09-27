@@ -41,7 +41,7 @@ public class HttpParserImpl implements HttpParser {
                 } else {
                     // parse a single frame, look for more
                     List<? extends DataWrapper> split = dataGen.split(wrapperToParse, length);
-                    Http2Frame frame = Http2Frame.setFromDataWrapper(split.get(0));
+                    Http2Frame frame = Http2Frame.getFromDataWrapper(split.get(0));
                     frames.add(frame);
                     wrapperToParse = split.get(1);
                 }

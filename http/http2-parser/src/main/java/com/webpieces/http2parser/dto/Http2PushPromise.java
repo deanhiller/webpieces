@@ -47,7 +47,7 @@ class Http2PushPromise extends Http2Frame {
 			return pad(padding, finalDW);
 	}
 
-	protected void setPayload(DataWrapper payload) {
+	protected void setFromPayload(DataWrapper payload) {
 		List<? extends DataWrapper> split = dataGen.split(payload, 4);
 		ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
 		promisedStreamId = prelude.getInt() & 0x7FFFFFFF;

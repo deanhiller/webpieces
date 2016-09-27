@@ -31,7 +31,7 @@ class Http2Ping extends Http2Frame {
 		return new ByteBufferDataWrapper(payload);
 	}
 
-	protected void setPayload(DataWrapper payload) {
+	protected void setFromPayload(DataWrapper payload) {
 		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
 		opaqueData = payloadByteBuffer.getLong();
 	}

@@ -51,7 +51,7 @@ public abstract class Http2Frame {
     }
 
     // Ignores what's left over at the end of the datawrapper
-	static public Http2Frame setFromDataWrapper(DataWrapper data) {
+	static public Http2Frame getFromDataWrapper(DataWrapper data) {
         ByteBuffer headerByteBuffer = ByteBuffer.wrap(data.readBytesAt(0, 9));
         int length = headerByteBuffer.getShort() << 8;
         length |= headerByteBuffer.get();
@@ -73,7 +73,7 @@ public abstract class Http2Frame {
                 List<? extends DataWrapper> splitWrappers = dataGen.split(data, 9);
                 DataWrapper payloadPlusMore = splitWrappers.get(1);
                 List<? extends DataWrapper> split = dataGen.split(payloadPlusMore, length);
-                ret.setPayload(split.get(0));
+                ret.setFromPayload(split.get(0));
             }
             return ret;
 
@@ -84,7 +84,7 @@ public abstract class Http2Frame {
     }
 
     // The payload doesn't have any extra data past the end of the frame by now
-    protected abstract void setPayload(DataWrapper payload);
+    protected abstract void setFromPayload(DataWrapper payload);
 
 	public byte[] getBytes() {
 		return getDataWrapper().createByteArray();

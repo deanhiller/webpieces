@@ -47,6 +47,8 @@ public class TestHttp2Data{
         byte[] data = castFrame.getData().createByteArray();
         Assert.assertArrayEquals(data, Util.toByteArray("FF FF FF FF FF FF FF FF"));
         Assert.assertFalse(castFrame.isEndStream());
+
+        Util.testBidiFromBytes(unpaddedDataFrame);
     }
 
     @Test
@@ -60,6 +62,7 @@ public class TestHttp2Data{
         byte[] data = castFrame.getData().createByteArray();
         Assert.assertArrayEquals(data, Util.toByteArray("FF FF FF FF FF FF FF FF"));
         Assert.assertFalse(castFrame.isEndStream());
+        Util.testBidiFromBytes(paddedDataFrame);
     }
 
     @Test
@@ -69,6 +72,7 @@ public class TestHttp2Data{
         frame.setStreamId(1);
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(unpaddedDataFrame));
         Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
+        Util.testBidiFromBytes(Util.toHexString(frame.getBytes()));
     }
 
     @Test public void testCreateDataFramePadded() {
@@ -78,6 +82,7 @@ public class TestHttp2Data{
         frame.setPadding(Util.toByteArray("00 00"));
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(paddedDataFrame));
         Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
+        Util.testBidiFromBytes(Util.toHexString(frame.getBytes()));
     }
 
     @Test
@@ -88,6 +93,7 @@ public class TestHttp2Data{
         frame.setEndStream();
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(endStreamDataFrame));
         Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
+        Util.testBidiFromBytes(Util.toHexString(frame.getBytes()));
     }
 
     @Test
@@ -99,5 +105,6 @@ public class TestHttp2Data{
         frame.setPadding(Util.toByteArray("00 00"));
         Assert.assertArrayEquals(frame.getBytes(), Util.toByteArray(paddedEndStreamDataFrame));
         Assert.assertTrue(Util.isReservedBitZero(frame.getDataWrapper()));
+        Util.testBidiFromBytes(Util.toHexString(frame.getBytes()));
     }
 }

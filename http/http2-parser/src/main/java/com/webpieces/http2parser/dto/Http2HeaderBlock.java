@@ -11,24 +11,30 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class Http2HeaderBlock {
-    private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    static private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    class Header {
-        public Header(String header, String value) {
+    static class Header {
+        Header(String header, String value) {
             this.header = header;
             this.value = value;
         }
 
-        public String header;
-        public String value;
+        String header;
+        String value;
     }
 
-    private List<Header> headers;
+    private final List<Header> headers;
 
-    protected DataWrapper getDataWrapper() {
+    Http2HeaderBlock(List<Header> headers) {
+        this.headers = headers;
+    }
+
+    DataWrapper getDataWrapper() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         // TODO: get max header table size from settings
@@ -41,10 +47,18 @@ class Http2HeaderBlock {
                         header.value.getBytes(),
                         false);
             } catch(IOException e) {
-
+                // TODO: reraise appropriately
             }
         }
         return dataGen.wrapByteArray(out.toByteArray());
+    }
+
+    Map<String, String> toMap() {
+        Map<String, String> headerMap = new HashMap<>();
+        for(Header header: headers) {
+            headerMap.put(header.header, header.value);
+        }
+        return headerMap;
     }
 
     Http2HeaderBlock(DataWrapper data) {
@@ -59,7 +73,7 @@ class Http2HeaderBlock {
         HeaderListener listener = new HeaderListener() {
             @Override
             public void addHeader(byte[] name, byte[] value, boolean sensitive) {
-                headers.add(new Header(name.toString(), value.toString()));
+                headers.add(new Header(new String(name), new String(value)));
             }
         };
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);

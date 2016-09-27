@@ -58,7 +58,7 @@ public class Http2Data extends Http2Frame {
 		}
 	}
 
-	protected void setPayload(DataWrapper payload) {
+	protected void setFromPayload(DataWrapper payload) {
 		if(padded) {
 			byte padLength = payload.readByteAt(0);
 			List<? extends DataWrapper> split = dataGen.split(payload, 1);
