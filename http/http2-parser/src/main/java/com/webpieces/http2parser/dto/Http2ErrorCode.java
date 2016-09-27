@@ -1,4 +1,4 @@
-package dto;
+package com.webpieces.http2parser.dto;
 
 public enum Http2ErrorCode {
     NO_ERROR(0x0),

@@ -2,7 +2,7 @@ package com.webpieces.http2parser.api;
 
 import java.util.List;
 
-import dto.Http2Frame;
+import com.webpieces.http2parser.dto.Http2Frame;
 
 public interface Memento {
 

@@ -1,9 +1,6 @@
 package com.webpieces.http2parser.dto;
 
-import dto.Http2Data;
-import dto.Http2Frame;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class TestHttp2Data{

@@ -1,6 +1,5 @@
 package com.webpieces.http2parser.dto;
 
-import dto.Http2Frame;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;

@@ -1,4 +1,4 @@
-package dto;
+package com.webpieces.http2parser.dto;
 
 public enum Http2FrameType {
     DATA(0x0),
