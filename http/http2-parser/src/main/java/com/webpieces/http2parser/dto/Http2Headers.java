@@ -83,7 +83,7 @@ class Http2Headers extends Http2Frame {
     }
 
     public void setStreamDependency(int streamDependency) {
-        this.streamDependency = streamDependency;
+        this.streamDependency = streamDependency & 0x7FFFFFFF;
     }
 
     public byte getWeight() {
