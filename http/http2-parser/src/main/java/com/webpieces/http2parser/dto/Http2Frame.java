@@ -22,6 +22,10 @@ public abstract class Http2Frame {
         this.streamId = streamId & 0x7FFFFFFF;
     }
 
+    public int getStreamId() {
+        return streamId;
+    }
+
 	public DataWrapper getDataWrapper() {
 		ByteBuffer header = ByteBuffer.allocate(9);
 		DataWrapper payload = getPayloadDataWrapper();

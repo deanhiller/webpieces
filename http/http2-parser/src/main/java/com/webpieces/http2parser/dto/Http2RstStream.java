@@ -17,6 +17,15 @@ class Http2RstStream extends Http2Frame {
 
 	/* payload */
 	private Http2ErrorCode errorCode; //32 bits
+
+	public Http2ErrorCode getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(Http2ErrorCode errorCode) {
+		this.errorCode = errorCode;
+	}
+
 	protected DataWrapper getPayloadDataWrapper() {
 		ByteBuffer payload = ByteBuffer.allocate(4);
 		payload.putInt(errorCode.getCode());
