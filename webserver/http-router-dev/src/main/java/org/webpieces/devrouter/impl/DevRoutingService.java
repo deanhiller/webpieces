@@ -12,7 +12,9 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
@@ -79,7 +81,8 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
 		}
 		
-		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req)); 
+
+		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req));
 	}
 	
 	private class DevErrorRoutes implements ErrorRoutes {

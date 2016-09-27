@@ -137,4 +137,10 @@ public class ResponseCreator {
 		cookie.setHttpOnly(c.isHttpOnly);
 		return httpSubParser.createHeader(cookie);
 	}
+
+	public void addDeleteCookie(HttpResponse response, String badCookieName) {
+		RouterCookie cookie = cookieTranslator.createDeleteCookie(badCookieName);
+		Header cookieHeader = create(cookie);
+		response.addHeader(cookieHeader);
+	}
 }

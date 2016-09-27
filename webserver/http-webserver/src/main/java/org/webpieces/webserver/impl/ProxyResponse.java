@@ -78,8 +78,29 @@ public class ProxyResponse implements ResponseStreamer {
 		this.pool = pool;
 	}
 
+	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
+		RedirectResponse httpResponse = new RedirectResponse(req.isHttps, req.domain, req.relativePath);
+		HttpResponse response = createRedirect(httpResponse);
+		
+		responseCreator.addDeleteCookie(response, badCookieName);
+		
+		log.info("sending REDIRECT(due to bad cookie) response channel="+channel);
+		channel.write(response);
+
+		channelCloser.closeIfNeeded(request, channel);		
+	}
+	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
+		HttpResponse response = createRedirect(httpResponse);
+
+		log.info("sending REDIRECT response channel="+channel);
+		channel.write(response);
+
+		channelCloser.closeIfNeeded(request, channel);
+	}
+
+	private HttpResponse createRedirect(RedirectResponse httpResponse) {
 		HttpResponseStatus status = new HttpResponseStatus();
 		status.setKnownStatus(KnownStatusCode.HTTP_303_SEEOTHER);
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
@@ -109,11 +130,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
 		response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, 0+""));
-
-		log.info("sending REDIRECT response channel="+channel);
-		channel.write(response);
-
-		channelCloser.closeIfNeeded(request, channel);
+		return response;
 	}
 
 	@Override
