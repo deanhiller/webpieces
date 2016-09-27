@@ -1,5 +1,6 @@
 package com.webpieces.http2parser.dto;
 
+import com.webpieces.http2parser.Util;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,5 +1,6 @@
 package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.HttpParser;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.dto.Http2Frame;
 import org.webpieces.data.api.DataWrapper;
@@ -9,7 +10,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpParserImpl {
+public class HttpParserImpl implements HttpParser {
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     public ParserResult prepareToParse() {

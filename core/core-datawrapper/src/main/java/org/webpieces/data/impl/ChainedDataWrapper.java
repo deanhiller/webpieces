@@ -38,12 +38,13 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 
 	@Override
 	public byte readByteAt(int i) {
+        int j = i;
 		for(DataWrapper wrapper : wrappers) {
 			int size = wrapper.getReadableSize();
-			if(i < size) {
+			if(j < size) {
 				return wrapper.readByteAt(i);
 			}
-			i = i - size;
+			j = j - size;
 		}
 		
 		throw new IndexOutOfBoundsException("i="+i+" is out of bounds of size="+getReadableSize());
