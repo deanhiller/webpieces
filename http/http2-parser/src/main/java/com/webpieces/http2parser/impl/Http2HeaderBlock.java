@@ -1,4 +1,4 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Http2HeaderBlock {
+public class Http2HeaderBlock {
     static private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     static class Header {

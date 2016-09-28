@@ -1,6 +1,8 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.Util;
+import com.webpieces.http2parser.api.Http2Frame;
+import com.webpieces.http2parser.api.Http2Priority;
+import com.webpieces.http2parser.impl.Http2PriorityImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,20 +17,20 @@ public class TestHttp2Priority {
 
     @Test
     public void testCreatePriorityFrame() {
-        Http2Priority frame = new Http2Priority();
+        Http2Priority frame = new Http2PriorityImpl();
         frame.setStreamDependency(4);
         frame.setStreamDependencyIsExclusive();
         frame.setWeight((byte) 0x5);
 
-        String hexFrame = Util.toHexString(frame.getBytes());
-        Assert.assertArrayEquals(Util.toByteArray(hexFrame), Util.toByteArray(priorityFrame));
+        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(priorityFrame));
 
-        Util.testBidiFromBytes(hexFrame);
+        UtilsForTest.testBidiFromBytes(hexFrame);
     }
 
     @Test
     public void testParsePriorityFrame() {
-        Http2Frame frame = Util.frameFromHex(priorityFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(priorityFrame);
         Assert.assertTrue(Http2Priority.class.isInstance(frame));
 
         Http2Priority castFrame = (Http2Priority) frame;

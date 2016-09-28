@@ -1,10 +1,17 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2FrameType;
+import com.webpieces.http2parser.api.Http2Padded;
 import org.webpieces.data.api.DataWrapper;
+import com.webpieces.http2parser.api.Http2Data;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import java.util.List;
 
-public class Http2Data extends Http2Frame {
+public class Http2DataImpl extends Http2FrameImpl implements Http2Data {
+	private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.DATA;
 	}
@@ -12,18 +19,17 @@ public class Http2Data extends Http2Frame {
 	/* flags */
 	private boolean endStream = false; /* 0x1 */
 	private boolean padded = false;    /* 0x8 */
-	protected byte getFlagsByte() {
+	public byte getFlagsByte() {
 		byte value = (byte) 0x0;
 		if(endStream) value |= 0x1;
 		if(padded) value |= 0x8;
 		return value;
 	}
 
-	protected void setFlags(byte flags) {
+	public void setFlags(byte flags) {
 		endStream = (flags & 0x1) == 0x1;
 		padded = (flags & 0x8) == 0x8;
 	}
-
 
 	/* payload */
 	private DataWrapper data = null;
@@ -50,15 +56,15 @@ public class Http2Data extends Http2Frame {
 		this.endStream = true;
 	}
 
-	protected DataWrapper getPayloadDataWrapper() {
+	public DataWrapper getPayloadDataWrapper() {
 		if(!padded) {
 			return data;
 		} else {
-			return pad(padding, data);
+			return Http2Padded.pad(padding, data);
 		}
 	}
 
-	protected void setPayloadFromDataWrapper(DataWrapper payload) {
+	public void setPayloadFromDataWrapper(DataWrapper payload) {
 		if(padded) {
 			byte padLength = payload.readByteAt(0);
 			List<? extends DataWrapper> split = dataGen.split(payload, 1);

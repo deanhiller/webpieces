@@ -1,11 +1,13 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2FrameType;
+import com.webpieces.http2parser.api.Http2RstStream;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 
-class Http2RstStream extends Http2Frame {
+public class Http2RstStreamImpl extends Http2FrameImpl implements Http2RstStream {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.RST_STREAM;
 	}
@@ -26,7 +28,7 @@ class Http2RstStream extends Http2Frame {
 		this.errorCode = errorCode;
 	}
 
-	protected DataWrapper getPayloadDataWrapper() {
+	public DataWrapper getPayloadDataWrapper() {
 		ByteBuffer payload = ByteBuffer.allocate(4);
 		payload.putInt(errorCode.getCode());
 		payload.flip();
@@ -34,7 +36,7 @@ class Http2RstStream extends Http2Frame {
 		return new ByteBufferDataWrapper(payload);
 	}
 
-	protected void setPayloadFromDataWrapper(DataWrapper payload) {
+	public void setPayloadFromDataWrapper(DataWrapper payload) {
 		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
 		errorCode = Http2ErrorCode.fromInteger(payloadByteBuffer.getInt());
 	}

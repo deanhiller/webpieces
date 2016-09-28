@@ -1,11 +1,13 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2FrameType;
+import com.webpieces.http2parser.api.Http2Ping;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 
-class Http2Ping extends Http2Frame {
+public class Http2PingImpl extends Http2FrameImpl implements Http2Ping {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.PING;
 	}
@@ -21,9 +23,26 @@ class Http2Ping extends Http2Frame {
 		isPingResponse = (flags & 0x1) == 0x1;
 	}
 
+	public boolean isPingResponse() {
+		return isPingResponse;
+	}
+
+	public void setPingResponse(boolean pingResponse) {
+		isPingResponse = pingResponse;
+	}
+
 	/* payload */
 	private long opaqueData;
-	protected DataWrapper getPayloadDataWrapper() {
+
+	public long getOpaqueData() {
+		return opaqueData;
+	}
+
+	public void setOpaqueData(long opaqueData) {
+		this.opaqueData = opaqueData;
+	}
+
+	public DataWrapper getPayloadDataWrapper() {
 		ByteBuffer payload = ByteBuffer.allocate(8);
 		payload.putLong(opaqueData);
 		payload.flip();
@@ -31,7 +50,7 @@ class Http2Ping extends Http2Frame {
 		return new ByteBufferDataWrapper(payload);
 	}
 
-	protected void setPayloadFromDataWrapper(DataWrapper payload) {
+	public void setPayloadFromDataWrapper(DataWrapper payload) {
 		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
 		opaqueData = payloadByteBuffer.getLong();
 	}

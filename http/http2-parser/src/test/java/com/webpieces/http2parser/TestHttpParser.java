@@ -1,9 +1,7 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.HttpParser;
+import com.webpieces.http2parser.api.Http2Frame;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.dto.Http2Frame;
-import com.webpieces.http2parser.impl.HttpParserImpl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -44,12 +42,11 @@ public class TestHttpParser {
             "00 00 08" + // length
             "00"; // type
 
-    private static HttpParser parser = new HttpParserImpl();
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     @Test
     public void testBasicParse() {
-        ParserResult result = parser.parse(Util.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper());
+        ParserResult result = Http2Frame.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper());
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertFalse(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -59,9 +56,9 @@ public class TestHttpParser {
 
     @Test
     public void testBasicParseWithPriorData() {
-        ParserResult result = parser.parse(
-                Util.dataWrapperFromHex(aBunchOfDataFrames.subSequence(0, 8).toString()), // oldData
-                Util.dataWrapperFromHex(aBunchOfDataFrames.substring(8)) // newData
+        ParserResult result = Http2Frame.parse(
+                UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames.subSequence(0, 8).toString()), // oldData
+                UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames.substring(8)) // newData
             );
 
         Assert.assertTrue(result.hasParsedFrames());
@@ -72,49 +69,49 @@ public class TestHttpParser {
 
     @Test
     public void testBasicParseWithSomeData() {
-        ParserResult result = parser.parse(
-                Util.dataWrapperFromHex(dataFramesWithSomeLeftOverData),
+        ParserResult result = Http2Frame.parse(
+                UtilsForTest.dataWrapperFromHex(dataFramesWithSomeLeftOverData),
                 dataGen.emptyWrapper());
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertTrue(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 4);
-        Assert.assertEquals(Util.toHexString(result.getMoreData().createByteArray()), "0000");
+        Assert.assertEquals(UtilsForTest.toHexString(result.getMoreData().createByteArray()), "0000");
     }
 
     @Test
     public void testBasicParseWithMoreData() {
-        ParserResult result = parser.parse(
-                Util.dataWrapperFromHex(dataFramesWithABunchOfLeftOverData),
+        ParserResult result = Http2Frame.parse(
+                UtilsForTest.dataWrapperFromHex(dataFramesWithABunchOfLeftOverData),
                 dataGen.emptyWrapper());
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertTrue(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 4);
-        Assert.assertEquals(Util.toHexString(result.getMoreData().createByteArray()), "00000800");
+        Assert.assertEquals(UtilsForTest.toHexString(result.getMoreData().createByteArray()), "00000800");
     }
 
     @Test
     public void testBasicParseWithLittleData() {
-        ParserResult result = parser.parse(
-                Util.dataWrapperFromHex("00 00"),
+        ParserResult result = Http2Frame.parse(
+                UtilsForTest.dataWrapperFromHex("00 00"),
                 dataGen.emptyWrapper());
         Assert.assertFalse(result.hasParsedFrames());
         Assert.assertTrue(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 0);
-        Assert.assertEquals(Util.toHexString(result.getMoreData().createByteArray()), "0000");
+        Assert.assertEquals(UtilsForTest.toHexString(result.getMoreData().createByteArray()), "0000");
     }
 
     @Test
     public void testBasicParseWithNoData() {
-        ParserResult result = parser.parse(
+        ParserResult result = Http2Frame.parse(
                 dataGen.emptyWrapper(),
                 dataGen.emptyWrapper());
         Assert.assertFalse(result.hasParsedFrames());
         Assert.assertFalse(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 0);
-        Assert.assertEquals(Util.toHexString(result.getMoreData().createByteArray()), "");
+        Assert.assertEquals(UtilsForTest.toHexString(result.getMoreData().createByteArray()), "");
     }
 }

@@ -1,12 +1,17 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2FrameType;
+import com.webpieces.http2parser.api.Http2Padded;
+import com.webpieces.http2parser.api.Http2PushPromise;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-class Http2PushPromise extends Http2Frame {
+public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPromise {
 
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.PUSH_PROMISE;
@@ -15,6 +20,15 @@ class Http2PushPromise extends Http2Frame {
 	/* flags */
 	private boolean endHeaders; /* 0x4 */
 	private boolean padded; /* 0x8 */
+
+	public boolean isEndHeaders() {
+		return endHeaders;
+	}
+
+	public void setEndHeaders() {
+		this.endHeaders = true;
+	}
+
 	public byte getFlagsByte() {
 		byte value = 0x0;
 		if(endHeaders) value |= 0x4;
@@ -26,13 +40,39 @@ class Http2PushPromise extends Http2Frame {
 		padded = (flags & 0x8) == 0x8;
 	}
 
-	/* payload */
+    /* payload */
 	// reserved - 1bit
 	private int promisedStreamId; //31bits
 	private Http2HeaderBlock headerBlock;
 	private byte[] padding;
 
-	protected DataWrapper getPayloadDataWrapper() {
+	public void setPadding(byte[] padding) {
+		this.padding = padding;
+		padded = true;
+	}
+
+    public int getPromisedStreamId() {
+        return promisedStreamId;
+    }
+
+    public void setPromisedStreamId(int promisedStreamId) {
+        this.promisedStreamId = promisedStreamId;
+    }
+
+	// Should reuse code in Http2HeadersImpl but multiple-inheritance is not possible?
+	public void setHeaders(Map<String, String> headers) {
+		List<Http2HeaderBlock.Header> headerList = new ArrayList<>();
+		for(Map.Entry<String, String> entry: headers.entrySet()) {
+			headerList.add(new Http2HeaderBlock.Header(entry.getKey(), entry.getValue()));
+		}
+		headerBlock = new Http2HeaderBlock(headerList);
+	}
+
+	public Map<String, String> getHeaders() {
+		return headerBlock.toMap();
+	}
+
+	public DataWrapper getPayloadDataWrapper() {
 		ByteBuffer prelude = ByteBuffer.allocate(4);
 		prelude.putInt(promisedStreamId);
 		prelude.flip();
@@ -44,10 +84,10 @@ class Http2PushPromise extends Http2Frame {
 		if(padded)
 			return finalDW;
 		else
-			return pad(padding, finalDW);
+			return Http2Padded.pad(padding, finalDW);
 	}
 
-	protected void setPayloadFromDataWrapper(DataWrapper payload) {
+	public void setPayloadFromDataWrapper(DataWrapper payload) {
 		List<? extends DataWrapper> split = dataGen.split(payload, 4);
 		ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
 		promisedStreamId = prelude.getInt() & 0x7FFFFFFF;

@@ -1,14 +1,17 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2FrameType;
+import com.webpieces.http2parser.api.Http2Settings;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-class Http2Settings extends Http2Frame {
+public class Http2SettingsImpl extends Http2FrameImpl implements Http2Settings {
 	public Http2FrameType getFrameType() {
         return Http2FrameType.SETTINGS;
     }
@@ -38,47 +41,20 @@ class Http2Settings extends Http2Frame {
     }
 
     /* payload */
-    public enum Parameter {
-		SETTINGS_HEADER_TABLE_SIZE(0x1),
-        SETTINGS_ENABLE_PUSH(0x2),
-        SETTINGS_MAX_CONCURRENT_STREAMS(0x3),
-        SETTINGS_INITIAL_WINDOW_SIZE(0x4),
-        SETTINGS_MAX_FRAME_SIZE(0x5),
-        SETTINGS_MAX_HEADER_LIST_SIZE(0x6);
 
-        private short id;
-
-        Parameter(int id) {
-            this.id = (short) id;
-        }
-
-        short getId() {
-            return id;
-        }
-        static Parameter fromId(short id) {
-            switch(id) {
-                case 0x1: return SETTINGS_HEADER_TABLE_SIZE;
-                case 0x2: return SETTINGS_ENABLE_PUSH;
-                case 0x3: return SETTINGS_MAX_CONCURRENT_STREAMS;
-                case 0x4: return SETTINGS_INITIAL_WINDOW_SIZE;
-                case 0x5: return SETTINGS_MAX_FRAME_SIZE;
-                case 0x6: return SETTINGS_MAX_HEADER_LIST_SIZE;
-                default: return SETTINGS_HEADER_TABLE_SIZE; // TODO: throw here
-            }
-        }
-	}
 
 	// id 16bits
     // value 32bits
-	private Map<Parameter, Integer> settings = new HashMap<>();
-    protected DataWrapper getPayloadDataWrapper() {
+	private Map<Http2Settings.Parameter, Integer> settings = new LinkedHashMap<>();
+
+    public DataWrapper getPayloadDataWrapper() {
         if(ack) {
             // If ack then settings must be empty
             return dataGen.emptyWrapper();
         } else {
             ByteBuffer payload = ByteBuffer.allocate(6 * settings.size());
 
-            for (Map.Entry<Parameter, Integer> setting : settings.entrySet()) {
+            for (Map.Entry<Http2Settings.Parameter, Integer> setting : settings.entrySet()) {
                 short id = setting.getKey().getId();
                 Integer value = setting.getValue();
                 payload.putShort(id).putInt(value);
@@ -89,20 +65,20 @@ class Http2Settings extends Http2Frame {
         }
     }
 
-    protected void setPayloadFromDataWrapper(DataWrapper payload) {
+    public void setPayloadFromDataWrapper(DataWrapper payload) {
         ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
         while(payloadByteBuffer.hasRemaining()) {
             settings.put(
-                    Parameter.fromId(payloadByteBuffer.getShort()),
+                    Http2Settings.Parameter.fromId(payloadByteBuffer.getShort()),
                     payloadByteBuffer.getInt());
         }
     }
 
-    public void setSetting(Parameter param, Integer value) {
+    public void setSetting(Http2Settings.Parameter param, Integer value) {
         settings.put(param, value);
     }
 
-    public Map<Parameter, Integer> getSettings() {
+    public Map<Http2Settings.Parameter, Integer> getSettings() {
         if(!ack) {
             return settings;
         } else

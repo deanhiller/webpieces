@@ -1,4 +1,6 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.api;
+
+import com.webpieces.http2parser.impl.*;
 
 public enum Http2FrameType {
     DATA(0x0),
@@ -39,17 +41,17 @@ public enum Http2FrameType {
 
     public Class<? extends Http2Frame> getFrameClass() {
         switch(id) {
-            case 0x0: return Http2Data.class;
-            case 0x1: return Http2Headers.class;
-            case 0x2: return Http2Priority.class;
-            case 0x3: return Http2RstStream.class;
-            case 0x4: return Http2Settings.class;
-            case 0x5: return Http2PushPromise.class;
-            case 0x6: return Http2Ping.class;
-            case 0x7: return Http2GoAway.class;
-            case 0x8: return Http2WindowUpdate.class;
-            case 0x9: return Http2Continuation.class;
-            default: return Http2Data.class; // TODO: throw here, should never happen
+            case 0x0: return Http2DataImpl.class;
+            case 0x1: return Http2HeadersImpl.class;
+            case 0x2: return Http2PriorityImpl.class;
+            case 0x3: return Http2RstStreamImpl.class;
+            case 0x4: return Http2SettingsImpl.class;
+            case 0x5: return Http2PushPromiseImpl.class;
+            case 0x6: return Http2PingImpl.class;
+            case 0x7: return Http2GoAwayImpl.class;
+            case 0x8: return Http2WindowUpdateImpl.class;
+            case 0x9: return Http2ContinuationImpl.class;
+            default: return Http2DataImpl.class; // TODO: throw here, should never happen
         }
     }
 }

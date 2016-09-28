@@ -1,15 +1,15 @@
 package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2Frame;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.dto.Http2Frame;
 import org.webpieces.data.api.DataWrapper;
 import java.util.List;
 
-class ParserResultImpl implements ParserResult {
+public class ParserResultImpl implements ParserResult {
     final private List<Http2Frame> frames;
     final private DataWrapper leftOverData;
 
-    ParserResultImpl(List<Http2Frame> frames, DataWrapper leftOverData) {
+    public ParserResultImpl(List<Http2Frame> frames, DataWrapper leftOverData) {
         this.frames = frames;
         this.leftOverData = leftOverData;
     }

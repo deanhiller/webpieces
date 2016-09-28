@@ -1,14 +1,15 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.Util;
+import com.webpieces.http2parser.api.Http2Headers;
+import com.webpieces.http2parser.impl.Http2HeadersImpl;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class TestHttp2Headers {
-    static Map<String, String> basicRequestHeaders = new HashMap<>();
-    static Map<String, String> basicResponseHeaders = new HashMap<>();
+    private static Map<String, String> basicRequestHeaders = new HashMap<>();
+    private static Map<String, String> basicResponseHeaders = new HashMap<>();
     static {
         basicRequestHeaders.put(":method", "GET");
         basicRequestHeaders.put(":scheme", "https");
@@ -30,22 +31,22 @@ public class TestHttp2Headers {
 
     @Test
     public void testCreateRequestHeadersFrame() {
-        Http2Headers frame = new Http2Headers();
+        Http2Headers frame = new Http2HeadersImpl();
         frame.setHeaders(basicRequestHeaders);
         frame.setEndHeaders();
-        String hexFrame = Util.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
 
-        Util.testBidiFromBytes(hexFrame);
+        UtilsForTest.testBidiFromBytes(hexFrame);
     }
 
     @Test
     public void testCreateResponseHeadersFrame() {
-        Http2Headers frame = new Http2Headers();
+        Http2Headers frame = new Http2HeadersImpl();
         frame.setHeaders(basicResponseHeaders);
         frame.setEndHeaders();
-        String hexFrame = Util.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
 
-        Util.testBidiFromBytes(hexFrame);
+        UtilsForTest.testBidiFromBytes(hexFrame);
     }
 
     // TODO: Add bits -> frame tests from real world snooped data

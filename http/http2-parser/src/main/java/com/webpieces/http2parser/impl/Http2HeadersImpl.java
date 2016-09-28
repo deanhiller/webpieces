@@ -1,5 +1,8 @@
-package com.webpieces.http2parser.dto;
+package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2FrameType;
+import com.webpieces.http2parser.api.Http2Headers;
+import com.webpieces.http2parser.api.Http2Padded;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
@@ -8,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class Http2Headers extends Http2Frame {
+public class Http2HeadersImpl extends Http2FrameImpl implements Http2Headers  {
 	public Http2FrameType getFrameType() {
 		return Http2FrameType.HEADERS;
 	}
@@ -28,7 +31,7 @@ class Http2Headers extends Http2Frame {
         return value;
     }
 
-	protected void setFlags(byte flags) {
+	public void setFlags(byte flags) {
 		endStream = (flags & 0x1) == 0x1;
 		endHeaders = (flags & 0x4) == 0x4;
 		padded = (flags & 0x8) == 0x8;
@@ -49,10 +52,6 @@ class Http2Headers extends Http2Frame {
 
     public void setEndHeaders() {
         this.endHeaders = true;
-    }
-
-    public boolean isPadded() {
-        return padded;
     }
 
     public boolean isPriority() {
@@ -111,7 +110,7 @@ class Http2Headers extends Http2Frame {
         return headerBlock.toMap();
     }
 
-	protected DataWrapper getPayloadDataWrapper() {
+	public DataWrapper getPayloadDataWrapper() {
 		ByteBuffer prelude = ByteBuffer.allocate(5);
 		prelude.putInt(streamDependency);
 		if(streamDependencyIsExclusive) prelude.put(0, (byte) (prelude.get(0) | 0x80));
@@ -125,11 +124,11 @@ class Http2Headers extends Http2Frame {
 			return unpadded;
 		}
 		else {
-			return pad(padding, unpadded);
+			return Http2Padded.pad(padding, unpadded);
 		}
 	}
 
-	protected void setPayloadFromDataWrapper(DataWrapper payload) {
+	public void setPayloadFromDataWrapper(DataWrapper payload) {
 		List<? extends DataWrapper> split = dataGen.split(payload, 5);
 		ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
 		int firstInt = prelude.getInt();
