@@ -137,7 +137,6 @@ public class Http2HeadersImpl extends Http2FrameImpl implements Http2Headers {
             headerBlock.setFromDataWrapper(split2.get(0));
             padding = split2.get(1).createByteArray();
         } else {
-            padding = new byte[0];
             headerBlock.setFromDataWrapper(split.get(1));
         }
     }

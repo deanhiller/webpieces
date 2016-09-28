@@ -13,7 +13,7 @@ public class Http2PingImpl extends Http2FrameImpl implements Http2Ping {
     }
 
     /* flags */
-    private boolean isPingResponse; /* 0x1 */
+    private boolean isPingResponse = false; /* 0x1 */
 
     public byte getFlagsByte() {
         byte value = 0x0;
@@ -29,12 +29,12 @@ public class Http2PingImpl extends Http2FrameImpl implements Http2Ping {
         return isPingResponse;
     }
 
-    public void setPingResponse(boolean pingResponse) {
-        isPingResponse = pingResponse;
+    public void setPingResponse() {
+        isPingResponse = true;
     }
 
     /* payload */
-    private long opaqueData;
+    private long opaqueData = 0x0;
 
     public long getOpaqueData() {
         return opaqueData;

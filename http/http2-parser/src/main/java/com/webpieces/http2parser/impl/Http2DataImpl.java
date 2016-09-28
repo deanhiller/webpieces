@@ -71,8 +71,8 @@ public class Http2DataImpl extends Http2FrameImpl implements Http2Data {
             List<? extends DataWrapper> split = dataGen.split(payload, 1);
 
             List<? extends DataWrapper> split2 = dataGen.split(split.get(1), split.get(1).getReadableSize() - padLength);
-            setData(split2.get(0));
-            setPadding(split2.get(1).createByteArray());
+            data = split2.get(0);
+            padding = split2.get(1).createByteArray();
         } else {
             setData(payload);
         }

@@ -17,8 +17,8 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
     }
 
     /* flags */
-    private boolean endHeaders; /* 0x4 */
-    private boolean padded; /* 0x8 */
+    private boolean endHeaders = false; /* 0x4 */
+    private boolean padded = false; /* 0x8 */
 
     public boolean isEndHeaders() {
         return endHeaders;
@@ -77,7 +77,7 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
         DataWrapper finalDW = dataGen.chainDataWrappers(
                 new ByteBufferDataWrapper(prelude),
                 headersDW);
-        if (padded)
+        if (!padded)
             return finalDW;
         else
             return Http2Padded.pad(padding, finalDW);
@@ -96,7 +96,6 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
             headerBlock.setFromDataWrapper(split2.get(0));
             padding = split2.get(1).createByteArray();
         } else {
-            padding = new byte[0];
             headerBlock.setFromDataWrapper(split.get(1));
         }
     }
