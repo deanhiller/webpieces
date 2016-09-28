@@ -20,24 +20,34 @@ public interface Http2Settings extends Http2Frame {
         public short getId() {
             return id;
         }
+
         public static Parameter fromId(short id) {
-            switch(id) {
-                case 0x1: return SETTINGS_HEADER_TABLE_SIZE;
-                case 0x2: return SETTINGS_ENABLE_PUSH;
-                case 0x3: return SETTINGS_MAX_CONCURRENT_STREAMS;
-                case 0x4: return SETTINGS_INITIAL_WINDOW_SIZE;
-                case 0x5: return SETTINGS_MAX_FRAME_SIZE;
-                case 0x6: return SETTINGS_MAX_HEADER_LIST_SIZE;
-                default: return SETTINGS_HEADER_TABLE_SIZE; // TODO: throw here
+            switch (id) {
+                case 0x1:
+                    return SETTINGS_HEADER_TABLE_SIZE;
+                case 0x2:
+                    return SETTINGS_ENABLE_PUSH;
+                case 0x3:
+                    return SETTINGS_MAX_CONCURRENT_STREAMS;
+                case 0x4:
+                    return SETTINGS_INITIAL_WINDOW_SIZE;
+                case 0x5:
+                    return SETTINGS_MAX_FRAME_SIZE;
+                case 0x6:
+                    return SETTINGS_MAX_HEADER_LIST_SIZE;
+                default:
+                    return SETTINGS_HEADER_TABLE_SIZE; // TODO: throw here
             }
         }
     }
 
     /* flags */
     boolean isAck();
+
     void setAck();
 
     /* payload */
     void setSetting(Http2Settings.Parameter param, Integer value);
+
     Map<Parameter, Integer> getSettings();
 }

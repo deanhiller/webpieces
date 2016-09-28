@@ -11,13 +11,13 @@ public interface Http2Frame {
         DataWrapper wrapperToParse;
         List<Http2Frame> frames = new ArrayList<>();
 
-        if(oldData.getReadableSize() > 0)
+        if (oldData.getReadableSize() > 0)
             wrapperToParse = Http2FrameUtil.dataGen.chainDataWrappers(oldData, newData);
         else
             wrapperToParse = newData;
 
         // Loop until a return (ack)
-        while(true) {
+        while (true) {
             int lengthOfData = wrapperToParse.getReadableSize();
             if (lengthOfData <= 3) {
                 // Not even a length
@@ -40,16 +40,23 @@ public interface Http2Frame {
     }
 
     void setStreamId(int streamId);
+
     int getStreamId();
+
     Http2FrameType getFrameType();
+
     DataWrapper getDataWrapper();
+
     byte[] getBytes();
 
     // These should not actually be public parts of the interface but they are needed
     // for the subclasses etc.
     byte getFlagsByte();
+
     void setFlags(byte flag);
+
     void setPayloadFromDataWrapper(DataWrapper data);
+
     DataWrapper getPayloadDataWrapper();
 
 }

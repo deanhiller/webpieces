@@ -1,7 +1,5 @@
 package com.webpieces.http2parser.api;
 
-import java.util.Map;
-
 public interface Http2Headers extends Http2Frame, Http2Padded, Http2HeaderFrame {
     /* flags */
     boolean isEndStream();

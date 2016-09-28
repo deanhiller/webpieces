@@ -37,7 +37,7 @@ class Http2FrameUtil {
             int streamId = headerByteBuffer.getInt();
             ret.setStreamId(streamId);
 
-            if(length > 0) {
+            if (length > 0) {
                 List<? extends DataWrapper> splitWrappers = dataGen.split(data, 9);
                 DataWrapper payloadPlusMore = splitWrappers.get(1);
                 List<? extends DataWrapper> split = dataGen.split(payloadPlusMore, length);

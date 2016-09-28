@@ -5,9 +5,14 @@ public interface Http2Priority extends Http2Frame {
 
     /* payload */
     boolean isStreamDependencyIsExclusive();
+
     void setStreamDependencyIsExclusive();
+
     int getStreamDependency();
+
     void setStreamDependency(int streamDependency);
+
     byte getWeight();
+
     void setWeight(byte weight);
 }

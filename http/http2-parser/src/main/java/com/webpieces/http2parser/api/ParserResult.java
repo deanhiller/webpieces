@@ -6,8 +6,10 @@ import java.util.List;
 
 public interface ParserResult {
     boolean hasParsedFrames();
+
     List<Http2Frame> getParsedFrames();
 
     boolean hasMoreData();
+
     DataWrapper getMoreData();
 }

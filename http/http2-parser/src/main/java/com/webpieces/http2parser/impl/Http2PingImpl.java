@@ -8,50 +8,52 @@ import org.webpieces.data.impl.ByteBufferDataWrapper;
 import java.nio.ByteBuffer;
 
 public class Http2PingImpl extends Http2FrameImpl implements Http2Ping {
-	public Http2FrameType getFrameType() {
-		return Http2FrameType.PING;
-	}
+    public Http2FrameType getFrameType() {
+        return Http2FrameType.PING;
+    }
 
-	/* flags */
-	private boolean isPingResponse; /* 0x1 */
-	public byte getFlagsByte() {
-		byte value = 0x0;
-		if(isPingResponse) value |= 0x1;
-		return value;
-	}
-	public void setFlags(byte flags) {
-		isPingResponse = (flags & 0x1) == 0x1;
-	}
+    /* flags */
+    private boolean isPingResponse; /* 0x1 */
 
-	public boolean isPingResponse() {
-		return isPingResponse;
-	}
+    public byte getFlagsByte() {
+        byte value = 0x0;
+        if (isPingResponse) value |= 0x1;
+        return value;
+    }
 
-	public void setPingResponse(boolean pingResponse) {
-		isPingResponse = pingResponse;
-	}
+    public void setFlags(byte flags) {
+        isPingResponse = (flags & 0x1) == 0x1;
+    }
 
-	/* payload */
-	private long opaqueData;
+    public boolean isPingResponse() {
+        return isPingResponse;
+    }
 
-	public long getOpaqueData() {
-		return opaqueData;
-	}
+    public void setPingResponse(boolean pingResponse) {
+        isPingResponse = pingResponse;
+    }
 
-	public void setOpaqueData(long opaqueData) {
-		this.opaqueData = opaqueData;
-	}
+    /* payload */
+    private long opaqueData;
 
-	public DataWrapper getPayloadDataWrapper() {
-		ByteBuffer payload = ByteBuffer.allocate(8);
-		payload.putLong(opaqueData);
-		payload.flip();
+    public long getOpaqueData() {
+        return opaqueData;
+    }
 
-		return new ByteBufferDataWrapper(payload);
-	}
+    public void setOpaqueData(long opaqueData) {
+        this.opaqueData = opaqueData;
+    }
 
-	public void setPayloadFromDataWrapper(DataWrapper payload) {
-		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
-		opaqueData = payloadByteBuffer.getLong();
-	}
+    public DataWrapper getPayloadDataWrapper() {
+        ByteBuffer payload = ByteBuffer.allocate(8);
+        payload.putLong(opaqueData);
+        payload.flip();
+
+        return new ByteBufferDataWrapper(payload);
+    }
+
+    public void setPayloadFromDataWrapper(DataWrapper payload) {
+        ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
+        opaqueData = payloadByteBuffer.getLong();
+    }
 }
