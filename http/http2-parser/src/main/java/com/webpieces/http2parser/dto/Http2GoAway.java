@@ -43,7 +43,7 @@ class Http2GoAway extends Http2Frame {
 		);
 	}
 
-	protected void setFromPayload(DataWrapper payload) {
+	protected void setPayloadFromDataWrapper(DataWrapper payload) {
 		List<? extends DataWrapper> split = dataGen.split(payload, 8);
 		ByteBuffer preludeBytes = ByteBuffer.wrap(split.get(0).createByteArray());
 		setLastStreamId(preludeBytes.getInt());

@@ -129,7 +129,7 @@ class Http2Headers extends Http2Frame {
 		}
 	}
 
-	protected void setFromPayload(DataWrapper payload) {
+	protected void setPayloadFromDataWrapper(DataWrapper payload) {
 		List<? extends DataWrapper> split = dataGen.split(payload, 5);
 		ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
 		int firstInt = prelude.getInt();

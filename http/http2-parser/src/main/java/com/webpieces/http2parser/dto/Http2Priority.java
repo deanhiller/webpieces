@@ -55,7 +55,7 @@ class Http2Priority extends Http2Frame {
 		return new ByteBufferDataWrapper(payload);
 	}
 
-	protected void setFromPayload(DataWrapper payload) {
+	protected void setPayloadFromDataWrapper(DataWrapper payload) {
 		ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
 		int firstInt = payloadByteBuffer.getInt();
 		streamDependencyIsExclusive = firstInt >>> 31 == 0x1;
