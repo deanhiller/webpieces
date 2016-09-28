@@ -7,7 +7,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +65,7 @@ public class Http2HeadersImpl extends Http2FrameImpl implements Http2Headers  {
     private boolean streamDependencyIsExclusive = false; //1 bit
     private int streamDependency = 0x0; //31 bits
 	private byte weight = 0x0; //8 bits
-	private Http2HeaderBlock headerBlock = null;
+	private Http2HeaderBlockImpl headerBlock = new Http2HeaderBlockImpl();
 	private byte[] padding = null;
 
     public boolean isStreamDependencyIsExclusive() {
@@ -99,15 +98,11 @@ public class Http2HeadersImpl extends Http2FrameImpl implements Http2Headers  {
     }
 
     public void setHeaders(Map<String, String> headers) {
-		List<Http2HeaderBlock.Header> headerList = new ArrayList<>();
-		for(Map.Entry<String, String> entry: headers.entrySet()) {
-			headerList.add(new Http2HeaderBlock.Header(entry.getKey(), entry.getValue()));
-		}
-		headerBlock = new Http2HeaderBlock(headerList);
+		headerBlock.setFromMap(headers);
 	}
 
 	public Map<String, String> getHeaders() {
-        return headerBlock.toMap();
+        return headerBlock.getMap();
     }
 
 	public DataWrapper getPayloadDataWrapper() {
@@ -140,11 +135,11 @@ public class Http2HeadersImpl extends Http2FrameImpl implements Http2Headers  {
 			byte padLength = split.get(1).readByteAt(0);
 			List<? extends DataWrapper> split1 = dataGen.split(split.get(1), 1);
 			List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), payload.getReadableSize() - padLength);
-			headerBlock = new Http2HeaderBlock(split2.get(0));
+			headerBlock.setFromDataWrapper(split2.get(0));
 			padding = split2.get(1).createByteArray();
 		} else {
 			padding = new byte[0];
-			headerBlock = new Http2HeaderBlock(split.get(1));
+			headerBlock.setFromDataWrapper(split.get(1));
 		}
 	}
 }

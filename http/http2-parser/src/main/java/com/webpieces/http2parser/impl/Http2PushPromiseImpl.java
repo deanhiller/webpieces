@@ -7,7 +7,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,9 +41,9 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
 
     /* payload */
 	// reserved - 1bit
-	private int promisedStreamId; //31bits
-	private Http2HeaderBlock headerBlock;
-	private byte[] padding;
+	private int promisedStreamId = 0x0; //31bits
+	private Http2HeaderBlockImpl headerBlock = new Http2HeaderBlockImpl();
+	private byte[] padding = null;
 
 	public void setPadding(byte[] padding) {
 		this.padding = padding;
@@ -61,15 +60,11 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
 
 	// Should reuse code in Http2HeadersImpl but multiple-inheritance is not possible?
 	public void setHeaders(Map<String, String> headers) {
-		List<Http2HeaderBlock.Header> headerList = new ArrayList<>();
-		for(Map.Entry<String, String> entry: headers.entrySet()) {
-			headerList.add(new Http2HeaderBlock.Header(entry.getKey(), entry.getValue()));
-		}
-		headerBlock = new Http2HeaderBlock(headerList);
+		headerBlock.setFromMap(headers);
 	}
 
 	public Map<String, String> getHeaders() {
-		return headerBlock.toMap();
+		return headerBlock.getMap();
 	}
 
 	public DataWrapper getPayloadDataWrapper() {
@@ -97,11 +92,11 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
 			byte padLength = split.get(1).readByteAt(0);
 			List<? extends DataWrapper> split1 = dataGen.split(split.get(1), 1);
 			List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), payload.getReadableSize() - padLength);
-			headerBlock = new Http2HeaderBlock(split2.get(0));
+			headerBlock.setFromDataWrapper(split2.get(0));
 			padding = split2.get(1).createByteArray();
 		} else {
 			padding = new byte[0];
-			headerBlock = new Http2HeaderBlock(split.get(1));
+			headerBlock.setFromDataWrapper(split.get(1));
 		}
 	}
 }

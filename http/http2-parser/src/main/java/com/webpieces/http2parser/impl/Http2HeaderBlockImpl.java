@@ -3,6 +3,7 @@ package com.webpieces.http2parser.impl;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.twitter.hpack.HeaderListener;
+import com.webpieces.http2parser.api.Http2HeaderBlock;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -15,31 +16,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Http2HeaderBlock {
+public class Http2HeaderBlockImpl implements Http2HeaderBlock {
     static private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    static class Header {
-        Header(String header, String value) {
-            this.header = header;
-            this.value = value;
-        }
+    private final List<Http2HeaderBlock.Header> headers = new ArrayList<>();
 
-        String header;
-        String value;
-    }
-
-    private final List<Header> headers;
-
-    Http2HeaderBlock(List<Header> headers) {
-        this.headers = headers;
-    }
-
-    DataWrapper getDataWrapper() {
+    public DataWrapper getDataWrapper() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         // TODO: get max header table size from settings
         Encoder encoder = new Encoder(4096);
-        for(Header header: headers) {
+        for(Http2HeaderBlock.Header header: headers) {
             try {
                 encoder.encodeHeader(
                         out,
@@ -53,27 +40,30 @@ public class Http2HeaderBlock {
         return dataGen.wrapByteArray(out.toByteArray());
     }
 
-    Map<String, String> toMap() {
+    public Map<String, String> getMap() {
         Map<String, String> headerMap = new HashMap<>();
-        for(Header header: headers) {
+        for(Http2HeaderBlock.Header header: headers) {
             headerMap.put(header.header, header.value);
         }
         return headerMap;
     }
 
-    Http2HeaderBlock(DataWrapper data) {
-        headers = new ArrayList<>();
-        setFromDataWrapper(data);
+    public void setFromMap(Map<String, String> map) {
+        headers.clear();
+        for(Map.Entry<String, String> entry: map.entrySet()) {
+            headers.add(new Http2HeaderBlockImpl.Header(entry.getKey(), entry.getValue()));
+        }
     }
 
-    private void setFromDataWrapper(DataWrapper data) {
+    public void setFromDataWrapper(DataWrapper data) {
+        headers.clear();
         byte[] bytes = data.createByteArray();
         // TODO: get maxs from settings
         Decoder decoder = new Decoder(4096, 4096);
         HeaderListener listener = new HeaderListener() {
             @Override
             public void addHeader(byte[] name, byte[] value, boolean sensitive) {
-                headers.add(new Header(new String(name), new String(value)));
+                headers.add(new Http2HeaderBlock.Header(new String(name), new String(value)));
             }
         };
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
