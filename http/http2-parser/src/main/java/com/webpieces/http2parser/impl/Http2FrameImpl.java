@@ -28,6 +28,7 @@ public abstract class Http2FrameImpl implements Http2Frame {
         return streamId;
     }
 
+    // Look in ObjectTranslator for classtoMarshaller examples, use bufferPools
     public DataWrapper getDataWrapper() {
         ByteBuffer header = ByteBuffer.allocate(9);
         DataWrapper payload = getPayloadDataWrapper();
@@ -42,10 +43,7 @@ public abstract class Http2FrameImpl implements Http2Frame {
         header.putInt(streamId);
         header.flip();
 
-        // The payload might be a chained datawrapper, and we can't stick a chained datawrapper on the end
-        // of a non-chained datawrapper, so we wrap the new bytebufferdatawrapper into a chained datawrapper
-        // here.
-        return dataGen.chainDataWrappers(new ChainedDataWrapper(new ByteBufferDataWrapper(header)), payload);
+        return dataGen.chainDataWrappers(dataGen.wrapByteBuffer(header), payload);
     }
 
     // The payload doesn't have any extra data past the end of the frame by now

@@ -52,17 +52,16 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 			ChainedDataWrapper chained = (ChainedDataWrapper) firstData;
 			chained.addMoreData(secondData);
 			return chained;
-		} else if(secondData instanceof ChainedDataWrapper) {
-			//ordering matters a ton.  If we really wanted to support this odd situation, we would have to
-			//insert the firstData into the beginning of the ChainedDataWrapper but in reality, it is a client bug
-			//were they are accidentally not paying attention so let's flag it instead
-			throw new IllegalArgumentException("The second argument should never be a ChainedDataWrapper...you probably screwed up your ordering.  This is fail fast so you find out immediately");
 		} else if(!(firstData instanceof SliceableDataWrapper)) {
 			throw new IllegalArgumentException("Only SliceableDataWrappers or ChainedDataWrappers are allowed to be chained");
+		} else if(secondData instanceof ChainedDataWrapper) {
+			//convert first to ChainedDataWrapped and then do above code...
+			ChainedDataWrapper wrapper = new ChainedDataWrapper((SliceableDataWrapper) firstData);
+			wrapper.addMoreData(secondData);
+			return wrapper;
 		} else if(!(secondData instanceof SliceableDataWrapper)) {
 			throw new IllegalArgumentException("Only SliceableDataWrappers or ChainedDataWrappers are allowed to be chained");
 		}
-		
 		SliceableDataWrapper first = (SliceableDataWrapper) firstData;
 		SliceableDataWrapper second = (SliceableDataWrapper) secondData;
 
