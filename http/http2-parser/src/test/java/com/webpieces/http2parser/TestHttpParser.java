@@ -44,6 +44,8 @@ public class TestHttpParser {
 
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
+    // TODO: Add test with end of frame plus beginning of new frame as the new data
+
     @Test
     public void testBasicParse() {
         ParserResult result = Http2Frame.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper());
