@@ -1,6 +1,7 @@
 package org.webpieces.httpclient.api;
 
 import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface ResponseListener {
@@ -22,12 +23,18 @@ public interface ResponseListener {
 	 * 
 	 * NOTE: All HttpChunks can contain extensions as well.  Those are included if they exist in the
 	 * HttpChunk object
+	 *
+	 * For Http 2, the server could send back a PUSH_PROMISE which has an imputed request, so we
+	 * need to pass back the imputed request from the PUSH_PROMISE message. For http1.1 responses
+	 * and http2 'normal' responses, we just pass back the request that we started with here.
+	 *
+	 * For http2 we don't need to worry about chunking.
 	 * 
 	 * @param resp The HttpResponse message including body if there is one
 	 * @param isComplete false if the transfer encoding is chunked in which case incomingChunk will
 	 * be called for each chunk coming
 	 */
-	public void incomingResponse(HttpResponse resp, boolean isComplete);
+	public void incomingResponse(HttpResponse resp, /* HttpRequest req, */ boolean isComplete);
 	
 	/**
 	 * 

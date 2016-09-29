@@ -13,7 +13,7 @@ public interface HttpRequestListener {
 	 * @param req
 	 * @param isHttps true if this request came in over an https socket
 	 */
-	void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps);
+	void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps); //, boolean isHttp2);
 	
 	/**
 	 * In the event the client sends a bad unparseable request, OR your HttpRequestListener 
