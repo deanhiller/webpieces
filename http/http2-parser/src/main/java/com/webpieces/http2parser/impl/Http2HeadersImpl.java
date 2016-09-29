@@ -131,11 +131,9 @@ public class Http2HeadersImpl extends Http2FrameImpl implements Http2Headers {
         weight = prelude.get();
 
         if (padded) {
-            byte padLength = split.get(1).readByteAt(0);
-            List<? extends DataWrapper> split1 = dataGen.split(split.get(1), 1);
-            List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), payload.getReadableSize() - padLength);
-            headerBlock.setFromDataWrapper(split2.get(0));
+            List<? extends DataWrapper> split2 = Http2Padded.getPayloadAndPadding(split.get(1));
             padding = split2.get(1).createByteArray();
+            headerBlock.setFromDataWrapper(split2.get(0));
         } else {
             headerBlock.setFromDataWrapper(split.get(1));
         }

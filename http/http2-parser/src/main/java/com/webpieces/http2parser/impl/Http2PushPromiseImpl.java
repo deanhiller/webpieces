@@ -56,7 +56,7 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
     }
 
     public void setPromisedStreamId(int promisedStreamId) {
-        this.promisedStreamId = promisedStreamId;
+        this.promisedStreamId = promisedStreamId & 0x7FFFFFFF;
     }
 
     // Should reuse code in Http2HeadersImpl but multiple-inheritance is not possible?
@@ -86,15 +86,12 @@ public class Http2PushPromiseImpl extends Http2FrameImpl implements Http2PushPro
     public void setPayloadFromDataWrapper(DataWrapper payload) {
         List<? extends DataWrapper> split = dataGen.split(payload, 4);
         ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
-        promisedStreamId = prelude.getInt() & 0x7FFFFFFF;
+        setPromisedStreamId(prelude.getInt());
 
-        // TODO: Reuse this code among the frames which need to deal with padding
         if (padded) {
-            byte padLength = split.get(1).readByteAt(0);
-            List<? extends DataWrapper> split1 = dataGen.split(split.get(1), 1);
-            List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), payload.getReadableSize() - padLength);
-            headerBlock.setFromDataWrapper(split2.get(0));
+            List<? extends DataWrapper> split2 = Http2Padded.getPayloadAndPadding(split.get(1));
             padding = split2.get(1).createByteArray();
+            headerBlock.setFromDataWrapper(split2.get(0));
         } else {
             headerBlock.setFromDataWrapper(split.get(1));
         }
