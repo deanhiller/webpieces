@@ -1,7 +1,6 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.Http2PushPromise;
-import com.webpieces.http2parser.impl.Http2PushPromiseImpl;
+import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -18,11 +17,11 @@ public class TestHttp2PushPromise {
 
     @Test
     public void testCreatePushPromiseFrame() {
-        Http2PushPromise frame = new Http2PushPromiseImpl();
+        Http2PushPromise frame = new Http2PushPromise();
         frame.setHeaders(basicRequestHeaders);
         frame.setPromisedStreamId(5);
 
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
     }

@@ -1,7 +1,6 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.Http2Headers;
-import com.webpieces.http2parser.impl.Http2HeadersImpl;
+import com.webpieces.http2parser.api.dto.Http2Headers;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -31,20 +30,20 @@ public class TestHttp2Headers {
 
     @Test
     public void testCreateRequestHeadersFrame() {
-        Http2Headers frame = new Http2HeadersImpl();
+        Http2Headers frame = new Http2Headers();
         frame.setHeaders(basicRequestHeaders);
         frame.setEndHeaders();
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
     }
 
     @Test
     public void testCreateResponseHeadersFrame() {
-        Http2Headers frame = new Http2HeadersImpl();
+        Http2Headers frame = new Http2Headers();
         frame.setHeaders(basicResponseHeaders);
         frame.setEndHeaders();
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
     }

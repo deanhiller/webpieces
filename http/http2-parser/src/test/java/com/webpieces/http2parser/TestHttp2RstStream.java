@@ -1,9 +1,8 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.Http2Frame;
-import com.webpieces.http2parser.api.Http2RstStream;
-import com.webpieces.http2parser.impl.Http2ErrorCode;
-import com.webpieces.http2parser.impl.Http2RstStreamImpl;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,10 +15,10 @@ public class TestHttp2RstStream {
             "00 00 00 0A"; // payload
     @Test
     public void testCreateRstStream() {
-        Http2RstStream frame = new Http2RstStreamImpl();
+        Http2RstStream frame = new Http2RstStream();
         frame.setStreamId(0x4);
         frame.setErrorCode(Http2ErrorCode.CONNECT_ERROR);
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
     }

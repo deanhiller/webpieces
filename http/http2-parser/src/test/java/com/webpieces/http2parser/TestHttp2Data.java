@@ -1,8 +1,7 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.Http2Data;
-import com.webpieces.http2parser.api.Http2Frame;
-import com.webpieces.http2parser.impl.Http2DataImpl;
+import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -69,44 +68,44 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFrameUnpadded() {
-        Http2Data frame = new Http2DataImpl();
+        Http2Data frame = new Http2Data();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
-        Assert.assertArrayEquals(frame.getBytes(), UtilsForTest.toByteArray(unpaddedDataFrame));
-        Assert.assertTrue(UtilsForTest.isReservedBitZero(frame.getDataWrapper()));
-        UtilsForTest.testBidiFromBytes(UtilsForTest.toHexString(frame.getBytes()));
+        Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(unpaddedDataFrame));
+        Assert.assertTrue(UtilsForTest.isReservedBitZero(UtilsForTest.frameToDataWrapper(frame)));
+        UtilsForTest.testBidiFromBytes(UtilsForTest.frameToHex(frame));
     }
 
     @Test public void testCreateDataFramePadded() {
-        Http2Data frame = new Http2DataImpl();
+        Http2Data frame = new Http2Data();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setPadding(UtilsForTest.toByteArray("00 00"));
-        Assert.assertArrayEquals(frame.getBytes(), UtilsForTest.toByteArray(paddedDataFrame));
-        Assert.assertTrue(UtilsForTest.isReservedBitZero(frame.getDataWrapper()));
-        UtilsForTest.testBidiFromBytes(UtilsForTest.toHexString(frame.getBytes()));
+        Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(paddedDataFrame));
+        Assert.assertTrue(UtilsForTest.isReservedBitZero(UtilsForTest.frameToDataWrapper(frame)));
+        UtilsForTest.testBidiFromBytes(UtilsForTest.frameToHex(frame));
     }
 
     @Test
     public void testCreateDataFrameEndStream() {
-        Http2Data frame = new Http2DataImpl();
+        Http2Data frame = new Http2Data();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setEndStream();
-        Assert.assertArrayEquals(frame.getBytes(), UtilsForTest.toByteArray(endStreamDataFrame));
-        Assert.assertTrue(UtilsForTest.isReservedBitZero(frame.getDataWrapper()));
-        UtilsForTest.testBidiFromBytes(UtilsForTest.toHexString(frame.getBytes()));
+        Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(endStreamDataFrame));
+        Assert.assertTrue(UtilsForTest.isReservedBitZero(UtilsForTest.frameToDataWrapper(frame)));
+        UtilsForTest.testBidiFromBytes(UtilsForTest.frameToHex(frame));
     }
 
     @Test
     public void testCreateDataFramePaddedEndStream() {
-        Http2Data frame = new Http2DataImpl();
+        Http2Data frame = new Http2Data();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setEndStream();
         frame.setPadding(UtilsForTest.toByteArray("00 00"));
-        Assert.assertArrayEquals(frame.getBytes(), UtilsForTest.toByteArray(paddedEndStreamDataFrame));
-        Assert.assertTrue(UtilsForTest.isReservedBitZero(frame.getDataWrapper()));
-        UtilsForTest.testBidiFromBytes(UtilsForTest.toHexString(frame.getBytes()));
+        Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(paddedEndStreamDataFrame));
+        Assert.assertTrue(UtilsForTest.isReservedBitZero(UtilsForTest.frameToDataWrapper(frame)));
+        UtilsForTest.testBidiFromBytes(UtilsForTest.frameToHex(frame));
     }
 }

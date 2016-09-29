@@ -1,8 +1,7 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.Http2Frame;
-import com.webpieces.http2parser.api.Http2Settings;
-import com.webpieces.http2parser.impl.Http2SettingsImpl;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,10 +24,10 @@ public class TestHttp2Settings {
 
     @Test
     public void testCreateSettings() {
-        Http2Settings frame = new Http2SettingsImpl();
+        Http2Settings frame = new Http2Settings();
         frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1);
         frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256);
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(basicSettings));
 
         UtilsForTest.testBidiFromBytes(hexFrame);
@@ -57,7 +56,7 @@ public class TestHttp2Settings {
     }
     @Test
     public void testCreateAck() {
-        Http2Settings frame = new Http2SettingsImpl();
+        Http2Settings frame = new Http2Settings();
         frame.setAck();
         frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1);
         frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256);
@@ -65,7 +64,7 @@ public class TestHttp2Settings {
         // If it's an ack there's no settings, even if we set them
         Assert.assertEquals(frame.getSettings().size(), 0);
 
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(ackFrame));
 
         UtilsForTest.testBidiFromBytes(hexFrame);

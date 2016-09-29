@@ -1,8 +1,7 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.Http2Frame;
-import com.webpieces.http2parser.api.Http2Ping;
-import com.webpieces.http2parser.impl.Http2PingImpl;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2Ping;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,19 +23,19 @@ public class TestHttp2Ping {
 
     @Test
     public void testCreatePingFrame() {
-        Http2Ping frame = new Http2PingImpl();
+        Http2Ping frame = new Http2Ping();
         frame.setOpaqueData(0x10);
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
     }
 
     @Test
     public void testCreatePongFrame() {
-        Http2Ping frame = new Http2PingImpl();
+        Http2Ping frame = new Http2Ping();
         frame.setOpaqueData(0x10);
         frame.setPingResponse();
-        String hexFrame = UtilsForTest.toHexString(frame.getBytes());
+        String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
     }
