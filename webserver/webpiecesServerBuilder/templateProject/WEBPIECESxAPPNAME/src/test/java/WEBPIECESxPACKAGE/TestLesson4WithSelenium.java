@@ -28,12 +28,12 @@ public class TestLesson4WithSelenium {
 
 	@BeforeClass
 	public static void staticSetup() {
-		//driver = new FirefoxDriver();
+		driver = new FirefoxDriver();
 	}
 	@AfterClass
 	public static void tearDown() {
-		//driver.close();
-		//driver.quit();
+		driver.close();
+		driver.quit();
 	}
 	
 	@Before
