@@ -4,7 +4,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -52,7 +51,7 @@ public class SeleniumBasicTest {
 
 	
 	//You must have firefox installed to run this test...
-	@Ignore
+	//@Ignore
 	@Test
 	public void testSomething() throws ClassNotFoundException {
 
