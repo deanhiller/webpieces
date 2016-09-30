@@ -57,7 +57,7 @@ public class TestHttp2Settings {
     @Test
     public void testCreateAck() {
         Http2Settings frame = new Http2Settings();
-        frame.setAck();
+        frame.setAck(true);
         frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1);
         frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256);
 

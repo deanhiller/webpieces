@@ -8,6 +8,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Optional;
 
 public class SettingsMarshaller extends FrameMarshallerImpl {
 
@@ -15,7 +16,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         super(bufferPool, dataGen);
     }
 
-    public DataWrapper getPayloadDataWrapper(Http2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
         if (castFrame.isAck()) {
@@ -36,11 +37,29 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         }
     }
 
-    public byte getFlagsByte(Http2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
         byte value = 0x0;
         if (castFrame.isAck()) value |= 0x1;
         return value;
+    }
+
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+        Http2Settings castFrame = (Http2Settings) frame;
+
+        castFrame.setAck((flags & 0x1) == 0x1);
+
+        maybePayload.ifPresent(payload -> {
+            ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
+
+            while (payloadByteBuffer.hasRemaining()) {
+                castFrame.setSetting(
+                        Http2Settings.Parameter.fromId(payloadByteBuffer.getShort()),
+                        payloadByteBuffer.getInt());
+            }
+
+            bufferPool.releaseBuffer(payloadByteBuffer);
+        });
     }
 }

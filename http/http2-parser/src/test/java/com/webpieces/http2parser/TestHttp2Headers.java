@@ -32,7 +32,7 @@ public class TestHttp2Headers {
     public void testCreateRequestHeadersFrame() {
         Http2Headers frame = new Http2Headers();
         frame.setHeaders(basicRequestHeaders);
-        frame.setEndHeaders();
+        frame.setEndHeaders(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
@@ -42,7 +42,7 @@ public class TestHttp2Headers {
     public void testCreateResponseHeadersFrame() {
         Http2Headers frame = new Http2Headers();
         frame.setHeaders(basicResponseHeaders);
-        frame.setEndHeaders();
+        frame.setEndHeaders(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);

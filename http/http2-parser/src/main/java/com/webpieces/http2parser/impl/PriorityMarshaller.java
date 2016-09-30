@@ -8,6 +8,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 public class PriorityMarshaller implements FrameMarshaller {
     private BufferPool bufferPool;
@@ -18,11 +19,11 @@ public class PriorityMarshaller implements FrameMarshaller {
         this.dataGen = dataGen;
     }
 
-    public byte getFlagsByte(Http2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         return 0x0;
     }
 
-    public DataWrapper getPayloadDataWrapper(Http2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Priority castFrame = (Http2Priority) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(5);
@@ -32,6 +33,22 @@ public class PriorityMarshaller implements FrameMarshaller {
         payload.flip();
 
         return dataGen.wrapByteBuffer(payload);
+    }
+
+
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
+        Http2Priority castFrame = (Http2Priority) frame;
+
+        maybePayload.ifPresent(payload -> {
+            ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
+
+            int firstInt = payloadByteBuffer.getInt();
+            castFrame.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
+            castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
+            castFrame.setWeight(payloadByteBuffer.get());
+
+            bufferPool.releaseBuffer(payloadByteBuffer);
+        });
     }
 
 }

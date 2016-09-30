@@ -56,17 +56,15 @@ public class Http2Settings extends Http2Frame {
         return ack;
     }
 
-    public void setAck() {
-        this.ack = true;
+    public void setAck(boolean ack) {
+        this.ack = ack;
 
         // If ack, the settings must be empty
-        this.settings.clear();
+        if(ack)
+            this.settings.clear();
     }
 
 
-    public void unmarshalFlags(byte flags) {
-        ack = (flags & 0x1) == 0x1;
-    }
 
     /* payload */
 
@@ -74,14 +72,6 @@ public class Http2Settings extends Http2Frame {
     // value 32bits
     private Map<Http2Settings.Parameter, Integer> settings = new LinkedHashMap<>();
 
-    public void unmarshalPayload(DataWrapper payload) {
-        ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
-        while (payloadByteBuffer.hasRemaining()) {
-            settings.put(
-                    Http2Settings.Parameter.fromId(payloadByteBuffer.getShort()),
-                    payloadByteBuffer.getInt());
-        }
-    }
 
     public void setSetting(Http2Settings.Parameter param, Integer value) {
         settings.put(param, value);

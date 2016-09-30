@@ -22,8 +22,8 @@ public class Http2Priority extends Http2Frame {
         return streamDependencyIsExclusive;
     }
 
-    public void setStreamDependencyIsExclusive() {
-        this.streamDependencyIsExclusive = true;
+    public void setStreamDependencyIsExclusive(boolean streamDependencyIsExclusive) {
+        this.streamDependencyIsExclusive = streamDependencyIsExclusive;
     }
 
     public int getStreamDependency() {
@@ -40,14 +40,6 @@ public class Http2Priority extends Http2Frame {
 
     public void setWeight(byte weight) {
         this.weight = weight;
-    }
-
-    public void unmarshalPayload(DataWrapper payload) {
-        ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
-        int firstInt = payloadByteBuffer.getInt();
-        streamDependencyIsExclusive = firstInt >>> 31 == 0x1;
-        streamDependency = firstInt & 0x7FFFFFFF;
-        weight = payloadByteBuffer.get();
     }
 
 }

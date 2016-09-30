@@ -8,10 +8,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -82,23 +79,30 @@ public class Http2ParserImpl implements Http2Parser {
 
         Class<? extends Http2Frame> frameClass = getFrameClassForType(Http2FrameType.fromId(frameTypeId));
         try {
-            Http2Frame ret = frameClass.newInstance();
+            Http2Frame frame = frameClass.newInstance();
+            FrameMarshaller marshaller = dtoToMarshaller.get(frameClass);
 
-            byte flags = headerByteBuffer.get();
-            ret.unmarshalFlags(flags);
+            byte flagsByte = headerByteBuffer.get();
 
             // Ignore the reserved bit
             int streamId = headerByteBuffer.getInt();
-            ret.setStreamId(streamId);
+            frame.setStreamId(streamId);
             bufferPool.releaseBuffer(headerByteBuffer);
+
+            Optional<DataWrapper> maybePayload;
 
             if (length > 0) {
                 List<? extends DataWrapper> splitWrappers = dataGen.split(data, 9);
                 DataWrapper payloadPlusMore = splitWrappers.get(1);
                 List<? extends DataWrapper> split = dataGen.split(payloadPlusMore, length);
-                ret.unmarshalPayload(split.get(0));
+                maybePayload = Optional.of(split.get(0));
+            } else {
+                maybePayload = Optional.empty();
             }
-            return ret;
+
+            marshaller.unmarshalFlagsAndPayload(frame, flagsByte, maybePayload);
+
+            return frame;
 
         } catch (InstantiationException | IllegalAccessException e) {
             // TODO: deal with exception
@@ -119,14 +123,14 @@ public class Http2ParserImpl implements Http2Parser {
             return null; //throw here
 
         ByteBuffer header = ByteBuffer.allocate(9);
-        DataWrapper payload = marshaller.getPayloadDataWrapper(frame);
+        DataWrapper payload = marshaller.marshalPayload(frame);
 
         int length = payload.getReadableSize();
         header.put((byte) (length >>> 16));
         header.putShort((short) length);
 
         header.put(getFrameTypeByte(frame));
-        header.put(marshaller.getFlagsByte(frame));
+        header.put(marshaller.marshalFlags(frame));
 
         // 1 bit reserved, streamId MSB is always 0, see setStreamId()
         header.putInt(frame.getStreamId());

@@ -18,7 +18,7 @@ public class TestHttp2Priority {
     public void testCreatePriorityFrame() {
         Http2Priority frame = new Http2Priority();
         frame.setStreamDependency(4);
-        frame.setStreamDependencyIsExclusive();
+        frame.setStreamDependencyIsExclusive(true);
         frame.setWeight((byte) 0x5);
 
         String hexFrame = UtilsForTest.frameToHex(frame);

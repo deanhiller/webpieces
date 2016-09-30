@@ -8,6 +8,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Optional;
 
 public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
 
@@ -15,7 +17,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         super(bufferPool, dataGen);
     }
 
-    public DataWrapper getPayloadDataWrapper(Http2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Headers castFrame = (Http2Headers) frame;
 
         ByteBuffer prelude = bufferPool.nextBuffer(5);
@@ -30,7 +32,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         return castFrame.getPadding().padDataIfNeeded(unpadded);
     }
 
-    public byte getFlagsByte(Http2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         Http2Headers castFrame = (Http2Headers) frame;
 
         byte value = 0x0;
@@ -39,5 +41,28 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         if (castFrame.getPadding().isPadded()) value |= 0x8;
         if (castFrame.isPriority()) value |= 0x20;
         return value;
+    }
+
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
+        Http2Headers castFrame = (Http2Headers) frame;
+
+        castFrame.setEndStream((flagsByte & 0x1) == 0x1);
+        castFrame.setEndHeaders((flagsByte & 0x4) == 0x4);
+        castFrame.getPadding().setIsPadded((flagsByte & 0x8) == 0x8);
+        castFrame.setPriority((flagsByte & 0x20) == 0x20);
+
+        maybePayload.ifPresent(payload -> {
+            List<? extends DataWrapper> split = dataGen.split(payload, 5);
+            ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
+
+            int firstInt = preludeBytes.getInt();
+            castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
+            castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
+            castFrame.setWeight(preludeBytes.get());
+
+            castFrame.getHeaderBlock().deserialize(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
+
+            bufferPool.releaseBuffer(preludeBytes);
+        });
     }
 }

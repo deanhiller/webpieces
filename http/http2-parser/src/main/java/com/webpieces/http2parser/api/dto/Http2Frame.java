@@ -21,9 +21,4 @@ public abstract class Http2Frame {
     public int getStreamId() {
         return streamId;
     }
-
-    // The payload doesn't have any extra data past the end of the frame by now
-    public abstract void unmarshalPayload(DataWrapper payload);
-
-    public abstract void unmarshalFlags(byte flag);
 }

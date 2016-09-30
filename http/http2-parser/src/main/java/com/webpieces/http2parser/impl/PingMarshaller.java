@@ -8,20 +8,21 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 public class PingMarshaller extends FrameMarshallerImpl {
     PingMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool, dataGen);
     }
 
-    public byte getFlagsByte(Http2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         Http2Ping castFrame = (Http2Ping) frame;
 
         byte value = 0x0;
         if (castFrame.isPingResponse()) value |= 0x1;
         return value;
     }
-    public DataWrapper getPayloadDataWrapper(Http2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Ping castFrame = (Http2Ping) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(8);
@@ -30,4 +31,17 @@ public class PingMarshaller extends FrameMarshallerImpl {
 
         return new ByteBufferDataWrapper(payload);
     }
+
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+        Http2Ping castFrame = (Http2Ping) frame;
+        castFrame.setIsPingResponse((flags & 0x1) == 0x1);
+        maybePayload.ifPresent(payload -> {
+            ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
+
+            castFrame.setOpaqueData(payloadByteBuffer.getLong());
+
+            bufferPool.releaseBuffer(payloadByteBuffer);
+        });
+    }
+
 }

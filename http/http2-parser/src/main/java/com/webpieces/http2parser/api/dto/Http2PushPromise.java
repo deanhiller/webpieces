@@ -24,19 +24,14 @@ public class Http2PushPromise extends Http2Frame {
         return endHeaders;
     }
 
-    public void setEndHeaders() {
-        this.endHeaders = true;
-    }
-
-    public void unmarshalFlags(byte flags) {
-        endHeaders = (flags & 0x4) == 0x4;
-        padding.setIsPadded((flags & 0x8) == 0x8);
+    public void setEndHeaders(boolean endHeaders) {
+        this.endHeaders = endHeaders;
     }
 
     /* payload */
     // reserved - 1bit
     private int promisedStreamId = 0x0; //31bits
-    private HeaderBlock headerBlock = HeaderBlockFactory.create();
+    private HeaderBlock headerBlock = HeaderBlockFactory.createHeaderBlock();
     private Padding padding = PaddingFactory.createPadding();
 
     public void setPadding(byte[] padding) {
@@ -69,10 +64,4 @@ public class Http2PushPromise extends Http2Frame {
     }
 
 
-    public void unmarshalPayload(DataWrapper payload) {
-        List<? extends DataWrapper> split = dataGen.split(payload, 4);
-        ByteBuffer prelude = ByteBuffer.wrap(split.get(0).createByteArray());
-        setPromisedStreamId(prelude.getInt());
-        headerBlock.deserialize(padding.extractPayloadAndSetPaddingIfNeeded(split.get(1)));
-    }
 }

@@ -5,6 +5,7 @@ import com.webpieces.http2parser.api.PaddingFactory;
 import org.webpieces.data.api.DataWrapper;
 
 public class Http2Data extends Http2Frame {
+
     public Http2FrameType getFrameType() {
         return Http2FrameType.DATA;
     }
@@ -13,9 +14,12 @@ public class Http2Data extends Http2Frame {
     private boolean endStream = false; /* 0x1 */
     //private boolean padded = false;    /* 0x8 */
 
-    public void unmarshalFlags(byte flags) {
-        endStream = (flags & 0x1) == 0x1;
-        padding.setIsPadded((flags & 0x8) == 0x8);
+    public boolean isEndStream() {
+        return endStream;
+    }
+
+    public void setEndStream(boolean endStream) {
+        this.endStream = endStream;
     }
 
     /* payload */
@@ -36,17 +40,5 @@ public class Http2Data extends Http2Frame {
 
     public void setPadding(byte[] padding) {
         this.padding.setPadding(padding);
-    }
-
-    public boolean isEndStream() {
-        return endStream;
-    }
-
-    public void setEndStream() {
-        this.endStream = true;
-    }
-
-    public void unmarshalPayload(DataWrapper payload) {
-        data = padding.extractPayloadAndSetPaddingIfNeeded(payload);
     }
 }

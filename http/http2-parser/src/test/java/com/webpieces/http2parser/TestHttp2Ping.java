@@ -34,7 +34,7 @@ public class TestHttp2Ping {
     public void testCreatePongFrame() {
         Http2Ping frame = new Http2Ping();
         frame.setOpaqueData(0x10);
-        frame.setPingResponse();
+        frame.setIsPingResponse(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);

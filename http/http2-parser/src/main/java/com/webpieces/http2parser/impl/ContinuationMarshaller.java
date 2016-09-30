@@ -6,12 +6,15 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
+import javax.xml.crypto.Data;
+import java.util.Optional;
+
 public class ContinuationMarshaller extends FrameMarshallerImpl {
     ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool, dataGen);
     }
 
-    public byte getFlagsByte(Http2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         Http2Continuation castFrame = (Http2Continuation) frame;
 
         byte value = 0x0;
@@ -19,8 +22,17 @@ public class ContinuationMarshaller extends FrameMarshallerImpl {
         return value;
     }
 
-    public DataWrapper getPayloadDataWrapper(Http2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Continuation castFrame = (Http2Continuation) frame;
         return castFrame.getHeaderBlock().serialize();
     }
+
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+        Http2Continuation castFrame = (Http2Continuation) frame;
+
+        castFrame.setEndHeaders((flags & 0x4) == 0x4);
+
+        maybePayload.ifPresent(payload -> castFrame.getHeaderBlock().deserialize(payload));
+    }
+
 }

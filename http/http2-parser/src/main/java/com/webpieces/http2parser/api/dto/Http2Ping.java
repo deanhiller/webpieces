@@ -12,16 +12,12 @@ public class Http2Ping extends Http2Frame {
     /* flags */
     private boolean isPingResponse = false; /* 0x1 */
 
-    public void unmarshalFlags(byte flags) {
-        isPingResponse = (flags & 0x1) == 0x1;
-    }
-
     public boolean isPingResponse() {
         return isPingResponse;
     }
 
-    public void setPingResponse() {
-        isPingResponse = true;
+    public void setIsPingResponse(boolean isPingResponse) {
+        this.isPingResponse = isPingResponse;
     }
 
     /* payload */
@@ -36,8 +32,4 @@ public class Http2Ping extends Http2Frame {
     }
 
 
-    public void unmarshalPayload(DataWrapper payload) {
-        ByteBuffer payloadByteBuffer = ByteBuffer.wrap(payload.createByteArray());
-        opaqueData = payloadByteBuffer.getLong();
-    }
 }

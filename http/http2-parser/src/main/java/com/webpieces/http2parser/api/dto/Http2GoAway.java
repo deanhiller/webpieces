@@ -6,16 +6,11 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 public class Http2GoAway extends Http2Frame {
-
     public Http2FrameType getFrameType() {
         return Http2FrameType.GOAWAY;
     }
 
     /* flags */
-
-
-    public void unmarshalFlags(byte flags) {
-    }
 
     /* payload */
     // 1 bit reserved
@@ -47,15 +42,6 @@ public class Http2GoAway extends Http2Frame {
         this.debugData = debugData;
     }
 
-
-    public void unmarshalPayload(DataWrapper payload) {
-        List<? extends DataWrapper> split = dataGen.split(payload, 8);
-        ByteBuffer preludeBytes = ByteBuffer.wrap(split.get(0).createByteArray());
-        setLastStreamId(preludeBytes.getInt());
-        setErrorCode(Http2ErrorCode.fromInteger(preludeBytes.getInt()));
-
-        debugData = split.get(1);
-    }
 
 
 }
