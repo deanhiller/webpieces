@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -23,15 +24,16 @@ public class TestScopesSelenium {
 
 	@BeforeClass
 	public static void staticSetup() {
-		driver = new FirefoxDriver();
+		//driver = new FirefoxDriver();
 	}
 	
 	@AfterClass
 	public static void tearDown() {
-		driver.close();
-		driver.quit();
+//		driver.close();
+//		driver.quit();
 	}
 	
+	@Ignore
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
