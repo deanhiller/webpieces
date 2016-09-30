@@ -24,13 +24,13 @@ public class TestScopesSelenium {
 
 	@BeforeClass
 	public static void staticSetup() {
-		//driver = new FirefoxDriver();
+		driver = new FirefoxDriver();
 	}
 	
 	@AfterClass
 	public static void tearDown() {
-//		driver.close();
-//		driver.quit();
+		driver.close();
+		driver.quit();
 	}
 	
 	@Ignore
@@ -46,7 +46,7 @@ public class TestScopesSelenium {
 	}
 	
 	//You must have firefox installed to run this test...
-	//@Ignore
+	@Ignore
 	@Test
 	public void testSessionBasic() throws ClassNotFoundException {
 		driver.get("http://localhost:"+port+"/home");
@@ -63,6 +63,7 @@ public class TestScopesSelenium {
 		Assert.assertTrue("pageSource="+pageSource2, pageSource2.contains("name=Dean"));
 	}
 	
+	@Ignore
 	@Test
 	public void testSessionTooBig() {
 		driver.get("http://localhost:"+port+"/home");

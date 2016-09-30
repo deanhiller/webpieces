@@ -23,29 +23,29 @@ public class SeleniumBasicTest {
 
 	@BeforeClass
 	public static void staticSetup() {
-//		try {
-//		driver = new FirefoxDriver();
-//		} catch(Throwable e) {
-//			throw new RuntimeException("You must have firefox 47.0 :(", e);
-//		}
+		try {
+		driver = new FirefoxDriver();
+		} catch(Throwable e) {
+			throw new RuntimeException("You must have firefox 47.0 :(", e);
+		}
 	}
 	@AfterClass
 	public static void tearDown() {
-//		driver.close();
-//		driver.quit();
+		driver.close();
+		driver.quit();
 	}
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
-//		Asserts.assertWasCompiledWithParamNames("test");
-//		
-//		TemplateCompileConfig config = new TemplateCompileConfig();
-//		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
-//		//mocks after every test AND you can no longer run multi-threaded(tradeoffs, tradeoffs)
-//		//This is however pretty fast to do in many systems...
-//		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config ), new AppOverridesModule(), true, null);
-//		webserver.start();
-//		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
+		Asserts.assertWasCompiledWithParamNames("test");
+		
+		TemplateCompileConfig config = new TemplateCompileConfig();
+		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
+		//mocks after every test AND you can no longer run multi-threaded(tradeoffs, tradeoffs)
+		//This is however pretty fast to do in many systems...
+		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config ), new AppOverridesModule(), true, null);
+		webserver.start();
+		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
 	
 

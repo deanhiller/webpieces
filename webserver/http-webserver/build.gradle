@@ -21,3 +21,9 @@ dependencies {
 uploadArchives.repositories.mavenDeployer.pom.project {
    description='The full webpieces server AS A library'
 }
+
+test {
+    if (project.hasProperty('excludeSelenium')) {
+        exclude '**/*Selenium*'
+    }
+}
