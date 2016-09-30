@@ -63,7 +63,7 @@ public class TestDevRefreshPageWithNoRestarting {
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(userDir+"/src/test/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(userDir + "/src/test/resources/devmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(userDir + "/src/test/resources/devMeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...
