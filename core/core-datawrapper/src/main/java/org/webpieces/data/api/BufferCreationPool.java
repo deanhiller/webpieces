@@ -62,6 +62,14 @@ public class BufferCreationPool implements BufferPool {
 		return buffer;
 	}
 
+	public ByteBuffer createWithDataWrapper(DataWrapper data) {
+		ByteBuffer byteBuffer = nextBuffer(data.getReadableSize());
+		byteBuffer.put(data.createByteArray());
+		byteBuffer.flip();
+
+		return byteBuffer;
+	}
+
 	private ByteBuffer createBuffer(int size2) {
 		ByteBuffer buffer;
 		if(isDirect)

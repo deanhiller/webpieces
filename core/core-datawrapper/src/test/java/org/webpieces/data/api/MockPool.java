@@ -20,4 +20,9 @@ public class MockPool implements BufferPool {
 		return null;
 	}
 
+	@Override
+	public ByteBuffer createWithDataWrapper(DataWrapper data) {
+		return null;
+	}
+
 }

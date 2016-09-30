@@ -19,4 +19,7 @@ public interface BufferPool {
 	 */
 	public void releaseBuffer(ByteBuffer buffer);
 
+	/** Create a ByteBuffer filled with the DataWrapper */
+	public ByteBuffer createWithDataWrapper(DataWrapper data);
+
 }
