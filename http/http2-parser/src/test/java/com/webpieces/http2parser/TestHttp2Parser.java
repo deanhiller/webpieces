@@ -8,9 +8,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.helpers.Util;
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
+import javax.xml.crypto.Data;
 import java.util.List;
 
 public class TestHttp2Parser {
@@ -50,11 +52,20 @@ public class TestHttp2Parser {
 
     private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
-    // TODO: Add test with end of frame plus beginning of new frame as the new data
-
     @Test
     public void testBasicParse() {
         ParserResult result = parser.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper());
+        Assert.assertTrue(result.hasParsedFrames());
+        Assert.assertFalse(result.hasMoreData());
+        List<Http2Frame> frames = result.getParsedFrames();
+        Assert.assertTrue(frames.size() == 4);
+    }
+
+    @Test
+    public void testParseWithSplitFrame() {
+        DataWrapper fullFrames = UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames);
+        List<? extends DataWrapper> split = dataGen.split(fullFrames, 6);
+        ParserResult result = parser.parse(split.get(0), split.get(1));
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertFalse(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
