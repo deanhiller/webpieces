@@ -194,6 +194,10 @@ subprojects {
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
+      testLogging {
+        events "failed"
+        exceptionFormat "short"
+      }
    }
 
    //Using eclipse bin folder is WAY too common.  use outputeclipse instead so we can safely ignore it
