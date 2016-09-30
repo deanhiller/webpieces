@@ -42,7 +42,7 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		for(DataWrapper wrapper : wrappers) {
 			int size = wrapper.getReadableSize();
 			if(j < size) {
-				return wrapper.readByteAt(i);
+				return wrapper.readByteAt(j);
 			}
 			j = j - size;
 		}
