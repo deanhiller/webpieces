@@ -26,6 +26,12 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
 
     //task uploadArchives(overwrite: true) << {
     //}
+
+    test {
+        if (project.hasProperty('excludeSelenium')) {
+            exclude '**/*Selenium*'
+        }
+    }
 }
 
 project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev') {
