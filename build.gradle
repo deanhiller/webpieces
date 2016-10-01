@@ -61,6 +61,16 @@ buildScan {
 }
 
 allprojects {
+    //apply plugin: 'java'
+    apply plugin: 'jacoco' //code coverage
+
+    repositories {
+        jcenter()
+    }
+
+    jacoco {
+        toolVersion = '0.7.1.201405082137'
+    }
 }
 
 subprojects {
@@ -150,6 +160,20 @@ subprojects {
                    )
       }
    }
+
+    jacocoTestReport {
+        additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
+        sourceDirectories = files(sourceSets.main.allSource.srcDirs)
+        classDirectories =  files(sourceSets.main.output)
+        reports {
+            html.enabled = true
+            xml.enabled = true
+            csv.enabled = false
+        }
+    }
+
+    jacocoTestReport.dependsOn test
+    check.dependsOn jacocoTestReport
 
    task sourcesJar(type: Jar) {
       classifier = 'sources'
@@ -290,6 +314,11 @@ if(project.hasProperty('projVersion')) {
 //We will do this if we see it breaking now and then if needed to prevent breaks
 //task integrationTestTemplate
 
+task buildAll << { }
+buildAll.dependsOn {
+    project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("build") }
+}
+
 task uploadArchives2 << { }
 
 uploadArchives2.dependsOn {
@@ -309,4 +338,28 @@ task printTasks << {
 }
 
 task release(dependsOn: ':webserver:githubRelease')
+
+task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories =  files(subprojects.sourceSets.main.output)
+    executionData = files(subprojects.jacocoTestReport.executionData)
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+    onlyIf = {
+        true
+    }
+    doFirst {
+        executionData = files(executionData.findAll {
+            it.exists()
+        })
+    }
+}
+jacocoRootReport.dependsOn buildAll
+
+task testBuild(dependsOn: ':jacocoRootReport')
 
