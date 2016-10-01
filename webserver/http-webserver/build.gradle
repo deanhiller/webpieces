@@ -1,3 +1,5 @@
+apply plugin: 'jacoco' //code coverage
+
 sourceSets {
     test {
         resources {
@@ -27,3 +29,35 @@ test {
         exclude '**/*Selenium*'
     }
 }
+
+jacocoTestReport {
+    additionalSourceDirs = 
+       files(
+          project(":core:core-asyncserver").sourceSets.main.java.srcDirs +
+          project(":core:core-channelmanager2").sourceSets.main.java.srcDirs +
+          project(":core:core-datawrapper").sourceSets.main.java.srcDirs +
+          project(":core:core-mock").sourceSets.main.java.srcDirs +
+          project(":core:core-ssl").sourceSets.main.java.srcDirs +
+          project(":core:core-util").sourceSets.main.java.srcDirs +
+          project(":core:runtimecompile").sourceSets.main.java.srcDirs +
+          project(":http:http-frontend").sourceSets.main.java.srcDirs +
+          project(":http:http1_1-parser").sourceSets.main.java.srcDirs +
+          project(":http:http2-parser").sourceSets.main.java.srcDirs +
+          project(":webserver:http-router").sourceSets.main.java.srcDirs +
+          project(":webserver:http-router-dev").sourceSets.main.java.srcDirs +
+          project(":webserver:http-shared").sourceSets.main.java.srcDirs +
+          project(":webserver:http-templating").sourceSets.main.java.srcDirs +
+          project(":webserver:http-templating-dev").sourceSets.main.java.srcDirs +
+          project(":webserver:http-webserver").sourceSets.main.java.srcDirs
+       )
+
+    println("files="+additionalSourceDirs.files)
+    reports {
+         xml.enabled = true
+         html.enabled = true
+    }
+}
+
+jacocoTestReport.dependsOn test
+check.dependsOn jacocoTestReport
+
