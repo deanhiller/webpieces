@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely 'Feature' Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
 This project is essentially pieces that can be used to build any http related software and full stacks as well.  
 
@@ -70,18 +70,17 @@ Some HTTP/2 features
  * Multiplexing multiple requests over TCP connection
 
 Pieces
- * embeddablehttpproxy - a proxy with http 2 support
- * webserver/http-webserver - a webserver with http 2 support
- * http/http-client - An http client built on channelmanager and http parser
+ * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer)
+ * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers together)
+ * http/http1_1-parser - an asynchronous http parser that can accept partial payloads (ie. nio payloads don't have full messages).  Can be used with ANY nio library.
+ * http/httpclient - http client built on above core components
  * http/http-frontend - An very thin http library.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end)
- * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths
- * channelmanager - a very thin layer on nio for speed
- * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers)
- * http/http1_1-parser - an asynchronous http parser than can accept partial payloads (ie. nio payloads don't have full message).  Can be used with ANY nio library.
- * httpclient - http client built on above core components
  * embeddablehttpproxy - build on http-frontend and http client
+ * webserver/http-webserver - a webserver with http 2 support
+ * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO: 
+* add jacoco to the generated webpieces project, create example project for feature testing blog
 * test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
@@ -100,14 +99,14 @@ TODO:
 * start createing a real website!!!! AND on https
 
 Other longterm TODO:
-* playing with channel manager, add testing maybe? OR maybe asyncserver project
+* playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * using the webserver and creating examples in the example app (may actually need some tags as well like render as is)
    * escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
 * tab state
 * http2
 * metrics
 * dynamic JMX
-* turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2)
+* turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
 
 
 Examples.....
