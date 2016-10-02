@@ -1,11 +1,13 @@
 package org.webpieces.httpparser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public abstract class HttpPayload {
-	
-	private static final DataWrapper EMPTY_WRAPPER = DataWrapperGeneratorFactory.createDataWrapperGenerator().emptyWrapper();
+
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private static final DataWrapper EMPTY_WRAPPER = dataGen.emptyWrapper();
 	private DataWrapper body;
 
 	public abstract HttpMessageType getMessageType();
@@ -42,10 +44,15 @@ public abstract class HttpPayload {
 	/**
 	 * @return
 	 */
-	public DataWrapper getBody() {
-		return body;
+	public DataWrapper getBody() { return body; }
+
+	/**
+	 *
+	 */
+	public void appendBody(DataWrapper data) {
+		this.body = dataGen.chainDataWrappers(this.body, data);
 	}
-	
+
 	/**
 	 * This is true only if this is a response OR request with a
 	 * Transfer-encoding header of chunked so the client will know if there are

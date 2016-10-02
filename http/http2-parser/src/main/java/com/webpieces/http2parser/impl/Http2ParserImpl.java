@@ -31,6 +31,10 @@ public class Http2ParserImpl implements Http2Parser {
         dtoToMarshaller.put(Http2Continuation.class, new ContinuationMarshaller(bufferPool, dataGen));
     }
 
+    public DataWrapper prepareToParse() {
+        return dataGen.emptyWrapper();
+    }
+
     // includes header length
     private int peekLengthOfFrame(DataWrapper data) {
         ByteBuffer lengthBytes = ByteBuffer.wrap(data.readBytesAt(0, 3));

@@ -35,6 +35,12 @@ public interface ResponseListener {
 	 * be called for each chunk coming
 	 */
 	public void incomingResponse(HttpResponse resp, /* HttpRequest req, */ boolean isComplete);
+
+	/**
+	 * To support HTTP2 we need to pass the 'request' back with the response because the
+	 * server might push a response with an implied request.
+	 */
+	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete);
 	
 	/**
 	 * 

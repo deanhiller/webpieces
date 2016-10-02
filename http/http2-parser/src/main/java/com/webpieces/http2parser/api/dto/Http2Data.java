@@ -23,7 +23,7 @@ public class Http2Data extends Http2Frame {
     }
 
     /* payload */
-    private DataWrapper data = null;
+    private DataWrapper data = dataGen.emptyWrapper();
     private Padding padding = PaddingFactory.createPadding();
 
     public Padding getPadding() {

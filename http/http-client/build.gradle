@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':core:core-channelmanager2'), project(':http:http1_1-parser')
+    compile project(':core:core-channelmanager2'), project(':http:http1_1-parser'), project(':http:http2-parser')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

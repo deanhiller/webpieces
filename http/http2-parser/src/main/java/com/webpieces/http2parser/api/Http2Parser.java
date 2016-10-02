@@ -4,6 +4,8 @@ import com.webpieces.http2parser.api.dto.Http2Frame;
 import org.webpieces.data.api.DataWrapper;
 
 public interface Http2Parser {
+    DataWrapper prepareToParse();
+
     Http2Frame unmarshal(DataWrapper data);
 
     DataWrapper marshal(Http2Frame frame);
