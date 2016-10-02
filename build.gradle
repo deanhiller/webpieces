@@ -61,16 +61,17 @@ buildScan {
 }
 
 allprojects {
-    //apply plugin: 'java'
-    apply plugin: 'jacoco' //code coverage
+   apply plugin: 'jacoco' //code coverage
 
-    repositories {
-        jcenter()
-    }
+   buildDir = file('output')
 
-    jacoco {
-        toolVersion = '0.7.1.201405082137'
-    }
+   repositories {
+      jcenter()
+   }
+
+   jacoco {
+      toolVersion = '0.7.1.201405082137'
+   }
 }
 
 subprojects {
@@ -88,7 +89,6 @@ subprojects {
      project.version = '1.9-developer'
      println("CREATING DEVELOPER VERSION "+version)
    }
-   buildDir = file('output')
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
@@ -314,11 +314,6 @@ if(project.hasProperty('projVersion')) {
 //We will do this if we see it breaking now and then if needed to prevent breaks
 //task integrationTestTemplate
 
-task buildAll << { }
-buildAll.dependsOn {
-    project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("build") }
-}
-
 task uploadArchives2 << { }
 
 uploadArchives2.dependsOn {
@@ -339,7 +334,7 @@ task printTasks << {
 
 task release(dependsOn: ':webserver:githubRelease')
 
-task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     dependsOn = subprojects.test
     additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
     sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
@@ -359,7 +354,12 @@ task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
         })
     }
 }
-jacocoRootReport.dependsOn buildAll
 
-task testBuild(dependsOn: ':jacocoRootReport')
+//we don't do java plugin on top level on purpose as it is not a java
+//project BUT we need build and clean to work inline with the java projects
+task build(dependsOn: ':codeCoverage')
+
+task clean() << {
+   delete "${buildDir}"
+}
 

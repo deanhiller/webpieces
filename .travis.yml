@@ -10,4 +10,4 @@ cache:
     - $HOME/.gradle/wrapper/
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-script: ./gradlew testBuild -PexcludeSelenium=true
+script: ./gradlew build -PexcludeSelenium=true
