@@ -72,9 +72,12 @@ public class Http2Settings extends Http2Frame {
     // value 32bits
     private Map<Http2Settings.Parameter, Integer> settings = new LinkedHashMap<>();
 
-
     public void setSetting(Http2Settings.Parameter param, Integer value) {
         settings.put(param, value);
+    }
+
+    public void setSettings(Map<Parameter, Integer> settings) {
+        this.settings = settings;
     }
 
     public Map<Http2Settings.Parameter, Integer> getSettings() {

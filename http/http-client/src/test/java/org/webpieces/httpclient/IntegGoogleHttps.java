@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -73,14 +75,15 @@ public class IntegGoogleHttps {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
-		HttpParser parser = HttpParserFactory.createParser(pool2);
+		HttpParser httpParser = HttpParserFactory.createParser(pool2);
+		Http2Parser http2Parser = Http2ParserFactory.createParser(pool2);
 		
 		HttpClient client;
 		if(isHttp)
-			client = HttpClientFactory.createHttpClient(mgr, parser);
+			client = HttpClientFactory.createHttpClient(mgr, httpParser, http2Parser);
 		else {
 			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
-			client = HttpClientFactory.createHttpsClient(mgr, parser, sslFactory);
+			client = HttpClientFactory.createHttpsClient(mgr, httpParser, http2Parser, sslFactory);
 		}
 		return client;
 	}
@@ -98,6 +101,12 @@ public class IntegGoogleHttps {
 		@Override
 		public void incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("resp="+resp+" complete="+isComplete);
+		}
+
+		@Override
+		public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
+			log.info("req="+req);
+			incomingResponse(resp, isComplete);
 		}
 
 		@Override

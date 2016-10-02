@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class CatchResponseListener implements ResponseListener {
@@ -20,6 +21,15 @@ public class CatchResponseListener implements ResponseListener {
 	public void incomingResponse(HttpResponse resp, boolean isComplete) {
 		try {
 			listener.incomingResponse(resp, isComplete);
+		} catch(Throwable e) {
+			log.error("exception", e);
+		}
+	}
+
+	@Override
+	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
+		try {
+			listener.incomingResponse(resp, req, isComplete);
 		} catch(Throwable e) {
 			log.error("exception", e);
 		}

@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class CompletableListener implements ResponseListener {
@@ -22,6 +23,12 @@ public class CompletableListener implements ResponseListener {
 					+ "chunked download response and could potentially blow out your memory"));
 		}
 		future.complete(resp);
+	}
+
+	@Override
+	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
+		// This listener ignores the request associated with the response
+		incomingResponse(resp, isComplete);
 	}
 
 	@Override

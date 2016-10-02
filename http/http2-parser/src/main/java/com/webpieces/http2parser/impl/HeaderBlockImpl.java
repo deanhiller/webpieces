@@ -4,6 +4,7 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.twitter.hpack.HeaderListener;
 import com.webpieces.http2parser.api.HeaderBlock;
+import com.webpieces.http2parser.api.ParserResult;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -43,7 +44,12 @@ public class HeaderBlockImpl implements HeaderBlock {
     public Map<String, String> getMap() {
         Map<String, String> headerMap = new HashMap<>();
         for (HeaderBlock.Header header : headers) {
-            headerMap.put(header.header, header.value);
+            // If the header is already in the headermap, append the value TODO: make sure this is right.
+            if (headerMap.containsKey(header.header)) {
+                headerMap.put(header.header, headerMap.get(header.header) + header.value);
+            } else {
+                headerMap.put(header.header, header.value);
+            }
         }
         return headerMap;
     }
@@ -63,7 +69,8 @@ public class HeaderBlockImpl implements HeaderBlock {
         HeaderListener listener = new HeaderListener() {
             @Override
             public void addHeader(byte[] name, byte[] value, boolean sensitive) {
-                headers.add(new HeaderBlock.Header(new String(name), new String(value)));
+                // all headers are stored lowercase
+                headers.add(new HeaderBlock.Header(new String(name).toLowerCase(), new String(value).toLowerCase()));
             }
         };
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);

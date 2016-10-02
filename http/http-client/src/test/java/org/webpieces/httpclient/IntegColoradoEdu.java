@@ -55,6 +55,12 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
+		public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
+			log.info("received req="+req);
+			incomingResponse(resp, isComplete);
+		}
+
+		@Override
 		public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
 			log.info("received resp="+chunk+" last="+isLastChunk);
 		}

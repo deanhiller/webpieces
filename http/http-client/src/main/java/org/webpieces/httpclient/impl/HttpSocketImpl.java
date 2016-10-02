@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.net.ssl.SSLEngine;
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.crypto.Data;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.ParserResult;
@@ -37,6 +36,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
+import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.*;
 import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP11;
 import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP2;
 import static org.webpieces.httpclient.impl.Stream.StreamStatus.*;
@@ -52,36 +52,71 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private boolean isClosed;
 	private boolean connected;
 
-	private enum Protocol { HTTP11, HTTP2 };
+	enum Protocol { HTTP11, HTTP2 };
 	private Protocol protocol = HTTP11;
 
-	// HTTP 2
-	private Http2Parser http2Parser;
-	private boolean tryHttp2 = true;
-	private Http2Settings preferredSettings = new Http2Settings();
-	private Http2Settings serverSettings = new Http2Settings();
-	private Http2Settings clientSettings = new Http2Settings();
-	private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
-
-	// HTTP 1.1
-	private HttpParser http11Parser;
-	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
-	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
-
-	private ProxyDataListener dataListener = new ProxyDataListener();
+	private ProxyDataListener dataListener;
 	private CloseListener closeListener;
 	private HttpsSslEngineFactory factory;
 	private ChannelManager mgr;
 	private String idForLogging;
 	private boolean isRecording = false;
 
+	// HTTP 2
+	private Http2Parser http2Parser;
+	private boolean tryHttp2 = true;
+	private Map<Http2Settings.Parameter, Integer> localPreferredSettings = new HashMap<>();
+
+	// TODO: Initialize these two with the protocol defaults
+	private ConcurrentHashMap<Http2Settings.Parameter, Integer> remoteSettings = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<Http2Settings.Parameter, Integer> localSettings = new ConcurrentHashMap<>();
+
+	private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
+
+	// start with streamId 3 because 1 might be used for the upgrade stream.
+	private int nextStreamId = 0x3;
+
+	// TODO: figure out how to deal with the goaway. For now we're just
+	// going to record what they told us.
+	private boolean remoteGoneAway = false;
+	private int goneAwayLastStreamId;
+	private Http2ErrorCode goneAwayErrorCode;
+	private DataWrapper additionalDebugData;
+
+	// HTTP 1.1
+	private HttpParser httpParser;
+	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
+
+
+
 	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser parser2,
+						  Http2Parser http2Parser,
 			CloseListener listener) {
 		this.factory = factory;
 		this.mgr = mgr;
 		this.idForLogging = idForLogging;
-		this.http11Parser = parser2;
+		this.httpParser = parser2;
+		this.http2Parser = http2Parser;
 		this.closeListener = listener;
+		this.dataListener = new ProxyDataListener();
+
+		// Initialize to defaults
+		remoteSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096);
+		localSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096);
+
+		remoteSettings.put(SETTINGS_ENABLE_PUSH, 1);
+		localSettings.put(SETTINGS_ENABLE_PUSH, 1);
+
+		// No limit for MAX_CONCURRENT_STREAMS by default so it isn't in the map
+
+		remoteSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535);
+		localSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535);
+
+		remoteSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384);
+		localSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384);
+
+		// No limit for MAX_HEADER_LIST_SIZE by default, so not in the map
 	}
 
 	@Override
@@ -114,7 +149,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private void sendHttp2Preface() {
 		String prefaceString = "505249202a20485454502f322e300d0a0d0a534d0d0a0d0a";
 		channel.write(ByteBuffer.wrap(DatatypeConverter.parseHexBinary(prefaceString)));
-		channel.write(ByteBuffer.wrap(http2Parser.marshal(preferredSettings).createByteArray()));
+		Http2Settings settingsFrame = new Http2Settings();
+
+		settingsFrame.setSettings(localPreferredSettings);
+		channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
 	}
 
 	private CompletableFuture<HttpSocket> negotiateHttpVersion() {
@@ -136,8 +174,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			upgradeRequest.addHeader(new Header("Connection", "Upgrade, HTTP2-Settings"));
 			upgradeRequest.addHeader(new Header("Upgrade", "h2c"));
 
+			Http2Settings settingsFrame = new Http2Settings();
+			settingsFrame.setSettings(localPreferredSettings);
 			upgradeRequest.addHeader(new Header("HTTP2-Settings",
-					Base64.getEncoder().encodeToString(http2Parser.marshal(preferredSettings).createByteArray())));
+					Base64.getEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray())));
 
 			CompletableFuture<HttpResponse> response = sendIgnoreConnected(upgradeRequest);
 			return response.thenApply(r -> {
@@ -198,11 +238,91 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			actuallySendRequest(request, listener);
 	}
 
+	private Map<String, String> requestToHeaders(HttpRequest request) {
+		HttpRequestLine requestLine = request.getRequestLine();
+		List<Header> requestHeaders = request.getHeaders();
+
+		Map<String, String> headerMap = new HashMap<>();
+
+		// Add regular headers
+		for(Header header: requestHeaders) {
+			headerMap.put(header.getName().toLowerCase(), header.getValue());
+		}
+
+		// add special headers
+		headerMap.put(":method", requestLine.getMethod().getMethodAsString());
+
+		UrlInfo urlInfo = requestLine.getUri().getUriBreakdown();
+		headerMap.put(":scheme", urlInfo.getPrefix());
+		if(urlInfo.getPort() == null)
+			headerMap.put(":authority", urlInfo.getHost());
+		else
+			headerMap.put(":authority", String.format("{}:{}", urlInfo.getHost(), urlInfo.getPort()));
+
+		headerMap.put(":path", urlInfo.getFullPath());
+
+		return headerMap;
+	}
+
+	private CompletableFuture<Channel> sendDataFrames(DataWrapper body, int streamId, Stream stream) {
+		Http2Data newFrame = new Http2Data();
+		newFrame.setStreamId(streamId);
+
+		// writes only one frame at a time
+		if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
+			newFrame.setData(body);
+			newFrame.setEndStream(true);
+			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
+					channel -> {
+						stream.setStatus(HALF_CLOSED_LOCAL);
+						return channel;
+					}
+			);
+		} else {
+			List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
+			newFrame.setData(split.get(0));
+			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
+					channel ->  sendDataFrames(split.get(1), streamId, stream)
+			);
+		}
+	}
+
+	// we never send endstream on the header frame to make our life easier. we always just send
+	// endstream on a data frame.
+	private CompletableFuture<Channel> sendHeaderFrames(Map<String, String> headerMap, int streamId, Stream stream, boolean firstFrame) {
+		// Assume for now we can send all the headers in one frame
+		// we're going to have to create a 'hasHeaders' interface so we can
+		// abstract between Headers and Continuation frames here
+		// if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
+		Http2Headers newFrame = new Http2Headers();
+		newFrame.setStreamId(streamId);
+		ByteBuffer byteBuffer;
+
+		// If it all fits into one frame
+		if(true) {
+			newFrame.setEndHeaders(true);
+			newFrame.setHeaders(headerMap);
+			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
+					channel ->
+					{
+						stream.setStatus(OPEN);
+						return channel;
+					}
+			);
+		} else {
+			// figure out how to split up the headermap into what can fit and what can't.
+			newFrame.setHeaders(headerMap);
+			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
+					channel -> sendHeaderFrames(Collections.emptyMap(), streamId, stream, false)
+			);
+		}
+	}
+
 	private void actuallySendRequest(HttpRequest request, ResponseListener listener) {
+		ResponseListener l = new CatchResponseListener(listener);
+
 		if(protocol == HTTP11) {
-			ResponseListener l = new CatchResponseListener(listener);
-			byte[] bytes = http11Parser.marshalToBytes(request);
-			ByteBuffer wrap = ByteBuffer.wrap(bytes);
+			ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
 
 			//put this on the queue before the write to be completed from the listener below
 			responsesToComplete.offer(l);
@@ -211,8 +331,17 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			CompletableFuture<Channel> write = channel.write(wrap);
 			write.exceptionally(e -> fail(l, e));
 		} else { // HTTP2
+			// Create a stream
+			Stream newStream = new Stream();
 
-		}
+			// Find a new Stream id
+			activeStreams.put(nextStreamId, newStream);
+			nextStreamId += 2;
+
+			Map<String, String> headers = requestToHeaders(request);
+			sendHeaderFrames(headers, nextStreamId, newStream, true).thenApply(
+					channel -> sendDataFrames(request.getBodyNonNull(), nextStreamId, newStream));
+			}
 	}
 	
 	private Channel fail(ResponseListener l, Throwable e) {
@@ -256,7 +385,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				listener.failure(new NioClosedChannelException(msg+" before responses were received"));
 			}
 		}
-		
+
 		synchronized (this) {
 			while(!pendingRequests.isEmpty()) {
 				PendingRequest pending = pendingRequests.poll();
@@ -308,7 +437,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private DataWrapper oldData = http2Parser.prepareToParse();
 		private boolean gotSettings = false;
 
-		private void handleEndStream(boolean isComplete, Stream stream) {
+		private void updateListener(boolean isComplete, Stream stream) {
 			stream.getListener().incomingResponse(stream.getResponse(), stream.getRequest(), isComplete);
 
 			if(isComplete) {
@@ -321,9 +450,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						// Now send ES back
 						Http2Data sendFrame = new Http2Data();
 						sendFrame.setEndStream(true);
-						channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()));
 
-						stream.setStatus(CLOSED);
+						// Set the stream status to closed after the final ES frame is sent back.
+						// we want to keep track somewhere of our window
+						channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()))
+								.thenAccept(channel -> stream.setStatus(CLOSED));
 						break;
 					default:
 						// throw error here
@@ -338,7 +469,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				case HALF_CLOSED_LOCAL:
 					stream.getResponse().appendBody(frame.getData());
 					boolean isComplete = frame.isEndStream();
-					handleEndStream(isComplete, stream);
+					updateListener(isComplete, stream);
 					break;
 				default:
 					// Throw
@@ -396,8 +527,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				if(!specialHeaders.contains(entry.getKey()))
 					request.addHeader(new Header(entry.getKey(), entry.getValue()));
 			}
-			// hm do we need this?
-			request.addHeader(new Header("Host", authority));
 
 			return request;
 		}
@@ -410,16 +539,18 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					// throw appropriate error
 			}
 
-			HttpResponse response = createResponseFromHeaders(frame.getHeaders());
-			stream.setResponse(response);
+			// start accumulating headers
+			stream.setHeaderHeaders(frame.getHeaders());
+
 			if(frame.isEndHeaders()) {
-				// If we are done getting headers
+				// If we are done getting headers, create the response
+				HttpResponse response = createResponseFromHeaders(frame.getHeaders());
+				stream.setResponse(response);
 				stream.setStatus(OPEN);
+				updateListener(frame.isEndStream(), stream);
 			} else {
 				stream.setStatus(WAITING_MORE_NORMAL_HEADERS);
 			}
-			boolean isComplete = frame.isEndStream();
-			handleEndStream(isComplete, stream);
 		}
 
 
@@ -435,6 +566,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				case HALF_CLOSED_LOCAL:
 				case RESERVED_LOCAL:
 				case RESERVED_REMOTE:
+				case CLOSED:
+				case WAITING_MORE_NORMAL_HEADERS:
+				case WAITING_MORE_PUSH_PROMISE_HEADERS:
+					// TODO: put the error code in the appropriate exception
+					stream.getListener().failure(new RuntimeException("blah"));
 					stream.setStatus(CLOSED);
 					break;
 				default:
@@ -448,41 +584,106 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			int newStreamId = frame.getPromisedStreamId();
 
 			// TODO: make sure streamid is valid
+			// TODO: close all lower numbered even IDLE streams
 			activeStreams.put(newStreamId, promisedStream);
-			HttpRequest request = createRequestFromHeaders(frame.getHeaders());
-			stream.setRequest(request);
+			promisedStream.setPushPromiseHeaders(frame.getHeaders());
 
 			// Uses the same listener as the stream it came in on
-			stream.setListener(stream.getListener());
+			promisedStream.setListener(stream.getListener());
+
 			if(frame.isEndHeaders()) {
-				// If we are done getting headers
-				stream.setStatus(RESERVED_REMOTE);
+				// If we are done getting headers, set the request
+				HttpRequest request = createRequestFromHeaders(frame.getHeaders());
+				promisedStream.setRequest(request);
+				promisedStream.setStatus(RESERVED_REMOTE);
+				updateListener(false, stream);
 			} else {
-				stream.setStatus(WAITING_MORE_NORMAL_HEADERS);
+				promisedStream.setStatus(WAITING_MORE_NORMAL_HEADERS);
 			}
 		}
 
 		private void handleContinuation(Http2Continuation frame, Stream stream) {
-			HttpMessage msg;
+			Map<String, String> headerMap;
 
 			switch(stream.getStatus()) {
 				case WAITING_MORE_PUSH_PROMISE_HEADERS: // after a PUSH_PROMISE
-					msg = stream.getRequest();
+					headerMap = stream.getPushPromiseHeaders();
 					break;
 				case WAITING_MORE_NORMAL_HEADERS: // after a HEADERS
-					msg = stream.getResponse();
+					headerMap = stream.getHeaderHeaders();
 					break;
 				default:
-					// throw, can't get a continuation here
+					// throw, can't get a continuation here, spit out PROTOCOL_ERROR
+					throw new RuntimeException("blah");
 			}
-
 			// Add the headers to the msg
+			// Set all other headers
+			headerMap.putAll(frame.getHeaders());
 
+			if(frame.isEndHeaders()) {
+				// If we're done getting headers, add them to the request/response
+				stream.setStatus(RESERVED_REMOTE);
+				switch(stream.getStatus()) {
+					case WAITING_MORE_NORMAL_HEADERS:
+						HttpResponse response = createResponseFromHeaders(headerMap);
+						stream.setResponse(response);
+						break;
+					case WAITING_MORE_PUSH_PROMISE_HEADERS:
+						HttpRequest request = createRequestFromHeaders(headerMap);
+						stream.setRequest(request);
+						break;
+					default:
+						// should throw in the prior switch if this is the case
+						throw new RuntimeException("should not happen");
+				}
+
+				// Send what we got back to the listener
+				updateListener(false, stream);
+			}
 		}
 
 		private void handleWindowUpdate(Http2WindowUpdate frame, Stream stream) {
 			// can get this on any stream id
 			stream.setWindowIncrement(frame.getWindowSizeIncrement());
+		}
+
+		private void handleSettings(Http2Settings frame) {
+			if(frame.isAck()) {
+				// we received an ack, so the settings we sent have been accepted.
+				for(Map.Entry<Http2Settings.Parameter, Integer> entry: localPreferredSettings.entrySet()) {
+					localSettings.put(entry.getKey(), entry.getValue());
+				}
+			} else {
+				// We've received a settings. Update remoteSettings and send an ack
+				gotSettings = true;
+				for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
+					remoteSettings.put(entry.getKey(), entry.getValue());
+				}
+				Http2Settings responseFrame = new Http2Settings();
+				responseFrame.setAck(true);
+				channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
+			}
+		}
+
+		// TODO: actually deal with this goaway stuff where necessary
+		private void handleGoAway(Http2GoAway frame) {
+			remoteGoneAway = true;
+			goneAwayLastStreamId = frame.getLastStreamId();
+			goneAwayErrorCode = frame.getErrorCode();
+			additionalDebugData = frame.getDebugData();
+		}
+
+		private void handlePing(Http2Ping frame) {
+			if(!frame.isPingResponse()) {
+				// Send the same frame back, setting ping response
+				frame.setIsPingResponse(true);
+				channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+			} else {
+				// measure latency from the ping that was sent. The opaqueData we sent is
+				// System.nanoTime() so we just measure the difference
+				long latency = System.nanoTime() - frame.getOpaqueData();
+				log.info("Ping: %ld ns", latency);
+			}
 		}
 
 		private void handleFrame(Http2Frame frame) {
@@ -549,12 +750,23 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		@Override
 		public void farEndClosed(Channel channel) {
+			log.info("far end closed");
+			isClosed = true;
+			cleanUpPendings("Remote end closed");
 
+			if(closeListener != null)
+				closeListener.farEndClosed(HttpSocketImpl.this);
 		}
 
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
-
+			log.error("Failure on channel="+channel, e);
+			while(!responsesToComplete.isEmpty()) {
+				ResponseListener listener = responsesToComplete.poll();
+				if(listener != null) {
+					listener.failure(e);
+				}
+			}
 		}
 
 		@Override
@@ -570,13 +782,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private class Http11DataListener implements DataListener {
 		private boolean processingChunked = false;
-		private Memento memento = http11Parser.prepareToParse();
+		private Memento memento = httpParser.prepareToParse();
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
 			log.info("size="+b.remaining());
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
-			memento = http11Parser.parse(memento, wrapper);
+			memento = httpParser.parse(memento, wrapper);
 
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 			for(HttpPayload msg : parsedMessages) {

@@ -19,8 +19,8 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
-        if (castFrame.isAck()) {
-            // If ack then settings must be empty
+        if (castFrame.isAck() || castFrame.getSettings().size() == 0) {
+            // If ack or empty settings
             return dataGen.emptyWrapper();
         } else {
             Map<Http2Settings.Parameter, Integer> settings = castFrame.getSettings();

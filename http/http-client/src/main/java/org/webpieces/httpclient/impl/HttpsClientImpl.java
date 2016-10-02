@@ -3,6 +3,7 @@ package org.webpieces.httpclient.impl;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.Http2Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
@@ -19,12 +20,14 @@ public class HttpsClientImpl implements HttpClient {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 	private ChannelManager mgr;
-	private HttpParser parser;
+	private HttpParser httpParser;
+	private Http2Parser http2Parser;
 	private HttpsSslEngineFactory factory;
 
-	public HttpsClientImpl(ChannelManager mgr, HttpParser parser, HttpsSslEngineFactory factory) {
+	public HttpsClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, HttpsSslEngineFactory factory) {
 		this.mgr = mgr;
-		this.parser = parser;
+		this.httpParser = httpParser;
+		this.http2Parser = http2Parser;
 		this.factory = factory;
 	}
 
@@ -34,7 +37,7 @@ public class HttpsClientImpl implements HttpClient {
 		CompletableFuture<HttpSocket> connect = socket.connect(addr);
 		return connect.thenCompose(p -> socket.send(request));
 	}
-	
+
 	@Override
 	public void sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener listener) {
 		HttpSocket socket = openHttpSocket(addr+"");
@@ -58,10 +61,10 @@ public class HttpsClientImpl implements HttpClient {
 	public HttpSocket openHttpSocket(String idForLogging) {
 		return openHttpSocket(idForLogging, null);
 	}
-	
+
 	@Override
 	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpSocketImpl(mgr, idForLogging, factory, parser, listener);
+		return new HttpSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener);
 	}
 
 
