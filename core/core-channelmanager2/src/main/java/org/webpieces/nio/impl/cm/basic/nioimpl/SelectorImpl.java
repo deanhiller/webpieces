@@ -9,8 +9,8 @@ import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
@@ -105,8 +105,7 @@ public class SelectorImpl implements Select
             try {           
                 running = true;
                 runLoop();
-                if(log.isTraceEnabled())
-                    log.trace("shutting down the PollingThread");
+                log.trace(()->"shutting down the PollingThread");
                 selector.close();
                 selector = null;
                 thread = null;                

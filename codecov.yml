@@ -6,7 +6,7 @@
 coverage:
   precision: 2
   round: down
-  range: 50...75
+  range: 50...70
 
   status:
     # Learn more at https://codecov.io/docs#yaml_default_commit_status

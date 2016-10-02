@@ -3,8 +3,8 @@ package org.webpieces.frontend.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.frontend.api.exception.HttpClientException;
 import org.webpieces.frontend.api.exception.HttpException;
@@ -33,8 +33,7 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 		try {
 			InetSocketAddress addr = channel.getRemoteAddress();
 			channel.setName(""+addr);
-			if(log.isTraceEnabled())
-				log.trace("incoming data. size="+b.remaining()+" channel="+channel);
+			log.trace(()->"incoming data. size="+b.remaining()+" channel="+channel);
 			processor.deserialize(channel, b);
 		} catch(ParseException e) {
 			HttpClientException exc = new HttpClientException("Could not parse http request", KnownStatusCode.HTTP_400_BADREQUEST, e);
@@ -57,8 +56,7 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 	}
 
 	public void farEndClosed(Channel channel) {
-		if(log.isTraceEnabled())
-			log.trace("far end closed. channel="+channel);
+		log.trace(()->"far end closed. channel="+channel);
 		processor.farEndClosed(channel);
 	}
 

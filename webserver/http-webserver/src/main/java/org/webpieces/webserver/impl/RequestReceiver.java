@@ -13,8 +13,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.AcceptMediaType;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterCookie;

@@ -9,8 +9,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -44,17 +44,15 @@ public class CookieTranslator {
 		
 		CookieScopeImpl data = (CookieScopeImpl) cookie1;
 		if(data.isNeedCreateSetCookie()) {
-			if(log.isDebugEnabled())
-				log.debug("translating cookie="+cookie1.getName()+" to send to browser");
+			log.debug(()->"translating cookie="+cookie1.getName()+" to send to browser");
 			RouterCookie cookie = translateScopeToCookie(data);
 			cookies.add(cookie);
 		} else if(data.isNeedCreateDeleteCookie()) {
-			if(log.isDebugEnabled())
-				log.debug("creating delete cookie for "+cookie1.getName()+" to send to browser");
+			log.debug(()->"creating delete cookie for "+cookie1.getName()+" to send to browser");
 			RouterCookie cookie = createDeleteCookie(data.getName());
 			cookies.add(cookie);
-		} else if(log.isDebugEnabled()) {
-			log.debug("not sending any cookie to browser for cookie="+cookie1.getName());
+		} else {
+			log.debug(()->"not sending any cookie to browser for cookie="+cookie1.getName());
 		}
 	}
 	

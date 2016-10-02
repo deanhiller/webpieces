@@ -10,8 +10,8 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
@@ -216,8 +216,7 @@ public class ProxyResponse implements ResponseStreamer {
 		//for security, banking pages, all dynamic pages, we tell browser not to store them
 		resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
 
-		if(log.isDebugEnabled())
-			log.debug("content about to be sent back="+content);
+		log.debug(()->"content about to be sent back="+content);
 		
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);

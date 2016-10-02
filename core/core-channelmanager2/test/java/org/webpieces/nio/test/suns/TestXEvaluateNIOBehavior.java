@@ -9,7 +9,7 @@ import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
+import org.webpieces.util.logging.Logger;
 
 import junit.framework.TestCase;
 

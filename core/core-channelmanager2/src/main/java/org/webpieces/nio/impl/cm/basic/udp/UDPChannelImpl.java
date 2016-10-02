@@ -11,8 +11,8 @@ import java.nio.channels.SelectableChannel;
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
@@ -50,8 +50,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		CompletableFuture<Channel> promise = new CompletableFuture<>();
 		
 		try {
-			if(apiLog.isTraceEnabled())
-				apiLog.trace(this+"Basic.connect called-addr="+addr);
+			apiLog.trace(()->this+"Basic.connect called-addr="+addr);
 			
 			channel.connect(addr);
 			
@@ -65,8 +64,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
     
     public synchronized void disconnect() {
-		if(apiLog.isTraceEnabled())
-			apiLog.trace(this+"Basic.disconnect called");
+		apiLog.trace(()->this+"Basic.disconnect called");
 		
 		try {
 			isConnected = false;        

@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import org.slf4j.Logger;
+import org.webpieces.util.logging.Logger;
 
 import junit.framework.TestCase;
 

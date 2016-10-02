@@ -33,8 +33,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
@@ -164,8 +164,7 @@ public class SelectorManager2 implements SelectorListener {
 		SelectableChannel s = channel.getRealChannel();
 		
 		int previousOps = 0;
-		if (log.isTraceEnabled())
-			log.trace(channel+"registering2="+s+" ops="+Helper.opType(validOps));
+		log.trace(()->channel+"registering2="+s+" ops="+Helper.opType(validOps));
         
 		SelectionKey previous = channel.keyFor(selector);
 		if(previous == null) {
@@ -184,8 +183,7 @@ public class SelectorManager2 implements SelectorListener {
 		
 		//log.info("registering="+Helper.opType(allOps)+" opsToAdd="+Helper.opType(validOps)+" previousOps="+Helper.opType(previousOps)+" type="+type);
 		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));	
-		if (log.isTraceEnabled())
-			log.trace(channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
+		log.trace(()->channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
 	}
 
 	private CompletableFuture<Void> asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
@@ -211,8 +209,7 @@ public class SelectorManager2 implements SelectorListener {
         
 		listenerList.add(r);
 
-		if(log.isTraceEnabled())
-			log.trace(s+"call wakeup on selector to register for="+r);
+		log.trace(()->s+"call wakeup on selector to register for="+r);
 		wakeUpSelector();
 		
 		return future;
@@ -242,8 +239,7 @@ public class SelectorManager2 implements SelectorListener {
 		
 		listenerList.add(r);
 
-		if(log.isTraceEnabled())
-			log.trace(s+"call wakeup on selector to register for="+r);
+		log.trace(()->s+"call wakeup on selector to register for="+r);
 		wakeUpSelector();
 		
 		return future;
@@ -266,8 +262,7 @@ public class SelectorManager2 implements SelectorListener {
         //he will be served with all the others in an equal priority round robin
         //fashion.
         Set<SelectionKey> keySet = selector.selectedKeys();
-        if(log.isTraceEnabled())
-        	log.trace("keySetCnt="+keySet.size()+" registerCnt="+listenerList.size()
+        log.trace(()->"keySetCnt="+keySet.size()+" registerCnt="+listenerList.size()
         			+" needCloseOrRegister="+needCloseOrRegister+" wantShutdown="+selector.isWantShutdown());
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
@@ -277,13 +272,12 @@ public class SelectorManager2 implements SelectorListener {
 	
 	protected int waitOnSelector() {
 		int numNewKeys = 0;
-		if(log.isTraceEnabled())
-			log.trace("coming into select");
+		log.trace(()->"coming into select");
 		numNewKeys = selector.select();
 //should assert we are not stopping, have listeners, or have keys to process...
 
-		if(log.isTraceEnabled())
-			log.trace("coming out of select with newkeys="+numNewKeys+
+		final int num = numNewKeys;
+		log.trace(()->"coming out of select with newkeys="+num+
 					" regCnt="+listenerList.size()+" needCloseOrRegister="+needCloseOrRegister+
 					" wantShutdown="+selector.isWantShutdown());
 
@@ -315,8 +309,7 @@ public class SelectorManager2 implements SelectorListener {
 	 * Also, this is used to wakeup the selector to process registrations!!!
 	 */
 	public void wakeUpSelector() {
-		if(log.isTraceEnabled())
-			log.trace("Wakeup selector to enable close or registers");
+		log.trace(()->"Wakeup selector to enable close or registers");
 		needCloseOrRegister = true;
 		selector.wakeup();
 	}

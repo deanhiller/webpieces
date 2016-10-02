@@ -12,8 +12,8 @@ import java.util.Properties;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;

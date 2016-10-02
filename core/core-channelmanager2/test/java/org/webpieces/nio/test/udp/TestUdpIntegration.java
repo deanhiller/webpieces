@@ -11,7 +11,7 @@ import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import org.slf4j.Logger;
+import org.webpieces.util.logging.Logger;
 
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;

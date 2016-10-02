@@ -2,7 +2,7 @@ package org.webpieces.nio.test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import org.slf4j.Logger;
+import org.webpieces.util.logging.Logger;
 
 import javax.net.ssl.SSLEngine;
 
