@@ -2,8 +2,8 @@ package org.webpieces.httpclient.impl;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.ResponseListener;
-import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -45,7 +45,7 @@ public class CompletableListener implements ResponseListener {
 	}
 
 	@Override
-	public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
+	public void incomingData(DataWrapper data, boolean isLastData) {
 	}
 
 	@Override

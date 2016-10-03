@@ -20,7 +20,6 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -110,10 +109,9 @@ public class IntegGoogleHttps {
 		}
 
 		@Override
-		public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
-			DataWrapper wrapper = chunk.getBody();
+		public void incomingData(DataWrapper wrapper, boolean isLastData) {
 			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
-			log.info("result=(lastChunk="+isLastChunk+"\n"+result+"/////");
+			log.info("result=(lastData="+ isLastData +"\n"+result+"/////");
 		}
 
 		@Override

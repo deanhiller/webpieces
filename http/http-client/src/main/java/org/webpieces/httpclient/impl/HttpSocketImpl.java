@@ -222,7 +222,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	@Override
 	public CompletableFuture<HttpResponse> send(HttpRequest request) {
-		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
+		CompletableFuture<HttpResponse> future = new CompletableFuture<>();
 		ResponseListener l = new CompletableListener(future);
 		send(request, l);
 		return future;
@@ -456,28 +456,24 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private DataWrapper oldData = http2Parser.prepareToParse();
 		private boolean gotSettings = false;
 
-		private void updateListener(boolean isComplete, Stream stream) {
-			stream.getListener().incomingResponse(stream.getResponse(), stream.getRequest(), isComplete);
+		private void receivedEndStream(Stream stream) {
+			// Make sure status can accept ES
+			switch(stream.getStatus()) {
+				case OPEN:
+				case HALF_CLOSED_LOCAL:
+					stream.setStatus(HALF_CLOSED_REMOTE);
 
-			if(isComplete) {
-				// Make sure status can accept ES
-				switch(stream.getStatus()) {
-					case OPEN:
-					case HALF_CLOSED_LOCAL:
-						stream.setStatus(HALF_CLOSED_REMOTE);
+					// Now send ES back
+					Http2Data sendFrame = new Http2Data();
+					sendFrame.setEndStream(true);
 
-						// Now send ES back
-						Http2Data sendFrame = new Http2Data();
-						sendFrame.setEndStream(true);
-
-						// Set the stream status to closed after the final ES frame is sent back.
-						// we want to keep track somewhere of our window
-						channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()))
-								.thenAccept(channel -> stream.setStatus(CLOSED));
-						break;
-					default:
-						// throw error here
-				}
+					// Set the stream status to closed after the final ES frame is sent back.
+					// we want to keep track somewhere of our window
+					channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()))
+							.thenAccept(channel -> stream.setStatus(CLOSED));
+					break;
+				default:
+					// throw error here
 			}
 		}
 
@@ -486,9 +482,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			switch(stream.getStatus()) {
 				case OPEN:
 				case HALF_CLOSED_LOCAL:
-					stream.getResponse().appendBody(frame.getData());
 					boolean isComplete = frame.isEndStream();
-					updateListener(isComplete, stream);
+					stream.getListener().incomingData(frame.getData(), isComplete);
+					if(isComplete)
+						receivedEndStream(stream);
 					break;
 				default:
 					// Throw
@@ -566,8 +563,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				HttpResponse response = createResponseFromHeaders(frame.getHeaders());
 				stream.setResponse(response);
 				stream.setStatus(OPEN);
-				updateListener(frame.isEndStream(), stream);
+				boolean isComplete = frame.isEndStream();
+				stream.getListener().incomingResponse(response, stream.getRequest(), isComplete);
+				if(isComplete)
+					receivedEndStream(stream);
 			} else {
+				if(frame.isEndStream()) {
+					// TODO: throw here, because we can't end the stream when waiting for more headers
+				}
 				stream.setStatus(WAITING_MORE_NORMAL_HEADERS);
 			}
 		}
@@ -615,7 +618,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				HttpRequest request = createRequestFromHeaders(frame.getHeaders());
 				promisedStream.setRequest(request);
 				promisedStream.setStatus(RESERVED_REMOTE);
-				updateListener(false, stream);
 			} else {
 				promisedStream.setStatus(WAITING_MORE_NORMAL_HEADERS);
 			}
@@ -657,7 +659,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 
 				// Send what we got back to the listener
-				updateListener(false, stream);
+				receivedEndStream(stream);
 			}
 		}
 
@@ -819,7 +821,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						responsesToComplete.poll();
 					}
 					
-					listener.incomingChunk(chunk, chunk.isLastChunk());
+					listener.incomingData(chunk.getBodyNonNull(), chunk.isLastChunk());
 				} else if(!msg.isHasChunkedTransferHeader()) {
 					HttpResponse resp = (HttpResponse) msg;
 					ResponseListener listener = responsesToComplete.poll();

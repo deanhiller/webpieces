@@ -1,6 +1,6 @@
 package org.webpieces.httpclient.api;
 
-import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -17,21 +17,24 @@ public interface ResponseListener {
 	 * 
 	 * This makes the callback api have a larger surface area than desired.  The incomingResponse
 	 * method will have isComplete=true in the cases of #1 or #2 above.  In the case of #3, 
-	 * incomingChunk will be called over and over until the last chunk in which case isLastChunk
+	 * incomingData will be called over and over until the last chunk in which case isLastChunk
 	 * will be set to true and the chunk will be of size 0, but the last chunk is special in that
 	 * it can contain extra headers with it.  
 	 * 
-	 * NOTE: All HttpChunks can contain extensions as well.  Those are included if they exist in the
-	 * HttpChunk object
+	 * NOTE: All HttpChunks can contain extensions as well.  Those are dropped.
 	 *
 	 * For Http 2, the server could send back a PUSH_PROMISE which has an imputed request, so we
 	 * need to pass back the imputed request from the PUSH_PROMISE message. For http1.1 responses
 	 * and http2 'normal' responses, we just pass back the request that we started with here.
 	 *
-	 * For http2 we don't need to worry about chunking.
+	 * For Http2, only 3 and 4 are possible, so 'incomingResponse' will be called once the header
+	 * has arrived, and incomingData will be called for each dataframe that follows. If there is no
+	 * data after the header (eg a HEAD request) then incomingResponse may be called with isComplete,
+	 * but it's possible that an empty dataframe will be sent, in which case incomignData will be
+	 * called with an empty dataWrapper and isLastData set to true.
 	 * 
 	 * @param resp The HttpResponse message including body if there is one
-	 * @param isComplete false if the transfer encoding is chunked in which case incomingChunk will
+	 * @param isComplete false if the transfer encoding is chunked in which case incomingData will
 	 * be called for each chunk coming
 	 */
 	public void incomingResponse(HttpResponse resp, boolean isComplete);
@@ -43,11 +46,10 @@ public interface ResponseListener {
 	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete);
 	
 	/**
-	 * 
-	 * @param chunk
-	 * @param isLastChunk
+	 *  @param data
+	 * @param isLastData
 	 */
-	public void incomingChunk(HttpChunk chunk, boolean isLastChunk);
+	public void incomingData(DataWrapper data, boolean isLastData);
 	
 	public void failure(Throwable e);
 	
