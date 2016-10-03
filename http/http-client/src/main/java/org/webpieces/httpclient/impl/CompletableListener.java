@@ -10,14 +10,27 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 public class CompletableListener implements ResponseListener {
 
 	private CompletableFuture<HttpResponse> future;
+	private boolean ignoreIsComplete;
 
 	public CompletableListener(CompletableFuture<HttpResponse> future) {
 		this.future = future;
+		this.ignoreIsComplete = false;
+	}
+
+	/**
+	 *
+	 * @param future
+	 * @param ignoreIsComplete if true, completes the future after just getting the first HttpResponse 'incomingResponse'
+	 *
+	 */
+	public CompletableListener(CompletableFuture<HttpResponse> future, boolean ignoreIsComplete) {
+		this.future = future;
+		this.ignoreIsComplete = ignoreIsComplete;
 	}
 
 	@Override
 	public void incomingResponse(HttpResponse resp, boolean isComplete) {
-		if(!isComplete) {
+		if(!isComplete && !ignoreIsComplete) {
 			future.completeExceptionally(new IllegalStateException("You need to call "
 					+ "sendRequest(HttpRequest req, ResponseListener l) because this is a "
 					+ "chunked download response and could potentially blow out your memory"));

@@ -20,7 +20,7 @@ public class IntegColoradoEdu {
 
 	private static final Logger log = LoggerFactory.getLogger(IntegColoradoEdu.class);
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		boolean isHttp = false;
 		
 		String host = "www.colorado.edu";
@@ -40,6 +40,8 @@ public class IntegColoradoEdu {
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(p -> socket.send(req, listener))
 			.exceptionally(e -> reportException(socket, e));
+
+		Thread.sleep(100000);
 	}
 
 	private static Void reportException(HttpSocket socket, Throwable e) {

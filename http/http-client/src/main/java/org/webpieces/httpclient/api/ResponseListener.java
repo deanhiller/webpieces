@@ -34,7 +34,7 @@ public interface ResponseListener {
 	 * @param isComplete false if the transfer encoding is chunked in which case incomingChunk will
 	 * be called for each chunk coming
 	 */
-	public void incomingResponse(HttpResponse resp, /* HttpRequest req, */ boolean isComplete);
+	public void incomingResponse(HttpResponse resp, boolean isComplete);
 
 	/**
 	 * To support HTTP2 we need to pass the 'request' back with the response because the

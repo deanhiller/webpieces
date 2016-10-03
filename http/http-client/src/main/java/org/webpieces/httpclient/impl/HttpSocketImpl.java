@@ -27,6 +27,7 @@ import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
@@ -137,7 +138,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		
 		connectFuture = channel.connect(addr, dataListenerToUse).thenCompose(channel -> {
 			if(tryHttp2) {
-				return negotiateHttpVersion();
+				return negotiateHttpVersion(addr);
 			}
 			else {
 				return CompletableFuture.completedFuture(connected());
@@ -155,9 +156,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
 	}
 
-	private CompletableFuture<HttpSocket> negotiateHttpVersion() {
+	private CompletableFuture<HttpSocket> negotiateHttpVersion(InetSocketAddress addr) {
 		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
-		if (false) { // alpn says HTTP? or we have some other prior knowledge
+		if (false) { // alpn says HTTP2 or we have some other prior knowledge
 			protocol = HTTP2;
 			dataListener.setProtocol(HTTP2);
 			sendHttp2Preface();
@@ -167,7 +168,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else { // Try the HTTP1.1 upgrade technique
 			HttpRequest upgradeRequest = new HttpRequest();
 			HttpRequestLine requestLine = new HttpRequestLine();
-			requestLine.setMethod(KnownHttpMethod.HEAD);
+
+			// TODO: switch this back to HEAD
+			// HEAD doesn't work when connecting to a chunking server
+			// because the parser stays in chunked mode because there was no final chunk
+			// We have to fix the parser so that HEAD responses that have no chunks don't
+			// leave the parser in chunking mode.
+			requestLine.setMethod(KnownHttpMethod.GET);
 			requestLine.setUri(new HttpUri("/"));
 			requestLine.setVersion(new HttpVersion());
 			upgradeRequest.setRequestLine(requestLine);
@@ -180,15 +187,27 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					Base64.getEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray())));
 
 			CompletableFuture<HttpResponse> response = sendIgnoreConnected(upgradeRequest);
-			return response.thenApply(r -> {
+			return response.thenCompose(r -> {
 				if(r.getStatusLine().getStatus().getCode() != 101) {
-					return connected();
+					// That didn't work, let's not try http2 and try again
+					tryHttp2 = false;
+
+					// If the response was not chunked, then we're going to assume
+					// that the connection will be closed and we have to reconnect without
+					// HTTP2. If the response was chunked, then we can just say we're connected
+					// and proceed with HTTP1.1.
+					// TODO: Find a way to actually just see if the connection has been closed (or is about to be?) or not.
+					Header transferEncodingHeader = r.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
+					if(transferEncodingHeader != null && transferEncodingHeader.getValue().equals("chunked"))
+						return CompletableFuture.completedFuture(connected());
+					else
+						return connect(addr);
 				} else {
 					protocol = HTTP2;
 					dataListener.setProtocol(HTTP2);
 					sendHttp2Preface();
 
-					return connected();
+					return CompletableFuture.completedFuture(connected());
 				}
 			});
 		}
@@ -196,7 +215,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private CompletableFuture<HttpResponse> sendIgnoreConnected(HttpRequest request) {
 		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
-		ResponseListener l = new CompletableListener(future);
+		ResponseListener l = new CompletableListener(future, true);
 		actuallySendRequest(request, l);
 		return future;
 	}
@@ -327,7 +346,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			//put this on the queue before the write to be completed from the listener below
 			responsesToComplete.offer(l);
 
-			log.info("sending request now. req=" + request.getRequestLine().getUri());
+			log.info("sending request now. req=" + request.getRequestLine().toString());
 			CompletableFuture<Channel> write = channel.write(wrap);
 			write.exceptionally(e -> fail(l, e));
 		} else { // HTTP2
