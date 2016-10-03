@@ -4,7 +4,6 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.twitter.hpack.HeaderListener;
 import com.webpieces.http2parser.api.HeaderBlock;
-import com.webpieces.http2parser.api.ParserResult;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -69,8 +68,7 @@ public class HeaderBlockImpl implements HeaderBlock {
         HeaderListener listener = new HeaderListener() {
             @Override
             public void addHeader(byte[] name, byte[] value, boolean sensitive) {
-                // all headers are stored lowercase
-                headers.add(new HeaderBlock.Header(new String(name).toLowerCase(), new String(value).toLowerCase()));
+                headers.add(new HeaderBlock.Header(new String(name).toLowerCase(), new String(value)));
             }
         };
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);

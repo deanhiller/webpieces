@@ -22,9 +22,6 @@ public class TestHttp2PushPromise {
         frame.setPromisedStreamId(5);
 
         String hexFrame = UtilsForTest.frameToHex(frame);
-    //  bidi probably doesn't work because the Map doesn't preserve ordering.
-    //  TODO: change references to Map<String, String> to List<Header> to ensure
-    //  That we are preserving ordering.
-    //  UtilsForTest.testBidiFromBytes(hexFrame);
+        UtilsForTest.testBidiFromBytes(hexFrame);
     }
 }
