@@ -35,7 +35,11 @@ public class Layer1Response implements ResponseListener {
 		//responseListener.processResponse(channel, req, data, isLastData);
 	}
 
-	@Override
+    @Override
+    public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+    }
+
+    @Override
 	public void failure(Throwable e) {
 		responseListener.processError(channel, req, e);
 	}

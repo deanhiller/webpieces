@@ -49,6 +49,10 @@ public class CompletableListener implements ResponseListener {
 	}
 
 	@Override
+	public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+	}
+
+	@Override
 	public void failure(Throwable e) {
 		future.completeExceptionally(e);
 	}

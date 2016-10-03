@@ -109,6 +109,11 @@ public class IntegGoogleHttps {
 		}
 
 		@Override
+		public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+			incomingData(data, isLastData);
+		}
+
+		@Override
 		public void incomingData(DataWrapper wrapper, boolean isLastData) {
 			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
 			log.info("result=(lastData="+ isLastData +"\n"+result+"/////");

@@ -68,6 +68,12 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
+		public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+			log.info("req="+request);
+			incomingData(data, isLastData);
+		}
+
+		@Override
 		public void failure(Throwable e) {
 			log.error("failed", e);
 		}

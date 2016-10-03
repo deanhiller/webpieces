@@ -483,7 +483,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				case OPEN:
 				case HALF_CLOSED_LOCAL:
 					boolean isComplete = frame.isEndStream();
-					stream.getListener().incomingData(frame.getData(), isComplete);
+					stream.getListener().incomingData(frame.getData(), stream.getRequest(), isComplete);
 					if(isComplete)
 						receivedEndStream(stream);
 					break;

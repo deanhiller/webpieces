@@ -50,6 +50,8 @@ public interface ResponseListener {
 	 * @param isLastData
 	 */
 	public void incomingData(DataWrapper data, boolean isLastData);
+
+	public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData);
 	
 	public void failure(Throwable e);
 	

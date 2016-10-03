@@ -45,6 +45,16 @@ public class CatchResponseListener implements ResponseListener {
 	}
 
 	@Override
+	public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+		try
+		{
+			listener.incomingData(data, request, isLastData);
+		} catch(Throwable e) {
+			log.error("exception", e);
+		}
+	}
+
+	@Override
 	public void failure(Throwable e) {
 		try {
 			listener.failure(e);
