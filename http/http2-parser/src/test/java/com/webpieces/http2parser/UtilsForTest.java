@@ -60,7 +60,10 @@ public class UtilsForTest {
     }
 
     public static void testBidiFromBytes(String hexFrame) {
-        Assert.assertArrayEquals(frameToBytes(frameFromHex(hexFrame)), toByteArray(hexFrame));
+        Http2Frame frame = frameFromHex(hexFrame);
+        String hex = frameToHex(frame);
+        byte[] bytes = frameToBytes(frame);
+        Assert.assertArrayEquals(bytes, toByteArray(hexFrame));
     }
 
 }
