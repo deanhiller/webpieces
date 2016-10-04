@@ -1,5 +1,5 @@
 dependencies {
-    compile deps['hpack']
+    compile deps['twitter-hpack']
     compile project(':core:core-datawrapper')
 }
 

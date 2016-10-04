@@ -61,7 +61,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private HttpsSslEngineFactory factory;
 	private ChannelManager mgr;
 	private String idForLogging;
-	private boolean isRecording = false;
+	private boolean isRecording = true;
+
+	private InetSocketAddress addr;
 
 	// HTTP 2
 	private Http2Parser http2Parser;
@@ -141,7 +143,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				return negotiateHttpVersion(addr);
 			}
 			else {
-				return CompletableFuture.completedFuture(connected());
+				return CompletableFuture.completedFuture(connected(addr));
 			}
 		});
 		return connectFuture;
@@ -149,21 +151,23 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private void sendHttp2Preface() {
 		String prefaceString = "505249202a20485454502f322e300d0a0d0a534d0d0a0d0a";
+		log.info("sending preface");
 		channel.write(ByteBuffer.wrap(DatatypeConverter.parseHexBinary(prefaceString)));
 		Http2Settings settingsFrame = new Http2Settings();
 
 		settingsFrame.setSettings(localPreferredSettings);
+		log.info("sending settings");
 		channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
 	}
 
 	private CompletableFuture<HttpSocket> negotiateHttpVersion(InetSocketAddress addr) {
 		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
-		if (false) { // alpn says HTTP2 or we have some other prior knowledge
+		if (true) { // let's just try http2 first and see what happens
 			protocol = HTTP2;
 			dataListener.setProtocol(HTTP2);
 			sendHttp2Preface();
 
-			return CompletableFuture.completedFuture(connected());
+			return CompletableFuture.completedFuture(connected(addr));
 
 		} else { // Try the HTTP1.1 upgrade technique
 			HttpRequest upgradeRequest = new HttpRequest();
@@ -180,6 +184,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			upgradeRequest.setRequestLine(requestLine);
 			upgradeRequest.addHeader(new Header("Connection", "Upgrade, HTTP2-Settings"));
 			upgradeRequest.addHeader(new Header("Upgrade", "h2c"));
+			upgradeRequest.addHeader(new Header("Host", addr.getHostName() + ":" + addr.getPort()));
 
 			Http2Settings settingsFrame = new Http2Settings();
 			settingsFrame.setSettings(localPreferredSettings);
@@ -199,7 +204,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					// TODO: Find a way to actually just see if the connection has been closed (or is about to be?) or not.
 					Header transferEncodingHeader = r.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
 					if(transferEncodingHeader != null && transferEncodingHeader.getValue().equals("chunked"))
-						return CompletableFuture.completedFuture(connected());
+						return CompletableFuture.completedFuture(connected(addr));
 					else
 						return connect(addr);
 				} else {
@@ -207,7 +212,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					dataListener.setProtocol(HTTP2);
 					sendHttp2Preface();
 
-					return CompletableFuture.completedFuture(connected());
+					return CompletableFuture.completedFuture(connected(addr));
 				}
 			});
 		}
@@ -228,8 +233,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		return future;
 	}
 	
-	private synchronized HttpSocket connected() {
+	private synchronized HttpSocket connected(InetSocketAddress addr) {
 		connected = true;
+		this.addr = addr;
 		
 		while(!pendingRequests.isEmpty()) {
 			PendingRequest req = pendingRequests.remove();
@@ -272,11 +278,32 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		headerMap.put(":method", requestLine.getMethod().getMethodAsString());
 
 		UrlInfo urlInfo = requestLine.getUri().getUriBreakdown();
-		headerMap.put(":scheme", urlInfo.getPrefix());
-		if(urlInfo.getPort() == null)
-			headerMap.put(":authority", urlInfo.getHost());
-		else
-			headerMap.put(":authority", String.format("{}:{}", urlInfo.getHost(), urlInfo.getPort()));
+
+		// Figure out scheme
+		if(urlInfo.getPrefix() != null) {
+			headerMap.put(":scheme", urlInfo.getPrefix());
+		} else {
+			if(channel.isSslChannel()) {
+				headerMap.put(":scheme", "https");
+			} else {
+				headerMap.put(":scheme", "http");
+			}
+		}
+
+		// Figure out authority
+		if(headerMap.containsKey("host")) {
+			headerMap.put(":authority", headerMap.get("host"));
+		} else {
+			if (urlInfo.getHost() != null) {
+				String host = urlInfo.getHost();
+				if (urlInfo.getPort() == null)
+					headerMap.put(":authority", urlInfo.getHost());
+				else
+					headerMap.put(":authority", String.format("{}:{}", urlInfo.getHost(), urlInfo.getPort()));
+			} else {
+				headerMap.put(":authority", addr.getHostName() + ":" + addr.getPort());
+			}
+		}
 
 		headerMap.put(":path", urlInfo.getFullPath());
 
@@ -291,6 +318,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
 			newFrame.setData(body);
 			newFrame.setEndStream(true);
+			log.info("sending final data frame");
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
 					channel -> {
 						stream.setStatus(HALF_CLOSED_LOCAL);
@@ -300,6 +328,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else {
 			List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
 			newFrame.setData(split.get(0));
+			log.info("sending non-final data frame");
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
 					channel ->  sendDataFrames(split.get(1), streamId, stream)
 			);
@@ -315,12 +344,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		// if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
 		Http2Headers newFrame = new Http2Headers();
 		newFrame.setStreamId(streamId);
-		ByteBuffer byteBuffer;
 
 		// If it all fits into one frame
 		if(true) {
 			newFrame.setEndHeaders(true);
 			newFrame.setHeaders(headerMap);
+			log.info("sending final header frame");
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
 					channel ->
 					{
@@ -331,6 +360,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else {
 			// figure out how to split up the headermap into what can fit and what can't.
 			newFrame.setHeaders(headerMap);
+			log.info("sending non-final header frame");
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
 					channel -> sendHeaderFrames(Collections.emptyMap(), streamId, stream, false)
 			);
@@ -469,6 +499,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 					// Set the stream status to closed after the final ES frame is sent back.
 					// we want to keep track somewhere of our window
+					log.info("sending endstream ack data frame");
 					channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()))
 							.thenAccept(channel -> stream.setStatus(CLOSED));
 					break;
@@ -682,6 +713,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 				Http2Settings responseFrame = new Http2Settings();
 				responseFrame.setAck(true);
+				log.info("sending settings ack");
 				channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
 			}
 		}
@@ -698,6 +730,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			if(!frame.isPingResponse()) {
 				// Send the same frame back, setting ping response
 				frame.setIsPingResponse(true);
+				log.info("sending ping response");
 				channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
 			} else {
 				// measure latency from the ping that was sent. The opaqueData we sent is
@@ -765,6 +798,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			ParserResult parserResult = http2Parser.parse(oldData, newData);
 
 			for(Http2Frame frame: parserResult.getParsedFrames()) {
+				log.info("got frame="+frame);
 				handleFrame(frame);
 			}
 		}
