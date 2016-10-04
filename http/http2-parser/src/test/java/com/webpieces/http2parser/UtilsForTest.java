@@ -15,7 +15,7 @@ public class UtilsForTest {
     private static Base64.Encoder encoder = Base64.getEncoder();
     private static Base64.Decoder decoder = Base64.getDecoder();
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-    private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
+    static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
     private static String dataWrapperToBase64(DataWrapper data) {
         return encoder.encodeToString(data.createByteArray());

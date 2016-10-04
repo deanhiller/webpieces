@@ -1,5 +1,6 @@
 package org.webpieces.httpclient.impl;
 
+import com.webpieces.http2parser.api.dto.HasHeaders;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -8,6 +9,8 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.webpieces.httpclient.impl.Stream.StreamStatus.IDLE;
 
@@ -32,22 +35,22 @@ public class Stream {
     private HttpRequest request;
     private HttpResponse response;
     private ResponseListener listener;
-    private Map<String, String> pushPromiseHeaders;
-    private Map<String, String> headerHeaders;
+    private ConcurrentLinkedQueue<HasHeaders.Header> pushPromiseHeaders;
+    private ConcurrentLinkedQueue<HasHeaders.Header> headerHeaders;
 
-    public Map<String, String> getPushPromiseHeaders() {
+    public ConcurrentLinkedQueue<HasHeaders.Header> getPushPromiseHeaders() {
         return pushPromiseHeaders;
     }
 
-    public void setPushPromiseHeaders(Map<String, String> pushPromiseHeaders) {
+    public void setPushPromiseHeaders(ConcurrentLinkedQueue<HasHeaders.Header> pushPromiseHeaders) {
         this.pushPromiseHeaders = pushPromiseHeaders;
     }
 
-    public Map<String, String> getHeaderHeaders() {
+    public ConcurrentLinkedQueue<HasHeaders.Header> getHeaderHeaders() {
         return headerHeaders;
     }
 
-    public void setHeaderHeaders(Map<String, String> headerHeaders) {
+    public void setHeaderHeaders(ConcurrentLinkedQueue<HasHeaders.Header> headerHeaders) {
         this.headerHeaders = headerHeaders;
     }
 

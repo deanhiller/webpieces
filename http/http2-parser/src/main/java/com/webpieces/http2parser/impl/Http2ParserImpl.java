@@ -1,5 +1,8 @@
 package com.webpieces.http2parser.impl;
 
+import com.twitter.hpack.Decoder;
+import com.twitter.hpack.Encoder;
+import com.twitter.hpack.HeaderListener;
 import com.webpieces.http2parser.api.*;
 import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.BufferPool;
@@ -7,6 +10,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -20,15 +26,15 @@ public class Http2ParserImpl implements Http2Parser {
         this.bufferPool = bufferPool;
 
         dtoToMarshaller.put(Http2Data.class, new DataMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Headers.class, new HeadersMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(Http2Headers.class, new HeadersMarshaller(bufferPool, dataGen, this));
         dtoToMarshaller.put(Http2Priority.class, new PriorityMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2RstStream.class, new RstStreamMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2Settings.class, new SettingsMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2PushPromise.class, new PushPromiseMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(Http2PushPromise.class, new PushPromiseMarshaller(bufferPool, dataGen, this));
         dtoToMarshaller.put(Http2Ping.class, new PingMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2GoAway.class, new GoAwayMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2WindowUpdate.class, new WindowUpdateMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Continuation.class, new ContinuationMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(Http2Continuation.class, new ContinuationMarshaller(bufferPool, dataGen, this));
     }
 
     public DataWrapper prepareToParse() {
@@ -175,4 +181,63 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
+    public DataWrapper createSerializedHeaders(LinkedList<HasHeaders.Header> headers) {
+        // TODO: get from settings
+        Encoder encoder = new Encoder(4096);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        for (HasHeaders.Header header : headers) {
+            try {
+                encoder.encodeHeader(
+                        out,
+                        header.header.getBytes(),
+                        header.value.getBytes(),
+                        false);
+            } catch (IOException e) {
+                // TODO: reraise appropriately
+            }
+        }
+        return dataGen.wrapByteArray(out.toByteArray());
+    }
+
+    public List<Http2Frame> createHeaderFrames(LinkedList<HasHeaders.Header> headers, Class<? extends HasHeaders> startingFrameType, int streamId) {
+        List<Http2Frame> headerFrames = new ArrayList<>();
+
+        // Only create one for now
+        try {
+            HasHeaders frame = startingFrameType.newInstance();
+            ((Http2Frame) frame).setStreamId(streamId);
+
+            frame.setHeaders(headers);
+            frame.setEndHeaders(true);
+            frame.setSerializedHeaders(createSerializedHeaders(headers));
+            headerFrames.add((Http2Frame) frame);
+            return headerFrames;
+        } catch (IllegalAccessException | InstantiationException e) {
+            // TODO: deal with exception
+            return null;
+        }
+    }
+
+    public LinkedList<HasHeaders.Header> deserializeHeaders(DataWrapper data) {
+        LinkedList<HasHeaders.Header> headers = new LinkedList<>();
+
+        byte[] bytes = data.createByteArray();
+        // TODO: get maxs from settings
+        Decoder decoder = new Decoder(4096, 4096);
+        HeaderListener listener = new HeaderListener() {
+            @Override
+            public void addHeader(byte[] name, byte[] value, boolean sensitive) {
+                headers.add(new HasHeaders.Header(new String(name).toLowerCase(), new String(value)));
+            }
+        };
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        try {
+            decoder.decode(in, listener);
+        } catch (IOException e) {
+            // TODO: reraise appropriately here
+        }
+        decoder.endHeaderBlock();
+        return headers;
+    }
 }

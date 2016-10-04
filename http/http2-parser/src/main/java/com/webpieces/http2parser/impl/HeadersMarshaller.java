@@ -1,6 +1,7 @@
 package com.webpieces.http2parser.impl;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Headers;
 import org.webpieces.data.api.BufferPool;
@@ -13,8 +14,11 @@ import java.util.Optional;
 
 public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
 
-    HeadersMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+    Http2Parser parser;
+
+    HeadersMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen, Http2Parser parser) {
         super(bufferPool, dataGen);
+        this.parser = parser;
     }
 
     public DataWrapper marshalPayload(Http2Frame frame) {
@@ -28,7 +32,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
 
         DataWrapper unpadded = dataGen.chainDataWrappers(
                 dataGen.wrapByteBuffer(prelude),
-                castFrame.getHeaderBlock().serialize());
+                castFrame.getSerializedHeaders());
         return castFrame.getPadding().padDataIfNeeded(unpadded);
     }
 
@@ -59,8 +63,8 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
             castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
             castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
             castFrame.setWeight(preludeBytes.get());
-
-            castFrame.getHeaderBlock().deserialize(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
+            castFrame.setSerializedHeaders(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
+            castFrame.setHeaders(parser.deserializeHeaders(castFrame.getSerializedHeaders()));
 
             bufferPool.releaseBuffer(preludeBytes);
         });

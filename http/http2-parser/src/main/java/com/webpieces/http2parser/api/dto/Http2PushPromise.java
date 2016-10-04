@@ -1,16 +1,13 @@
 package com.webpieces.http2parser.api.dto;
 
-import com.webpieces.http2parser.api.HeaderBlock;
-import com.webpieces.http2parser.api.HeaderBlockFactory;
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
 import org.webpieces.data.api.DataWrapper;
 
-import java.nio.ByteBuffer;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-public class Http2PushPromise extends Http2Frame {
+public class Http2PushPromise extends Http2Frame implements HasHeaders {
 
     public Http2FrameType getFrameType() {
         return Http2FrameType.PUSH_PROMISE;
@@ -31,8 +28,17 @@ public class Http2PushPromise extends Http2Frame {
     /* payload */
     // reserved - 1bit
     private int promisedStreamId = 0x0; //31bits
-    private HeaderBlock headerBlock = HeaderBlockFactory.createHeaderBlock();
+    private LinkedList<Header> headers;
+    private DataWrapper serializedHeaders;
     private Padding padding = PaddingFactory.createPadding();
+
+    public DataWrapper getSerializedHeaders() {
+        return serializedHeaders;
+    }
+
+    public void setSerializedHeaders(DataWrapper serializedHeaders) {
+        this.serializedHeaders = serializedHeaders;
+    }
 
     public void setPadding(byte[] padding) {
         this.padding.setPadding(padding);
@@ -50,18 +56,11 @@ public class Http2PushPromise extends Http2Frame {
         this.promisedStreamId = promisedStreamId & 0x7FFFFFFF;
     }
 
-    // Should reuse code in Http2HeadersImpl but multiple-inheritance is not possible?
-    public void setHeaders(Map<String, String> headers) {
-        headerBlock.setFromMap(headers);
+    public LinkedList<Header> getHeaders() {
+        return headers;
     }
 
-    public HeaderBlock getHeaderBlock() {
-        return headerBlock;
+    public void setHeaders(LinkedList<Header> headers) {
+        this.headers = headers;
     }
-
-    public Map<String, String> getHeaders() {
-        return headerBlock.getMap();
-    }
-
-
 }

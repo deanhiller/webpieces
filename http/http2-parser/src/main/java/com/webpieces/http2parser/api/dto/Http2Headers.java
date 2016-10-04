@@ -1,13 +1,13 @@
 package com.webpieces.http2parser.api.dto;
 
-import com.webpieces.http2parser.api.HeaderBlock;
-import com.webpieces.http2parser.api.HeaderBlockFactory;
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
+import org.webpieces.data.api.DataWrapper;
 
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
-public class Http2Headers extends Http2Frame {
+public class Http2Headers extends Http2Frame implements HasHeaders {
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
     }
@@ -43,8 +43,17 @@ public class Http2Headers extends Http2Frame {
     private boolean streamDependencyIsExclusive = false; //1 bit
     private int streamDependency = 0x0; //31 bits
     private byte weight = 0x0; //8 bits
-    private HeaderBlock headerBlock = HeaderBlockFactory.createHeaderBlock();
+    private LinkedList<Header> headers;
+    private DataWrapper serializedHeaders;
     private Padding padding = PaddingFactory.createPadding();
+
+    public DataWrapper getSerializedHeaders() {
+        return serializedHeaders;
+    }
+
+    public void setSerializedHeaders(DataWrapper serializedHeaders) {
+        this.serializedHeaders = serializedHeaders;
+    }
 
     public boolean isStreamDependencyIsExclusive() {
         return streamDependencyIsExclusive;
@@ -78,16 +87,11 @@ public class Http2Headers extends Http2Frame {
         return this.padding;
     }
 
-    public void setHeaders(Map<String, String> headers) {
-        headerBlock.setFromMap(headers);
+    public LinkedList<Header> getHeaders() {
+        return headers;
     }
 
-    public HeaderBlock getHeaderBlock() {
-        return headerBlock;
+    public void setHeaders(LinkedList<Header> headers) {
+        this.headers = headers;
     }
-
-    public Map<String, String> getHeaders() {
-        return headerBlock.getMap();
-    }
-
 }

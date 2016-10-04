@@ -1,5 +1,6 @@
 package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import org.webpieces.data.api.BufferPool;
@@ -11,8 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class PushPromiseMarshaller extends FrameMarshallerImpl {
-    PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+    Http2Parser parser;
+
+    PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen, Http2Parser parser) {
         super(bufferPool, dataGen);
+        this.parser = parser;
     }
 
     public DataWrapper marshalPayload(Http2Frame frame) {
@@ -22,7 +26,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
         prelude.putInt(castFrame.getPromisedStreamId());
         prelude.flip();
 
-        DataWrapper headersDW = castFrame.getHeaderBlock().serialize();
+        DataWrapper headersDW = castFrame.getSerializedHeaders();
         DataWrapper finalDW = dataGen.chainDataWrappers(
                 dataGen.wrapByteBuffer(prelude),
                 headersDW);
@@ -49,8 +53,8 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
             ByteBuffer prelude = bufferPool.createWithDataWrapper(split.get(0));
 
             castFrame.setPromisedStreamId(prelude.getInt());
-            castFrame.getHeaderBlock().deserialize(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
-
+            castFrame.setSerializedHeaders(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
+            castFrame.setHeaders(parser.deserializeHeaders(castFrame.getSerializedHeaders()));
             bufferPool.releaseBuffer(prelude);
         });
     }

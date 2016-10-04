@@ -1,11 +1,11 @@
 package com.webpieces.http2parser.api.dto;
 
-import com.webpieces.http2parser.api.HeaderBlock;
-import com.webpieces.http2parser.api.HeaderBlockFactory;
+import org.webpieces.data.api.DataWrapper;
 
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
-public class Http2Continuation extends Http2Frame {
+public class Http2Continuation extends Http2Frame implements HasHeaders {
 
     public Http2FrameType getFrameType() {
         return Http2FrameType.CONTINUATION;
@@ -22,20 +22,24 @@ public class Http2Continuation extends Http2Frame {
         this.endHeaders = endHeaders;
     }
 
-
     /* payload */
-    private HeaderBlock headerBlock = HeaderBlockFactory.createHeaderBlock();
+    private LinkedList<Header> headers;
+    private DataWrapper serializedHeaders;
 
-
-    public void setHeaders(Map<String, String> headers) {
-        headerBlock.setFromMap(headers);
+    public void setHeaders(LinkedList<Header> headers) {
+        this.headers = headers;
     }
 
-    public HeaderBlock getHeaderBlock() {
-        return headerBlock;
+    public LinkedList<Header> getHeaders() {
+        return headers;
     }
 
-    public Map<String, String> getHeaders() {
-        return headerBlock.getMap();
+    @Override
+    public DataWrapper getSerializedHeaders() {
+        return serializedHeaders;
+    }
+
+    public void setSerializedHeaders(DataWrapper serializedHeaders) {
+        this.serializedHeaders = serializedHeaders;
     }
 }
