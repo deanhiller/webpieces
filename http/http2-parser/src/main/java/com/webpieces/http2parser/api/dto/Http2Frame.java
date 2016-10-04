@@ -1,6 +1,5 @@
 package com.webpieces.http2parser.api.dto;
 
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
@@ -20,5 +19,12 @@ public abstract class Http2Frame {
 
     public int getStreamId() {
         return streamId;
+    }
+
+    @Override
+    public String toString() {
+        return "Http2Frame{" +
+                "streamId=" + streamId +
+                '}';
     }
 }

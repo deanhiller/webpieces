@@ -31,5 +31,11 @@ public class Http2Ping extends Http2Frame {
         this.opaqueData = opaqueData;
     }
 
-
+    @Override
+    public String toString() {
+        return "Http2Ping{" +
+                "isPingResponse=" + isPingResponse +
+                ", opaqueData=" + opaqueData +
+                "} " + super.toString();
+    }
 }

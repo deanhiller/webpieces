@@ -94,4 +94,19 @@ public class Http2Headers extends Http2Frame implements HasHeaders {
     public void setHeaders(LinkedList<Header> headers) {
         this.headers = headers;
     }
+
+    @Override
+    public String toString() {
+        return "Http2Headers{" +
+                "endStream=" + endStream +
+                ", endHeaders=" + endHeaders +
+                ", priority=" + priority +
+                ", streamDependencyIsExclusive=" + streamDependencyIsExclusive +
+                ", streamDependency=" + streamDependency +
+                ", weight=" + weight +
+                ", headers=" + headers +
+                ", serializedHeaders=" + serializedHeaders +
+                ", padding=" + padding +
+                "} " + super.toString();
+    }
 }

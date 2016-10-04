@@ -42,6 +42,12 @@ public class Http2GoAway extends Http2Frame {
         this.debugData = debugData;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Http2GoAway{" +
+                "lastStreamId=" + lastStreamId +
+                ", errorCode=" + errorCode +
+                ", debugData=" + debugData +
+                "} " + super.toString();
+    }
 }

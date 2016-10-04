@@ -77,7 +77,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
 
 	// start with streamId 3 because 1 might be used for the upgrade stream.
-	private int nextStreamId = 0x3;
+	private int nextStreamId = 0x1;
 
 	// TODO: figure out how to deal with the goaway. For now we're just
 	// going to record what they told us.
@@ -156,7 +156,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		Http2Settings settingsFrame = new Http2Settings();
 
 		settingsFrame.setSettings(localPreferredSettings);
-		log.info("sending settings");
+		log.info("sending settings: " + settingsFrame);
 		channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
 	}
 
@@ -210,6 +210,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				} else {
 					protocol = HTTP2;
 					dataListener.setProtocol(HTTP2);
+					getAndIncrementStreamId();
 					sendHttp2Preface();
 
 					return CompletableFuture.completedFuture(connected(addr));
@@ -323,7 +324,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
 			newFrame.setData(body);
 			newFrame.setEndStream(true);
-			log.info("sending final data frame");
+			log.info("sending final data frame: " + newFrame);
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
 					channel -> {
 						stream.setStatus(HALF_CLOSED_LOCAL);
@@ -333,7 +334,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else {
 			List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
 			newFrame.setData(split.get(0));
-			log.info("sending non-final data frame");
+			log.info("sending non-final data frame: " + newFrame);
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
 					channel ->  sendDataFrames(split.get(1), streamId, stream)
 			);
@@ -351,7 +352,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		// If it all fits into one frame
 		if(true) {
-			log.info("sending final header frame");
+			log.info("sending final header frame: " + frameList.get(0));
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList.get(0)).createByteArray())).thenApply(
 					channel ->
 					{
@@ -361,11 +362,18 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			);
 		} else {
 			// figure out how to split up the headermap into what can fit and what can't.
-			log.info("sending non-final header frame");
+			log.info("sending non-final header frame: " + frameList.get(0));
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList.get(0)).createByteArray())).thenCompose(
 					channel -> sendHeaderFrames(new LinkedList<>(), streamId, stream, false)
 			);
 		}
+	}
+
+	private synchronized int getAndIncrementStreamId() {
+		int thisStreamId = nextStreamId;
+		nextStreamId += 2;
+
+		return thisStreamId;
 	}
 
 	private void actuallySendRequest(HttpRequest request, ResponseListener listener) {
@@ -383,14 +391,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else { // HTTP2
 			// Create a stream
 			Stream newStream = new Stream();
+			int thisStreamId = getAndIncrementStreamId();
 
 			// Find a new Stream id
-			activeStreams.put(nextStreamId, newStream);
-			nextStreamId += 2;
-
+			activeStreams.put(thisStreamId, newStream);
 			LinkedList<HasHeaders.Header> headers = requestToHeaders(request);
-			sendHeaderFrames(headers, nextStreamId, newStream, true).thenApply(
-					channel -> sendDataFrames(request.getBodyNonNull(), nextStreamId, newStream));
+			sendHeaderFrames(headers, thisStreamId, newStream, true).thenApply(
+					channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
+
 			}
 	}
 	
@@ -500,7 +508,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 					// Set the stream status to closed after the final ES frame is sent back.
 					// we want to keep track somewhere of our window
-					log.info("sending endstream ack data frame");
+					log.info("sending endstream ack data frame: "  + sendFrame);
 					channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()))
 							.thenAccept(channel -> stream.setStatus(CLOSED));
 					break;
@@ -728,7 +736,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 				Http2Settings responseFrame = new Http2Settings();
 				responseFrame.setAck(true);
-				log.info("sending settings ack");
+				log.info("sending settings ack: " + responseFrame);
 				channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
 			}
 		}
@@ -745,7 +753,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			if(!frame.isPingResponse()) {
 				// Send the same frame back, setting ping response
 				frame.setIsPingResponse(true);
-				log.info("sending ping response");
+				log.info("sending ping response: " + frame);
 				channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
 			} else {
 				// measure latency from the ping that was sent. The opaqueData we sent is

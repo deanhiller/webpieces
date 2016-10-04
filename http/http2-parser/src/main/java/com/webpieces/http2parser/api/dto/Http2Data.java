@@ -41,4 +41,13 @@ public class Http2Data extends Http2Frame {
     public void setPadding(byte[] padding) {
         this.padding.setPadding(padding);
     }
+
+    @Override
+    public String toString() {
+        return "Http2Data{" +
+                "endStream=" + endStream +
+                ", data=" + data +
+                ", padding=" + padding +
+                "} " + super.toString();
+    }
 }

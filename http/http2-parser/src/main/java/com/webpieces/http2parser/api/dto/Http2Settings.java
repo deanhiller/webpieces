@@ -87,4 +87,12 @@ public class Http2Settings extends Http2Frame {
             return Collections.emptyMap();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Http2Settings{" +
+                "ack=" + ack +
+                ", settings=" + settings +
+                "} " + super.toString();
+    }
 }

@@ -63,4 +63,15 @@ public class Http2PushPromise extends Http2Frame implements HasHeaders {
     public void setHeaders(LinkedList<Header> headers) {
         this.headers = headers;
     }
+
+    @Override
+    public String toString() {
+        return "Http2PushPromise{" +
+                "endHeaders=" + endHeaders +
+                ", promisedStreamId=" + promisedStreamId +
+                ", headers=" + headers +
+                ", serializedHeaders=" + serializedHeaders +
+                ", padding=" + padding +
+                "} " + super.toString();
+    }
 }

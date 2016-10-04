@@ -27,4 +27,10 @@ public class Http2WindowUpdate extends Http2Frame {
         this.windowSizeIncrement = windowSizeIncrement & 0x7FFFFFFF;
     }
 
+    @Override
+    public String toString() {
+        return "Http2WindowUpdate{" +
+                "windowSizeIncrement=" + windowSizeIncrement +
+                "} " + super.toString();
+    }
 }

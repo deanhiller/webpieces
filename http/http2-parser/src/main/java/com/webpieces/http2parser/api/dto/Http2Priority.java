@@ -42,4 +42,12 @@ public class Http2Priority extends Http2Frame {
         this.weight = weight;
     }
 
+    @Override
+    public String toString() {
+        return "Http2Priority{" +
+                "streamDependencyIsExclusive=" + streamDependencyIsExclusive +
+                ", streamDependency=" + streamDependency +
+                ", weight=" + weight +
+                "} " + super.toString();
+    }
 }

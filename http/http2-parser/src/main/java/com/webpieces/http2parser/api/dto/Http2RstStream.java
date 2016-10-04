@@ -22,4 +22,10 @@ public class Http2RstStream extends Http2Frame {
         this.errorCode = errorCode;
     }
 
+    @Override
+    public String toString() {
+        return "Http2RstStream{" +
+                "errorCode=" + errorCode +
+                "} " + super.toString();
+    }
 }

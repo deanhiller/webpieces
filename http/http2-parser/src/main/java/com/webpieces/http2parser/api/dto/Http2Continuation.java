@@ -3,7 +3,6 @@ package com.webpieces.http2parser.api.dto;
 import org.webpieces.data.api.DataWrapper;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class Http2Continuation extends Http2Frame implements HasHeaders {
 
@@ -41,5 +40,14 @@ public class Http2Continuation extends Http2Frame implements HasHeaders {
 
     public void setSerializedHeaders(DataWrapper serializedHeaders) {
         this.serializedHeaders = serializedHeaders;
+    }
+
+    @Override
+    public String toString() {
+        return "Http2Continuation{" +
+                "endHeaders=" + endHeaders +
+                ", headers=" + headers +
+                ", serializedHeaders=" + serializedHeaders +
+                "} " + super.toString();
     }
 }
