@@ -133,4 +133,9 @@ public class TestHttp2Parser {
         Assert.assertTrue(frames.size() == 0);
         Assert.assertEquals(UtilsForTest.toHexString(result.getMoreData().createByteArray()), "");
     }
+
+    @Test
+    public void testCreateSerializedHeaders() {
+
+    }
 }

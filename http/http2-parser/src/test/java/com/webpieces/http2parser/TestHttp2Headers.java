@@ -4,9 +4,7 @@ import com.webpieces.http2parser.api.dto.HasHeaders;
 import com.webpieces.http2parser.api.dto.Http2Headers;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import static com.webpieces.http2parser.UtilsForTest.parser;
 
@@ -36,7 +34,7 @@ public class TestHttp2Headers {
     public void testCreateRequestHeadersFrame() {
         Http2Headers frame = new Http2Headers();
         frame.setHeaders(basicRequestHeaders);
-        frame.setSerializedHeaders(parser.createSerializedHeaders(basicRequestHeaders));
+        frame.setSerializedHeaders(parser.serializedHeaders(basicRequestHeaders));
         frame.setEndHeaders(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
@@ -47,7 +45,7 @@ public class TestHttp2Headers {
     public void testCreateResponseHeadersFrame() {
         Http2Headers frame = new Http2Headers();
         frame.setHeaders(basicResponseHeaders);
-        frame.setSerializedHeaders(parser.createSerializedHeaders(basicResponseHeaders));
+        frame.setSerializedHeaders(parser.serializedHeaders(basicResponseHeaders));
         frame.setEndHeaders(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 

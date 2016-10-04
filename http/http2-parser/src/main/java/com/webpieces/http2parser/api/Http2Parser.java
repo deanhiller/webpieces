@@ -20,7 +20,7 @@ public interface Http2Parser {
 
     ParserResult parse(DataWrapper oldData, DataWrapper newData);
 
-    DataWrapper createSerializedHeaders(LinkedList<HasHeaders.Header> headers);
+    DataWrapper serializedHeaders(LinkedList<HasHeaders.Header> headers);
     List<Http2Frame> createHeaderFrames(LinkedList<HasHeaders.Header> headers, Class<? extends HasHeaders> startingFrameType, int streamId);
     LinkedList<HasHeaders.Header> deserializeHeaders(DataWrapper headerPayload);
 }

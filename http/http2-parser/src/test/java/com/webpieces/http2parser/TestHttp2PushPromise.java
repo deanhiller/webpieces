@@ -4,9 +4,7 @@ import com.webpieces.http2parser.api.dto.HasHeaders;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import static com.webpieces.http2parser.UtilsForTest.parser;
 
@@ -24,7 +22,7 @@ public class TestHttp2PushPromise {
     public void testCreatePushPromiseFrame() {
         Http2PushPromise frame = new Http2PushPromise();
         frame.setHeaders(basicRequestHeaders);
-        frame.setSerializedHeaders(parser.createSerializedHeaders(basicRequestHeaders));
+        frame.setSerializedHeaders(parser.serializedHeaders(basicRequestHeaders));
         frame.setPromisedStreamId(5);
 
         String hexFrame = UtilsForTest.frameToHex(frame);

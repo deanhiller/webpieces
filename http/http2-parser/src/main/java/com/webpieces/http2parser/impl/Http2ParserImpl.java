@@ -181,7 +181,7 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
-    public DataWrapper createSerializedHeaders(LinkedList<HasHeaders.Header> headers) {
+    public DataWrapper serializedHeaders(LinkedList<HasHeaders.Header> headers) {
         // TODO: get from settings
         Encoder encoder = new Encoder(4096);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -210,7 +210,7 @@ public class Http2ParserImpl implements Http2Parser {
 
             frame.setHeaders(headers);
             frame.setEndHeaders(true);
-            frame.setSerializedHeaders(createSerializedHeaders(headers));
+            frame.setSerializedHeaders(serializedHeaders(headers));
             headerFrames.add((Http2Frame) frame);
             return headerFrames;
         } catch (IllegalAccessException | InstantiationException e) {
