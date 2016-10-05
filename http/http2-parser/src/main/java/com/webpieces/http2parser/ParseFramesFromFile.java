@@ -1,5 +1,6 @@
 package com.webpieces.http2parser;
 
+import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.ParserResult;
@@ -22,12 +23,14 @@ public class ParseFramesFromFile {
         ByteBuffer buf = ByteBuffer.allocate((int) aFile.length());
         Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
         DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+        Decoder decoder = new Decoder(4096, 4096);
 
         while (inChannel.read(buf) != -1) {
             buf.flip();
             buf.getInt();
-            ParserResult result = parser.parse(dataGen.wrapByteBuffer(buf.slice()), dataGen.emptyWrapper());
+            ParserResult result = parser.parse(dataGen.wrapByteBuffer(buf.slice()), dataGen.emptyWrapper(), decoder);
             List<Http2Frame> frames = result.getParsedFrames();
+            System.out.print(frames.toString());
             buf.clear();
         }
         inFile.close();

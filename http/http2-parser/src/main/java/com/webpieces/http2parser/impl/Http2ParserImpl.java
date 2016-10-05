@@ -18,9 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static com.webpieces.http2parser.api.dto.Http2FrameType.CONTINUATION;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.*;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -179,7 +177,7 @@ public class Http2ParserImpl implements Http2Parser {
         return data;
     }
 
-    public ParserResult parse(DataWrapper oldData, DataWrapper newData) {
+    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder) {
         DataWrapper wrapperToParse;
         List<Http2Frame> frames = new LinkedList<>();
         List<Http2Frame> hasHeaderFragmentList = new LinkedList<>();
@@ -233,7 +231,7 @@ public class Http2ParserImpl implements Http2Parser {
                             for(Http2Frame iterFrame: hasHeaderFragmentList) {
                                 allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, ((HasHeaderFragment) iterFrame).getHeaderFragment());
                             }
-                            ((HasHeaderList) firstFrame).setHeaderList(deserializeHeaders(allSerializedHeaders));
+                            ((HasHeaderList) firstFrame).setHeaderList(deserializeHeaders(allSerializedHeaders, decoder));
                             ((HasHeaderFragment) firstFrame).setEndHeaders(true); // fake setting end headers
                             frames.add(firstFrame);
 
@@ -250,17 +248,21 @@ public class Http2ParserImpl implements Http2Parser {
                         frames.add(frame);
                         wrapperToParse = split.get(1);
                         wrapperToReturn = wrapperToParse;
+                        // I don't think we need to do this because the ack won't be sent so the
+                        // other side shouldn't start sending frames under the new settings until
+                        // the ack is sent/received.
+//                        if(frameType == SETTINGS) {
+//                            // If we get a settings frame return immediately without parsing more frames,
+//                            // because it might affect the parsing of subsequent frames.
+//                            return new ParserResultImpl(frames, wrapperToReturn);
+//                        }
                     }
                 }
             }
         }
     }
 
-    public DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers) {
-        // TODO: get from settings
-        Encoder encoder = new Encoder(4096);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+    public DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers, Encoder encoder, ByteArrayOutputStream out) {
         for (HasHeaderFragment.Header header : headers) {
             try {
                 encoder.encodeHeader(
@@ -279,10 +281,12 @@ public class Http2ParserImpl implements Http2Parser {
             LinkedList<HasHeaderFragment.Header> headers,
             Http2FrameType startingFrameType,
             int streamId,
-            Map<Http2Settings.Parameter, Integer> remoteSettings) {
+            Map<Http2Settings.Parameter, Integer> remoteSettings,
+            Encoder encoder,
+            ByteArrayOutputStream out) {
         List<Http2Frame> headerFrames = new LinkedList<>();
 
-        DataWrapper serializedHeaders = serializeHeaders(headers);
+        DataWrapper serializedHeaders = serializeHeaders(headers, encoder, out);
         int maxFrameSize = remoteSettings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
         boolean firstFrame = true;
         boolean lastFrame = false;
@@ -328,12 +332,10 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
-    public LinkedList<HasHeaderFragment.Header> deserializeHeaders(DataWrapper data) {
+    public LinkedList<HasHeaderFragment.Header> deserializeHeaders(DataWrapper data, Decoder decoder) {
         LinkedList<HasHeaderFragment.Header> headers = new LinkedList<>();
 
         byte[] bytes = data.createByteArray();
-        // TODO: get maxs from settings
-        Decoder decoder = new Decoder(4096, 4096);
         HeaderListener listener = new HeaderListener() {
             @Override
             public void addHeader(byte[] name, byte[] value, boolean sensitive) {

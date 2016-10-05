@@ -1,11 +1,15 @@
 package com.webpieces.http2parser.api;
 
+import com.twitter.hpack.Decoder;
+import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.webpieces.data.api.DataWrapper;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +22,15 @@ public interface Http2Parser {
     DataWrapper marshal(Http2Frame frame);
     DataWrapper marshal(List<Http2Frame> frames);
 
-    ParserResult parse(DataWrapper oldData, DataWrapper newData);
+    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder);
 
-    DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers);
+    DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers, Encoder encoder, ByteArrayOutputStream out);
     List<Http2Frame> createHeaderFrames(LinkedList<HasHeaderFragment.Header> headers,
                                         Http2FrameType frameType,
                                         int streamId,
-                                        Map<Http2Settings.Parameter, Integer> remoteSettings);
+                                        Map<Http2Settings.Parameter, Integer> remoteSettings,
+                                        Encoder encoder,
+                                        ByteArrayOutputStream out);
 
-    LinkedList<HasHeaderFragment.Header> deserializeHeaders(DataWrapper headerPayload);
+    LinkedList<HasHeaderFragment.Header> deserializeHeaders(DataWrapper headerPayload, Decoder decoder);
 }

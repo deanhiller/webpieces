@@ -1,5 +1,6 @@
 package org.webpieces.httpclient.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,6 +13,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.net.ssl.SSLEngine;
 import javax.xml.bind.DatatypeConverter;
 
+import com.twitter.hpack.Decoder;
+import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
@@ -39,6 +42,7 @@ import org.webpieces.nio.api.handlers.RecordingDataListener;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.*;
+import static java.lang.Math.min;
 import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP11;
 import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP2;
 import static org.webpieces.httpclient.impl.Stream.StreamStatus.*;
@@ -80,6 +84,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	// start with streamId 3 because 1 might be used for the upgrade stream.
 	private int nextStreamId = 0x1;
 
+	private Encoder encoder;
+	private Decoder decoder;
+	private boolean maxHeaderTableSizeNeedsUpdate = false;
+	private int minimumMaxHeaderTableSizeUpdate = Integer.MAX_VALUE;
+
 	// TODO: figure out how to deal with the goaway. For now we're just
 	// going to record what they told us.
 	private boolean remoteGoneAway = false;
@@ -104,6 +113,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		this.http2Parser = http2Parser;
 		this.closeListener = listener;
 		this.dataListener = new ProxyDataListener();
+		this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE));
+		this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE));
 
 		// Initialize to defaults
 		remoteSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096);
@@ -347,8 +358,26 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	// we never send endstream on the header frame to make our life easier. we always just send
 	// endstream on a data frame.
 	private CompletableFuture<Channel> sendHeaderFrames(LinkedList<HasHeaderFragment.Header> headerList, int streamId, Stream stream) {
+
+		// If the header table size needs update, we pre-fill the buffer with the update notification
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			if (maxHeaderTableSizeNeedsUpdate) {
+				// If we need to update the max header table size
+				int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE);
+				if (minimumMaxHeaderTableSizeUpdate < newMaxHeaderTableSize) {
+					encoder.setMaxHeaderTableSize(out, minimumMaxHeaderTableSizeUpdate);
+				}
+				encoder.setMaxHeaderTableSize(out, newMaxHeaderTableSize);
+				minimumMaxHeaderTableSizeUpdate = Integer.MAX_VALUE;
+				maxHeaderTableSizeNeedsUpdate = false;
+			}
+		} catch (IOException e) {
+			// TODO: reraise appropriately
+		}
+
 		// if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
-		List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings);
+		List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
 
 		// Send all the frames at once
 		log.info("sending header frames: " + frameList);
@@ -672,6 +701,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
 					remoteSettings.put(entry.getKey(), entry.getValue());
 				}
+
+				// What do we do when certain settings are updated
+				if(frame.getSettings().containsKey(SETTINGS_HEADER_TABLE_SIZE)) {
+					maxHeaderTableSizeNeedsUpdate = true;
+					minimumMaxHeaderTableSizeUpdate = min(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE), minimumMaxHeaderTableSizeUpdate);
+				}
 				Http2Settings responseFrame = new Http2Settings();
 				responseFrame.setAck(true);
 				log.info("sending settings ack: " + responseFrame);
@@ -738,6 +773,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 			} else {
 				switch (frame.getFrameType()) {
+					case WINDOW_UPDATE:
+						handleWindowUpdate((Http2WindowUpdate) frame, null);
 					case SETTINGS:
 						handleSettings((Http2Settings) frame);
 						break;
@@ -756,7 +793,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper newData = wrapperGen.wrapByteBuffer(b);
-			ParserResult parserResult = http2Parser.parse(oldData, newData);
+			ParserResult parserResult = http2Parser.parse(oldData, newData, decoder);
 
 			for(Http2Frame frame: parserResult.getParsedFrames()) {
 				log.info("got frame="+frame);
