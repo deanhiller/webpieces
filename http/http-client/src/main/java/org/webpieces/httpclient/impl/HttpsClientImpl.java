@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import com.webpieces.http2parser.api.Http2Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.data.api.BufferPool;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
@@ -21,12 +20,14 @@ public class HttpsClientImpl implements HttpClient {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 	private ChannelManager mgr;
-	private BufferPool bufferPool;
+	private HttpParser httpParser;
+	private Http2Parser http2Parser;
 	private HttpsSslEngineFactory factory;
 
-	public HttpsClientImpl(ChannelManager mgr, BufferPool bufferPool, HttpsSslEngineFactory factory) {
+	public HttpsClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, HttpsSslEngineFactory factory) {
 		this.mgr = mgr;
-		this.bufferPool = bufferPool;
+		this.httpParser = httpParser;
+		this.http2Parser = http2Parser;
 		this.factory = factory;
 	}
 
@@ -63,7 +64,7 @@ public class HttpsClientImpl implements HttpClient {
 
 	@Override
 	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpSocketImpl(mgr, idForLogging, factory, bufferPool, listener);
+		return new HttpSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener);
 	}
 
 
