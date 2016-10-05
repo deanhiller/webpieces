@@ -628,6 +628,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					// throw appropriate error
 			}
 
+			if(frame.isPriority()) {
+                stream.setPriorityDetails(frame.getPriorityDetails());
+            }
+
 			if(frame.isEndHeaders()) {
 				// the parser has already accumulated the headers in the frame for us.
 				HttpResponse response = createResponseFromHeaders(frame.getHeaderList());
@@ -644,8 +648,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 
 		private void handlePriority(Http2Priority frame, Stream stream) {
-			// ignore priority for now. priority can be received in any state.
-
+            // Can be received in any state. We aren't doing anything with this right now.
+            stream.setPriorityDetails(frame.getPriorityDetails());
 		}
 
 		private void handleRstStream(Http2RstStream frame, Stream stream) {

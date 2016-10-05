@@ -1,53 +1,52 @@
 package com.webpieces.http2parser.api.dto;
 
-import org.webpieces.data.api.DataWrapper;
-
-import java.nio.ByteBuffer;
-
-public class Http2Priority extends Http2Frame {
+public class Http2Priority extends Http2Frame implements HasPriorityDetails {
     public Http2FrameType getFrameType() {
         return Http2FrameType.PRIORITY;
     }
 
     /* flags */
-    public void unmarshalFlags(byte flags) {
-    }
 
     /* payload */
-    private boolean streamDependencyIsExclusive = false; //1 bit
-    private int streamDependency = 0x0; //31 bits
-    private short weight = 0x0; //8
+    private PriorityDetails priorityDetails;
 
     public boolean isStreamDependencyIsExclusive() {
-        return streamDependencyIsExclusive;
+        return priorityDetails.streamDependencyIsExclusive;
     }
 
     public void setStreamDependencyIsExclusive(boolean streamDependencyIsExclusive) {
-        this.streamDependencyIsExclusive = streamDependencyIsExclusive;
+        this.priorityDetails.streamDependencyIsExclusive = streamDependencyIsExclusive;
     }
 
     public int getStreamDependency() {
-        return streamDependency;
+        return priorityDetails.streamDependency;
     }
 
     public void setStreamDependency(int streamDependency) {
-        this.streamDependency = streamDependency & 0x7FFFFFFF;
+        this.priorityDetails.streamDependency = streamDependency & 0x7FFFFFFF;
     }
 
     public short getWeight() {
-        return weight;
+        return priorityDetails.weight;
     }
 
     public void setWeight(short weight) {
-        this.weight = weight;
+        this.priorityDetails.weight = weight;
+    }
+
+    public PriorityDetails getPriorityDetails() {
+        return priorityDetails;
     }
 
     @Override
     public String toString() {
         return "Http2Priority{" +
-                "streamDependencyIsExclusive=" + streamDependencyIsExclusive +
-                ", streamDependency=" + streamDependency +
-                ", weight=" + weight +
+                "priorityDetails=" + priorityDetails +
                 "} " + super.toString();
     }
+
+    public void setPriorityDetails(PriorityDetails priorityDetails) {
+        this.priorityDetails = priorityDetails;
+    }
+
 }

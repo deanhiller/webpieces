@@ -6,7 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import java.util.LinkedList;
 
-public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHeaderList {
+public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
     }
@@ -38,10 +38,21 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
     }
     public void setPriority(boolean priority) { this.priority = priority; }
 
+    @Override
+    public String toString() {
+        return "Http2Headers{" +
+                "endStream=" + endStream +
+                ", endHeaders=" + endHeaders +
+                ", priority=" + priority +
+                ", priorityDetails=" + priorityDetails +
+                ", headerFragment=" + headerFragment +
+                ", headerList=" + headerList +
+                ", padding=" + padding +
+                "} " + super.toString();
+    }
+
     /* payload */
-    private boolean streamDependencyIsExclusive = false; //1 bit
-    private int streamDependency = 0x0; //31 bits
-    private short weight = 0x0; //8 bits
+    private PriorityDetails priorityDetails; /* optional */
     private DataWrapper headerFragment;
     private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();
@@ -63,44 +74,39 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
     }
 
     public boolean isStreamDependencyIsExclusive() {
-        return streamDependencyIsExclusive;
+        return priorityDetails.streamDependencyIsExclusive;
     }
 
     public void setStreamDependencyIsExclusive(boolean streamDependencyIsExclusive) {
-        this.streamDependencyIsExclusive = streamDependencyIsExclusive;
+        this.priorityDetails.streamDependencyIsExclusive = streamDependencyIsExclusive;
     }
 
     public int getStreamDependency() {
-        return streamDependency;
+        return priorityDetails.streamDependency;
     }
 
     public void setStreamDependency(int streamDependency) {
-        this.streamDependency = streamDependency & 0x7FFFFFFF;
+        this.priorityDetails.streamDependency = streamDependency & 0x7FFFFFFF;
     }
 
     public short getWeight() {
-        return weight;
+        return priorityDetails.weight;
     }
 
     public void setWeight(short weight) {
-        this.weight = weight;
+        this.priorityDetails.weight = weight;
+    }
+
+    public PriorityDetails getPriorityDetails() {
+        return priorityDetails;
+    }
+
+    public void setPriorityDetails(PriorityDetails priorityDetails) {
+        this.priorityDetails = priorityDetails;
     }
 
     public Padding getPadding() {
         return this.padding;
     }
 
-    @Override
-    public String toString() {
-        return "Http2Headers{" +
-                "endStream=" + endStream +
-                ", endHeaders=" + endHeaders +
-                ", priority=" + priority +
-                ", streamDependencyIsExclusive=" + streamDependencyIsExclusive +
-                ", streamDependency=" + streamDependency +
-                ", weight=" + weight +
-                ", serializeHeaders=" + headerFragment +
-                ", padding=" + padding +
-                "} " + super.toString();
-    }
 }

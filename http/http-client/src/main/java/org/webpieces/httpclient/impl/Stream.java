@@ -1,5 +1,6 @@
 package org.webpieces.httpclient.impl;
 
+import com.webpieces.http2parser.api.dto.HasPriorityDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.ResponseListener;
@@ -50,23 +51,26 @@ public class Stream {
     }
 
     private StreamStatus status = IDLE;
-    private int windowIncrement = 0;
-    private int priority = 0;
+    private HasPriorityDetails.PriorityDetails priorityDetails;
 
-    public int getWindowIncrement() {
-        return windowIncrement;
+    public HasPriorityDetails.PriorityDetails getPriorityDetails() {
+        return priorityDetails;
     }
 
-    public void setWindowIncrement(int windowIncrement) {
-        this.windowIncrement = windowIncrement;
+    public void setPriorityDetails(HasPriorityDetails.PriorityDetails priorityDetails) {
+        this.priorityDetails = priorityDetails;
     }
 
-    public int getPriority() {
-        return priority;
+    public boolean isStreamDependencyIsExclusive() {
+        return priorityDetails.isStreamDependencyIsExclusive();
     }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public int getStreamDependency() {
+        return priorityDetails.getStreamDependency();
+    }
+
+    public short getWeight() {
+        return priorityDetails.getWeight();
     }
 
     public StreamStatus getStatus() {
