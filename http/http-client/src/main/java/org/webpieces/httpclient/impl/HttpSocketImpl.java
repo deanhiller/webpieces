@@ -255,6 +255,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			PendingRequest req = pendingRequests.remove();
 			actuallySendRequest(req.getRequest(), req.getListener());
 		}
+
+		// Send a ping every 5 seconds
+		if(protocol == HTTP2) {
+            Timer timer = new Timer();
+            timer.schedule(new SendPing(), 0, 5000);
+        }
 		
 		return this;
 	}
@@ -416,6 +422,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		return thisStreamId;
 	}
+
+	private class SendPing extends TimerTask {
+        public void run() {
+            Http2Ping pingFrame = new Http2Ping();
+            pingFrame.setOpaqueData(System.nanoTime());
+            channel.write(ByteBuffer.wrap(http2Parser.marshal(pingFrame).createByteArray()));
+        }
+    }
 
 	private void actuallySendRequest(HttpRequest request, ResponseListener listener) {
 		ResponseListener l = new CatchResponseListener(listener);
@@ -768,7 +782,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				// measure latency from the ping that was sent. The opaqueData we sent is
 				// System.nanoTime() so we just measure the difference
 				long latency = System.nanoTime() - frame.getOpaqueData();
-				log.info("Ping: %ld ns", latency);
+				log.info("Ping: {} ms", latency * 1e-6);
 			}
 		}
 
