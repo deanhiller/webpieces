@@ -27,6 +27,10 @@ import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.exceptions.ClientError;
+import org.webpieces.httpclient.api.exceptions.GoAwayError;
+import org.webpieces.httpclient.api.exceptions.InternalError;
+import org.webpieces.httpclient.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -75,7 +79,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private boolean tryHttp2 = true;
 	private Map<Http2Settings.Parameter, Integer> localPreferredSettings = new HashMap<>();
 
-	// TODO: Initialize these two with the protocol defaults
 	private ConcurrentHashMap<Http2Settings.Parameter, Integer> remoteSettings = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<Http2Settings.Parameter, Integer> localSettings = new ConcurrentHashMap<>();
 
@@ -381,7 +384,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				maxHeaderTableSizeNeedsUpdate = false;
 			}
 		} catch (IOException e) {
-			// TODO: reraise appropriately
+            // TODO: Remove debugdata when not in developer mode
+			throw new InternalError(lastClosedServerStream(), wrapperGen.wrapByteArray(e.toString().getBytes()));
 		}
 
 		// if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
@@ -416,6 +420,20 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }).count();
     }
 
+    private int lastClosedServerStream() {
+        return activeStreams.entrySet()
+                .stream()
+                .filter(entry -> (entry.getValue().getStatus() == CLOSED) && (entry.getValue().getStreamId() % 2 == 0))
+                .max(Comparator.comparingInt(Map.Entry::getKey)).get().getKey();
+    }
+
+    private int lastClosedClientStream() {
+        return activeStreams.entrySet()
+                .stream()
+                .filter(entry -> (entry.getValue().getStatus() == CLOSED) && (entry.getValue().getStreamId() % 2 == 1))
+                .max(Comparator.comparingInt(Map.Entry::getKey)).get().getKey();
+    }
+
 	private synchronized int getAndIncrementStreamId() {
 		int thisStreamId = nextStreamId;
 		nextStreamId += 2;
@@ -447,8 +465,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
             // Check if we are allowed to create a new stream
             if(remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
                     countOpenClientStreams() >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
-                // TODO: throw here to tell the client that it has to wait
-                // or we could create a request queue that gets emptied...?
+                throw new ClientError("Max concurrent streams exceeded, please wait and try again.");
+                // TODO: create a request queue that gets emptied when there are open streams
             }
 			// Create a stream
 			Stream newStream = new Stream();
@@ -592,6 +610,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private HttpResponse createResponseFromHeaders(Queue<HasHeaderFragment.Header> headers) {
 			HttpResponse response = new HttpResponse();
 
+            // TODO: throw if special headers are not at the front
+
 			// Set special header
 			String statusString = null;
 			for(HasHeaderFragment.Header header: headers) {
@@ -600,12 +620,16 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					break;
 				}
 			}
-			// TODO: throw if no such header
+			if(statusString == null)
+			    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR);
 
 			HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 			HttpResponseStatus status = new HttpResponseStatus();
-			status.setCode(Integer.parseInt(statusString));
-			// TODO: throw if can't parse
+            try {
+                status.setCode(Integer.parseInt(statusString));
+            } catch(NumberFormatException e) {
+                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR);
+            }
 
 			statusLine.setStatus(status);
 			response.setStatusLine(statusLine);
@@ -627,11 +651,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			HttpRequest request = new HttpRequest();
 
 			// Set special headers
-			// TODO: throw if no such headers
+            // TODO: throw if special headers are not at the front
 			String method = headerMap.get(":method");
 			String scheme = headerMap.get(":scheme");
 			String authority = headerMap.get(":authority");
 			String path = headerMap.get(":path");
+            if(method == null || scheme == null || authority == null || path == null)
+                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR);
 
 			// See https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html#asterisk-form
 			if(method.toLowerCase().equals("options") && path.equals("*")) {
@@ -664,8 +690,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					break;
                 case RESERVED_REMOTE:
                     stream.setStatus(HALF_CLOSED_LOCAL);
+                    break;
 				default:
-					// throw appropriate error
+					throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 			}
 
 			if(frame.isPriority()) {
@@ -700,12 +727,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				case RESERVED_LOCAL:
 				case RESERVED_REMOTE:
 				case CLOSED:
-					// TODO: put the error code in the appropriate exception
-					stream.getListener().failure(new RuntimeException("blah"));
+					stream.getListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
 					stream.setStatus(CLOSED);
 					break;
 				default:
-					// throw the error here
+				    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 			}
 		}
 
@@ -714,7 +740,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			if(frame.isEndHeaders()) {
                 if(localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
                         countOpenServerStreams() >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
-                    // TODO: throw to return a REFUSED_STREAM
+                    throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, frame.getPromisedStreamId());
                 }
 				Stream promisedStream = new Stream();
 				int newStreamId = frame.getPromisedStreamId();
@@ -730,7 +756,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				promisedStream.setRequest(request);
 				promisedStream.setStatus(RESERVED_REMOTE);
 			} else {
-				// TODO: throw. this should not happen if the parser is working right
+				throw new InternalError(lastClosedServerStream(), wrapperGen.emptyWrapper());
 			}
 		}
 
@@ -788,13 +814,17 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		private void handleFrame(Http2Frame frame) {
 			if(frame.getFrameType() != SETTINGS && !gotSettings) {
-				// TODO: throw here, must get settings as the first frame from the server
+                throw new GoAwayError(lastClosedServerStream(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
 			}
 
 			// Transition the stream state
 			if(frame.getStreamId() != 0x0) {
 				Stream stream = activeStreams.get(frame.getStreamId());
-				// TODO: throw here if we don't have a record of this stream
+				// If the stream doesn't exist, create it
+                if(stream == null) {
+                    stream = new Stream();
+                    stream.setStreamId(frame.getStreamId());
+                }
 
 				switch (frame.getFrameType()) {
 					case DATA:
@@ -816,8 +846,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						handleWindowUpdate((Http2WindowUpdate) frame, stream);
 						break;
 					case CONTINUATION:
-						// TODO: throw. we should not get these if the parser is working right.
-						break;
+						throw new InternalError(lastClosedServerStream(), wrapperGen.emptyWrapper());
 					default:
 						// throw a protocol error
 				}
