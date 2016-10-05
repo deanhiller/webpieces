@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.webpieces.http2parser.UtilsForTest.parser;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
 
 public class TestHttp2Parser {
     private static String aBunchOfDataFrames =
@@ -171,9 +172,9 @@ public class TestHttp2Parser {
         Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
         // set a small max frame size for testing
         remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
-        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, HEADERS, 0x1, remoteSettings);
         Assert.assertEquals(headerFrames.size(), 2);
-        Assert.assertEquals(headerFrames.get(0).getFrameType(), Http2FrameType.HEADERS);
+        Assert.assertEquals(headerFrames.get(0).getFrameType(), HEADERS);
         Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
         Assert.assertEquals(headerFrames.get(0).getStreamId(), 0x1);
         Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
@@ -209,7 +210,7 @@ public class TestHttp2Parser {
         Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
         // set a small max frame size for testing
         remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
-        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings);
 
         Assert.assertEquals(headerFrames.size(), 2);
         DataWrapper serializedHeaderFrames = parser.marshal(headerFrames);
@@ -221,6 +222,9 @@ public class TestHttp2Parser {
 
         ParserResult result = parser.parse(combined, dataGen.emptyWrapper());
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
+        Http2Frame headerFrame = result.getParsedFrames().get(4);
+        Assert.assertEquals(headerFrame.getFrameType(), HEADERS);
+        Assert.assertEquals(((Http2Headers) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
     }
 
     @Test
