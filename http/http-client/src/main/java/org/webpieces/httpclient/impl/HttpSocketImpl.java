@@ -392,6 +392,24 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		);
 	}
 
+	private long countOpenServerStreams() {
+        return activeStreams.entrySet().stream().filter(entry -> {
+            Stream.StreamStatus status = entry.getValue().getStatus();
+            boolean open = (Arrays.asList(OPEN, HALF_CLOSED_LOCAL, HALF_CLOSED_REMOTE).contains(status));
+            boolean server = entry.getValue().getStreamId() % 2 == 0;
+            return open && server;
+        }).count();
+    }
+
+    private long countOpenClientStreams() {
+        return activeStreams.entrySet().stream().filter(entry -> {
+            Stream.StreamStatus status = entry.getValue().getStatus();
+            boolean open = (Arrays.asList(OPEN, HALF_CLOSED_LOCAL, HALF_CLOSED_REMOTE).contains(status));
+            boolean client = entry.getValue().getStreamId() % 2 == 1;
+            return open && client;
+        }).count();
+    }
+
 	private synchronized int getAndIncrementStreamId() {
 		int thisStreamId = nextStreamId;
 		nextStreamId += 2;
@@ -412,6 +430,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			CompletableFuture<Channel> write = channel.write(wrap);
 			write.exceptionally(e -> fail(l, e));
 		} else { // HTTP2
+            // Check if we are allowed to create a new stream
+            if(remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
+                    countOpenClientStreams() >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+                // TODO: throw here to tell the client that it has to wait
+                // or we could create a request queue that gets emptied...?
+            }
 			// Create a stream
 			Stream newStream = new Stream();
 
@@ -674,6 +698,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private void handlePushPromise(Http2PushPromise frame, Stream stream) {
 			// Can get this on any stream id, creates a new stream
 			if(frame.isEndHeaders()) {
+                if(localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
+                        countOpenServerStreams() >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+                    // TODO: throw to return a REFUSED_STREAM
+                }
 				Stream promisedStream = new Stream();
 				int newStreamId = frame.getPromisedStreamId();
                 promisedStream.setStreamId(newStreamId);
