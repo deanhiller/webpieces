@@ -38,7 +38,12 @@ public class IntegNgHttp2 {
         HttpSocket socket = client.openHttpSocket("oneTimer");
         socket
                 .connect(new InetSocketAddress(host, port))
-                .thenAccept(p -> socket.send(req, listener))
+                .thenAccept(p -> {
+                    // Send a bunch of requests
+                    for(int i = 0; i < 10; i++) {
+                        socket.send(req, listener);
+                    }
+                })
                 .exceptionally(e -> reportException(socket, e));
 
         Thread.sleep(100000);
