@@ -82,29 +82,45 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
-    // ignores what's left over at the end of the datawrapper
-    public Http2Frame unmarshal(DataWrapper data) {
+    private int getLength(DataWrapper data) {
         ByteBuffer headerByteBuffer = bufferPool.nextBuffer(9);
         headerByteBuffer.put(data.readBytesAt(0, 9));
         headerByteBuffer.flip();
 
-        int length = headerByteBuffer.getShort() << 8;
-        length |= headerByteBuffer.get();
+        // Get 4 bytes and just drop the rightmost one.
+        return headerByteBuffer.getInt() >>> 8;
+    }
 
-        byte frameTypeId = headerByteBuffer.get();
+    private byte getFrameTypeId(DataWrapper data) {
+        return data.readByteAt(3);
+    }
+
+    private byte getFlagsByte(DataWrapper data) {
+        return data.readByteAt(4);
+    }
+
+    private int getStreamId(DataWrapper data) {
+        ByteBuffer streamIdBuffer = bufferPool.nextBuffer(4);
+        streamIdBuffer.put(data.readBytesAt(5, 4));
+        streamIdBuffer.flip();
+
+        // Ignore the reserved bit
+        return streamIdBuffer.getInt() & 0x7FFFFFFF;
+    }
+
+    // ignores what's left over at the end of the datawrapper
+    public Http2Frame unmarshal(DataWrapper data) {
+        int length = getLength(data);
+        byte frameTypeId = getFrameTypeId(data);
+        byte flagsByte = getFlagsByte(data);
+        int streamId = getStreamId(data);
 
         Class<? extends Http2Frame> frameClass = getFrameClassForType(Http2FrameType.fromId(frameTypeId));
         try {
             Http2Frame frame = frameClass.newInstance();
             FrameMarshaller marshaller = dtoToMarshaller.get(frameClass);
 
-            byte flagsByte = headerByteBuffer.get();
-
-            // Ignore the reserved bit
-            int streamId = headerByteBuffer.getInt();
             frame.setStreamId(streamId);
-            bufferPool.releaseBuffer(headerByteBuffer);
-
             Optional<DataWrapper> maybePayload;
 
             if (length > 0) {
@@ -180,12 +196,12 @@ public class Http2ParserImpl implements Http2Parser {
         // Loop until a return (ack)
         while (true) {
             int lengthOfData = wrapperToParse.getReadableSize();
-            if (lengthOfData <= 3) {
-                // Not even a length
+            if (lengthOfData <= 9) {
+                // Not even a frame header
                 return new ParserResultImpl(frames, wrapperToReturn);
             } else {
-                // peek for length
-                int length = peekLengthOfFrame(wrapperToParse);
+                // peek for length, add 9 bytes for the header
+                int length = getLength(wrapperToParse) + 9;
                 if (lengthOfData < length) {
                     // not a whole frame
                     return new ParserResultImpl(frames, wrapperToReturn);
