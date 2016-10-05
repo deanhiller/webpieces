@@ -414,9 +414,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		} else { // HTTP2
 			// Create a stream
 			Stream newStream = new Stream();
-			int thisStreamId = getAndIncrementStreamId();
 
-			// Find a new Stream id
+            // Find a new Stream id
+            int thisStreamId = getAndIncrementStreamId();
+            newStream.setListener(listener);
+            newStream.setStreamId(thisStreamId);
+            newStream.setRequest(request);
+
 			activeStreams.put(thisStreamId, newStream);
 			LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
 			sendHeaderFrames(headers, thisStreamId, newStream).thenApply(
@@ -522,18 +526,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			// Make sure status can accept ES
 			switch(stream.getStatus()) {
 				case OPEN:
+				    stream.setStatus(HALF_CLOSED_REMOTE);
+                    break;
 				case HALF_CLOSED_LOCAL:
-					stream.setStatus(HALF_CLOSED_REMOTE);
-
-					// Now send ES back
-					Http2Data sendFrame = new Http2Data();
-					sendFrame.setEndStream(true);
-
-					// Set the stream status to closed after the final ES frame is sent back.
-					// we want to keep track somewhere of our window
-					log.info("sending endstream ack data frame: "  + sendFrame);
-					channel.write(ByteBuffer.wrap(http2Parser.marshal(sendFrame).createByteArray()))
-							.thenAccept(channel -> stream.setStatus(CLOSED));
+					stream.setStatus(CLOSED);
 					break;
 				default:
 					// throw error here
@@ -605,7 +601,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			}
 
 			HttpRequestLine requestLine = new HttpRequestLine();
-			requestLine.setUri(new HttpUri(String.format("{}://{}{}", scheme, authority, path)));
+			requestLine.setUri(new HttpUri(String.format("%s://%s%s", scheme, authority, path)));
 			requestLine.setMethod(new HttpRequestMethod(method));
 			request.setRequestLine(requestLine);
 
@@ -623,7 +619,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private void handleHeaders(Http2Headers frame, Stream stream) {
 			switch (stream.getStatus()) {
 				case IDLE:
+                case HALF_CLOSED_LOCAL:
+                    stream.setStatus(OPEN);
 					break;
+                case RESERVED_REMOTE:
+                    stream.setStatus(HALF_CLOSED_LOCAL);
 				default:
 					// throw appropriate error
 			}
@@ -632,7 +632,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				// the parser has already accumulated the headers in the frame for us.
 				HttpResponse response = createResponseFromHeaders(frame.getHeaderList());
 				stream.setResponse(response);
-				stream.setStatus(OPEN);
 
 				boolean isComplete = frame.isEndStream();
 				if (isComplete)
@@ -671,6 +670,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			if(frame.isEndHeaders()) {
 				Stream promisedStream = new Stream();
 				int newStreamId = frame.getPromisedStreamId();
+                promisedStream.setStreamId(newStreamId);
 
 				// TODO: make sure streamid is valid
 				// TODO: close all lower numbered even IDLE streams
@@ -687,8 +687,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		}
 
 		private void handleWindowUpdate(Http2WindowUpdate frame, Stream stream) {
-			// can get this on any stream id
-			stream.setWindowIncrement(frame.getWindowSizeIncrement());
+			// can get this on any stream id, or with no stream
+			//stream.setWindowIncrement(frame.getWindowSizeIncrement());
 		}
 
 		private void handleSettings(Http2Settings frame) {
@@ -801,6 +801,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				log.info("got frame="+frame);
 				handleFrame(frame);
 			}
+			oldData = parserResult.getMoreData();
 		}
 
 		@Override
