@@ -113,8 +113,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		this.http2Parser = http2Parser;
 		this.closeListener = listener;
 		this.dataListener = new ProxyDataListener();
-		this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE));
-		this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE));
 
 		// Initialize to defaults
 		remoteSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096);
