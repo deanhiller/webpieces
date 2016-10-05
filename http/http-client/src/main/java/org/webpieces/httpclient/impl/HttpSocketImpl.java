@@ -132,6 +132,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		localSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384);
 
 		// No limit for MAX_HEADER_LIST_SIZE by default, so not in the map
+
+        this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE));
+        this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE));
 	}
 
 	@Override
