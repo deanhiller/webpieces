@@ -29,7 +29,7 @@ public class PriorityMarshaller implements FrameMarshaller {
         ByteBuffer payload = bufferPool.nextBuffer(5);
         payload.putInt(castFrame.getStreamDependency());
         if (castFrame.isStreamDependencyIsExclusive()) payload.put(0, (byte) (payload.get(0) | 0x80));
-        payload.put(castFrame.getWeight());
+        payload.put((byte) (castFrame.getWeight() & 0xFF));
         payload.flip();
 
         return dataGen.wrapByteBuffer(payload);
@@ -45,7 +45,7 @@ public class PriorityMarshaller implements FrameMarshaller {
             int firstInt = payloadByteBuffer.getInt();
             castFrame.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
             castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
-            castFrame.setWeight(payloadByteBuffer.get());
+            castFrame.setWeight((short) (payloadByteBuffer.get() & 0xFF));
 
             bufferPool.releaseBuffer(payloadByteBuffer);
         });

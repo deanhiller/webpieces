@@ -41,7 +41,7 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
     /* payload */
     private boolean streamDependencyIsExclusive = false; //1 bit
     private int streamDependency = 0x0; //31 bits
-    private byte weight = 0x0; //8 bits
+    private short weight = 0x0; //8 bits
     private DataWrapper headerFragment;
     private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();
@@ -78,16 +78,12 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
         this.streamDependency = streamDependency & 0x7FFFFFFF;
     }
 
-    public byte getWeight() {
+    public short getWeight() {
         return weight;
     }
 
-    public void setWeight(byte weight) {
+    public void setWeight(short weight) {
         this.weight = weight;
-    }
-
-    public void setPadding(byte[] padding) {
-        this.padding.setPadding(padding);
     }
 
     public Padding getPadding() {

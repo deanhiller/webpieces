@@ -27,7 +27,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         ByteBuffer prelude = bufferPool.nextBuffer(5);
         prelude.putInt(castFrame.getStreamDependency());
         if (castFrame.isStreamDependencyIsExclusive()) prelude.put(0, (byte) (prelude.get(0) | 0x80));
-        prelude.put(castFrame.getWeight());
+        prelude.put((byte) (castFrame.getWeight() & 0xFF));
         prelude.flip();
 
         DataWrapper unpadded = dataGen.chainDataWrappers(
@@ -62,7 +62,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
             int firstInt = preludeBytes.getInt();
             castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
             castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
-            castFrame.setWeight(preludeBytes.get());
+            castFrame.setWeight((short) (preludeBytes.get() & 0xFF));
             castFrame.setHeaderFragment(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
 
             bufferPool.releaseBuffer(preludeBytes);

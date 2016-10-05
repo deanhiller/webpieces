@@ -40,7 +40,7 @@ public class PaddingImpl implements Padding {
     @Override
     public DataWrapper extractPayloadAndSetPaddingIfNeeded(DataWrapper data) {
         if(isPadded()) {
-            byte padLength = data.readByteAt(0);
+            short padLength = (short) (data.readByteAt(0) & 0xFF);
             List<? extends DataWrapper> split1 = dataGen.split(data, 1);
             List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), split1.get(1).getReadableSize() - padLength);
             setPadding(split2.get(1).createByteArray());

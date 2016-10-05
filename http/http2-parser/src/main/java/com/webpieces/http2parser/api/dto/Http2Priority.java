@@ -16,7 +16,7 @@ public class Http2Priority extends Http2Frame {
     /* payload */
     private boolean streamDependencyIsExclusive = false; //1 bit
     private int streamDependency = 0x0; //31 bits
-    private byte weight = 0x0; //8
+    private short weight = 0x0; //8
 
     public boolean isStreamDependencyIsExclusive() {
         return streamDependencyIsExclusive;
@@ -34,11 +34,11 @@ public class Http2Priority extends Http2Frame {
         this.streamDependency = streamDependency & 0x7FFFFFFF;
     }
 
-    public byte getWeight() {
+    public short getWeight() {
         return weight;
     }
 
-    public void setWeight(byte weight) {
+    public void setWeight(short weight) {
         this.weight = weight;
     }
 
