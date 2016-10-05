@@ -619,8 +619,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		private void handleHeaders(Http2Headers frame, Stream stream) {
 			switch (stream.getStatus()) {
 				case IDLE:
-                case HALF_CLOSED_LOCAL:
                     stream.setStatus(OPEN);
+                    break;
+                case HALF_CLOSED_LOCAL:
+                    // No status change in this case
 					break;
                 case RESERVED_REMOTE:
                     stream.setStatus(HALF_CLOSED_LOCAL);
