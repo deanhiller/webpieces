@@ -61,17 +61,31 @@ public class TestHttp2Parser {
 
     private static LinkedList<HasHeaderFragment.Header> basicRequestHeaders = new LinkedList<>();
     private static LinkedList<HasHeaderFragment.Header> basicResponseHeaders = new LinkedList<>();
+    private static LinkedList<HasHeaderFragment.Header> ngHttp2ExampleHeaders = new LinkedList<>();
 
     private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
 
     // https://github.com/http2jp/hpack-test-case/blob/master/nghttp2/story_00.json
     private static String basicRequestSerializationNghttp2 = "82864188f439ce75c875fa5784";
+
+    private static String ngHttp2ExampleHeaderFragment =
+            "82 84 86 41 88 aa 69 d2 9a c4 b9 ec 9b 53 03 2a 2f" +
+            "2a 90 7a 8a aa 69 d2 9a c4 c0 57 0b 6b 83";
     static {
         basicRequestHeaders.add(new HasHeaderFragment.Header(":method", "GET"));
         basicRequestHeaders.add(new HasHeaderFragment.Header(":scheme", "http"));
         basicRequestHeaders.add(new HasHeaderFragment.Header(":authority", "yahoo.co.jp"));
         basicRequestHeaders.add(new HasHeaderFragment.Header(":path", "/"));
+
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":method", "GET"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":path", "/"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":scheme", "http"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":authority", "/"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header("accept", "*/*"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header("accept-encoding", "gzip, deflate"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header("user-agent", "nghttp2/1.15.0"));
+
 
         basicResponseHeaders.add(new HasHeaderFragment.Header(":status", "200"));
         basicResponseHeaders.add(new HasHeaderFragment.Header("date", "Tue, 27 Sep 2016 19:41:50 GMT"));
@@ -244,6 +258,14 @@ public class TestHttp2Parser {
 
     @Test
     public void testSerializeHeaders() {
+
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        DataWrapper serializedExample = parser.serializeHeaders(ngHttp2ExampleHeaders, encoder, out2);
+        String serializedExampleHex = UtilsForTest.toHexString(serializedExample.createByteArray());
+        Assert.assertArrayEquals(
+                UtilsForTest.toByteArray(serializedExampleHex),
+                UtilsForTest.toByteArray(ngHttp2ExampleHeaderFragment));
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         DataWrapper serialized = parser.serializeHeaders(basicRequestHeaders, encoder, out);
@@ -252,11 +274,18 @@ public class TestHttp2Parser {
                 UtilsForTest.toByteArray(serializedHex),
                 UtilsForTest.toByteArray(basicRequestSerializationNghttp2)
         );
+
     }
 
     @Test
     public void testDeserializeHeaders() {
-        List<HasHeaderFragment.Header> headers = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(basicRequestSerializationNghttp2), decoder);
-        Assert.assertEquals(headers, basicRequestHeaders);
+        List<HasHeaderFragment.Header> headers = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(ngHttp2ExampleHeaderFragment), decoder);
+        Assert.assertEquals(headers, ngHttp2ExampleHeaders);
+
+        List<HasHeaderFragment.Header> headers2 = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(basicRequestSerializationNghttp2), decoder);
+        Assert.assertEquals(headers2, basicRequestHeaders);
+
+
     }
+
 }

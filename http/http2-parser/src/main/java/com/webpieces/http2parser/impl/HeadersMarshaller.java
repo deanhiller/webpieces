@@ -23,15 +23,21 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
 
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Headers castFrame = (Http2Headers) frame;
-
-        ByteBuffer prelude = bufferPool.nextBuffer(5);
-        prelude.putInt(castFrame.getStreamDependency());
-        if (castFrame.isStreamDependencyIsExclusive()) prelude.put(0, (byte) (prelude.get(0) | 0x80));
-        prelude.put((byte) (castFrame.getWeight() & 0xFF));
-        prelude.flip();
+        DataWrapper preludeDW;
+        if(castFrame.isPriority()) {
+            ByteBuffer prelude = bufferPool.nextBuffer(5);
+            prelude.putInt(castFrame.getStreamDependency());
+            if (castFrame.isStreamDependencyIsExclusive()) prelude.put(0, (byte) (prelude.get(0) | 0x80));
+            prelude.put((byte) (castFrame.getWeight() & 0xFF));
+            prelude.flip();
+            preludeDW = dataGen.wrapByteBuffer(prelude);
+        }
+        else {
+            preludeDW = dataGen.emptyWrapper();
+        }
 
         DataWrapper unpadded = dataGen.chainDataWrappers(
-                dataGen.wrapByteBuffer(prelude),
+                preludeDW,
                 castFrame.getHeaderFragment());
         return castFrame.getPadding().padDataIfNeeded(unpadded);
     }
@@ -56,16 +62,22 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         castFrame.setPriority((flagsByte & 0x20) == 0x20);
 
         maybePayload.ifPresent(payload -> {
-            List<? extends DataWrapper> split = dataGen.split(payload, 5);
-            ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
+            DataWrapper paddingStripped = castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(payload);
 
-            int firstInt = preludeBytes.getInt();
-            castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
-            castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
-            castFrame.setWeight((short) (preludeBytes.get() & 0xFF));
-            castFrame.setHeaderFragment(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
+            if(castFrame.isPriority()) {
+                List<? extends DataWrapper> split = dataGen.split(paddingStripped, 5);
+                ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
 
-            bufferPool.releaseBuffer(preludeBytes);
+                int firstInt = preludeBytes.getInt();
+                castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
+                castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
+                castFrame.setWeight((short) (preludeBytes.get() & 0xFF));
+                castFrame.setHeaderFragment(split.get(1));
+                bufferPool.releaseBuffer(preludeBytes);
+            } else {
+                castFrame.setHeaderFragment(paddingStripped);
+            }
+
         });
     }
 }

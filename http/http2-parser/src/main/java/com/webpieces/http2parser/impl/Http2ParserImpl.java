@@ -11,6 +11,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.crypto.Data;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -147,7 +148,6 @@ public class Http2ParserImpl implements Http2Parser {
 
     public DataWrapper marshal(Http2Frame frame) {
         FrameMarshaller marshaller = dtoToMarshaller.get(frame.getClass());
-        // Look in ObjectTranslator for classtoMarshaller examples, use bufferPools
 
         if(marshaller == null)
             return null; //throw here
@@ -287,6 +287,7 @@ public class Http2ParserImpl implements Http2Parser {
         List<Http2Frame> headerFrames = new LinkedList<>();
 
         DataWrapper serializedHeaders = serializeHeaders(headers, encoder, out);
+        String hex = DatatypeConverter.printHexBinary(serializedHeaders.createByteArray());
         int maxFrameSize = remoteSettings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
         boolean firstFrame = true;
         boolean lastFrame = false;

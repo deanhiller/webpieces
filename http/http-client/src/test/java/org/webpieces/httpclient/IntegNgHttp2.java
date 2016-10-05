@@ -92,9 +92,9 @@ public class IntegNgHttp2 {
 
         HttpRequest req = new HttpRequest();
         req.setRequestLine(requestLine);
-        req.addHeader(new Header(KnownHeaderName.HOST, host));
         req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
-        req.addHeader(new Header(KnownHeaderName.USER_AGENT, "webpieces/0.9"));
+        req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
+        req.addHeader(new Header(KnownHeaderName.USER_AGENT, "nghttp2/1.15.0"));
         return req;
     }
 }

@@ -283,15 +283,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		LinkedList<HasHeaderFragment.Header> headerList = new LinkedList<>();
 
-		// Add regular headers
-		for(Header header: requestHeaders) {
-			headerList.add(new HasHeaderFragment.Header(header.getName().toLowerCase(), header.getValue()));
-		}
 
 		// add special headers
 		headerList.add(new HasHeaderFragment.Header(":method", requestLine.getMethod().getMethodAsString()));
 
 		UrlInfo urlInfo = requestLine.getUri().getUriBreakdown();
+        headerList.add(new HasHeaderFragment.Header(":path", urlInfo.getFullPath()));
 
 		// Figure out scheme
 		if(urlInfo.getPrefix() != null) {
@@ -324,7 +321,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				headerList.add(new HasHeaderFragment.Header(":authority", addr.getHostName() + ":" + addr.getPort()));
 			}
 		}
-		headerList.add(new HasHeaderFragment.Header(":path", urlInfo.getFullPath()));
+
+        // Add regular headers
+        for(Header header: requestHeaders) {
+            headerList.add(new HasHeaderFragment.Header(header.getName().toLowerCase(), header.getValue()));
+        }
 
 		return headerList;
 	}
