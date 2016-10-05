@@ -33,6 +33,10 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.HttpVersion;
 
+import javax.inject.Singleton;
+
+// We only need one parser because we have no per-connection state.
+@Singleton
 public class HttpParserImpl implements HttpParser {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpParserImpl.class);

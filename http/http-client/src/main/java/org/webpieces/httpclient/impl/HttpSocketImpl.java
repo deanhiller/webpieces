@@ -13,10 +13,12 @@ import javax.net.ssl.SSLEngine;
 import javax.xml.bind.DatatypeConverter;
 
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -25,6 +27,7 @@ import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -94,14 +97,16 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 
 
-	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser parser2,
-						  Http2Parser http2Parser,
-			CloseListener listener) {
+	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, BufferPool bufferPool,
+						  CloseListener listener) {
 		this.factory = factory;
 		this.mgr = mgr;
 		this.idForLogging = idForLogging;
-		this.httpParser = parser2;
-		this.http2Parser = http2Parser;
+
+		// We want a new HTTP2 parser per socket because of the HPACK encoder/decoder state.
+		this.httpParser = HttpParserFactory.createParser(bufferPool);
+		this.http2Parser = Http2ParserFactory.createParser(bufferPool);
+
 		this.closeListener = listener;
 		this.dataListener = new ProxyDataListener();
 
