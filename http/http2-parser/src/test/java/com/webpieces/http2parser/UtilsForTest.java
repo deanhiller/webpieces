@@ -38,8 +38,7 @@ public class UtilsForTest {
     }
 
     public static Http2Frame frameFromHex(String frameHex) {
-        ParserResult result = parser.parse(dataWrapperFromHex(frameHex), dataGen.emptyWrapper());
-        return result.getParsedFrames().get(0);
+        return parser.unmarshal(dataWrapperFromHex(frameHex));
     }
 
     public static DataWrapper frameToDataWrapper(Http2Frame frame) {

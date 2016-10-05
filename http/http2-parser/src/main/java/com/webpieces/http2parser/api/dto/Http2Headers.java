@@ -5,9 +5,8 @@ import com.webpieces.http2parser.api.PaddingFactory;
 import org.webpieces.data.api.DataWrapper;
 
 import java.util.LinkedList;
-import java.util.List;
 
-public class Http2Headers extends Http2Frame implements HasHeaders {
+public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHeaderList {
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
     }
@@ -43,16 +42,24 @@ public class Http2Headers extends Http2Frame implements HasHeaders {
     private boolean streamDependencyIsExclusive = false; //1 bit
     private int streamDependency = 0x0; //31 bits
     private byte weight = 0x0; //8 bits
-    private LinkedList<Header> headers;
-    private DataWrapper serializedHeaders;
+    private DataWrapper headerFragment;
+    private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();
 
-    public DataWrapper getSerializedHeaders() {
-        return serializedHeaders;
+    public LinkedList<Header> getHeaderList() {
+        return headerList;
     }
 
-    public void setSerializedHeaders(DataWrapper serializedHeaders) {
-        this.serializedHeaders = serializedHeaders;
+    public void setHeaderList(LinkedList<Header> headerList) {
+        this.headerList = headerList;
+    }
+
+    public DataWrapper getHeaderFragment() {
+        return headerFragment;
+    }
+
+    public void setHeaderFragment(DataWrapper serializedHeaders) {
+        this.headerFragment = serializedHeaders;
     }
 
     public boolean isStreamDependencyIsExclusive() {
@@ -87,14 +94,6 @@ public class Http2Headers extends Http2Frame implements HasHeaders {
         return this.padding;
     }
 
-    public LinkedList<Header> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(LinkedList<Header> headers) {
-        this.headers = headers;
-    }
-
     @Override
     public String toString() {
         return "Http2Headers{" +
@@ -104,8 +103,7 @@ public class Http2Headers extends Http2Frame implements HasHeaders {
                 ", streamDependencyIsExclusive=" + streamDependencyIsExclusive +
                 ", streamDependency=" + streamDependency +
                 ", weight=" + weight +
-                ", headers=" + headers +
-                ", serializedHeaders=" + serializedHeaders +
+                ", serializeHeaders=" + headerFragment +
                 ", padding=" + padding +
                 "} " + super.toString();
     }

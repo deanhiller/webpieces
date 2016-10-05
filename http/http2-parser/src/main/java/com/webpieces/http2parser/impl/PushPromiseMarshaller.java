@@ -26,7 +26,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
         prelude.putInt(castFrame.getPromisedStreamId());
         prelude.flip();
 
-        DataWrapper headersDW = castFrame.getSerializedHeaders();
+        DataWrapper headersDW = castFrame.getHeaderFragment();
         DataWrapper finalDW = dataGen.chainDataWrappers(
                 dataGen.wrapByteBuffer(prelude),
                 headersDW);
@@ -53,8 +53,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
             ByteBuffer prelude = bufferPool.createWithDataWrapper(split.get(0));
 
             castFrame.setPromisedStreamId(prelude.getInt());
-            castFrame.setSerializedHeaders(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
-            castFrame.setHeaders(parser.deserializeHeaders(castFrame.getSerializedHeaders()));
+            castFrame.setHeaderFragment(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
             bufferPool.releaseBuffer(prelude);
         });
     }

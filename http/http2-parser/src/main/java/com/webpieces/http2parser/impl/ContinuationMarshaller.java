@@ -7,7 +7,6 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import javax.xml.crypto.Data;
 import java.util.Optional;
 
 public class ContinuationMarshaller extends FrameMarshallerImpl {
@@ -28,7 +27,7 @@ public class ContinuationMarshaller extends FrameMarshallerImpl {
 
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Continuation castFrame = (Http2Continuation) frame;
-        return castFrame.getSerializedHeaders();
+        return castFrame.getHeaderFragment();
     }
 
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
@@ -38,8 +37,7 @@ public class ContinuationMarshaller extends FrameMarshallerImpl {
 
         maybePayload.ifPresent(payload ->
         {
-            castFrame.setSerializedHeaders(payload);
-            castFrame.setHeaders(parser.deserializeHeaders(castFrame.getSerializedHeaders()));
+            castFrame.setHeaderFragment(payload);
         });
     }
 

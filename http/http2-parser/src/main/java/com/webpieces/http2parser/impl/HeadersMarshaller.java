@@ -32,7 +32,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
 
         DataWrapper unpadded = dataGen.chainDataWrappers(
                 dataGen.wrapByteBuffer(prelude),
-                castFrame.getSerializedHeaders());
+                castFrame.getHeaderFragment());
         return castFrame.getPadding().padDataIfNeeded(unpadded);
     }
 
@@ -63,8 +63,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
             castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
             castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
             castFrame.setWeight(preludeBytes.get());
-            castFrame.setSerializedHeaders(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
-            castFrame.setHeaders(parser.deserializeHeaders(castFrame.getSerializedHeaders()));
+            castFrame.setHeaderFragment(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
 
             bufferPool.releaseBuffer(preludeBytes);
         });

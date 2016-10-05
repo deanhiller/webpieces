@@ -2,9 +2,7 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.LinkedList;
-
-public class Http2Continuation extends Http2Frame implements HasHeaders {
+public class Http2Continuation extends Http2Frame implements HasHeaderFragment {
 
     public Http2FrameType getFrameType() {
         return Http2FrameType.CONTINUATION;
@@ -22,32 +20,22 @@ public class Http2Continuation extends Http2Frame implements HasHeaders {
     }
 
     /* payload */
-    private LinkedList<Header> headers;
-    private DataWrapper serializedHeaders;
-
-    public void setHeaders(LinkedList<Header> headers) {
-        this.headers = headers;
-    }
-
-    public LinkedList<Header> getHeaders() {
-        return headers;
-    }
+    private DataWrapper headerFragment;
 
     @Override
-    public DataWrapper getSerializedHeaders() {
-        return serializedHeaders;
+    public DataWrapper getHeaderFragment() {
+        return headerFragment;
     }
 
-    public void setSerializedHeaders(DataWrapper serializedHeaders) {
-        this.serializedHeaders = serializedHeaders;
+    public void setHeaderFragment(DataWrapper serializedHeaders) {
+        this.headerFragment = serializedHeaders;
     }
 
     @Override
     public String toString() {
         return "Http2Continuation{" +
                 "endHeaders=" + endHeaders +
-                ", headers=" + headers +
-                ", serializedHeaders=" + serializedHeaders +
+                ", serializeHeaders=" + headerFragment +
                 "} " + super.toString();
     }
 }

@@ -5,7 +5,7 @@ import org.webpieces.data.api.DataWrapper;
 import java.util.LinkedList;
 import java.util.List;
 
-public interface HasHeaders {
+public interface HasHeaderFragment {
     class Header {
         @Override
         public boolean equals(Object o) {
@@ -34,14 +34,10 @@ public interface HasHeaders {
         public String header;
         public String value;
     }
-
-    LinkedList<Header> getHeaders();
-    void setHeaders(LinkedList<Header> headers);
-
     boolean isEndHeaders();
 
     void setEndHeaders(boolean endHeaders);
 
-    DataWrapper getSerializedHeaders();
-    void setSerializedHeaders(DataWrapper serialized);
+    DataWrapper getHeaderFragment();
+    void setHeaderFragment(DataWrapper fragment);
 }

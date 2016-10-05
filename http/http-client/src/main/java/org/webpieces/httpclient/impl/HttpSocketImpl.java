@@ -36,6 +36,7 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
+import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.*;
 import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP11;
@@ -264,54 +265,54 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			actuallySendRequest(request, listener);
 	}
 
-	private LinkedList<HasHeaders.Header> requestToHeaders(HttpRequest request) {
+	private LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
 		HttpRequestLine requestLine = request.getRequestLine();
 		List<Header> requestHeaders = request.getHeaders();
 
-		LinkedList<HasHeaders.Header> headerList = new LinkedList<>();
+		LinkedList<HasHeaderFragment.Header> headerList = new LinkedList<>();
 
 		// Add regular headers
 		for(Header header: requestHeaders) {
-			headerList.add(new HasHeaders.Header(header.getName().toLowerCase(), header.getValue()));
+			headerList.add(new HasHeaderFragment.Header(header.getName().toLowerCase(), header.getValue()));
 		}
 
 		// add special headers
-		headerList.add(new HasHeaders.Header(":method", requestLine.getMethod().getMethodAsString()));
+		headerList.add(new HasHeaderFragment.Header(":method", requestLine.getMethod().getMethodAsString()));
 
 		UrlInfo urlInfo = requestLine.getUri().getUriBreakdown();
 
 		// Figure out scheme
 		if(urlInfo.getPrefix() != null) {
-			headerList.add(new HasHeaders.Header(":scheme", urlInfo.getPrefix()));
+			headerList.add(new HasHeaderFragment.Header(":scheme", urlInfo.getPrefix()));
 		} else {
 			if(channel.isSslChannel()) {
-				headerList.add(new HasHeaders.Header(":scheme", "https"));
+				headerList.add(new HasHeaderFragment.Header(":scheme", "https"));
 			} else {
-				headerList.add(new HasHeaders.Header(":scheme", "http"));
+				headerList.add(new HasHeaderFragment.Header(":scheme", "http"));
 			}
 		}
 
 		// Figure out authority
 		String h = null;
-		for(HasHeaders.Header header: headerList) {
+		for(HasHeaderFragment.Header header: headerList) {
 			if(header.header.equals("host")) {
 				h = header.value;
 				break;
 			}
 		}
 		if(h != null) {
-			headerList.add(new HasHeaders.Header(":authority", h));
+			headerList.add(new HasHeaderFragment.Header(":authority", h));
 		} else {
 			if (urlInfo.getHost() != null) {
 				if (urlInfo.getPort() == null)
-					headerList.add(new HasHeaders.Header(":authority", urlInfo.getHost()));
+					headerList.add(new HasHeaderFragment.Header(":authority", urlInfo.getHost()));
 				else
-					headerList.add(new HasHeaders.Header(":authority", String.format("%s:%d", urlInfo.getHost(), urlInfo.getPort())));
+					headerList.add(new HasHeaderFragment.Header(":authority", String.format("%s:%d", urlInfo.getHost(), urlInfo.getPort())));
 			} else {
-				headerList.add(new HasHeaders.Header(":authority", addr.getHostName() + ":" + addr.getPort()));
+				headerList.add(new HasHeaderFragment.Header(":authority", addr.getHostName() + ":" + addr.getPort()));
 			}
 		}
-		headerList.add(new HasHeaders.Header(":path", urlInfo.getFullPath()));
+		headerList.add(new HasHeaderFragment.Header(":path", urlInfo.getFullPath()));
 
 		return headerList;
 	}
@@ -320,8 +321,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		Http2Data newFrame = new Http2Data();
 		newFrame.setStreamId(streamId);
 
-		// writes only one frame at a time
+		// writes only one frame at a time.
 		if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
+			// the body fits within one frame so send an endstream with this frame
 			newFrame.setData(body);
 			newFrame.setEndStream(true);
 			log.info("sending final data frame: " + newFrame);
@@ -332,6 +334,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					}
 			);
 		} else {
+			// to big, split it, send, and recurse.
 			List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
 			newFrame.setData(split.get(0));
 			log.info("sending non-final data frame: " + newFrame);
@@ -343,30 +346,19 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	// we never send endstream on the header frame to make our life easier. we always just send
 	// endstream on a data frame.
-	private CompletableFuture<Channel> sendHeaderFrames(LinkedList<HasHeaders.Header> headerList, int streamId, Stream stream, boolean firstFrame) {
-		// Assume for now we can send all the headers in one frame
-		// we're going to have to create a 'hasHeaders' interface so we can
-		// abstract between Headers and Continuation frames here
+	private CompletableFuture<Channel> sendHeaderFrames(LinkedList<HasHeaderFragment.Header> headerList, int streamId, Stream stream) {
 		// if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
-		List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, Http2Headers.class, streamId);
+		List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings);
 
-		// If it all fits into one frame
-		if(true) {
-			log.info("sending final header frame: " + frameList.get(0));
-			return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList.get(0)).createByteArray())).thenApply(
-					channel ->
-					{
-						stream.setStatus(OPEN);
-						return channel;
-					}
-			);
-		} else {
-			// figure out how to split up the headermap into what can fit and what can't.
-			log.info("sending non-final header frame: " + frameList.get(0));
-			return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList.get(0)).createByteArray())).thenCompose(
-					channel -> sendHeaderFrames(new LinkedList<>(), streamId, stream, false)
-			);
-		}
+		// Send all the frames at once
+		log.info("sending header frames: " + frameList);
+		return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenApply(
+				channel ->
+				{
+					stream.setStatus(OPEN);
+					return channel;
+				}
+		);
 	}
 
 	private synchronized int getAndIncrementStreamId() {
@@ -395,8 +387,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 			// Find a new Stream id
 			activeStreams.put(thisStreamId, newStream);
-			LinkedList<HasHeaders.Header> headers = requestToHeaders(request);
-			sendHeaderFrames(headers, thisStreamId, newStream, true).thenApply(
+			LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
+			sendHeaderFrames(headers, thisStreamId, newStream).thenApply(
 					channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
 
 			}
@@ -532,12 +524,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			}
 		}
 
-		private HttpResponse createResponseFromHeaders(Queue<HasHeaders.Header> headers) {
+		private HttpResponse createResponseFromHeaders(Queue<HasHeaderFragment.Header> headers) {
 			HttpResponse response = new HttpResponse();
 
 			// Set special header
 			String statusString = null;
-			for(HasHeaders.Header header: headers) {
+			for(HasHeaderFragment.Header header: headers) {
 				if (header.header.equals(":status")) {
 					statusString = header.value;
 					break;
@@ -554,7 +546,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			response.setStatusLine(statusLine);
 
 			// Set all other headers
-			for(HasHeaders.Header header: headers) {
+			for(HasHeaderFragment.Header header: headers) {
 				if(header.header.equals(":status"))
 					response.addHeader(new Header(header.header, header.value));
 			}
@@ -562,9 +554,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			return response;
 		}
 
-		private HttpRequest createRequestFromHeaders(Queue<HasHeaders.Header> headers) {
+		private HttpRequest createRequestFromHeaders(Queue<HasHeaderFragment.Header> headers) {
 			Map<String, String> headerMap = new HashMap<>();
-			for(HasHeaders.Header header: headers) {
+			for(HasHeaderFragment.Header header: headers) {
 				headerMap.put(header.header, header.value);
 			}
 			HttpRequest request = new HttpRequest();
@@ -589,7 +581,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			List<String> specialHeaders = Arrays.asList(":method", ":scheme", ":authority", ":path");
 
 			// Set all other headers
-			for(HasHeaders.Header header: headers) {
+			for(HasHeaderFragment.Header header: headers) {
 				if(!specialHeaders.contains(header.header))
 					request.addHeader(new Header(header.header, header.value));
 			}
@@ -605,25 +597,18 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					// throw appropriate error
 			}
 
-			// start accumulating headers
-			ConcurrentLinkedQueue<HasHeaders.Header> headers = new ConcurrentLinkedQueue<>();
-			headers.addAll(frame.getHeaders());
-			stream.setHeaderHeaders(headers);
-
 			if(frame.isEndHeaders()) {
-				// If we are done getting headers, create the response
-				HttpResponse response = createResponseFromHeaders(frame.getHeaders());
+				// the parser has already accumulated the headers in the frame for us.
+				HttpResponse response = createResponseFromHeaders(frame.getHeaderList());
 				stream.setResponse(response);
 				stream.setStatus(OPEN);
+
 				boolean isComplete = frame.isEndStream();
-				stream.getListener().incomingResponse(response, stream.getRequest(), isComplete);
-				if(isComplete)
+				if (isComplete)
 					receivedEndStream(stream);
-			} else {
-				if(frame.isEndStream()) {
-					// TODO: throw here, because we can't end the stream when waiting for more headers
-				}
-				stream.setStatus(WAITING_MORE_NORMAL_HEADERS);
+			}
+			else {
+				// TODO: throw. This should not happen if the parser is working right.
 			}
 		}
 
@@ -641,8 +626,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				case RESERVED_LOCAL:
 				case RESERVED_REMOTE:
 				case CLOSED:
-				case WAITING_MORE_NORMAL_HEADERS:
-				case WAITING_MORE_PUSH_PROMISE_HEADERS:
 					// TODO: put the error code in the appropriate exception
 					stream.getListener().failure(new RuntimeException("blah"));
 					stream.setStatus(CLOSED);
@@ -654,66 +637,21 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		private void handlePushPromise(Http2PushPromise frame, Stream stream) {
 			// Can get this on any stream id, creates a new stream
-			Stream promisedStream = new Stream();
-			int newStreamId = frame.getPromisedStreamId();
-
-			// TODO: make sure streamid is valid
-			// TODO: close all lower numbered even IDLE streams
-			activeStreams.put(newStreamId, promisedStream);
-			ConcurrentLinkedQueue<HasHeaders.Header> headers = new ConcurrentLinkedQueue<>();
-			headers.addAll(frame.getHeaders());
-			promisedStream.setPushPromiseHeaders(headers);
-
-			// Uses the same listener as the stream it came in on
-			promisedStream.setListener(stream.getListener());
-
 			if(frame.isEndHeaders()) {
-				// If we are done getting headers, set the request
-				HttpRequest request = createRequestFromHeaders(frame.getHeaders());
+				Stream promisedStream = new Stream();
+				int newStreamId = frame.getPromisedStreamId();
+
+				// TODO: make sure streamid is valid
+				// TODO: close all lower numbered even IDLE streams
+				activeStreams.put(newStreamId, promisedStream);
+
+				// Uses the same listener as the stream it came in on
+				promisedStream.setListener(stream.getListener());
+				HttpRequest request = createRequestFromHeaders(frame.getHeaderList());
 				promisedStream.setRequest(request);
 				promisedStream.setStatus(RESERVED_REMOTE);
 			} else {
-				promisedStream.setStatus(WAITING_MORE_NORMAL_HEADERS);
-			}
-		}
-
-		private void handleContinuation(Http2Continuation frame, Stream stream) {
-			ConcurrentLinkedQueue<HasHeaders.Header> headers;
-
-			switch(stream.getStatus()) {
-				case WAITING_MORE_PUSH_PROMISE_HEADERS: // after a PUSH_PROMISE
-					headers = stream.getPushPromiseHeaders();
-					break;
-				case WAITING_MORE_NORMAL_HEADERS: // after a HEADERS
-					headers = stream.getHeaderHeaders();
-					break;
-				default:
-					// throw, can't get a continuation here, spit out PROTOCOL_ERROR
-					throw new RuntimeException("blah");
-			}
-			// Add the headers to the msg
-			// Set all other headers
-			headers.addAll(frame.getHeaders());
-
-			if(frame.isEndHeaders()) {
-				// If we're done getting headers, add them to the request/response
-				stream.setStatus(RESERVED_REMOTE);
-				switch(stream.getStatus()) {
-					case WAITING_MORE_NORMAL_HEADERS:
-						HttpResponse response = createResponseFromHeaders(headers);
-						stream.setResponse(response);
-						break;
-					case WAITING_MORE_PUSH_PROMISE_HEADERS:
-						HttpRequest request = createRequestFromHeaders(headers);
-						stream.setRequest(request);
-						break;
-					default:
-						// should throw in the prior switch if this is the case
-						throw new RuntimeException("should not happen");
-				}
-
-				// Send what we got back to the listener
-				receivedEndStream(stream);
+				// TODO: throw. this should not happen if the parser is working right
 			}
 		}
 
@@ -793,7 +731,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						handleWindowUpdate((Http2WindowUpdate) frame, stream);
 						break;
 					case CONTINUATION:
-						handleContinuation((Http2Continuation) frame, stream);
+						// TODO: throw. we should not get these if the parser is working right.
 						break;
 					default:
 						// throw a protocol error

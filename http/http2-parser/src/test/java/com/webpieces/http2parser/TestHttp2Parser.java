@@ -2,20 +2,21 @@ package com.webpieces.http2parser;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.HasHeaders;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.*;
 import com.webpieces.http2parser.api.ParserResult;
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.helpers.Util;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import javax.xml.crypto.Data;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import static com.webpieces.http2parser.UtilsForTest.parser;
 
 public class TestHttp2Parser {
     private static String aBunchOfDataFrames =
@@ -54,28 +55,28 @@ public class TestHttp2Parser {
 
     private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
-    private static LinkedList<HasHeaders.Header> basicRequestHeaders = new LinkedList<>();
-    private static LinkedList<HasHeaders.Header> basicResponseHeaders = new LinkedList<>();
+    private static LinkedList<HasHeaderFragment.Header> basicRequestHeaders = new LinkedList<>();
+    private static LinkedList<HasHeaderFragment.Header> basicResponseHeaders = new LinkedList<>();
 
     // https://github.com/http2jp/hpack-test-case/blob/master/nghttp2/story_00.json
     private static String basicRequestSerializationNghttp2 = "82864188f439ce75c875fa5784";
     static {
-        basicRequestHeaders.add(new HasHeaders.Header(":method", "GET"));
-        basicRequestHeaders.add(new HasHeaders.Header(":scheme", "http"));
-        basicRequestHeaders.add(new HasHeaders.Header(":authority", "yahoo.co.jp"));
-        basicRequestHeaders.add(new HasHeaders.Header(":path", "/"));
+        basicRequestHeaders.add(new HasHeaderFragment.Header(":method", "GET"));
+        basicRequestHeaders.add(new HasHeaderFragment.Header(":scheme", "http"));
+        basicRequestHeaders.add(new HasHeaderFragment.Header(":authority", "yahoo.co.jp"));
+        basicRequestHeaders.add(new HasHeaderFragment.Header(":path", "/"));
 
-        basicResponseHeaders.add(new HasHeaders.Header(":status", "200"));
-        basicResponseHeaders.add(new HasHeaders.Header("date", "Tue, 27 Sep 2016 19:41:50 GMT"));
-        basicResponseHeaders.add(new HasHeaders.Header("content-type", "text/html"));
-        basicResponseHeaders.add(new HasHeaders.Header("set-cookie", "__cfduid=d8bfe297ef26ef6252ea3a822360a6f411475005310; expires=Wed, 27-Sep-17 19:41:50 GMT; path=/; domain=.cloudflare.com; HttpOnly"));
-        basicResponseHeaders.add(new HasHeaders.Header("last-modified", "Tue, 27 Sep 2016 17:39:01 GMT"));
-        basicResponseHeaders.add(new HasHeaders.Header("cache-control", "public, max-age=14400"));
-        basicResponseHeaders.add(new HasHeaders.Header("served-in-seconds", "0.001"));
-        basicResponseHeaders.add(new HasHeaders.Header("cf-cache-status", "REVALIDATED"));
-        basicResponseHeaders.add(new HasHeaders.Header("expires", "Tue, 27 Sep 2016 23:41:50 GMT"));
-        basicResponseHeaders.add(new HasHeaders.Header("server", "cloudflare-nginx"));
-        basicResponseHeaders.add(new HasHeaders.Header("cf-ray", "2e916f776c724fd5-DEN"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header(":status", "200"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("date", "Tue, 27 Sep 2016 19:41:50 GMT"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("content-type", "text/html"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("set-cookie", "__cfduid=d8bfe297ef26ef6252ea3a822360a6f411475005310; expires=Wed, 27-Sep-17 19:41:50 GMT; path=/; domain=.cloudflare.com; HttpOnly"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("last-modified", "Tue, 27 Sep 2016 17:39:01 GMT"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("cache-control", "public, max-age=14400"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("served-in-seconds", "0.001"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("cf-cache-status", "REVALIDATED"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("expires", "Tue, 27 Sep 2016 23:41:50 GMT"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("server", "cloudflare-nginx"));
+        basicResponseHeaders.add(new HasHeaderFragment.Header("cf-ray", "2e916f776c724fd5-DEN"));
     }
 
     @Test
@@ -160,9 +161,71 @@ public class TestHttp2Parser {
         Assert.assertEquals(UtilsForTest.toHexString(result.getMoreData().createByteArray()), "");
     }
 
+
+    @Test
+    public void testCreateHugeHeadersFrame() {
+        LinkedList<HasHeaderFragment.Header> bigHeaderList = new LinkedList<>();
+        for(int i = 0; i < 5; i++) {
+            bigHeaderList.addAll(basicResponseHeaders);
+        }
+        Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+        // set a small max frame size for testing
+        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings);
+        Assert.assertEquals(headerFrames.size(), 2);
+        Assert.assertEquals(headerFrames.get(0).getFrameType(), Http2FrameType.HEADERS);
+        Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
+        Assert.assertEquals(headerFrames.get(0).getStreamId(), 0x1);
+        Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
+        Assert.assertTrue(((HasHeaderFragment) headerFrames.get(1)).isEndHeaders());
+        Assert.assertFalse(((HasHeaderFragment) headerFrames.get(0)).isEndHeaders());
+    }
+
+    @Test
+    public void testCreateHugePushPromiseFrame() {
+        LinkedList<HasHeaderFragment.Header> bigHeaderList = new LinkedList<>();
+        for(int i = 0; i < 5; i++) {
+            bigHeaderList.addAll(basicResponseHeaders);
+        }
+        Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+        // set a small max frame size for testing
+        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings);
+        Assert.assertEquals(headerFrames.size(), 2);
+        Assert.assertEquals(headerFrames.get(0).getFrameType(), Http2FrameType.PUSH_PROMISE);
+        Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
+        Assert.assertTrue(((HasHeaderFragment) headerFrames.get(1)).isEndHeaders());
+        Assert.assertFalse(((HasHeaderFragment) headerFrames.get(0)).isEndHeaders());
+        Assert.assertEquals(((Http2PushPromise) headerFrames.get(0)).getPromisedStreamId(), 0x1);
+        Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
+    }
+
+    @Test
+    public void testParseWithHeaderFrames() {
+        LinkedList<HasHeaderFragment.Header> bigHeaderList = new LinkedList<>();
+        for(int i = 0; i < 5; i++) {
+            bigHeaderList.addAll(basicResponseHeaders);
+        }
+        Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+        // set a small max frame size for testing
+        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings);
+
+        Assert.assertEquals(headerFrames.size(), 2);
+        DataWrapper serializedHeaderFrames = parser.marshal(headerFrames);
+        DataWrapper combined = dataGen.chainDataWrappers(
+                UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames),
+                dataGen.chainDataWrappers(
+                        serializedHeaderFrames,
+                        UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames)));
+
+        ParserResult result = parser.parse(combined, dataGen.emptyWrapper());
+        Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
+    }
+
     @Test
     public void testSerializeHeaders() {
-        DataWrapper serialized = parser.serializedHeaders(basicRequestHeaders);
+        DataWrapper serialized = parser.serializeHeaders(basicRequestHeaders);
         String serializedHex = UtilsForTest.toHexString(serialized.createByteArray());
         Assert.assertArrayEquals(
                 UtilsForTest.toByteArray(serializedHex),
@@ -172,7 +235,7 @@ public class TestHttp2Parser {
 
     @Test
     public void testDeserializeHeaders() {
-        List<HasHeaders.Header> headers = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(basicRequestSerializationNghttp2));
+        List<HasHeaderFragment.Header> headers = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(basicRequestSerializationNghttp2));
         Assert.assertEquals(headers, basicRequestHeaders);
     }
 }
