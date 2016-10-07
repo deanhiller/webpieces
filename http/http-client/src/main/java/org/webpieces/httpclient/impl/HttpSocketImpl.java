@@ -9,6 +9,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntUnaryOperator;
 
 import javax.net.ssl.SSLEngine;
 import javax.xml.bind.DatatypeConverter;
@@ -76,9 +80,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	// HTTP 2
 	private Http2Parser http2Parser;
-	private boolean tryHttp2 = true;
-    private boolean negotiationDone = false;
-    private boolean negotiationStarted = false;
+	private AtomicBoolean tryHttp2 = new AtomicBoolean(true);
+    private AtomicBoolean negotiationDone = new AtomicBoolean(false);
+    private AtomicBoolean negotiationStarted = new AtomicBoolean(false);
     private CompletableFuture<Channel> negotiationDoneNotifier = new CompletableFuture<>();
 	private Map<Http2Settings.Parameter, Integer> localPreferredSettings = new HashMap<>();
 
@@ -86,21 +90,19 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private ConcurrentHashMap<Http2Settings.Parameter, Integer> localSettings = new ConcurrentHashMap<>();
 
 	private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
-
-	// start with streamId 3 because 1 might be used for the upgrade stream.
-	private int nextStreamId = 0x1;
+    private AtomicInteger nextStreamId = new AtomicInteger(0x1);
 
 	private Encoder encoder;
 	private Decoder decoder;
-	private boolean maxHeaderTableSizeNeedsUpdate = false;
-	private int minimumMaxHeaderTableSizeUpdate = Integer.MAX_VALUE;
+	private AtomicBoolean maxHeaderTableSizeNeedsUpdate = new AtomicBoolean(false);
+	private AtomicInteger minimumMaxHeaderTableSizeUpdate = new AtomicInteger(Integer.MAX_VALUE);
 
 	// TODO: figure out how to deal with the goaway. For now we're just
 	// going to record what they told us.
-	private boolean remoteGoneAway = false;
-	private int goneAwayLastStreamId;
-	private Http2ErrorCode goneAwayErrorCode;
-	private DataWrapper additionalDebugData;
+	private AtomicBoolean remoteGoneAway = new AtomicBoolean(false);
+	private AtomicInteger goneAwayLastStreamId = new AtomicInteger(0x0);
+	private AtomicReference<Http2ErrorCode> goneAwayErrorCode = new AtomicReference<>(Http2ErrorCode.NO_ERROR);
+	private AtomicReference<DataWrapper> additionalDebugData = new AtomicReference<>(wrapperGen.emptyWrapper());
 
 	// HTTP 1.1
 	private HttpParser httpParser;
@@ -176,7 +178,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         protocol = HTTP2;
         dataListener.setProtocol(HTTP2);
         sendHttp2Preface();
-        negotiationDone = true;
+        negotiationDone.set(true);
 
         if(protocol == HTTP2) {
             Timer timer = new Timer();
@@ -190,6 +192,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		if (false) { // We don't know how to check ALPN yet, but if we do, put that check here
             log.info("setting http2 because of alpn");
             enableHttp2();
+            negotiationDone.set(true);
             negotiationDoneNotifier.complete(channel);
 			return CompletableFuture.completedFuture(channel);
 
@@ -210,15 +213,15 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				if(r.getStatusLine().getStatus().getCode() != 101) {
                     log.info("upgrade failed");
 					// That didn't work, let's not try http2 and send what we have so far to the normal listener
-					tryHttp2 = false;
-                    negotiationDone = true;
+					tryHttp2.set(false);
+                    negotiationDone.set(true);
+                    negotiationDoneNotifier.complete(channel);
 
                     // If the response is chunked then it is probably not complete.
                     // TODO: make sure this is right. would be nicer to grab the isComplete
                     // out of the incomingResponse call to the CompletableListener in
                     // sendHttp11AndWaitForHeaders I think.
                     listener.incomingResponse(r, !r.isHasChunkedTransferHeader());
-                    negotiationDoneNotifier.complete(channel);
                     return channel;
 				} else {
                     log.info("upgrade suceeded");
@@ -248,7 +251,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                     if(leftOverData.getReadableSize() > 0)
                         dataListener.incomingData(channel, ByteBuffer.wrap(leftOverData.createByteArray()));
 
-                    negotiationDoneNotifier.complete(channel);
 					return channel;
 				}
 			});
@@ -401,15 +403,15 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		// If the header table size needs update, we pre-fill the buffer with the update notification
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			if (maxHeaderTableSizeNeedsUpdate) {
+			if (maxHeaderTableSizeNeedsUpdate.get()) {
 				// If we need to update the max header table size
 				int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE);
-				if (minimumMaxHeaderTableSizeUpdate < newMaxHeaderTableSize) {
-					encoder.setMaxHeaderTableSize(out, minimumMaxHeaderTableSizeUpdate);
+				if (minimumMaxHeaderTableSizeUpdate.get() < newMaxHeaderTableSize) {
+					encoder.setMaxHeaderTableSize(out, minimumMaxHeaderTableSizeUpdate.get());
 				}
 				encoder.setMaxHeaderTableSize(out, newMaxHeaderTableSize);
-				minimumMaxHeaderTableSizeUpdate = Integer.MAX_VALUE;
-				maxHeaderTableSizeNeedsUpdate = false;
+				minimumMaxHeaderTableSizeUpdate.set(Integer.MAX_VALUE);
+				maxHeaderTableSizeNeedsUpdate.set(false);
 			}
 		} catch (IOException e) {
             // TODO: Remove debugdata when not in developer mode
@@ -462,11 +464,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                 .max(Comparator.comparingInt(Map.Entry::getKey)).map(entry -> entry.getKey());
     }
 
-	private synchronized int getAndIncrementStreamId() {
-		int thisStreamId = nextStreamId;
-		nextStreamId += 2;
-
-		return thisStreamId;
+	private int getAndIncrementStreamId() {
+        return nextStreamId.getAndAdd(2);
 	}
 
 	private class SendPing extends TimerTask {
@@ -490,9 +489,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private CompletableFuture<Channel> negotiateAndSendRequest(HttpRequest request, ResponseListener listener) {
         ResponseListener l = new CatchResponseListener(listener);
-        if (!negotiationDone) {
-            if (!negotiationStarted) {
-                negotiationStarted = true;
+        if (!negotiationDone.get()) {
+            if (!negotiationStarted.get()) {
+                negotiationStarted.set(true);
                 return negotiateHttpVersion(request, l);
             } else {
                 log.info("waiting for negotiation to complete");
@@ -833,8 +832,21 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 				// What do we do when certain settings are updated
 				if(frame.getSettings().containsKey(SETTINGS_HEADER_TABLE_SIZE)) {
-					maxHeaderTableSizeNeedsUpdate = true;
-					minimumMaxHeaderTableSizeUpdate = min(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE), minimumMaxHeaderTableSizeUpdate);
+					maxHeaderTableSizeNeedsUpdate.set(true);
+                    class UpdateMinimum implements IntUnaryOperator {
+                        int newTableSize;
+
+                        public UpdateMinimum(int newTableSize) {
+                            this.newTableSize = newTableSize;
+                        }
+
+                        @Override
+                        public int applyAsInt(int operand) {
+                            return min(operand, newTableSize);
+                        }
+                    }
+					minimumMaxHeaderTableSizeUpdate.updateAndGet(
+					        new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE)));
 				}
 				Http2Settings responseFrame = new Http2Settings();
 				responseFrame.setAck(true);
@@ -845,10 +857,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		// TODO: actually deal with this goaway stuff where necessary
 		private void handleGoAway(Http2GoAway frame) {
-			remoteGoneAway = true;
-			goneAwayLastStreamId = frame.getLastStreamId();
-			goneAwayErrorCode = frame.getErrorCode();
-			additionalDebugData = frame.getDebugData();
+			remoteGoneAway.set(true);
+			goneAwayLastStreamId.set(frame.getLastStreamId());
+			goneAwayErrorCode.set(frame.getErrorCode());
+			additionalDebugData.set(frame.getDebugData());
 		}
 
 		private void handlePing(Http2Ping frame) {
