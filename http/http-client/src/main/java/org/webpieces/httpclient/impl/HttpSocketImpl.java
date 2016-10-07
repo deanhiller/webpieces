@@ -270,7 +270,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		return future;
 	}
 
-	// Sends the requests serially. This way we won't send the second request
+	// Sends the pending requests serially. This way we won't send the second request
     // until the first request has completed http2 negotiation.
 	private CompletableFuture<Boolean> clearPendingRequests() {
         if(!pendingRequests.isEmpty()) {
@@ -507,30 +507,34 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }
     }
 
+    private CompletableFuture<Channel> sendHttp2Request(HttpRequest request, ResponseListener l) {
+        // Check if we are allowed to create a new stream
+        if (remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
+                countOpenClientStreams() >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+            throw new ClientError("Max concurrent streams exceeded, please wait and try again.");
+            // TODO: create a request queue that gets emptied when there are open streams
+        }
+        // Create a stream
+        Stream newStream = new Stream();
+
+        // Find a new Stream id
+        int thisStreamId = getAndIncrementStreamId();
+        newStream.setListener(l);
+        newStream.setStreamId(thisStreamId);
+        newStream.setRequest(request);
+
+        activeStreams.put(thisStreamId, newStream);
+        LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
+        return sendHeaderFrames(headers, thisStreamId, newStream).thenCompose(
+                channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
+
+    }
+
     private CompletableFuture<Channel> actuallySendRequest(HttpRequest request, ResponseListener l) {
         if (protocol == HTTP11) {
             return sendHttp11Request(request, l);
         } else { // HTTP2
-            // Check if we are allowed to create a new stream
-            if (remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
-                    countOpenClientStreams() >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
-                throw new ClientError("Max concurrent streams exceeded, please wait and try again.");
-                // TODO: create a request queue that gets emptied when there are open streams
-            }
-            // Create a stream
-            Stream newStream = new Stream();
-
-            // Find a new Stream id
-            int thisStreamId = getAndIncrementStreamId();
-            newStream.setListener(l);
-            newStream.setStreamId(thisStreamId);
-            newStream.setRequest(request);
-
-            activeStreams.put(thisStreamId, newStream);
-            LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
-            return sendHeaderFrames(headers, thisStreamId, newStream).thenCompose(
-                    channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
-
+            return sendHttp2Request(request, l);
         }
     }
 	
