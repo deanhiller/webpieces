@@ -40,7 +40,7 @@ public class IntegNgHttp2 {
                 .connect(new InetSocketAddress(host, port))
                 .thenAccept(p -> {
                     // Send a bunch of requests
-                    for(int i = 0; i < 10; i++) {
+                    for(int i = 0; i < 1; i++) {
                         socket.send(req, listener);
                     }
                 })
@@ -97,6 +97,7 @@ public class IntegNgHttp2 {
 
         HttpRequest req = new HttpRequest();
         req.setRequestLine(requestLine);
+        req.addHeader(new Header(KnownHeaderName.HOST, host));
         req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
         req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
         req.addHeader(new Header(KnownHeaderName.USER_AGENT, "nghttp2/1.15.0"));

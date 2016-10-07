@@ -178,7 +178,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private CompletableFuture<HttpSocket> negotiateHttpVersion(InetSocketAddress addr) {
 		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
-		if (true) { // let's just try http2 first and see what happens
+		if (false) { // let's just try http2 first and see what happens
 			protocol = HTTP2;
 			dataListener.setProtocol(HTTP2);
 			sendHttp2Preface();
@@ -189,7 +189,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			HttpRequest upgradeRequest = new HttpRequest();
 			HttpRequestLine requestLine = new HttpRequestLine();
 
-			// TODO: switch this back to HEAD
+			// TODO: make this send the actual request that we are making rather than a dummy request
 			// HEAD doesn't work when connecting to a chunking server
 			// because the parser stays in chunked mode because there was no final chunk
 			// We have to fix the parser so that HEAD responses that have no chunks don't
@@ -198,14 +198,15 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			requestLine.setUri(new HttpUri("/"));
 			requestLine.setVersion(new HttpVersion());
 			upgradeRequest.setRequestLine(requestLine);
-			upgradeRequest.addHeader(new Header("Connection", "Upgrade, HTTP2-Settings"));
-			upgradeRequest.addHeader(new Header("Upgrade", "h2c"));
-			upgradeRequest.addHeader(new Header("Host", addr.getHostName() + ":" + addr.getPort()));
-
+            upgradeRequest.addHeader(new Header("host", addr.getHostName() + ":" + addr.getPort()));
+			upgradeRequest.addHeader(new Header("connection", "Upgrade, HTTP2-Settings"));
+			upgradeRequest.addHeader(new Header("upgrade", "h2c"));
 			Http2Settings settingsFrame = new Http2Settings();
 			settingsFrame.setSettings(localPreferredSettings);
-			upgradeRequest.addHeader(new Header("HTTP2-Settings",
-					Base64.getEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray())));
+            // For some reason we need to add a " " after the base64urlencoded settings to get this to work
+            // against nghttp2.org ?
+			upgradeRequest.addHeader(new Header("http2-settings",
+					Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
 
 			CompletableFuture<HttpResponse> response = sendIgnoreConnected(upgradeRequest);
 			return response.thenCompose(r -> {
@@ -226,8 +227,54 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				} else {
 					protocol = HTTP2;
 					dataListener.setProtocol(HTTP2);
-					getAndIncrementStreamId();
-					sendHttp2Preface();
+
+                    sendHttp2Preface();
+
+                    int initialStreamId = getAndIncrementStreamId();
+                    Stream initialStream = new Stream();
+                    initialStream.setStreamId(initialStreamId);
+                    initialStream.setRequest(upgradeRequest);
+                    // set a dummy listener
+                    initialStream.setListener(new ResponseListener() {
+                        @Override
+                        public void incomingResponse(HttpResponse resp, boolean isComplete) {
+
+                        }
+
+                        @Override
+                        public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
+
+                        }
+
+                        @Override
+                        public void incomingData(DataWrapper data, boolean isLastData) {
+
+                        }
+
+                        @Override
+                        public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+
+                        }
+
+                        @Override
+                        public void failure(Throwable e) {
+
+                        }
+                    });
+                    activeStreams.put(initialStreamId, initialStream);
+
+                    DataWrapper responseBody = r.getBodyNonNull();
+
+                    // Send the content of the response to the datalistener, if any
+                    if(responseBody.getReadableSize() > 0)
+                        dataListener.incomingData(channel, ByteBuffer.wrap(responseBody.createByteArray()));
+
+                    // Grab the leftover data out of the http11 parser and send that to the datalistener
+                    DataWrapper leftOverData = ((Http11DataListener) dataListener.dataListenerMap.get(HTTP11))
+                            .getLeftOverData();
+                    if(leftOverData.getReadableSize() > 0)
+                        dataListener.incomingData(channel, ByteBuffer.wrap(leftOverData.createByteArray()));
+
 
 					return CompletableFuture.completedFuture(connected(addr));
 				}
@@ -385,7 +432,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			}
 		} catch (IOException e) {
             // TODO: Remove debugdata when not in developer mode
-			throw new InternalError(lastClosedServerStream(), wrapperGen.wrapByteArray(e.toString().getBytes()));
+			throw new InternalError(lastClosedServerStream().orElse(0), wrapperGen.wrapByteArray(e.toString().getBytes()));
 		}
 
 		// if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
@@ -420,18 +467,18 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }).count();
     }
 
-    private int lastClosedServerStream() {
+    private Optional<Integer> lastClosedServerStream() {
         return activeStreams.entrySet()
                 .stream()
                 .filter(entry -> (entry.getValue().getStatus() == CLOSED) && (entry.getValue().getStreamId() % 2 == 0))
-                .max(Comparator.comparingInt(Map.Entry::getKey)).get().getKey();
+                .max(Comparator.comparingInt(Map.Entry::getKey)).map(entry -> entry.getKey());
     }
 
-    private int lastClosedClientStream() {
+    private Optional<Integer> lastClosedClientStream() {
         return activeStreams.entrySet()
                 .stream()
                 .filter(entry -> (entry.getValue().getStatus() == CLOSED) && (entry.getValue().getStreamId() % 2 == 1))
-                .max(Comparator.comparingInt(Map.Entry::getKey)).get().getKey();
+                .max(Comparator.comparingInt(Map.Entry::getKey)).map(entry -> entry.getKey());
     }
 
 	private synchronized int getAndIncrementStreamId() {
@@ -756,7 +803,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				promisedStream.setRequest(request);
 				promisedStream.setStatus(RESERVED_REMOTE);
 			} else {
-				throw new InternalError(lastClosedServerStream(), wrapperGen.emptyWrapper());
+				throw new InternalError(lastClosedServerStream().orElse(0), wrapperGen.emptyWrapper());
 			}
 		}
 
@@ -814,13 +861,15 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 		private void handleFrame(Http2Frame frame) {
 			if(frame.getFrameType() != SETTINGS && !gotSettings) {
-                throw new GoAwayError(lastClosedServerStream(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                throw new GoAwayError(lastClosedServerStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
 			}
 
 			// Transition the stream state
 			if(frame.getStreamId() != 0x0) {
 				Stream stream = activeStreams.get(frame.getStreamId());
-				// If the stream doesn't exist, create it
+				// If the stream doesn't exist, create it, but we will drop
+                // everything because we don't have a listener for it
+                // TODO: make sure the lack of listener doesn't cause problems
                 if(stream == null) {
                     stream = new Stream();
                     stream.setStreamId(frame.getStreamId());
@@ -846,7 +895,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						handleWindowUpdate((Http2WindowUpdate) frame, stream);
 						break;
 					case CONTINUATION:
-						throw new InternalError(lastClosedServerStream(), wrapperGen.emptyWrapper());
+						throw new InternalError(lastClosedServerStream().orElse(0), wrapperGen.emptyWrapper());
 					default:
 						// throw a protocol error
 				}
@@ -916,6 +965,16 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private class Http11DataListener implements DataListener {
 		private boolean processingChunked = false;
 		private Memento memento = httpParser.prepareToParse();
+
+        /**
+         * This is a special 'reach-in' method to let the http2 parser grab the data from the http11
+         * parser that has not yet been parsed.
+         *
+         * @return
+         */
+        public DataWrapper getLeftOverData() {
+           return memento.getLeftOverData();
+        }
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {

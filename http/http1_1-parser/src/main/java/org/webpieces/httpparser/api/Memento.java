@@ -2,6 +2,7 @@ package org.webpieces.httpparser.api;
 
 import java.util.List;
 
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public interface Memento {
@@ -20,7 +21,7 @@ public interface Memento {
 	 * requests with a Content-Length header, then this will be non-null.  You will receive this however with the body
 	 * a second time when you call getParsedMessages
 	 */
-	public HttpPayload getHalfParsedMessage();
+	HttpPayload getHalfParsedMessage();
 
 	/**
 	 * For those who would like to throw an exception if the incoming size of all headers is too large, the current
@@ -28,5 +29,11 @@ public interface Memento {
 	 * @return
 	 */
 	UnparsedState getUnParsedState();
+
+	/**
+	 * We need a way to reach in to get the leftover data so that the http2 parser can take over from
+	 * the http11 parser in the case of an upgrade to http2.
+	 */
+	DataWrapper getLeftOverData();
 	
 }

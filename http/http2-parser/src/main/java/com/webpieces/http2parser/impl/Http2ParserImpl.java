@@ -6,6 +6,8 @@ import com.twitter.hpack.Encoder;
 import com.twitter.hpack.HeaderListener;
 import com.webpieces.http2parser.api.*;
 import com.webpieces.http2parser.api.dto.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -23,6 +25,7 @@ import static com.webpieces.http2parser.api.dto.Http2FrameType.*;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    private static final Logger log = LoggerFactory.getLogger(Http2ParserImpl.class);
 
     private final BufferPool bufferPool;
     private final Map<Class<? extends Http2Frame>, FrameMarshaller> dtoToMarshaller = new HashMap<>();
