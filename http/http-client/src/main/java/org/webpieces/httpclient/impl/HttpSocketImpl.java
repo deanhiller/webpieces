@@ -77,6 +77,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	// HTTP 2
 	private Http2Parser http2Parser;
 	private boolean tryHttp2 = true;
+    private boolean negotiationDone = false;
+    private boolean negotiationStarted = false;
+    private CompletableFuture<Channel> negotiationDoneNotifier = new CompletableFuture<>();
 	private Map<Http2Settings.Parameter, Integer> localPreferredSettings = new HashMap<>();
 
 	private ConcurrentHashMap<Http2Settings.Parameter, Integer> remoteSettings = new ConcurrentHashMap<>();
@@ -154,14 +157,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			dataListenerToUse = dataListener;
 		}
 		
-		connectFuture = channel.connect(addr, dataListenerToUse).thenCompose(channel -> {
-			if(tryHttp2) {
-				return negotiateHttpVersion(addr);
-			}
-			else {
-				return CompletableFuture.completedFuture(connected(addr));
-			}
-		});
+		connectFuture = channel.connect(addr, dataListenerToUse).thenApply(channel -> connected(addr));
 		return connectFuture;
 	}
 
@@ -176,96 +172,73 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
 	}
 
-	private CompletableFuture<HttpSocket> negotiateHttpVersion(InetSocketAddress addr) {
-		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
-		if (false) { // let's just try http2 first and see what happens
-			protocol = HTTP2;
-			dataListener.setProtocol(HTTP2);
-			sendHttp2Preface();
+	private void enableHttp2() {
+        protocol = HTTP2;
+        dataListener.setProtocol(HTTP2);
+        sendHttp2Preface();
+        negotiationDone = true;
 
-			return CompletableFuture.completedFuture(connected(addr));
+        if(protocol == HTTP2) {
+            Timer timer = new Timer();
+            // in 5 seconds send a ping every 5 seconds
+            timer.schedule(new SendPing(), 5000, 5000);
+        }
+    }
+
+	private CompletableFuture<Channel> negotiateHttpVersion(HttpRequest req, ResponseListener listener) {
+		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
+		if (false) { // We don't know how to check ALPN yet, but if we do, put that check here
+            log.info("setting http2 because of alpn");
+            enableHttp2();
+            negotiationDoneNotifier.complete(channel);
+			return CompletableFuture.completedFuture(channel);
 
 		} else { // Try the HTTP1.1 upgrade technique
-			HttpRequest upgradeRequest = new HttpRequest();
-			HttpRequestLine requestLine = new HttpRequestLine();
-
-			// TODO: make this send the actual request that we are making rather than a dummy request
-			// HEAD doesn't work when connecting to a chunking server
-			// because the parser stays in chunked mode because there was no final chunk
-			// We have to fix the parser so that HEAD responses that have no chunks don't
-			// leave the parser in chunking mode.
-			requestLine.setMethod(KnownHttpMethod.GET);
-			requestLine.setUri(new HttpUri("/"));
-			requestLine.setVersion(new HttpVersion());
-			upgradeRequest.setRequestLine(requestLine);
-            upgradeRequest.addHeader(new Header("host", addr.getHostName() + ":" + addr.getPort()));
-			upgradeRequest.addHeader(new Header("connection", "Upgrade, HTTP2-Settings"));
-			upgradeRequest.addHeader(new Header("upgrade", "h2c"));
+            log.info("attempting http11 upgrade");
+			req.addHeader(new Header("connection", "Upgrade, HTTP2-Settings"));
+			req.addHeader(new Header("upgrade", "h2c"));
 			Http2Settings settingsFrame = new Http2Settings();
 			settingsFrame.setSettings(localPreferredSettings);
             // For some reason we need to add a " " after the base64urlencoded settings to get this to work
             // against nghttp2.org ?
-			upgradeRequest.addHeader(new Header("http2-settings",
+			req.addHeader(new Header("http2-settings",
 					Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
 
-			CompletableFuture<HttpResponse> response = sendIgnoreConnected(upgradeRequest);
-			return response.thenCompose(r -> {
+            CompletableFuture<HttpResponse> response = sendHttp11AndWaitForHeaders(req);
+
+			return response.thenApply(r -> {
 				if(r.getStatusLine().getStatus().getCode() != 101) {
-					// That didn't work, let's not try http2 and try again
+                    log.info("upgrade failed");
+					// That didn't work, let's not try http2 and send what we have so far to the normal listener
 					tryHttp2 = false;
+                    negotiationDone = true;
 
-					// If the response was not chunked, then we're going to assume
-					// that the connection will be closed and we have to reconnect without
-					// HTTP2. If the response was chunked, then we can just say we're connected
-					// and proceed with HTTP1.1.
-					// TODO: Find a way to actually just see if the connection has been closed (or is about to be?) or not.
-					Header transferEncodingHeader = r.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
-					if(transferEncodingHeader != null && transferEncodingHeader.getValue().equals("chunked"))
-						return CompletableFuture.completedFuture(connected(addr));
-					else
-						return connect(addr);
+                    // If the response is chunked then it is probably not complete.
+                    // TODO: make sure this is right. would be nicer to grab the isComplete
+                    // out of the incomingResponse call to the CompletableListener in
+                    // sendHttp11AndWaitForHeaders I think.
+                    listener.incomingResponse(r, !r.isHasChunkedTransferHeader());
+                    negotiationDoneNotifier.complete(channel);
+                    return channel;
 				} else {
-					protocol = HTTP2;
-					dataListener.setProtocol(HTTP2);
-
-                    sendHttp2Preface();
+                    log.info("upgrade suceeded");
+                    enableHttp2();
 
                     int initialStreamId = getAndIncrementStreamId();
                     Stream initialStream = new Stream();
                     initialStream.setStreamId(initialStreamId);
-                    initialStream.setRequest(upgradeRequest);
-                    // set a dummy listener
-                    initialStream.setListener(new ResponseListener() {
-                        @Override
-                        public void incomingResponse(HttpResponse resp, boolean isComplete) {
-
-                        }
-
-                        @Override
-                        public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
-
-                        }
-
-                        @Override
-                        public void incomingData(DataWrapper data, boolean isLastData) {
-
-                        }
-
-                        @Override
-                        public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-
-                        }
-
-                        @Override
-                        public void failure(Throwable e) {
-
-                        }
-                    });
+                    initialStream.setRequest(req);
+                    initialStream.setListener(listener);
+                    initialStream.setResponse(r);
+                    // Since we already sent the entire request as the upgrade, the stream basically starts in
+                    // half closed local
+                    initialStream.setStatus(HALF_CLOSED_LOCAL);
                     activeStreams.put(initialStreamId, initialStream);
 
                     DataWrapper responseBody = r.getBodyNonNull();
 
                     // Send the content of the response to the datalistener, if any
+                    // Not likely to happen but just in case
                     if(responseBody.getReadableSize() > 0)
                         dataListener.incomingData(channel, ByteBuffer.wrap(responseBody.createByteArray()));
 
@@ -275,17 +248,17 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                     if(leftOverData.getReadableSize() > 0)
                         dataListener.incomingData(channel, ByteBuffer.wrap(leftOverData.createByteArray()));
 
-
-					return CompletableFuture.completedFuture(connected(addr));
+                    negotiationDoneNotifier.complete(channel);
+					return channel;
 				}
 			});
 		}
 	}
 
-	private CompletableFuture<HttpResponse> sendIgnoreConnected(HttpRequest request) {
+	private CompletableFuture<HttpResponse> sendHttp11AndWaitForHeaders(HttpRequest request) {
 		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
 		ResponseListener l = new CompletableListener(future, true);
-		actuallySendRequest(request, l);
+		sendHttp11Request(request, l);
 		return future;
 	}
 
@@ -296,41 +269,49 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		send(request, l);
 		return future;
 	}
-	
+
+	// Sends the requests serially. This way we won't send the second request
+    // until the first request has completed http2 negotiation.
+	private CompletableFuture<Boolean> clearPendingRequests() {
+        if(!pendingRequests.isEmpty()) {
+            PendingRequest req = pendingRequests.remove();
+            return negotiateAndSendRequest(req.getRequest(), req.getListener()).thenApply(channel -> true)
+                    .thenCompose(channel -> {
+                        req.complete();
+                        return clearPendingRequests();
+                    });
+        } else {
+            return CompletableFuture.completedFuture(false);
+        }
+    }
 	private synchronized HttpSocket connected(InetSocketAddress addr) {
 		connected = true;
 		this.addr = addr;
-		
-		while(!pendingRequests.isEmpty()) {
-			PendingRequest req = pendingRequests.remove();
-			actuallySendRequest(req.getRequest(), req.getListener());
-		}
 
-		// Send a ping every 5 seconds
-		if(protocol == HTTP2) {
-            Timer timer = new Timer();
-            timer.schedule(new SendPing(), 0, 5000);
-        }
+        clearPendingRequests();
 		
 		return this;
 	}
 
 	@Override
-	public void send(HttpRequest request, ResponseListener listener) {
+	public CompletableFuture<HttpRequest> send(HttpRequest request, ResponseListener listener) {
 		if(connectFuture == null) 
 			throw new IllegalArgumentException("You must at least call httpSocket.connect first(it "
 					+ "doesn't have to complete...you just have to call it before caling send)");
+        CompletableFuture<HttpRequest> future = new CompletableFuture<>();
 
 		boolean wasConnected = false;
 		synchronized (this) {
 			if(!connected) {
-				pendingRequests.add(new PendingRequest(request, listener));
+				pendingRequests.add(new PendingRequest(request, listener, future));
 			} else
 				wasConnected = true;
 		}
 		
 		if(wasConnected) 
-			actuallySendRequest(request, listener);
+			return negotiateAndSendRequest(request, listener).thenApply(channel -> request);
+        else
+            return future;
 	}
 
 	private LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
@@ -496,41 +477,62 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }
     }
 
-	private void actuallySendRequest(HttpRequest request, ResponseListener listener) {
-		ResponseListener l = new CatchResponseListener(listener);
+    private CompletableFuture<Channel> sendHttp11Request(HttpRequest request, ResponseListener l) {
+        ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
 
-		if(protocol == HTTP11) {
-			ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
+        //put this on the queue before the write to be completed from the listener below
+        responsesToComplete.offer(l);
 
-			//put this on the queue before the write to be completed from the listener below
-			responsesToComplete.offer(l);
+        log.info("sending request now. req=" + request);
+        CompletableFuture<Channel> write = channel.write(wrap);
+        return write.exceptionally(e -> fail(l, e));
+    }
 
-			log.info("sending request now. req=" + request.getRequestLine().toString());
-			CompletableFuture<Channel> write = channel.write(wrap);
-			write.exceptionally(e -> fail(l, e));
-		} else { // HTTP2
+	private CompletableFuture<Channel> negotiateAndSendRequest(HttpRequest request, ResponseListener listener) {
+        ResponseListener l = new CatchResponseListener(listener);
+        if (!negotiationDone) {
+            if (!negotiationStarted) {
+                negotiationStarted = true;
+                return negotiateHttpVersion(request, l);
+            } else {
+                log.info("waiting for negotiation to complete");
+                return negotiationDoneNotifier.thenCompose(channel -> {
+                    log.info("done waiting for negotiation to complete");
+                    return actuallySendRequest(request, l);
+                });
+            }
+        } else {
+            log.info("not waiting for negotiation at all");
+            return actuallySendRequest(request, l);
+        }
+    }
+
+    private CompletableFuture<Channel> actuallySendRequest(HttpRequest request, ResponseListener l) {
+        if (protocol == HTTP11) {
+            return sendHttp11Request(request, l);
+        } else { // HTTP2
             // Check if we are allowed to create a new stream
-            if(remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
+            if (remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
                     countOpenClientStreams() >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
                 throw new ClientError("Max concurrent streams exceeded, please wait and try again.");
                 // TODO: create a request queue that gets emptied when there are open streams
             }
-			// Create a stream
-			Stream newStream = new Stream();
+            // Create a stream
+            Stream newStream = new Stream();
 
             // Find a new Stream id
             int thisStreamId = getAndIncrementStreamId();
-            newStream.setListener(listener);
+            newStream.setListener(l);
             newStream.setStreamId(thisStreamId);
             newStream.setRequest(request);
 
-			activeStreams.put(thisStreamId, newStream);
-			LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
-			sendHeaderFrames(headers, thisStreamId, newStream).thenApply(
-					channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
+            activeStreams.put(thisStreamId, newStream);
+            LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
+            return sendHeaderFrames(headers, thisStreamId, newStream).thenCompose(
+                    channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
 
-			}
-	}
+        }
+    }
 	
 	private Channel fail(ResponseListener l, Throwable e) {
 		l.failure(e);

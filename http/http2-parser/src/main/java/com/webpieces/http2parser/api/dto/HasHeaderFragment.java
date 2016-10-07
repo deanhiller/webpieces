@@ -31,6 +31,14 @@ public interface HasHeaderFragment {
             this.value = value;
         }
 
+        @Override
+        public String toString() {
+            return "Header{" +
+                    "header='" + header + '\'' +
+                    ", value='" + value + '\'' +
+                    '}';
+        }
+
         public String header;
         public String value;
     }

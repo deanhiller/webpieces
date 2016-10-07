@@ -1,6 +1,7 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,14 @@ public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
 
+    static private CompletableFuture<HttpRequest> sendManyTimes(HttpSocket socket, int n, HttpRequest req, ResponseListener l) {
+        if(n > 0) {
+            return socket.send(req, l).thenCompose(request -> sendManyTimes(socket, n-1, req, l));
+        } else {
+            return CompletableFuture.completedFuture(req);
+        }
+    }
+
     public static void main(String[] args) throws InterruptedException {
         boolean isHttp = true;
 
@@ -38,15 +47,19 @@ public class IntegNgHttp2 {
         HttpSocket socket = client.openHttpSocket("oneTimer");
         socket
                 .connect(new InetSocketAddress(host, port))
-                .thenAccept(p -> {
-                    // Send a bunch of requests
-                    for(int i = 0; i < 1; i++) {
-                        socket.send(req, listener);
-                    }
-                })
-                .exceptionally(e -> reportException(socket, e));
+                .thenCompose(channel -> sendManyTimes(socket, 10, req, listener))
+                .exceptionally(e -> {
+                    reportException(socket, e);
+                    return req;
+                });
 
-        Thread.sleep(100000);
+        Thread.sleep(10000);
+
+        sendManyTimes(socket, 10, req, listener).exceptionally(e -> {
+            reportException(socket, e);
+            return req;
+        });
+        Thread.sleep(10000);
     }
 
     private static Void reportException(HttpSocket socket, Throwable e) {
@@ -86,11 +99,6 @@ public class IntegNgHttp2 {
     }
 
     private static HttpRequest createRequest(String host) {
-//		GET / HTTP/1.1
-//		Host: www.colorado.edu
-//		User-Agent: curl/7.43.0
-//		Accept: */*
-
         HttpRequestLine requestLine = new HttpRequestLine();
         requestLine.setMethod(KnownHttpMethod.GET);
         requestLine.setUri(new HttpUri("/"));

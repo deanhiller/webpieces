@@ -21,7 +21,7 @@ public interface HttpSocket {
 	//TODO: Implement timeout for clients so that requests will timeout
 	public CompletableFuture<HttpResponse> send(HttpRequest request);
 	
-	public void send(HttpRequest request, ResponseListener l);
+	public CompletableFuture<HttpRequest> send(HttpRequest request, ResponseListener l);
 
 	public CompletableFuture<HttpSocket> closeSocket();
 

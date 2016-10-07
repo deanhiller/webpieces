@@ -21,7 +21,7 @@ public class IntegColoradoEdu {
 	private static final Logger log = LoggerFactory.getLogger(IntegColoradoEdu.class);
 	
 	public static void main(String[] args) throws InterruptedException {
-		boolean isHttp = false;
+		boolean isHttp = true;
 		
 		String host = "www.colorado.edu";
 		int port = 443;
