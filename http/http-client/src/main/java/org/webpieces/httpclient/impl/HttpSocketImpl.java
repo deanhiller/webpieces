@@ -628,7 +628,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private class Http2DataListener implements DataListener {
 		private DataWrapper oldData = http2Parser.prepareToParse();
-		private boolean gotSettings = false;
+		private AtomicBoolean gotSettings = new AtomicBoolean(false);
 
 		private void receivedEndStream(Stream stream) {
 			// Make sure status can accept ES
@@ -640,7 +640,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					stream.setStatus(CLOSED);
 					break;
 				default:
-					// throw error here
+					// TODO: throw error here
 			}
 		}
 
@@ -655,7 +655,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						receivedEndStream(stream);
 					break;
 				default:
-					// Throw
+					// TODO: Throw
 			}
 		}
 
@@ -825,7 +825,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 			} else {
 				// We've received a settings. Update remoteSettings and send an ack
-				gotSettings = true;
+                gotSettings.set(true);
 				for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
 					remoteSettings.put(entry.getKey(), entry.getValue());
 				}
@@ -878,7 +878,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		}
 
 		private void handleFrame(Http2Frame frame) {
-			if(frame.getFrameType() != SETTINGS && !gotSettings) {
+			if(frame.getFrameType() != SETTINGS && !gotSettings.get()) {
                 throw new GoAwayError(lastClosedServerStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
 			}
 
