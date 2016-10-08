@@ -1,6 +1,9 @@
 package org.webpieces.plugins.hibernate.app;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -17,10 +20,10 @@ public class HibernateController {
 	
 	private static final Logger log = LoggerFactory.getLogger(HibernateController.class);
 	
-	private SessionFactory factory;
+	private EntityManagerFactory factory;
 
 	@Inject
-	public HibernateController(SessionFactory factory) {
+	public HibernateController(EntityManagerFactory factory) {
 		this.factory = factory;
 	}
 	
@@ -30,39 +33,42 @@ public class HibernateController {
 	 * @return
 	 */
 	public Redirect save() {
-		Session session = factory.getCurrentSession();
-		Transaction tx = session.beginTransaction();
+		
+		EntityManager mgr = factory.createEntityManager();
+		EntityTransaction tx = mgr.getTransaction();
+		tx.begin();
 		
 		CompanyDbo company = new CompanyDbo();
 		company.setName("WebPieces LLC");
 		
 		UserDbo user = new UserDbo();
 		user.setEmail("dean@xsoftware.biz");
-		user.setName("Soemthing");
+		user.setName("SomeName");
 		user.setCompany(company);
 		
 		try {
-			session.save(company);
-			session.save(user);
-		
-			session.flush();
+			mgr.persist(company);
+			mgr.persist(user);
+
+			mgr.flush();
 			
 			tx.commit();
 		} catch(Throwable e) {
 			rollbackIfNeeded(tx, e);
-			closeSession(session, e);
+			closeSession(mgr, e);
 			throw new RuntimeException(e);
 		}
 		
-		return Actions.redirect(HibernateRouteId.DISPLAY_ENTITY, "user", user.getId());
+		return Actions.redirect(HibernateRouteId.DISPLAY_ENTITY, "id", user.getId());
 	}
 	
 	public Render display(Integer id) {
-		Session session = factory.getCurrentSession();
-		Transaction tx = session.beginTransaction();
+		EntityManager mgr = factory.createEntityManager();
+		EntityTransaction tx = mgr.getTransaction();
+		tx.begin();
 		
 		try {
-			UserDbo user = session.find(UserDbo.class, id);
+			UserDbo user = mgr.find(UserDbo.class, id);
 
 			tx.commit();
 
@@ -70,14 +76,14 @@ public class HibernateController {
 
 		} catch(Throwable e) {
 			rollbackIfNeeded(tx, e);
-			closeSession(session, e);
+			closeSession(mgr, e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void closeSession(Session session, Throwable original) {
+	private void closeSession(EntityManager mgr, Throwable original) {
 		try {
-			session.close();
+			mgr.close();
 		} catch(Throwable e) {
 			//original is what will be thrown but add a secondary suppressed exception
 			//into the original...
@@ -85,7 +91,7 @@ public class HibernateController {
 		}
 	}
 
-	private void rollbackIfNeeded(Transaction tx, Throwable original) {
+	private void rollbackIfNeeded(EntityTransaction tx, Throwable original) {
 		try {
 			if(tx.isActive())
 				tx.rollback();

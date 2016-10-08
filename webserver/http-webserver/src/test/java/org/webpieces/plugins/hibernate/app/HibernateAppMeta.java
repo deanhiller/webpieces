@@ -14,7 +14,7 @@ public class HibernateAppMeta implements WebAppMeta {
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(
 				new H2DbModule(),
-				new HibernateModule("plugins/hibernate.cfg.xml")
+				new HibernateModule("fortest")
 				);
 	}
 	

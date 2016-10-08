@@ -53,7 +53,7 @@ public class MeetingController {
 		//}
 		
 		//need to send redirect at this point to getUser with id=id
-		return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_SHOW_MTG, 888));
+		return CompletableFuture.completedFuture(Actions.redirect(MtgRouteId.GET_SHOW_MTG, "id", 888));
 	}
 	
 	/**
@@ -76,7 +76,7 @@ public class MeetingController {
 	
 	public CompletableFuture<Redirect> asyncMethod() {
 		return service.remoteCall()
-			.thenApply(val -> Actions.redirect(MtgRouteId.GET_SHOW_MTG, val));
+			.thenApply(val -> Actions.redirect(MtgRouteId.GET_SHOW_MTG, "id", val));
 	}
 	
 }

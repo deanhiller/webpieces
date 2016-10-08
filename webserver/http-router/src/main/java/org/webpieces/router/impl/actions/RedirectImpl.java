@@ -1,7 +1,6 @@
 package org.webpieces.router.impl.actions;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.dto.RedirectResponse;
@@ -9,12 +8,12 @@ import org.webpieces.router.api.routing.RouteId;
 
 public class RedirectImpl implements Redirect {
 	private RouteId id;
-	private List<Object> args;
+	private Map<String, Object> args;
 	private RedirectResponse redirectResponse;
 
 	public RedirectImpl(RouteId id, Object ... args) {
 		this.id = id;
-		this.args = Arrays.asList(args);
+		this.args = PageArgListConverter.createPageArgMap(args);
 	}
 
 	public RedirectImpl(RedirectResponse redirectResponse) {
@@ -25,7 +24,7 @@ public class RedirectImpl implements Redirect {
 		return id;
 	}
 
-	public List<Object> getArgs() {
+	public Map<String, Object> getArgs() {
 		return args;
 	}
 
