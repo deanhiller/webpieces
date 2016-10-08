@@ -18,6 +18,7 @@ dependencies {
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-router-dev')
     testCompile project(':webserver-plugins:hibernate-plugin')
+    testCompile project(':webserver-plugins:h2db-plugin')
     testCompile deps['selenium']
 }
 
