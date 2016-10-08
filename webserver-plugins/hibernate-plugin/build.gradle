@@ -1,0 +1,6 @@
+dependencies {
+    compile deps['hibernate']
+    compile deps['log4jdbc']
+    compile deps['hsqldb']
+    compile project(':webserver-plugins:plugin-api')
+}

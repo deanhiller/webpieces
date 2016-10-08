@@ -20,6 +20,9 @@ public class HttpsController {
 	}
 	
 	public Redirect postLogin() {
+		//simulating successful login here...
+		Current.session().put(HttpsRouteModule.LOGIN_TOKEN, "someId");
+		
 		String url = Current.flash().get("url");
 		if(url != null) {
 			return Actions.redirectToUrl(url); //page the user was trying to access before logging in

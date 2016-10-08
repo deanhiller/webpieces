@@ -34,9 +34,11 @@ ext {
     deps = [
        'junit':           'junit:junit:4.11',  
        'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+
        //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
-       //instead of bringing in an entire jar?
+       //instead of bringing in an entire jar perhaps...?
        'commons-beans':   'commons-beanutils:commons-beanutils:1.9.2',
+
        'javax-inject':    'javax.inject:javax.inject:1',
        'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
        //do we need this one...
@@ -50,6 +52,10 @@ ext {
        'metrics':         'io.dropwizard.metrics:metrics-core:3.1.0',
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'hpack':           'com.twitter:hpack:v1.0.1',
+
+       'hibernate':       'org.hibernate:hibernate-core:5.2.3.Final',
+       'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
+       'hsqldb':          'org.hsqldb:hsqldb:2.3.4',
     ]   
 
 }

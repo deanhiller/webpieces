@@ -10,12 +10,13 @@ import org.webpieces.webserver.api.LoginInfo;
 
 public class HttpsRouteModule extends AbstractRouteModule {
 
+	public static final String LOGIN_TOKEN = "userId";
 	@Override
 	public void configure(String currentPackage) {
 		
 		addHttpsRoute(GET , "/secureRoute",         "HttpsController.home", HttpsRouteId.HOME);
 		addHttpsRoute(GET , "/login",               "HttpsController.login", HttpsRouteId.LOGIN);
-		addHttpsRoute(POST, "/postLogin",           "HttpsController.postLogin", HttpsRouteId.POST_LOGIN);
+		addHttpsRoute(POST, "/postLogin",           "HttpsController.postLogin", HttpsRouteId.POST_LOGIN, false);
 		addHttpsRoute(GET , "/secure/internal",     "HttpsController.internal", HttpsRouteId.INTERNAL);
 
 		//in this case, https route of same path is never hit since the order is wrong...
@@ -29,7 +30,7 @@ public class HttpsRouteModule extends AbstractRouteModule {
 		//Unlike routes which apply regex to request urls, filters regexs are applied to route regexs so if a filter
 		//matches a route, it will be added to all requests for that route.  This is done so we don't have to
 		//figure out which filters to apply on each request and on startup can wire up all filters once
-		addFilter("/secure/.*", HttpLoginFilter.class, new LoginInfo("userId", HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
+		addFilter("/secure/.*", HttpLoginFilter.class, new LoginInfo(LOGIN_TOKEN, HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
 		addFilter("/backend/.*", HttpLoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), PortType.HTTPS_FILTER);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");

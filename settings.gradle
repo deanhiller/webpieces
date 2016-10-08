@@ -22,6 +22,8 @@ include 'webserver:projectcreator'
 include 'webserver:gradle-plugin-htmlcompiler'
 include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev'
 include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME'
+include 'webserver-plugins:hibernate-plugin'
+include 'webserver-plugins:plugin-api'
 include 'embeddablehttpproxy'
 include 'full-httpproxy'
 

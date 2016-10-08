@@ -79,13 +79,16 @@ Pieces
  * webserver/http-webserver - a webserver with http 2 support
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
-TODO: 
+TODO:
+* add hibernate and embedded in-memory H2 in dev mode along with embedded http web client 
 * add jacoco to the generated webpieces project, create example project for feature testing blog
+* add checkstyle with the really good rules to all projects to fail if any are violated
+* add automatic formatter... https://github.com/diffplug/spotless so no one worries about formatting
 * test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
 * catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
-* Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be look but the controller as well possibly
+* Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be css but could be css+html for easier construction of themes
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
 * CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
