@@ -92,6 +92,17 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     private AtomicInteger nextStreamId = new AtomicInteger(0x1);
     private ConcurrentHashMap<Integer, AtomicInteger> outgoingFlowControl = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, AtomicInteger> incomingFlowControl = new ConcurrentHashMap<>();
+    private class PendingDataFrame {
+        CompletableFuture<Channel> future;
+        Http2Data frame;
+
+        PendingDataFrame(CompletableFuture<Channel> future, Http2Data frame) {
+            this.future = future;
+            this.frame = frame;
+        }
+    }
+
+    private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<PendingDataFrame>> outgoingDataQueue = new ConcurrentHashMap<>();
 
 	private Encoder encoder;
 	private Decoder decoder;
@@ -376,9 +387,72 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		return headerList;
 	}
 
-	private CompletableFuture<Channel> sendDataFrames(DataWrapper body, int streamId, Stream stream) {
+    private void decrementOutgoingWindow(int streamId, int length) {
+        log.info("decrementing outgoing window for {} by {}", streamId, length);
+        if(outgoingFlowControl.get(0x0).addAndGet(- length) < 0) {
+            throw new RuntimeException("this should not happen");
+        }
+        if(outgoingFlowControl.get(streamId).decrementAndGet() < 0) {
+            throw new RuntimeException("this should not happen");
+        }
+    }
+
+    private CompletableFuture<Channel> actuallyWriteDataFrame(PendingDataFrame pendingDataFrame) {
+        Http2Data frame = pendingDataFrame.frame;
+        CompletableFuture<Channel> future = pendingDataFrame.future;
+
+        int streamId = frame.getStreamId();
+        decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
+        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenApply(
+                channel -> {
+                    future.complete(channel);
+                    return channel;
+                }
+        );
+    }
+    private boolean canSendFrame(Http2Data dataFrame) {
+        int length = http2Parser.getFrameLength(dataFrame);
+        return (outgoingFlowControl.get(dataFrame.getStreamId()).get() > length &&
+                outgoingFlowControl.get(0x0).get() > length);
+    }
+
+	private void clearQueue(int streamId) {
+        ConcurrentLinkedQueue<PendingDataFrame> queue = outgoingDataQueue.get(streamId);
+        if (!queue.isEmpty()) {
+            synchronized (queue) {
+                PendingDataFrame pendingDataFrame = queue.peek();
+                if(pendingDataFrame != null) {
+                    int length = http2Parser.getFrameLength(pendingDataFrame.frame);
+                    if (outgoingFlowControl.get(streamId).get() > length &&
+                            outgoingFlowControl.get(0x0).get() > length) {
+                        // Will write one frame, then write more frames
+                        queue.poll();
+                        actuallyWriteDataFrame(pendingDataFrame).thenAccept(channel -> clearQueue(streamId));
+                    }
+                }
+            }
+        }
+    }
+
+	private CompletableFuture<Channel> writeDataFrame(Http2Data dataFrame) {
+        int streamId = dataFrame.getStreamId();
+        if(!outgoingDataQueue.contains(streamId)) {
+            outgoingDataQueue.put(streamId, new ConcurrentLinkedQueue<>());
+        }
+        CompletableFuture<Channel> future = new CompletableFuture<>();
+        PendingDataFrame pendingDataFrame = new PendingDataFrame(future, dataFrame);
+
+        if(canSendFrame(dataFrame) && outgoingDataQueue.get(streamId).isEmpty()) {
+            return actuallyWriteDataFrame(pendingDataFrame);
+        } else {
+            outgoingDataQueue.get(streamId).add(pendingDataFrame);
+            return future;
+        }
+    }
+
+	private CompletableFuture<Channel> sendDataFrames(DataWrapper body, Stream stream) {
 		Http2Data newFrame = new Http2Data();
-		newFrame.setStreamId(streamId);
+		newFrame.setStreamId(stream.getStreamId());
 
 		// writes only one frame at a time.
 		if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
@@ -398,7 +472,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			newFrame.setData(split.get(0));
 			log.info("sending non-final data frame: " + newFrame);
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
-					channel ->  sendDataFrames(split.get(1), streamId, stream)
+					channel ->  sendDataFrames(split.get(1), stream)
 			);
 		}
 	}
@@ -538,7 +612,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         activeStreams.put(thisStreamId, newStream);
         LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
         return sendHeaderFrames(headers, thisStreamId, newStream).thenCompose(
-                channel -> sendDataFrames(request.getBodyNonNull(), thisStreamId, newStream));
+                channel -> sendDataFrames(request.getBodyNonNull(), newStream));
 
     }
 
@@ -667,6 +741,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                 throw new RstStreamError(Http2ErrorCode.FLOW_CONTROL_ERROR, streamId);
             }
 
+        }
+
+        private void incrementOutgoingWindow(int streamId, int length) {
+            log.info("incrementing outgoing window for {} by {}", streamId, length);
+            outgoingFlowControl.get(0x0).addAndGet(length);
+            outgoingFlowControl.get(streamId).addAndGet(length);
         }
 
         private void incrementIncomingWindow(int streamId, int length) {
@@ -856,8 +936,20 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		}
 
 		private void handleWindowUpdate(Http2WindowUpdate frame, Stream stream) {
-			// can get this on any stream id, or with no stream
-			//stream.setWindowIncrement(frame.getWindowSizeIncrement());
+            incrementOutgoingWindow(stream.getStreamId(), frame.getWindowSizeIncrement());
+
+            // clear all queues if the connection-level stream
+            if(frame.getStreamId() == 0x0) {
+                for (Map.Entry<Integer, ConcurrentLinkedQueue<PendingDataFrame>> entry : outgoingDataQueue.entrySet()) {
+                    if (!entry.getValue().isEmpty())
+                        clearQueue(entry.getKey());
+                }
+            }
+            else {
+                if(outgoingDataQueue.containsKey(frame.getStreamId())) {
+                    clearQueue(frame.getStreamId());
+                }
+            }
 		}
 
 		private void handleSettings(Http2Settings frame) {
