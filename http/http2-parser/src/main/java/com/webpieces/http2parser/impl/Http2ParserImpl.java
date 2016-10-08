@@ -149,6 +149,12 @@ public class Http2ParserImpl implements Http2Parser {
         return frame.getFrameType().getId();
     }
 
+    public int getFrameLength(Http2Frame frame) {
+        FrameMarshaller marshaller = dtoToMarshaller.get(frame.getClass());
+        DataWrapper payload = marshaller.marshalPayload(frame);
+        return payload.getReadableSize();
+    }
+
     public DataWrapper marshal(Http2Frame frame) {
         FrameMarshaller marshaller = dtoToMarshaller.get(frame.getClass());
 

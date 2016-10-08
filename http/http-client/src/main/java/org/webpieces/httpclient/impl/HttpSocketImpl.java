@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,6 +90,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
     private AtomicInteger nextStreamId = new AtomicInteger(0x1);
+    private ConcurrentHashMap<Integer, AtomicInteger> outgoingFlowControl = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, AtomicInteger> incomingFlowControl = new ConcurrentHashMap<>();
 
 	private Encoder encoder;
 	private Decoder decoder;
@@ -178,11 +181,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         sendHttp2Preface();
         negotiationDone.set(true);
 
-        if(protocol == HTTP2) {
-            Timer timer = new Timer();
-            // in 5 seconds send a ping every 5 seconds
-            timer.schedule(new SendPing(), 5000, 5000);
-        }
+        // Initialize connection level flow control
+        initializeFlowControl(0x0);
+
+        Timer timer = new Timer();
+        // in 5 seconds send a ping every 5 seconds
+        timer.schedule(new SendPing(), 5000, 5000);
+
     }
 
 	private CompletableFuture<Channel> negotiateHttpVersion(HttpRequest req, ResponseListener listener) {
@@ -190,7 +195,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         // If we set this to true, then everyting is copacetic with http://nghttp2.org, but
         // if we set it to false and do upgrade negotation, then the first request succeeds
         // but subsequent requests give us RstStream responses from the server.
-		if (false) { // We don't know how to check ALPN yet, but if we do, put that check here
+		if (true) { // We don't know how to check ALPN yet, but if we do, put that check here
             log.info("setting http2 because of alpn");
             enableHttp2();
             negotiationDone.set(true);
@@ -231,6 +236,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                     int initialStreamId = getAndIncrementStreamId();
                     Stream initialStream = new Stream();
                     initialStream.setStreamId(initialStreamId);
+                    initializeFlowControl(initialStreamId);
                     initialStream.setRequest(req);
                     initialStream.setListener(listener);
                     initialStream.setResponse(r);
@@ -507,6 +513,12 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }
     }
 
+    private void initializeFlowControl(int streamId) {
+        // Set up flow control
+        incomingFlowControl.put(streamId, new AtomicInteger(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
+        outgoingFlowControl.put(streamId, new AtomicInteger(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
+    }
+
     private CompletableFuture<Channel> sendHttp2Request(HttpRequest request, ResponseListener l) {
         // Check if we are allowed to create a new stream
         if (remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
@@ -522,7 +534,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         newStream.setListener(l);
         newStream.setStreamId(thisStreamId);
         newStream.setRequest(request);
-
+        initializeFlowControl(thisStreamId);
         activeStreams.put(thisStreamId, newStream);
         LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
         return sendHeaderFrames(headers, thisStreamId, newStream).thenCompose(
@@ -645,13 +657,43 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			}
 		}
 
+		private void decrementIncomingWindow(int streamId, int length) {
+            log.info("decrementing window for {} by {}", streamId, length);
+            if(incomingFlowControl.get(0x0).addAndGet(- length) < 0) {
+                throw new GoAwayError(lastClosedServerStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR,
+                        wrapperGen.emptyWrapper());
+            }
+            if(incomingFlowControl.get(streamId).decrementAndGet() < 0) {
+                throw new RstStreamError(Http2ErrorCode.FLOW_CONTROL_ERROR, streamId);
+            }
+
+        }
+
+        private void incrementIncomingWindow(int streamId, int length) {
+            log.info("incrementing window for {} by {}", streamId, length);
+            incomingFlowControl.get(0x0).addAndGet(length);
+            incomingFlowControl.get(streamId).addAndGet(length);
+
+            Http2WindowUpdate frame = new Http2WindowUpdate();
+            frame.setWindowSizeIncrement(length);
+            frame.setStreamId(0x0);
+            channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+
+            // reusing the frame! ack.
+            frame.setStreamId(streamId);
+            channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+        }
+
 		private void handleData(Http2Data frame, Stream stream) {
 			// Only allowable if stream is open or half closed local
 			switch(stream.getStatus()) {
 				case OPEN:
 				case HALF_CLOSED_LOCAL:
 					boolean isComplete = frame.isEndStream();
-					stream.getListener().incomingData(frame.getData(), stream.getRequest(), isComplete);
+                    int payloadLength = http2Parser.getFrameLength(frame);
+                    decrementIncomingWindow(frame.getStreamId(), payloadLength);
+                    stream.getListener().incomingData(frame.getData(), stream.getRequest(), isComplete).thenAccept(
+                            length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
 					if(isComplete)
 						receivedEndStream(stream);
 					break;
@@ -796,6 +838,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                 }
 				Stream promisedStream = new Stream();
 				int newStreamId = frame.getPromisedStreamId();
+                initializeFlowControl(newStreamId);
                 promisedStream.setStreamId(newStreamId);
 
 				// TODO: make sure streamid is valid
@@ -892,6 +935,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                 if(stream == null) {
                     stream = new Stream();
                     stream.setStreamId(frame.getStreamId());
+                    initializeFlowControl(stream.getStreamId());
                 }
 
 				switch (frame.getFrameType()) {

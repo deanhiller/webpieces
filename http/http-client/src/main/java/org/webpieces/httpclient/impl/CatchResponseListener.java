@@ -7,6 +7,8 @@ import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.concurrent.CompletableFuture;
+
 public class CatchResponseListener implements ResponseListener {
 
 	private static final Logger log = LoggerFactory.getLogger(CatchResponseListener.class);
@@ -36,22 +38,19 @@ public class CatchResponseListener implements ResponseListener {
 	}
 
 	@Override
-	public void incomingData(DataWrapper data, boolean isLastData) {
-		try {
-			listener.incomingData(data, isLastData);
-		} catch(Throwable e) {
+	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
+		return listener.incomingData(data, isLastData).exceptionally(e -> {
 			log.error("exception", e);
-		}
+			return data.getReadableSize();
+		});
 	}
 
 	@Override
-	public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-		try
-		{
-			listener.incomingData(data, request, isLastData);
-		} catch(Throwable e) {
+	public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+		return listener.incomingData(data, request, isLastData).exceptionally(e -> {
 			log.error("exception", e);
-		}
+			return data.getReadableSize();
+		});
 	}
 
 	@Override

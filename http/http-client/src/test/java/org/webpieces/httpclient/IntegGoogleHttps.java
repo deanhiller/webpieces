@@ -1,6 +1,7 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -109,14 +110,15 @@ public class IntegGoogleHttps {
 		}
 
 		@Override
-		public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-			incomingData(data, isLastData);
+		public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+			return incomingData(data, isLastData);
 		}
 
 		@Override
-		public void incomingData(DataWrapper wrapper, boolean isLastData) {
+		public CompletableFuture<Integer> incomingData(DataWrapper wrapper, boolean isLastData) {
 			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
 			log.info("result=(lastData="+ isLastData +"\n"+result+"/////");
+			return CompletableFuture.completedFuture(wrapper.getReadableSize());
 		}
 
 		@Override

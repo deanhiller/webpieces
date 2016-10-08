@@ -21,6 +21,7 @@ public interface Http2Parser {
 
     DataWrapper marshal(Http2Frame frame);
     DataWrapper marshal(List<Http2Frame> frames);
+    int getFrameLength(Http2Frame frame);
 
     ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder);
 

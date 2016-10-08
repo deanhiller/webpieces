@@ -81,14 +81,15 @@ public class IntegNgHttp2 {
         }
 
         @Override
-        public void incomingData(DataWrapper data, boolean isLastData) {
+        public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
             log.info("received resp="+ data +" last="+ isLastData);
+            return CompletableFuture.completedFuture(data.getReadableSize());
         }
 
         @Override
-        public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+        public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
             log.info("req="+request);
-            incomingData(data, isLastData);
+            return incomingData(data, isLastData);
         }
 
         @Override

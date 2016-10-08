@@ -45,11 +45,13 @@ public class CompletableListener implements ResponseListener {
 	}
 
 	@Override
-	public void incomingData(DataWrapper data, boolean isLastData) {
+	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
+		return CompletableFuture.completedFuture(data.getReadableSize());
 	}
 
 	@Override
-	public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+	public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+		return incomingData(data, isLastData);
 	}
 
 	@Override

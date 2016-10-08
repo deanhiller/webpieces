@@ -6,6 +6,8 @@ import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.concurrent.CompletableFuture;
+
 public class Layer1Response implements ResponseListener {
 
 	private Layer2ResponseListener responseListener;
@@ -29,14 +31,16 @@ public class Layer1Response implements ResponseListener {
 	}
 
 	@Override
-	public void incomingData(DataWrapper data, boolean isLastData) {
+	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
 		// TODO: fix this to deal with the fact that we are getting only the datawrapper now
 		// not the chunk.
 		//responseListener.processResponse(channel, req, data, isLastData);
+		return CompletableFuture.completedFuture(data.getReadableSize());
 	}
 
     @Override
-    public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+    public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
+		return incomingData(data, isLastData);
     }
 
     @Override

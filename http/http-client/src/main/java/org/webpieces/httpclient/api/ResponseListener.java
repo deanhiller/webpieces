@@ -4,6 +4,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface ResponseListener {
 
 	/**
@@ -46,12 +48,16 @@ public interface ResponseListener {
 	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete);
 	
 	/**
+	 *
+	 * incomingData returns a future because we want to be able to signal that we're
+	 * done processing this data and the flow control window can be opened back up again.
+	 *
 	 *  @param data
 	 * @param isLastData
 	 */
-	public void incomingData(DataWrapper data, boolean isLastData);
+	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData);
 
-	public void incomingData(DataWrapper data, HttpRequest request, boolean isLastData);
+	public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData);
 	
 	public void failure(Throwable e);
 	
