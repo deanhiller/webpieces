@@ -189,6 +189,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 	private CompletableFuture<Channel> negotiateHttpVersion(HttpRequest req, ResponseListener listener) {
 		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
+        // If we set this to true, then everyting is copacetic with http://nghttp2.org, but
+        // if we set it to false and do upgrade negotation, then the first request succeeds
+        // but subsequent requests give us RstStream responses from the server.
 		if (false) { // We don't know how to check ALPN yet, but if we do, put that check here
             log.info("setting http2 because of alpn");
             enableHttp2();
