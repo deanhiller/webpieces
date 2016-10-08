@@ -10,6 +10,14 @@ sourceSets {
     }
 }
 
+//ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
+//and scan for classes with @Entity in the directory OR jar with that xml file only
+//maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
+//this screws tools in many situations like this one so this puts it back so the output is at
+//least put to the same location
+sourceSets.test.output.resourcesDir = sourceSets.test.output.classesDir
+compileJava.doLast { tasks.processResources.execute() }
+
 dependencies {
     compile deps['guice']
     compile project(':http:http-frontend'), project(':http:http1_1-parser')

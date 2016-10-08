@@ -31,10 +31,8 @@ public class TestBasicHibernate {
 	
 	@Test
 	public void testCompletePromiseOnRequestThread() {
-		//Well, it works in eclipse but not in gradle yet...classpath issues :(
-		//commit all other changes then fix
-//		String redirectUrl = saveBean();
-//		readBean(redirectUrl);
+		String redirectUrl = saveBean();
+		readBean(redirectUrl);
 	}
 
 	private String saveBean() {
