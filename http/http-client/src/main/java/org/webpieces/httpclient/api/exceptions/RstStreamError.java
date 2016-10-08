@@ -8,8 +8,8 @@ public class RstStreamError extends Http2Error {
     private Http2ErrorCode errorCode;
     private int streamId;
 
-    public RstStreamError(Http2ErrorCode errorCode) {
-        this.errorCode = errorCode;
+    public int getStreamId() {
+        return streamId;
     }
 
     public RstStreamError(Http2ErrorCode errorCode, int streamId) {

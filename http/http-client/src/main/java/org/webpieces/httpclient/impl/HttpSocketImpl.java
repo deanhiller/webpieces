@@ -31,10 +31,8 @@ import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
-import org.webpieces.httpclient.api.exceptions.ClientError;
-import org.webpieces.httpclient.api.exceptions.GoAwayError;
+import org.webpieces.httpclient.api.exceptions.*;
 import org.webpieces.httpclient.api.exceptions.InternalError;
-import org.webpieces.httpclient.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -643,7 +641,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					stream.setStatus(CLOSED);
 					break;
 				default:
-					// TODO: throw error here
+					throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 			}
 		}
 
@@ -658,15 +656,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						receivedEndStream(stream);
 					break;
 				default:
-					// TODO: Throw
+					throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 			}
 		}
 
-		private HttpResponse createResponseFromHeaders(Queue<HasHeaderFragment.Header> headers) {
+		private HttpResponse createResponseFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
 			HttpResponse response = new HttpResponse();
 
             // TODO: throw if special headers are not at the front
-
 			// Set special header
 			String statusString = null;
 			for(HasHeaderFragment.Header header: headers) {
@@ -676,14 +673,14 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 				}
 			}
 			if(statusString == null)
-			    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR);
+			    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 
 			HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 			HttpResponseStatus status = new HttpResponseStatus();
             try {
                 status.setCode(Integer.parseInt(statusString));
             } catch(NumberFormatException e) {
-                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR);
+                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
 
 			statusLine.setStatus(status);
@@ -698,7 +695,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			return response;
 		}
 
-		private HttpRequest createRequestFromHeaders(Queue<HasHeaderFragment.Header> headers) {
+		private HttpRequest createRequestFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
 			Map<String, String> headerMap = new HashMap<>();
 			for(HasHeaderFragment.Header header: headers) {
 				headerMap.put(header.header, header.value);
@@ -712,7 +709,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			String authority = headerMap.get(":authority");
 			String path = headerMap.get(":path");
             if(method == null || scheme == null || authority == null || path == null)
-                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR);
+                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 
 			// See https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html#asterisk-form
 			if(method.toLowerCase().equals("options") && path.equals("*")) {
@@ -756,7 +753,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 			if(frame.isEndHeaders()) {
 				// the parser has already accumulated the headers in the frame for us.
-				HttpResponse response = createResponseFromHeaders(frame.getHeaderList());
+				HttpResponse response = createResponseFromHeaders(frame.getHeaderList(), stream);
 				stream.setResponse(response);
 
 				boolean isComplete = frame.isEndStream();
@@ -764,7 +761,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					receivedEndStream(stream);
 			}
 			else {
-				// TODO: throw. This should not happen if the parser is working right.
+				throw new InternalError(lastClosedServerStream().orElse(0), wrapperGen.emptyWrapper());
 			}
 		}
 
@@ -807,7 +804,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 				// Uses the same listener as the stream it came in on
 				promisedStream.setListener(stream.getListener());
-				HttpRequest request = createRequestFromHeaders(frame.getHeaderList());
+				HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), promisedStream);
 				promisedStream.setRequest(request);
 				promisedStream.setStatus(RESERVED_REMOTE);
 			} else {
@@ -864,6 +861,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			goneAwayLastStreamId.set(frame.getLastStreamId());
 			goneAwayErrorCode.set(frame.getErrorCode());
 			additionalDebugData.set(frame.getDebugData());
+            farEndClosed(channel);
 		}
 
 		private void handlePing(Http2Ping frame) {
@@ -918,7 +916,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 					case CONTINUATION:
 						throw new InternalError(lastClosedServerStream().orElse(0), wrapperGen.emptyWrapper());
 					default:
-						// throw a protocol error
+						throw new GoAwayError(lastClosedServerStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR,
+                                wrapperGen.emptyWrapper());
 				}
 			} else {
 				switch (frame.getFrameType()) {
@@ -934,7 +933,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 						handlePing((Http2Ping) frame);
 						break;
 					default:
-						// Throw a protocol error
+						throw new GoAwayError(lastClosedServerStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR,
+                                    wrapperGen.emptyWrapper());
 				}
 			}
 		}
@@ -946,7 +946,18 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
 			for(Http2Frame frame: parserResult.getParsedFrames()) {
 				log.info("got frame="+frame);
-				handleFrame(frame);
+                try {
+                    handleFrame(frame);
+                } catch (Http2Error e) {
+                    channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrame()).createByteArray()));
+                    if(RstStreamError.class.isInstance(e)) {
+                        // Mark the stream closed
+                        activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(CLOSED);
+                    }
+                    if(GoAwayError.class.isInstance(e)) {
+                        // TODO: Shut this connection down
+                    }
+                }
 			}
 			oldData = parserResult.getMoreData();
 		}
