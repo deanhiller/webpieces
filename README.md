@@ -1,6 +1,8 @@
 # webpieces
 
 [![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
+
+This code coverage is actually not accurate or at least when we run it locally, it tells us 66% of the code is covered...
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 
