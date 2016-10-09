@@ -52,7 +52,7 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
     }
 
     /* payload */
-    private PriorityDetails priorityDetails; /* optional */
+    private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
     private DataWrapper headerFragment;
     private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();

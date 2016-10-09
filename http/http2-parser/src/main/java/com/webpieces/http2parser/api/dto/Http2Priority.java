@@ -8,7 +8,7 @@ public class Http2Priority extends Http2Frame implements HasPriorityDetails {
     /* flags */
 
     /* payload */
-    private PriorityDetails priorityDetails;
+    private PriorityDetails priorityDetails = new PriorityDetails();
 
     public boolean isStreamDependencyIsExclusive() {
         return priorityDetails.streamDependencyIsExclusive;

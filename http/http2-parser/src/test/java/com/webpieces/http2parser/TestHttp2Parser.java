@@ -81,7 +81,7 @@ public class TestHttp2Parser {
         ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":method", "GET"));
         ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":path", "/"));
         ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":scheme", "http"));
-        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":authority", "/"));
+        ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header(":authority", "nghttp2.org"));
         ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header("accept", "*/*"));
         ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header("accept-encoding", "gzip, deflate"));
         ngHttp2ExampleHeaders.add(new HasHeaderFragment.Header("user-agent", "nghttp2/1.15.0"));
