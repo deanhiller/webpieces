@@ -13,6 +13,7 @@ This project is essentially pieces that can be used to build any http related so
 HUGE WINS in using this webserver
 
 * unlike Seam/JSF and heavyweight servers, you can slap down 1000 of these as it is built for clustering and scale and being stateless!!!
+* be blown away with the optimistic locking pattern.  If your end users both post a change to the same entity, one will win and the other will go through a path of code where you can decide, 1. show the user his changes and the other users, 2. just tell the user it failed and to start over 3. let it overwrite the previous user code 
 * look ma, no restarting the server in development mode with complete java refactoring
 * prod server runs on :8080, dev server on :9000 all locally such that unlike play, dev server never caches files so cached files from :8080 don't interfere with development mode and dev server never caches files making development seamless(modify css file and it's up to date)
 * no erasing users input from forms which many websites do....soooo annoying
@@ -85,6 +86,9 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
+* add optimistic locking test case
+* add async transaction filter test case (and test loading entities in webpage in synch and async versions to see if we are consistent there)
+* move transaction code to filter
 * add hibernate and embedded in-memory H2 in dev mode along with embedded http web client 
 * add jacoco to the generated webpieces project, create example project for feature testing blog
 * add checkstyle with the really good rules to all projects to fail if any are violated

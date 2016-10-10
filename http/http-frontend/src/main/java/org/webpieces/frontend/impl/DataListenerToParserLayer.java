@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.logging.SupressedExceptionLog;
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.frontend.api.exception.HttpClientException;
 import org.webpieces.frontend.api.exception.HttpException;
@@ -39,10 +40,12 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 			HttpClientException exc = new HttpClientException("Could not parse http request", KnownStatusCode.HTTP_400_BADREQUEST, e);
 			//move down to debug level later on..
 			log.info("Client screwed up", exc);
+			SupressedExceptionLog.log(exc); //next log secondary exceptions
 			sendBadResponse(channel, exc);
 		} catch(Throwable e) {
 			HttpServerException exc = new HttpServerException("There was a bug in the server, please see the server logs", KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, e);
 			log.error("Exeption processing", exc);
+			SupressedExceptionLog.log(exc);
 			sendBadResponse(channel, exc);
 		}
 	}

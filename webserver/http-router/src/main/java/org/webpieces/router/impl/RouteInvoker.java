@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.logging.SupressedExceptionLog;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
@@ -135,7 +136,10 @@ public class RouteInvoker {
 			ErrorRoutes errorRoutes, Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, RouteMeta failedRoute) {
 		try {
 			log.error("There is three parts to this error message... request, route found, and the exception "
-					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
+					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
+					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
+			SupressedExceptionLog.log(exc);
+			
 			MatchResult result = errorRoutes.fetchInternalServerErrorRoute();
 			return invokeImpl(result, result.getMeta().getService222(), requestCtx, responseCb);
 		} catch(Throwable e) {
