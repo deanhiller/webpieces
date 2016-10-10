@@ -4,13 +4,9 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2parser.api.Http2Parser;
+import org.webpieces.httpclient.api.*;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.httpclient.api.CloseListener;
-import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpclient.api.HttpsSslEngineFactory;
-import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -34,16 +30,16 @@ public class HttpsClientImpl implements HttpClient {
 	@Override
 	public CompletableFuture<HttpResponse> sendSingleRequest(InetSocketAddress addr, HttpRequest request) {
 		HttpSocket socket = openHttpSocket(addr+"");
-		CompletableFuture<HttpSocket> connect = socket.connect(addr);
-		return connect.thenCompose(p -> socket.send(request));
+		CompletableFuture<RequestListener> connect = socket.connect(addr);
+		return connect.thenCompose(requestListener -> socket.send(request));
 	}
 
 	@Override
 	public void sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener listener) {
 		HttpSocket socket = openHttpSocket(addr+"");
 
-		CompletableFuture<HttpSocket> connect = socket.connect(addr);
-		connect.thenAccept(p -> socket.send(request, listener))
+		CompletableFuture<RequestListener> connect = socket.connect(addr);
+		connect.thenAccept(requestListener -> requestListener.incomingRequest(request, true, listener))
 			.exceptionally(e -> fail(socket, listener, e));
 	}
 

@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.webpieces.httpclient.api.RequestListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
@@ -68,22 +69,23 @@ public class Layer4Processor implements HttpRequestListener {
 		//need synchronization if two clients of proxy access same httpSocket/addr!!!
 		HttpSocket socket = cache.getIfPresent(addr);
 		if(socket != null) {
-			sendData(channel, socket, req);
+			sendData(channel, socket.getRequestListener(), req);
 		} else {
 			openAndConnectSocket(addr, req, channel);
 		}
 	}
 
-	private void sendData(FrontendSocket channel, HttpSocket socket, HttpRequest req) {
-		socket.send(req, new Layer1Response(layer2Processor, channel, req));
+	private void sendData(FrontendSocket channel, RequestListener requestListener, HttpRequest req) {
+		// Can only deal with complete requests
+		requestListener.incomingRequest(req, true, new Layer1Response(layer2Processor, channel, req));
 	}
 
 	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, FrontendSocket channel) {
 		HttpSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
-				.thenAccept(s -> {
-					sendData(channel, socket, req);
+				.thenAccept(requestListener -> {
+					sendData(channel, requestListener, req);
 					cache.put(addr, socket);
 				})
 				.exceptionally(e -> layer2Processor.processError(channel, req, e));

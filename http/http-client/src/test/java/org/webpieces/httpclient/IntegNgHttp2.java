@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.RequestListener;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -21,9 +22,10 @@ public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
 
-    static private CompletableFuture<HttpRequest> sendManyTimes(HttpSocket socket, int n, HttpRequest req, ResponseListener l) {
+    static private CompletableFuture<HttpRequest> sendManyTimes(RequestListener requestListener, int n, HttpRequest req, ResponseListener l) {
         if(n > 0) {
-            return socket.send(req, l).thenCompose(request -> sendManyTimes(socket, n-1, req, l));
+            return requestListener.incomingRequest(req, true, l)
+                    .thenCompose(request -> sendManyTimes(requestListener, n-1, req, l));
         } else {
             return CompletableFuture.completedFuture(req);
         }
@@ -47,7 +49,7 @@ public class IntegNgHttp2 {
         HttpSocket socket = client.openHttpSocket("oneTimer");
         socket
                 .connect(new InetSocketAddress(host, port))
-                .thenCompose(channel -> sendManyTimes(socket, 10, req, listener))
+                .thenCompose(requestListener -> sendManyTimes(requestListener, 10, req, listener))
                 .exceptionally(e -> {
                     reportException(socket, e);
                     return req;
@@ -55,7 +57,7 @@ public class IntegNgHttp2 {
 
         Thread.sleep(10000);
 
-        sendManyTimes(socket, 10, req, listener).exceptionally(e -> {
+        sendManyTimes(socket.getRequestListener(), 10, req, listener).exceptionally(e -> {
             reportException(socket, e);
             return req;
         });

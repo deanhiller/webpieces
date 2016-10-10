@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,6 +17,7 @@ import java.util.function.IntUnaryOperator;
 import javax.net.ssl.SSLEngine;
 import javax.xml.bind.DatatypeConverter;
 
+import org.webpieces.httpclient.api.*;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import com.twitter.hpack.Decoder;
@@ -28,16 +28,11 @@ import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.CloseListener;
-import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpclient.api.HttpsSslEngineFactory;
-import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpclient.api.exceptions.*;
 import org.webpieces.httpclient.api.exceptions.InternalError;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
@@ -54,14 +49,14 @@ import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP11;
 import static org.webpieces.httpclient.impl.HttpSocketImpl.Protocol.HTTP2;
 import static org.webpieces.httpclient.impl.Stream.StreamStatus.*;
 
-public class HttpSocketImpl implements HttpSocket, Closeable {
+public class HttpSocketImpl implements HttpSocket, RequestListener, Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
 	private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private TCPChannel channel;
 
-	private CompletableFuture<HttpSocket> connectFuture;
+	private CompletableFuture<RequestListener> connectFuture;
 	private boolean isClosed;
 	private boolean connected;
 
@@ -120,7 +115,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private HttpParser httpParser;
 	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
 	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
-
+    private AtomicBoolean acceptingRequest = new AtomicBoolean(false);
 
 
 	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser parser2,
@@ -156,7 +151,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 
 	@Override
-	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr) {
+	public CompletableFuture<RequestListener> connect(InetSocketAddress addr) {
 		if(factory == null) {
 			channel = mgr.createTCPChannel(idForLogging);
 		} else {
@@ -201,17 +196,22 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
     }
 
-	private CompletableFuture<Channel> negotiateHttpVersion(HttpRequest req, ResponseListener listener) {
+    // These hosts can support http2, no need to try to upgrade.
+    private boolean defaultToHttp2(InetSocketAddress addr, TCPChannel channel) {
+        return Arrays.asList("nghttp2.org").contains(addr.getHostName());
+    }
+
+	private CompletableFuture<RequestId> negotiateHttpVersion(HttpRequest req, boolean isComplete, ResponseListener listener) {
 		// First check if ALPN says HTTP2, in which case, set the protocol to HTTP2 and we're done
         // If we set this to true, then everyting is copacetic with http://nghttp2.org, but
         // if we set it to false and do upgrade negotation, then the first request succeeds
         // but subsequent requests give us RstStream responses from the server.
-		if (true) { // We don't know how to check ALPN yet, but if we do, put that check here
-            log.info("setting http2 because of alpn");
+		if (defaultToHttp2(addr, channel)) { // We don't know how to check ALPN yet, but if we do, put that check here
+            log.info("setting http2 because of defaultToHttp2");
             enableHttp2();
             negotiationDone.set(true);
             negotiationDoneNotifier.complete(channel);
-			return CompletableFuture.completedFuture(channel);
+			return actuallySendRequest(req, isComplete, listener);
 
 		} else { // Try the HTTP1.1 upgrade technique
             log.info("attempting http11 upgrade");
@@ -239,9 +239,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                     // out of the incomingResponse call to the CompletableListener in
                     // sendHttp11AndWaitForHeaders I think.
                     listener.incomingResponse(r, !r.isHasChunkedTransferHeader());
-                    return channel;
+                    // Request id is 0 for HTTP/1.1
+                    return new RequestId(0);
 				} else {
-                    log.info("upgrade suceeded");
+                    log.info("upgrade succeeded");
                     enableHttp2();
 
                     int initialStreamId = getAndIncrementStreamId();
@@ -269,7 +270,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
                     if(leftOverData.getReadableSize() > 0)
                         dataListener.incomingData(channel, ByteBuffer.wrap(leftOverData.createByteArray()));
 
-					return channel;
+					return new RequestId(initialStreamId);
 				}
 			});
 		}
@@ -278,7 +279,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private CompletableFuture<HttpResponse> sendHttp11AndWaitForHeaders(HttpRequest request) {
 		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
 		ResponseListener l = new CompletableListener(future, true);
-		sendHttp11Request(request, l);
+        // This only works for complete requests
+		sendHttp11Request(request, true, l);
 		return future;
 	}
 
@@ -286,7 +288,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	public CompletableFuture<HttpResponse> send(HttpRequest request) {
 		CompletableFuture<HttpResponse> future = new CompletableFuture<>();
 		ResponseListener l = new CompletableListener(future);
-		send(request, l);
+
+        // This only works for complete requests
+		incomingRequest(request, true, l);
 		return future;
 	}
 
@@ -295,16 +299,16 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private CompletableFuture<Boolean> clearPendingRequests() {
         if(!pendingRequests.isEmpty()) {
             PendingRequest req = pendingRequests.remove();
-            return negotiateAndSendRequest(req.getRequest(), req.getListener()).thenApply(channel -> true)
-                    .thenCompose(channel -> {
-                        req.complete();
+            return negotiateAndSendRequest(req.getRequest(), req.isComplete(), req.getListener())
+                    .thenCompose(requestId -> {
+                        req.complete(requestId);
                         return clearPendingRequests();
                     });
         } else {
             return CompletableFuture.completedFuture(false);
         }
     }
-	private synchronized HttpSocket connected(InetSocketAddress addr) {
+	private synchronized RequestListener connected(InetSocketAddress addr) {
 		connected = true;
 		this.addr = addr;
 
@@ -314,27 +318,56 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 
 	@Override
-	public CompletableFuture<HttpRequest> send(HttpRequest request, ResponseListener listener) {
+	public CompletableFuture<RequestId> incomingRequest(HttpRequest request, boolean isComplete, ResponseListener listener) {
 		if(connectFuture == null) 
 			throw new IllegalArgumentException("You must at least call httpSocket.connect first(it "
 					+ "doesn't have to complete...you just have to call it before caling send)");
-        CompletableFuture<HttpRequest> future = new CompletableFuture<>();
+        CompletableFuture<RequestId> future = new CompletableFuture<>();
 
 		boolean wasConnected = false;
+        if(acceptingRequest.get()) {
+            throw new IllegalArgumentException("You can't call incoming request while in "
+                    + "HTTP11 mode and a prior request is not complete");
+        }
+        if(!isComplete && protocol == HTTP11) {
+            acceptingRequest.set(true);
+        }
 		synchronized (this) {
 			if(!connected) {
-				pendingRequests.add(new PendingRequest(request, listener, future));
+				pendingRequests.add(new PendingRequest(request, isComplete, listener, future));
 			} else
 				wasConnected = true;
 		}
 		
 		if(wasConnected) 
-			return negotiateAndSendRequest(request, listener).thenApply(channel -> request);
+			return negotiateAndSendRequest(request, isComplete, listener);
         else
             return future;
 	}
 
-	private LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
+    @Override
+    public CompletableFuture<Integer> incomingData(RequestId id, DataWrapper data, boolean isComplete) {
+        if(protocol == HTTP11) {
+            if(isComplete)
+                acceptingRequest.set(false);
+
+            // TODO: create a chunk out of the data
+            throw new IllegalArgumentException("incomingData not implemented for HTTP/1.1");
+        }
+        else {
+            Stream stream = activeStreams.get(id.getValue());
+            switch(stream.getStatus()) {
+                case OPEN:
+                case HALF_CLOSED_REMOTE:
+                    return sendDataFrames(data, isComplete, stream).thenApply(channel -> data.getReadableSize());
+                default:
+                    throw new ClientError(
+                            String.format("can't send data on a stream in state %s", stream.getStatus().toString()));
+            }
+        }
+    }
+
+    private LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
 		HttpRequestLine requestLine = request.getRequestLine();
 		List<Header> requestHeaders = request.getHeaders();
 
@@ -434,6 +467,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }
     }
 
+    // TODO: actually use writeDataFrame!!!
 	private CompletableFuture<Channel> writeDataFrame(Http2Data dataFrame) {
         int streamId = dataFrame.getStreamId();
         if(!outgoingDataQueue.contains(streamId)) {
@@ -450,7 +484,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }
     }
 
-	private CompletableFuture<Channel> sendDataFrames(DataWrapper body, Stream stream) {
+	private CompletableFuture<Channel> sendDataFrames(DataWrapper body, boolean isComplete, Stream stream) {
 		Http2Data newFrame = new Http2Data();
 		newFrame.setStreamId(stream.getStreamId());
 
@@ -458,7 +492,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
 			// the body fits within one frame so send an endstream with this frame
 			newFrame.setData(body);
-			newFrame.setEndStream(true);
+            if(isComplete)
+			    newFrame.setEndStream(true);
+
 			log.info("sending final data frame: " + newFrame);
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
 					channel -> {
@@ -472,7 +508,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			newFrame.setData(split.get(0));
 			log.info("sending non-final data frame: " + newFrame);
 			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
-					channel ->  sendDataFrames(split.get(1), stream)
+					channel ->  sendDataFrames(split.get(1), isComplete, stream)
 			);
 		}
 	}
@@ -558,34 +594,43 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         }
     }
 
-    private CompletableFuture<Channel> sendHttp11Request(HttpRequest request, ResponseListener l) {
+    private CompletableFuture<RequestId> sendHttp11Request(HttpRequest request, boolean isComplete, ResponseListener l) {
         ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
+
+        // TODO: confirm that is isComplete is false that the transfer-encoding is chunked, otherwise throw
+        if(!isComplete)
+            throw new IllegalArgumentException("can only send complete requests for HTTP1.1 right now");
 
         //put this on the queue before the write to be completed from the listener below
         responsesToComplete.offer(l);
 
         log.info("sending request now. req=" + request);
-        CompletableFuture<Channel> write = channel.write(wrap);
-        return write.exceptionally(e -> fail(l, e));
+
+        // HTTP/1.1 has request ids of 0
+        return channel.write(wrap).thenApply(channel -> new RequestId(0));
     }
 
-	private CompletableFuture<Channel> negotiateAndSendRequest(HttpRequest request, ResponseListener listener) {
+	private CompletableFuture<RequestId> negotiateAndSendRequest(HttpRequest request, boolean isComplete, ResponseListener listener) {
         ResponseListener l = new CatchResponseListener(listener);
         if (!negotiationDone.get()) {
             if (!negotiationStarted.get()) {
                 negotiationStarted.set(true);
-                return negotiateHttpVersion(request, l);
+                return negotiateHttpVersion(request, isComplete, l);
             } else {
                 log.info("waiting for negotiation to complete");
                 return negotiationDoneNotifier.thenCompose(channel -> {
                     log.info("done waiting for negotiation to complete");
-                    return actuallySendRequest(request, l);
+                    return actuallySendRequest(request, isComplete, l);
                 });
             }
         } else {
             log.info("not waiting for negotiation at all");
-            return actuallySendRequest(request, l);
+            return actuallySendRequest(request, isComplete, l);
         }
+    }
+
+    public RequestListener getRequestListener() {
+        return this;
     }
 
     private void initializeFlowControl(int streamId) {
@@ -594,7 +639,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         outgoingFlowControl.put(streamId, new AtomicInteger(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
     }
 
-    private CompletableFuture<Channel> sendHttp2Request(HttpRequest request, ResponseListener l) {
+    private CompletableFuture<RequestId> sendHttp2Request(HttpRequest request, boolean isComplete, ResponseListener l) {
         // Check if we are allowed to create a new stream
         if (remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
                 countOpenClientStreams() >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
@@ -612,16 +657,18 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         initializeFlowControl(thisStreamId);
         activeStreams.put(thisStreamId, newStream);
         LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
-        return sendHeaderFrames(headers, thisStreamId, newStream).thenCompose(
-                channel -> sendDataFrames(request.getBodyNonNull(), newStream));
+        return sendHeaderFrames(headers, thisStreamId, newStream)
+                .thenCompose(
+                    channel -> sendDataFrames(request.getBodyNonNull(), isComplete, newStream))
+                .thenApply(channel -> new RequestId(thisStreamId));
 
     }
 
-    private CompletableFuture<Channel> actuallySendRequest(HttpRequest request, ResponseListener l) {
+    private CompletableFuture<RequestId> actuallySendRequest(HttpRequest request, boolean isComplete, ResponseListener l) {
         if (protocol == HTTP11) {
-            return sendHttp11Request(request, l);
+            return sendHttp11Request(request, isComplete, l);
         } else { // HTTP2
-            return sendHttp2Request(request, l);
+            return sendHttp2Request(request, isComplete, l);
         }
     }
 	
