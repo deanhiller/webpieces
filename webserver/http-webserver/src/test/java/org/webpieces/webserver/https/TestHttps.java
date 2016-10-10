@@ -6,6 +6,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -148,5 +150,41 @@ public class TestHttps {
 		FullResponse response = responses.get(0);
 		//before we can show you the page, you need to be logged in, redirect to login page...
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+	}
+	
+	@Test
+	public void testSecureAndLoggedInAlready() {
+		Header cookie = simulateLogin();
+		
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal");
+		req.addHeader(cookie);
+		
+		server.processHttpRequests(socket, req , true);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		//before we can show you the page, you need to be logged in, redirect to login page...
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("This is some home page");
+	}
+
+	private Header simulateLogin() {
+		HttpRequest req1 = Requests.createRequest(KnownHttpMethod.POST, "/postLogin");
+		
+		server.processHttpRequests(socket, req1, true);
+		
+		List<FullResponse> responses1 = socket.getResponses();
+		Assert.assertEquals(1, responses1.size());
+
+		FullResponse response1 = responses1.get(0);
+		Header header = response1.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
+		String value = header.getValue();
+		value = value.replace("; path=/; HttpOnly", "");
+		Header cookie = new Header(KnownHeaderName.COOKIE, value);
+		
+		socket.clear();
+		return cookie;
 	}
 }

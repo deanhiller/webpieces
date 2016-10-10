@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
@@ -54,9 +54,7 @@ public class BytecodeCache {
 	                }
 	                if (!hash(source).equals(hash.toString())) {
 	
-	                    if (log.isTraceEnabled()) {
-	                        log.trace("Bytecode too old ("+hash+" != "+hash(source)+") for name="+name);
-	                    }
+	                    log.trace(()->"Bytecode too old ("+hash+" != "+hash(source)+") for name="+name);
 	                    return null;
 	                }
 	                byte[] byteCode = new byte[(int) f.length() - (offset + 1)];
@@ -65,9 +63,7 @@ public class BytecodeCache {
             	}
             }
 
-            if (log.isTraceEnabled()) {
-                log.trace("Cache MISS for "+name);
-            }
+            log.trace(()->"Cache MISS for "+name);
             return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -90,9 +86,7 @@ public class BytecodeCache {
 	            fos.write(byteCode);
             }
 
-            if (log.isTraceEnabled()) {
-                log.trace(name + "cached");
-            }
+            log.trace(()->name + "cached");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

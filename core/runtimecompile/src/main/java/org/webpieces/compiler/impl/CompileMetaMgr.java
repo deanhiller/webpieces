@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
@@ -40,8 +40,7 @@ public class CompileMetaMgr {
     	else if(current == null)
     		return null;
 
-    	if(log.isTraceEnabled())
-    		log.trace("Adding class="+name+" to ApplicationClassMgr");
+    	log.trace(()->"Adding class="+name+" to ApplicationClassMgr");
 		CompileClassMeta appClass = new CompileClassMeta(name, current, config);
 		classes.put(name, appClass);
 		return appClass;

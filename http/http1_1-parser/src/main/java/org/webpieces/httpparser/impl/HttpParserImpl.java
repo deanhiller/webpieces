@@ -5,8 +5,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -197,8 +197,7 @@ public class HttpParserImpl implements HttpParser {
 					+ "to you from this method.  It contains state of leftover data");
 		}
 		
-		if(log.isTraceEnabled())
-			log.trace("Trying to parse message");
+		log.trace(()->"Trying to parse message");
 //		if(log.isDebugEnabled()) {
 //			byte[] someData = moreData.createByteArray();
 //			String readable = conversion.convertToReadableForm(someData);

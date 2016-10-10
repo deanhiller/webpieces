@@ -18,8 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
@@ -129,17 +129,16 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         }
         byte[] bc = byteCodeCache.getBytecode(name, applicationClass.javaSource);
 
-        if(log.isTraceEnabled())
-        	log.trace("Loading class for "+name);
+        log.trace(()->"Loading class for "+name);
 
         if (bc != null) {
         	applicationClass.javaByteCode = bc;
             applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.javaByteCode, 0, applicationClass.javaByteCode.length, protectionDomain);
             resolveClass(applicationClass.javaClass);
             
-            if(log.isTraceEnabled()) {
+            if(log.isDebugEnabled()) {
             	long time = System.currentTimeMillis() - start;
-            	log.trace(time+"ms to load class "+name+" from cache");
+            	log.trace(()->time+"ms to load class "+name+" from cache");
             }
 
             return applicationClass.javaClass;
@@ -163,7 +162,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
 
         if(log.isTraceEnabled()) {
         	long time = System.currentTimeMillis() - start;
-        	log.trace(time+"ms to load class "+name);
+        	log.trace(()->time+"ms to load class "+name);
         }
 
         return applicationClass.javaClass;

@@ -8,8 +8,8 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.exceptions.NioException;
@@ -141,7 +141,7 @@ public class DatagramChannelImpl implements DatagramChannel
     public InetSocketAddress getLocalAddress() {
         if(!socket.isBound())
             throw new IllegalStateException(id+"Must bind socket before any operations can be called");
-        log.trace("get local="+socket.getLocalPort());
+        log.trace(()->"get local="+socket.getLocalPort());
         return new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort());
     }
 
@@ -161,8 +161,7 @@ public class DatagramChannelImpl implements DatagramChannel
             throw new IllegalStateException(id+"Must bind socket before any operations can be called");
         DatagramPacket packet = new DatagramPacket(b.array(), b.position(), b.limit()-b.position(), addr);
         
-        if(log.isTraceEnabled())
-            log.trace("size="+(b.limit()-b.position())+" addr="+addr);
+        log.trace(()->"size="+(b.limit()-b.position())+" addr="+addr);
         
         
         socket.send(packet);
@@ -172,8 +171,7 @@ public class DatagramChannelImpl implements DatagramChannel
         while(!shutDownThread) {
             readPackets();
         }
-        if(log.isTraceEnabled())
-            log.trace(id+"reader thread ending");
+        log.trace(()->id+"reader thread ending");
     }
     
     private void readPackets() {

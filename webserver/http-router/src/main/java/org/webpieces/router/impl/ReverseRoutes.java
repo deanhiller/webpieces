@@ -72,7 +72,7 @@ public class ReverseRoutes {
 	public RouteMeta get(RouteId id) {
 		RouteMeta meta = routeIdToRoute.get(id);
 		if(meta == null)
-			throw new IllegalStateException("addRoute with a route id="+id+" was never called by your application, yet this controller is trying to use it");
+			throw new IllegalStateException("addRoute method with param route id="+id+" was never called by your application(your RouteModule files), yet this controller is trying to use it");
 		return meta;
 	}
 

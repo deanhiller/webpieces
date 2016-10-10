@@ -12,8 +12,8 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.exceptions.NioException;
@@ -72,8 +72,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		
 			IdObject obj = new IdObject(getIdObject(), newSocketNum);
 			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), pool);
-			if(log.isTraceEnabled())
-				log.trace(tcpChan+"Accepted new incoming connection");
+			log.trace(()->tcpChan+"Accepted new incoming connection");
 			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
 			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));
 			

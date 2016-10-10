@@ -8,8 +8,8 @@ import java.util.concurrent.CompletionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
@@ -185,7 +185,8 @@ public class RouteInvoker {
 			String token = requestCtx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
 			String formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);
 			if(formToken == null)
-				throw new BadRequestException("missing form token...someone posting form without getting it first(hacker or otherwise) OR "
+				throw new BadRequestException("missing form token(or route added without setting checkToken variable to false)"
+						+ "...someone posting form without getting it first(hacker or otherwise) OR "
 						+ "you are not using the #{form}# tag or the #{secureToken}# tag to secure your forms");
 			else if(!formToken.equals(token))
 				throw new BadRequestException("bad form token...someone posting form with invalid token(hacker or otherwise)");

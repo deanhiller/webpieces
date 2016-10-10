@@ -1,7 +1,7 @@
 package org.webpieces.httpclient.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;

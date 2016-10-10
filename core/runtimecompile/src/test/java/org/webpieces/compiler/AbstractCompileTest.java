@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.compiler.impl.CompileOnDemandImpl;

@@ -21,8 +21,8 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
 
@@ -249,9 +249,7 @@ public class CompilerWrapper {
                         clazzName.append(compoundName[j]);
                     }
 
-                    if (log.isTraceEnabled()) {
-                        log.trace("Received Success eclipse Compiled result for=" + clazzName);
-                    }
+                    log.trace(()->"Received Success eclipse Compiled result for=" + clazzName);
 
                     String name = clazzName.toString();
                     VirtualFile file = fileLookup.getJava(name);

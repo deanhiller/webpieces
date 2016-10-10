@@ -3,9 +3,9 @@ package org.webpieces.httpclient;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.ResponseListener;

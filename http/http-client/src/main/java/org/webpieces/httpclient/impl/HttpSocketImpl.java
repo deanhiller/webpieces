@@ -18,13 +18,13 @@ import java.util.function.IntUnaryOperator;
 import javax.net.ssl.SSLEngine;
 import javax.xml.bind.DatatypeConverter;
 
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;

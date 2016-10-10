@@ -18,8 +18,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -132,8 +132,7 @@ public class StaticFileReader {
 	    }
 
 	    info.getChannel().write(response);
-	    if(log.isDebugEnabled())
-	    	log.debug("sending chunked file via async read="+file);
+	    log.debug(()->"sending chunked file via async read="+file);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
 	    //Use fileExecutor for the callback so we control threadpool configuration...
@@ -233,8 +232,7 @@ public class StaticFileReader {
 	private void sendHttpChunk(RequestInfo info, ByteBuffer buf) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		
-		if(log.isTraceEnabled())
-			log.trace("sending chunk with body size="+data.getReadableSize());
+		log.trace(()->"sending chunk with body size="+data.getReadableSize());
 		
 		HttpChunk chunk = new HttpChunk();
 		chunk.setBody(data);

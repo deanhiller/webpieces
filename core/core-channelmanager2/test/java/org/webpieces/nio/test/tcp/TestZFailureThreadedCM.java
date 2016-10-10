@@ -2,7 +2,7 @@ package org.webpieces.nio.test.tcp;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
+import org.webpieces.util.logging.Logger;
 
 import org.webpieces.nio.api.deprecated.ChannelManagerOld;
 import org.webpieces.nio.api.deprecated.ChannelService;

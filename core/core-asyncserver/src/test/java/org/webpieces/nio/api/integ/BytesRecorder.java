@@ -3,8 +3,8 @@ package org.webpieces.nio.api.integ;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class BytesRecorder {
 

@@ -34,9 +34,11 @@ ext {
     deps = [
        'junit':           'junit:junit:4.11',  
        'groovy':          'org.codehaus.groovy:groovy-all:2.4.6',
+
        //We literally ONLY bring this in for one method call into PropertyUtils so we should clone that code
-       //instead of bringing in an entire jar?
+       //instead of bringing in an entire jar perhaps...?
        'commons-beans':   'commons-beanutils:commons-beanutils:1.9.2',
+
        'javax-inject':    'javax.inject:javax.inject:1',
        'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
        //do we need this one...
@@ -50,8 +52,11 @@ ext {
        'metrics':         'io.dropwizard.metrics:metrics-core:3.1.0',
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'twitter-hpack':   'com.twitter:hpack:v1.0.1',
-       'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1'
-    ]   
+       'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1',
+       'hibernate':       'org.hibernate:hibernate-core:5.2.3.Final',
+       'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
+       'h2db':            'com.h2database:h2:1.4.192',
+    ]
 
 }
 
@@ -62,6 +67,17 @@ buildScan {
 }
 
 allprojects {
+   apply plugin: 'jacoco' //code coverage
+
+   buildDir = file('output')
+
+   repositories {
+      jcenter()
+   }
+
+   jacoco {
+      toolVersion = '0.7.1.201405082137'
+   }
 }
 
 subprojects {
@@ -79,7 +95,6 @@ subprojects {
      project.version = '1.9-developer'
      println("CREATING DEVELOPER VERSION "+version)
    }
-   buildDir = file('output')
 
    ext {
       //This is an input directory that we read jars from if they are not in a repo somewhere
@@ -151,6 +166,20 @@ subprojects {
                    )
       }
    }
+
+    jacocoTestReport {
+        additionalSourceDirs = files(sourceSets.main.allSource.srcDirs)
+        sourceDirectories = files(sourceSets.main.allSource.srcDirs)
+        classDirectories =  files(sourceSets.main.output)
+        reports {
+            html.enabled = true
+            xml.enabled = true
+            csv.enabled = false
+        }
+    }
+
+    jacocoTestReport.dependsOn test
+    check.dependsOn jacocoTestReport
 
    task sourcesJar(type: Jar) {
       classifier = 'sources'
@@ -310,4 +339,33 @@ task printTasks << {
 }
 
 task release(dependsOn: ':webserver:githubRelease')
+
+task codeCoverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories =  files(subprojects.sourceSets.main.output)
+    executionData = files(subprojects.jacocoTestReport.executionData)
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+    onlyIf = {
+        true
+    }
+    doFirst {
+        executionData = files(executionData.findAll {
+            it.exists()
+        })
+    }
+}
+
+//we don't do java plugin on top level on purpose as it is not a java
+//project BUT we need build and clean to work inline with the java projects
+task build(dependsOn: ':codeCoverage')
+
+task clean() << {
+   delete "${buildDir}"
+}
 

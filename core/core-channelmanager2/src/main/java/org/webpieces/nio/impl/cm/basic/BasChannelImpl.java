@@ -14,8 +14,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -123,8 +123,7 @@ public abstract class BasChannelImpl
 			throw new IllegalStateException("This channel is in a failed state.  "
 					+ "failure functions were called so look for exceptions from them");
 		
-		if(apiLog.isTraceEnabled())
-			apiLog.trace(this+"Basic.write");
+		apiLog.trace(()->this+"Basic.write");
 		
 		CompletableFuture<Channel> future = new CompletableFuture<Channel>();
 		
@@ -134,12 +133,9 @@ public abstract class BasChannelImpl
 			//since we didn't switch and were not in this mode, complete the action outside sync block
 			pool.releaseBuffer(b);
 			future.complete(this);
-			if(log.isTraceEnabled())
-				log.trace(this+" wrote bytes on client thread");			
+			log.trace(()->this+" wrote bytes on client thread");			
 		} else {
-			if(log.isTraceEnabled()) {
-				log.trace(this+"sent write to queue");
-			}
+			log.trace(()->this+"sent write to queue");
 		}
 		
 		return future;
@@ -213,8 +209,7 @@ public abstract class BasChannelImpl
 	}
 
 	private void registerForWrites() {
-        if(log.isTraceEnabled())
-            log.trace(this+"registering channel for write msg. size="+dataToBeWritten.size());
+        log.trace(()->this+"registering channel for write msg. size="+dataToBeWritten.size());
         getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
 	}
        
@@ -238,8 +233,7 @@ public abstract class BasChannelImpl
 					if(buffer.remaining() + wroteOut != initialSize)
 						throw new IllegalStateException("Something went wrong.  b.remaining()="+buffer.remaining()+" written="+wroteOut+" total="+initialSize);
 					
-	                if(log.isTraceEnabled())
-	                    log.trace(this+"Did not write all data out");
+	                log.trace(()->this+"Did not write all data out");
 	                int leftOverSize = buffer.remaining();
 	                int writtenOut = initialSize - leftOverSize;
 	                waitingBytesCounter -= writtenOut;
@@ -266,8 +260,7 @@ public abstract class BasChannelImpl
 	        //we are registered for writes with ANY size queue
 	        if(dataToBeWritten.isEmpty() && inDelayedWriteMode) {
 	        	inDelayedWriteMode = false;
-	        	if(log.isTraceEnabled())
-	        		log.trace(this+"unregister writes");
+	        	log.trace(()->this+"unregister writes");
 	            Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
 	        }
 		}
@@ -281,8 +274,7 @@ public abstract class BasChannelImpl
     public void bind(SocketAddress addr) {
         if(!(addr instanceof InetSocketAddress))
             throw new IllegalArgumentException(this+"Can only bind to InetSocketAddress addressses");
-        if(apiLog.isTraceEnabled())
-        	apiLog.trace(this+"Basic.bind called addr="+addr);
+        apiLog.trace(()->this+"Basic.bind called addr="+addr);
         
         try {
 			bindImpl(addr);
@@ -328,8 +320,7 @@ public abstract class BasChannelImpl
 		} else if(isClosed())
 			throw new IllegalStateException("Channel is closed");
 
-		if(apiLog.isTraceEnabled())
-			apiLog.trace(this+"Basic.registerForReads called");
+		apiLog.trace(()->this+"Basic.registerForReads called");
 		
         try {
 			return getSelectorManager().registerChannelForRead(this, dataListener).thenApply(v -> {
@@ -344,8 +335,7 @@ public abstract class BasChannelImpl
 	}
 	
 	public CompletableFuture<Channel> unregisterForReads() {
-		if(apiLog.isTraceEnabled())
-			apiLog.trace(this+"Basic.unregisterForReads called");		
+		apiLog.trace(()->this+"Basic.unregisterForReads called");		
 		try {
 			isRegisterdForReads = false;
 			return getSelectorManager().unregisterChannelForRead(this).thenApply(v -> this);
@@ -375,8 +365,7 @@ public abstract class BasChannelImpl
         //and just return -1 to indicate socket closed.
     	CompletableFuture<Channel> future = new CompletableFuture<>();
     	try {
-    		if(apiLog.isTraceEnabled())
-    			apiLog.trace(this+"Basic.close called");
+    		apiLog.trace(()->this+"Basic.close called");
     		
 	        if(!getRealChannel().isOpen()) {
 	        	future.complete(this);

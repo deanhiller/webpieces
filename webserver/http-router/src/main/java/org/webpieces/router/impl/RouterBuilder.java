@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.RouteId;

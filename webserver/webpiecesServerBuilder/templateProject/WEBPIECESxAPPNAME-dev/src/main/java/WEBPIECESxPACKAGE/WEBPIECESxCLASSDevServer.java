@@ -3,8 +3,8 @@ package WEBPIECESxPACKAGE;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.templating.api.DevTemplateModule;
