@@ -35,6 +35,7 @@ public class HibernateController {
 	public Redirect save() {
 		
 		EntityManager mgr = factory.createEntityManager();
+		
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
 		

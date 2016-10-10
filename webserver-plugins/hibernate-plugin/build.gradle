@@ -1,5 +1,5 @@
 dependencies {
     compile deps['hibernate']
     compile deps['log4jdbc']
-    compile project(':webserver-plugins:plugin-api')
+    compile project(':webserver:http-router')
 }

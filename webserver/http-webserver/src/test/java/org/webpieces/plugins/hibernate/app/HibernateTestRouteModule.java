@@ -4,7 +4,7 @@ import static org.webpieces.ctx.api.HttpMethod.*;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 
-public class HibernateRouteModule extends AbstractRouteModule {
+public class HibernateTestRouteModule extends AbstractRouteModule {
 
 	@Override
 	protected void configure(String currentPackage) {
