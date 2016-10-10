@@ -3,6 +3,7 @@ package org.webpieces.httpclient.impl;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.Http2Parser;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;

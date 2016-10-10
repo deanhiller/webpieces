@@ -107,6 +107,10 @@ public class Logger {
     		logger.info(msg.get());
     }
 
+    public void info(String msg, Object... arguments) {
+        logger.info(msg, arguments);
+    }
+
     /**
      * Log an exception (throwable) at the INFO level with an
      * accompanying message.
