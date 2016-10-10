@@ -16,6 +16,7 @@ public class GoAwayError extends Http2Error {
         this.debugData = debugData;
     }
 
+    @Override
     public Http2Frame toFrame() {
         Http2GoAway frame = new Http2GoAway();
         frame.setErrorCode(errorCode);

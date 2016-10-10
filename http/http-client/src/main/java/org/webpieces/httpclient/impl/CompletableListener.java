@@ -19,7 +19,7 @@ public class CompletableListener implements ResponseListener {
 
 	/**
 	 *
-	 * @param future
+	 * @param future the future that completes when the response comes in
 	 * @param ignoreIsComplete if true, completes the future after just getting the first HttpResponse 'incomingResponse'
 	 *
 	 */
@@ -33,7 +33,7 @@ public class CompletableListener implements ResponseListener {
 		if(!isComplete && !ignoreIsComplete) {
 			future.completeExceptionally(new IllegalStateException("You need to call "
 					+ "sendRequest(HttpRequest req, ResponseListener l) because this is a "
-					+ "chunked download response and could potentially blow out your memory"));
+					+ "chunked or http2 download response and could potentially blow out your memory"));
 		}
 		future.complete(resp);
 	}

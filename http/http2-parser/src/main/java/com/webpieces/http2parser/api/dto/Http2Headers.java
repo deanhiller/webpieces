@@ -7,6 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 import java.util.LinkedList;
 
 public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
     }
@@ -25,10 +26,12 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
         this.endStream = endStream;
     }
 
+    @Override
     public boolean isEndHeaders() {
         return endHeaders;
     }
 
+    @Override
     public void setEndHeaders(boolean endHeaders) {
         this.endHeaders = endHeaders;
     }
@@ -57,50 +60,62 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
     private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();
 
+    @Override
     public LinkedList<Header> getHeaderList() {
         return headerList;
     }
 
+    @Override
     public void setHeaderList(LinkedList<Header> headerList) {
         this.headerList = headerList;
     }
 
+    @Override
     public DataWrapper getHeaderFragment() {
         return headerFragment;
     }
 
+    @Override
     public void setHeaderFragment(DataWrapper serializedHeaders) {
         this.headerFragment = serializedHeaders;
     }
 
+    @Override
     public boolean isStreamDependencyIsExclusive() {
         return priorityDetails.streamDependencyIsExclusive;
     }
 
+    @Override
     public void setStreamDependencyIsExclusive(boolean streamDependencyIsExclusive) {
         this.priorityDetails.streamDependencyIsExclusive = streamDependencyIsExclusive;
     }
 
+    @Override
     public int getStreamDependency() {
         return priorityDetails.streamDependency;
     }
 
+    @Override
     public void setStreamDependency(int streamDependency) {
         this.priorityDetails.streamDependency = streamDependency & 0x7FFFFFFF;
     }
 
+    @Override
     public short getWeight() {
         return priorityDetails.weight;
     }
 
+    @Override
     public void setWeight(short weight) {
         this.priorityDetails.weight = weight;
     }
 
+    @Override
     public PriorityDetails getPriorityDetails() {
         return priorityDetails;
     }
 
+    @Override
     public void setPriorityDetails(PriorityDetails priorityDetails) {
         this.priorityDetails = priorityDetails;
     }

@@ -15,18 +15,22 @@ public class ParserResultImpl implements ParserResult {
         this.leftOverData = leftOverData;
     }
 
+    @Override
     public List<Http2Frame> getParsedFrames() {
         return frames;
     }
 
+    @Override
     public DataWrapper getMoreData() {
         return leftOverData;
     }
 
+    @Override
     public boolean hasMoreData() {
         return leftOverData.getReadableSize() > 0;
     }
 
+    @Override
     public boolean hasParsedFrames() {
         return frames.size() > 0;
     }

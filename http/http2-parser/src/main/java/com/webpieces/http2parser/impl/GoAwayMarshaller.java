@@ -16,10 +16,12 @@ public class GoAwayMarshaller extends FrameMarshallerImpl {
         super(bufferPool, dataGen);
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         return 0x0;
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2GoAway castFrame = (Http2GoAway) frame;
 
@@ -33,6 +35,7 @@ public class GoAwayMarshaller extends FrameMarshallerImpl {
         );
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
         Http2GoAway castFrame = (Http2GoAway) frame;
 

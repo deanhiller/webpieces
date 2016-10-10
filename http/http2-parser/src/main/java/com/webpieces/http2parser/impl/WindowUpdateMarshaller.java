@@ -15,10 +15,12 @@ public class WindowUpdateMarshaller extends FrameMarshallerImpl {
         super(bufferPool, dataGen);
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         return 0x0;
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2WindowUpdate castFrame = (Http2WindowUpdate) frame;
 
@@ -28,6 +30,7 @@ public class WindowUpdateMarshaller extends FrameMarshallerImpl {
         return dataGen.wrapByteBuffer(payload);
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2WindowUpdate castFrame = (Http2WindowUpdate) frame;
         maybePayload.ifPresent(payload -> {

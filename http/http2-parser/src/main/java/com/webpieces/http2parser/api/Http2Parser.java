@@ -9,7 +9,6 @@ import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.webpieces.data.api.DataWrapper;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

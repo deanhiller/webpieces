@@ -15,15 +15,14 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
         super(bufferPool, dataGen);
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
+
         Http2Data castFrame = (Http2Data) frame;
         return castFrame.getPadding().padDataIfNeeded(castFrame.getData());
     }
 
-    public void unmarshalPayload(Http2Frame frame, DataWrapper payload) {
-
-    }
-
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         Http2Data castFrame = (Http2Data) frame;
 
@@ -33,6 +32,7 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
         return value;
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2Data castFrame = (Http2Data) frame;
 

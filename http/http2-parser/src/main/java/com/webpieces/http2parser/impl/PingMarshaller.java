@@ -15,6 +15,7 @@ public class PingMarshaller extends FrameMarshallerImpl {
         super(bufferPool, dataGen);
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         Http2Ping castFrame = (Http2Ping) frame;
 
@@ -22,6 +23,8 @@ public class PingMarshaller extends FrameMarshallerImpl {
         if (castFrame.isPingResponse()) value |= 0x1;
         return value;
     }
+
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Ping castFrame = (Http2Ping) frame;
 
@@ -32,6 +35,7 @@ public class PingMarshaller extends FrameMarshallerImpl {
         return new ByteBufferDataWrapper(payload);
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2Ping castFrame = (Http2Ping) frame;
         castFrame.setIsPingResponse((flags & 0x1) == 0x1);

@@ -4,6 +4,7 @@ import org.webpieces.data.api.DataWrapper;
 
 public class Http2Continuation extends Http2Frame implements HasHeaderFragment {
 
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.CONTINUATION;
     }
@@ -11,10 +12,12 @@ public class Http2Continuation extends Http2Frame implements HasHeaderFragment {
     /* flags */
     private boolean endHeaders = false; /* 0x4 */
 
+    @Override
     public boolean isEndHeaders() {
         return endHeaders;
     }
 
+    @Override
     public void setEndHeaders(boolean endHeaders) {
         this.endHeaders = endHeaders;
     }
@@ -27,6 +30,7 @@ public class Http2Continuation extends Http2Frame implements HasHeaderFragment {
         return headerFragment;
     }
 
+    @Override
     public void setHeaderFragment(DataWrapper serializedHeaders) {
         this.headerFragment = serializedHeaders;
     }

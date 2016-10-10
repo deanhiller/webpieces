@@ -2,10 +2,8 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
 public class Http2GoAway extends Http2Frame {
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.GOAWAY;
     }

@@ -17,6 +17,7 @@ public class RstStreamError extends Http2Error {
         this.streamId = streamId;
     }
 
+    @Override
     public Http2Frame toFrame() {
         Http2RstStream frame = new Http2RstStream();
         frame.setStreamId(streamId);

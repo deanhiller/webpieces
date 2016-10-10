@@ -1,19 +1,12 @@
 package com.webpieces.http2parser.api.dto;
 
-import org.webpieces.data.api.DataWrapper;
-
-import java.nio.ByteBuffer;
-
 public class Http2WindowUpdate extends Http2Frame {
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.WINDOW_UPDATE;
     }
 
     /* flags */
-
-
-    public void unmarshalFlags(byte flags) {
-    }
 
     /* payload */
     //1bit reserved

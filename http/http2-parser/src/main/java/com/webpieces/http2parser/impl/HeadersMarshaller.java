@@ -14,13 +14,11 @@ import java.util.Optional;
 
 public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
 
-    Http2Parser parser;
-
-    HeadersMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen, Http2Parser parser) {
+    HeadersMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool, dataGen);
-        this.parser = parser;
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Headers castFrame = (Http2Headers) frame;
         DataWrapper preludeDW;
@@ -42,6 +40,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         return castFrame.getPadding().padDataIfNeeded(unpadded);
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         Http2Headers castFrame = (Http2Headers) frame;
 
@@ -53,6 +52,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         return value;
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
         Http2Headers castFrame = (Http2Headers) frame;
 

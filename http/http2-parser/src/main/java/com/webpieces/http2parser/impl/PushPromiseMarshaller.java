@@ -12,13 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class PushPromiseMarshaller extends FrameMarshallerImpl {
-    Http2Parser parser;
-
-    PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen, Http2Parser parser) {
+    PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool, dataGen);
-        this.parser = parser;
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2PushPromise castFrame = (Http2PushPromise) frame;
 
@@ -33,6 +31,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
         return castFrame.getPadding().padDataIfNeeded(finalDW);
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         Http2PushPromise castFrame = (Http2PushPromise) frame;
 
@@ -42,6 +41,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
         return value;
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2PushPromise castFrame = (Http2PushPromise) frame;
 

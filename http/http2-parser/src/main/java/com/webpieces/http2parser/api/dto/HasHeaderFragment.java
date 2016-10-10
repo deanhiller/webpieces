@@ -2,9 +2,6 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public interface HasHeaderFragment {
     class Header {
         @Override

@@ -1,10 +1,7 @@
 package com.webpieces.http2parser.api.dto;
 
-import org.webpieces.data.api.DataWrapper;
-
-import java.nio.ByteBuffer;
-
 public class Http2RstStream extends Http2Frame {
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.RST_STREAM;
     }

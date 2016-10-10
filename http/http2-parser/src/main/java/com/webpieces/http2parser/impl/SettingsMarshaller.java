@@ -16,6 +16,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         super(bufferPool, dataGen);
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
@@ -37,6 +38,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         }
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
@@ -45,6 +47,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         return value;
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2Settings castFrame = (Http2Settings) frame;
 

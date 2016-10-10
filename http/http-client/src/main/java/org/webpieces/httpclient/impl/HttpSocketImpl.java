@@ -65,7 +65,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	private boolean isClosed;
 	private boolean connected;
 
-	enum Protocol { HTTP11, HTTP2 };
+	enum Protocol { HTTP11, HTTP2 }
 	private Protocol protocol = HTTP11;
 
 	private ProxyDataListener dataListener;
@@ -550,6 +550,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 
 	private class SendPing extends TimerTask {
+        @Override
         public void run() {
             Http2Ping pingFrame = new Http2Ping();
             pingFrame.setOpaqueData(System.nanoTime());

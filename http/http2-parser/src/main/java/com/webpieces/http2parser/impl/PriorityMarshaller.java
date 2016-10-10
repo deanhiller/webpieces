@@ -19,10 +19,12 @@ public class PriorityMarshaller implements FrameMarshaller {
         this.dataGen = dataGen;
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         return 0x0;
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Priority castFrame = (Http2Priority) frame;
 
@@ -35,7 +37,7 @@ public class PriorityMarshaller implements FrameMarshaller {
         return dataGen.wrapByteBuffer(payload);
     }
 
-
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
         Http2Priority castFrame = (Http2Priority) frame;
 

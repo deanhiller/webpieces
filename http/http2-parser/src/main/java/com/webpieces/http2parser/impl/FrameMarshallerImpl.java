@@ -4,9 +4,9 @@ import com.webpieces.http2parser.api.FrameMarshaller;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-public abstract class FrameMarshallerImpl implements FrameMarshaller {
-    protected BufferPool bufferPool;
-    protected DataWrapperGenerator dataGen;
+abstract class FrameMarshallerImpl implements FrameMarshaller {
+    BufferPool bufferPool;
+    DataWrapperGenerator dataGen;
 
     FrameMarshallerImpl(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         this.bufferPool = bufferPool;

@@ -1,6 +1,5 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.Http2Continuation;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import org.webpieces.data.api.BufferPool;
@@ -10,13 +9,11 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import java.util.Optional;
 
 public class ContinuationMarshaller extends FrameMarshallerImpl {
-    private Http2Parser parser;
-
-    ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen, Http2Parser parser) {
+    ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool, dataGen);
-        this.parser = parser;
     }
 
+    @Override
     public byte marshalFlags(Http2Frame frame) {
         Http2Continuation castFrame = (Http2Continuation) frame;
 
@@ -25,11 +22,13 @@ public class ContinuationMarshaller extends FrameMarshallerImpl {
         return value;
     }
 
+    @Override
     public DataWrapper marshalPayload(Http2Frame frame) {
         Http2Continuation castFrame = (Http2Continuation) frame;
         return castFrame.getHeaderFragment();
     }
 
+    @Override
     public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2Continuation castFrame = (Http2Continuation) frame;
 

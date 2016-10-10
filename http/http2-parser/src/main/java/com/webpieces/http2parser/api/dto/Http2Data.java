@@ -6,6 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 
 public class Http2Data extends Http2Frame {
 
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.DATA;
     }

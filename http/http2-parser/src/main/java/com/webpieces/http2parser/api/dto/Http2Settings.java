@@ -1,8 +1,5 @@
 package com.webpieces.http2parser.api.dto;
 
-import org.webpieces.data.api.DataWrapper;
-
-import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,6 +42,7 @@ public class Http2Settings extends Http2Frame {
             }
         }
     }
+    @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.SETTINGS;
     }
