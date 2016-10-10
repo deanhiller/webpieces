@@ -39,13 +39,13 @@ public interface ResponseListener {
 	 * @param isComplete false if the transfer encoding is chunked in which case incomingData will
 	 * be called for each chunk coming
 	 */
-	public void incomingResponse(HttpResponse resp, boolean isComplete);
+	void incomingResponse(HttpResponse resp, boolean isComplete);
 
 	/**
 	 * To support HTTP2 we need to pass the 'request' back with the response because the
 	 * server might push a response with an implied request.
 	 */
-	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete);
+	void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete);
 	
 	/**
 	 *
@@ -55,10 +55,10 @@ public interface ResponseListener {
 	 *  @param data
 	 * @param isLastData
 	 */
-	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData);
+	CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData);
 
-	public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData);
+	CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData);
 	
-	public void failure(Throwable e);
+	void failure(Throwable e);
 	
 }

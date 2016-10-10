@@ -467,7 +467,6 @@ public class HttpSocketImpl implements HttpSocket, RequestListener, Closeable {
         }
     }
 
-    // TODO: actually use writeDataFrame!!!
 	private CompletableFuture<Channel> writeDataFrame(Http2Data dataFrame) {
         int streamId = dataFrame.getStreamId();
         if(!outgoingDataQueue.contains(streamId)) {
@@ -495,10 +494,11 @@ public class HttpSocketImpl implements HttpSocket, RequestListener, Closeable {
             if(isComplete)
 			    newFrame.setEndStream(true);
 
-			log.info("sending final data frame: " + newFrame);
-			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenApply(
+			log.info("sending final data frame: (but might not complete the request)" + newFrame);
+			return writeDataFrame(newFrame).thenApply(
 					channel -> {
-						stream.setStatus(HALF_CLOSED_LOCAL);
+                        if(isComplete)
+						    stream.setStatus(HALF_CLOSED_LOCAL);
 						return channel;
 					}
 			);
@@ -507,7 +507,7 @@ public class HttpSocketImpl implements HttpSocket, RequestListener, Closeable {
 			List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
 			newFrame.setData(split.get(0));
 			log.info("sending non-final data frame: " + newFrame);
-			return channel.write(ByteBuffer.wrap(http2Parser.marshal(newFrame).createByteArray())).thenCompose(
+			return writeDataFrame(newFrame).thenCompose(
 					channel ->  sendDataFrames(split.get(1), isComplete, stream)
 			);
 		}
