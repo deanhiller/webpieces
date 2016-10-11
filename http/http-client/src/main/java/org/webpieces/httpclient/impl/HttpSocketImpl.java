@@ -31,7 +31,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     private HttpParser httpParser;
     private Http2Parser http2Parser;
 
-    private CompletableFuture<RequestListener> connectFuture;
+    private CompletableFuture<RequestSender> connectFuture;
     private boolean isClosed;
     private boolean connected;
     private CloseListener closeListener;
@@ -41,7 +41,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     private boolean isRecording = true;
 
     private InetSocketAddress addr;
-    private ClientRequestListener requestListener;
+    private RequestSenderImpl requestListener;
 
     public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser httpParser,
                           Http2Parser http2Parser,
@@ -56,7 +56,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 
     // HTTP Socket interface calls
     @Override
-    public CompletableFuture<RequestListener> connect(InetSocketAddress addr) {
+    public CompletableFuture<RequestSender> connect(InetSocketAddress addr) {
         if (factory == null) {
             channel = mgr.createTCPChannel(idForLogging);
         } else {
@@ -64,7 +64,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
             channel = mgr.createTCPChannel(idForLogging, engine);
         }
 
-        requestListener = new ClientRequestListener(this,
+        requestListener = new RequestSenderImpl(this,
                 this.httpParser,
                 this.http2Parser,
                 closeListener,
@@ -82,21 +82,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         return connectFuture;
     }
 
-
-    @Override
-    public CompletableFuture<HttpResponse> send(HttpRequest request) {
-        CompletableFuture<HttpResponse> future = new CompletableFuture<>();
-        ResponseListener l = new CompletableListener(future);
-
-        // This only works for complete requests
-        if(connected) {
-            requestListener.incomingRequest(request, true, l);
-            return future;
-        } else {
-            throw new IllegalArgumentException("can't call 'send' until the socket is connected");
-        }
-    }
-
     @Override
     public CompletableFuture<HttpSocket> closeSocket() {
         if (isClosed) {
@@ -112,11 +97,11 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     }
 
     @Override
-    public RequestListener getRequestListener() {
+    public RequestSender getRequestSender() {
         return requestListener;
     }
 
-    private synchronized RequestListener connected(InetSocketAddress addr) {
+    private synchronized RequestSender connected(InetSocketAddress addr) {
         connected = true;
         this.addr = addr;
 

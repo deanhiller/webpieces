@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.webpieces.httpclient.api.RequestListener;
+import org.webpieces.httpclient.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
@@ -69,15 +69,15 @@ public class Layer4Processor implements HttpRequestListener {
 		//need synchronization if two clients of proxy access same httpSocket/addr!!!
 		HttpSocket socket = cache.getIfPresent(addr);
 		if(socket != null) {
-			sendData(channel, socket.getRequestListener(), req);
+			sendData(channel, socket.getRequestSender(), req);
 		} else {
 			openAndConnectSocket(addr, req, channel);
 		}
 	}
 
-	private void sendData(FrontendSocket channel, RequestListener requestListener, HttpRequest req) {
+	private void sendData(FrontendSocket channel, RequestSender requestListener, HttpRequest req) {
 		// Can only deal with complete requests
-		requestListener.incomingRequest(req, true, new Layer1Response(layer2Processor, channel, req));
+		requestListener.sendRequest(req, true, new Layer1Response(layer2Processor, channel, req));
 	}
 
 	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, FrontendSocket channel) {

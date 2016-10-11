@@ -46,7 +46,7 @@ import static org.webpieces.httpclient.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpclient.impl.Stream.StreamStatus.RESERVED_REMOTE;
 
 public class Http2Engine {
-    private static final Logger log = LoggerFactory.getLogger(ClientRequestListener.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private TCPChannel channel;

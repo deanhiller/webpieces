@@ -19,7 +19,7 @@ public interface ResponseListener {
 	 * 
 	 * This makes the callback api have a larger surface area than desired.  The incomingResponse
 	 * method will have isComplete=true in the cases of #1 or #2 above.  In the case of #3, 
-	 * incomingData will be called over and over until the last chunk in which case isLastChunk
+	 * sendData will be called over and over until the last chunk in which case isLastChunk
 	 * will be set to true and the chunk will be of size 0, but the last chunk is special in that
 	 * it can contain extra headers with it.  
 	 * 
@@ -30,7 +30,7 @@ public interface ResponseListener {
 	 * and http2 'normal' responses, we just pass back the request that we started with here.
 	 *
 	 * For Http2, only 3 and 4 are possible, so 'incomingResponse' will be called once the header
-	 * has arrived, and incomingData will be called for each dataframe that follows. If there is no
+	 * has arrived, and sendData will be called for each dataframe that follows. If there is no
 	 * data after the header (eg a HEAD request) then incomingResponse may be called with isComplete,
 	 * but it's possible that an empty dataframe will be sent, in which case incomignData will be
 	 * called with an empty dataWrapper and isLastData set to true.
@@ -44,13 +44,13 @@ public interface ResponseListener {
 	 *           HTTP1.1 you just have to take them serially-- ie all incomingdatas that show up
 	 *           between incomingresponses belong to the prior incomingresponse.
 	 * @param isComplete false if the transfer encoding is chunked or http/2 in which case
-	 *                      incomingData will be called for each chunk/dataframe coming in
+	 *                      sendData will be called for each chunk/dataframe coming in
 	 */
 	void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete);
 	
 	/**
 	 *
-	 * incomingData returns a future because we want to be able to signal that we're
+	 * sendData returns a future because we want to be able to signal that we're
 	 * done processing this data and the flow control window can be opened back up again.
 	 *
 	 * @param data

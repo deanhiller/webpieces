@@ -19,9 +19,9 @@ public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
 
-    static private CompletableFuture<HttpRequest> sendManyTimes(RequestListener requestListener, int n, HttpRequest req, ResponseListener l) {
+    static private CompletableFuture<HttpRequest> sendManyTimes(RequestSender requestListener, int n, HttpRequest req, ResponseListener l) {
         if(n > 0) {
-            return requestListener.incomingRequest(req, true, l)
+            return requestListener.sendRequest(req, true, l)
                     .thenCompose(request -> sendManyTimes(requestListener, n-1, req, l));
         } else {
             return CompletableFuture.completedFuture(req);
@@ -54,7 +54,7 @@ public class IntegNgHttp2 {
 
         Thread.sleep(10000);
 
-        sendManyTimes(socket.getRequestListener(), 10, req, listener).exceptionally(e -> {
+        sendManyTimes(socket.getRequestSender(), 10, req, listener).exceptionally(e -> {
             reportException(socket, e);
             return req;
         });

@@ -40,7 +40,7 @@ public class IntegColoradoEdu {
 		HttpSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))
-			.thenAccept(requestListener -> requestListener.incomingRequest(req, true, listener))
+			.thenAccept(requestListener -> requestListener.sendRequest(req, true, listener))
 			.exceptionally(e -> reportException(socket, e));
 
 		Thread.sleep(100000);

@@ -84,8 +84,8 @@ public class IntegGoogleHttps {
 		return client;
 	}
 
-	private void sendRequest(RequestListener requestListener, HttpRequest req) {
-		requestListener.incomingRequest(req, true, new OurListener());
+	private void sendRequest(RequestSender requestListener, HttpRequest req) {
+		requestListener.sendRequest(req, true, new OurListener());
 	}
 
 	private Void reportException(HttpSocket socket, Throwable e) {

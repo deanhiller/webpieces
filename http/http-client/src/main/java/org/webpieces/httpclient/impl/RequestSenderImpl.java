@@ -25,12 +25,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.webpieces.httpclient.impl.ClientRequestListener.Protocol.HTTP11;
-import static org.webpieces.httpclient.impl.ClientRequestListener.Protocol.HTTP2;
+import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
+import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP2;
 import static org.webpieces.httpclient.impl.Http2Engine.HttpSide.CLIENT;
 
-public class ClientRequestListener implements RequestListener {
-    private static final Logger log = LoggerFactory.getLogger(ClientRequestListener.class);
+public class RequestSenderImpl implements RequestSender {
+    private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 
@@ -64,12 +64,12 @@ public class ClientRequestListener implements RequestListener {
     private AtomicBoolean acceptingRequest = new AtomicBoolean(false);
 
 
-    public ClientRequestListener(HttpSocket socket,
-                                 HttpParser httpParser,
-                                 Http2Parser http2Parser,
-                                 CloseListener closeListener,
-                                 InetSocketAddress addr,
-                                 TCPChannel channel) {
+    public RequestSenderImpl(HttpSocket socket,
+                             HttpParser httpParser,
+                             Http2Parser http2Parser,
+                             CloseListener closeListener,
+                             InetSocketAddress addr,
+                             TCPChannel channel) {
         this.socket = socket;
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
@@ -158,7 +158,7 @@ public class ClientRequestListener implements RequestListener {
 
                     // Grab the leftover data out of the http11 parser and send that
                     // to the http2 engine
-                    DataWrapper leftOverData = ((ClientRequestListener.Http11DataListener) dataListener.dataListenerMap.get(HTTP11))
+                    DataWrapper leftOverData = ((RequestSenderImpl.Http11DataListener) dataListener.dataListenerMap.get(HTTP11))
                             .getLeftOverData();
                     return http2Engine.createInitialStream(r, req, listener, leftOverData);
                 }
@@ -174,8 +174,17 @@ public class ClientRequestListener implements RequestListener {
         return future;
     }
 
+
     @Override
-    public CompletableFuture<RequestId> incomingRequest(HttpRequest request, boolean isComplete, ResponseListener listener) {
+    public CompletableFuture<HttpResponse> send(HttpRequest request) {
+        CompletableFuture<HttpResponse> future = new CompletableFuture<>();
+        ResponseListener l = new CompletableListener(future);
+        sendRequest(request, true, l);
+        return future;
+    }
+
+    @Override
+    public CompletableFuture<RequestId> sendRequest(HttpRequest request, boolean isComplete, ResponseListener listener) {
         if(acceptingRequest.get()) {
             throw new IllegalArgumentException("You can't call incoming request while in "
                     + "HTTP11 mode and a prior request is not complete");
@@ -189,13 +198,13 @@ public class ClientRequestListener implements RequestListener {
     }
 
     @Override
-    public CompletableFuture<Integer> incomingData(RequestId id, DataWrapper data, boolean isComplete) {
+    public CompletableFuture<Integer> sendData(RequestId id, DataWrapper data, boolean isComplete) {
         if(protocol == HTTP11) {
             if(isComplete)
                 acceptingRequest.set(false);
 
             // TODO: create a chunk out of the data
-            throw new IllegalArgumentException("incomingData not implemented for HTTP/1.1");
+            throw new IllegalArgumentException("sendData not implemented for HTTP/1.1");
         }
         else {
             return http2Engine.incomingData(id, data, isComplete);

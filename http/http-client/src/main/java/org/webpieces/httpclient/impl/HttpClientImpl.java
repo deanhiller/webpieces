@@ -28,16 +28,16 @@ public class HttpClientImpl implements HttpClient {
 	@Override
 	public CompletableFuture<HttpResponse> sendSingleRequest(InetSocketAddress addr, HttpRequest request) {
 		HttpSocket socket = openHttpSocket(addr+"");
-		CompletableFuture<RequestListener> connect = socket.connect(addr);
-		return connect.thenCompose(p -> socket.send(request));
+		CompletableFuture<RequestSender> connect = socket.connect(addr);
+		return connect.thenCompose(requestSender -> requestSender.send(request));
 	}
 	
 	@Override
 	public void sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener listener) {
 		HttpSocket socket = openHttpSocket(addr+"");
 
-		CompletableFuture<RequestListener> connect = socket.connect(addr);
-		connect.thenAccept(requestListener -> requestListener.incomingRequest(request, true, listener))
+		CompletableFuture<RequestSender> connect = socket.connect(addr);
+		connect.thenAccept(requestSender -> requestSender.sendRequest(request, true, listener))
 			.exceptionally(e -> fail(socket, listener, e));
 	}
 
