@@ -292,7 +292,6 @@ public class ClientRequestListener implements RequestListener {
                 closeListener.farEndClosed(socket);
 
             // call farEndClosed on every protocol
-            // Call failure on every protocol
             for(Map.Entry<Protocol, DataListener> entry: dataListenerMap.entrySet()) {
                 entry.getValue().farEndClosed(channel);
             }
