@@ -3,7 +3,7 @@ package org.webpieces.frontend.api;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
-public interface HttpRequestListener {
+public interface RequestListener {
 
 	/**
 	 * This is the main method that is invoked on every incoming http request on every channel giving
@@ -13,17 +13,17 @@ public interface HttpRequestListener {
 	 * @param req
 	 * @param isHttps true if this request came in over an https socket
 	 */
-	void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps); //, boolean isHttp2);
+	void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps); //, boolean isHttp2);
 	
 	/**
-	 * In the event the client sends a bad unparseable request, OR your HttpRequestListener 
+	 * In the event the client sends a bad unparseable request, OR your RequestListener
 	 * throws an exception, we call this method to pass in the status you 'should' return to
 	 * the client as well as the channel to feed that response into
 	 * 
 	 * @param channel
 	 * @param exc
 	 */
-	void sendServerResponse(FrontendSocket channel, HttpException exc);
+	void incomingError(FrontendSocket channel, HttpException exc);
 
 	/**
 	 * client opened their channel(can start timeouts here)

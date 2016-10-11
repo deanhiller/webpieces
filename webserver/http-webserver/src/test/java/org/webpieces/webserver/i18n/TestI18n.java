@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -21,7 +21,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestI18n {
 
-	private HttpRequestListener server;
+	private RequestListener server;
 	private MockFrontendSocket socket = new MockFrontendSocket();
 
 	@Before
@@ -36,7 +36,7 @@ public class TestI18n {
 	public void testDefaultText() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -52,7 +52,7 @@ public class TestI18n {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_LANGUAGE, "zh-CN"));
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

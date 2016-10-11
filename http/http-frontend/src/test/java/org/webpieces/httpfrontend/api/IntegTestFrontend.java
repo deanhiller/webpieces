@@ -2,11 +2,8 @@ package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
 
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.HttpFrontendFactory;
-import org.webpieces.frontend.api.HttpFrontendManager;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.*;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
@@ -19,14 +16,14 @@ public class IntegTestFrontend {
 		frontEndMgr.createHttpServer(config, new OurListener());
 	}
 	
-	private static class OurListener implements HttpRequestListener {
+	private static class OurListener implements RequestListener {
 
 		@Override
-		public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+		public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		}
 
 		@Override
-		public void sendServerResponse(FrontendSocket channel, HttpException exc) {
+		public void incomingError(FrontendSocket channel, HttpException exc) {
 		}
 
 		@Override

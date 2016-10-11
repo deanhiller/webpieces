@@ -4,8 +4,8 @@ import org.webpieces.nio.api.SSLEngineFactory;
 
 public interface HttpFrontendManager {
 
-	HttpFrontend createHttpServer(FrontendConfig config, HttpRequestListener listener);
+	HttpFrontend createHttpServer(FrontendConfig config, RequestListener listener);
 	
-	HttpFrontend createHttpsServer(FrontendConfig config, HttpRequestListener listener, SSLEngineFactory factory);
+	HttpFrontend createHttpsServer(FrontendConfig config, RequestListener listener, SSLEngineFactory factory);
 
 }

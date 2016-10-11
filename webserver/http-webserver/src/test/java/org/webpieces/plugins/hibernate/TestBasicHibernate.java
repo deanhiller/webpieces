@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -20,7 +20,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestBasicHibernate {
 	private MockFrontendSocket socket = new MockFrontendSocket();
-	private HttpRequestListener server;
+	private RequestListener server;
 
 	@Before
 	public void setUp() {
@@ -38,7 +38,7 @@ public class TestBasicHibernate {
 	private String saveBean() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, "/save");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -55,7 +55,7 @@ public class TestBasicHibernate {
 	private void readBean(String redirectUrl) {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

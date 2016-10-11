@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -22,8 +22,6 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.WEBPIECESxCLASSServer;
 import WEBPIECESxPACKAGE.example.RemoteService;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 
@@ -36,7 +34,7 @@ import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
  */
 public class TestLesson1BasicRequestResponse {
 
-	private HttpRequestListener server;
+	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
 	//any redirects in the application properly..
 	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
@@ -61,7 +59,7 @@ public class TestLesson1BasicRequestResponse {
 	public void testSynchronousController() {
 		HttpRequest req = createRequest("/");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -85,7 +83,7 @@ public class TestLesson1BasicRequestResponse {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = createRequest("/async");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());
@@ -111,7 +109,7 @@ public class TestLesson1BasicRequestResponse {
 		HttpRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());

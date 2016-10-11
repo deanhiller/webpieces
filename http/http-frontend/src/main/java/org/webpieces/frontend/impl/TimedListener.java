@@ -10,7 +10,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.frontend.api.exception.HttpClientException;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -22,11 +22,11 @@ public class TimedListener {
 	private static final Logger log = LoggerFactory.getLogger(TimedListener.class);
 
 	private ScheduledExecutorService timer;
-	private HttpRequestListener listener;
+	private RequestListener listener;
 	private FrontendConfig config;
 	private Map<FrontendSocket, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
 
-	public TimedListener(ScheduledExecutorService timer, HttpRequestListener listener, FrontendConfig config) {
+	public TimedListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
 		this.timer = timer;
 		this.listener = listener;
 		this.config = config;
@@ -34,7 +34,7 @@ public class TimedListener {
 
 	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		releaseTimeout(channel);
-		listener.processHttpRequests(channel, req, isHttps);
+		listener.incomingRequest(channel, req, isHttps);
 	}
 
 	private void releaseTimeout(FrontendSocket channel) {
@@ -45,7 +45,7 @@ public class TimedListener {
 	}
 
 	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
-		listener.sendServerResponse(channel, exc);
+		listener.incomingError(channel, exc);
 		
 		//safety measure preventing leak on quick connect/close clients
 		releaseTimeout(channel);
@@ -73,7 +73,7 @@ public class TimedListener {
 		
 		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(channel), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
 		//lifecycle of the entry in the Map is until the TimeoutOnRequest runs OR
-		//until processHttpRequests is invoked as we have a request OR
+		//until incomingRequest is invoked as we have a request OR
 		//client closes the socket before sending http request and before the timeout
 		socketToTimeout.put(channel, future);
 	}

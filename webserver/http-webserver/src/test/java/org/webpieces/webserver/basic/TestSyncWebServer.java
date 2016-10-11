@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -20,7 +20,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 public class TestSyncWebServer {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
-	private HttpRequestListener server;
+	private RequestListener server;
 	
 	@Before
 	public void setUp() {
@@ -32,7 +32,7 @@ public class TestSyncWebServer {
 	public void testBasic() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -49,7 +49,7 @@ public class TestSyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -63,7 +63,7 @@ public class TestSyncWebServer {
 	public void testJsonFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

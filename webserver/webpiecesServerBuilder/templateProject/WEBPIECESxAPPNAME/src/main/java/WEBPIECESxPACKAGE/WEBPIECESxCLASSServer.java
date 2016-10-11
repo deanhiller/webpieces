@@ -9,9 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
@@ -225,7 +225,7 @@ public class WEBPIECESxCLASSServer {
 		//channel.socket().setReceiveBufferSize(size);
 	}
 	
-	public HttpRequestListener start() {
+	public RequestListener start() {
 		return webServer.start();	
 	}
 

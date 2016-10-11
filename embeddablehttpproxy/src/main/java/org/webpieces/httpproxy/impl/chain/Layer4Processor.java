@@ -12,7 +12,7 @@ import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
@@ -28,7 +28,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
-public class Layer4Processor implements HttpRequestListener {
+public class Layer4Processor implements RequestListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer4Processor.class);
 
@@ -52,7 +52,7 @@ public class Layer4Processor implements HttpRequestListener {
 			    .build();
 	}
 	
-	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+	public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		log.info("incoming request. channel="+channel+"=\n"+req);
 		InetSocketAddress addr = req.getServerToConnectTo(null);
 		if(config.isForceAllConnectionToHttps()) {
@@ -128,7 +128,7 @@ public class Layer4Processor implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
+	public void incomingError(FrontendSocket channel, HttpException exc) {
 		badResponse.sendServerResponse(channel, exc);
 	}
 

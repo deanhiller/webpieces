@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -21,7 +21,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestScopes {
 
-	private HttpRequestListener server;
+	private RequestListener server;
 	private MockFrontendSocket socket = new MockFrontendSocket();
 	
 	@Before
@@ -36,7 +36,7 @@ public class TestScopes {
 	public void testSessionScope() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -52,7 +52,7 @@ public class TestScopes {
 	public void testSessionScopeModificationByClient() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -72,7 +72,7 @@ public class TestScopes {
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
 		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
 		
-		server.processHttpRequests(socket, req2, false);
+		server.incomingRequest(socket, req2, false);
 		
 		responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

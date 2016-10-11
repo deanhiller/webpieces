@@ -6,9 +6,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -37,7 +37,7 @@ import com.google.inject.util.Modules;
 public class TestDevSynchronousErrors {
 
 	private static final Logger log = LoggerFactory.getLogger(TestDevSynchronousErrors.class);
-	private HttpRequestListener server;
+	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
 	//any redirects in the application properly..
 	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
@@ -71,7 +71,7 @@ public class TestDevSynchronousErrors {
 	public void testNotFoundRoute() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -87,7 +87,7 @@ public class TestDevSynchronousErrors {
 		//no int doesn't really exist so it's a NotFound
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -101,7 +101,7 @@ public class TestDevSynchronousErrors {
 	public void testWebappThrowsNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -118,7 +118,7 @@ public class TestDevSynchronousErrors {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -137,7 +137,7 @@ public class TestDevSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -153,7 +153,7 @@ public class TestDevSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());

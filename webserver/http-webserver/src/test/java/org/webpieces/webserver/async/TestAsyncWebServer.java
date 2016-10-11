@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -25,7 +25,7 @@ import com.google.inject.Module;
 public class TestAsyncWebServer {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
-	private HttpRequestListener server;
+	private RequestListener server;
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 
 	@Before
@@ -39,7 +39,7 @@ public class TestAsyncWebServer {
 	public void testCompletePromiseOnRequestThread() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -56,7 +56,7 @@ public class TestAsyncWebServer {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 
 		//now have the server complete processing
 		future.complete(5);
@@ -73,7 +73,7 @@ public class TestAsyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

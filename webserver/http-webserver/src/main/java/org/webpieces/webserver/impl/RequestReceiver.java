@@ -22,7 +22,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -40,7 +40,7 @@ import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
 
-public class RequestReceiver implements HttpRequestListener {
+public class RequestReceiver implements RequestListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(RequestReceiver.class);
 	private static final HeaderPriorityParser headerParser = HttpParserFactory.createHeaderParser();
@@ -85,7 +85,7 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 	
 	@Override
-	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {		
+	public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 		//log.info("request received on channel="+channel);
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
@@ -229,7 +229,7 @@ public class RequestReceiver implements HttpRequestListener {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
+	public void incomingError(FrontendSocket channel, HttpException exc) {
 		//If status is a 4xx, send it back to the client with just raw information
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user

@@ -9,7 +9,7 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.SSLEngineFactory;
 
@@ -27,7 +27,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpFrontend createHttpServer(FrontendConfig config, HttpRequestListener listener) {
+	public HttpFrontend createHttpServer(FrontendConfig config, RequestListener listener) {
 		preconditionCheck(config);
 		
 		TimedListener timed = new TimedListener(timer, listener, config);
@@ -45,7 +45,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpFrontend createHttpsServer(FrontendConfig config, HttpRequestListener listener,
+	public HttpFrontend createHttpsServer(FrontendConfig config, RequestListener listener,
 			SSLEngineFactory factory) {
 		preconditionCheck(config);
 		TimedListener timed = new TimedListener(timer, listener, config);

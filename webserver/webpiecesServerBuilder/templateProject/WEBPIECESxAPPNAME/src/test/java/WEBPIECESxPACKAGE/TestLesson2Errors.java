@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.test.Asserts;
@@ -17,8 +17,6 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.WEBPIECESxCLASSServer;
 import WEBPIECESxPACKAGE.example.RemoteService;
 import WEBPIECESxPACKAGE.example.SomeLibrary;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
@@ -39,7 +37,7 @@ import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
  */
 public class TestLesson2Errors {
 
-	private HttpRequestListener server;
+	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
 	//any redirects in the application properly..
 	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
@@ -67,7 +65,7 @@ public class TestLesson2Errors {
 		mockLibrary.throwException(new RuntimeException("test internal bug page"));
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -84,7 +82,7 @@ public class TestLesson2Errors {
 	public void testNotFound() {
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -103,7 +101,7 @@ public class TestLesson2Errors {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
 		
-		server.processHttpRequests(mockResponseSocket, req, false);
+		server.incomingRequest(mockResponseSocket, req, false);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());

@@ -1,20 +1,20 @@
 package org.webpieces.httpfrontend.api;
 
 import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
-public class MockRequestListener implements HttpRequestListener {
+public class MockRequestListener implements RequestListener {
 
 	private boolean isClosed;
 
 	@Override
-	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+	public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
 	}
 
 	@Override
-	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
+	public void incomingError(FrontendSocket channel, HttpException exc) {
 	}
 
 	@Override

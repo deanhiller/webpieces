@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -24,7 +24,7 @@ import com.google.inject.util.Modules;
 public class TestIncludeTypeTags {
 
 	private MockFrontendSocket socket = new MockFrontendSocket();
-	private HttpRequestListener server;
+	private RequestListener server;
 	
 	@Before
 	public void setUp() {
@@ -39,7 +39,7 @@ public class TestIncludeTypeTags {
 	public void testCustomTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/customtag");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -58,7 +58,7 @@ public class TestIncludeTypeTags {
 	public void testRenderTagArgsTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderTagArgs");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -74,7 +74,7 @@ public class TestIncludeTypeTags {
 	public void testRenderPageArgsTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderPageArgs");
 		
-		server.processHttpRequests(socket, req , false);
+		server.incomingRequest(socket, req , false);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

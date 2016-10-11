@@ -15,7 +15,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
-import org.webpieces.frontend.api.HttpRequestListener;
+import org.webpieces.frontend.api.RequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RoutingService;
@@ -43,7 +43,7 @@ public class WebServerImpl implements WebServer {
 	private HttpFrontend httpsServer;
 
 	@Override
-	public HttpRequestListener start() {
+	public RequestListener start() {
 		log.info("starting server");
 
 		routingService.start();
