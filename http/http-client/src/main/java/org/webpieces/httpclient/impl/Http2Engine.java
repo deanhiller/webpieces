@@ -187,7 +187,6 @@ public class Http2Engine {
 
         LinkedList<HasHeaderFragment.Header> headerList = new LinkedList<>();
 
-
         // add special headers
         headerList.add(new HasHeaderFragment.Header(":method", requestLine.getMethod().getMethodAsString()));
 
