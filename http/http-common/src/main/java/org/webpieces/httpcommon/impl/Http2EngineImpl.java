@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpcommon.impl;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
@@ -8,10 +8,11 @@ import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.RequestId;
-import org.webpieces.httpclient.api.ResponseListener;
-import org.webpieces.httpclient.api.exceptions.*;
-import org.webpieces.httpclient.api.exceptions.InternalError;
+import org.webpieces.httpcommon.api.Http2Engine;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseListener;
+import org.webpieces.httpcommon.api.exceptions.*;
+import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.channels.Channel;
@@ -39,14 +40,11 @@ import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.*;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE;
 import static java.lang.Math.min;
-import static org.webpieces.httpclient.impl.Http2Engine.HttpSide.CLIENT;
-import static org.webpieces.httpclient.impl.Http2Engine.HttpSide.SERVER;
-import static org.webpieces.httpclient.impl.Stream.StreamStatus.*;
-import static org.webpieces.httpclient.impl.Stream.StreamStatus.CLOSED;
-import static org.webpieces.httpclient.impl.Stream.StreamStatus.RESERVED_REMOTE;
+import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
+import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 
-public class Http2Engine {
-    private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
+public class Http2EngineImpl implements Http2Engine {
+    private static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private TCPChannel channel;
@@ -54,7 +52,6 @@ public class Http2Engine {
     private Http2Parser http2Parser;
     private InetSocketAddress addr;
 
-    public enum HttpSide { CLIENT, SERVER };
     private HttpSide side;
 
     private Map<Http2Settings.Parameter, Integer> localPreferredSettings = new HashMap<>();
@@ -95,7 +92,7 @@ public class Http2Engine {
     private Http2ErrorCode goneAwayErrorCode;
     private DataWrapper additionalDebugData;
 
-    public Http2Engine(Http2Parser http2Parser, TCPChannel channel, InetSocketAddress addr, HttpSide side) {
+    public Http2EngineImpl(Http2Parser http2Parser, TCPChannel channel, InetSocketAddress addr, HttpSide side) {
         this.http2Parser = http2Parser;
         this.channel = channel;
         this.addr = addr;
@@ -173,7 +170,7 @@ public class Http2Engine {
         initialStream.setResponse(r);
         // Since we already sent the entire request as the upgrade, the stream basically starts in
         // half closed local
-        initialStream.setStatus(HALF_CLOSED_LOCAL);
+        initialStream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
         activeStreams.put(initialStreamId, initialStream);
 
         DataWrapper responseBody = r.getBodyNonNull();
@@ -189,12 +186,12 @@ public class Http2Engine {
         return new RequestId(initialStreamId);
     }
 
-    public CompletableFuture<Integer> incomingData(RequestId id, DataWrapper data, boolean isComplete) {
+    public CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete) {
         Stream stream = activeStreams.get(id.getValue());
         switch(stream.getStatus()) {
             case OPEN:
             case HALF_CLOSED_REMOTE:
-                return sendDataFrames(data, isComplete, stream).thenApply(channel -> data.getReadableSize());
+                return sendDataFrames(data, isComplete, stream);
             default:
                 throw new ClientError(
                         String.format("can't send data on a stream in state %s", stream.getStatus().toString()));
@@ -317,7 +314,7 @@ public class Http2Engine {
         }
     }
 
-    private CompletableFuture<Channel> sendDataFrames(DataWrapper body, boolean isComplete, Stream stream) {
+    private CompletableFuture<Void> sendDataFrames(DataWrapper body, boolean isComplete, Stream stream) {
         Http2Data newFrame = new Http2Data();
         newFrame.setStreamId(stream.getStreamId());
 
@@ -329,11 +326,10 @@ public class Http2Engine {
                 newFrame.setEndStream(true);
 
             log.info("sending final data frame: (but might not complete the request)" + newFrame);
-            return writeDataFrame(newFrame).thenApply(
+            return writeDataFrame(newFrame).thenAccept(
                     channel -> {
-                        if(isComplete)
-                            stream.setStatus(HALF_CLOSED_LOCAL);
-                        return channel;
+                        if (isComplete)
+                            stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
                     }
             );
         } else {
@@ -377,7 +373,7 @@ public class Http2Engine {
         return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenApply(
                 channel ->
                 {
-                    stream.setStatus(OPEN);
+                    stream.setStatus(Stream.StreamStatus.OPEN);
                     return channel;
                 }
         );
@@ -387,7 +383,7 @@ public class Http2Engine {
         int mod = side == CLIENT ? 1 : 0;
         return activeStreams.entrySet().stream().filter(entry -> {
             Stream.StreamStatus status = entry.getValue().getStatus();
-            boolean open = (Arrays.asList(OPEN, HALF_CLOSED_LOCAL, HALF_CLOSED_REMOTE).contains(status));
+            boolean open = (Arrays.asList(Stream.StreamStatus.OPEN, Stream.StreamStatus.HALF_CLOSED_LOCAL, Stream.StreamStatus.HALF_CLOSED_REMOTE).contains(status));
             boolean server = entry.getValue().getStreamId() % 2 == mod;
             return open && server;
         }).count();
@@ -407,7 +403,7 @@ public class Http2Engine {
         int mod = side == CLIENT ? 1 : 0;
         return activeStreams.entrySet()
                 .stream()
-                .filter(entry -> (entry.getValue().getStatus() == CLOSED) && (entry.getValue().getStreamId() % 2 == mod))
+                .filter(entry -> (entry.getValue().getStatus() == Stream.StreamStatus.CLOSED) && (entry.getValue().getStreamId() % 2 == mod))
                 .max(Comparator.comparingInt(Map.Entry::getKey)).map(entry -> entry.getKey());
     }
 
@@ -448,7 +444,7 @@ public class Http2Engine {
     }
 
     // Client only
-    public CompletableFuture<RequestId> sendHttp2Request(HttpRequest request, boolean isComplete, ResponseListener l) {
+    public CompletableFuture<RequestId> sendRequest(HttpRequest request, boolean isComplete, ResponseListener l) {
 
         // Check if we are allowed to create a new stream
         if (remoteSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
@@ -482,10 +478,10 @@ public class Http2Engine {
             // Make sure status can accept ES
             switch(stream.getStatus()) {
                 case OPEN:
-                    stream.setStatus(HALF_CLOSED_REMOTE);
+                    stream.setStatus(Stream.StreamStatus.HALF_CLOSED_REMOTE);
                     break;
                 case HALF_CLOSED_LOCAL:
-                    stream.setStatus(CLOSED);
+                    stream.setStatus(Stream.StreamStatus.CLOSED);
                     break;
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
@@ -625,13 +621,13 @@ public class Http2Engine {
         private void handleHeaders(Http2Headers frame, Stream stream) {
             switch (stream.getStatus()) {
                 case IDLE:
-                    stream.setStatus(OPEN);
+                    stream.setStatus(Stream.StreamStatus.OPEN);
                     break;
                 case HALF_CLOSED_LOCAL:
                     // No status change in this case
                     break;
                 case RESERVED_REMOTE:
-                    stream.setStatus(HALF_CLOSED_LOCAL);
+                    stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
                     break;
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
@@ -683,7 +679,7 @@ public class Http2Engine {
                     else
                         stream.getRequestListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
 
-                    stream.setStatus(CLOSED);
+                    stream.setStatus(Stream.StreamStatus.CLOSED);
                     break;
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
@@ -715,7 +711,7 @@ public class Http2Engine {
                 promisedStream.setResponseListener(stream.getResponseListener());
                 HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), promisedStream);
                 promisedStream.setRequest(request);
-                promisedStream.setStatus(RESERVED_REMOTE);
+                promisedStream.setStatus(Stream.StreamStatus.RESERVED_REMOTE);
             } else {
                 throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper());
             }
@@ -881,7 +877,7 @@ public class Http2Engine {
                     channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrame()).createByteArray()));
                     if(RstStreamError.class.isInstance(e)) {
                         // Mark the stream closed
-                        activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(CLOSED);
+                        activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(Stream.StreamStatus.CLOSED);
                     }
                     if(GoAwayError.class.isInstance(e)) {
                         // TODO: Shut this connection down

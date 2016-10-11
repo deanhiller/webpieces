@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.httpcommon.api;
 
 public interface CloseListener {
 

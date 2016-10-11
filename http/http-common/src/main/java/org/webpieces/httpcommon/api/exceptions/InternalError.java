@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api.exceptions;
+package org.webpieces.httpcommon.api.exceptions;
 
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import org.webpieces.data.api.DataWrapper;

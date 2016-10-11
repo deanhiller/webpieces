@@ -1,11 +1,11 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.httpcommon.api;
 
 
 public class RequestId {
     private Integer value;
 
     public RequestId(int value) {
-        this.value = new Integer(value);
+        this.value = value;
     }
 
     public RequestId(String s) throws NumberFormatException {

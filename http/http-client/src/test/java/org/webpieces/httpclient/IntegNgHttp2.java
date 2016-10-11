@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.*;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -43,7 +46,7 @@ public class IntegNgHttp2 {
 
         HttpClient client = IntegGoogleHttps.createHttpClient(isHttp);
 
-        HttpSocket socket = client.openHttpSocket("oneTimer");
+        HttpClientSocket socket = client.openHttpSocket("oneTimer");
         socket
                 .connect(new InetSocketAddress(host, port))
                 .thenCompose(requestListener -> sendManyTimes(requestListener, 10, req, listener))
@@ -61,7 +64,7 @@ public class IntegNgHttp2 {
         Thread.sleep(10000);
     }
 
-    private static Void reportException(HttpSocket socket, Throwable e) {
+    private static Void reportException(HttpClientSocket socket, Throwable e) {
         log.error("exception on socket="+socket, e);
         return null;
     }

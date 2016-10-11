@@ -8,13 +8,14 @@ import java.util.concurrent.CompletableFuture;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.httpclient.api.*;
+import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -22,9 +23,9 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
 
-public class HttpSocketImpl implements HttpSocket, Closeable {
+public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpClientSocketImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private TCPChannel channel;
@@ -43,9 +44,9 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     private InetSocketAddress addr;
     private RequestSenderImpl requestListener;
 
-    public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser httpParser,
-                          Http2Parser http2Parser,
-                          CloseListener closeListener) {
+    public HttpClientSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser httpParser,
+                                Http2Parser http2Parser,
+                                CloseListener closeListener) {
         this.factory = factory;
         this.mgr = mgr;
         this.idForLogging = idForLogging;
@@ -83,16 +84,15 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     }
 
     @Override
-    public CompletableFuture<HttpSocket> closeSocket() {
+    public CompletableFuture<Void> closeSocket() {
         if (isClosed) {
-            return CompletableFuture.completedFuture(this);
+            return CompletableFuture.completedFuture(null);
         }
         requestListener.cleanUpPendings("close socket called");
 
         CompletableFuture<Channel> future = channel.close();
-        return future.thenApply(chan -> {
+        return future.thenAccept(chan -> {
             isClosed = true;
-            return this;
         });
     }
 
@@ -114,10 +114,10 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
             return;
 
         //best effort and ignore exception except log it
-        CompletableFuture<HttpSocket> future = closeSocket();
+        CompletableFuture<Void> future = closeSocket();
         future.exceptionally(e -> {
             log.info("close failed", e);
-            return this;
+            return null;
         });
     }
 }

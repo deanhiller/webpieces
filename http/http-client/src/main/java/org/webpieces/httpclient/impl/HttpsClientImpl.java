@@ -5,6 +5,9 @@ import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import org.webpieces.httpclient.api.*;
+import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpparser.api.HttpParser;
@@ -29,38 +32,38 @@ public class HttpsClientImpl implements HttpClient {
 
 	@Override
 	public CompletableFuture<HttpResponse> sendSingleRequest(InetSocketAddress addr, HttpRequest request) {
-		HttpSocket socket = openHttpSocket(addr+"");
+		HttpClientSocket socket = openHttpSocket(addr+"");
 		CompletableFuture<RequestSender> connect = socket.connect(addr);
 		return connect.thenCompose(requestSender -> requestSender.send(request));
 	}
 
 	@Override
 	public void sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener listener) {
-		HttpSocket socket = openHttpSocket(addr+"");
+		HttpClientSocket socket = openHttpSocket(addr+"");
 
 		CompletableFuture<RequestSender> connect = socket.connect(addr);
 		connect.thenAccept(requestListener -> requestListener.sendRequest(request, true, listener))
 			.exceptionally(e -> fail(socket, listener, e));
 	}
 
-	private Void fail(HttpSocket socket, ResponseListener listener, Throwable e) {
-		CompletableFuture<HttpSocket> closeSocket = socket.closeSocket();
+	private Void fail(HttpClientSocket socket, ResponseListener listener, Throwable e) {
+		CompletableFuture<Void> closeSocket = socket.closeSocket();
 		closeSocket.exceptionally(ee -> {
 			log.error("could not close socket due to exception");
-			return socket;
+			return null;
 		});
 		listener.failure(e);
 		return null;
 	}
 
 	@Override
-	public HttpSocket openHttpSocket(String idForLogging) {
+	public HttpClientSocket openHttpSocket(String idForLogging) {
 		return openHttpSocket(idForLogging, null);
 	}
 
 	@Override
-	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener);
+	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
+		return new HttpClientSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener);
 	}
 
 

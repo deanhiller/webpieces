@@ -3,8 +3,8 @@ package org.webpieces.httpclient.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.RequestId;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 

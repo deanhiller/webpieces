@@ -6,6 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.*;
+import org.webpieces.httpcommon.api.*;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -27,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
 import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP2;
-import static org.webpieces.httpclient.impl.Http2Engine.HttpSide.CLIENT;
 
 public class RequestSenderImpl implements RequestSender {
     private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
@@ -64,7 +64,7 @@ public class RequestSenderImpl implements RequestSender {
     private AtomicBoolean acceptingRequest = new AtomicBoolean(false);
 
 
-    public RequestSenderImpl(HttpSocket socket,
+    public RequestSenderImpl(HttpClientSocket socket,
                              HttpParser httpParser,
                              Http2Parser http2Parser,
                              CloseListener closeListener,
@@ -74,7 +74,7 @@ public class RequestSenderImpl implements RequestSender {
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
         this.closeListener = closeListener;
-        this.http2Engine = new Http2Engine(http2Parser, channel, addr, CLIENT);
+        this.http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, addr, Http2Engine.HttpSide.CLIENT);
         this.channel = channel;
         this.addr = addr;
 
@@ -198,7 +198,7 @@ public class RequestSenderImpl implements RequestSender {
     }
 
     @Override
-    public CompletableFuture<Integer> sendData(RequestId id, DataWrapper data, boolean isComplete) {
+    public CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete) {
         if(protocol == HTTP11) {
             if(isComplete)
                 acceptingRequest.set(false);
@@ -207,7 +207,7 @@ public class RequestSenderImpl implements RequestSender {
             throw new IllegalArgumentException("sendData not implemented for HTTP/1.1");
         }
         else {
-            return http2Engine.incomingData(id, data, isComplete);
+            return http2Engine.sendData(id, data, isComplete);
         }
     }
 
@@ -256,7 +256,7 @@ public class RequestSenderImpl implements RequestSender {
         if (protocol == HTTP11) {
             return sendHttp11Request(request, isComplete, l);
         } else { // HTTP2
-            return http2Engine.sendHttp2Request(request, isComplete, l);
+            return http2Engine.sendRequest(request, isComplete, l);
         }
     }
 

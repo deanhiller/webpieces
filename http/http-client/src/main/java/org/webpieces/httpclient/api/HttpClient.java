@@ -3,6 +3,8 @@ package org.webpieces.httpclient.api;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -30,11 +32,11 @@ public interface HttpClient {
 	public void sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener l);
 
 	/**
-	 * HttpSocket is so you can send multiple requests
+	 * HttpClientSocket is so you can send multiple requests
 	 * 
 	 * @return
 	 */
-	public HttpSocket openHttpSocket(String idForLogging);
+	public HttpClientSocket openHttpSocket(String idForLogging);
 	
 	/**
 	 * Feel free to use openHttpSocket(String idForLogging) unless you want to be notified of the 
@@ -47,6 +49,6 @@ public interface HttpClient {
 	 * 
 	 * @return
 	 */
-	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener);
+	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener);
 	
 }

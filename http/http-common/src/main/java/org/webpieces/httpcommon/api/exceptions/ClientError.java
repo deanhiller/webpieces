@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api.exceptions;
+package org.webpieces.httpcommon.api.exceptions;
 
 // These are throws that the caller of the API will see
 public class ClientError extends RuntimeException {

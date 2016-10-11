@@ -9,7 +9,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.exception.HttpClientException;
 import org.webpieces.frontend.api.exception.HttpServerException;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -56,7 +56,7 @@ public class Layer2ResponseListener {
 		return null;
 	}
 
-	public void farEndClosed(HttpSocket socket, Channel channel) {
+	public void farEndClosed(HttpClientSocket socket, Channel channel) {
 		//since socket is closing, close the channel from the browser...
 		log.info("closing connection from browser.  channel="+channel);
 		channel.close();

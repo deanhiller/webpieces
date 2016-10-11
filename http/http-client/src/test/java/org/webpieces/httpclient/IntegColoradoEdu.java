@@ -4,12 +4,12 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.RequestId;
+import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -37,7 +37,7 @@ public class IntegColoradoEdu {
 		
 		HttpClient client = IntegGoogleHttps.createHttpClient(isHttp);
 		
-		HttpSocket socket = client.openHttpSocket("oneTimer");
+		HttpClientSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(requestListener -> requestListener.sendRequest(req, true, listener))
@@ -46,7 +46,7 @@ public class IntegColoradoEdu {
 		Thread.sleep(100000);
 	}
 
-	private static Void reportException(HttpSocket socket, Throwable e) {
+	private static Void reportException(HttpClientSocket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
 	}

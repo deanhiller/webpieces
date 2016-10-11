@@ -3,10 +3,10 @@ package org.webpieces.httpclient.api;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.RequestSender;
 
-public interface HttpSocket {
+public interface HttpClientSocket extends HttpSocket {
 
 
     /**
@@ -20,8 +20,5 @@ public interface HttpSocket {
     CompletableFuture<RequestSender> connect(InetSocketAddress addr);
 
     RequestSender getRequestSender();
-
-	CompletableFuture<HttpSocket> closeSocket();
-
 	
 }

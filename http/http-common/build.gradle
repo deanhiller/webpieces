@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':core:core-channelmanager2'), project(':http:http1_1-parser'), project(':http:http2-parser')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Common code between http client and frontend'
+}

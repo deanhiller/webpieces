@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.httpcommon.api;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -52,13 +52,12 @@ public interface RequestSender {
 
     /**
      *
-     * Pass along additional data to the HTTP request referenced. Returns the side of the
-     * datawrapper.
+     * Pass along additional data to the HTTP request referenced.
      *
      * @param data
      * @return
      */
-    CompletableFuture<Integer> sendData(RequestId id, DataWrapper data, boolean isComplete);
+    CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete);
 
     void failure(Throwable e);
 }

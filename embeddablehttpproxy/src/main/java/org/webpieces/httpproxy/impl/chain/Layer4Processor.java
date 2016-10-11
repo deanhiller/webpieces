@@ -6,15 +6,16 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.webpieces.httpclient.api.RequestSender;
+import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendSocket;
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.exception.HttpException;
-import org.webpieces.httpclient.api.CloseListener;
+import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.UrlInfo;
@@ -40,7 +41,7 @@ public class Layer4Processor implements HttpRequestListener {
 	@Inject
 	private LayerZSendBadResponse badResponse;
 	
-	private final Cache<SocketAddress, HttpSocket> cache;
+	private final Cache<SocketAddress, HttpClientSocket> cache;
 	
 	public Layer4Processor() {
 		cache = CacheBuilder.newBuilder()
@@ -67,7 +68,7 @@ public class Layer4Processor implements HttpRequestListener {
 		}
 	
 		//need synchronization if two clients of proxy access same httpSocket/addr!!!
-		HttpSocket socket = cache.getIfPresent(addr);
+		HttpClientSocket socket = cache.getIfPresent(addr);
 		if(socket != null) {
 			sendData(channel, socket.getRequestSender(), req);
 		} else {
@@ -80,8 +81,8 @@ public class Layer4Processor implements HttpRequestListener {
 		requestListener.sendRequest(req, true, new Layer1Response(layer2Processor, channel, req));
 	}
 
-	private HttpSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, FrontendSocket channel) {
-		HttpSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
+	private HttpClientSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, FrontendSocket channel) {
+		HttpClientSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
 				.thenAccept(requestListener -> {
@@ -103,11 +104,11 @@ public class Layer4Processor implements HttpRequestListener {
 		log.info("browser client closed channel="+channel);
 	}
 
-	private class SocketExpiredListener implements RemovalListener<SocketAddress, HttpSocket> {
+	private class SocketExpiredListener implements RemovalListener<SocketAddress, HttpClientSocket> {
 		@Override
-		public void onRemoval(RemovalNotification<SocketAddress, HttpSocket> notification) {
+		public void onRemoval(RemovalNotification<SocketAddress, HttpClientSocket> notification) {
 			log.info("closing socket="+notification.getKey()+".  cache removal cause="+notification.getCause());
-			HttpSocket socket = notification.getValue();
+			HttpClientSocket socket = notification.getValue();
 			socket.closeSocket();
 		}
 	}

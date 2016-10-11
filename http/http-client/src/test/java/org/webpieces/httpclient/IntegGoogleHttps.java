@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import org.webpieces.httpclient.api.*;
+import org.webpieces.httpcommon.api.*;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -56,7 +57,7 @@ public class IntegGoogleHttps {
 		
 		HttpClient client = createHttpClient(isHttp);
 		
-		HttpSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
+		HttpClientSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(requestListener -> sendRequest(requestListener, req))
@@ -88,7 +89,7 @@ public class IntegGoogleHttps {
 		requestListener.sendRequest(req, true, new OurListener());
 	}
 
-	private Void reportException(HttpSocket socket, Throwable e) {
+	private Void reportException(HttpClientSocket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
 	}

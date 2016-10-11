@@ -2,8 +2,8 @@ package org.webpieces.httpproxy.impl.responsechain;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.httpclient.api.RequestId;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 

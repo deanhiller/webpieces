@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.httpcommon.api;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
