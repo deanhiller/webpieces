@@ -34,37 +34,31 @@ public interface ResponseListener {
 	 * data after the header (eg a HEAD request) then incomingResponse may be called with isComplete,
 	 * but it's possible that an empty dataframe will be sent, in which case incomignData will be
 	 * called with an empty dataWrapper and isLastData set to true.
-	 * 
-	 * @param resp The HttpResponse message including body if there is one
-	 * @param isComplete false if the transfer encoding is chunked in which case incomingData will
-	 * be called for each chunk coming
-	 */
-	// Delete this guy
-	void incomingResponse(HttpResponse resp, boolean isComplete);
-
-	/**
+	 *
 	 * To support HTTP2 we need to pass the 'request' back with the response because the
 	 * server might push a response with an implied request.
+	 *
+	 * @param resp The HttpResponse message including body if there is one
+	 * @param req the originating or presumed request
+	 * @param id an id to help us map incomingResponses to incomingDatas. UNUSED in HTTP1.1. In
+	 *           HTTP1.1 you just have to take them serially-- ie all incomingdatas that show up
+	 *           between incomingresponses belong to the prior incomingresponse.
+	 * @param isComplete false if the transfer encoding is chunked or http/2 in which case
+	 *                      incomingData will be called for each chunk/dataframe coming in
 	 */
-	// Add RequestId (aka streamid)
-	void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete);
+	void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete);
 	
 	/**
 	 *
 	 * incomingData returns a future because we want to be able to signal that we're
 	 * done processing this data and the flow control window can be opened back up again.
 	 *
-	 *  @param data
+	 * @param data
 	 * @param isLastData
 	 */
-	// Delete this guy
-	CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData);
-
-	// Add RequestId (aka streamid) -- remove httpRequest here
-	// Change to Void
 	// maybe add optional chunk or chunk extension, or not
-	CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData);
-	
+	CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData);
+
 	void failure(Throwable e);
 	
 }

@@ -6,10 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
-import org.webpieces.httpclient.api.RequestListener;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.*;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -72,26 +69,14 @@ public class IntegNgHttp2 {
     private static class ChunkedResponseListener implements ResponseListener {
 
         @Override
-        public void incomingResponse(HttpResponse resp, boolean isComplete) {
-            log.info("received resp="+resp+" iscomplete="+isComplete);
+        public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+            log.info("received req="+req+"resp="+resp+" id=" + id +" iscomplete="+isComplete);
         }
 
         @Override
-        public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
-            log.info("received req="+req);
-            incomingResponse(resp, isComplete);
-        }
-
-        @Override
-        public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
-            log.info("received data="+ data +" last="+ isLastData);
-            return CompletableFuture.completedFuture(data.getReadableSize());
-        }
-
-        @Override
-        public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-            log.info("req="+request);
-            return incomingData(data, isLastData);
+        public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+            log.info("received resp="+ data +" id=" + id + " last="+ isLastData);
+            return CompletableFuture.completedFuture(null);
         }
 
         @Override
@@ -100,6 +85,7 @@ public class IntegNgHttp2 {
         }
 
     }
+
 
     private static HttpRequest createRequest(String host) {
         HttpRequestLine requestLine = new HttpRequestLine();

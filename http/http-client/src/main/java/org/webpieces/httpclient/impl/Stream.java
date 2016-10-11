@@ -3,6 +3,7 @@ package org.webpieces.httpclient.impl;
 import com.webpieces.http2parser.api.dto.HasPriorityDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.RequestId;
 import org.webpieces.httpclient.api.RequestListener;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -40,6 +41,8 @@ public class Stream {
     public int getStreamId() {
         return streamId;
     }
+
+    public RequestId getRequestId() { return new RequestId(streamId); }
 
     public void setStreamId(int streamId) {
         this.streamId = streamId;

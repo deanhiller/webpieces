@@ -95,31 +95,19 @@ public class IntegGoogleHttps {
 
 	private static class OurListener implements ResponseListener {
 		@Override
-		public void incomingResponse(HttpResponse resp, boolean isComplete) {
-			log.info("resp="+resp+" complete="+isComplete);
+		public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+			log.info("received req="+req+"resp="+resp+" id=" + id +" iscomplete="+isComplete);
 		}
 
 		@Override
-		public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
-			log.info("req="+req);
-			incomingResponse(resp, isComplete);
-		}
-
-		@Override
-		public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-			return incomingData(data, isLastData);
-		}
-
-		@Override
-		public CompletableFuture<Integer> incomingData(DataWrapper wrapper, boolean isLastData) {
-			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
-			log.info("result=(lastData="+ isLastData +"\n"+result+"/////");
-			return CompletableFuture.completedFuture(wrapper.getReadableSize());
+		public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+			log.info("received resp="+ data +" id=" + id + " last="+ isLastData);
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
 		public void failure(Throwable e) {
-			log.error("exception", e);
+			log.error("failed", e);
 		}
 	}
 	

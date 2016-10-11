@@ -1,5 +1,6 @@
 package org.webpieces.httpclient.impl;
 
+import org.webpieces.httpclient.api.RequestId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
@@ -20,36 +21,19 @@ public class CatchResponseListener implements ResponseListener {
 	}
 
 	@Override
-	public void incomingResponse(HttpResponse resp, boolean isComplete) {
+	public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
 		try {
-			listener.incomingResponse(resp, isComplete);
+			listener.incomingResponse(resp, req, id, isComplete);
 		} catch(Throwable e) {
 			log.error("exception", e);
 		}
 	}
 
 	@Override
-	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
-		try {
-			listener.incomingResponse(resp, req, isComplete);
-		} catch(Throwable e) {
+	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+		return listener.incomingData(data, id, isLastData).exceptionally(e -> {
 			log.error("exception", e);
-		}
-	}
-
-	@Override
-	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
-		return listener.incomingData(data, isLastData).exceptionally(e -> {
-			log.error("exception", e);
-			return data.getReadableSize();
-		});
-	}
-
-	@Override
-	public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-		return listener.incomingData(data, request, isLastData).exceptionally(e -> {
-			log.error("exception", e);
-			return data.getReadableSize();
+			return null;
 		});
 	}
 

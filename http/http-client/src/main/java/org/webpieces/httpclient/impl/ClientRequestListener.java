@@ -51,7 +51,16 @@ public class ClientRequestListener implements RequestListener {
 
     // HTTP 1.1
     private HttpParser httpParser;
-    private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
+    private class RequestAwaitingCompletion {
+        ResponseListener listener;
+        HttpRequest request;
+
+        public RequestAwaitingCompletion(ResponseListener listener, HttpRequest request) {
+            this.listener = listener;
+            this.request = request;
+        }
+    }
+    private ConcurrentLinkedQueue<RequestAwaitingCompletion> responsesToComplete = new ConcurrentLinkedQueue<>();
     private AtomicBoolean acceptingRequest = new AtomicBoolean(false);
 
 
@@ -140,7 +149,7 @@ public class ClientRequestListener implements RequestListener {
                     // TODO: make sure this is right. would be nicer to grab the isComplete
                     // out of the incomingResponse call to the CompletableListener in
                     // sendHttp11AndWaitForHeaders I think.
-                    listener.incomingResponse(r, !r.isHasChunkedTransferHeader());
+                    listener.incomingResponse(r, req, new RequestId(0), !r.isHasChunkedTransferHeader());
                     // Request id is 0 for HTTP/1.1
                     return new RequestId(0);
                 } else {
@@ -207,7 +216,7 @@ public class ClientRequestListener implements RequestListener {
             throw new IllegalArgumentException("can only send complete requests for HTTP1.1 right now");
 
         //put this on the queue before the write to be completed from the listener below
-        responsesToComplete.offer(l);
+        responsesToComplete.offer(new RequestAwaitingCompletion(l, request));
 
         log.info("sending request now. req=" + request);
 
@@ -245,7 +254,7 @@ public class ClientRequestListener implements RequestListener {
     public void cleanUpPendings(String msg) {
         //do we need an isClosing state and cache that future?  (I don't think so but time will tell)
         while(!responsesToComplete.isEmpty()) {
-            ResponseListener listener = responsesToComplete.poll();
+            ResponseListener listener = responsesToComplete.poll().listener;
             if(listener != null) {
                 listener.failure(new NioClosedChannelException(msg+" before responses were received"));
             }
@@ -331,22 +340,24 @@ public class ClientRequestListener implements RequestListener {
             for(HttpPayload msg : parsedMessages) {
                 if(processingChunked) {
                     HttpChunk chunk = (HttpChunk) msg;
-                    ResponseListener listener = responsesToComplete.peek();
+                    ResponseListener listener = responsesToComplete.peek().listener;
                     if(chunk.isLastChunk()) {
                         processingChunked = false;
                         responsesToComplete.poll();
                     }
 
-                    listener.incomingData(chunk.getBodyNonNull(), chunk.isLastChunk());
+                    listener.incomingData(chunk.getBodyNonNull(), new RequestId(0), chunk.isLastChunk());
                 } else if(!msg.isHasChunkedTransferHeader()) {
                     HttpResponse resp = (HttpResponse) msg;
-                    ResponseListener listener = responsesToComplete.poll();
-                    listener.incomingResponse(resp, true);
+                    RequestAwaitingCompletion requestAwaitingCompletion = responsesToComplete.poll();
+                    ResponseListener listener = requestAwaitingCompletion.listener;
+                    listener.incomingResponse(resp, requestAwaitingCompletion.request, new RequestId(0), true);
                 } else {
                     processingChunked = true;
                     HttpResponse resp = (HttpResponse) msg;
-                    ResponseListener listener = responsesToComplete.peek();
-                    listener.incomingResponse(resp, false);
+                    RequestAwaitingCompletion requestAwaitingCompletion = responsesToComplete.peek();
+                    ResponseListener listener = requestAwaitingCompletion.listener;
+                    listener.incomingResponse(resp, requestAwaitingCompletion.request, new RequestId(0), false);
                 }
             }
         }
@@ -359,7 +370,7 @@ public class ClientRequestListener implements RequestListener {
         @Override
         public void failure(Channel channel, ByteBuffer data, Exception e) {
             while(!responsesToComplete.isEmpty()) {
-                ResponseListener listener = responsesToComplete.poll();
+                ResponseListener listener = responsesToComplete.poll().listener;
                 if(listener != null) {
                     listener.failure(e);
                 }

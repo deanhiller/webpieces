@@ -533,7 +533,7 @@ public class Http2Engine {
                     boolean isComplete = frame.isEndStream();
                     int payloadLength = http2Parser.getFrameLength(frame);
                     decrementIncomingWindow(frame.getStreamId(), payloadLength);
-                    stream.getResponseListener().incomingData(frame.getData(), stream.getRequest(), isComplete).thenAccept(
+                    stream.getResponseListener().incomingData(frame.getData(), stream.getRequestId(), isComplete).thenAccept(
                             length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
                     if(isComplete)
                         receivedEndStream(stream);
@@ -649,7 +649,7 @@ public class Http2Engine {
                 if(side == CLIENT) {
                     HttpResponse response = createResponseFromHeaders(frame.getHeaderList(), stream);
                     stream.setResponse(response);
-                    stream.getResponseListener().incomingResponse(response, stream.getRequest(), isComplete);
+                    stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getRequestId(), isComplete);
                 } else {
                     HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), stream);
                     stream.setRequest(request);

@@ -3,6 +3,7 @@ package org.webpieces.httpclient.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpclient.api.RequestId;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -29,29 +30,19 @@ public class CompletableListener implements ResponseListener {
 	}
 
 	@Override
-	public void incomingResponse(HttpResponse resp, boolean isComplete) {
-		if(!isComplete && !ignoreIsComplete) {
-			future.completeExceptionally(new IllegalStateException("You need to call "
-					+ "sendRequest(HttpRequest req, ResponseListener l) because this is a "
-					+ "chunked or http2 download response and could potentially blow out your memory"));
-		}
-		future.complete(resp);
-	}
-
-	@Override
-	public void incomingResponse(HttpResponse resp, HttpRequest req, boolean isComplete) {
+	public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
 		// This listener ignores the request associated with the response
-		incomingResponse(resp, isComplete);
+        if(!isComplete && !ignoreIsComplete) {
+            future.completeExceptionally(new IllegalStateException("You need to call "
+                    + "sendRequest(HttpRequest req, ResponseListener l) because this is a "
+                    + "chunked or http2 download response and could potentially blow out your memory"));
+        }
+        future.complete(resp);
 	}
 
 	@Override
-	public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
-		return CompletableFuture.completedFuture(data.getReadableSize());
-	}
-
-	@Override
-	public CompletableFuture<Integer> incomingData(DataWrapper data, HttpRequest request, boolean isLastData) {
-		return incomingData(data, isLastData);
+	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override
