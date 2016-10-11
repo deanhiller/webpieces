@@ -28,6 +28,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private TCPChannel channel;
+    private HttpParser httpParser;
+    private Http2Parser http2Parser;
 
     private CompletableFuture<RequestListener> connectFuture;
     private boolean isClosed;
@@ -48,7 +50,8 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
         this.mgr = mgr;
         this.idForLogging = idForLogging;
         this.closeListener = closeListener;
-        this.requestListener = new ClientRequestListener(this, httpParser, http2Parser, closeListener);
+        this.http2Parser = http2Parser;
+        this.httpParser = httpParser;
     }
 
     // HTTP Socket interface calls
@@ -60,9 +63,13 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
             SSLEngine engine = factory.createSslEngine(addr.getHostName(), addr.getPort());
             channel = mgr.createTCPChannel(idForLogging, engine);
         }
-        requestListener.setChannel(channel);
-        requestListener.setAddr(addr);
 
+        requestListener = new ClientRequestListener(this,
+                this.httpParser,
+                this.http2Parser,
+                closeListener,
+                addr,
+                channel);
         DataListener dataListener;
 
         if (isRecording) {
@@ -112,8 +119,6 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
     private synchronized RequestListener connected(InetSocketAddress addr) {
         connected = true;
         this.addr = addr;
-
-        requestListener.clearPendingRequests();
 
         return requestListener;
     }
