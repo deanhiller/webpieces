@@ -116,6 +116,8 @@ public class Http2ParserImpl implements Http2Parser {
         byte flagsByte = getFlagsByte(data);
         int streamId = getStreamId(data);
 
+        // TODO: if the length exceeds max frame size throw a protocol error.
+
         Class<? extends Http2Frame> frameClass = getFrameClassForType(Http2FrameType.fromId(frameTypeId));
         try {
             Http2Frame frame = frameClass.newInstance();

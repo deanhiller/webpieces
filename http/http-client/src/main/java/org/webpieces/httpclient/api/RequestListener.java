@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
  *
  */
 public interface RequestListener {
+    // Change this to be more user-friendly /sender not listener
     /**
      *
      * Initiate an HTTP request. Returns an ID so that the client can send more data
@@ -42,4 +43,6 @@ public interface RequestListener {
      * @return
      */
     CompletableFuture<Integer> incomingData(RequestId id, DataWrapper data, boolean isComplete);
+
+    void failure(Throwable e);
 }

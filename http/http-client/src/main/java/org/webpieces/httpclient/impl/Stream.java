@@ -3,6 +3,7 @@ package org.webpieces.httpclient.impl;
 import com.webpieces.http2parser.api.dto.HasPriorityDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.webpieces.httpclient.api.RequestListener;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -27,7 +28,13 @@ public class Stream {
 
     private HttpRequest request;
     private HttpResponse response;
-    private ResponseListener listener;
+
+    // Only used for client
+    private ResponseListener responseListener;
+
+    // Only used for server
+    private RequestListener requestListener;
+
     private int streamId;
 
     public int getStreamId() {
@@ -46,8 +53,8 @@ public class Stream {
         this.response = response;
     }
 
-    public void setListener(ResponseListener listener) {
-        this.listener = listener;
+    public void setResponseListener(ResponseListener responseListener) {
+        this.responseListener = responseListener;
     }
 
     private StreamStatus status = IDLE;
@@ -90,7 +97,15 @@ public class Stream {
         return response;
     }
 
-    public ResponseListener getListener() {
-        return listener;
+    public ResponseListener getResponseListener() {
+        return responseListener;
+    }
+
+    public RequestListener getRequestListener() {
+        return requestListener;
+    }
+
+    public void setRequestListener(RequestListener requestListener) {
+        this.requestListener = requestListener;
     }
 }

@@ -84,7 +84,7 @@ public class IntegNgHttp2 {
 
         @Override
         public CompletableFuture<Integer> incomingData(DataWrapper data, boolean isLastData) {
-            log.info("received resp="+ data +" last="+ isLastData);
+            log.info("received data="+ data +" last="+ isLastData);
             return CompletableFuture.completedFuture(data.getReadableSize());
         }
 

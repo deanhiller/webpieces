@@ -1,16 +1,11 @@
 package org.webpieces.httpclient.impl;
 
-import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.*;
-import org.webpieces.httpclient.api.exceptions.*;
-import org.webpieces.httpclient.api.exceptions.InternalError;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -21,31 +16,18 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import javax.xml.bind.DatatypeConverter;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.IntUnaryOperator;
 
-import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.*;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE;
-import static java.lang.Math.min;
 import static org.webpieces.httpclient.impl.ClientRequestListener.Protocol.HTTP11;
 import static org.webpieces.httpclient.impl.ClientRequestListener.Protocol.HTTP2;
-import static org.webpieces.httpclient.impl.Stream.StreamStatus.*;
-import static org.webpieces.httpclient.impl.Stream.StreamStatus.CLOSED;
+import static org.webpieces.httpclient.impl.Http2Engine.HttpSide.CLIENT;
 
 public class ClientRequestListener implements RequestListener {
     private static final Logger log = LoggerFactory.getLogger(ClientRequestListener.class);
@@ -83,7 +65,7 @@ public class ClientRequestListener implements RequestListener {
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
         this.closeListener = closeListener;
-        this.http2Engine = new Http2Engine(http2Parser, channel, addr);
+        this.http2Engine = new Http2Engine(http2Parser, channel, addr, CLIENT);
         this.channel = channel;
         this.addr = addr;
 
@@ -210,6 +192,13 @@ public class ClientRequestListener implements RequestListener {
             return http2Engine.incomingData(id, data, isComplete);
         }
     }
+
+    @Override
+    public void failure(Throwable e) {
+        // TODO: fill this in appropriately
+        throw new NotImplementedException();
+    }
+
     private CompletableFuture<RequestId> sendHttp11Request(HttpRequest request, boolean isComplete, ResponseListener l) {
         ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
 
