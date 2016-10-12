@@ -34,7 +34,7 @@ public class TestFormTag {
 	public void testFormTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuserform");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

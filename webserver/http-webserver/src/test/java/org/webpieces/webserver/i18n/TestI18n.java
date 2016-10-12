@@ -36,7 +36,7 @@ public class TestI18n {
 	public void testDefaultText() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -52,7 +52,7 @@ public class TestI18n {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/i18nBasic");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_LANGUAGE, "zh-CN"));
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

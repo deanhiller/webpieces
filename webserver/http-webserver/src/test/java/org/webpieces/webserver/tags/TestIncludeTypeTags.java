@@ -39,7 +39,7 @@ public class TestIncludeTypeTags {
 	public void testCustomTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/customtag");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -58,7 +58,7 @@ public class TestIncludeTypeTags {
 	public void testRenderTagArgsTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderTagArgs");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -74,7 +74,7 @@ public class TestIncludeTypeTags {
 	public void testRenderPageArgsTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderPageArgs");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

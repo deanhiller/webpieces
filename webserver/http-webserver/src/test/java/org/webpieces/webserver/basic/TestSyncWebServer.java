@@ -32,7 +32,7 @@ public class TestSyncWebServer {
 	public void testBasic() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -49,7 +49,7 @@ public class TestSyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -63,7 +63,7 @@ public class TestSyncWebServer {
 	public void testJsonFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

@@ -59,7 +59,7 @@ public class TestLesson1BasicRequestResponse {
 	public void testSynchronousController() {
 		HttpRequest req = createRequest("/");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -83,7 +83,7 @@ public class TestLesson1BasicRequestResponse {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = createRequest("/async");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());
@@ -109,7 +109,7 @@ public class TestLesson1BasicRequestResponse {
 		HttpRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());

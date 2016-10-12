@@ -65,7 +65,7 @@ public class TestLesson2Errors {
 		mockLibrary.throwException(new RuntimeException("test internal bug page"));
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -82,7 +82,7 @@ public class TestLesson2Errors {
 	public void testNotFound() {
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -101,7 +101,7 @@ public class TestLesson2Errors {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());

@@ -34,7 +34,7 @@ public class TestAHrefTag {
 	public void testAHref() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/ahref");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

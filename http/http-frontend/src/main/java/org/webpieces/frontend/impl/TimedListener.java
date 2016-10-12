@@ -2,10 +2,12 @@ package org.webpieces.frontend.impl;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -32,9 +34,9 @@ public class TimedListener {
 		this.config = config;
 	}
 
-	public void processHttpRequests(ResponseSender channel, HttpRequest req, boolean isHttps) {
-		releaseTimeout(channel);
-		listener.incomingRequest(req, isHttps, channel);
+	public CompletableFuture<RequestId> incomingRequest(ResponseSender responseSender, HttpRequest req, boolean isComplete) {
+		releaseTimeout(responseSender);
+		return listener.incomingRequest(req, isComplete, responseSender);
 	}
 
 	private void releaseTimeout(ResponseSender responseSender) {

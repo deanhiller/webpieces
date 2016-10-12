@@ -61,7 +61,7 @@ public class TestBeans {
 
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, uri);
 
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 
         // In case we are async, wait up to 500ms
 		List<FullResponse> responses = socket.getResponses(500, 1);
@@ -77,7 +77,7 @@ public class TestBeans {
 	@Test
     public void testFlasMessage() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        server.incomingRequest(req, false, socket);
+        server.incomingRequest(req, true, socket);
 
         List<FullResponse> responses = socket.getResponses();
         Assert.assertEquals(1, responses.size());
@@ -90,7 +90,7 @@ public class TestBeans {
     @Test
     public void testValidationError() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/validationerror");
-        server.incomingRequest(req, false, socket);
+        server.incomingRequest(req, true, socket);
 
         List<FullResponse> responses = socket.getResponses();
         Assert.assertEquals(1, responses.size());
@@ -109,7 +109,7 @@ public class TestBeans {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -128,7 +128,7 @@ public class TestBeans {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -152,7 +152,7 @@ public class TestBeans {
 				"user.address.street", "Coolness Dr.",
 				"password", "should be hidden from flash");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -173,7 +173,7 @@ public class TestBeans {
 	public void testArrayForm() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -201,7 +201,7 @@ public class TestBeans {
 				"user.fullName", "Dean Hiller"
 				);
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

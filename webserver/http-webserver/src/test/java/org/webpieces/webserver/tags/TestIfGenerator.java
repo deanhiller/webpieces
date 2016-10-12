@@ -34,7 +34,7 @@ public class TestIfGenerator {
 	public void testIfTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/if");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -50,7 +50,7 @@ public class TestIfGenerator {
 	public void testElseTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/else");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -71,7 +71,7 @@ public class TestIfGenerator {
 	public void testElseIFTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/elseif");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

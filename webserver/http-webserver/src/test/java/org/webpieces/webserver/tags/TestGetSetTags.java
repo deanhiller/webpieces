@@ -34,7 +34,7 @@ public class TestGetSetTags {
 	public void testSimpleSetGet() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/setget");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

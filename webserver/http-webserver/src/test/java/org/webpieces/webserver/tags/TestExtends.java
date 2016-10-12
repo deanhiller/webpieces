@@ -34,7 +34,7 @@ public class TestExtends {
 	public void testBasicExtends() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/extends");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

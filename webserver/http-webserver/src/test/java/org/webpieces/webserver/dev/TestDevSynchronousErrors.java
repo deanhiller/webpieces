@@ -71,7 +71,7 @@ public class TestDevSynchronousErrors {
 	public void testNotFoundRoute() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -87,7 +87,7 @@ public class TestDevSynchronousErrors {
 		//no int doesn't really exist so it's a NotFound
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -101,7 +101,7 @@ public class TestDevSynchronousErrors {
 	public void testWebappThrowsNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -118,7 +118,7 @@ public class TestDevSynchronousErrors {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -137,7 +137,7 @@ public class TestDevSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -153,7 +153,7 @@ public class TestDevSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());

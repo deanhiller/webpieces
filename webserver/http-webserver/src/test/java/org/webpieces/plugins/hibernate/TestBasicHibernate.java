@@ -38,7 +38,7 @@ public class TestBasicHibernate {
 	private String saveBean() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, "/save");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -55,7 +55,7 @@ public class TestBasicHibernate {
 	private void readBean(String redirectUrl) {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

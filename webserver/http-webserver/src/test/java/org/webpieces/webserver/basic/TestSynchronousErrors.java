@@ -53,7 +53,7 @@ public class TestSynchronousErrors {
 	public void testNotFoundRoute() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -69,7 +69,7 @@ public class TestSynchronousErrors {
 		//no int doesn't really exist so it's a NotFound
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -83,7 +83,7 @@ public class TestSynchronousErrors {
 	public void testWebappThrowsNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -98,7 +98,7 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -113,7 +113,7 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -129,7 +129,7 @@ public class TestSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -146,7 +146,7 @@ public class TestSynchronousErrors {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -165,7 +165,7 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -181,7 +181,7 @@ public class TestSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -197,7 +197,7 @@ public class TestSynchronousErrors {
 	public void testTemplateHasBug() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/badtemplate");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -213,7 +213,7 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/null");
 		
-		server.incomingRequest(req, false, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());

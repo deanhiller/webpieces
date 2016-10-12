@@ -34,7 +34,7 @@ public class TestStaticPaths {
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -49,7 +49,7 @@ public class TestStaticPaths {
 	public void testStaticDirJpg() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -65,7 +65,7 @@ public class TestStaticPaths {
 	public void testStaticDirAndNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -80,7 +80,7 @@ public class TestStaticPaths {
 	public void testStaticFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());

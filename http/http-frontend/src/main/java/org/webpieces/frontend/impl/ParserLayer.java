@@ -8,7 +8,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
@@ -44,7 +43,7 @@ public class ParserLayer {
 		List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 		
 		for(HttpRequest req : parsedRequests) {
-			listener.processHttpRequests(translate(channel), req, isHttps);
+			listener.incomingRequest(translate(channel), req, !req.isHasChunkedTransferHeader());
 		}
 	}
 

@@ -19,6 +19,8 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
+
 public class TestHttps {
 
 	private RequestListener server;
@@ -34,9 +36,9 @@ public class TestHttps {
 
 	@Test
 	public void testSameRouteHttpAndHttpsWrongOrder() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", true); // https
 		
-		server.incomingRequest(req, true, socket); //https
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -46,8 +48,9 @@ public class TestHttps {
 		response.assertContains("Http Route"); //notice the Https Route page is not shown		
 		
 		socket.clear();
-		
-		server.incomingRequest(req, false, socket); //http
+
+		req.setHttpScheme(HTTP);
+		server.incomingRequest(req, true, socket);
 		
 		responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -59,7 +62,7 @@ public class TestHttps {
 	
 	@Test
 	public void testSameRouteHttpAndHttpsCorrectOrder() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2", true);
 		
 		server.incomingRequest(req, true, socket);
 		
@@ -71,8 +74,9 @@ public class TestHttps {
 		response.assertContains("Https Route");
 		
 		socket.clear();
-		
-		server.incomingRequest(req, false, socket);
+
+		req.setHttpScheme(HTTP);
+		server.incomingRequest(req, true, socket);
 		
 		responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -84,7 +88,7 @@ public class TestHttps {
 	
 	@Test
 	public void testBasicPageOverHttps() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute", true);
 		
 		server.incomingRequest(req, true, socket);
 		
@@ -100,7 +104,7 @@ public class TestHttps {
 	public void testAccessHttpsPageOverHttp() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -114,7 +118,7 @@ public class TestHttps {
 	public void testUseHttpButGoThroughLoginFilter() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/randomPage");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -126,7 +130,7 @@ public class TestHttps {
 	
 	@Test
 	public void testSecureLoginNotFoundHttpsPage() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/notFoundPage");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/notFoundPage", true);
 		
 		server.incomingRequest(req, true, socket);
 		
@@ -140,7 +144,7 @@ public class TestHttps {
 	
 	@Test
 	public void testSecureLoginHasHttpsPage() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal", true); // https
 		
 		server.incomingRequest(req, true, socket);
 		
@@ -156,7 +160,7 @@ public class TestHttps {
 	public void testSecureAndLoggedInAlready() {
 		Header cookie = simulateLogin();
 		
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal", true); // https
 		req.addHeader(cookie);
 		
 		server.incomingRequest(req, true, socket);
@@ -171,7 +175,7 @@ public class TestHttps {
 	}
 
 	private Header simulateLogin() {
-		HttpRequest req1 = Requests.createRequest(KnownHttpMethod.POST, "/postLogin");
+		HttpRequest req1 = Requests.createRequest(KnownHttpMethod.POST, "/postLogin", true);
 		
 		server.incomingRequest(req1, true, socket);
 		

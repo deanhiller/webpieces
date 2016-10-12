@@ -36,7 +36,7 @@ public class TestScopes {
 	public void testSessionScope() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -52,7 +52,7 @@ public class TestScopes {
 	public void testSessionScopeModificationByClient() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -72,7 +72,7 @@ public class TestScopes {
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
 		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
 		
-		server.incomingRequest(req2, false, socket);
+		server.incomingRequest(req2, true, socket);
 		
 		responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

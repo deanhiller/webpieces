@@ -39,7 +39,7 @@ public class TestAsyncWebServer {
 	public void testCompletePromiseOnRequestThread() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -55,8 +55,8 @@ public class TestAsyncWebServer {
 		mockNotFoundLib.queueFuture(future );
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
-		
-		server.incomingRequest(req, false, socket);
+
+		server.incomingRequest(req, true, socket);
 
 		//now have the server complete processing
 		future.complete(5);
@@ -73,7 +73,7 @@ public class TestAsyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, false, socket);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
