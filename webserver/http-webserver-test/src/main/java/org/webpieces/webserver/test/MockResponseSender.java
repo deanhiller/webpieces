@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -39,13 +40,20 @@ public class MockResponseSender implements ResponseSender {
 			HttpLastChunk chunk = new HttpLastChunk();
 			chunk.setBody(data);
 			chunkedResponse.setLastChunk(chunk);
-			this.notifyAll();
+			payloads.add(chunkedResponse);
 			chunkedResponse = null;
+			this.notifyAll();
 		} else {
 			HttpChunk chunk = new HttpChunk();
+			chunk.setBody(data);
 			chunkedResponse.addChunk(chunk);
 		}
 
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<Void> sendException(HttpException e) {
 		return null;
 	}
 

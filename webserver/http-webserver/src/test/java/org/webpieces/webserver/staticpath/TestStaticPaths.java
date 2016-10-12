@@ -20,7 +20,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 public class TestStaticPaths {
 
 	private RequestListener server;
-	private MockResponseSender socket = new MockResponseSender();
+	private MockResponseSender mockResponseSender = new MockResponseSender();
 
 	@Before
 	public void setUp() {
@@ -34,9 +34,9 @@ public class TestStaticPaths {
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
@@ -49,9 +49,9 @@ public class TestStaticPaths {
 	public void testStaticDirJpg() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
@@ -65,9 +65,9 @@ public class TestStaticPaths {
 	public void testStaticDirAndNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = socket.getResponses(2000, 1);
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
@@ -80,9 +80,9 @@ public class TestStaticPaths {
 	public void testStaticFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = socket.getResponses(2000, 1);
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
