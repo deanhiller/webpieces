@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
@@ -17,8 +19,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -65,17 +66,19 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	private ChannelCloser channelCloser;
 	
-	private FrontendSocket channel;
+	private ResponseSender responseSender;
 	//private HttpRequest request;
 	private BufferPool pool;
 	private RouterRequest routerRequest;
 	private HttpRequest request;
+	private ResponseId responseId;
 
-	public void init(RouterRequest req, FrontendSocket channel, BufferPool pool) {
+	public void init(RouterRequest req, ResponseSender responseSender, ResponseId responseId, BufferPool pool) {
 		this.routerRequest = req;
 		this.request = (HttpRequest) req.orginalRequest;
-		this.channel = channel;
+		this.responseSender = responseSender;
 		this.pool = pool;
+		this.responseId = responseId;
 	}
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
@@ -84,20 +87,20 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		responseCreator.addDeleteCookie(response, badCookieName);
 		
-		log.info("sending REDIRECT(due to bad cookie) response channel="+channel);
-		channel.write(response);
+		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ responseSender);
+		responseSender.sendResponse(response, request, responseId, true);
 
-		channelCloser.closeIfNeeded(request, channel);		
+		channelCloser.closeIfNeeded(request, responseSender);
 	}
 	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
 		HttpResponse response = createRedirect(httpResponse);
 
-		log.info("sending REDIRECT response channel="+channel);
-		channel.write(response);
+		log.info("sending REDIRECT response responseSender="+ responseSender);
+		responseSender.sendResponse(response, request, responseId, true);
 
-		channelCloser.closeIfNeeded(request, channel);
+		channelCloser.closeIfNeeded(request, responseSender);
 	}
 
 	private HttpResponse createRedirect(RedirectResponse httpResponse) {
@@ -193,7 +196,7 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
-		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, channel);
+		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, responseSender, responseId);
 		return reader.sendRenderStatic(requestInfo, renderStatic);
 	}
 	
@@ -236,7 +239,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private void sendChunkedResponse(HttpResponse resp, byte[] bytes, Compression compression) {
 		
-		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" channel="+channel);
+		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ responseSender);
 
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 
@@ -248,9 +251,10 @@ public class ProxyResponse implements ResponseStreamer {
 			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compression.getCompressionType()));
 		}
 		
-		OutputStream chunkedStream = new ChunkedStream(channel, config.getMaxBodySize(), compressed);
+		OutputStream chunkedStream = new ChunkedStream(responseSender, config.getMaxBodySize(), compressed, responseId);
 
-		channel.write(resp);
+		// Send the headers
+		responseSender.sendResponse(resp, request, responseId, false);
 
 		try(OutputStream chainStream = compression.createCompressionStream(chunkedStream)) {
 			//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
@@ -273,11 +277,11 @@ public class ProxyResponse implements ResponseStreamer {
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
 		resp.setBody(data);
 
-		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" channel="+channel);
+		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" responseSender="+ responseSender);
 		
-		channel.write(resp);
+		responseSender.sendResponse(resp, request, responseId, true);
 		
-		channelCloser.closeIfNeeded(request, channel);
+		channelCloser.closeIfNeeded(request, responseSender);
 	}
 	
 	private byte[] synchronousCompress(Compression compression, byte[] bytes) {

@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -15,7 +15,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Module;
@@ -23,7 +23,7 @@ import com.google.inject.util.Modules;
 
 public class TestIncludeTypeTags {
 
-	private MockFrontendSocket socket = new MockFrontendSocket();
+	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
 	
 	@Before
@@ -39,7 +39,7 @@ public class TestIncludeTypeTags {
 	public void testCustomTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/customtag");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -58,7 +58,7 @@ public class TestIncludeTypeTags {
 	public void testRenderTagArgsTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderTagArgs");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -74,7 +74,7 @@ public class TestIncludeTypeTags {
 	public void testRenderPageArgsTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderPageArgs");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

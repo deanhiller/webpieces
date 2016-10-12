@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
@@ -26,7 +26,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -35,7 +35,7 @@ public class TestDevRefreshPageWithNoRestarting {
 
 	private static final Logger log = LoggerFactory.getLogger(TestDevSynchronousErrors.class);
 	private RequestListener server;
-	private MockFrontendSocket socket = new MockFrontendSocket();
+	private MockResponseSender socket = new MockResponseSender();
 	private File stashedExistingCodeDir;
 	private File existingCodeLoc;
 	private String userDir;
@@ -90,12 +90,12 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testGuiceModuleAddAndControllerChange() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		verifyPageContents("user=Dean Hiller");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/guiceModule");
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		verifyPageContents("newuser=Joseph");
 	}
 
@@ -103,19 +103,19 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testJustControllerChanged() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		verifyPageContents("user=Dean Hiller");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/controllerChange");
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		verifyPageContents("user=CoolJeff");
 	}
 
 	@Test
 	public void testRouteAdditionWithNewControllerPath() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
@@ -125,14 +125,14 @@ public class TestDevRefreshPageWithNoRestarting {
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/routeChange");
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		verifyPageContents("Existing Route Page");
 	}
 	
 	@Test
 	public void testFilterChanged() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
@@ -143,7 +143,7 @@ public class TestDevRefreshPageWithNoRestarting {
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		
 		responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -156,7 +156,7 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound?webpiecesShowPage");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
@@ -165,7 +165,7 @@ public class TestDevRefreshPageWithNoRestarting {
 		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
 		socket.clear();
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		
 		responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -178,24 +178,24 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notfound/notfound?webpiecesShowPage=true");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		verify404PageContents("value1=something1");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		verify404PageContents("value2=something2");
 	}
 	
 	@Test
 	public void testInternalErrorModifiedAndControllerModified() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		verify500PageContents("InternalError1=error1");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/internalError");
 		
-		server.incomingRequest(socket, req, false);
+		server.incomingRequest(req, false, socket);
 		verify500PageContents("InternalError2=error2");		
 	}
 	

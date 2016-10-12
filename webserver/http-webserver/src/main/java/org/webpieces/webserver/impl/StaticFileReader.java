@@ -131,7 +131,7 @@ public class StaticFileReader {
 	    	file = fetchFile("File=", fullFilePath);
 	    }
 
-	    info.getChannel().write(response);
+	    info.getResponseSender().sendResponse(response, info.getRequest(), info.getResponseId(), false);
 	    log.debug(()->"sending chunked file via async read="+file);
 	    
 	    //NOTE: try with resource is synchronous and won't work here :(
@@ -161,7 +161,7 @@ public class StaticFileReader {
 
 		//now we close if needed
 		try {
-			channelCloser.closeIfNeeded(info.getRequest(), info.getChannel());
+			channelCloser.closeIfNeeded(info.getRequest(), info.getResponseSender());
 		} catch(Throwable e) {
 			if(exc == null) //Previous exception more important so only log if no previous exception
 				log.error("Exception closing if needed", e);
@@ -202,9 +202,8 @@ public class StaticFileReader {
 	}
 
 	private void sendLastChunk(RequestInfo info, ByteBuffer buf) {
-		HttpLastChunk last = new HttpLastChunk();
 		info.getPool().releaseBuffer(buf);
-		info.getChannel().write(last);
+		info.getResponseSender().sendData(wrapperFactory.emptyWrapper(), info.getResponseId(), true);
 	}
 
 	private CompletableFuture<ByteBuffer> asyncRead(RequestInfo info, Path file, AsynchronousFileChannel asyncFile, long position) {
@@ -233,9 +232,6 @@ public class StaticFileReader {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		
 		log.trace(()->"sending chunk with body size="+data.getReadableSize());
-		
-		HttpChunk chunk = new HttpChunk();
-		chunk.setBody(data);
-		info.getChannel().write(chunk);
+		info.getResponseSender().sendData(data, info.getResponseId(), false);
 	}
 }

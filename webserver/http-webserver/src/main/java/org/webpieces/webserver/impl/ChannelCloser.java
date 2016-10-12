@@ -1,13 +1,13 @@
 package org.webpieces.webserver.impl;
 
-import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public class ChannelCloser {
 
-	public Void closeIfNeeded(HttpRequest request, FrontendSocket channel) {
+	public Void closeIfNeeded(HttpRequest request, ResponseSender channel) {
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		boolean close = false;
 		if(connHeader != null) {

@@ -15,7 +15,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontend;
 import org.webpieces.frontend.api.HttpFrontendManager;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RoutingService;

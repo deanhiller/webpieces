@@ -1,10 +1,14 @@
 package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.*;
-import org.webpieces.frontend.api.RequestListener;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public class IntegTestFrontend {
@@ -19,27 +23,33 @@ public class IntegTestFrontend {
 	private static class OurListener implements RequestListener {
 
 		@Override
-		public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+		public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
+			return CompletableFuture.completedFuture(new RequestId(0));
 		}
 
 		@Override
-		public void incomingError(FrontendSocket channel, HttpException exc) {
+		public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
-		public void clientOpenChannel(FrontendSocket channel) {
+		public void incomingError(HttpException exc, ResponseSender channel) {
+		}
+
+		@Override
+		public void clientOpenChannel() {
 		}
 		
 		@Override
-		public void clientClosedChannel(FrontendSocket channel) {
+		public void clientClosedChannel() {
 		}
 
 		@Override
-		public void applyWriteBackPressure(FrontendSocket channel) {
+		public void applyWriteBackPressure(ResponseSender sender) {
 		}
 
 		@Override
-		public void releaseBackPressure(FrontendSocket channel) {
+		public void releaseBackPressure(ResponseSender sender) {
 		}
 		
 	}

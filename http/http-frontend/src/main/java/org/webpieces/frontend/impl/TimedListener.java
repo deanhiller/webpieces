@@ -6,13 +6,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.RequestListener;
-import org.webpieces.frontend.api.exception.HttpClientException;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.SafeRunnable;
@@ -24,7 +24,7 @@ public class TimedListener {
 	private ScheduledExecutorService timer;
 	private RequestListener listener;
 	private FrontendConfig config;
-	private Map<FrontendSocket, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
+	private Map<ResponseSender, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
 
 	public TimedListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
 		this.timer = timer;
@@ -32,57 +32,57 @@ public class TimedListener {
 		this.config = config;
 	}
 
-	public void processHttpRequests(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+	public void processHttpRequests(ResponseSender channel, HttpRequest req, boolean isHttps) {
 		releaseTimeout(channel);
-		listener.incomingRequest(channel, req, isHttps);
+		listener.incomingRequest(req, isHttps, channel);
 	}
 
-	private void releaseTimeout(FrontendSocket channel) {
-		ScheduledFuture<?> scheduledFuture = socketToTimeout.remove(channel);
+	private void releaseTimeout(ResponseSender responseSender) {
+		ScheduledFuture<?> scheduledFuture = socketToTimeout.remove(responseSender);
 		if(scheduledFuture != null) {
 			scheduledFuture.cancel(false);
 		}
 	}
 
-	public void sendServerResponse(FrontendSocket channel, HttpException exc) {
-		listener.incomingError(channel, exc);
+	public void sendServerException(ResponseSender responseSender, HttpException exc) {
+		listener.incomingError(exc, responseSender);
 		
 		//safety measure preventing leak on quick connect/close clients
-		releaseTimeout(channel);
+		releaseTimeout(responseSender);
 		
-		log.info("closing channel="+channel+" due to response code="+exc.getStatusCode());
-		channel.close();
-		listener.clientClosedChannel(channel);
+		log.info("closing channel="+responseSender+" due to response code="+exc.getStatusCode());
+		responseSender.close();
+		listener.clientClosedChannel();
 	}
 
-	public void clientOpenChannel(FrontendSocket channel, boolean isReadyForWrites) {
-		if(!channel.getUnderlyingChannel().isSslChannel()) {
-			scheduleTimeout(channel);
-			listener.clientOpenChannel(channel);
+	public void clientOpenChannel(ResponseSender responseSender, boolean isReadyForWrites) {
+		if(!responseSender.getUnderlyingChannel().isSslChannel()) {
+			scheduleTimeout(responseSender);
+			listener.clientOpenChannel();
 		} else if(isReadyForWrites) {
 			//if ready for writes, the channel is encrypted and fully open
-			listener.clientOpenChannel(channel);
+			listener.clientOpenChannel();
 		} else { //if not ready for writes, the socket is open but encryption handshake is not been done yet
-			scheduleTimeout(channel);
+			scheduleTimeout(responseSender);
 		}
 	}
 
-	private void scheduleTimeout(FrontendSocket channel) {
+	private void scheduleTimeout(ResponseSender responseSender) {
 		if(timer == null || config.maxConnectToRequestTimeoutMs == null)
 			return;
 		
-		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(channel), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(responseSender), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
 		//lifecycle of the entry in the Map is until the TimeoutOnRequest runs OR
 		//until incomingRequest is invoked as we have a request OR
 		//client closes the socket before sending http request and before the timeout
-		socketToTimeout.put(channel, future);
+		socketToTimeout.put(responseSender, future);
 	}
 
 	private class TimeoutOnRequest extends SafeRunnable {
 		
-		private FrontendSocket channel;
+		private ResponseSender channel;
 
-		public TimeoutOnRequest(FrontendSocket channel) {
+		public TimeoutOnRequest(ResponseSender channel) {
 			this.channel = channel;
 		}
 
@@ -92,20 +92,20 @@ public class TimedListener {
 			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket. channel="+channel);
 			
 			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time", KnownStatusCode.HTTP_408_REQUEST_TIMEOUT);
-			sendServerResponse(channel, exc);
+			sendServerException(channel, exc);
 		}
 	}
 	
-	public void clientClosedChannel(FrontendSocket channel) {
-		listener.clientClosedChannel(channel);
+	public void clientClosedChannel(ResponseSender responseSender) {
+		listener.clientClosedChannel();
 	}
 
-	public void applyWriteBackPressure(FrontendSocket channel) {
-		listener.applyWriteBackPressure(channel);
+	public void applyWriteBackPressure(ResponseSender responseSender) {
+		listener.applyWriteBackPressure(responseSender);
 	}
 
-	public void releaseBackPressure(FrontendSocket channel) {
-		listener.releaseBackPressure(channel);
+	public void releaseBackPressure(ResponseSender responseSender) {
+		listener.releaseBackPressure(responseSender);
 	}
 
 	

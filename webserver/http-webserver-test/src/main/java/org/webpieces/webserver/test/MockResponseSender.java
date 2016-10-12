@@ -4,58 +4,65 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.frontend.api.FrontendSocket;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class MockFrontendSocket implements FrontendSocket {
+public class MockResponseSender implements ResponseSender {
 
-	private static final Logger log = LoggerFactory.getLogger(MockFrontendSocket.class);
+	private static final Logger log = LoggerFactory.getLogger(MockResponseSender.class);
 	private List<FullResponse> payloads = new ArrayList<>();
 	private FullResponse chunkedResponse;
 	
 	@Override
-	public CompletableFuture<FrontendSocket> close() {
+	public CompletableFuture<Void> close() {
 		return null;
 	}
 
 	@Override
-	public synchronized CompletableFuture<FrontendSocket> write(HttpPayload payload) {
+	public ResponseId getNextResponseId() {
+		return new ResponseId(0);
+	}
+
+	@Override
+	public CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isLastData) {
+		if(isLastData) {
+			HttpLastChunk chunk = new HttpLastChunk();
+			chunk.setBody(data);
+			chunkedResponse.setLastChunk(chunk);
+			this.notifyAll();
+			chunkedResponse = null;
+		} else {
+			HttpChunk chunk = new HttpChunk();
+			chunkedResponse.addChunk(chunk);
+		}
+
+		return null;
+	}
+
+	@Override
+	public synchronized CompletableFuture<Void> sendResponse(HttpResponse response, HttpRequest request, ResponseId id, boolean isComplete) {
 		if(chunkedResponse == null) {
-			HttpResponse response = payload.getHttpResponse();
-			if(response == null) {
-				log.warn("should be receiving http response but received="+payload);
-				return null;
-			}
 			FullResponse nextResp = new FullResponse(response);
-			if(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
+			if (response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
 				payloads.add(nextResp);
 				this.notifyAll();
 			} else
 				chunkedResponse = nextResp;
-			
-			return null;
 		}
-		
-		switch (payload.getMessageType()) {
-		case CHUNK:
-			chunkedResponse.addChunk(payload.getHttpChunk());
-			break;
-		case LAST_CHUNK:
-			chunkedResponse.setLastChunk(payload.getLastHttpChunk());
-			payloads.add(chunkedResponse);
-			this.notifyAll();
-			chunkedResponse = null;
-			break;
-		default:
-			log.error("expecting chunk but received payload="+payload);
-			return null;
+		else {
+			log.error("expecting sendData but got Response instead=" + response);
 		}
-		
+
 		return null;
 	}
 

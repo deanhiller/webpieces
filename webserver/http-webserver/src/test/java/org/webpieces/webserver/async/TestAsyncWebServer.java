@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -16,7 +16,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Binder;
@@ -24,7 +24,7 @@ import com.google.inject.Module;
 
 public class TestAsyncWebServer {
 
-	private MockFrontendSocket socket = new MockFrontendSocket();
+	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 
@@ -39,7 +39,7 @@ public class TestAsyncWebServer {
 	public void testCompletePromiseOnRequestThread() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -56,7 +56,7 @@ public class TestAsyncWebServer {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 
 		//now have the server complete processing
 		future.complete(5);
@@ -73,7 +73,7 @@ public class TestAsyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

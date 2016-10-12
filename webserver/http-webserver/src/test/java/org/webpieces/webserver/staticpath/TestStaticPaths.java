@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -14,13 +14,13 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestStaticPaths {
 
 	private RequestListener server;
-	private MockFrontendSocket socket = new MockFrontendSocket();
+	private MockResponseSender socket = new MockResponseSender();
 
 	@Before
 	public void setUp() {
@@ -34,7 +34,7 @@ public class TestStaticPaths {
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -49,7 +49,7 @@ public class TestStaticPaths {
 	public void testStaticDirJpg() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -65,7 +65,7 @@ public class TestStaticPaths {
 	public void testStaticDirAndNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -80,7 +80,7 @@ public class TestStaticPaths {
 	public void testStaticFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());

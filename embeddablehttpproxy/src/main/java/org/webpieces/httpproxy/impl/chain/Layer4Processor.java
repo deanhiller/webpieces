@@ -2,18 +2,21 @@ package org.webpieces.httpproxy.impl.chain;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.RequestListener;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -27,6 +30,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Layer4Processor implements RequestListener {
 
@@ -52,8 +56,9 @@ public class Layer4Processor implements RequestListener {
 			    .build();
 	}
 	
-	public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
-		log.info("incoming request. channel="+channel+"=\n"+req);
+	@Override
+    public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
+		log.info("incoming request. channel="+ sender +"=\n"+req);
 		InetSocketAddress addr = req.getServerToConnectTo(null);
 		if(config.isForceAllConnectionToHttps()) {
 			addr = new InetSocketAddress(addr.getHostName(), 443);
@@ -70,18 +75,27 @@ public class Layer4Processor implements RequestListener {
 		//need synchronization if two clients of proxy access same httpSocket/addr!!!
 		HttpClientSocket socket = cache.getIfPresent(addr);
 		if(socket != null) {
-			sendData(channel, socket.getRequestSender(), req);
+			sendData(sender, socket.getRequestSender(), req);
 		} else {
-			openAndConnectSocket(addr, req, channel);
+			openAndConnectSocket(addr, req, sender);
 		}
+
+		// TODO: map the request to an id
+        return CompletableFuture.completedFuture(new RequestId(0));
 	}
 
-	private void sendData(FrontendSocket channel, RequestSender requestListener, HttpRequest req) {
+	private void sendData(ResponseSender channel, RequestSender requestListener, HttpRequest req) {
 		// Can only deal with complete requests
 		requestListener.sendRequest(req, true, new Layer1Response(layer2Processor, channel, req));
 	}
 
-	private HttpClientSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, FrontendSocket channel) {
+    @Override
+    public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
+        // TODO: deal with this
+        throw new NotImplementedException();
+    }
+
+    private HttpClientSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, ResponseSender channel) {
 		HttpClientSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
@@ -95,13 +109,13 @@ public class Layer4Processor implements RequestListener {
 	}
 
 	@Override
-	public void clientOpenChannel(FrontendSocket channel) {
-		log.info("browser client open channel="+channel);
+	public void clientOpenChannel() {
+		log.info("browser client open channel");
 	}
 	
 	@Override
-	public void clientClosedChannel(FrontendSocket channel) {
-		log.info("browser client closed channel="+channel);
+	public void clientClosedChannel() {
+		log.info("browser client closed channel");
 	}
 
 	private class SocketExpiredListener implements RemovalListener<SocketAddress, HttpClientSocket> {
@@ -128,17 +142,17 @@ public class Layer4Processor implements RequestListener {
 	}
 
 	@Override
-	public void incomingError(FrontendSocket channel, HttpException exc) {
-		badResponse.sendServerResponse(channel, exc);
+	public void incomingError(HttpException exc, ResponseSender responseSender) {
+		badResponse.sendServerResponse(responseSender, exc);
 	}
 
 	@Override
-	public void applyWriteBackPressure(FrontendSocket channel) {
+	public void applyWriteBackPressure(ResponseSender responseSender) {
 		log.error("NEED APPLY BACKPRESSURE", new RuntimeException());
 	}
 
 	@Override
-	public void releaseBackPressure(FrontendSocket channel) {
+	public void releaseBackPressure(ResponseSender sender) {
 	}
 
 }

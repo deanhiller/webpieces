@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -14,12 +14,12 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestSyncWebServer {
 
-	private MockFrontendSocket socket = new MockFrontendSocket();
+	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
 	
 	@Before
@@ -32,7 +32,7 @@ public class TestSyncWebServer {
 	public void testBasic() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -49,7 +49,7 @@ public class TestSyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -63,7 +63,7 @@ public class TestSyncWebServer {
 	public void testJsonFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

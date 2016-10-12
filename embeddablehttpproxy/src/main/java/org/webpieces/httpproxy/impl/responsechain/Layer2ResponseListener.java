@@ -4,11 +4,11 @@ import java.nio.channels.UnresolvedAddressException;
 
 import javax.inject.Inject;
 
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.exception.HttpClientException;
-import org.webpieces.frontend.api.exception.HttpServerException;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
+import org.webpieces.httpcommon.api.exceptions.HttpServerException;
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -23,24 +23,24 @@ public class Layer2ResponseListener {
 	@Inject
 	private LayerZSendBadResponse badResponse;
 	
-	public void processResponse(FrontendSocket channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
+	public void processResponse(ResponseSender channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
 		log.info("received response(channel="+channel+").  type="+resp.getClass().getSimpleName()+" complete="+isComplete+" resp=\n"+resp);
 
-		channel.write(resp)
-			.thenAccept(p -> wroteBytes(channel))
-			.exceptionally(e -> failedWrite(channel, e));
+//		channel.sendResponse(resp, , , )
+//			.thenAccept(p -> wroteBytes(channel))
+//			.exceptionally(e -> failedWrite(channel, e));
 	}
 
-	private Void failedWrite(FrontendSocket channel, Throwable e) {
+	private Void failedWrite(ResponseSender channel, Throwable e) {
 		log.error("failed to respond to channel="+channel, e);
 		return null;
 	}
 
-	private void wroteBytes(FrontendSocket channel) {
+	private void wroteBytes(ResponseSender channel) {
 		log.info("wrote bytes out channel="+channel);
 	}
 
-	public Void processError(FrontendSocket channel, HttpRequest req, Throwable e) {
+	public Void processError(ResponseSender channel, HttpRequest req, Throwable e) {
 		log.error("could not process req="+req+" from channel="+channel+" due to exception", e);
 
 		if(e.getCause() instanceof UnresolvedAddressException) {

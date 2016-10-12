@@ -1,5 +1,6 @@
 package org.webpieces.frontend.api;
 
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 
 public interface HttpFrontendManager {

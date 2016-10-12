@@ -5,9 +5,15 @@ import java.net.InetSocketAddress;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
+
 public class HttpRequest extends HttpMessage {
 
 	private HttpRequestLine requestLine;
+
+	public enum HttpScheme { HTTPS, HTTP }
+	public HttpScheme httpScheme = HTTP;
 	
 	public HttpRequestLine getRequestLine() {
 		return requestLine;
@@ -15,6 +21,14 @@ public class HttpRequest extends HttpMessage {
 
 	public void setRequestLine(HttpRequestLine requestLine) {
 		this.requestLine = requestLine;
+	}
+
+	public void setHttpScheme(HttpScheme httpScheme) {
+		this.httpScheme = httpScheme;
+	}
+
+	public boolean isHttps() {
+		return httpScheme == HTTPS;
 	}
 
 	@Override

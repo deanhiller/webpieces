@@ -7,9 +7,9 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
 import org.webpieces.asyncserver.api.AsyncDataListener;
-import org.webpieces.frontend.api.exception.HttpClientException;
-import org.webpieces.frontend.api.exception.HttpException;
-import org.webpieces.frontend.api.exception.HttpServerException;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
+import org.webpieces.httpcommon.api.exceptions.HttpServerException;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
@@ -52,7 +52,7 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 
 	private void sendBadResponse(Channel channel, HttpException exc) {
 		try {
-			processor.sendServerResponse(channel, exc);
+			processor.sendServerException(channel, exc);
 		} catch(Throwable e) {
 			log.info("Could not send response to client", e);
 		}

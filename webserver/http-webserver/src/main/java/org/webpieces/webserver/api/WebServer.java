@@ -1,6 +1,6 @@
 package org.webpieces.webserver.api;
 
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface WebServer {

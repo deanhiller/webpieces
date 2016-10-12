@@ -9,10 +9,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.AcceptMediaType;
@@ -21,9 +25,8 @@ import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.RequestListener;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -39,6 +42,7 @@ import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class RequestReceiver implements RequestListener {
 	
@@ -83,10 +87,19 @@ public class RequestReceiver implements RequestListener {
 		//we don't do redirects or anything like that yet...
 		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());
 	}
-	
+
 	@Override
-	public void incomingRequest(FrontendSocket channel, HttpRequest req, boolean isHttps) {
+	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
+		throw new NotImplementedException();
+	}
+
+	@Override
+	public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
 		//log.info("request received on channel="+channel);
+		if(!isComplete) {
+			throw new NotImplementedException();
+		}
+
 		for(Header h : req.getHeaders()) {
 			if(!headersSupported.contains(h.getName().toLowerCase()))
 				log.error("This webserver has not thought about supporting header="
@@ -95,7 +108,7 @@ public class RequestReceiver implements RequestListener {
 		
 		RouterRequest routerRequest = new RouterRequest();
 		routerRequest.orginalRequest = req;
-		routerRequest.isHttps = isHttps;
+		routerRequest.isHttps = req.isHttps();
 		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.HOST);
 		if(header == null) {
 			throw new IllegalArgumentException("Must contain Host header");
@@ -135,16 +148,20 @@ public class RequestReceiver implements RequestListener {
 		routerRequest.isSendAheadNextResponses = false;
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
-		
+
+		ResponseId responseId = sender.getNextResponseId();
 		ProxyResponse streamer = responseProvider.get();
 		try {
-			streamer.init(routerRequest, channel, bufferPool);
+			streamer.init(routerRequest, sender, responseId, bufferPool);
 
 			routingService.processHttpRequests(routerRequest, streamer );
 		} catch(BadCookieException e) {
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
 			streamer.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 		}
+
+		// TODO: create a requestid so we can deal with incomingData, but right now we're not going to deal with it.
+		return CompletableFuture.completedFuture(new RequestId(0));
 	}
 
 	private void parseAccept(HttpRequest req, RouterRequest routerRequest) {
@@ -229,7 +246,7 @@ public class RequestReceiver implements RequestListener {
 	}
 
 	@Override
-	public void incomingError(FrontendSocket channel, HttpException exc) {
+	public void incomingError(HttpException exc, ResponseSender responseSender) {
 		//If status is a 4xx, send it back to the client with just raw information
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
@@ -239,26 +256,27 @@ public class RequestReceiver implements RequestListener {
 		HttpRequest req = new HttpRequest();
 		RouterRequest routerReq = new RouterRequest();
 		routerReq.orginalRequest = req;
-		proxyResp.init(routerReq, channel, bufferPool);
+		ResponseId responseId = responseSender.getNextResponseId();
+		proxyResp.init(routerReq, responseSender, responseId, bufferPool);
 		proxyResp.sendFailure(exc);
 	}
 
 	@Override
-	public void clientOpenChannel(FrontendSocket channel) {
-		log.info("browser client open channel="+channel);
+	public void clientOpenChannel() {
+		log.info("browser client open channel");
 	}
 	
 	@Override
-	public void clientClosedChannel(FrontendSocket channel) {
-		log.info("browser client closed channel="+channel);
+	public void clientClosedChannel() {
+		log.info("browser client closed channel");
 	}
 
 	@Override
-	public void applyWriteBackPressure(FrontendSocket channel) {
+	public void applyWriteBackPressure(ResponseSender sender) {
 	}
 
 	@Override
-	public void releaseBackPressure(FrontendSocket channel) {
+	public void releaseBackPressure(ResponseSender sender) {
 	}
 
 }

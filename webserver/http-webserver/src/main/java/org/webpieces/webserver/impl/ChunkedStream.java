@@ -4,14 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
 
 public class ChunkedStream extends OutputStream {
 
@@ -20,14 +20,16 @@ public class ChunkedStream extends OutputStream {
 
 	private ByteArrayOutputStream str = new ByteArrayOutputStream();
 
-	private FrontendSocket channel;
+	private ResponseSender responseSender;
 	private int size;
 	private String type;
+	private ResponseId responseId;
 
-	public ChunkedStream(FrontendSocket channel, int size, boolean compressed) {
-		this.channel = channel;
+	public ChunkedStream(ResponseSender responseSender, int size, boolean compressed, ResponseId responseId) {
+		this.responseSender = responseSender;
 		this.size = size;
 		this.str = new ByteArrayOutputStream(size);
+		this.responseId = responseId;
 		if(compressed)
 			this.type = "compressed";
 		else
@@ -58,19 +60,15 @@ public class ChunkedStream extends OutputStream {
 			writeDataOut();
 		}
 		
-		//now write Last chunk
-		channel.write(new HttpLastChunk());
+		responseSender.sendData(wrapperFactory.emptyWrapper(), responseId, true);
 	}
 	
 	private void writeDataOut() {
 		byte[] data = str.toByteArray();
 		str = new ByteArrayOutputStream();
 		DataWrapper body = wrapperFactory.wrapByteArray(data);
-		HttpChunk chunk = new HttpChunk();
-		//if(log.isDebugEnabled())
-			log.info("writing "+type+" data="+body.getReadableSize());
-		chunk.setBody(body);
-		channel.write(chunk);
+		log.info("writing "+type+" data="+body.getReadableSize());
+		responseSender.sendData(body, responseId, false);
 	}
 
 }

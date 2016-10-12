@@ -1,14 +1,13 @@
 package org.webpieces.httpcommon.api;
 
-
-public class RequestId {
+public class ResponseId {
     private Integer value;
 
-    public RequestId(int value) {
+    public ResponseId(int value) {
         this.value = value;
     }
 
-    public RequestId(String s) throws NumberFormatException {
+    public ResponseId(String s) throws NumberFormatException {
         this.value = new Integer(s);
     }
 
@@ -21,9 +20,9 @@ public class RequestId {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        RequestId requestId = (RequestId) o;
+        ResponseId that = (ResponseId) o;
 
-        return getValue() != null ? getValue().equals(requestId.getValue()) : requestId.getValue() == null;
+        return getValue() != null ? getValue().equals(that.getValue()) : that.getValue() == null;
 
     }
 

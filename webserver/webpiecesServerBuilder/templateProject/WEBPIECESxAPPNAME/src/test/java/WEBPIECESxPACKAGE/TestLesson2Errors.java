@@ -6,12 +6,12 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Binder;
@@ -25,7 +25,7 @@ import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 /**
  * Error/Failure testing is something that tends to get missed but it can be pretty important to make sure you render a nice message
  * when errors happen with links to other things.  The same goes for not found pages too so these are good tests to have/modify for
- * your use case.  I leave it to the test write to add one where rendering the 500 or 404 page fails ;).  On render 500 failure, our
+ * your use case.  I leave it to the test sendResponse to add one where rendering the 500 or 404 page fails ;).  On render 500 failure, our
  * platform swaps in a page of our own....ie. don't let your 500 page fail in the first place as our page does not match the style of
  * your website but at least let's the user know there was a bug (on top of a bug).
  * 
@@ -38,9 +38,9 @@ import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 public class TestLesson2Errors {
 
 	private RequestListener server;
-	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
+	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
+	private MockResponseSender mockResponseSocket = new MockResponseSender();
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
@@ -65,7 +65,7 @@ public class TestLesson2Errors {
 		mockLibrary.throwException(new RuntimeException("test internal bug page"));
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -82,7 +82,7 @@ public class TestLesson2Errors {
 	public void testNotFound() {
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -101,7 +101,7 @@ public class TestLesson2Errors {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());

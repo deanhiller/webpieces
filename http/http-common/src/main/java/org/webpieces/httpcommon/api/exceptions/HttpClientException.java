@@ -1,4 +1,4 @@
-package org.webpieces.frontend.api.exception;
+package org.webpieces.httpcommon.api.exceptions;
 
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 

@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -16,13 +16,13 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestHttps {
 
 	private RequestListener server;
-	private MockFrontendSocket socket = new MockFrontendSocket();
+	private MockResponseSender socket = new MockResponseSender();
 
 	@Before
 	public void setUp() {
@@ -36,7 +36,7 @@ public class TestHttps {
 	public void testSameRouteHttpAndHttpsWrongOrder() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same");
 		
-		server.incomingRequest(socket, req , true); //https
+		server.incomingRequest(req, true, socket); //https
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -47,7 +47,7 @@ public class TestHttps {
 		
 		socket.clear();
 		
-		server.incomingRequest(socket, req , false); //http
+		server.incomingRequest(req, false, socket); //http
 		
 		responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -61,7 +61,7 @@ public class TestHttps {
 	public void testSameRouteHttpAndHttpsCorrectOrder() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2");
 		
-		server.incomingRequest(socket, req , true);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -72,7 +72,7 @@ public class TestHttps {
 		
 		socket.clear();
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -86,7 +86,7 @@ public class TestHttps {
 	public void testBasicPageOverHttps() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
-		server.incomingRequest(socket, req , true);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -100,7 +100,7 @@ public class TestHttps {
 	public void testAccessHttpsPageOverHttp() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -114,7 +114,7 @@ public class TestHttps {
 	public void testUseHttpButGoThroughLoginFilter() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/randomPage");
 		
-		server.incomingRequest(socket, req , false);
+		server.incomingRequest(req, false, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -128,7 +128,7 @@ public class TestHttps {
 	public void testSecureLoginNotFoundHttpsPage() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/notFoundPage");
 		
-		server.incomingRequest(socket, req , true);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -142,7 +142,7 @@ public class TestHttps {
 	public void testSecureLoginHasHttpsPage() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal");
 		
-		server.incomingRequest(socket, req , true);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -159,7 +159,7 @@ public class TestHttps {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal");
 		req.addHeader(cookie);
 		
-		server.incomingRequest(socket, req , true);
+		server.incomingRequest(req, true, socket);
 		
 		List<FullResponse> responses = socket.getResponses(200000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -173,7 +173,7 @@ public class TestHttps {
 	private Header simulateLogin() {
 		HttpRequest req1 = Requests.createRequest(KnownHttpMethod.POST, "/postLogin");
 		
-		server.incomingRequest(socket, req1, true);
+		server.incomingRequest(req1, true, socket);
 		
 		List<FullResponse> responses1 = socket.getResponses();
 		Assert.assertEquals(1, responses1.size());

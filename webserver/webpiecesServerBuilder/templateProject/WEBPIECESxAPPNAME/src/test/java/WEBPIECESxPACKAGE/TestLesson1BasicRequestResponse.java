@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -16,7 +16,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Binder;
@@ -35,9 +35,9 @@ import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 public class TestLesson1BasicRequestResponse {
 
 	private RequestListener server;
-	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
+	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
+	private MockResponseSender mockResponseSocket = new MockResponseSender();
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 
@@ -59,7 +59,7 @@ public class TestLesson1BasicRequestResponse {
 	public void testSynchronousController() {
 		HttpRequest req = createRequest("/");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -74,7 +74,7 @@ public class TestLesson1BasicRequestResponse {
 	 * This is a single threaded test that actually allows the webserver thread to return back to the test before 
 	 * the response comes.  (in production the thread would process other requests while waiting for remote system response).  
 	 * Then the test simulates the response coming in from remote system and makes sure we send a response back
-	 * to the FrontendSocket.  In implementations like this with a remote system, one can avoid holding threads up
+	 * to the ResponseSender.  In implementations like this with a remote system, one can avoid holding threads up
 	 * and allow them to keep working while waiting for a response from the remote system.
 	 */
 	@Test
@@ -83,7 +83,7 @@ public class TestLesson1BasicRequestResponse {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = createRequest("/async");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());
@@ -109,7 +109,7 @@ public class TestLesson1BasicRequestResponse {
 		HttpRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());

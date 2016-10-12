@@ -1,7 +1,7 @@
 package org.webpieces.httpproxy.impl.chain;
 
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpResponseStatus;
@@ -11,7 +11,7 @@ public class LayerZSendBadResponse {
 
 	//private static final Logger log = LoggerFactory.getLogger(LayerZSendBadResponse.class);
 	
-	public void sendServerResponse(FrontendSocket channel, HttpException e) {
+	public void sendServerResponse(ResponseSender responseSender, HttpException e) {
 		HttpResponseStatus respStatus = new HttpResponseStatus();
 		respStatus.setKnownStatus(e.getStatusCode());
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
@@ -21,8 +21,9 @@ public class LayerZSendBadResponse {
 		response.setStatusLine(statusLine );
 
 		response.addHeader(new Header("Failure", e.getMessage()));
-		
-		channel.write(response);
+
+		// TODO: fix this
+		//responseSender.write(response);
 	}
 
 }

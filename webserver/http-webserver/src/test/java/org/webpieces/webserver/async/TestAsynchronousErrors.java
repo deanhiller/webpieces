@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -21,7 +21,7 @@ import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockFrontendSocket;
+import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Binder;
@@ -34,9 +34,9 @@ import com.google.inject.Module;
 public class TestAsynchronousErrors {
 
 	private RequestListener server;
-	//In the future, we may develop a FrontendSimulator that can be used instead of MockFrontendSocket that would follow
+	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockFrontendSocket mockResponseSocket = new MockFrontendSocket();
+	private MockResponseSender mockResponseSocket = new MockResponseSender();
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
 
@@ -57,7 +57,7 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -81,7 +81,7 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future2);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -107,7 +107,7 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -128,7 +128,7 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -152,7 +152,7 @@ public class TestAsynchronousErrors {
 
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -181,7 +181,7 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -204,7 +204,7 @@ public class TestAsynchronousErrors {
 		mockInternalSvrErrorLib.queueFuture(future2);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(mockResponseSocket, req, false);
+		server.incomingRequest(req, false, mockResponseSocket);
 		
 		List<FullResponse> responses2 = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses2.size());
@@ -230,7 +230,7 @@ public class TestAsynchronousErrors {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
 		
-		server.incomingRequest(mockResponseSocket, req , false);
+		server.incomingRequest(req, false, mockResponseSocket);
 
 		//now have the server complete processing
 		future.complete(5);

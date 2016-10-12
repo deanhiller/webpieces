@@ -8,9 +8,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.FrontendSocket;
-import org.webpieces.frontend.api.exception.HttpClientException;
-import org.webpieces.frontend.api.exception.HttpException;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
@@ -21,6 +22,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
+
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class ParserLayer {
 
@@ -63,6 +66,10 @@ public class ParserLayer {
 		for(HttpPayload msg : parsedMsgs) {
 			if(msg.getMessageType() != HttpMessageType.REQUEST)
 				throw new ParseException("Wrong message type="+msg.getMessageType()+" should be="+HttpMessageType.REQUEST);
+			HttpRequest req = msg.getHttpRequest();
+			if(channel.isSslChannel())
+				req.setHttpScheme(HTTPS);
+
 			parsedRequests.add(msg.getHttpRequest());
 		}
 		return parsedRequests;
@@ -88,36 +95,36 @@ public class ParserLayer {
 		return resultMemento;
 	}
 
-	public void sendServerResponse(Channel channel, HttpException exc) {
-		FrontendSocket socket = translate(channel);
-		listener.sendServerResponse(socket, exc);
+	public void sendServerException(Channel channel, HttpException exc) {
+		ResponseSender socket = translate(channel);
+		listener.sendServerException(socket, exc);
 	}
 
 	public void openedConnection(Channel channel, boolean isReadyForWrites) {
-		FrontendSocket socket = translate(channel);
+		ResponseSender socket = translate(channel);
 		listener.clientOpenChannel(socket, isReadyForWrites);
 	}
 	
 	public void farEndClosed(Channel channel) {
-		FrontendSocket socket = translate(channel);
+		ResponseSender socket = translate(channel);
 		listener.clientClosedChannel(socket);		
 	}
 
 	public void applyWriteBackPressure(Channel channel) {
-		FrontendSocket socket = translate(channel);
+		ResponseSender socket = translate(channel);
 		listener.applyWriteBackPressure(socket);
 	}
 
 	public void releaseBackPressure(Channel channel) {
-		FrontendSocket socket = translate(channel);
+		ResponseSender socket = translate(channel);
 		listener.releaseBackPressure(socket);
 	}
 
-	private FrontendSocket translate(Channel channel) {
+	private ResponseSender translate(Channel channel) {
 		ChannelSession session = channel.getSession();
-		FrontendSocketImpl socket = (FrontendSocketImpl) session.get("webpieces.frontendSocket");
+		ResponseSenderImpl socket = (ResponseSenderImpl) session.get("webpieces.frontendSocket");
 		if(socket == null) {
-			socket = new FrontendSocketImpl(channel, parser);
+			socket = new ResponseSenderImpl(channel, parser);
 			session.put("webpieces.frontendSocket", socket);
 		}
 		return socket;
