@@ -42,7 +42,6 @@ import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class RequestReceiver implements RequestListener {
 	
@@ -90,14 +89,14 @@ public class RequestReceiver implements RequestListener {
 
 	@Override
 	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
 		//log.info("request received on channel="+channel);
 		if(!isComplete) {
-			throw new NotImplementedException();
+			throw new UnsupportedOperationException();
 		}
 
 		for(Header h : req.getHeaders()) {

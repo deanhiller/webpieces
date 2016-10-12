@@ -7,20 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpServerException;
-import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpproxy.impl.chain.LayerZSendBadResponse;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class Layer2ResponseListener {
 

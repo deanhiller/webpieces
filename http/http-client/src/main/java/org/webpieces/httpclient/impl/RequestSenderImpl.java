@@ -1,33 +1,46 @@
 package org.webpieces.httpclient.impl;
 
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.dto.*;
+import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
+import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP2;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.*;
-import org.webpieces.httpcommon.api.*;
+import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.Http2Engine;
+import org.webpieces.httpcommon.api.Http2EngineFactory;
+import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.dto.*;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
-import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP2;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class RequestSenderImpl implements RequestSender {
     private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
@@ -214,7 +227,7 @@ public class RequestSenderImpl implements RequestSender {
     @Override
     public void failure(Throwable e) {
         // TODO: fill this in appropriately
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     private CompletableFuture<RequestId> sendHttp11Request(HttpRequest request, boolean isComplete, ResponseListener l) {

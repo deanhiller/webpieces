@@ -8,29 +8,28 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestSender;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
-import org.webpieces.httpcommon.api.CloseListener;
-import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpproxy.api.ProxyConfig;
 import org.webpieces.httpproxy.impl.responsechain.Layer1Response;
 import org.webpieces.httpproxy.impl.responsechain.Layer2ResponseListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Layer4Processor implements RequestListener {
 
@@ -92,7 +91,7 @@ public class Layer4Processor implements RequestListener {
     @Override
     public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
         // current we don't handle chunked requests. TODO: deal with chunked requests
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     private HttpClientSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, ResponseSender channel) {

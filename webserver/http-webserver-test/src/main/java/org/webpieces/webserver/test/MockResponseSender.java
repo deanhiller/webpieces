@@ -16,7 +16,6 @@ import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class MockResponseSender implements ResponseSender {
 
