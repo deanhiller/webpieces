@@ -37,7 +37,7 @@ public class TestLesson1BasicRequestResponse {
 	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockResponseSender mockResponseSocket = new MockResponseSender();
+	private MockResponseSender mockResponseSender = new MockResponseSender();
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 
@@ -59,9 +59,9 @@ public class TestLesson1BasicRequestResponse {
 	public void testSynchronousController() {
 		HttpRequest req = createRequest("/");
 		
-		server.incomingRequest(req, true, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSender.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);
@@ -83,9 +83,9 @@ public class TestLesson1BasicRequestResponse {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = createRequest("/async");
 		
-		server.incomingRequest(req, true, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSender.getResponses();
 		Assert.assertEquals(0, responses.size());
 
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
@@ -93,7 +93,7 @@ public class TestLesson1BasicRequestResponse {
 		int value = 85;
 		future.complete(value);
 
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = mockResponseSender.getResponses();
 		Assert.assertEquals(1, responses2.size());
 		
 		FullResponse httpPayload = responses2.get(0);
@@ -109,9 +109,9 @@ public class TestLesson1BasicRequestResponse {
 		HttpRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		server.incomingRequest(req, true, mockResponseSocket);
+		server.incomingRequest(req, true, mockResponseSender);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = mockResponseSender.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);

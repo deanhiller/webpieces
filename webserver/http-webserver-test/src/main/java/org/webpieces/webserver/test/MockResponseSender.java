@@ -42,7 +42,7 @@ public class MockResponseSender implements ResponseSender {
 			chunkedResponse.setLastChunk(chunk);
 			payloads.add(chunkedResponse);
 			chunkedResponse = null;
-			this.notifyAll();
+			synchronized (this) { this.notifyAll(); }
 		} else {
 			HttpChunk chunk = new HttpChunk();
 			chunk.setBody(data);
@@ -63,7 +63,7 @@ public class MockResponseSender implements ResponseSender {
 			FullResponse nextResp = new FullResponse(response);
 			if (response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
 				payloads.add(nextResp);
-				this.notifyAll();
+				synchronized (this) { this.notifyAll(); }
 			} else
 				chunkedResponse = nextResp;
 		}
