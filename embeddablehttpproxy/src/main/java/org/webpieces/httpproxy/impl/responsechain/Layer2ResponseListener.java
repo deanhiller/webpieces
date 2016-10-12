@@ -1,10 +1,16 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
 import java.nio.channels.UnresolvedAddressException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
@@ -19,39 +25,49 @@ import org.webpieces.nio.api.channels.Channel;
 public class Layer2ResponseListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer2ResponseListener.class);
+	private ConcurrentHashMap<RequestId, ResponseId> requestResponseMap = new ConcurrentHashMap<>();
 
 	@Inject
 	private LayerZSendBadResponse badResponse;
 	
-	public void processResponse(ResponseSender channel, HttpRequest req, HttpPayload resp, boolean isComplete) {
-		log.info("received response(channel="+channel+").  type="+resp.getClass().getSimpleName()+" complete="+isComplete+" resp=\n"+resp);
+	public ResponseId processResponse(ResponseSender responseSender, HttpRequest req, HttpResponse resp, RequestId requestId, boolean isComplete) {
+		log.info("received response(responseSender="+responseSender+").  type="+resp.getClass().getSimpleName()+" complete="+isComplete+" resp=\n"+resp);
 
-//		channel.sendResponse(resp, , , )
-//			.thenAccept(p -> wroteBytes(channel))
-//			.exceptionally(e -> failedWrite(channel, e));
+		ResponseId responseId = responseSender.getNextResponseId();
+		requestResponseMap.put(requestId, responseId);
+
+		responseSender.sendResponse(resp, req, responseId, isComplete)
+			.thenAccept(p -> wroteBytes(responseSender))
+			.exceptionally(e -> failedWrite(responseSender, e));
+		return responseId;
 	}
 
-	private Void failedWrite(ResponseSender channel, Throwable e) {
-		log.error("failed to respond to channel="+channel, e);
+	public CompletableFuture<Void> processData(ResponseSender responseSender, DataWrapper data, RequestId id, boolean isComplete) {
+		ResponseId responseId = requestResponseMap.get(id);
+		return responseSender.sendData(data, responseId, isComplete);
+	}
+
+	private Void failedWrite(ResponseSender responseSender, Throwable e) {
+		log.error("failed to respond to responseSender="+responseSender, e);
 		return null;
 	}
 
-	private void wroteBytes(ResponseSender channel) {
-		log.info("wrote bytes out channel="+channel);
+	private void wroteBytes(ResponseSender responseSender) {
+		log.info("wrote bytes out responseSender="+responseSender);
 	}
 
-	public Void processError(ResponseSender channel, HttpRequest req, Throwable e) {
-		log.error("could not process req="+req+" from channel="+channel+" due to exception", e);
+	public Void processError(ResponseSender responseSender, HttpRequest req, Throwable e) {
+		log.error("could not process req="+req+" from responseSender="+responseSender+" due to exception", e);
 
 		if(e.getCause() instanceof UnresolvedAddressException) {
 			HttpClientException exc = new HttpClientException("Client gave a bad address to connect to", KnownStatusCode.HTTP_404_NOTFOUND, e);
-			badResponse.sendServerResponse(channel, exc);
+			badResponse.sendServerResponse(responseSender, exc);
 		} else {
 			HttpServerException exc = new HttpServerException("Server has a bug", KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, e);
-			badResponse.sendServerResponse(channel, exc);
+			badResponse.sendServerResponse(responseSender, exc);
 		}
 		
-		channel.close();
+		responseSender.close();
 		
 		return null;
 	}

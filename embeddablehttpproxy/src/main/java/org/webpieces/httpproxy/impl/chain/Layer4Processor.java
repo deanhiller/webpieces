@@ -84,14 +84,14 @@ public class Layer4Processor implements RequestListener {
         return CompletableFuture.completedFuture(new RequestId(0));
 	}
 
-	private void sendData(ResponseSender channel, RequestSender requestListener, HttpRequest req) {
+	private void sendData(ResponseSender channel, RequestSender requestSender, HttpRequest req) {
 		// Can only deal with complete requests
-		requestListener.sendRequest(req, true, new Layer1Response(layer2Processor, channel, req));
+		requestSender.sendRequest(req, true, new Layer1Response(layer2Processor, channel, req));
 	}
 
     @Override
     public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
-        // TODO: deal with this
+        // current we don't handle chunked requests. TODO: deal with chunked requests
         throw new NotImplementedException();
     }
 

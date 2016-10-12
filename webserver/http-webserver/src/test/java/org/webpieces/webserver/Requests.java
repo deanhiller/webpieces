@@ -14,11 +14,14 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
+
 public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	public static HttpRequest createRequest(KnownHttpMethod method, String url) {
+	public static HttpRequest createRequest(KnownHttpMethod method, String url, boolean isHttps) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(method);
@@ -26,10 +29,18 @@ public class Requests {
 		
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine);
-		
+		if(isHttps)
+			req.setHttpScheme(HTTPS);
+		else
+			req.setHttpScheme(HTTP);
+
 		req.addHeader(new Header(KnownHeaderName.HOST, "myhost.com"));
 
 		return req;
+	}
+
+	public static HttpRequest createRequest(KnownHttpMethod method, String url) {
+		return createRequest(method, url, false);
 	}
 
 	public static HttpRequest createPostRequest(String url, String ... argTuples) {

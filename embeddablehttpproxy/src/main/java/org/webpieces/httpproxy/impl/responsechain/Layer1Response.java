@@ -12,29 +12,29 @@ import java.util.concurrent.CompletableFuture;
 public class Layer1Response implements ResponseListener {
 
 	private Layer2ResponseListener responseListener;
-	private ResponseSender channel;
+	private ResponseSender responseSender;
 	private HttpRequest req;
 
-	public Layer1Response(Layer2ResponseListener responseListener, ResponseSender channel, HttpRequest req) {
+	public Layer1Response(Layer2ResponseListener responseListener, ResponseSender responseSender, HttpRequest req) {
 		this.responseListener = responseListener;
-		this.channel = channel;
+		this.responseSender = responseSender;
 		this.req = req;
 	}
 
 	@Override
 	public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
-		responseListener.processResponse(channel, req, resp, isComplete);
+		responseListener.processResponse(responseSender, req, resp, id, isComplete);
 
 	}
 
     @Override
     public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
-		return CompletableFuture.completedFuture(null);
+		return responseListener.processData(responseSender, data, id, isLastData);
     }
 
     @Override
 	public void failure(Throwable e) {
-		responseListener.processError(channel, req, e);
+		responseListener.processError(responseSender, req, e);
 	}
 
 }
