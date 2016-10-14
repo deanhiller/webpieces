@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 

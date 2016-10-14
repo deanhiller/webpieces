@@ -1,8 +1,12 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpcommon.impl;
 
+import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.Protocol;
+import org.webpieces.httpcommon.api.SwitchableDataListener;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -11,31 +15,43 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
+import static org.webpieces.httpcommon.api.Protocol.HTTP11;
 
-public class SwitchableDataListener implements DataListener {
-    private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
 
-    private RequestSenderImpl.Protocol protocol = HTTP11;
-    private Map<RequestSenderImpl.Protocol, DataListener> dataListenerMap = new HashMap<>();
+public class SwitchableDataListenerImpl implements SwitchableDataListener {
+    private static final Logger log = LoggerFactory.getLogger(SwitchableDataListenerImpl.class);
+
+    private Protocol protocol = HTTP11;
+    private Map<Protocol, DataListener> dataListenerMap = new HashMap<>();
     private HttpSocket socket;
     private CloseListener closeListener;
 
-    public SwitchableDataListener(HttpSocket socket, CloseListener closeListener) {
+    public SwitchableDataListenerImpl(HttpSocket socket, CloseListener closeListener) {
         this.socket = socket;
         this.closeListener = closeListener;
     }
 
-    void setProtocol(RequestSenderImpl.Protocol protocol) {
+    public void setProtocol(Protocol protocol) {
         this.protocol = protocol;
     }
 
-    public void put(RequestSenderImpl.Protocol protocol, DataListener listener) {
+    public void put(Protocol protocol, DataListener listener) {
         dataListenerMap.put(protocol, listener);
     }
 
-    public DataListener getDataListener(RequestSenderImpl.Protocol protocol) {
+    public DataListener getDataListener(Protocol protocol) {
         return dataListenerMap.get(protocol);
+    }
+
+    @Override
+    public void connectionOpened(TCPChannel proxy, boolean isReadyForWrites) {
+        DataListener listener = dataListenerMap.get(protocol);
+        if(AsyncDataListener.class.isInstance(listener)) {
+            ((AsyncDataListener) listener).connectionOpened(proxy, isReadyForWrites);
+        } else
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
@@ -52,7 +68,7 @@ public class SwitchableDataListener implements DataListener {
             closeListener.farEndClosed(socket);
 
         // call farEndClosed on every protocol
-        for(Map.Entry<RequestSenderImpl.Protocol, DataListener> entry: dataListenerMap.entrySet()) {
+        for(Map.Entry<Protocol, DataListener> entry: dataListenerMap.entrySet()) {
             entry.getValue().farEndClosed(channel);
         }
     }
@@ -62,7 +78,7 @@ public class SwitchableDataListener implements DataListener {
         log.error("Failure on channel="+channel, e);
 
         // Call failure on every protocol
-        for(Map.Entry<RequestSenderImpl.Protocol, DataListener> entry: dataListenerMap.entrySet()) {
+        for(Map.Entry<Protocol, DataListener> entry: dataListenerMap.entrySet()) {
             entry.getValue().failure(channel, data, e);
         }
     }

@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncConfig;
-import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;

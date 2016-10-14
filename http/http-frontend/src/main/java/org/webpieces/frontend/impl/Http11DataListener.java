@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
-import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpcommon.api.exceptions.HttpServerException;

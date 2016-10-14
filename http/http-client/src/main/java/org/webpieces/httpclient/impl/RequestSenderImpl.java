@@ -1,15 +1,13 @@
 package org.webpieces.httpclient.impl;
 
-import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
-import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP2;
+import static org.webpieces.httpcommon.api.Protocol.HTTP11;
+import static org.webpieces.httpcommon.api.Protocol.HTTP2;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,6 +17,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.api.*;
+import org.webpieces.httpcommon.api.exceptions.SwitchableDataListenerFactory;
+import org.webpieces.httpcommon.impl.SwitchableDataListenerImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -40,11 +40,8 @@ public class RequestSenderImpl implements RequestSender {
     private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    private HttpSocket socket;
-    enum Protocol { HTTP11, HTTP2 }
     private Protocol protocol = HTTP11;
     private SwitchableDataListener dataListener;
-    private CloseListener closeListener;
     private TCPChannel channel;
     private InetSocketAddress addr;
 
@@ -76,15 +73,13 @@ public class RequestSenderImpl implements RequestSender {
                              CloseListener closeListener,
                              InetSocketAddress addr,
                              TCPChannel channel) {
-        this.socket = socket;
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
-        this.closeListener = closeListener;
         this.http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, addr, Http2Engine.HttpSide.CLIENT);
         this.channel = channel;
         this.addr = addr;
 
-        dataListener = new SwitchableDataListener(socket, closeListener);
+        dataListener = SwitchableDataListenerFactory.createSwitchableDataListener(socket, closeListener);
         dataListener.put(HTTP2, this.http2Engine.getDataListener());
         dataListener.put(HTTP11, new Http11DataListener());
     }
@@ -173,7 +168,7 @@ public class RequestSenderImpl implements RequestSender {
     }
 
     private CompletableFuture<HttpResponse> sendHttp11AndWaitForHeaders(HttpRequest request) {
-        CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
+        CompletableFuture<HttpResponse> future = new CompletableFuture<>();
         ResponseListener l = new CompletableListener(future, true);
         // This only works for complete requests
         sendHttp11Request(request, true, l);
@@ -226,7 +221,7 @@ public class RequestSenderImpl implements RequestSender {
     private CompletableFuture<RequestId> sendHttp11Request(HttpRequest request, boolean isComplete, ResponseListener l) {
         ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
 
-        // TODO: confirm that is isComplete is false that the transfer-encoding is chunked, otherwise throw
+        // TODO: confirm that if isComplete is false that the transfer-encoding is chunked, otherwise throw
         if(!isComplete)
             throw new IllegalArgumentException("can only send complete requests for HTTP1.1 right now");
 

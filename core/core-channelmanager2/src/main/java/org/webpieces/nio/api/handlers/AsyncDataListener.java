@@ -1,7 +1,6 @@
-package org.webpieces.asyncserver.api;
+package org.webpieces.nio.api.handlers;
 
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.handlers.DataListener;
 
 public interface AsyncDataListener extends DataListener {
 

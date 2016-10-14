@@ -7,7 +7,7 @@ import java.util.concurrent.Executor;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;

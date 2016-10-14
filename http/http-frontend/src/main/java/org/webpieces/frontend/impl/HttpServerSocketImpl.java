@@ -3,7 +3,7 @@ package org.webpieces.frontend.impl;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServerSocket;
