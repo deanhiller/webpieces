@@ -19,7 +19,6 @@ import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.SafeRunnable;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 class TimedListener implements RequestListener {
 
@@ -58,7 +57,7 @@ class TimedListener implements RequestListener {
     @Override
     public void clientOpenChannel(ResponseSender responseSender) {
         // This is bypassed by openedConnection
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override

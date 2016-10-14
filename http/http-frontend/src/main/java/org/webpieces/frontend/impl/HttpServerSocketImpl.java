@@ -13,11 +13,11 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 public class HttpServerSocketImpl implements HttpServerSocket {
 
 	private AsyncServer server;
-	private DataListenerToParserLayer dataListener;
+	private AsyncDataListener dataListener;
 
-	public HttpServerSocketImpl(TimedListener listener, HttpParser parser, FrontendConfig config, boolean isHttps) {
-		ParserLayer nextStage = new ParserLayer(parser, listener, config, isHttps);
-		dataListener = new DataListenerToParserLayer(nextStage);
+	public HttpServerSocketImpl(TimedListener requestListener, HttpParser parser, FrontendConfig config, boolean isHttps) {
+		Http11Layer http11Layer = new Http11Layer(parser, requestListener, config, isHttps);
+		dataListener = new Http11DataListener(http11Layer);
 	}
 	
 	public void init(AsyncServer asyncServer) {

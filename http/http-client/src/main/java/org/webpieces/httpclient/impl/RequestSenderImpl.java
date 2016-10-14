@@ -40,11 +40,10 @@ public class RequestSenderImpl implements RequestSender {
     private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-
     private HttpSocket socket;
     enum Protocol { HTTP11, HTTP2 }
     private Protocol protocol = HTTP11;
-    private ProxyDataListener dataListener;
+    private SwitchableDataListener dataListener;
     private CloseListener closeListener;
     private TCPChannel channel;
     private InetSocketAddress addr;
@@ -85,7 +84,7 @@ public class RequestSenderImpl implements RequestSender {
         this.channel = channel;
         this.addr = addr;
 
-        dataListener = new ProxyDataListener();
+        dataListener = new SwitchableDataListener(socket, closeListener);
         dataListener.put(HTTP2, this.http2Engine.getDataListener());
         dataListener.put(HTTP11, new Http11DataListener());
     }
@@ -165,7 +164,7 @@ public class RequestSenderImpl implements RequestSender {
 
                     // Grab the leftover data out of the http11 parser and send that
                     // to the http2 engine
-                    DataWrapper leftOverData = ((RequestSenderImpl.Http11DataListener) dataListener.dataListenerMap.get(HTTP11))
+                    DataWrapper leftOverData = ((RequestSenderImpl.Http11DataListener) dataListener.getDataListener(HTTP11))
                             .getLeftOverData();
                     return http2Engine.createInitialStream(r, req, listener, leftOverData);
                 }
@@ -280,57 +279,6 @@ public class RequestSenderImpl implements RequestSender {
         http2Engine.cleanUpPendings(msg);
     }
 
-    private class ProxyDataListener implements DataListener {
-        private Protocol protocol = HTTP11;
-        private Map<Protocol, DataListener> dataListenerMap = new HashMap<>();
-
-        void setProtocol(Protocol protocol) {
-            this.protocol = protocol;
-        }
-
-        public void put(Protocol protocol, DataListener listener) {
-            dataListenerMap.put(protocol, listener);
-        }
-
-        @Override
-        public void incomingData(Channel channel, ByteBuffer b) {
-            dataListenerMap.get(protocol).incomingData(channel, b);
-        }
-
-        @Override
-        public void farEndClosed(Channel channel) {
-            log.info("far end closed");
-            socket.closeSocket();
-
-            if(closeListener != null)
-                closeListener.farEndClosed(socket);
-
-            // call farEndClosed on every protocol
-            for(Map.Entry<Protocol, DataListener> entry: dataListenerMap.entrySet()) {
-                entry.getValue().farEndClosed(channel);
-            }
-        }
-
-        @Override
-        public void failure(Channel channel, ByteBuffer data, Exception e) {
-            log.error("Failure on channel="+channel, e);
-
-            // Call failure on every protocol
-            for(Map.Entry<Protocol, DataListener> entry: dataListenerMap.entrySet()) {
-                entry.getValue().failure(channel, data, e);
-            }
-        }
-
-        @Override
-        public void applyBackPressure(Channel channel) {
-            dataListenerMap.get(protocol).applyBackPressure(channel);
-        }
-
-        @Override
-        public void releaseBackPressure(Channel channel) {
-            dataListenerMap.get(protocol).releaseBackPressure(channel);
-        }
-    }
 
     private class Http11DataListener implements DataListener {
         private boolean processingChunked = false;

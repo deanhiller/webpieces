@@ -8,9 +8,7 @@ import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpcommon.api.Http2Engine;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.ResponseListener;
+import org.webpieces.httpcommon.api.*;
 import org.webpieces.httpcommon.api.exceptions.*;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpparser.api.common.Header;
@@ -86,11 +84,15 @@ public class Http2EngineImpl implements Http2Engine {
 
     // TODO: figure out how to deal with the goaway. For now we're just
     // going to record what they told us.
-    // these don't have to be concurrent-safe because the listener is virtually single threaded.
+    // these don't have to be concurrent-safe because the datalistener is virtually single threaded.
     private boolean remoteGoneAway = false;
     private int goneAwayLastStreamId;
     private Http2ErrorCode goneAwayErrorCode;
     private DataWrapper additionalDebugData;
+
+    // Server only
+    private RequestListener requestListener;
+    private ResponseSender responseSender;
 
     public Http2EngineImpl(Http2Parser http2Parser, TCPChannel channel, InetSocketAddress addr, HttpSide side) {
         this.http2Parser = http2Parser;
@@ -158,6 +160,7 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
     // Client only
+    @Override
     public RequestId createInitialStream(HttpResponse r, HttpRequest req, ResponseListener listener, DataWrapper leftOverData) {
         if(side != CLIENT) throw new RuntimeException("can't call createInitialStream from server");
 
@@ -186,6 +189,7 @@ public class Http2EngineImpl implements Http2Engine {
         return new RequestId(initialStreamId);
     }
 
+    @Override
     public CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete) {
         Stream stream = activeStreams.get(id.getValue());
         switch(stream.getStatus()) {
@@ -649,8 +653,7 @@ public class Http2EngineImpl implements Http2Engine {
                 } else {
                     HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), stream);
                     stream.setRequest(request);
-                    // TODO: put in the responsesender here.
-                    stream.getRequestListener().incomingRequest(request, stream.getRequestId(), false, null);
+                    requestListener.incomingRequest(request, stream.getRequestId(), false, responseSender);
                 }
 
                 if (isComplete)
@@ -680,7 +683,7 @@ public class Http2EngineImpl implements Http2Engine {
                         stream.getResponseListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
                     else
                         // TODO: change incomingError to failure and fix the exception types
-                        stream.getRequestListener().incomingError(null, null);
+                        responseSender.sendException(null);
 
                     stream.setStatus(Stream.StreamStatus.CLOSED);
                     break;
@@ -818,7 +821,6 @@ public class Http2EngineImpl implements Http2Engine {
                     if(side == SERVER)
                     {
                         // TOOD: get the default request listener?
-                        stream.setRequestListener(null);
                     }
                 }
 

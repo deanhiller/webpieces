@@ -10,10 +10,10 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
 
-public class Stream {
+class Stream {
     private static final Logger log = LoggerFactory.getLogger(Stream.class);
 
-    public enum StreamStatus {
+    enum StreamStatus {
         IDLE,
         RESERVED_LOCAL,
         RESERVED_REMOTE,
@@ -31,19 +31,16 @@ public class Stream {
     // Only used for client
     private ResponseListener responseListener;
 
-    // Only used for server
-    private RequestListener requestListener;
-
     private int streamId;
 
-    public int getStreamId() {
+    int getStreamId() {
         return streamId;
     }
 
-    public RequestId getRequestId() { return new RequestId(streamId); }
-    public ResponseId getResponseId() { return new ResponseId(streamId); }
+    RequestId getRequestId() { return new RequestId(streamId); }
+    ResponseId getResponseId() { return new ResponseId(streamId); }
 
-    public void setStreamId(int streamId) {
+    void setStreamId(int streamId) {
         this.streamId = streamId;
     }
 
@@ -55,7 +52,7 @@ public class Stream {
         this.response = response;
     }
 
-    public void setResponseListener(ResponseListener responseListener) {
+    void setResponseListener(ResponseListener responseListener) {
         this.responseListener = responseListener;
     }
 
@@ -66,7 +63,7 @@ public class Stream {
         return priorityDetails;
     }
 
-    public void setPriorityDetails(HasPriorityDetails.PriorityDetails priorityDetails) {
+    void setPriorityDetails(HasPriorityDetails.PriorityDetails priorityDetails) {
         this.priorityDetails = priorityDetails;
     }
 
@@ -82,11 +79,11 @@ public class Stream {
         return priorityDetails.getWeight();
     }
 
-    public StreamStatus getStatus() {
+    StreamStatus getStatus() {
         return status;
     }
 
-    public void setStatus(StreamStatus status) {
+    void setStatus(StreamStatus status) {
         log.info("{}: {} -> {}", streamId, this.status, status);
         this.status = status;
     }
@@ -99,15 +96,7 @@ public class Stream {
         return response;
     }
 
-    public ResponseListener getResponseListener() {
+    ResponseListener getResponseListener() {
         return responseListener;
-    }
-
-    public RequestListener getRequestListener() {
-        return requestListener;
-    }
-
-    public void setRequestListener(RequestListener requestListener) {
-        this.requestListener = requestListener;
     }
 }

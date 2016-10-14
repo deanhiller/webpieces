@@ -13,8 +13,6 @@ import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
@@ -26,7 +24,6 @@ import org.webpieces.nio.api.handlers.RecordingDataListener;
 public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(HttpClientSocketImpl.class);
-    private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private TCPChannel channel;
     private HttpParser httpParser;
@@ -34,15 +31,13 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
     private CompletableFuture<RequestSender> connectFuture;
     private boolean isClosed;
-    private boolean connected;
     private CloseListener closeListener;
     private HttpsSslEngineFactory factory;
     private ChannelManager mgr;
     private String idForLogging;
     private boolean isRecording = true;
 
-    private InetSocketAddress addr;
-    private RequestSenderImpl requestListener;
+    private RequestSenderImpl requestSender;
 
     public HttpClientSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser httpParser,
                                 Http2Parser http2Parser,
@@ -65,7 +60,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
             channel = mgr.createTCPChannel(idForLogging, engine);
         }
 
-        requestListener = new RequestSenderImpl(this,
+        requestSender = new RequestSenderImpl(this,
                 this.httpParser,
                 this.http2Parser,
                 closeListener,
@@ -74,12 +69,12 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
         DataListener dataListener;
 
         if (isRecording) {
-            dataListener = new RecordingDataListener("httpSock-", requestListener.getDataListener());
+            dataListener = new RecordingDataListener("httpSock-", requestSender.getDataListener());
         } else {
-            dataListener = requestListener.getDataListener();
+            dataListener = requestSender.getDataListener();
         }
 
-        connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected(addr));
+        connectFuture = channel.connect(addr, dataListener).thenApply(channel -> requestSender);
         return connectFuture;
     }
 
@@ -88,7 +83,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
         if (isClosed) {
             return CompletableFuture.completedFuture(null);
         }
-        requestListener.cleanUpPendings("close socket called");
+        requestSender.cleanUpPendings("close socket called");
 
         CompletableFuture<Channel> future = channel.close();
         return future.thenAccept(chan -> {
@@ -98,14 +93,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
     @Override
     public RequestSender getRequestSender() {
-        return requestListener;
-    }
-
-    private synchronized RequestSender connected(InetSocketAddress addr) {
-        connected = true;
-        this.addr = addr;
-
-        return requestListener;
+        return requestSender;
     }
 
     @Override

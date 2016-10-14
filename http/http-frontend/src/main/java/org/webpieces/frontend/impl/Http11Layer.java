@@ -25,7 +25,7 @@ import org.webpieces.nio.api.channels.ChannelSession;
 
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
-public class ParserLayer {
+public class Http11Layer {
 
 	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
@@ -33,7 +33,7 @@ public class ParserLayer {
 	private boolean isHttps;
 	private FrontendConfig config;
 	
-	ParserLayer(HttpParser parser2, TimedListener listener, FrontendConfig config, boolean isHttps) {
+	Http11Layer(HttpParser parser2, TimedListener listener, FrontendConfig config, boolean isHttps) {
 		this.parser = parser2;
 		this.listener = listener;
 		this.config = config;
@@ -45,7 +45,7 @@ public class ParserLayer {
 
         // TODO: if we get chunks, send these to incomingData.
 		for(HttpRequest req : parsedRequests) {
-			listener.incomingRequest(req, new RequestId(0), !req.isHasChunkedTransferHeader(), translate(channel));
+			listener.incomingRequest(req, new RequestId(0), !req.isHasChunkedTransferHeader(), getResponseSenderForChannel(channel));
 		}
 	}
 
@@ -97,31 +97,31 @@ public class ParserLayer {
 	}
 
 	void sendServerException(Channel channel, HttpException exc) {
-		ResponseSender responseSender = translate(channel);
+		ResponseSender responseSender = getResponseSenderForChannel(channel);
 		listener.incomingError(exc, responseSender);
 	}
 
 	void openedConnection(Channel channel, boolean isReadyForWrites) {
-		ResponseSender responseSender = translate(channel);
+		ResponseSender responseSender = getResponseSenderForChannel(channel);
 		listener.openedConnection(responseSender, isReadyForWrites);
 	}
 	
 	void farEndClosed(Channel channel) {
-		ResponseSender responseSender = translate(channel);
+		ResponseSender responseSender = getResponseSenderForChannel(channel);
 		listener.clientClosedChannel(responseSender);
 	}
 
 	void applyWriteBackPressure(Channel channel) {
-		ResponseSender responseSender = translate(channel);
+		ResponseSender responseSender = getResponseSenderForChannel(channel);
 		listener.applyWriteBackPressure(responseSender);
 	}
 
 	void releaseBackPressure(Channel channel) {
-		ResponseSender responseSender = translate(channel);
+		ResponseSender responseSender = getResponseSenderForChannel(channel);
 		listener.releaseBackPressure(responseSender);
 	}
 
-	private ResponseSender translate(Channel channel) {
+	private ResponseSender getResponseSenderForChannel(Channel channel) {
 		ChannelSession session = channel.getSession();
 		Http11ResponseSender responseSender = (Http11ResponseSender) session.get("webpieces.httpResponseSender");
 		if(responseSender == null) {

@@ -25,6 +25,5 @@ public interface Http2Engine {
     // These are both needed to give the RequestSender the ability to deal with negotiating http1.1 vs http2.
     RequestId createInitialStream(HttpResponse r, HttpRequest req, ResponseListener listener, DataWrapper leftOverData);
     void sendHttp2Preface();
-
     CompletableFuture<RequestId> sendRequest(HttpRequest request, boolean isComplete, ResponseListener l);
 }

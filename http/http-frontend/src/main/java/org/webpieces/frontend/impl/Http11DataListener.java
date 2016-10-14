@@ -15,13 +15,13 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 
-class DataListenerToParserLayer implements AsyncDataListener {
+class Http11DataListener implements AsyncDataListener {
 
-	private static final Logger log = LoggerFactory.getLogger(DataListenerToParserLayer.class);
+	private static final Logger log = LoggerFactory.getLogger(Http11DataListener.class);
 	
-	private ParserLayer processor;
+	private Http11Layer processor;
 	
-	DataListenerToParserLayer(ParserLayer nextStage) {
+	Http11DataListener(Http11Layer nextStage) {
 		this.processor = nextStage;
 	}
 

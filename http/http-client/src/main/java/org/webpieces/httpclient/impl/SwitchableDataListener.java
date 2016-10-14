@@ -1,0 +1,80 @@
+package org.webpieces.httpclient.impl;
+
+import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.webpieces.httpclient.impl.RequestSenderImpl.Protocol.HTTP11;
+
+public class SwitchableDataListener implements DataListener {
+    private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
+
+    private RequestSenderImpl.Protocol protocol = HTTP11;
+    private Map<RequestSenderImpl.Protocol, DataListener> dataListenerMap = new HashMap<>();
+    private HttpSocket socket;
+    private CloseListener closeListener;
+
+    public SwitchableDataListener(HttpSocket socket, CloseListener closeListener) {
+        this.socket = socket;
+        this.closeListener = closeListener;
+    }
+
+    void setProtocol(RequestSenderImpl.Protocol protocol) {
+        this.protocol = protocol;
+    }
+
+    public void put(RequestSenderImpl.Protocol protocol, DataListener listener) {
+        dataListenerMap.put(protocol, listener);
+    }
+
+    public DataListener getDataListener(RequestSenderImpl.Protocol protocol) {
+        return dataListenerMap.get(protocol);
+    }
+
+    @Override
+    public void incomingData(Channel channel, ByteBuffer b) {
+        dataListenerMap.get(protocol).incomingData(channel, b);
+    }
+
+    @Override
+    public void farEndClosed(Channel channel) {
+        log.info("far end closed");
+        socket.closeSocket();
+
+        if(closeListener != null)
+            closeListener.farEndClosed(socket);
+
+        // call farEndClosed on every protocol
+        for(Map.Entry<RequestSenderImpl.Protocol, DataListener> entry: dataListenerMap.entrySet()) {
+            entry.getValue().farEndClosed(channel);
+        }
+    }
+
+    @Override
+    public void failure(Channel channel, ByteBuffer data, Exception e) {
+        log.error("Failure on channel="+channel, e);
+
+        // Call failure on every protocol
+        for(Map.Entry<RequestSenderImpl.Protocol, DataListener> entry: dataListenerMap.entrySet()) {
+            entry.getValue().failure(channel, data, e);
+        }
+    }
+
+    @Override
+    public void applyBackPressure(Channel channel) {
+        dataListenerMap.get(protocol).applyBackPressure(channel);
+    }
+
+    @Override
+    public void releaseBackPressure(Channel channel) {
+        dataListenerMap.get(protocol).releaseBackPressure(channel);
+    }
+}
+
