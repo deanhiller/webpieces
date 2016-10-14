@@ -7,7 +7,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.HttpParser;
@@ -27,11 +27,11 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpFrontend createHttpServer(FrontendConfig config, RequestListener listener) {
+	public HttpServerSocket createHttpServer(FrontendConfig config, RequestListener listener) {
 		preconditionCheck(config);
 		
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, config, false);
+		HttpServerSocketImpl frontend = new HttpServerSocketImpl(timed, parser, config, false);
 		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
@@ -45,11 +45,11 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpFrontend createHttpsServer(FrontendConfig config, RequestListener listener,
-			SSLEngineFactory factory) {
+	public HttpServerSocket createHttpsServer(FrontendConfig config, RequestListener listener,
+                                              SSLEngineFactory factory) {
 		preconditionCheck(config);
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpFrontendImpl frontend = new HttpFrontendImpl(timed, parser, config, true);
+		HttpServerSocketImpl frontend = new HttpServerSocketImpl(timed, parser, config, true);
 		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);

@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer4Processor;
@@ -21,7 +21,7 @@ public class HttpProxyImpl implements HttpProxy {
 	@Inject
 	private Layer4Processor serverListener;
 	
-	private HttpFrontend httpServer;
+	private HttpServerSocket httpServer;
 	
 	@Override
 	public void start() {
@@ -38,7 +38,7 @@ public class HttpProxyImpl implements HttpProxy {
 
 	@Override
 	public void stop() {
-		httpServer.close();
+		httpServer.closeSocket();
 	}
 
 }

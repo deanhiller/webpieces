@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
@@ -19,7 +20,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.SafeRunnable;
 
-public class TimedListener {
+class TimedListener {
 
 	private static final Logger log = LoggerFactory.getLogger(TimedListener.class);
 
@@ -28,13 +29,13 @@ public class TimedListener {
 	private FrontendConfig config;
 	private Map<ResponseSender, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
 
-	public TimedListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
+	TimedListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
 		this.timer = timer;
 		this.listener = listener;
 		this.config = config;
 	}
 
-	public void incomingRequest(ResponseSender responseSender, HttpRequest req, boolean isComplete, RequestId id) {
+	public void incomingRequest(HttpRequest req, RequestId id, boolean isComplete, ResponseSender responseSender) {
 		releaseTimeout(responseSender);
 		listener.incomingRequest(req, id, isComplete, responseSender);
 	}
@@ -46,10 +47,10 @@ public class TimedListener {
 		}
 	}
 
-	public void sendServerException(ResponseSender responseSender, HttpException exc) {
+	void incomingError(HttpException exc, ResponseSender responseSender) {
 		listener.incomingError(exc, responseSender);
 		
-		//safety measure preventing leak on quick connect/close clients
+		//safety measure preventing leak on quick connect/closeSocket clients
 		releaseTimeout(responseSender);
 		
 		log.info("closing channel="+responseSender+" due to response code="+exc.getStatusCode());
@@ -57,7 +58,7 @@ public class TimedListener {
 		listener.clientClosedChannel(responseSender);
 	}
 
-	public void clientOpenChannel(ResponseSender responseSender, boolean isReadyForWrites) {
+	void clientOpenChannel(ResponseSender responseSender, boolean isReadyForWrites) {
 		if(!responseSender.getUnderlyingChannel().isSslChannel()) {
 			scheduleTimeout(responseSender);
 			listener.clientOpenChannel(responseSender);
@@ -84,7 +85,7 @@ public class TimedListener {
 		
 		private ResponseSender channel;
 
-		public TimeoutOnRequest(ResponseSender channel) {
+		TimeoutOnRequest(ResponseSender channel) {
 			this.channel = channel;
 		}
 
@@ -94,19 +95,19 @@ public class TimedListener {
 			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket. channel="+channel);
 			
 			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time", KnownStatusCode.HTTP_408_REQUEST_TIMEOUT);
-			sendServerException(channel, exc);
+			incomingError(exc, channel);
 		}
 	}
 	
-	public void clientClosedChannel(ResponseSender responseSender) {
+	void clientClosedChannel(ResponseSender responseSender) {
 		listener.clientClosedChannel(responseSender);
 	}
 
-	public void applyWriteBackPressure(ResponseSender responseSender) {
+	void applyWriteBackPressure(ResponseSender responseSender) {
 		listener.applyWriteBackPressure(responseSender);
 	}
 
-	public void releaseBackPressure(ResponseSender responseSender) {
+	void releaseBackPressure(ResponseSender responseSender) {
 		listener.releaseBackPressure(responseSender);
 	}
 

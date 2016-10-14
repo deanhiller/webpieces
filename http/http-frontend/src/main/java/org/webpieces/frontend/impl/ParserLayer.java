@@ -45,7 +45,7 @@ public class ParserLayer {
 
         // TODO: if we get chunks, send these to incomingData.
 		for(HttpRequest req : parsedRequests) {
-			listener.incomingRequest(translate(channel), req, !req.isHasChunkedTransferHeader(), new RequestId(0));
+			listener.incomingRequest(req, new RequestId(0), !req.isHasChunkedTransferHeader(), translate(channel));
 		}
 	}
 
@@ -98,7 +98,7 @@ public class ParserLayer {
 
 	public void sendServerException(Channel channel, HttpException exc) {
 		ResponseSender socket = translate(channel);
-		listener.sendServerException(socket, exc);
+		listener.incomingError(exc, socket);
 	}
 
 	public void openedConnection(Channel channel, boolean isReadyForWrites) {

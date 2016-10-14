@@ -1,20 +1,21 @@
 package org.webpieces.frontend.impl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
-public class HttpFrontendImpl implements HttpFrontend {
+public class HttpServerSocketImpl implements HttpServerSocket {
 
 	private AsyncServer server;
 	private DataListenerToParserLayer dataListener;
 
-	public HttpFrontendImpl(TimedListener listener, HttpParser parser, FrontendConfig config, boolean isHttps) {
+	public HttpServerSocketImpl(TimedListener listener, HttpParser parser, FrontendConfig config, boolean isHttps) {
 		ParserLayer nextStage = new ParserLayer(parser, listener, config, isHttps);
 		dataListener = new DataListenerToParserLayer(nextStage);
 	}
@@ -24,8 +25,8 @@ public class HttpFrontendImpl implements HttpFrontend {
 	}
 	
 	@Override
-	public void close() {
-		server.closeServerChannel();
+	public CompletableFuture<Void> closeSocket() {
+		return server.closeServerChannel();
 	}
 	
 	public AsyncDataListener getDataListener() {

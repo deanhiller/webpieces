@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.ChannelManager;
@@ -37,7 +37,7 @@ public class TestIntegTimeoutConnection {
 		FrontendConfig config = new FrontendConfig("tcpServer", new InetSocketAddress(0));
 		config.maxConnectToRequestTimeoutMs = 1000;
 		MockRequestListener mockRequestListener = new MockRequestListener();
-		HttpFrontend server = mgr.createHttpServer(config, mockRequestListener);
+		HttpServerSocket server = mgr.createHttpServer(config, mockRequestListener);
 		
 		int port = server.getUnderlyingChannel().getLocalAddress().getPort();
 		
@@ -70,7 +70,7 @@ public class TestIntegTimeoutConnection {
 		FrontendConfig config = new FrontendConfig("tcpServer", new InetSocketAddress(0));
 		config.maxConnectToRequestTimeoutMs = 1000;
 		MockRequestListener mockRequestListener = new MockRequestListener();
-		HttpFrontend server = mgr.createHttpsServer(config, mockRequestListener, new SSLEngineFactoryForTest());
+		HttpServerSocket server = mgr.createHttpsServer(config, mockRequestListener, new SSLEngineFactoryForTest());
 		
 		int port = server.getUnderlyingChannel().getLocalAddress().getPort();
 		

@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontend;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -39,8 +39,8 @@ public class WebServerImpl implements WebServer {
 	@Inject
 	private RoutingService routingService;
 	
-	private HttpFrontend httpServer;
-	private HttpFrontend httpsServer;
+	private HttpServerSocket httpServer;
+	private HttpServerSocket httpsServer;
 
 	@Override
 	public RequestListener start() {
@@ -138,9 +138,9 @@ public class WebServerImpl implements WebServer {
 
 	@Override
 	public void stop() {
-		httpServer.close();
+		httpServer.closeSocket();
 		if(httpsServer != null)
-			httpsServer.close();
+			httpsServer.closeSocket();
 	}
 
 	@Override
