@@ -33,14 +33,14 @@ public class ParserLayer {
 	private boolean isHttps;
 	private FrontendConfig config;
 	
-	public ParserLayer(HttpParser parser2, TimedListener listener, FrontendConfig config, boolean isHttps) {
+	ParserLayer(HttpParser parser2, TimedListener listener, FrontendConfig config, boolean isHttps) {
 		this.parser = parser2;
 		this.listener = listener;
 		this.config = config;
 		this.isHttps = isHttps;
 	}
 
-	public void deserialize(Channel channel, ByteBuffer chunk) {
+	void deserialize(Channel channel, ByteBuffer chunk) {
 		List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 
         // TODO: if we get chunks, send these to incomingData.
@@ -96,39 +96,39 @@ public class ParserLayer {
 		return resultMemento;
 	}
 
-	public void sendServerException(Channel channel, HttpException exc) {
-		ResponseSender socket = translate(channel);
-		listener.incomingError(exc, socket);
+	void sendServerException(Channel channel, HttpException exc) {
+		ResponseSender responseSender = translate(channel);
+		listener.incomingError(exc, responseSender);
 	}
 
-	public void openedConnection(Channel channel, boolean isReadyForWrites) {
-		ResponseSender socket = translate(channel);
-		listener.clientOpenChannel(socket, isReadyForWrites);
+	void openedConnection(Channel channel, boolean isReadyForWrites) {
+		ResponseSender responseSender = translate(channel);
+		listener.openedConnection(responseSender, isReadyForWrites);
 	}
 	
-	public void farEndClosed(Channel channel) {
-		ResponseSender socket = translate(channel);
-		listener.clientClosedChannel(socket);		
+	void farEndClosed(Channel channel) {
+		ResponseSender responseSender = translate(channel);
+		listener.clientClosedChannel(responseSender);
 	}
 
-	public void applyWriteBackPressure(Channel channel) {
-		ResponseSender socket = translate(channel);
-		listener.applyWriteBackPressure(socket);
+	void applyWriteBackPressure(Channel channel) {
+		ResponseSender responseSender = translate(channel);
+		listener.applyWriteBackPressure(responseSender);
 	}
 
-	public void releaseBackPressure(Channel channel) {
-		ResponseSender socket = translate(channel);
-		listener.releaseBackPressure(socket);
+	void releaseBackPressure(Channel channel) {
+		ResponseSender responseSender = translate(channel);
+		listener.releaseBackPressure(responseSender);
 	}
 
 	private ResponseSender translate(Channel channel) {
 		ChannelSession session = channel.getSession();
-		ResponseSenderImpl socket = (ResponseSenderImpl) session.get("webpieces.frontendSocket");
-		if(socket == null) {
-			socket = new ResponseSenderImpl(channel, parser);
-			session.put("webpieces.frontendSocket", socket);
+		Http11ResponseSender responseSender = (Http11ResponseSender) session.get("webpieces.httpResponseSender");
+		if(responseSender == null) {
+			responseSender = new Http11ResponseSender(channel, parser);
+			session.put("webpieces.httpResponseSender", responseSender);
 		}
-		return socket;
+		return responseSender;
 	}
 
 }

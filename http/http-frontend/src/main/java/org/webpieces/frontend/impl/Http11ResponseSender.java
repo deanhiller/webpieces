@@ -12,17 +12,17 @@ import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.channels.Channel;
 
-public class ResponseSenderImpl implements ResponseSender {
+class Http11ResponseSender implements ResponseSender {
 
 	private Channel channel;
 	private HttpParser parser;
 
-	public ResponseSenderImpl(Channel channel, HttpParser parser) {
+	public Http11ResponseSender(Channel channel, HttpParser parser) {
 		this.channel = channel;
 		this.parser = parser;
 	}
 
-	// HTTP/1.1 doesn't need request ids so we're just going to return zero right now
+	// HTTP/1.1 doesn't need responseids
 	private ResponseId getNextResponseId() {
 		return new ResponseId(0);
 	}

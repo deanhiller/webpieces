@@ -15,13 +15,13 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 
-public class DataListenerToParserLayer implements AsyncDataListener {
+class DataListenerToParserLayer implements AsyncDataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(DataListenerToParserLayer.class);
 	
 	private ParserLayer processor;
 	
-	public DataListenerToParserLayer(ParserLayer nextStage) {
+	DataListenerToParserLayer(ParserLayer nextStage) {
 		this.processor = nextStage;
 	}
 
@@ -30,6 +30,7 @@ public class DataListenerToParserLayer implements AsyncDataListener {
 		processor.openedConnection(channel, isReadyForWrites);
 	}
 	
+	@Override
 	public void incomingData(Channel channel, ByteBuffer b){
 		try {
 			InetSocketAddress addr = channel.getRemoteAddress();

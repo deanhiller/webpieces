@@ -29,7 +29,7 @@ public class HttpServerSocketImpl implements HttpServerSocket {
 		return server.closeServerChannel();
 	}
 	
-	public AsyncDataListener getDataListener() {
+	AsyncDataListener getDataListener() {
 		return dataListener;
 	}
 

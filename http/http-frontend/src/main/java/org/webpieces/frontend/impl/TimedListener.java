@@ -19,8 +19,9 @@ import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.SafeRunnable;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-class TimedListener {
+class TimedListener implements RequestListener {
 
 	private static final Logger log = LoggerFactory.getLogger(TimedListener.class);
 
@@ -35,7 +36,9 @@ class TimedListener {
 		this.config = config;
 	}
 
-	public void incomingRequest(HttpRequest req, RequestId id, boolean isComplete, ResponseSender responseSender) {
+
+	@Override
+    public void incomingRequest(HttpRequest req, RequestId id, boolean isComplete, ResponseSender responseSender) {
 		releaseTimeout(responseSender);
 		listener.incomingRequest(req, id, isComplete, responseSender);
 	}
@@ -47,7 +50,19 @@ class TimedListener {
 		}
 	}
 
-	void incomingError(HttpException exc, ResponseSender responseSender) {
+    @Override
+    public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
+        return listener.incomingData(data, id, isComplete, sender);
+    }
+
+    @Override
+    public void clientOpenChannel(ResponseSender responseSender) {
+        // This is bypassed by openedConnection
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public void incomingError(HttpException exc, ResponseSender responseSender) {
 		listener.incomingError(exc, responseSender);
 		
 		//safety measure preventing leak on quick connect/closeSocket clients
@@ -58,7 +73,7 @@ class TimedListener {
 		listener.clientClosedChannel(responseSender);
 	}
 
-	void clientOpenChannel(ResponseSender responseSender, boolean isReadyForWrites) {
+	void openedConnection(ResponseSender responseSender, boolean isReadyForWrites) {
 		if(!responseSender.getUnderlyingChannel().isSslChannel()) {
 			scheduleTimeout(responseSender);
 			listener.clientOpenChannel(responseSender);
@@ -99,15 +114,15 @@ class TimedListener {
 		}
 	}
 	
-	void clientClosedChannel(ResponseSender responseSender) {
+	public void clientClosedChannel(ResponseSender responseSender) {
 		listener.clientClosedChannel(responseSender);
 	}
 
-	void applyWriteBackPressure(ResponseSender responseSender) {
+	public void applyWriteBackPressure(ResponseSender responseSender) {
 		listener.applyWriteBackPressure(responseSender);
 	}
 
-	void releaseBackPressure(ResponseSender responseSender) {
+	public void releaseBackPressure(ResponseSender responseSender) {
 		listener.releaseBackPressure(responseSender);
 	}
 
