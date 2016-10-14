@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
@@ -54,12 +54,12 @@ public class IntegColoradoEdu {
 	private static class ChunkedResponseListener implements ResponseListener {
 
 		@Override
-		public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+		public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
 			log.info("received req="+req+"resp="+resp+" id=" + id +" iscomplete="+isComplete);
 		}
 
 		@Override
-		public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+		public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 			log.info("received resp="+ data +" id=" + id + " last="+ isLastData);
 			return CompletableFuture.completedFuture(null);
 		}

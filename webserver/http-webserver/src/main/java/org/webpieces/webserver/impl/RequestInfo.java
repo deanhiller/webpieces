@@ -14,12 +14,11 @@ public class RequestInfo {
 	private ResponseSender responseSender;
 	private ResponseId responseId;
 
-	public RequestInfo(RouterRequest routerRequest, HttpRequest request, BufferPool pool, ResponseSender responseSender, ResponseId responseId) {
+	public RequestInfo(RouterRequest routerRequest, HttpRequest request, BufferPool pool, ResponseSender responseSender) {
 		this.routerRequest = routerRequest;
 		this.request = request;
 		this.pool = pool;
 		this.responseSender = responseSender;
-		this.responseId = responseId;
 	}
 
 	public RouterRequest getRouterRequest() {
@@ -42,4 +41,7 @@ public class RequestInfo {
 		return responseId;
 	}
 
+	public void setResponseId(ResponseId responseId) {
+		this.responseId = responseId;
+	}
 }

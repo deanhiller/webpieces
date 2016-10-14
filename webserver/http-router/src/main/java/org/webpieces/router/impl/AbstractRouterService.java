@@ -20,12 +20,12 @@ public abstract class AbstractRouterService implements RoutingService {
 	}
 
 	@Override
-	public final void processHttpRequests(RouterRequest req, ResponseStreamer responseCb) {
+	public final void incomingCompleteRequest(RouterRequest req, ResponseStreamer responseCb) {
 		try {
 			if(!started)
 				throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 			
-			processHttpRequestsImpl(req, responseCb);
+			incomingRequestImpl(req, responseCb);
 		} catch(BadCookieException e) {
 			throw e;
 		} catch (Throwable e) {
@@ -34,7 +34,7 @@ public abstract class AbstractRouterService implements RoutingService {
 		}
 	}
 
-	protected abstract void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb);
+	protected abstract void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb);
 	
 	@Override
 	public String convertToUrl(String routeId, Map<String, String> args) {

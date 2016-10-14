@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -34,7 +35,7 @@ public class TestStaticPaths {
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -49,7 +50,7 @@ public class TestStaticPaths {
 	public void testStaticDirJpg() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -65,7 +66,7 @@ public class TestStaticPaths {
 	public void testStaticDirAndNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());
@@ -80,7 +81,7 @@ public class TestStaticPaths {
 	public void testStaticFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
 		Assert.assertEquals(1, responses.size());

@@ -8,6 +8,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendConfig;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
@@ -41,9 +42,10 @@ public class ParserLayer {
 
 	public void deserialize(Channel channel, ByteBuffer chunk) {
 		List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
-		
+
+        // TODO: if we get chunks, send these to incomingData.
 		for(HttpRequest req : parsedRequests) {
-			listener.incomingRequest(translate(channel), req, !req.isHasChunkedTransferHeader());
+			listener.incomingRequest(translate(channel), req, !req.isHasChunkedTransferHeader(), new RequestId(0));
 		}
 	}
 

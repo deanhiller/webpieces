@@ -96,12 +96,12 @@ public class IntegGoogleHttps {
 
 	private static class OurListener implements ResponseListener {
 		@Override
-		public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+		public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
 			log.info("received req="+req+"resp="+resp+" id=" + id +" iscomplete="+isComplete);
 		}
 
 		@Override
-		public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+		public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 			log.info("received resp="+ data +" id=" + id + " last="+ isLastData);
 			return CompletableFuture.completedFuture(null);
 		}

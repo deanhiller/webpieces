@@ -64,7 +64,7 @@ public class ErrorCommonTest {
 		MockResponseStream mockResponseStream = new MockResponseStream();
 
 		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
-		server.processHttpRequests(req, mockResponseStream);
+		server.incomingCompleteRequest(req, mockResponseStream);
 			
 		Exception e = mockResponseStream.getOnlyException();
 		Assert.assertEquals(IllegalStateException.class, e.getClass());
@@ -82,7 +82,7 @@ public class ErrorCommonTest {
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
 		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
-		server.processHttpRequests(req, mockResponseStream);
+		server.incomingCompleteRequest(req, mockResponseStream);
 
 		verifyNotFoundRendered(mockResponseStream);
 	}
@@ -105,7 +105,7 @@ public class ErrorCommonTest {
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
 		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
-		server.processHttpRequests(req, mockResponseStream);
+		server.incomingCompleteRequest(req, mockResponseStream);
 
 		verifyNotFoundRendered(mockResponseStream);
 	}
@@ -126,7 +126,7 @@ public class ErrorCommonTest {
 //		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.POST, "/notexistpostroute");
 //		MockResponseStream mockResponseStream = new MockResponseStream();
 //		
-//		server.processHttpRequests(req, mockResponseStream);
+//		server.incomingCompleteRequest(req, mockResponseStream);
 //
 //		verifyNotFoundRendered(mockResponseStream);
 //	}

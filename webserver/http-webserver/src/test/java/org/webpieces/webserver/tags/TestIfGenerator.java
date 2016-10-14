@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -34,7 +35,7 @@ public class TestIfGenerator {
 	public void testIfTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/if");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -50,7 +51,7 @@ public class TestIfGenerator {
 	public void testElseTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/else");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -71,7 +72,7 @@ public class TestIfGenerator {
 	public void testElseIFTag() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/elseif");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

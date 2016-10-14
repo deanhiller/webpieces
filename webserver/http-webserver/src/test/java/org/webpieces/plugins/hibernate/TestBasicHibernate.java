@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -38,7 +39,7 @@ public class TestBasicHibernate {
 	private String saveBean() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, "/save");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -55,7 +56,7 @@ public class TestBasicHibernate {
 	private void readBean(String redirectUrl) {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

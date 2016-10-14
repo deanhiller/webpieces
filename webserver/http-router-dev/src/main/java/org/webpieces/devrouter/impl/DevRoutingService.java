@@ -62,7 +62,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 	
 	@Override
-	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
+	public void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		

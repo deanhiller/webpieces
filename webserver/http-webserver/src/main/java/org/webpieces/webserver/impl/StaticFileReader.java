@@ -26,8 +26,6 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.RouterConfig;
@@ -131,22 +129,20 @@ public class StaticFileReader {
 	    	file = fetchFile("File=", fullFilePath);
 	    }
 
-	    info.getResponseSender().sendResponse(response, info.getRequest(), info.getResponseId(), false);
-	    log.debug(()->"sending chunked file via async read="+file);
-	    
-	    //NOTE: try with resource is synchronous and won't work here :(
-	    //Use fileExecutor for the callback so we control threadpool configuration...
-    	AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
-    	
-    	try {
-    		return readLoop(info, file, asyncFile, 0)
-    			.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures
-    			.thenApply(s -> null);
-    	} catch(Throwable e) {
-    		//cannot do this on success since it is completing on another thread...
-    		handleClose(info, true, null);
-    		throw new RuntimeException(e);
-    	}
+		AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
+
+		try {
+			log.debug(()->"sending chunked file via async read="+file);
+			return info.getResponseSender().sendResponse(response, info.getRequest(), false)
+					.thenAccept(responseId -> info.setResponseId(responseId))
+					.thenCompose(v -> readLoop(info, file, asyncFile, 0))
+					.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures
+					.thenAccept(s -> log.info("got:", s));
+		} catch(Throwable e) {
+			//cannot do this on success since it is completing on another thread...
+			handleClose(info, true, null);
+			throw new RuntimeException(e);
+		}
 	}
 
 	private Path fetchFile(String msg, String fullFilePath) {

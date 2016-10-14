@@ -56,7 +56,7 @@ public class Layer4Processor implements RequestListener {
 	}
 	
 	@Override
-    public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
+    public void incomingRequest(HttpRequest req, RequestId requestId, boolean isComplete, ResponseSender sender) {
 		log.info("incoming request. channel="+ sender +"=\n"+req);
 		InetSocketAddress addr = req.getServerToConnectTo(null);
 		if(config.isForceAllConnectionToHttps()) {
@@ -78,9 +78,6 @@ public class Layer4Processor implements RequestListener {
 		} else {
 			openAndConnectSocket(addr, req, sender);
 		}
-
-		// TODO: map the request to an id
-        return CompletableFuture.completedFuture(new RequestId(0));
 	}
 
 	private void sendData(ResponseSender channel, RequestSender requestSender, HttpRequest req) {
@@ -108,12 +105,12 @@ public class Layer4Processor implements RequestListener {
 	}
 
 	@Override
-	public void clientOpenChannel() {
+	public void clientOpenChannel(ResponseSender responseSender) {
 		log.info("browser client open channel");
 	}
 	
 	@Override
-	public void clientClosedChannel() {
+	public void clientClosedChannel(ResponseSender responseSender) {
 		log.info("browser client closed channel");
 	}
 

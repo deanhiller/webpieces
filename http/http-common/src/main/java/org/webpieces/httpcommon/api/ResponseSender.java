@@ -12,11 +12,10 @@ public interface ResponseSender {
 
 	CompletableFuture<Void> close();
 
-	ResponseId getNextResponseId();
-
-    // When starting a response we set the responseid so that we can match sendData calls to the original request
-    // This is not used for complete responses or http/1.1
-	CompletableFuture<Void> sendResponse(HttpResponse response, HttpRequest request, ResponseId id, boolean isComplete);
+    // When starting a response return a responseid
+	// (which could be the streamid) so that we can match sendData calls to the original request
+    // This is not used for http/1.1
+	CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, boolean isComplete);
 
 	CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isLastData);
 

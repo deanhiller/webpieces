@@ -14,8 +14,7 @@ public class MockRequestListener implements RequestListener {
 	private boolean isClosed;
 
 	@Override
-	public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
-		return CompletableFuture.completedFuture(new RequestId(0));
+	public void incomingRequest(HttpRequest req, RequestId requestId, boolean isComplete, ResponseSender sender) {
 	}
 
 	@Override
@@ -28,11 +27,11 @@ public class MockRequestListener implements RequestListener {
 	}
 
 	@Override
-	public void clientOpenChannel() {
+	public void clientOpenChannel(ResponseSender responseSender) {
 	}
 	
 	@Override
-	public void clientClosedChannel() {
+	public void clientClosedChannel(ResponseSender responseSender) {
 		isClosed = true;
 	}
 

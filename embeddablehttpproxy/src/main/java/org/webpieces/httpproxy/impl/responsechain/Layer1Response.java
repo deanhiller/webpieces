@@ -1,8 +1,8 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -22,13 +22,13 @@ public class Layer1Response implements ResponseListener {
 	}
 
 	@Override
-	public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+	public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
 		responseListener.processResponse(responseSender, req, resp, id, isComplete);
 
 	}
 
     @Override
-    public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+    public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 		return responseListener.processData(responseSender, data, id, isLastData);
     }
 

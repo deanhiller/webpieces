@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -65,7 +66,7 @@ public class TestLesson2Errors {
 		mockLibrary.throwException(new RuntimeException("test internal bug page"));
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
 		
-		server.incomingRequest(req, true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -82,7 +83,7 @@ public class TestLesson2Errors {
 	public void testNotFound() {
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
 		
-		server.incomingRequest(req, true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -101,7 +102,7 @@ public class TestLesson2Errors {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
 		
-		server.incomingRequest(req, true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
 		
 		List<FullResponse> responses = mockResponseSocket.getResponses();
 		Assert.assertEquals(0, responses.size());

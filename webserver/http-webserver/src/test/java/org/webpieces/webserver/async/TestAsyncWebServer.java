@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -39,7 +40,7 @@ public class TestAsyncWebServer {
 	public void testCompletePromiseOnRequestThread() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -56,7 +57,7 @@ public class TestAsyncWebServer {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
 
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
 		//now have the server complete processing
 		future.complete(5);
@@ -73,7 +74,7 @@ public class TestAsyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

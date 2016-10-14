@@ -3,7 +3,7 @@ package org.webpieces.httpclient.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -30,7 +30,7 @@ public class CompletableListener implements ResponseListener {
 	}
 
 	@Override
-	public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+	public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
 		// This listener ignores the request associated with the response
         if(!isComplete && !ignoreIsComplete) {
             future.completeExceptionally(new IllegalStateException("You need to call "
@@ -41,7 +41,7 @@ public class CompletableListener implements ResponseListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+	public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 		return CompletableFuture.completedFuture(null);
 	}
 

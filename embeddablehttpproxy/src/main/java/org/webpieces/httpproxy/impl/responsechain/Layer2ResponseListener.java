@@ -13,6 +13,7 @@ import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpServerException;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -24,26 +25,26 @@ import org.webpieces.util.logging.LoggerFactory;
 public class Layer2ResponseListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer2ResponseListener.class);
-	private ConcurrentHashMap<RequestId, ResponseId> requestResponseMap = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<ResponseId, ResponseId> incomingResponseToOutgoingResponseMap = new ConcurrentHashMap<>();
 
 	@Inject
 	private LayerZSendBadResponse badResponse;
 	
-	public ResponseId processResponse(ResponseSender responseSender, HttpRequest req, HttpResponse resp, RequestId requestId, boolean isComplete) {
+	public void processResponse(ResponseSender responseSender, HttpRequest req, HttpResponse resp, ResponseId incomingResponseId, boolean isComplete) {
 		log.info("received response(responseSender="+responseSender+").  type="+resp.getClass().getSimpleName()+" complete="+isComplete+" resp=\n"+resp);
 
-		ResponseId responseId = responseSender.getNextResponseId();
-		requestResponseMap.put(requestId, responseId);
 
-		responseSender.sendResponse(resp, req, responseId, isComplete)
-			.thenAccept(p -> wroteBytes(responseSender))
+		responseSender.sendResponse(resp, req, isComplete)
+			.thenAccept(outgoingResponseId -> {
+				wroteBytes(responseSender);
+				incomingResponseToOutgoingResponseMap.put(incomingResponseId, outgoingResponseId);
+			})
 			.exceptionally(e -> failedWrite(responseSender, e));
-		return responseId;
 	}
 
-	public CompletableFuture<Void> processData(ResponseSender responseSender, DataWrapper data, RequestId id, boolean isComplete) {
-		ResponseId responseId = requestResponseMap.get(id);
-		return responseSender.sendData(data, responseId, isComplete);
+	public CompletableFuture<Void> processData(ResponseSender responseSender, DataWrapper data, ResponseId incomingResponseId, boolean isComplete) {
+		ResponseId outgoingResponseId = incomingResponseToOutgoingResponseMap.get(incomingResponseId);
+		return responseSender.sendData(data, outgoingResponseId, isComplete);
 	}
 
 	private Void failedWrite(ResponseSender responseSender, Throwable e) {

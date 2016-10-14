@@ -90,7 +90,7 @@ public class TestProdRouter {
 		overrides.mockService.addToReturn(future);
 		
 		MockResponseStream mockResponseStream = new MockResponseStream();
-		server.processHttpRequests(req, mockResponseStream);
+		server.incomingCompleteRequest(req, mockResponseStream);
 		
 		//no response yet...
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();

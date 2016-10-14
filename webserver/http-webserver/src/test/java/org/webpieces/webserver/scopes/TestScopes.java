@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -36,7 +37,7 @@ public class TestScopes {
 	public void testSessionScope() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -52,7 +53,7 @@ public class TestScopes {
 	public void testSessionScopeModificationByClient() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.incomingRequest(req, true, socket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -72,7 +73,7 @@ public class TestScopes {
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
 		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
 		
-		server.incomingRequest(req2, true, socket);
+		server.incomingRequest(req2, new RequestId(0), true, socket);
 		
 		responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());

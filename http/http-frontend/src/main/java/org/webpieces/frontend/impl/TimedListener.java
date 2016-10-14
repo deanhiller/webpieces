@@ -34,9 +34,9 @@ public class TimedListener {
 		this.config = config;
 	}
 
-	public CompletableFuture<RequestId> incomingRequest(ResponseSender responseSender, HttpRequest req, boolean isComplete) {
+	public void incomingRequest(ResponseSender responseSender, HttpRequest req, boolean isComplete, RequestId id) {
 		releaseTimeout(responseSender);
-		return listener.incomingRequest(req, isComplete, responseSender);
+		listener.incomingRequest(req, id, isComplete, responseSender);
 	}
 
 	private void releaseTimeout(ResponseSender responseSender) {
@@ -54,16 +54,16 @@ public class TimedListener {
 		
 		log.info("closing channel="+responseSender+" due to response code="+exc.getStatusCode());
 		responseSender.close();
-		listener.clientClosedChannel();
+		listener.clientClosedChannel(responseSender);
 	}
 
 	public void clientOpenChannel(ResponseSender responseSender, boolean isReadyForWrites) {
 		if(!responseSender.getUnderlyingChannel().isSslChannel()) {
 			scheduleTimeout(responseSender);
-			listener.clientOpenChannel();
+			listener.clientOpenChannel(responseSender);
 		} else if(isReadyForWrites) {
 			//if ready for writes, the channel is encrypted and fully open
-			listener.clientOpenChannel();
+			listener.clientOpenChannel(responseSender);
 		} else { //if not ready for writes, the socket is open but encryption handshake is not been done yet
 			scheduleTimeout(responseSender);
 		}
@@ -99,7 +99,7 @@ public class TimedListener {
 	}
 	
 	public void clientClosedChannel(ResponseSender responseSender) {
-		listener.clientClosedChannel();
+		listener.clientClosedChannel(responseSender);
 	}
 
 	public void applyWriteBackPressure(ResponseSender responseSender) {

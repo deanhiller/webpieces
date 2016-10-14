@@ -32,10 +32,10 @@ public class ErrorTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
-		server.processHttpRequests(req, mockResponseStream);
+		server.incomingCompleteRequest(req, mockResponseStream);
 
 		//BIT NOTE: The failure MUST come from processHttpReqeusts which proves the compilation/validation
-		//happened on processHttpRequests and not during the start() method call like production does it
+		//happened on incomingCompleteRequest and not during the start() method call like production does it
 		//ie. production fails fast while dev keeps recompiling code and only compiles what is going to be
 		//run keeping startup times real fast for the dev server(which developers want!!!).  The prod server
 		//then starts up slower constructing everything which is ok as webapp users would rather have

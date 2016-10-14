@@ -32,7 +32,7 @@ public class ErrorTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
-		server.processHttpRequests(req, mockResponseStream);
+		server.incomingCompleteRequest(req, mockResponseStream);
 		
 		Exception e = mockResponseStream.getOnlyException();
 		Assert.assertEquals(IllegalStateException.class, e.getClass());

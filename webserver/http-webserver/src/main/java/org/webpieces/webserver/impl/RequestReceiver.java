@@ -1,19 +1,16 @@
 package org.webpieces.webserver.impl;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.RequestId;
@@ -47,7 +44,8 @@ public class RequestReceiver implements RequestListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(RequestReceiver.class);
 	private static final HeaderPriorityParser headerParser = HttpParserFactory.createHeaderParser();
-	
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+
 	@Inject
 	private RoutingService routingService;
 	@Inject
@@ -65,7 +63,18 @@ public class RequestReceiver implements RequestListener {
 	private Provider<ProxyResponse> responseProvider;
 	
 	private Set<String> headersSupported = new HashSet<>();
-	
+	private class RequestCollectingData {
+		public HttpRequest req;
+		public List<CompletableFuture<Void>> futures;
+
+		public RequestCollectingData(HttpRequest req) {
+			this.req = req;
+			this.futures = new LinkedList<>();
+		}
+	}
+
+	private ConcurrentHashMap<RequestId, RequestCollectingData> requestsStillCollecting = new ConcurrentHashMap<>();
+
 	public RequestReceiver() {
 		//We keep this list in place to log out what we have not implemented yet.  This allows us to see if
 		//we missed anything on the request side.
@@ -89,22 +98,32 @@ public class RequestReceiver implements RequestListener {
 
 	@Override
 	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
-		throw new UnsupportedOperationException();
+		RequestCollectingData collector = requestsStillCollecting.get(id);
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		collector.req.setBody(dataGen.chainDataWrappers(collector.req.getBodyNonNull(), data));
+		collector.futures.add(future);
+
+		if(isComplete) {
+			// Now we're done, remove it so that another request with the same id can come in
+			requestsStillCollecting.remove(id);
+
+			handleCompleteRequest(collector.req, sender);
+
+			// Complete all the futures because we're done dealing with this data.
+			for(CompletableFuture<Void> fut: collector.futures) {
+				fut.complete(null);
+			}
+		}
+		return future;
 	}
 
-	@Override
-	public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
-		//log.info("request received on channel="+channel);
-		if(!isComplete) {
-			throw new UnsupportedOperationException();
+	private void handleCompleteRequest(HttpRequest req, ResponseSender responseSender) {
+		for(Header h : req.getHeaders()) {
+			if (!headersSupported.contains(h.getName().toLowerCase()))
+				log.error("This webserver has not thought about supporting header="
+						+ h.getName() + " quite yet.  value=" + h.getValue() + " Please let us know and we can quickly add support");
 		}
 
-		for(Header h : req.getHeaders()) {
-			if(!headersSupported.contains(h.getName().toLowerCase()))
-				log.error("This webserver has not thought about supporting header="
-						+h.getName()+" quite yet.  value="+h.getValue()+" Please let us know and we can quickly add support");
-		}
-		
 		RouterRequest routerRequest = new RouterRequest();
 		routerRequest.orginalRequest = req;
 		routerRequest.isHttps = req.isHttps();
@@ -115,7 +134,7 @@ public class RequestReceiver implements RequestListener {
 		String value = header.getValue();
 		HttpRequestLine requestLine = req.getRequestLine();
 		UrlInfo uriInfo = requestLine.getUri().getUriBreakdown();
-		
+
 		HttpMethod method = HttpMethod.lookup(requestLine.getMethod().getMethodAsString());
 		if(method == null)
 			throw new UnsupportedOperationException("method not supported="+requestLine.getMethod().getMethodAsString());
@@ -128,7 +147,7 @@ public class RequestReceiver implements RequestListener {
 		Header referHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.REFERER);
 		if(referHeader != null)
 			routerRequest.referrer = referHeader.getValue().trim();
-		
+
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
 		routerRequest.domain = value;
@@ -140,27 +159,34 @@ public class RequestReceiver implements RequestListener {
 			urlEncodedParser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
 		} else {
 			routerRequest.queryParams = new HashMap<>();
-			routerRequest.relativePath = fullPath;	
+			routerRequest.relativePath = fullPath;
 		}
-		
+
 		//http1.1 so no...
 		routerRequest.isSendAheadNextResponses = false;
 		if(routerRequest.relativePath.contains("?"))
 			throw new UnsupportedOperationException("not supported yet");
 
-		ResponseId responseId = sender.getNextResponseId();
 		ProxyResponse streamer = responseProvider.get();
 		try {
-			streamer.init(routerRequest, sender, responseId, bufferPool);
+			streamer.init(routerRequest, responseSender, bufferPool);
 
-			routingService.processHttpRequests(routerRequest, streamer );
-		} catch(BadCookieException e) {
+			routingService.incomingCompleteRequest(routerRequest, streamer);
+		} catch (BadCookieException e) {
 			log.warn("This occurs if secret key changed, or you booted another webapp with different key on same port or someone modified the cookie", e);
 			streamer.sendRedirectAndClearCookie(routerRequest, e.getCookieName());
 		}
+	}
 
-		// TODO: create a requestid so we can deal with incomingData, but right now we're not going to deal with it.
-		return CompletableFuture.completedFuture(new RequestId(0));
+
+	@Override
+	public void incomingRequest(HttpRequest req, RequestId requestId, boolean isComplete, ResponseSender responseSender) {
+		//log.info("request received on channel="+channel);
+		if(isComplete) {
+			handleCompleteRequest(req, responseSender);
+		} else {
+			requestsStillCollecting.put(requestId, new RequestCollectingData(req));
+		}
 	}
 
 	private void parseAccept(HttpRequest req, RouterRequest routerRequest) {
@@ -255,18 +281,17 @@ public class RequestReceiver implements RequestListener {
 		HttpRequest req = new HttpRequest();
 		RouterRequest routerReq = new RouterRequest();
 		routerReq.orginalRequest = req;
-		ResponseId responseId = responseSender.getNextResponseId();
-		proxyResp.init(routerReq, responseSender, responseId, bufferPool);
+		proxyResp.init(routerReq, responseSender, bufferPool);
 		proxyResp.sendFailure(exc);
 	}
 
 	@Override
-	public void clientOpenChannel() {
+	public void clientOpenChannel(ResponseSender responseSender) {
 		log.info("browser client open channel");
 	}
 	
 	@Override
-	public void clientClosedChannel() {
+	public void clientClosedChannel(ResponseSender responseSender) {
 		log.info("browser client closed channel");
 	}
 

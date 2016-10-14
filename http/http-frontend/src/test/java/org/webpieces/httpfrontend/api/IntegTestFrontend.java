@@ -23,8 +23,7 @@ public class IntegTestFrontend {
 	private static class OurListener implements RequestListener {
 
 		@Override
-		public CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender) {
-			return CompletableFuture.completedFuture(new RequestId(0));
+		public void incomingRequest(HttpRequest req, RequestId requestId, boolean isComplete, ResponseSender sender) {
 		}
 
 		@Override
@@ -37,11 +36,11 @@ public class IntegTestFrontend {
 		}
 
 		@Override
-		public void clientOpenChannel() {
+		public void clientOpenChannel(ResponseSender responseSender) {
 		}
 		
 		@Override
-		public void clientClosedChannel() {
+		public void clientClosedChannel(ResponseSender responseSender) {
 		}
 
 		@Override

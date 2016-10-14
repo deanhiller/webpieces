@@ -529,7 +529,7 @@ public class Http2EngineImpl implements Http2Engine {
                     boolean isComplete = frame.isEndStream();
                     int payloadLength = http2Parser.getFrameLength(frame);
                     decrementIncomingWindow(frame.getStreamId(), payloadLength);
-                    stream.getResponseListener().incomingData(frame.getData(), stream.getRequestId(), isComplete).thenAccept(
+                    stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), isComplete).thenAccept(
                             length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
                     if(isComplete)
                         receivedEndStream(stream);
@@ -645,10 +645,12 @@ public class Http2EngineImpl implements Http2Engine {
                 if(side == CLIENT) {
                     HttpResponse response = createResponseFromHeaders(frame.getHeaderList(), stream);
                     stream.setResponse(response);
-                    stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getRequestId(), isComplete);
+                    stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), isComplete);
                 } else {
                     HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), stream);
                     stream.setRequest(request);
+                    // TODO: put in the responsesender here.
+                    stream.getRequestListener().incomingRequest(request, stream.getRequestId(), false, null);
                 }
 
                 if (isComplete)
@@ -677,7 +679,8 @@ public class Http2EngineImpl implements Http2Engine {
                     if(side == CLIENT)
                         stream.getResponseListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
                     else
-                        stream.getRequestListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
+                        // TODO: change incomingError to failure and fix the exception types
+                        stream.getRequestListener().incomingError(null, null);
 
                     stream.setStatus(Stream.StreamStatus.CLOSED);
                     break;

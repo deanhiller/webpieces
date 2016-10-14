@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;
@@ -23,10 +22,8 @@ public class ResponseSenderImpl implements ResponseSender {
 		this.parser = parser;
 	}
 
-	// HTTP/1.1 doesn't need request ids so we're just going to return zero.
-	//
-	@Override
-	public ResponseId getNextResponseId() {
+	// HTTP/1.1 doesn't need request ids so we're just going to return zero right now
+	private ResponseId getNextResponseId() {
 		return new ResponseId(0);
 	}
 
@@ -36,10 +33,10 @@ public class ResponseSenderImpl implements ResponseSender {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendResponse(HttpResponse response, HttpRequest request, ResponseId id, boolean isComplete) {
+	public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, boolean isComplete) {
 		ByteBuffer data = parser.marshalToByteBuffer(response);
-		
-		return channel.write(data).thenAccept(c -> {});
+		ResponseId id = getNextResponseId();
+		return channel.write(data).thenApply(c -> id);
 	}
 
 	@Override

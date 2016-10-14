@@ -29,11 +29,6 @@ public class MockResponseSender implements ResponseSender {
 	}
 
 	@Override
-	public ResponseId getNextResponseId() {
-		return new ResponseId(0);
-	}
-
-	@Override
 	public CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isLastData) {
 		if(isLastData) {
 			HttpLastChunk chunk = new HttpLastChunk();
@@ -57,7 +52,7 @@ public class MockResponseSender implements ResponseSender {
 	}
 
 	@Override
-	public synchronized CompletableFuture<Void> sendResponse(HttpResponse response, HttpRequest request, ResponseId id, boolean isComplete) {
+	public synchronized CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, boolean isComplete) {
 		if(chunkedResponse == null) {
 			FullResponse nextResp = new FullResponse(response);
 			if (response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
@@ -70,7 +65,7 @@ public class MockResponseSender implements ResponseSender {
 			log.error("expecting sendData but got Response instead=" + response);
 		}
 
-		return null;
+		return CompletableFuture.completedFuture(new ResponseId(0));
 	}
 
 	@Override

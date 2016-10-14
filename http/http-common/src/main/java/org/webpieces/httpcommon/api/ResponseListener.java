@@ -37,16 +37,14 @@ public interface ResponseListener {
 	 *
 	 * To support HTTP2 we need to pass the 'request' back with the response because the
 	 * server might push a response with an implied request.
-	 *
-	 * @param resp The HttpResponse message including body if there is one
+	 *  @param resp The HttpResponse message including body if there is one
 	 * @param req the originating or presumed request
 	 * @param id an id to help us map incomingResponses to incomingDatas. UNUSED in HTTP1.1. In
-	 *           HTTP1.1 you just have to take them serially-- ie all incomingdatas that show up
-	 *           between incomingresponses belong to the prior incomingresponse.
+ *           HTTP1.1 you just have to take them serially-- ie all incomingdatas that show up
+ *           between incomingresponses belong to the prior incomingresponse.
 	 * @param isComplete false if the transfer encoding is chunked or http/2 in which case
-	 *                      sendData will be called for each chunk/dataframe coming in
 	 */
-	void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete);
+	void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete);
 	
 	/**
 	 *
@@ -54,10 +52,11 @@ public interface ResponseListener {
 	 * done processing this data and the flow control window can be opened back up again.
 	 *
 	 * @param data
+	 * @param id
 	 * @param isLastData
 	 */
 	// maybe add optional chunk or chunk extension, or not
-	CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData);
+	CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData);
 
 	void failure(Throwable e);
 	

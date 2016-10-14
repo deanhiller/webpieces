@@ -13,14 +13,31 @@ public interface RequestListener {
 	 * you the channel it came in from.
      *
      * We encode if is https or httpv2 in the request itself.
-     *
-     * @param req
-     * @param isComplete true if this request came in over an https socket
-     *
-     *
+	 *
+	 * The RequestId is only used in HTTP/2 -- in HTTP/1.1 all incomingData requests that come in are for the
+	 * incomingRequest that came in immediately preceding, because multiplexing is not permitted.
+	 *  @param req
+     * @param requestId
+	 * @param isComplete true if this request contains the entire payload as well or false if just headers.
+	 *
      */
-	CompletableFuture<RequestId> incomingRequest(HttpRequest req, boolean isComplete, ResponseSender sender);
+	void incomingRequest(HttpRequest req, RequestId requestId, boolean isComplete, ResponseSender sender);
 
+	/**
+	 * When additional data comes in for a request that isn't complete, this is called. The RequestId is used
+	 * to map this additional data to the request that came in in the first place.
+	 *
+	 * The RequestId is only used in HTTP/2 -- in HTTP/1.1 all incomingData requests that come in are for the
+	 * incomingRequest that came in immediately preceding, because multiplexing is not permitted.
+	 *
+	 * The final bit of data has 'isComplete' set to true.
+	 *
+	 * @param data
+	 * @param id
+	 * @param isComplete
+	 * @param sender
+	 * @return
+	 */
     CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender);
 	
 	/**
@@ -35,14 +52,16 @@ public interface RequestListener {
 
 	/**
 	 * client opened their channel(can start timeouts here)
-     */
-	void clientOpenChannel();
+	 * @param responseSender
+	 */
+	void clientOpenChannel(ResponseSender responseSender);
 	
 	/**
 	 * The client closed their channel.
 	 *
-     */
-	void clientClosedChannel();
+	 * @param responseSender
+	 */
+	void clientClosedChannel(ResponseSender responseSender);
 
 	/**
 	 * As you sendResponse back to the client, this is called if writes are backing up in which case

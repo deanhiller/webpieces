@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.*;
-import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -72,12 +72,12 @@ public class IntegNgHttp2 {
     private static class ChunkedResponseListener implements ResponseListener {
 
         @Override
-        public void incomingResponse(HttpResponse resp, HttpRequest req, RequestId id, boolean isComplete) {
+        public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
             log.info("received req="+req+"resp="+resp+" id=" + id +" iscomplete="+isComplete);
         }
 
         @Override
-        public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isLastData) {
+        public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
             log.info("received resp="+ data +" id=" + id + " last="+ isLastData);
             return CompletableFuture.completedFuture(null);
         }

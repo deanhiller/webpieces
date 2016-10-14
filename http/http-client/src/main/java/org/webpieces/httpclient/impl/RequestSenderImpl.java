@@ -162,7 +162,7 @@ public class RequestSenderImpl implements RequestSender {
                     // TODO: make sure this is right. would be nicer to grab the isComplete
                     // out of the incomingResponse call to the CompletableListener in
                     // sendHttp11AndWaitForHeaders I think.
-                    listener.incomingResponse(r, req, new RequestId(0), !r.isHasChunkedTransferHeader());
+                    listener.incomingResponse(r, req, new ResponseId(0), !r.isHasChunkedTransferHeader());
                     // Request id is 0 for HTTP/1.1
                     return new RequestId(0);
                 } else {
@@ -368,18 +368,18 @@ public class RequestSenderImpl implements RequestSender {
                         responsesToComplete.poll();
                     }
 
-                    listener.incomingData(chunk.getBodyNonNull(), new RequestId(0), chunk.isLastChunk());
+                    listener.incomingData(chunk.getBodyNonNull(), new ResponseId(0), chunk.isLastChunk());
                 } else if(!msg.isHasChunkedTransferHeader()) {
                     HttpResponse resp = (HttpResponse) msg;
                     RequestAwaitingCompletion requestAwaitingCompletion = responsesToComplete.poll();
                     ResponseListener listener = requestAwaitingCompletion.listener;
-                    listener.incomingResponse(resp, requestAwaitingCompletion.request, new RequestId(0), true);
+                    listener.incomingResponse(resp, requestAwaitingCompletion.request, new ResponseId(0), true);
                 } else {
                     processingChunked = true;
                     HttpResponse resp = (HttpResponse) msg;
                     RequestAwaitingCompletion requestAwaitingCompletion = responsesToComplete.peek();
                     ResponseListener listener = requestAwaitingCompletion.listener;
-                    listener.incomingResponse(resp, requestAwaitingCompletion.request, new RequestId(0), false);
+                    listener.incomingResponse(resp, requestAwaitingCompletion.request, new ResponseId(0), false);
                 }
             }
         }

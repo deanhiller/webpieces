@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -59,7 +60,7 @@ public class TestLesson1BasicRequestResponse {
 	public void testSynchronousController() {
 		HttpRequest req = createRequest("/");
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses();
 		Assert.assertEquals(1, responses.size());
@@ -83,7 +84,7 @@ public class TestLesson1BasicRequestResponse {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = createRequest("/async");
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses();
 		Assert.assertEquals(0, responses.size());
@@ -109,7 +110,7 @@ public class TestLesson1BasicRequestResponse {
 		HttpRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		server.incomingRequest(req, true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses();
 		Assert.assertEquals(1, responses.size());

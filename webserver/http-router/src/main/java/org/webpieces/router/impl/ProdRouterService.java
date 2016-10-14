@@ -45,7 +45,7 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	}
 
 	@Override
-	public void processHttpRequestsImpl(RouterRequest req, ResponseStreamer responseCb) {
+	public void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb) {
 		MatchResult meta = routeLoader.fetchRoute(req);
 		
 		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(req, routeLoader);
