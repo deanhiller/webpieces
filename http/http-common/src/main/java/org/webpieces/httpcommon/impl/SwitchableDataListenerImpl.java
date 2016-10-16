@@ -1,12 +1,10 @@
 package org.webpieces.httpcommon.impl;
 
-import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.SwitchableDataListener;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -31,27 +29,23 @@ public class SwitchableDataListenerImpl implements SwitchableDataListener {
         this.closeListener = closeListener;
     }
 
+    public SwitchableDataListenerImpl(HttpSocket socket) {
+        this.socket = socket;
+    }
+
+    @Override
     public void setProtocol(Protocol protocol) {
         this.protocol = protocol;
     }
 
+    @Override
     public void put(Protocol protocol, DataListener listener) {
         dataListenerMap.put(protocol, listener);
     }
 
+    @Override
     public DataListener getDataListener(Protocol protocol) {
         return dataListenerMap.get(protocol);
-    }
-
-    @Override
-    public void connectionOpened(TCPChannel proxy, boolean isReadyForWrites) {
-        DataListener listener = dataListenerMap.get(protocol);
-        if(AsyncDataListener.class.isInstance(listener)) {
-            ((AsyncDataListener) listener).connectionOpened(proxy, isReadyForWrites);
-        } else
-        {
-            throw new UnsupportedOperationException();
-        }
     }
 
     @Override
