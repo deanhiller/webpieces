@@ -1,8 +1,5 @@
 package org.webpieces.httpcommon.api;
 
-import org.webpieces.httpcommon.api.CloseListener;
-import org.webpieces.httpcommon.api.HttpSocket;
-import org.webpieces.httpcommon.api.SwitchableDataListener;
 import org.webpieces.httpcommon.impl.SwitchableDataListenerImpl;
 
 public class SwitchableDataListenerFactory {
