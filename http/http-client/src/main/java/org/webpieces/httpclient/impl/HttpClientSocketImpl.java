@@ -50,6 +50,11 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
         this.httpParser = httpParser;
     }
 
+    @Override
+    public TCPChannel getUnderlyingChannel() {
+        return channel;
+    }
+
     // HTTP Socket interface calls
     @Override
     public CompletableFuture<RequestSender> connect(InetSocketAddress addr) {

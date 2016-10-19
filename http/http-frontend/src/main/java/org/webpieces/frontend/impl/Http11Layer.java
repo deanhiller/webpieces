@@ -8,6 +8,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendConfig;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
@@ -97,18 +98,11 @@ public class Http11Layer {
 	}
 
 	void sendServerException(Channel channel, HttpException exc) {
-		ResponseSender responseSender = getResponseSenderForChannel(channel);
-		listener.incomingError(exc, responseSender);
-	}
-
-	void openedConnection(Channel channel, boolean isReadyForWrites) {
-		ResponseSender responseSender = getResponseSenderForChannel(channel);
-		listener.openedConnection(responseSender, isReadyForWrites);
+		listener.incomingError(exc, getHttpServerSocketForChannel(channel));
 	}
 	
 	void farEndClosed(Channel channel) {
-		ResponseSender responseSender = getResponseSenderForChannel(channel);
-		listener.clientClosedChannel(responseSender);
+		listener.clientClosedChannel(getHttpServerSocketForChannel(channel));
 	}
 
 	void applyWriteBackPressure(Channel channel) {
@@ -121,14 +115,14 @@ public class Http11Layer {
 		listener.releaseBackPressure(responseSender);
 	}
 
-	private ResponseSender getResponseSenderForChannel(Channel channel) {
+	private HttpServerSocket getHttpServerSocketForChannel(Channel channel) {
 		ChannelSession session = channel.getSession();
-		Http11ResponseSender responseSender = (Http11ResponseSender) session.get("webpieces.httpResponseSender");
-		if(responseSender == null) {
-			responseSender = new Http11ResponseSender(channel, parser);
-			session.put("webpieces.httpResponseSender", responseSender);
-		}
-		return responseSender;
+		return (HttpServerSocket) session.get("webpieces.httpServerSocket");
+	}
+
+	private ResponseSender getResponseSenderForChannel(Channel channel) {
+		HttpServerSocket httpServerSocket = getHttpServerSocketForChannel(channel);
+		return httpServerSocket.getResponseSender();
 	}
 
 }

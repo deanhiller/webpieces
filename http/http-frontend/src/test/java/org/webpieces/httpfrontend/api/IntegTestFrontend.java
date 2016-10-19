@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.*;
+import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpcommon.api.RequestId;
@@ -32,15 +33,15 @@ public class IntegTestFrontend {
 		}
 
 		@Override
-		public void incomingError(HttpException exc, ResponseSender channel) {
+		public void incomingError(HttpException exc, HttpSocket channel) {
 		}
 
 		@Override
-		public void clientOpenChannel(ResponseSender responseSender) {
+		public void clientOpenChannel(HttpSocket HttpSocket) {
 		}
 		
 		@Override
-		public void clientClosedChannel(ResponseSender responseSender) {
+		public void clientClosedChannel(HttpSocket httpSocket) {
 		}
 
 		@Override

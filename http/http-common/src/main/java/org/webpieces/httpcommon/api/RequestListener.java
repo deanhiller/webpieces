@@ -44,24 +44,23 @@ public interface RequestListener {
 	 * In the event the client sends a bad unparseable request, OR your RequestListener
 	 * throws an exception, we call this method to pass in the status you 'should' return to
 	 * the client as well as the channel to feed that response into
-	 *
-     * @param exc
-     * @param sender
-     */
-	void incomingError(HttpException exc, ResponseSender sender);
+	 *  @param exc
+     * @param httpSocket
+	 */
+	void incomingError(HttpException exc, HttpSocket httpSocket);
 
 	/**
 	 * client opened their channel(can start timeouts here)
-	 * @param responseSender
+	 * @param HttpSocket
 	 */
-	void clientOpenChannel(ResponseSender responseSender);
+	void clientOpenChannel(HttpSocket HttpSocket);
 	
 	/**
 	 * The client closed their channel.
 	 *
-	 * @param responseSender
+	 * @param httpSocket
 	 */
-	void clientClosedChannel(ResponseSender responseSender);
+	void clientClosedChannel(HttpSocket httpSocket);
 
 	/**
 	 * As you sendResponse back to the client, this is called if writes are backing up in which case

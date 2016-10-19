@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.api.CloseListener;
@@ -105,12 +106,12 @@ public class Layer4Processor implements RequestListener {
 	}
 
 	@Override
-	public void clientOpenChannel(ResponseSender responseSender) {
+	public void clientOpenChannel(HttpSocket HttpSocket) {
 		log.info("browser client open channel");
 	}
 	
 	@Override
-	public void clientClosedChannel(ResponseSender responseSender) {
+	public void clientClosedChannel(HttpSocket httpSocket) {
 		log.info("browser client closed channel");
 	}
 
@@ -138,8 +139,8 @@ public class Layer4Processor implements RequestListener {
 	}
 
 	@Override
-	public void incomingError(HttpException exc, ResponseSender responseSender) {
-		badResponse.sendServerResponse(responseSender, exc);
+	public void incomingError(HttpException exc, HttpSocket httpSocket) {
+		badResponse.sendServerResponse(((HttpServerSocket) httpSocket).getResponseSender(), exc);
 	}
 
 	@Override

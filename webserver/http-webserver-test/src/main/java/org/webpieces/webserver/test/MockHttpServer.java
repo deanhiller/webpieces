@@ -3,13 +3,13 @@ package org.webpieces.webserver.test;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.frontend.api.HttpServerSocket;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
-public class MockHttpServerSocket implements HttpServerSocket {
+public class MockHttpServer implements HttpServer {
 
 	@Override
-	public CompletableFuture<Void> closeSocket() {
+	public CompletableFuture<Void> close() {
 		return CompletableFuture.completedFuture(null);
 	}
 

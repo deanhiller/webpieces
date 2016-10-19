@@ -1,0 +1,63 @@
+package org.webpieces.frontend.impl;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
+import org.webpieces.data.api.BufferPool;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
+import org.webpieces.nio.api.handlers.AsyncDataListener;
+import org.webpieces.asyncserver.api.AsyncServer;
+import org.webpieces.frontend.api.FrontendConfig;
+import org.webpieces.frontend.api.HttpServer;
+import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.nio.api.handlers.DataListener;
+
+public class HttpServerImpl implements HttpServer {
+
+	private AsyncServer server;
+	private AsyncDataListener dataListener;
+
+	public HttpServerImpl(TimedListener requestListener, BufferPool bufferPool, FrontendConfig config, boolean isHttps) {
+		HttpParser httpParser = HttpParserFactory.createParser(bufferPool);
+		Http2Parser http2Parser = Http2ParserFactory.createParser(bufferPool);
+
+		// The http11layer can be stateless but the http2 engine needs to keep track of
+		// state so we need a new http2engine for every connection.
+		Http11Layer http11Layer = new Http11Layer(httpParser, requestListener, config, isHttps);
+		Http11DataListener http11DataListener = new Http11DataListener(http11Layer);
+
+		dataListener = new ServerDataListener(requestListener, http11DataListener, httpParser);
+	}
+	
+	public void init(AsyncServer asyncServer) {
+		this.server = asyncServer;
+	}
+	
+	@Override
+	public CompletableFuture<Void> close() {
+		return server.closeServerChannel();
+	}
+	
+	AsyncDataListener getDataListener() {
+		return dataListener;
+	}
+
+	@Override
+	public void enableOverloadMode(ByteBuffer overloadResponse) {
+		server.enableOverloadMode(overloadResponse);
+	}
+
+	@Override
+	public void disableOverloadMode() {
+		server.disableOverloadMode();
+	}
+
+	@Override
+	public TCPServerChannel getUnderlyingChannel() {
+		return server.getUnderlyingChannel();
+	}
+
+}

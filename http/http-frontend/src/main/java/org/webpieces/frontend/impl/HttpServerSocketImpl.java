@@ -1,51 +1,41 @@
 package org.webpieces.frontend.impl;
 
-import java.nio.ByteBuffer;
+import org.webpieces.frontend.api.HttpServerSocket;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.handlers.DataListener;
+
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.handlers.AsyncDataListener;
-import org.webpieces.asyncserver.api.AsyncServer;
-import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpServerSocket;
-import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public class HttpServerSocketImpl implements HttpServerSocket {
+    private Channel channel;
+    private DataListener dataListener;
+    private ResponseSender responseSender;
 
-	private AsyncServer server;
-	private AsyncDataListener dataListener;
+    public HttpServerSocketImpl(Channel channel, DataListener dataListener, ResponseSender responseSender) {
+        this.channel = channel;
+        this.dataListener = dataListener;
+        this.responseSender = responseSender;
+    }
 
-	public HttpServerSocketImpl(TimedListener requestListener, HttpParser parser, FrontendConfig config, boolean isHttps) {
-		Http11Layer http11Layer = new Http11Layer(parser, requestListener, config, isHttps);
-		dataListener = new Http11DataListener(http11Layer);
-	}
-	
-	public void init(AsyncServer asyncServer) {
-		this.server = asyncServer;
-	}
-	
-	@Override
-	public CompletableFuture<Void> closeSocket() {
-		return server.closeServerChannel();
-	}
-	
-	AsyncDataListener getDataListener() {
-		return dataListener;
-	}
+    @Override
+    public CompletableFuture<Void> closeSocket() {
+        return null;
+    }
 
-	@Override
-	public void enableOverloadMode(ByteBuffer overloadResponse) {
-		server.enableOverloadMode(overloadResponse);
-	}
+    @Override
+    public Channel getUnderlyingChannel() {
+        return channel;
+    }
 
-	@Override
-	public void disableOverloadMode() {
-		server.disableOverloadMode();
-	}
+    @Override
+    public ResponseSender getResponseSender() {
+        return responseSender;
+    }
 
-	@Override
-	public TCPServerChannel getUnderlyingChannel() {
-		return server.getUnderlyingChannel();
-	}
-
+    @Override
+    public DataListener getDataListener() {
+        return dataListener;
+    }
 }

@@ -1,7 +1,7 @@
 package org.webpieces.webserver.test;
 
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpServerSocket;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -9,14 +9,14 @@ import org.webpieces.nio.api.SSLEngineFactory;
 public class MockHttpFrontendMgr implements HttpFrontendManager {
 
 	@Override
-	public HttpServerSocket createHttpServer(FrontendConfig config, RequestListener listener) {
-		return new MockHttpServerSocket();
+	public HttpServer createHttpServer(FrontendConfig config, RequestListener listener) {
+		return new MockHttpServer();
 	}
 
 	@Override
-	public HttpServerSocket createHttpsServer(FrontendConfig config, RequestListener listener,
-                                              SSLEngineFactory factory) {
-		return new MockHttpServerSocket();
+	public HttpServer createHttpsServer(FrontendConfig config, RequestListener listener,
+                                        SSLEngineFactory factory) {
+		return new MockHttpServer();
 	}
 
 }

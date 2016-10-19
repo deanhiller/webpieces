@@ -3,6 +3,7 @@ package org.webpieces.frontend.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
@@ -15,7 +16,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 
-class Http11DataListener implements AsyncDataListener {
+class Http11DataListener implements DataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Http11DataListener.class);
 	
@@ -23,11 +24,6 @@ class Http11DataListener implements AsyncDataListener {
 	
 	Http11DataListener(Http11Layer nextStage) {
 		this.processor = nextStage;
-	}
-
-	@Override
-	public void connectionOpened(TCPChannel channel, boolean isReadyForWrites) {
-		processor.openedConnection(channel, isReadyForWrites);
 	}
 	
 	@Override
@@ -45,7 +41,7 @@ class Http11DataListener implements AsyncDataListener {
 			sendBadResponse(channel, exc);
 		} catch(Throwable e) {
 			HttpServerException exc = new HttpServerException("There was a bug in the server, please see the server logs", KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, e);
-			log.error("Exeption processing", exc);
+			log.error("Exception processing", exc);
 			SupressedExceptionLog.log(exc);
 			sendBadResponse(channel, exc);
 		}

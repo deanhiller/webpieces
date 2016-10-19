@@ -155,7 +155,7 @@ public class StaticFileReader {
 
 	private Boolean handleClose(RequestInfo info, Boolean s, Throwable exc) {
 
-		//now we closeSocket if needed
+		//now we close if needed
 		try {
 			channelCloser.closeIfNeeded(info.getRequest(), info.getResponseSender());
 		} catch(Throwable e) {

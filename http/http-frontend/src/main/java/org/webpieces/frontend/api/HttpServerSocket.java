@@ -1,19 +1,11 @@
 package org.webpieces.frontend.api;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-
 import org.webpieces.httpcommon.api.HttpSocket;
-import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.nio.api.handlers.DataListener;
 
 public interface HttpServerSocket extends HttpSocket {
+    ResponseSender getResponseSender();
 
-	CompletableFuture<Void> closeSocket();
-
-	void enableOverloadMode(ByteBuffer overloadResponse);
-
-	void disableOverloadMode();
-
-	TCPServerChannel getUnderlyingChannel();
-
+    DataListener getDataListener();
 }

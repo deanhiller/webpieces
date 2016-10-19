@@ -11,9 +11,8 @@ import javax.inject.Provider;
 
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.frontend.api.HttpServerSocket;
+import org.webpieces.httpcommon.api.*;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.AcceptMediaType;
@@ -22,7 +21,6 @@ import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -271,7 +269,7 @@ public class RequestReceiver implements RequestListener {
 	}
 
 	@Override
-	public void incomingError(HttpException exc, ResponseSender responseSender) {
+	public void incomingError(HttpException exc, HttpSocket httpSocket) {
 		//If status is a 4xx, send it back to the client with just raw information
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
@@ -281,17 +279,17 @@ public class RequestReceiver implements RequestListener {
 		HttpRequest req = new HttpRequest();
 		RouterRequest routerReq = new RouterRequest();
 		routerReq.orginalRequest = req;
-		proxyResp.init(routerReq, responseSender, bufferPool);
+		proxyResp.init(routerReq, ((HttpServerSocket) httpSocket).getResponseSender(), bufferPool);
 		proxyResp.sendFailure(exc);
 	}
 
 	@Override
-	public void clientOpenChannel(ResponseSender responseSender) {
+	public void clientOpenChannel(HttpSocket HttpSocket) {
 		log.info("browser client open channel");
 	}
 	
 	@Override
-	public void clientClosedChannel(ResponseSender responseSender) {
+	public void clientClosedChannel(HttpSocket httpSocket) {
 		log.info("browser client closed channel");
 	}
 

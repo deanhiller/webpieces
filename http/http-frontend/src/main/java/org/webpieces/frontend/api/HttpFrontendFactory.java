@@ -29,16 +29,14 @@ public abstract class HttpFrontendFactory {
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, executor);
-		
-		HttpParser parser = HttpParserFactory.createParser(pool);
-		
+
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		
-		return createFrontEnd(svrMgr, timeout, parser);
+		return createFrontEnd(svrMgr, timeout, pool);
 	}
 	
-	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, HttpParser parser) {
-		return new FrontEndServerManagerImpl(svrManager, svc, parser);
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool) {
+		return new FrontEndServerManagerImpl(svrManager, svc, bufferPool);
 	}
 	
 }

@@ -8,8 +8,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.frontend.api.HttpServerSocket;
+import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
@@ -27,7 +31,7 @@ class TimedListener implements RequestListener {
 	private ScheduledExecutorService timer;
 	private RequestListener listener;
 	private FrontendConfig config;
-	private Map<ResponseSender, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
+	private Map<HttpSocket, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
 
 	TimedListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
 		this.timer = timer;
@@ -35,15 +39,19 @@ class TimedListener implements RequestListener {
 		this.config = config;
 	}
 
+    private HttpServerSocket getHttpServerSocketForChannel(Channel channel) {
+        ChannelSession session = channel.getSession();
+        return (HttpServerSocket) session.get("webpieces.httpServerSocket");
+    }
 
 	@Override
     public void incomingRequest(HttpRequest req, RequestId id, boolean isComplete, ResponseSender responseSender) {
-		releaseTimeout(responseSender);
+		releaseTimeout(getHttpServerSocketForChannel(responseSender.getUnderlyingChannel()));
 		listener.incomingRequest(req, id, isComplete, responseSender);
 	}
 
-	private void releaseTimeout(ResponseSender responseSender) {
-		ScheduledFuture<?> scheduledFuture = socketToTimeout.remove(responseSender);
+	private void releaseTimeout(HttpSocket httpSocket) {
+		ScheduledFuture<?> scheduledFuture = socketToTimeout.remove(httpSocket);
 		if(scheduledFuture != null) {
 			scheduledFuture.cancel(false);
 		}
@@ -55,66 +63,65 @@ class TimedListener implements RequestListener {
     }
 
     @Override
-    public void clientOpenChannel(ResponseSender responseSender) {
-        // This is bypassed by openedConnection
-        throw new UnsupportedOperationException();
+    public void clientOpenChannel(HttpSocket HttpSocket) {
+        listener.clientOpenChannel(HttpSocket);
     }
 
     @Override
-    public void incomingError(HttpException exc, ResponseSender responseSender) {
-		listener.incomingError(exc, responseSender);
+    public void incomingError(HttpException exc, HttpSocket httpSocket) {
+		listener.incomingError(exc, httpSocket);
 		
-		//safety measure preventing leak on quick connect/closeSocket clients
-		releaseTimeout(responseSender);
+		//safety measure preventing leak on quick connect/close clients
+		releaseTimeout(httpSocket);
 		
-		log.info("closing channel="+responseSender+" due to response code="+exc.getStatusCode());
-		responseSender.close();
-		listener.clientClosedChannel(responseSender);
+		log.info("closing socket="+httpSocket+" due to response code="+exc.getStatusCode());
+        ((HttpServerSocket) httpSocket).getResponseSender().close();
+		listener.clientClosedChannel(httpSocket);
 	}
 
-	void openedConnection(ResponseSender responseSender, boolean isReadyForWrites) {
-		if(!responseSender.getUnderlyingChannel().isSslChannel()) {
-			scheduleTimeout(responseSender);
-			listener.clientOpenChannel(responseSender);
+	void openedConnection(HttpServerSocket httpServerSocket, boolean isReadyForWrites) {
+		if(!httpServerSocket.getUnderlyingChannel().isSslChannel()) {
+			scheduleTimeout(httpServerSocket);
+            clientOpenChannel(httpServerSocket);
 		} else if(isReadyForWrites) {
-			//if ready for writes, the channel is encrypted and fully open
-			listener.clientOpenChannel(responseSender);
+			//if ready for writes, the tcpChannel is encrypted and fully open
+			clientOpenChannel(httpServerSocket);
 		} else { //if not ready for writes, the socket is open but encryption handshake is not been done yet
-			scheduleTimeout(responseSender);
+			scheduleTimeout(httpServerSocket);
 		}
 	}
 
-	private void scheduleTimeout(ResponseSender responseSender) {
+	private void scheduleTimeout(HttpSocket HttpSocket) {
 		if(timer == null || config.maxConnectToRequestTimeoutMs == null)
 			return;
 		
-		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(responseSender), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
+		ScheduledFuture<?> future = timer.schedule(new TimeoutOnRequest(HttpSocket), config.maxConnectToRequestTimeoutMs, TimeUnit.MILLISECONDS);
 		//lifecycle of the entry in the Map is until the TimeoutOnRequest runs OR
 		//until incomingRequest is invoked as we have a request OR
 		//client closes the socket before sending http request and before the timeout
-		socketToTimeout.put(responseSender, future);
+		socketToTimeout.put(HttpSocket, future);
 	}
 
 	private class TimeoutOnRequest extends SafeRunnable {
 		
-		private ResponseSender channel;
+		private HttpSocket httpSocket;
 
-		TimeoutOnRequest(ResponseSender channel) {
-			this.channel = channel;
+		TimeoutOnRequest(HttpSocket httpSocket) {
+			this.httpSocket = httpSocket;
 		}
 
 		@Override
 		public void runImpl() {
-			socketToTimeout.remove(channel);
-			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket. channel="+channel);
+			socketToTimeout.remove(httpSocket);
+			log.info("timing out a client that did not send a request in time="+config.maxConnectToRequestTimeoutMs+"ms so we are closing that client's socket. httpSocket="+ httpSocket);
 			
 			HttpClientException exc = new HttpClientException("timing out a client who did not send a request in time", KnownStatusCode.HTTP_408_REQUEST_TIMEOUT);
-			incomingError(exc, channel);
+			incomingError(exc, httpSocket);
 		}
 	}
 	
-	public void clientClosedChannel(ResponseSender responseSender) {
-		listener.clientClosedChannel(responseSender);
+	public void clientClosedChannel(HttpSocket httpSocket) {
+		listener.clientClosedChannel(httpSocket);
 	}
 
 	public void applyWriteBackPressure(ResponseSender responseSender) {

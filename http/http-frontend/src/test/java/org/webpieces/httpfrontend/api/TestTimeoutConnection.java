@@ -40,8 +40,7 @@ public class TestTimeoutConnection {
 		mockChanMgr.addTcpSvrChannel(mockChannel);
 		AsyncServerManager svrManager = AsyncServerMgrFactory.createAsyncServer(mockChanMgr);
 		BufferCreationPool pool = new BufferCreationPool();
-		HttpParser parser = HttpParserFactory.createParser(pool);
-		mgr = HttpFrontendFactory.createFrontEnd(svrManager, timer, parser);
+		mgr = HttpFrontendFactory.createFrontEnd(svrManager, timer, pool);
 	}
 	
 	/**

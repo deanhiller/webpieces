@@ -1,6 +1,7 @@
 package org.webpieces.httpfrontend.api;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
@@ -23,15 +24,15 @@ public class MockRequestListener implements RequestListener {
 	}
 
 	@Override
-	public void incomingError(HttpException exc, ResponseSender channel) {
+	public void incomingError(HttpException exc, HttpSocket channel) {
 	}
 
 	@Override
-	public void clientOpenChannel(ResponseSender responseSender) {
+	public void clientOpenChannel(HttpSocket HttpSocket) {
 	}
 	
 	@Override
-	public void clientClosedChannel(ResponseSender responseSender) {
+	public void clientClosedChannel(HttpSocket httpSocket) {
 		isClosed = true;
 	}
 

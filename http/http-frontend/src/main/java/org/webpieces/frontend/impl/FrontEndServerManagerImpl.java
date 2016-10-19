@@ -2,12 +2,13 @@ package org.webpieces.frontend.impl;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpServerSocket;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.HttpParser;
@@ -17,21 +18,21 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
 	private static final Logger log = LoggerFactory.getLogger(FrontEndServerManagerImpl.class);
 	private AsyncServerManager svrManager;
-	private HttpParser parser;
+	private BufferPool bufferPool;
 	private ScheduledExecutorService timer;
 
-	public FrontEndServerManagerImpl(AsyncServerManager svrManager, ScheduledExecutorService svc, HttpParser parser) {
+	public FrontEndServerManagerImpl(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool) {
 		this.timer = svc;
 		this.svrManager = svrManager;
-		this.parser = parser;
+		this.bufferPool = bufferPool;
 	}
 
 	@Override
-	public HttpServerSocket createHttpServer(FrontendConfig config, RequestListener listener) {
+	public HttpServer createHttpServer(FrontendConfig config, RequestListener listener) {
 		preconditionCheck(config);
 		
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpServerSocketImpl frontend = new HttpServerSocketImpl(timed, parser, config, false);
+		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config, false);
 		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
@@ -45,11 +46,11 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpServerSocket createHttpsServer(FrontendConfig config, RequestListener listener,
-                                              SSLEngineFactory factory) {
+	public HttpServer createHttpsServer(FrontendConfig config, RequestListener listener,
+                                        SSLEngineFactory factory) {
 		preconditionCheck(config);
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpServerSocketImpl frontend = new HttpServerSocketImpl(timed, parser, config, true);
+		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config, true);
 		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
