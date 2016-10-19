@@ -25,14 +25,16 @@ public class HttpServerImpl implements HttpServer {
 		Http2Parser http2Parser = Http2ParserFactory.createParser(bufferPool);
 
 		// The http11layer can be stateless but the http2 engine needs to keep track of
-		// state so we need a new http2engine for every connection.
+		// state so we need a new http2engine for every connection.. So we can create the http11
+		// stuff here but we have to create http2 stuff in the serverdatalistener on
+		// every new connection.
 		Http11Layer http11Layer = new Http11Layer(httpParser, requestListener, config, isHttps);
 		Http11DataListener http11DataListener = new Http11DataListener(http11Layer);
 
-		dataListener = new ServerDataListener(requestListener, http11DataListener, httpParser);
+		dataListener = new ServerDataListener(requestListener, http11DataListener, httpParser, http2Parser);
 	}
 	
-	public void init(AsyncServer asyncServer) {
+	void init(AsyncServer asyncServer) {
 		this.server = asyncServer;
 	}
 	

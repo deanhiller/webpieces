@@ -47,7 +47,7 @@ public class Http2EngineImpl implements Http2Engine {
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private static String prefaceHexString = "505249202a20485454502f322e300d0a0d0a534d0d0a0d0a";
 
-    private TCPChannel channel;
+    private Channel channel;
     private DataListener dataListener;
     private Http2Parser http2Parser;
     private InetSocketAddress addr;
@@ -94,11 +94,22 @@ public class Http2EngineImpl implements Http2Engine {
 
     // Server only
     private RequestListener requestListener;
-    private ResponseSender responseSender;
+    private ResponseSender responseSender = new Http2ResponseSender(this);
 
 
+    // Server only
+    @Override
+    public ResponseSender getResponseSender() {
+        return responseSender;
+    }
 
-    public Http2EngineImpl(Http2Parser http2Parser, TCPChannel channel, InetSocketAddress addr, HttpSide side) {
+    // Server only
+    @Override
+    public void setRequestListener(RequestListener requestListener) {
+        this.requestListener = requestListener;
+    }
+
+    public Http2EngineImpl(Http2Parser http2Parser, Channel channel, InetSocketAddress addr, HttpSide side) {
         this.http2Parser = http2Parser;
         this.channel = channel;
         this.addr = addr;

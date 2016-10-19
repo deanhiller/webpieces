@@ -1,7 +1,6 @@
-package org.webpieces.frontend.impl;
+package org.webpieces.httpcommon.impl;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpcommon.api.Http2Engine;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
@@ -16,6 +15,10 @@ import java.util.concurrent.CompletableFuture;
 public class Http2ResponseSender implements ResponseSender {
     // TODO: maybe we should just make the Http2ServerEngine implement ResponseSender?
     private Http2Engine http2Engine;
+
+    public Http2ResponseSender(Http2Engine http2Engine) {
+        this.http2Engine = http2Engine;
+    }
 
     @Override
     public CompletableFuture<Void> close() {

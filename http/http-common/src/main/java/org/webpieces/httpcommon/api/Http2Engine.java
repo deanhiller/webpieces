@@ -35,7 +35,8 @@ public interface Http2Engine {
     // that this 'push' response is associated with.
     CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete);
     CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isComplete);
-
+    ResponseSender getResponseSender();
+    void setRequestListener(RequestListener requestListener);
 
 
 }
