@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.*;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE;
@@ -44,6 +45,7 @@ import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 public class Http2EngineImpl implements Http2Engine {
     private static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
     private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    private static String prefaceHexString = "505249202a20485454502f322e300d0a0d0a534d0d0a0d0a";
 
     private TCPChannel channel;
     private DataListener dataListener;
@@ -94,6 +96,8 @@ public class Http2EngineImpl implements Http2Engine {
     private RequestListener requestListener;
     private ResponseSender responseSender;
 
+
+
     public Http2EngineImpl(Http2Parser http2Parser, TCPChannel channel, InetSocketAddress addr, HttpSide side) {
         this.http2Parser = http2Parser;
         this.channel = channel;
@@ -129,11 +133,14 @@ public class Http2EngineImpl implements Http2Engine {
         this.dataListener = new Http2DataListener();
     }
 
+    public Channel getUnderlyingChannel() {
+        return channel;
+    }
+
     // Client only
     public void sendHttp2Preface() {
-        String prefaceString = "505249202a20485454502f322e300d0a0d0a534d0d0a0d0a";
         log.info("sending preface");
-        channel.write(ByteBuffer.wrap(DatatypeConverter.parseHexBinary(prefaceString)));
+        channel.write(ByteBuffer.wrap(DatatypeConverter.parseHexBinary(prefaceHexString)));
         Http2Settings settingsFrame = new Http2Settings();
 
         settingsFrame.setSettings(localPreferredSettings);
@@ -192,14 +199,7 @@ public class Http2EngineImpl implements Http2Engine {
     @Override
     public CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete) {
         Stream stream = activeStreams.get(id.getValue());
-        switch(stream.getStatus()) {
-            case OPEN:
-            case HALF_CLOSED_REMOTE:
-                return sendDataFrames(data, isComplete, stream);
-            default:
-                throw new ClientError(
-                        String.format("can't send data on a stream in state %s", stream.getStatus().toString()));
-        }
+        return sendDataFrames(data, isComplete, stream);
     }
 
     private LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
@@ -319,40 +319,45 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
     private CompletableFuture<Void> sendDataFrames(DataWrapper body, boolean isComplete, Stream stream) {
-        Http2Data newFrame = new Http2Data();
-        newFrame.setStreamId(stream.getStreamId());
+        switch(stream.getStatus()) {
+            case OPEN:
+            case HALF_CLOSED_REMOTE:
+                Http2Data newFrame = new Http2Data();
+                newFrame.setStreamId(stream.getStreamId());
 
-        // writes only one frame at a time.
-        if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
-            // the body fits within one frame so send an endstream with this frame
-            newFrame.setData(body);
-            if(isComplete)
-                newFrame.setEndStream(true);
+                // writes only one frame at a time.
+                if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
+                    // the body fits within one frame so send an endstream with this frame
+                    newFrame.setData(body);
+                    if(isComplete)
+                        newFrame.setEndStream(true);
 
-            log.info("sending final data frame: (but might not complete the request)" + newFrame);
-            return writeDataFrame(newFrame).thenAccept(
-                    channel -> {
-                        if (isComplete)
-                            stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
-                    }
-            );
-        } else {
-            // to big, split it, send, and recurse.
-            List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
-            newFrame.setData(split.get(0));
-            log.info("sending non-final data frame: " + newFrame);
-            return writeDataFrame(newFrame).thenCompose(
-                    channel ->  sendDataFrames(split.get(1), isComplete, stream)
-            );
+                    log.info("sending final data frame: (but might not complete the request)" + newFrame);
+                    return writeDataFrame(newFrame).thenAccept(
+                            channel -> {
+                                if (isComplete)
+                                    stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
+                            }
+                    );
+                } else {
+                    // to big, split it, send, and recurse.
+                    List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
+                    newFrame.setData(split.get(0));
+                    log.info("sending non-final data frame: " + newFrame);
+                    return writeDataFrame(newFrame).thenCompose(
+                            channel ->  sendDataFrames(split.get(1), isComplete, stream)
+                    );
+                }
+            default:
+                throw new ClientError(
+                        String.format("can't send data on a stream in state %s", stream.getStatus().toString()));
         }
+
     }
 
-    // we never send endstream on the header frame to make our life easier. we always just send
-    // endstream on a data frame.
-    private CompletableFuture<Channel> sendHeaderFrames(LinkedList<HasHeaderFragment.Header> headerList, int streamId, Stream stream) {
-
+    private void updateMaxHeaderTableSize(ByteArrayOutputStream out) {
         // If the header table size needs update, we pre-fill the buffer with the update notification
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
         try {
             if (maxHeaderTableSizeNeedsUpdate.get()) {
                 // If we need to update the max header table size
@@ -368,17 +373,48 @@ public class Http2EngineImpl implements Http2Engine {
             // TODO: Remove debugdata when not in developer mode
             throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.wrapByteArray(e.toString().getBytes()));
         }
+    }
+    private CompletableFuture<Void> sendPushPromiseFrames(LinkedList<HasHeaderFragment.Header> headerList, Stream stream, Stream newStream) {
+        int streamId = stream.getStreamId();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        updateMaxHeaderTableSize(out);
 
-        // if firstFrame == true then create Http2Headers, otherwise create Http2Continuation
+        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, PUSH_PROMISE, newStream.getStreamId(), remoteSettings, encoder, out);
+        // Set the streamid in the first frame to this streamid
+        frameList.get(0).setStreamId(streamId);
+
+        // Send all the frames at once
+        log.info("sending push promise frames: " + frameList);
+        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenAccept(
+                channel -> newStream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL)
+        );
+
+    }
+    // we never send endstream on the header frame to make our life easier. we always just send
+    // endstream on a data frame.
+    private CompletableFuture<Void> sendHeaderFrames(LinkedList<HasHeaderFragment.Header> headerList, Stream stream) {
+        // TODO: check the status of the stream to ensure we can send HEADER frames
+
+        int streamId = stream.getStreamId();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        updateMaxHeaderTableSize(out);
+
         List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
 
         // Send all the frames at once
         log.info("sending header frames: " + frameList);
-        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenApply(
-                channel ->
-                {
-                    stream.setStatus(Stream.StreamStatus.OPEN);
-                    return channel;
+        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenAccept(
+                channel -> {
+                    switch (stream.getStatus()) {
+                        case IDLE:
+                            stream.setStatus(Stream.StreamStatus.OPEN);
+                            break;
+                        case HALF_CLOSED_LOCAL:
+                            stream.setStatus(Stream.StreamStatus.HALF_CLOSED_REMOTE);
+                            break;
+                        default:
+                            throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper()); //"should not be sending headers on a stream not open or half closed remote"
+                    }
                 }
         );
     }
@@ -467,16 +503,85 @@ public class Http2EngineImpl implements Http2Engine {
         initializeFlowControl(thisStreamId);
         activeStreams.put(thisStreamId, newStream);
         LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
-        return sendHeaderFrames(headers, thisStreamId, newStream)
+        return sendHeaderFrames(headers, newStream)
                 .thenCompose(
                         channel -> sendDataFrames(request.getBodyNonNull(), isComplete, newStream))
                 .thenApply(channel -> new RequestId(thisStreamId));
 
     }
 
+    private LinkedList<HasHeaderFragment.Header> responseToHeaders(HttpResponse response) {
+        LinkedList<HasHeaderFragment.Header> headers = new LinkedList<>();
+        headers.add(new HasHeaderFragment.Header(":status", response.getStatusLine().getStatus().getCode().toString()));
+        for(Header header: response.getHeaders()) {
+            headers.add(new HasHeaderFragment.Header(header.getName(), header.getValue()));
+        }
+        return headers;
+    }
+
+    // Server only
+    @Override
+    public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
+        Stream responseStream = activeStreams.get(requestId.getValue());
+        if(responseStream == null) {
+            // TODO: use the right exception here
+            throw new RuntimeException("invalid requestid: " + requestId);
+        }
+        // If we already have a response stored in the responseStream then we've already sent a response for this
+        // stream and we need to send a push promise and create a new stream
+        if(responseStream.getResponse() != null) { // If push promise, do some stuff (send PUSH_PROMISE frames, set up the new stream id, etc)
+            if(remoteSettings.get(SETTINGS_ENABLE_PUSH) == 0) {
+               // Enable push is not permitted, so ignore this response and return a -1 response id
+                log.info("push promise not permitted by client, ignoring pushed response");
+                return CompletableFuture.completedFuture(new ResponseId(0));
+            }
+            if(remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS) != null &&
+                    countOpenLocalOriginatedStreams() > remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+                // Too many open streams already, so going to drop this push promise
+                log.info("max concurrent streams exceeded, ignoring pushed response");
+                return CompletableFuture.completedFuture(new ResponseId(0));
+            }
+            Stream newStream = new Stream();
+            newStream.setStreamId(getAndIncrementStreamId());
+            newStream.setResponse(response);
+            newStream.setRequest(request);
+
+            return sendPushPromiseFrames(requestToHeaders(request), responseStream, newStream)
+                    .thenCompose(v -> actuallySendResponse(response, newStream, isComplete));
+        }
+        else {
+            responseStream.setResponse(response);
+            return actuallySendResponse(response, responseStream, isComplete);
+        }
+
+    }
+
+    private CompletableFuture<ResponseId> actuallySendResponse(HttpResponse response, Stream stream, boolean isComplete) {
+        return sendHeaderFrames(responseToHeaders(response), stream)
+                .thenAccept(v -> sendDataFrames(response.getBodyNonNull(), isComplete, stream))
+                .thenApply(v -> new ResponseId(stream.getStreamId()));
+    }
+
+    // Server only
+    @Override
+    public CompletableFuture<Void> sendData(DataWrapper data, ResponseId responseId, boolean isComplete) {
+        // If the responseid is 0 then we had just rejected the sendresponse because push promise is not permitted
+        if(responseId.getValue() == 0) {
+            log.info("push promise will be rejected by client, ignoring pushed data");
+            return CompletableFuture.completedFuture(null);
+        }
+        Stream responseStream = activeStreams.get(responseId.getValue());
+        if(responseStream == null) {
+            // TODO: use the right exception here
+            throw new RuntimeException("invalid responseid: " + responseId);
+        }
+        return sendDataFrames(data, isComplete, responseStream);
+    }
+
     private class Http2DataListener implements DataListener {
         private DataWrapper oldData = http2Parser.prepareToParse();
         private AtomicBoolean gotSettings = new AtomicBoolean(false);
+        private AtomicBoolean gotPreface = new AtomicBoolean(false);
 
         private void receivedEndStream(Stream stream) {
             // Make sure status can accept ES
@@ -533,8 +638,11 @@ public class Http2EngineImpl implements Http2Engine {
                     boolean isComplete = frame.isEndStream();
                     int payloadLength = http2Parser.getFrameLength(frame);
                     decrementIncomingWindow(frame.getStreamId(), payloadLength);
-                    stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), isComplete).thenAccept(
-                            length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
+                    if(side == CLIENT)
+                        stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), isComplete).thenAccept(
+                                length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
+                    else
+                        requestListener.incomingData(frame.getData(), stream.getRequestId(), isComplete, responseSender);
                     if(isComplete)
                         receivedEndStream(stream);
                     break;
@@ -653,7 +761,7 @@ public class Http2EngineImpl implements Http2Engine {
                 } else {
                     HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), stream);
                     stream.setRequest(request);
-                    requestListener.incomingRequest(request, stream.getRequestId(), false, responseSender);
+                    requestListener.incomingRequest(request, stream.getRequestId(), isComplete, responseSender);
                 }
 
                 if (isComplete)
@@ -872,24 +980,43 @@ public class Http2EngineImpl implements Http2Engine {
         @Override
         public void incomingData(Channel channel, ByteBuffer b) {
             DataWrapper newData = wrapperGen.wrapByteBuffer(b);
-            ParserResult parserResult = http2Parser.parse(oldData, newData, decoder);
+            try {
+                // TODO: turn the preface into a frame type.
+                // First check to make sure we got our preface
+                if(side == SERVER && !gotPreface.get()) {
+                    // check to make sure we got the preface.
+                    DataWrapper combined = wrapperGen.chainDataWrappers(oldData, newData);
+                    int prefaceLength = prefaceHexString.length()/2;
+                    if(combined.getReadableSize() >= prefaceLength) {
+                        List<? extends DataWrapper> split = wrapperGen.split(combined, prefaceLength);
+                        if(Arrays.equals(split.get(0).createByteArray(), (DatatypeConverter.parseHexBinary(prefaceHexString)))) {
+                            gotPreface.set(true);
+                            oldData = split.get(1);
+                        } else {
+                            throw new GoAwayError(0, Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                        }
+                    } else {
+                        oldData = combined;
+                    }
+                } else { // Either we got the preface or we don't need it
+                    ParserResult parserResult = http2Parser.parse(oldData, newData, decoder);
 
-            for(Http2Frame frame: parserResult.getParsedFrames()) {
-                log.info("got frame="+frame);
-                try {
-                    handleFrame(frame);
-                } catch (Http2Error e) {
-                    channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrame()).createByteArray()));
-                    if(RstStreamError.class.isInstance(e)) {
-                        // Mark the stream closed
-                        activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(Stream.StreamStatus.CLOSED);
+                    for (Http2Frame frame : parserResult.getParsedFrames()) {
+                        log.info("got frame=" + frame);
+                        handleFrame(frame);
                     }
-                    if(GoAwayError.class.isInstance(e)) {
-                        // TODO: Shut this connection down
-                    }
+                    oldData = parserResult.getMoreData();
+                }
+            } catch (Http2Error e) {
+                channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrame()).createByteArray()));
+                if(RstStreamError.class.isInstance(e)) {
+                    // Mark the stream closed
+                    activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(Stream.StreamStatus.CLOSED);
+                }
+                if(GoAwayError.class.isInstance(e)) {
+                    // TODO: Shut this connection down
                 }
             }
-            oldData = parserResult.getMoreData();
         }
 
         @Override

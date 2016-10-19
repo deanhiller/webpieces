@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
@@ -33,7 +34,7 @@ class Http11ResponseSender implements ResponseSender {
 	}
 	
 	@Override
-	public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, boolean isComplete) {
+	public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
 		ByteBuffer data = parser.marshalToByteBuffer(response);
 		ResponseId id = getNextResponseId();
 		return channel.write(data).thenApply(c -> id);

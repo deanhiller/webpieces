@@ -15,7 +15,7 @@ public interface ResponseSender {
     // When starting a response return a responseid
 	// (which could be the streamid) so that we can match sendData calls to the original request
     // This is not used for http/1.1
-	CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, boolean isComplete);
+	CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete);
 
 	CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isLastData);
 
