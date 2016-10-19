@@ -23,6 +23,7 @@ public class ServerDataListener implements AsyncDataListener {
                     channel,
                     http11DataListener,
                     new Http11ResponseSender(channel, httpParser));
+            session.put("webpieces.httpServerSocket", httpServerSocket);
         }
         return httpServerSocket;
     }

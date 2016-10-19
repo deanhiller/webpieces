@@ -28,7 +28,7 @@ public interface ConnectionListener {
 	 * We do this, because in multithread mode, you are in a thread pool, we only want to register for reads on the socket 
 	 * once we have this listener.  Without it, we don't want to read data with no where to send that data 
 	 */
-	public CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites);
+	CompletableFuture<DataListener> connected(Channel channel, boolean isReadyForWrites);
 	
 	/**
 	 * Unfortunately, channel may be the TCPServerChannel if accepting and failed or
@@ -36,5 +36,5 @@ public interface ConnectionListener {
 	 * UDPChannel every time.
 	 * 
 	 */
-	public void failed(RegisterableChannel channel, Throwable e);
+	void failed(RegisterableChannel channel, Throwable e);
 }
