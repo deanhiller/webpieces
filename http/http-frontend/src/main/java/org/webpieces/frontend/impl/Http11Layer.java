@@ -65,7 +65,7 @@ public class Http11Layer {
                         settingsFrame = ByteBuffer.wrap(DatatypeConverter.parseBase64Binary(header.getValue()));
                     }
                 }
-                if (upgradeHeader.toLowerCase().equals("h2c")) {
+                if (upgradeHeader != null && upgradeHeader.toLowerCase().equals("h2c")) {
                     final Optional<ByteBuffer> maybeSettingsFrame = Optional.of(settingsFrame);
 
                     // Create the upgrade response
@@ -78,7 +78,7 @@ public class Http11Layer {
                     response.addHeader(new Header("Connection", "Upgrade"));
                     response.addHeader(new Header("Upgrade", "h2c"));
 
-                    // Send the response and then switch to HTTP2
+                    // Send the upgrade accept response and then switch to HTTP2
                     getResponseSenderForChannel(channel).sendResponse(response, req, new RequestId(0), true).thenAccept(
                             responseId -> {
                                 // Switch the socket to using HTTP2
