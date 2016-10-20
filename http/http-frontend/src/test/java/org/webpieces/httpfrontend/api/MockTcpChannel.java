@@ -3,6 +3,7 @@ package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
@@ -15,6 +16,7 @@ public class MockTcpChannel implements TCPChannel {
 
 	private boolean isClosed;
 	private ChannelSessionImpl session = new ChannelSessionImpl();
+	private LinkedList<ByteBuffer> writeLog = new LinkedList<>();
 
 	@Override
 	public void setReuseAddress(boolean b) {
@@ -67,7 +69,8 @@ public class MockTcpChannel implements TCPChannel {
 
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {
-		return null;
+		writeLog.add(b);
+		return CompletableFuture.completedFuture(this);
 	}
 
 	@Override
@@ -140,7 +143,12 @@ public class MockTcpChannel implements TCPChannel {
 		return false;
 	}
 
-
-	
-
+	public ByteBuffer getWriteLog() {
+		ByteBuffer fullLog = ByteBuffer.allocate(writeLog.stream().map(b -> b.limit() - b.position()).reduce(0, (a, b) -> a+b));
+		for(ByteBuffer b: writeLog) {
+			fullLog.put(b);
+		}
+		fullLog.flip();
+		return fullLog;
+	}
 }

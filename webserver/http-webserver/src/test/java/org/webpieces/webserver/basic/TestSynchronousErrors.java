@@ -11,7 +11,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.webserver.Requests;
+import org.webpieces.httpcommon.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;

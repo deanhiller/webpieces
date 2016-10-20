@@ -12,7 +12,7 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.webserver.Requests;
+import org.webpieces.httpcommon.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;

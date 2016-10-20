@@ -16,7 +16,7 @@ import org.webpieces.mock.ParametersPassedIn;
 
 public class MockTimer extends MockSuperclass implements ScheduledExecutorService {
 
-	private static enum Method implements MethodEnum {
+	private enum Method implements MethodEnum {
 		SCHEDULE;
 	}
 	

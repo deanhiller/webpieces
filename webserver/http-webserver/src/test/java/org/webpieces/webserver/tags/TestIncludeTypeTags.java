@@ -12,7 +12,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.Requests;
+import org.webpieces.httpcommon.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
 import org.webpieces.webserver.test.FullResponse;

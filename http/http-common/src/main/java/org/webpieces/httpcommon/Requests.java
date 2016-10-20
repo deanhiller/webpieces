@@ -1,4 +1,4 @@
-package org.webpieces.webserver;
+package org.webpieces.httpcommon;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

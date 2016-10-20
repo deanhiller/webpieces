@@ -58,15 +58,15 @@ public class HttpParserImpl implements HttpParser {
 	}
 	
 	@Override
-	public byte[] marshalToBytes(HttpPayload request) {
-		if(request.getMessageType() == HttpMessageType.CHUNK || request.getMessageType() == HttpMessageType.LAST_CHUNK) {
-			return chunkedBytes((HttpChunk)request);
+	public byte[] marshalToBytes(HttpPayload payload) {
+		if(payload.getMessageType() == HttpMessageType.CHUNK || payload.getMessageType() == HttpMessageType.LAST_CHUNK) {
+			return chunkedBytes((HttpChunk)payload);
 		}
 		
-		HttpMessage msg = (HttpMessage) request;
-		String result = marshalHeaders(request);
+		HttpMessage msg = (HttpMessage) payload;
+		String result = marshalHeaders(payload);
 		
-		DataWrapper body = request.getBody();
+		DataWrapper body = payload.getBody();
 		Header header = msg.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		if(header != null && !header.getValue().equals("0")) {
 			if(body == null)
@@ -78,7 +78,7 @@ public class HttpParserImpl implements HttpParser {
 				throw new IllegalArgumentException("body size and KnownHeaderName.CONTENT_LENGTH"
 						+ " must match.  bodySize="+actualBodyLength+" header len="+lengthOfBodyFromHeader);
 			}
-		} else if(body != null) {
+		} else if(body != null && body.getReadableSize() != 0) {
 			throw new IllegalArgumentException("Body provided but no header for KnownHeaderName.CONTENT_LENGTH found");
 		} else 
 			body = EMPTY_WRAPPER;

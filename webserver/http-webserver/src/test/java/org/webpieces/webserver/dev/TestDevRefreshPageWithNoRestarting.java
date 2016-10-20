@@ -23,7 +23,7 @@ import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
-import org.webpieces.webserver.Requests;
+import org.webpieces.httpcommon.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
