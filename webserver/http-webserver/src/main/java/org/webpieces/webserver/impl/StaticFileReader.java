@@ -133,7 +133,7 @@ public class StaticFileReader {
 
 		try {
 			log.debug(()->"sending chunked file via async read="+file);
-			return info.getResponseSender().sendResponse(response, info.getRequest(), false)
+			return info.getResponseSender().sendResponse(response, info.getRequest(), info.getRequestId(), false)
 					.thenAccept(responseId -> info.setResponseId(responseId))
 					.thenCompose(v -> readLoop(info, file, asyncFile, 0))
 					.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures

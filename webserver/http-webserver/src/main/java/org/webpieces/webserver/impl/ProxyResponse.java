@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
@@ -71,12 +72,14 @@ public class ProxyResponse implements ResponseStreamer {
 	private BufferPool pool;
 	private RouterRequest routerRequest;
 	private HttpRequest request;
+	private RequestId requestId;
 
-	public void init(RouterRequest req, ResponseSender responseSender, BufferPool pool) {
+	public void init(RouterRequest req, ResponseSender responseSender, BufferPool pool, RequestId requestId) {
 		this.routerRequest = req;
 		this.request = (HttpRequest) req.orginalRequest;
 		this.responseSender = responseSender;
 		this.pool = pool;
+		this.requestId = requestId;
 	}
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
@@ -86,7 +89,7 @@ public class ProxyResponse implements ResponseStreamer {
 		responseCreator.addDeleteCookie(response, badCookieName);
 		
 		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ responseSender);
-		responseSender.sendResponse(response, request, true);
+		responseSender.sendResponse(response, request, requestId, true);
 
 		channelCloser.closeIfNeeded(request, responseSender);
 	}
@@ -96,7 +99,7 @@ public class ProxyResponse implements ResponseStreamer {
 		HttpResponse response = createRedirect(httpResponse);
 
 		log.info("sending REDIRECT response responseSender="+ responseSender);
-		responseSender.sendResponse(response, request, true);
+		responseSender.sendResponse(response, request, requestId, true);
 
 		channelCloser.closeIfNeeded(request, responseSender);
 	}
@@ -194,7 +197,7 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
-		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, responseSender);
+		RequestInfo requestInfo = new RequestInfo(routerRequest, request, requestId, pool, responseSender);
 		return reader.sendRenderStatic(requestInfo, renderStatic);
 	}
 	
@@ -243,7 +246,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 
 		// Send the headers and get the responseid.
-		responseSender.sendResponse(resp, request, false).thenAccept(responseId -> {
+		responseSender.sendResponse(resp, request, requestId, false).thenAccept(responseId -> {
 			boolean compressed = false;
 			Compression usingCompression;
 			if(compression == null) {
@@ -280,7 +283,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" responseSender="+ responseSender);
 		
-		responseSender.sendResponse(resp, request, true);
+		responseSender.sendResponse(resp, request, requestId, true);
 		
 		channelCloser.closeIfNeeded(request, responseSender);
 	}

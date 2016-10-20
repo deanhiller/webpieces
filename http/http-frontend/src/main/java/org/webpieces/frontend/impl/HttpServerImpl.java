@@ -13,14 +13,13 @@ import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.handlers.DataListener;
 
 public class HttpServerImpl implements HttpServer {
 
 	private AsyncServer server;
 	private AsyncDataListener dataListener;
 
-	public HttpServerImpl(TimedListener requestListener, BufferPool bufferPool, FrontendConfig config, boolean isHttps) {
+	public HttpServerImpl(TimedListener requestListener, BufferPool bufferPool, FrontendConfig config) {
 		HttpParser httpParser = HttpParserFactory.createParser(bufferPool);
 		Http2Parser http2Parser = Http2ParserFactory.createParser(bufferPool);
 
@@ -28,7 +27,7 @@ public class HttpServerImpl implements HttpServer {
 		// state so we need a new http2engine for every connection.. So we can create the http11
 		// stuff here but we have to create http2 stuff in the serverdatalistener on
 		// every new connection.
-		Http11Layer http11Layer = new Http11Layer(httpParser, requestListener, config, isHttps);
+		Http11Layer http11Layer = new Http11Layer(httpParser, requestListener, config);
 		Http11DataListener http11DataListener = new Http11DataListener(http11Layer);
 
 		dataListener = new ServerDataListener(requestListener, http11DataListener, httpParser, http2Parser);

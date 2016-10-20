@@ -1,6 +1,7 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.ResponseListener;
@@ -14,6 +15,7 @@ public class Layer1Response implements ResponseListener {
 	private Layer2ResponseListener responseListener;
 	private ResponseSender responseSender;
 	private HttpRequest req;
+	private RequestId requestId;
 
 	public Layer1Response(Layer2ResponseListener responseListener, ResponseSender responseSender, HttpRequest req) {
 		this.responseListener = responseListener;
@@ -21,9 +23,13 @@ public class Layer1Response implements ResponseListener {
 		this.req = req;
 	}
 
-	@Override
-	public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
-		responseListener.processResponse(responseSender, req, resp, id, isComplete);
+    public void setRequestId(RequestId requestId) {
+        this.requestId = requestId;
+    }
+
+    @Override
+	public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId responseId, boolean isComplete) {
+		responseListener.processResponse(responseSender, req, resp, requestId, responseId, isComplete);
 
 	}
 

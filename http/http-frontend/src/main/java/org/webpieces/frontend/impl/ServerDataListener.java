@@ -1,6 +1,7 @@
 package org.webpieces.frontend.impl;
 
 import com.webpieces.http2parser.api.Http2Parser;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpcommon.api.Http2Engine;
 import org.webpieces.httpcommon.api.Http2EngineFactory;
@@ -11,6 +12,7 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 
@@ -24,22 +26,13 @@ public class ServerDataListener implements AsyncDataListener {
         ChannelSession session = channel.getSession();
         HttpServerSocket httpServerSocket = (HttpServerSocket) session.get("webpieces.httpServerSocket");
         if(httpServerSocket == null) {
-            // If we have ALPN this is easy, just check that and create an HttpServerSocket appropriately
-            if(false) { // If alpn says no HTTP2
-                httpServerSocket = new HttpServerSocketImpl(
-                        channel,
-                        http11DataListener,
-                        new Http11ResponseSender(channel, httpParser));
-            }
-            else { // if alpn says HTTP2
-                Http2Engine http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, channel.getRemoteAddress(), SERVER);
-                http2Engine.setRequestListener(timedListener);
-                httpServerSocket = new HttpServerSocketImpl(
-                        channel,
-                        http2Engine.getDataListener(),
-                        http2Engine.getResponseSender()
-                );
-            }
+            // Default to HTTP/1.1 but pass in the parser so that we can upgrade to http2.
+            httpServerSocket = new HttpServerSocketImpl(
+                    channel,
+                    http11DataListener,
+                    new Http11ResponseSender(channel, httpParser),
+                    http2Parser,
+                    timedListener);
 
             session.put("webpieces.httpServerSocket", httpServerSocket);
         }
@@ -56,9 +49,12 @@ public class ServerDataListener implements AsyncDataListener {
 
     @Override
     public void connectionOpened(TCPChannel tcpChannel, boolean isReadyForWrites) {
-        // Create the HttpSocket here if one doesn't exist already.
-
-        timedListener.openedConnection(getHttpServerSocketForChannel(tcpChannel), isReadyForWrites);
+        HttpServerSocket socket = getHttpServerSocketForChannel(tcpChannel);
+        // TODO: replace 'false' with ALPN check
+        if(isReadyForWrites && tcpChannel.isSslChannel() && false) { // If ALPN, upgrade to HTTP2
+            socket.upgradeHttp2(Optional.empty());
+        }
+        timedListener.openedConnection(socket, isReadyForWrites);
     }
 
     @Override

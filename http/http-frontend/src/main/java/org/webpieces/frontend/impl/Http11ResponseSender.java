@@ -23,11 +23,6 @@ class Http11ResponseSender implements ResponseSender {
 		this.parser = parser;
 	}
 
-	// HTTP/1.1 doesn't need responseids
-	private ResponseId getNextResponseId() {
-		return new ResponseId(0);
-	}
-
 	@Override
 	public CompletableFuture<Void> close() {
 		return channel.close().thenAccept(c -> {});
@@ -36,7 +31,8 @@ class Http11ResponseSender implements ResponseSender {
 	@Override
 	public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
 		ByteBuffer data = parser.marshalToByteBuffer(response);
-		ResponseId id = getNextResponseId();
+		// HTTP/1.1 doesn't need responseids
+		ResponseId id = new ResponseId(0);
 		return channel.write(data).thenApply(c -> id);
 	}
 

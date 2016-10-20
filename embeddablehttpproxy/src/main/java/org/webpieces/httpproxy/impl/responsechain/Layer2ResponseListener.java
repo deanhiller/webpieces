@@ -30,11 +30,11 @@ public class Layer2ResponseListener {
 	@Inject
 	private LayerZSendBadResponse badResponse;
 	
-	public void processResponse(ResponseSender responseSender, HttpRequest req, HttpResponse resp, ResponseId incomingResponseId, boolean isComplete) {
+	public void processResponse(ResponseSender responseSender, HttpRequest req, HttpResponse resp, RequestId requestId, ResponseId incomingResponseId, boolean isComplete) {
 		log.info("received response(responseSender="+responseSender+").  type="+resp.getClass().getSimpleName()+" complete="+isComplete+" resp=\n"+resp);
 
 
-		responseSender.sendResponse(resp, req, isComplete)
+		responseSender.sendResponse(resp, req, requestId, isComplete)
 			.thenAccept(outgoingResponseId -> {
 				wroteBytes(responseSender);
 				incomingResponseToOutgoingResponseMap.put(incomingResponseId, outgoingResponseId);

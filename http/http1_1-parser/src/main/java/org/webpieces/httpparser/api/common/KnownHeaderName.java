@@ -63,7 +63,10 @@ public enum KnownHeaderName {
 	CONTENT_RANGE("Content-Range", HeaderType.ENTITY),  
 	CONTENT_TYPE("Content-Type", HeaderType.ENTITY),  
 	EXPIRES("Expires", HeaderType.ENTITY),       
-	LAST_MODIFIED("Last-Modified", HeaderType.ENTITY),  
+	LAST_MODIFIED("Last-Modified", HeaderType.ENTITY),
+
+	// For HTTP2 upgrade
+	HTTP2_SETTINGS("HTTP2-Settings", HeaderType.REQUEST),
 	;
 
 	private static Map<String, KnownHeaderName> lookup = new HashMap<>();

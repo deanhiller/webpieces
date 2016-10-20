@@ -14,7 +14,6 @@ import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -41,6 +40,7 @@ import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS
 import static java.lang.Math.min;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Http2EngineImpl implements Http2Engine {
     private static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
@@ -50,7 +50,7 @@ public class Http2EngineImpl implements Http2Engine {
     private Channel channel;
     private DataListener dataListener;
     private Http2Parser http2Parser;
-    private InetSocketAddress addr;
+    private InetSocketAddress remoteAddress;
 
     private HttpSide side;
 
@@ -58,6 +58,7 @@ public class Http2EngineImpl implements Http2Engine {
 
     // remotesettings doesn't need concurrent bc listener is vts
     private Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+    private AtomicBoolean gotSettings = new AtomicBoolean(false);
 
     // localsettings also doesn't need concurrent bc local settigs is only set when
     // it gets the ack from the settings that gets sent.
@@ -109,10 +110,10 @@ public class Http2EngineImpl implements Http2Engine {
         this.requestListener = requestListener;
     }
 
-    public Http2EngineImpl(Http2Parser http2Parser, Channel channel, InetSocketAddress addr, HttpSide side) {
+    public Http2EngineImpl(Http2Parser http2Parser, Channel channel, InetSocketAddress remoteAddress, HttpSide side) {
         this.http2Parser = http2Parser;
         this.channel = channel;
-        this.addr = addr;
+        this.remoteAddress = remoteAddress;
         this.side = side;
         if(side == CLIENT) {
             this.nextStreamId = new AtomicInteger(0x1);
@@ -142,6 +143,8 @@ public class Http2EngineImpl implements Http2Engine {
         this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE));
 
         this.dataListener = new Http2DataListener();
+
+        initializeFlowControl(0x0);
     }
 
     public Channel getUnderlyingChannel() {
@@ -152,6 +155,9 @@ public class Http2EngineImpl implements Http2Engine {
     public void sendHttp2Preface() {
         log.info("sending preface");
         channel.write(ByteBuffer.wrap(DatatypeConverter.parseHexBinary(prefaceHexString)));
+    }
+
+    public void sendLocalPreferredSettings() {
         Http2Settings settingsFrame = new Http2Settings();
 
         settingsFrame.setSettings(localPreferredSettings);
@@ -159,8 +165,39 @@ public class Http2EngineImpl implements Http2Engine {
         channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
     }
 
+    @Override
+    public void setRemoteSettings(Http2Settings frame) {
+        // We've received a settings. Update remoteSettings and send an ack
+        gotSettings.set(true);
+        for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
+            remoteSettings.put(entry.getKey(), entry.getValue());
+        }
+
+        // What do we do when certain settings are updated
+        if(frame.getSettings().containsKey(SETTINGS_HEADER_TABLE_SIZE)) {
+            maxHeaderTableSizeNeedsUpdate.set(true);
+            class UpdateMinimum implements IntUnaryOperator {
+                int newTableSize;
+
+                public UpdateMinimum(int newTableSize) {
+                    this.newTableSize = newTableSize;
+                }
+
+                @Override
+                public int applyAsInt(int operand) {
+                    return min(operand, newTableSize);
+                }
+            }
+            minimumMaxHeaderTableSizeUpdate.updateAndGet(
+                    new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE)));
+        }
+        Http2Settings responseFrame = new Http2Settings();
+        responseFrame.setAck(true);
+        log.info("sending settings ack: " + responseFrame);
+        channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
+    }
+
     public void initialize() {
-        initializeFlowControl(0x0);
 
         Timer timer = new Timer();
         // in 5 seconds send a ping every 5 seconds
@@ -253,7 +290,7 @@ public class Http2EngineImpl implements Http2Engine {
                 else
                     headerList.add(new HasHeaderFragment.Header(":authority", String.format("%s:%d", urlInfo.getHost(), urlInfo.getPort())));
             } else {
-                headerList.add(new HasHeaderFragment.Header(":authority", addr.getHostName() + ":" + addr.getPort()));
+                headerList.add(new HasHeaderFragment.Header(":authority", remoteAddress.getHostName() + ":" + remoteAddress.getPort()));
             }
         }
 
@@ -591,7 +628,6 @@ public class Http2EngineImpl implements Http2Engine {
 
     private class Http2DataListener implements DataListener {
         private DataWrapper oldData = http2Parser.prepareToParse();
-        private AtomicBoolean gotSettings = new AtomicBoolean(false);
         private AtomicBoolean gotPreface = new AtomicBoolean(false);
 
         private void receivedEndStream(Stream stream) {
@@ -662,7 +698,7 @@ public class Http2EngineImpl implements Http2Engine {
             }
         }
 
-        private HttpResponse createResponseFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
+        private HttpResponse responseFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
             HttpResponse response = new HttpResponse();
 
             // TODO: throw if special headers are not at the front, or we get a bad special header
@@ -701,7 +737,7 @@ public class Http2EngineImpl implements Http2Engine {
             return response;
         }
 
-        private HttpRequest createRequestFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
+        private HttpRequest requestFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
             Map<String, String> headerMap = new HashMap<>();
             for(HasHeaderFragment.Header header: headers) {
                 headerMap.put(header.header, header.value);
@@ -724,6 +760,17 @@ public class Http2EngineImpl implements Http2Engine {
 
             HttpRequestLine requestLine = new HttpRequestLine();
             requestLine.setUri(new HttpUri(String.format("%s://%s%s", scheme, authority, path)));
+            switch(scheme.toLowerCase()) {
+                case "http":
+                    request.setHttpScheme(HttpRequest.HttpScheme.HTTP);
+                    break;
+                case "https":
+                    request.setHttpScheme(HTTPS);
+                    break;
+                default:
+                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+            }
+
             requestLine.setMethod(new HttpRequestMethod(method));
             HttpVersion version = new HttpVersion();
             version.setVersion("2.0");
@@ -733,6 +780,7 @@ public class Http2EngineImpl implements Http2Engine {
             List<String> specialHeaders = Arrays.asList(":method", ":scheme", ":authority", ":path");
 
             // Set all other headers
+            // TODO: throw if there is an additional special header
             for(HasHeaderFragment.Header header: headers) {
                 if(!specialHeaders.contains(header.header))
                     request.addHeader(new Header(header.header, header.value));
@@ -766,11 +814,11 @@ public class Http2EngineImpl implements Http2Engine {
                 boolean isComplete = frame.isEndStream();
 
                 if(side == CLIENT) {
-                    HttpResponse response = createResponseFromHeaders(frame.getHeaderList(), stream);
+                    HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
                     stream.setResponse(response);
                     stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), isComplete);
                 } else {
-                    HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), stream);
+                    HttpRequest request = requestFromHeaders(frame.getHeaderList(), stream);
                     stream.setRequest(request);
                     requestListener.incomingRequest(request, stream.getRequestId(), isComplete, responseSender);
                 }
@@ -834,7 +882,7 @@ public class Http2EngineImpl implements Http2Engine {
 
                 // Uses the same listener as the stream it came in on
                 promisedStream.setResponseListener(stream.getResponseListener());
-                HttpRequest request = createRequestFromHeaders(frame.getHeaderList(), promisedStream);
+                HttpRequest request = requestFromHeaders(frame.getHeaderList(), promisedStream);
                 promisedStream.setRequest(request);
                 promisedStream.setStatus(Stream.StreamStatus.RESERVED_REMOTE);
             } else {
@@ -866,34 +914,7 @@ public class Http2EngineImpl implements Http2Engine {
                     localSettings.put(entry.getKey(), entry.getValue());
                 }
             } else {
-                // We've received a settings. Update remoteSettings and send an ack
-                gotSettings.set(true);
-                for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
-                    remoteSettings.put(entry.getKey(), entry.getValue());
-                }
-
-                // What do we do when certain settings are updated
-                if(frame.getSettings().containsKey(SETTINGS_HEADER_TABLE_SIZE)) {
-                    maxHeaderTableSizeNeedsUpdate.set(true);
-                    class UpdateMinimum implements IntUnaryOperator {
-                        int newTableSize;
-
-                        public UpdateMinimum(int newTableSize) {
-                            this.newTableSize = newTableSize;
-                        }
-
-                        @Override
-                        public int applyAsInt(int operand) {
-                            return min(operand, newTableSize);
-                        }
-                    }
-                    minimumMaxHeaderTableSizeUpdate.updateAndGet(
-                            new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE)));
-                }
-                Http2Settings responseFrame = new Http2Settings();
-                responseFrame.setAck(true);
-                log.info("sending settings ack: " + responseFrame);
-                channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
+                setRemoteSettings(frame);
             }
         }
 

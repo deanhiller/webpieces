@@ -11,7 +11,6 @@ import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpcommon.api.RequestListener;
-import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.SSLEngineFactory;
 
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
@@ -32,7 +31,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		preconditionCheck(config);
 		
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config, false);
+		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
 		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
@@ -50,7 +49,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		TimedListener timed = new TimedListener(timer, listener, config);
-		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config, true);
+		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
 		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);

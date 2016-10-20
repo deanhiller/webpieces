@@ -105,7 +105,7 @@ public class RequestReceiver implements RequestListener {
 			// Now we're done, remove it so that another request with the same id can come in
 			requestsStillCollecting.remove(id);
 
-			handleCompleteRequest(collector.req, sender);
+			handleCompleteRequest(collector.req, id, sender);
 
 			// Complete all the futures because we're done dealing with this data.
 			for(CompletableFuture<Void> fut: collector.futures) {
@@ -115,7 +115,7 @@ public class RequestReceiver implements RequestListener {
 		return future;
 	}
 
-	private void handleCompleteRequest(HttpRequest req, ResponseSender responseSender) {
+	private void handleCompleteRequest(HttpRequest req, RequestId requestId, ResponseSender responseSender) {
 		for(Header h : req.getHeaders()) {
 			if (!headersSupported.contains(h.getName().toLowerCase()))
 				log.error("This webserver has not thought about supporting header="
@@ -167,7 +167,7 @@ public class RequestReceiver implements RequestListener {
 
 		ProxyResponse streamer = responseProvider.get();
 		try {
-			streamer.init(routerRequest, responseSender, bufferPool);
+			streamer.init(routerRequest, responseSender, bufferPool, requestId);
 
 			routingService.incomingCompleteRequest(routerRequest, streamer);
 		} catch (BadCookieException e) {
@@ -181,7 +181,7 @@ public class RequestReceiver implements RequestListener {
 	public void incomingRequest(HttpRequest req, RequestId requestId, boolean isComplete, ResponseSender responseSender) {
 		//log.info("request received on channel="+channel);
 		if(isComplete) {
-			handleCompleteRequest(req, responseSender);
+			handleCompleteRequest(req, requestId, responseSender);
 		} else {
 			requestsStillCollecting.put(requestId, new RequestCollectingData(req));
 		}
@@ -279,7 +279,7 @@ public class RequestReceiver implements RequestListener {
 		HttpRequest req = new HttpRequest();
 		RouterRequest routerReq = new RouterRequest();
 		routerReq.orginalRequest = req;
-		proxyResp.init(routerReq, ((HttpServerSocket) httpSocket).getResponseSender(), bufferPool);
+		proxyResp.init(routerReq, ((HttpServerSocket) httpSocket).getResponseSender(), bufferPool, new RequestId(0));
 		proxyResp.sendFailure(exc);
 	}
 

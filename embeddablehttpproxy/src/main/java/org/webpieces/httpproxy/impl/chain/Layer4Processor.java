@@ -75,15 +75,16 @@ public class Layer4Processor implements RequestListener {
 		//need synchronization if two clients of proxy access same httpSocket/addr!!!
 		HttpClientSocket socket = cache.getIfPresent(addr);
 		if(socket != null) {
-			sendData(sender, socket.getRequestSender(), req);
+			sendRequest(sender, socket.getRequestSender(), req);
 		} else {
 			openAndConnectSocket(addr, req, sender);
 		}
 	}
 
-	private void sendData(ResponseSender channel, RequestSender requestSender, HttpRequest req) {
+	private void sendRequest(ResponseSender channel, RequestSender requestSender, HttpRequest req) {
 		// Can only deal with complete requests
-		requestSender.sendRequest(req, true, new Layer1Response(layer2Processor, channel, req));
+		Layer1Response responseListener = new Layer1Response(layer2Processor, channel, req);
+		requestSender.sendRequest(req, true, responseListener).thenAccept(responseListener::setRequestId);
 	}
 
     @Override
@@ -97,7 +98,7 @@ public class Layer4Processor implements RequestListener {
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)
 				.thenAccept(requestListener -> {
-					sendData(channel, requestListener, req);
+					sendRequest(channel, requestListener, req);
 					cache.put(addr, socket);
 				})
 				.exceptionally(e -> layer2Processor.processError(channel, req, e));

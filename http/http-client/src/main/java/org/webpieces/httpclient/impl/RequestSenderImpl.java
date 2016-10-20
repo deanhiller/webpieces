@@ -99,6 +99,7 @@ public class RequestSenderImpl implements RequestSender {
         protocol = HTTP2;
         dataListener.setProtocol(HTTP2);
         http2Engine.sendHttp2Preface();
+        http2Engine.sendLocalPreferredSettings();
         negotiationDone.set(true);
 
         // Initialize connection level flow control

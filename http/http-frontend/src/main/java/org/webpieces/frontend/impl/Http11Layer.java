@@ -1,8 +1,10 @@
 package org.webpieces.frontend.impl;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -13,16 +15,20 @@ import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
+import org.webpieces.httpcommon.impl.Http2EngineImpl;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.UnparsedState;
-import org.webpieces.httpparser.api.dto.HttpMessageType;
-import org.webpieces.httpparser.api.dto.HttpPayload;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
+
+import javax.xml.bind.DatatypeConverter;
 
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
@@ -31,22 +37,69 @@ public class Http11Layer {
 	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
 	private TimedListener listener;
-	private boolean isHttps;
 	private FrontendConfig config;
-	
-	Http11Layer(HttpParser parser2, TimedListener listener, FrontendConfig config, boolean isHttps) {
+	private static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
+
+	Http11Layer(HttpParser parser2, TimedListener listener, FrontendConfig config) {
 		this.parser = parser2;
 		this.listener = listener;
 		this.config = config;
-		this.isHttps = isHttps;
 	}
 
 	void deserialize(Channel channel, ByteBuffer chunk) {
 		List<HttpRequest> parsedRequests = doTheWork(channel, chunk);
 
-        // TODO: if we get chunks, send these to incomingData.
+        // TODO: if we get chunks, send these to incomingData.. right now we don't support receiving chunks on the server side.
 		for(HttpRequest req : parsedRequests) {
-			listener.incomingRequest(req, new RequestId(0), !req.isHasChunkedTransferHeader(), getResponseSenderForChannel(channel));
+			// Check for an HTTP2 upgrade, if not SSL
+			if(!channel.isSslChannel()) {
+                List<Header> reqHeaders = req.getHeaders();
+                String upgradeHeader = null;
+                ByteBuffer settingsFrame = null;
+
+                for (Header header : reqHeaders) {
+                    if (header.getKnownName() == KnownHeaderName.UPGRADE) {
+                        upgradeHeader = header.getValue();
+                    }
+                    if (header.getKnownName() == KnownHeaderName.HTTP2_SETTINGS) {
+                        settingsFrame = ByteBuffer.wrap(DatatypeConverter.parseBase64Binary(header.getValue()));
+                    }
+                }
+                if (upgradeHeader.toLowerCase().equals("h2c")) {
+                    final Optional<ByteBuffer> maybeSettingsFrame = Optional.of(settingsFrame);
+
+                    // Create the upgrade response
+                    HttpResponse response = new HttpResponse();
+                    HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
+                    HttpResponseStatus status = new HttpResponseStatus();
+                    status.setKnownStatus(KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
+                    statusLine.setStatus(status);
+                    response.setStatusLine(statusLine);
+                    response.addHeader(new Header("Connection", "Upgrade"));
+                    response.addHeader(new Header("Upgrade", "h2c"));
+
+                    // Send the response and then switch to HTTP2
+                    getResponseSenderForChannel(channel).sendResponse(response, req, new RequestId(0), true).thenAccept(
+                            responseId -> {
+                                // Switch the socket to using HTTP2
+                                HttpServerSocket socket = getHttpServerSocketForChannel(channel);
+                                socket.upgradeHttp2(maybeSettingsFrame);
+
+                                // Send the request to listener (requestid is 1 for this first request)
+                                listener.incomingRequest(req, new RequestId(0x1), true, socket.getResponseSender());
+                            }
+                    );
+
+                    // Drop all subsequent requests?
+                    break;
+                }
+			}
+
+			if(req.isHasChunkedTransferHeader())
+				throw new UnsupportedOperationException();
+			else
+				listener.incomingRequest(req, new RequestId(0), true, getResponseSenderForChannel(channel));
+
 		}
 	}
 

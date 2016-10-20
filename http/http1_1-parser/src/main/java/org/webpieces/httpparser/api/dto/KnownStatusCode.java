@@ -6,6 +6,7 @@ import java.util.Map;
 public enum KnownStatusCode {
 
 	HTTP_100_CONTINUE(100, "Continue", HttpStatusType.Informational),
+	HTTP_101_SWITCHING_PROTOCOLS(101, "Switching Protocols", HttpStatusType.Informational),
 	
 	HTTP_200_OK(200, "OK", HttpStatusType.Success), 
 	
