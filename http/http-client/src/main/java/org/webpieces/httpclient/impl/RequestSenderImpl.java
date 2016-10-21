@@ -21,6 +21,7 @@ import org.webpieces.httpcommon.api.SwitchableDataListenerFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -127,13 +128,13 @@ public class RequestSenderImpl implements RequestSender {
 
         } else { // Try the HTTP1.1 upgrade technique
             log.info("attempting http11 upgrade");
-            req.addHeader(new Header("connection", "Upgrade, HTTP2-Settings"));
-            req.addHeader(new Header("upgrade", "h2c"));
+            req.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
+            req.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
             Http2Settings settingsFrame = this.http2Engine.getLocalRequestedSettingsFrame();
 
             // For some reason we need to add a " " after the base64urlencoded settings to get this to work
             // against nghttp2.org ?
-            req.addHeader(new Header("http2-settings",
+            req.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
                     Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
 
             CompletableFuture<HttpResponse> response = sendHttp11AndWaitForHeaders(req);

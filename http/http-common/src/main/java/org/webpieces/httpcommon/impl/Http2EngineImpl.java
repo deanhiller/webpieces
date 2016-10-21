@@ -40,6 +40,7 @@ import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS
 import static java.lang.Math.min;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
+import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Http2EngineImpl implements Http2Engine {
@@ -318,6 +319,7 @@ public class Http2EngineImpl implements Http2Engine {
 
         int streamId = frame.getStreamId();
         decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
+        log.info("actually writing data frame: " + frame);
         return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenApply(
                 channel -> {
                     future.complete(channel);
@@ -361,6 +363,7 @@ public class Http2EngineImpl implements Http2Engine {
         if(canSendFrame(dataFrame) && outgoingDataQueue.get(streamId).isEmpty()) {
             return actuallyWriteDataFrame(pendingDataFrame);
         } else {
+            log.info("adding frame to the queue:" + pendingDataFrame);
             outgoingDataQueue.get(streamId).add(pendingDataFrame);
             return future;
         }
@@ -380,18 +383,28 @@ public class Http2EngineImpl implements Http2Engine {
                     if(isComplete)
                         newFrame.setEndStream(true);
 
-                    log.info("sending final data frame: (but might not complete the request)" + newFrame);
+                    log.info("queuing final data frame: (but might not complete the request)" + newFrame);
                     return writeDataFrame(newFrame).thenAccept(
                             channel -> {
-                                if (isComplete)
-                                    stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
+                                if (isComplete) {
+                                    switch(stream.getStatus()) {
+                                        case OPEN:
+                                            stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
+                                            break;
+                                        case HALF_CLOSED_REMOTE:
+                                            stream.setStatus(CLOSED);
+                                            break;
+                                        default:
+                                            throw new ClientError("can't send endstream on a stream in state " + stream.getStatus());
+                                    }
+                                }
                             }
                     );
                 } else {
                     // to big, split it, send, and recurse.
                     List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
                     newFrame.setData(split.get(0));
-                    log.info("sending non-final data frame: " + newFrame);
+                    log.info("queuing non-final data frame: " + newFrame);
                     return writeDataFrame(newFrame).thenCompose(
                             channel ->  sendDataFrames(split.get(1), isComplete, stream)
                     );
@@ -458,7 +471,8 @@ public class Http2EngineImpl implements Http2Engine {
                             stream.setStatus(Stream.StreamStatus.OPEN);
                             break;
                         case HALF_CLOSED_LOCAL:
-                            stream.setStatus(Stream.StreamStatus.HALF_CLOSED_REMOTE);
+                        case HALF_CLOSED_REMOTE:
+                            // leave status the same
                             break;
                         default:
                             throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper()); //"should not be sending headers on a stream not open or half closed remote"
@@ -491,7 +505,7 @@ public class Http2EngineImpl implements Http2Engine {
         int mod = side == CLIENT ? 1 : 0;
         return activeStreams.entrySet()
                 .stream()
-                .filter(entry -> (entry.getValue().getStatus() == Stream.StreamStatus.CLOSED) && (entry.getValue().getStreamId() % 2 == mod))
+                .filter(entry -> (entry.getValue().getStatus() == CLOSED) && (entry.getValue().getStreamId() % 2 == mod))
                 .max(Comparator.comparingInt(Map.Entry::getKey)).map(entry -> entry.getKey());
     }
 
@@ -571,9 +585,19 @@ public class Http2EngineImpl implements Http2Engine {
     @Override
     public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
         Stream responseStream = activeStreams.get(requestId.getValue());
-        if(responseStream == null) {
-            // TODO: use the right exception here
-            throw new RuntimeException("invalid requestid: " + requestId);
+        //
+        if(responseStream == null && requestId.getValue() == 0x1) {
+            if(requestId.getValue() == 0x1) {
+                // Create a new response stream for this stream, because this is the first response after an upgrade
+                responseStream = new Stream();
+                responseStream.setStreamId(0x1);
+                responseStream.setRequest(request);
+                initializeFlowControl(0x1);
+                responseStream.setStatus(Stream.StreamStatus.HALF_CLOSED_REMOTE);
+            }
+            else {
+                throw new RuntimeException("invalid request id " + requestId);
+            }
         }
         // If we already have a response stored in the responseStream then we've already sent a response for this
         // stream and we need to send a push promise and create a new stream
@@ -637,7 +661,7 @@ public class Http2EngineImpl implements Http2Engine {
                     stream.setStatus(Stream.StreamStatus.HALF_CLOSED_REMOTE);
                     break;
                 case HALF_CLOSED_LOCAL:
-                    stream.setStatus(Stream.StreamStatus.CLOSED);
+                    stream.setStatus(CLOSED);
                     break;
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
@@ -852,7 +876,7 @@ public class Http2EngineImpl implements Http2Engine {
                         // TODO: change incomingError to failure and fix the exception types
                         responseSender.sendException(null);
 
-                    stream.setStatus(Stream.StreamStatus.CLOSED);
+                    stream.setStatus(CLOSED);
                     break;
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
@@ -1043,7 +1067,7 @@ public class Http2EngineImpl implements Http2Engine {
                 channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrame()).createByteArray()));
                 if(RstStreamError.class.isInstance(e)) {
                     // Mark the stream closed
-                    activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(Stream.StreamStatus.CLOSED);
+                    activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(CLOSED);
                 }
                 if(GoAwayError.class.isInstance(e)) {
                     // TODO: Shut this connection down

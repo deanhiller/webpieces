@@ -208,7 +208,7 @@ public class Http2ParserImpl implements Http2Parser {
         // Loop until a return (ack)
         while (true) {
             int lengthOfData = wrapperToParse.getReadableSize();
-            if (lengthOfData <= 9) {
+            if (lengthOfData < 9) {
                 // Not even a frame header
                 return new ParserResultImpl(frames, wrapperToReturn);
             } else {
