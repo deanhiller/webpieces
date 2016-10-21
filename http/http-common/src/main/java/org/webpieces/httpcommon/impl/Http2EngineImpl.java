@@ -12,6 +12,7 @@ import org.webpieces.httpcommon.api.*;
 import org.webpieces.httpcommon.api.exceptions.*;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -41,6 +42,7 @@ import static java.lang.Math.min;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
+import static org.webpieces.httpcommon.impl.Stream.StreamStatus.HALF_CLOSED_REMOTE;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Http2EngineImpl implements Http2Engine {
@@ -276,9 +278,9 @@ public class Http2EngineImpl implements Http2Engine {
 
         // Figure out authority
         String h = null;
-        for(HasHeaderFragment.Header header: headerList) {
-            if(header.header.equals("host")) {
-                h = header.value;
+        for(Header header: requestHeaders) {
+            if(header.getKnownName().equals(KnownHeaderName.HOST)) {
+                h = header.getValue();
                 break;
             }
         }
@@ -303,15 +305,6 @@ public class Http2EngineImpl implements Http2Engine {
         return headerList;
     }
 
-    private void decrementOutgoingWindow(int streamId, int length) {
-        log.info("decrementing outgoing window for {} by {}", streamId, length);
-        if(outgoingFlowControl.get(0x0).addAndGet(- length) < 0) {
-            throw new RuntimeException("this should not happen");
-        }
-        if(outgoingFlowControl.get(streamId).decrementAndGet() < 0) {
-            throw new RuntimeException("this should not happen");
-        }
-    }
 
     private CompletableFuture<Channel> actuallyWriteDataFrame(PendingDataFrame pendingDataFrame) {
         Http2Data frame = pendingDataFrame.frame;
@@ -447,7 +440,7 @@ public class Http2EngineImpl implements Http2Engine {
         // Send all the frames at once
         log.info("sending push promise frames: " + frameList);
         return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenAccept(
-                channel -> newStream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL)
+                channel -> newStream.setStatus(Stream.StreamStatus.RESERVED_LOCAL)
         );
 
     }
@@ -473,6 +466,9 @@ public class Http2EngineImpl implements Http2Engine {
                         case HALF_CLOSED_LOCAL:
                         case HALF_CLOSED_REMOTE:
                             // leave status the same
+                            break;
+                        case RESERVED_LOCAL:
+                            stream.setStatus(HALF_CLOSED_REMOTE);
                             break;
                         default:
                             throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper()); //"should not be sending headers on a stream not open or half closed remote"
@@ -535,6 +531,52 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
 
+    private void decrementOutgoingWindow(int streamId, int length) {
+        log.info("decrementing outgoing window for {} by {}", streamId, length);
+        if(outgoingFlowControl.get(0x0).addAndGet(- length) < 0) {
+            throw new RuntimeException("this should not happen");
+        }
+        if(outgoingFlowControl.get(streamId).addAndGet(- length) < 0) {
+            throw new RuntimeException("this should not happen");
+        }
+        log.info("stream {} outgoing window is {} and connection window is {}", streamId, outgoingFlowControl.get(streamId), outgoingFlowControl.get(0));
+    }
+
+    private void decrementIncomingWindow(int streamId, int length) {
+        log.info("decrementing incoming window for {} by {}", streamId, length);
+        if(incomingFlowControl.get(0x0).addAndGet(- length) < 0) {
+            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR,
+                    wrapperGen.emptyWrapper());
+        }
+        if(incomingFlowControl.get(streamId).addAndGet(- length) < 0) {
+            throw new RstStreamError(Http2ErrorCode.FLOW_CONTROL_ERROR, streamId);
+        }
+        log.info("stream {} incoming window is {} and connection window is {}", streamId, incomingFlowControl.get(streamId), incomingFlowControl.get(0));
+    }
+
+    private void incrementOutgoingWindow(int streamId, int length) {
+        log.info("incrementing outgoing window for {} by {}", streamId, length);
+        outgoingFlowControl.get(0x0).addAndGet(length);
+        outgoingFlowControl.get(streamId).addAndGet(length);
+        log.info("stream {} outgoing window is {} and connection window is {}", streamId, outgoingFlowControl.get(streamId), outgoingFlowControl.get(0));
+    }
+
+    private void incrementIncomingWindow(int streamId, int length) {
+        log.info("incrementing incoming window for {} by {}", streamId, length);
+        incomingFlowControl.get(0x0).addAndGet(length);
+        incomingFlowControl.get(streamId).addAndGet(length);
+
+        Http2WindowUpdate frame = new Http2WindowUpdate();
+        frame.setWindowSizeIncrement(length);
+        frame.setStreamId(0x0);
+        channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+
+        // reusing the frame! ack.
+        frame.setStreamId(streamId);
+        channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+        log.info("stream {} incoming window is {} and connection window is {}", streamId, incomingFlowControl.get(streamId), incomingFlowControl.get(0));
+    }
+
     private void initializeFlowControl(int streamId) {
         // Set up flow control
         incomingFlowControl.put(streamId, new AtomicInteger(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
@@ -585,7 +627,7 @@ public class Http2EngineImpl implements Http2Engine {
     @Override
     public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
         Stream responseStream = activeStreams.get(requestId.getValue());
-        //
+
         if(responseStream == null && requestId.getValue() == 0x1) {
             if(requestId.getValue() == 0x1) {
                 // Create a new response stream for this stream, because this is the first response after an upgrade
@@ -594,6 +636,7 @@ public class Http2EngineImpl implements Http2Engine {
                 responseStream.setRequest(request);
                 initializeFlowControl(0x1);
                 responseStream.setStatus(Stream.StreamStatus.HALF_CLOSED_REMOTE);
+                activeStreams.put(0x1, responseStream);
             }
             else {
                 throw new RuntimeException("invalid request id " + requestId);
@@ -617,6 +660,8 @@ public class Http2EngineImpl implements Http2Engine {
             newStream.setStreamId(getAndIncrementStreamId());
             newStream.setResponse(response);
             newStream.setRequest(request);
+            initializeFlowControl(newStream.getStreamId());
+            activeStreams.put(newStream.getStreamId(), newStream);
 
             return sendPushPromiseFrames(requestToHeaders(request), responseStream, newStream)
                     .thenCompose(v -> actuallySendResponse(response, newStream, isComplete));
@@ -631,7 +676,10 @@ public class Http2EngineImpl implements Http2Engine {
     private CompletableFuture<ResponseId> actuallySendResponse(HttpResponse response, Stream stream, boolean isComplete) {
         return sendHeaderFrames(responseToHeaders(response), stream)
                 .thenAccept(v -> sendDataFrames(response.getBodyNonNull(), isComplete, stream))
-                .thenApply(v -> new ResponseId(stream.getStreamId()));
+                .thenApply(v -> stream.getResponseId()).exceptionally(e -> {
+                    log.error("can't send header frames", e);
+                    return stream.getResponseId();
+                });
     }
 
     // Server only
@@ -666,39 +714,6 @@ public class Http2EngineImpl implements Http2Engine {
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
-        }
-
-        private void decrementIncomingWindow(int streamId, int length) {
-            log.info("decrementing window for {} by {}", streamId, length);
-            if(incomingFlowControl.get(0x0).addAndGet(- length) < 0) {
-                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR,
-                        wrapperGen.emptyWrapper());
-            }
-            if(incomingFlowControl.get(streamId).decrementAndGet() < 0) {
-                throw new RstStreamError(Http2ErrorCode.FLOW_CONTROL_ERROR, streamId);
-            }
-
-        }
-
-        private void incrementOutgoingWindow(int streamId, int length) {
-            log.info("incrementing outgoing window for {} by {}", streamId, length);
-            outgoingFlowControl.get(0x0).addAndGet(length);
-            outgoingFlowControl.get(streamId).addAndGet(length);
-        }
-
-        private void incrementIncomingWindow(int streamId, int length) {
-            log.info("incrementing window for {} by {}", streamId, length);
-            incomingFlowControl.get(0x0).addAndGet(length);
-            incomingFlowControl.get(streamId).addAndGet(length);
-
-            Http2WindowUpdate frame = new Http2WindowUpdate();
-            frame.setWindowSizeIncrement(length);
-            frame.setStreamId(0x0);
-            channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
-
-            // reusing the frame! ack.
-            frame.setStreamId(streamId);
-            channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
         }
 
         private void handleData(Http2Data frame, Stream stream) {

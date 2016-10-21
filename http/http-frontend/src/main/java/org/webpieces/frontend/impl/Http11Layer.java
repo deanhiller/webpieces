@@ -1,6 +1,5 @@
 package org.webpieces.frontend.impl;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
