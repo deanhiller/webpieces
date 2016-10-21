@@ -24,9 +24,7 @@ public class ForTestSslClientEngineFactory implements HttpsSslEngineFactory {
 	public SSLEngine createSslEngine(String host, int port) {
 		try {
 			return createSslEngineImpl(host, port);
-		} catch (KeyManagementException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (KeyManagementException | NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
 	}
