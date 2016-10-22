@@ -3,6 +3,7 @@ package org.webpieces.plugins.hibernate;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -14,6 +15,7 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+@Singleton
 public class TransactionFilter implements RouteFilter<Void> {
 
 	private static final Logger log = LoggerFactory.getLogger(TransactionFilter.class);

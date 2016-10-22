@@ -2,12 +2,15 @@ package org.webpieces.webserver.dev.app;
 
 import java.util.concurrent.CompletableFuture;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.util.filters.Service;
 
+@Singleton
 public class MyFilter implements RouteFilter<Void> {
 
 	@Override

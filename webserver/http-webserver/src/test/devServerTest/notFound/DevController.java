@@ -1,8 +1,11 @@
 package org.webpieces.webserver.dev.app;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
+@Singleton
 public class DevController {
 
 	public Action home() {

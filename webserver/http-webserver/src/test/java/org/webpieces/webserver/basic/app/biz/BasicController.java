@@ -1,12 +1,14 @@
 package org.webpieces.webserver.basic.app.biz;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.app.BasicRouteId;
 
+@Singleton
 public class BasicController {
 
 	@Inject

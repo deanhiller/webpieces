@@ -1,10 +1,13 @@
 package org.webpieces.webserver.scopes.app;
 
+import javax.inject.Singleton;
+
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
+@Singleton
 public class ScopesController {
 
 	private static String longString;

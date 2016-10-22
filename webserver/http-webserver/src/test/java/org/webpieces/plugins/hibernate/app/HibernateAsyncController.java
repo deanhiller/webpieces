@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import org.webpieces.plugins.hibernate.Em;
@@ -15,6 +16,7 @@ import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+@Singleton
 public class HibernateAsyncController {
 	
 	private static final Logger log = LoggerFactory.getLogger(HibernateController.class);

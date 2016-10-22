@@ -1,8 +1,11 @@
 package org.webpieces.webserver.tags.include;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
+@Singleton
 public class IncludeTagController {
 
 	public Action customTag() {

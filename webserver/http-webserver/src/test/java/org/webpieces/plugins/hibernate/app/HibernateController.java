@@ -1,5 +1,6 @@
 package org.webpieces.plugins.hibernate.app;
 
+import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import org.webpieces.plugins.hibernate.Em;
@@ -11,6 +12,7 @@ import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+@Singleton
 public class HibernateController {
 	
 	private static final Logger log = LoggerFactory.getLogger(HibernateAsyncController.class);

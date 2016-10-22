@@ -3,6 +3,7 @@ package org.webpieces.webserver.basic.app.biz;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
@@ -12,6 +13,7 @@ import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.webserver.async.app.AsyncRouteId;
 
+@Singleton
 public class AsyncController {
 
 	@Inject
