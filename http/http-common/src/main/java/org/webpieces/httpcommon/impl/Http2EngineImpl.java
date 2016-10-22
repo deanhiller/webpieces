@@ -1066,6 +1066,7 @@ public class Http2EngineImpl implements Http2Engine {
                         if(Arrays.equals(split.get(0).createByteArray(), (DatatypeConverter.parseHexBinary(prefaceHexString)))) {
                             gotPreface.set(true);
                             oldData = split.get(1);
+                            log.info("got http2 preface");
                         } else {
                             throw new GoAwayError(0, Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
                         }
