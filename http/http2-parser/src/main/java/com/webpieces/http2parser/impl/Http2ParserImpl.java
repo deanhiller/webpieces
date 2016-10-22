@@ -2,7 +2,6 @@ package com.webpieces.http2parser.impl;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.twitter.hpack.HeaderListener;
 import com.webpieces.http2parser.api.*;
 import com.webpieces.http2parser.api.dto.*;
 import org.slf4j.Logger;
@@ -113,6 +112,8 @@ public class Http2ParserImpl implements Http2Parser {
         return streamIdBuffer.getInt() & 0x7FFFFFFF;
     }
 
+    List<Http2FrameType> framesThatNeedStream = Arrays.asList(DATA, HEADERS, PUSH_PROMISE);
+
     // ignores what's left over at the end of the datawrapper
     @Override
     public Http2Frame unmarshal(DataWrapper data) {
@@ -120,10 +121,12 @@ public class Http2ParserImpl implements Http2Parser {
         byte frameTypeId = getFrameTypeId(data);
         byte flagsByte = getFlagsByte(data);
         int streamId = getStreamId(data);
+        Http2FrameType frameType = Http2FrameType.fromId(frameTypeId);
+        if (streamId == 0x0 && framesThatNeedStream.contains(frameType)) {
+            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+        }
 
-        // TODO: if the length exceeds max frame size throw a protocol error.
-
-        Class<? extends Http2Frame> frameClass = getFrameClassForType(Http2FrameType.fromId(frameTypeId));
+        Class<? extends Http2Frame> frameClass = getFrameClassForType(frameType);
         try {
             Http2Frame frame = frameClass.newInstance();
             FrameMarshaller marshaller = dtoToMarshaller.get(frameClass);
@@ -195,8 +198,26 @@ public class Http2ParserImpl implements Http2Parser {
         return data;
     }
 
+    private static Map<Http2FrameType, Integer> fixedFrameLengthByType = new HashMap<>();
+    private static List<Http2FrameType> connectionLevelFrames = new ArrayList<>();
+
+    static {
+        fixedFrameLengthByType.put(PRIORITY, 5);
+        fixedFrameLengthByType.put(RST_STREAM, 4);
+        fixedFrameLengthByType.put(PING, 8);
+        fixedFrameLengthByType.put(WINDOW_UPDATE, 4);
+
+        connectionLevelFrames.add(SETTINGS);
+        connectionLevelFrames.add(CONTINUATION);
+        connectionLevelFrames.add(HEADERS);
+        connectionLevelFrames.add(PUSH_PROMISE);
+        connectionLevelFrames.add(RST_STREAM);
+        connectionLevelFrames.add(WINDOW_UPDATE);
+    }
+
+
     @Override
-    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder) {
+    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Map<Http2Settings.Parameter, Integer> settings) {
         DataWrapper wrapperToParse;
         List<Http2Frame> frames = new LinkedList<>();
         List<Http2Frame> hasHeaderFragmentList = new LinkedList<>();
@@ -218,28 +239,41 @@ public class Http2ParserImpl implements Http2Parser {
                 return new ParserResultImpl(frames, wrapperToReturn);
             } else {
                 // peek for length, add 9 bytes for the header
-                int length = getLength(wrapperToParse) + 9;
-                if (lengthOfData < length) {
+                int payloadLength =  getLength(wrapperToParse);
+                Http2FrameType frameType = Http2FrameType.fromId(getFrameTypeId(wrapperToParse));
+                Integer fixedLengthForType = fixedFrameLengthByType.get(frameType);
+
+                log.info("got header with frame payload length " + payloadLength);
+                if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) ||
+                        (fixedLengthForType != null && payloadLength != fixedLengthForType) ||
+                        (frameType == SETTINGS && payloadLength % 6 != 0)) {
+                    int streamId = getStreamId(wrapperToParse);
+                    boolean isConnectionLevel = connectionLevelFrames.contains(frameType) || streamId == 0x0;
+
+                    throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, isConnectionLevel);
+                }
+
+                int totalLength = payloadLength + 9;
+                if (lengthOfData < totalLength) {
                     // not a whole frame
                     return new ParserResultImpl(frames, wrapperToReturn);
                 } else {
                     // parse a single frame, look for more
-                    List<? extends DataWrapper> split = dataGen.split(wrapperToParse, length);
+                    List<? extends DataWrapper> split = dataGen.split(wrapperToParse, totalLength);
                     Http2Frame frame = unmarshal(split.get(0));
 
                     // If this is a header frame, we have to make sure we get all the header
                     // frames before adding them to our framelist
-                    Http2FrameType frameType = frame.getFrameType();
                     if(Arrays.asList(HEADERS, PUSH_PROMISE, CONTINUATION).contains(frameType)) {
                         if(frameType == CONTINUATION) {
                             if(hasHeaderFragmentList.isEmpty()) {
-                                // TODO: we can't parse a continuation if there was no leading frame, so throw
+                                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, frame.getStreamId(), true);
                             }
                             if(hasHeaderFragmentList.get(0).getFrameType() == HEADERS && frame.getStreamId() != hasHeaderFragmentList.get(0).getStreamId()) {
-                                // TODO: throw here because the continuation frame doesn't match streamid with the first frame
+                                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, frame.getStreamId(), true);
                             }
                             if(hasHeaderFragmentList.get(0).getFrameType() == PUSH_PROMISE && frame.getStreamId() != ((Http2PushPromise) hasHeaderFragmentList.get(0)).getPromisedStreamId()) {
-                                // TODO: throw here because the continuation frame doesn't match promised streamid with the first frame
+                                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, frame.getStreamId(), true);
                             }
                         }
                         hasHeaderFragmentList.add(frame);

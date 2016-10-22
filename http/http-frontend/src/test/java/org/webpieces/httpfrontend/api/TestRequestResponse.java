@@ -30,9 +30,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -46,6 +44,7 @@ public class TestRequestResponse {
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private Http2Settings settingsFrame = new Http2Settings();
     private Decoder decoder;
+    Map<Http2Settings.Parameter, Integer> settings = new HashMap<>();
 
     private HttpFrontendManager mgr;
 
@@ -58,6 +57,7 @@ public class TestRequestResponse {
         parser = HttpParserFactory.createParser(pool);
         http2Parser = Http2ParserFactory.createParser(pool);
         decoder = new Decoder(4096, 4096);
+        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384);
     }
 
     private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener) throws InterruptedException, ExecutionException {
@@ -117,7 +117,7 @@ public class TestRequestResponse {
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
         // Check that we got a settings frame, a settings ack frame, a headers frame, and a data frame
-        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder);
+        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(frames.size(), 4);
@@ -151,7 +151,7 @@ public class TestRequestResponse {
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
         // Check that we got a settings frame, a settings ack frame, a headers frame, and a data frame
-        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder);
+        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(frames.size(), 4);
@@ -192,7 +192,7 @@ public class TestRequestResponse {
 
         // Check that we got a settings frame, a settings ack frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
-        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder);
+        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(frames.size(), 7);

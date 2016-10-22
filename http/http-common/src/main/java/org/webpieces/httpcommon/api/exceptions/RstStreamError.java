@@ -4,6 +4,9 @@ import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RstStreamError extends Http2Error {
     private Http2ErrorCode errorCode;
     private int streamId;
@@ -18,10 +21,13 @@ public class RstStreamError extends Http2Error {
     }
 
     @Override
-    public Http2Frame toFrame() {
+    public List<Http2Frame> toFrames() {
         Http2RstStream frame = new Http2RstStream();
         frame.setStreamId(streamId);
         frame.setErrorCode(errorCode);
-        return frame;
+        List<Http2Frame> frames = new ArrayList<>();
+        frames.add(frame);
+
+        return frames;
     }
 }

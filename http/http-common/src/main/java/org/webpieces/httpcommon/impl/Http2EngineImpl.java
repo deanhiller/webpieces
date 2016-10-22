@@ -3,6 +3,7 @@ package org.webpieces.httpcommon.impl;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.DataWrapper;
@@ -1072,22 +1073,36 @@ public class Http2EngineImpl implements Http2Engine {
                         oldData = combined;
                     }
                 } else { // Either we got the preface or we don't need it
-                    ParserResult parserResult = http2Parser.parse(oldData, newData, decoder);
+                    try {
+                        ParserResult parserResult = http2Parser.parse(oldData, newData, decoder, localSettings);
 
-                    for (Http2Frame frame : parserResult.getParsedFrames()) {
-                        log.info("got frame=" + frame);
-                        handleFrame(frame);
+                        for (Http2Frame frame : parserResult.getParsedFrames()) {
+                            log.info("got frame=" + frame);
+                            handleFrame(frame);
+                        }
+                        oldData = parserResult.getMoreData();
                     }
-                    oldData = parserResult.getMoreData();
+                    catch (ParseException e) {
+                        if(e.isConnectionLevel()) {
+                            if(e.hasStream()) {
+                                throw new GoAwayError(lastClosedLocalOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), wrapperGen.emptyWrapper());
+                            }
+                            else {
+                                throw new GoAwayError(lastClosedLocalOriginatedStream().orElse(0), e.getErrorCode(), wrapperGen.emptyWrapper());
+                            }
+                        } else {
+                            throw new RstStreamError(e.getErrorCode(), e.getStreamId());
+                        }
+                    }
                 }
             } catch (Http2Error e) {
-                channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrame()).createByteArray()));
+                channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrames()).createByteArray()));
                 if(RstStreamError.class.isInstance(e)) {
                     // Mark the stream closed
                     activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(CLOSED);
                 }
                 if(GoAwayError.class.isInstance(e)) {
-                    // TODO: Shut this connection down
+                    // TODO: Shut this connection down properly.
                     channel.close();
                 }
             }
