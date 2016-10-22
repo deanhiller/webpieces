@@ -34,6 +34,7 @@ public class Selenium2Example  {
         // Google's search is rendered dynamically with JavaScript.
         // Wait for the page to load, timeout after 10 seconds
         (new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+            @Override
             public Boolean apply(WebDriver d) {
                 return d.getTitle().toLowerCase().startsWith("cheese!");
             }

@@ -122,8 +122,8 @@ public class TestLesson1BasicRequestResponse {
 	}
 	
 	static HttpRequest createRequest(String uri) {
-		HttpRequestLine requestLine = new HttpRequestLine();;
-		requestLine.setMethod(KnownHttpMethod.GET);
+		HttpRequestLine requestLine = new HttpRequestLine();
+        requestLine.setMethod(KnownHttpMethod.GET);
 		requestLine.setUri(new HttpUri(uri));
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine );

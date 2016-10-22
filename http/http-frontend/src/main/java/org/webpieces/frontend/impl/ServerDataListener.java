@@ -50,8 +50,8 @@ public class ServerDataListener implements AsyncDataListener {
         // if we have HTTP2 on by default for some reason the incoming data blocks for a long time before
         // it comes into the 'incomingData' call...
         //if(true) {
-            socket.upgradeHttp2();
-            socket.startHttp2(Optional.empty());
+            socket.upgradeHttp2(Optional.empty());
+            //socket.sendLocalPreferredSettings(Optional.empty());
         }
         timedRequestListener.openedConnection(socket, isReadyForWrites);
     }

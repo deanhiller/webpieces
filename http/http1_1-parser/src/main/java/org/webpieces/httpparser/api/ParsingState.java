@@ -4,6 +4,6 @@ public enum ParsingState {
 
 	HEADERS,
 	BODY, 
-	CHUNK;
-	
+	CHUNK
+
 }

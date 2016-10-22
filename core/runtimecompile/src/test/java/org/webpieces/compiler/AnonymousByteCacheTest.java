@@ -30,7 +30,8 @@ public class AnonymousByteCacheTest extends AbstractCompileTest {
 		return packageStr;
 	}
 	
-	@After
+	@Override
+    @After
 	public void tearDown() {
 		byteCodeControllerFile.delete();
 		byteCodeEnumFile.delete();

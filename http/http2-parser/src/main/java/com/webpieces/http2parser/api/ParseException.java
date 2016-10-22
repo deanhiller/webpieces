@@ -23,7 +23,7 @@ public class ParseException extends RuntimeException {
         super();
         this.errorCode = errorCode;
         this.streamId = streamId;
-    };
+    }
 
     public ParseException(Http2ErrorCode errorCode) {
         this.errorCode = errorCode;

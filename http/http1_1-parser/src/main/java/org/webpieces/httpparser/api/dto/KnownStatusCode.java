@@ -41,7 +41,7 @@ public enum KnownStatusCode {
 	private String reason;
 	private HttpStatusType statusType;
 
-	private KnownStatusCode(int code, String reason, HttpStatusType statusType) {
+	KnownStatusCode(int code, String reason, HttpStatusType statusType) {
 		this.code = code;
 		this.reason = reason;
 		this.statusType = statusType;

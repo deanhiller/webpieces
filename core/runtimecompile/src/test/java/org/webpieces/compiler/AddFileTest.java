@@ -18,7 +18,8 @@ public class AddFileTest extends AbstractCompileTest {
 		return "org.webpieces.compiler.addfile";
 	}
 	
-	@After
+	@Override
+    @After
 	public void tearDown() {
 		super.tearDown();
 		

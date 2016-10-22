@@ -16,5 +16,5 @@ public enum ParsedStatus {
 	 * More than one http message was provided(perhaps 1.5 to be honest) and we
 	 * parsed the first one and returned the leftover in a buffer
 	 */
-	MSG_PARSED_AND_LEFTOVER_DATA;
+	MSG_PARSED_AND_LEFTOVER_DATA
 }

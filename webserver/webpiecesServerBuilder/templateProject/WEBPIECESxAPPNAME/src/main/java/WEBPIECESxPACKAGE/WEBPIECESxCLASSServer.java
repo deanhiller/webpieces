@@ -54,11 +54,13 @@ public class WEBPIECESxCLASSServer {
 		//In production, we don't have a compiler on the classpath nor any funny classloaders so that
 		//production is very very clean and the code for this non-dev server is very easy to step through
 		//if you have a production issue
-		public List<Module> getGuiceModules() {
+		@Override
+        public List<Module> getGuiceModules() {
 			return Lists.newArrayList(new WEBPIECESxCLASSGuiceModule());
 		}
 		
-		public List<RouteModule> getRouteModules() {
+		@Override
+        public List<RouteModule> getRouteModules() {
 			return Lists.newArrayList(new WEBPIECESxCLASSRouteModule());
 		}
 

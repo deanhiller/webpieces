@@ -6,6 +6,6 @@ public enum HttpStatusType {
 	Success,
 	Redirection,
 	ClientError,
-	ServerError;
-	
+	ServerError
+
 }

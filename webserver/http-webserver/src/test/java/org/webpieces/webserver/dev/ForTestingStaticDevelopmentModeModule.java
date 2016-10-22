@@ -19,12 +19,12 @@ public class ForTestingStaticDevelopmentModeModule implements Module {
 	public void configure(Binder binder) {
 		binder.bind(HttpFrontendManager.class).toInstance(new MockHttpFrontendMgr());
 		
-		binder.bind(RoutingService.class).to(DevRoutingService.class).asEagerSingleton();;
-		binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
+		binder.bind(RoutingService.class).to(DevRoutingService.class).asEagerSingleton();
+        binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();
 		
-		binder.bind(CompileOnDemand.class).to(NoCompiling.class).asEagerSingleton();;
-	}
+		binder.bind(CompileOnDemand.class).to(NoCompiling.class).asEagerSingleton();
+    }
 
 	private static class NoCompiling implements CompileOnDemand {
 		private ClassLoader cl = ForTestingStaticDevelopmentModeModule.class.getClassLoader();

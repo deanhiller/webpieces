@@ -19,19 +19,22 @@ public class ScriptOutputImpl implements ScriptOutput {
 		this.className = className;
 	}
 
-	public void println(String text, Token forLineNumberComment) {
+	@Override
+    public void println(String text, Token forLineNumberComment) {
 		scriptSourceCode.append(text);
 		if(forLineNumberComment != null)
 			appendTokenComment(forLineNumberComment);
 		println();
 	}
 
-	public void println() {
+	@Override
+    public void println() {
 		scriptSourceCode.append("\n");
         currentLine++;
 	}
 
-	public void print(String text) {
+	@Override
+    public void print(String text) {
 		scriptSourceCode.append(text);
 	}
 

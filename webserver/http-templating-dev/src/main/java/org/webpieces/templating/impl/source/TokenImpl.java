@@ -34,7 +34,8 @@ public class TokenImpl implements Token {
 		return value;
 	}
 
-	public String getCleanValue() {
+	@Override
+    public String getCleanValue() {
 		return getValue().replaceAll("\r", "").replaceAll("\n", " ").trim();
 	}
 	
@@ -42,7 +43,8 @@ public class TokenImpl implements Token {
 		return filePath;
 	}
 	
-	public String getSourceLocation(boolean dueToError) {
+	@Override
+    public String getSourceLocation(boolean dueToError) {
 		String fileName = filePath;
 		int lastIndexOf = filePath.lastIndexOf("/");
 		if(lastIndexOf > 0) 

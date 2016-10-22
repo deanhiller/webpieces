@@ -90,18 +90,22 @@ public class CompilerWrapper {
             }
         }
 
+        @Override
         public char[] getFileName() {
             return fileName.toCharArray();
         }
 
+        @Override
         public char[] getContents() {
             return appClassMgr.getApplicationClass(clazzName).javaSource.toCharArray();
         }
 
+        @Override
         public char[] getMainTypeName() {
             return typeName;
         }
 
+        @Override
         public char[][] getPackageName() {
             return packageName;
         }
@@ -130,6 +134,7 @@ public class CompilerWrapper {
          */
         INameEnvironment nameEnvironment = new INameEnvironment() {
 
+            @Override
             public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
                 final StringBuffer result = new StringBuffer();
                 for (int i = 0; i < compoundTypeName.length; i++) {
@@ -141,6 +146,7 @@ public class CompilerWrapper {
                 return findType(result.toString());
             }
 
+            @Override
             public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
                 final StringBuffer result = new StringBuffer();
                 for (int i = 0; i < packageName.length; i++) {
@@ -186,6 +192,7 @@ public class CompilerWrapper {
                 }
             }
 
+            @Override
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
                 StringBuilder sb = new StringBuilder();
@@ -211,6 +218,7 @@ public class CompilerWrapper {
                 return true;
             }
 
+            @Override
             public void cleanup() {
             }
         };
@@ -220,6 +228,7 @@ public class CompilerWrapper {
          */
         ICompilerRequestor compilerRequestor = new ICompilerRequestor() {
 
+            @Override
             public void acceptResult(CompilationResult result) {
                 // If error
                 if (result.hasErrors()) {

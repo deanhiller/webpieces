@@ -27,7 +27,7 @@ public enum HttpMethod {
 	
 	private String code;
 	
-	private HttpMethod(String code) {
+	HttpMethod(String code) {
 		this.code = code;
 	}
 	

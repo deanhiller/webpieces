@@ -61,10 +61,8 @@ public class HttpVersion {
 		HttpVersion other = (HttpVersion) obj;
 		if (major != other.major)
 			return false;
-		if (minor != other.minor)
-			return false;
-		return true;
-	}
+        return minor == other.minor;
+    }
 
 	@Override
 	public String toString() {

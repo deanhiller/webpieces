@@ -56,7 +56,8 @@ public class ProdTemplateService implements TemplateService {
 		out.write(result);
 	}
 	
-	public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup) {
+	@Override
+    public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
 		StringWriter out = new StringWriter();

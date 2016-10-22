@@ -14,10 +14,8 @@ public class HttpChunk extends HttpPayload {
 	}
 
 	public boolean isLastChunk() {
-		if(getMessageType() == HttpMessageType.LAST_CHUNK)
-			return true;
-		return false;
-	}
+        return getMessageType() == HttpMessageType.LAST_CHUNK;
+    }
 	
 	public void addExtension(HttpChunkExtension extension) {
 		extensions.add(extension);

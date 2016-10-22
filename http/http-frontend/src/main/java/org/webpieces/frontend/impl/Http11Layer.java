@@ -67,7 +67,7 @@ public class Http11Layer {
                 }
                 if (upgradeHeader != null && upgradeHeader.toLowerCase().equals("h2c")) {
                     final Optional<ByteBuffer> maybeSettingsPayload = Optional.of(settingsFrame);
-
+                    log.info("got http2 upgrade with settings: " + DatatypeConverter.printHexBinary(settingsFrame.array()));
                     // Create the upgrade response
                     HttpResponse response = new HttpResponse();
                     HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
@@ -80,14 +80,14 @@ public class Http11Layer {
 
                     HttpServerSocket socket = getHttpServerSocketForChannel(channel);
                     ResponseSender http11Sender = socket.getResponseSender();
-                    socket.upgradeHttp2();
+                    socket.upgradeHttp2(maybeSettingsPayload);
 
                     // Send the upgrade accept response using the old sender and then pass the request on
                     // to the requestlistener with the new sender.
                     http11Sender.sendResponse(response, req, new RequestId(0), true)
                         .thenAccept(
                             responseId -> {
-                                socket.startHttp2(maybeSettingsPayload);
+                                //socket.sendLocalPreferredSettings();
                                 // Send the request to listener (requestid is 1 for this first request)
                                 listener.incomingRequest(req, new RequestId(0x1), true, socket.getResponseSender());
                             }

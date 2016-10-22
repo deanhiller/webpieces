@@ -5,5 +5,5 @@ public enum HeaderType {
 	GENERAL,
 	ENTITY,
 	REQUEST,
-	RESPONSE;
+	RESPONSE
 }

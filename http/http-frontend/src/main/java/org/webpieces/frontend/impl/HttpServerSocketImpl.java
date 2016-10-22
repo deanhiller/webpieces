@@ -43,15 +43,12 @@ public class HttpServerSocketImpl implements HttpServerSocket {
     }
 
     @Override
-    public synchronized void upgradeHttp2() {
+    public void upgradeHttp2(Optional<ByteBuffer> maybeSettingsPayload) {
         http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, channel.getRemoteAddress(), SERVER);
         http2Engine.setRequestListener(timedRequestListener);
         dataListener = http2Engine.getDataListener();
         responseSender = http2Engine.getResponseSender();
-    }
 
-    public synchronized void startHttp2(Optional<ByteBuffer> maybeSettingsPayload) {
-        http2Engine.sendLocalPreferredSettings();
         maybeSettingsPayload.ifPresent(settingsPayload ->
         {
             try {
@@ -64,6 +61,11 @@ public class HttpServerSocketImpl implements HttpServerSocket {
                 log.error("Unable to parse initial settings payload: 0x" + DatatypeConverter.printHexBinary(settingsPayload.array()), e);
             }
         });
+    }
+
+    @Override
+    public void sendLocalPreferredSettings() {
+        http2Engine.sendLocalPreferredSettings();
     }
 
     @Override

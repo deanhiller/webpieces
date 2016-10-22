@@ -55,11 +55,13 @@ class Http11DataListener implements DataListener {
 		}
 	}
 
+	@Override
 	public void farEndClosed(Channel channel) {
 		log.trace(()->"far end closed. channel="+channel);
 		processor.farEndClosed(channel);
 	}
 
+	@Override
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
 		log.info("Failure on channel="+channel, e);
 		channel.close();

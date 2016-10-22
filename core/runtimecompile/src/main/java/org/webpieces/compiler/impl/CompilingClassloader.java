@@ -171,6 +171,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
     /**
      * Search for the byte code of the given class.
      */
+    @Override
     public byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
         try (InputStream is = getResourceAsStream(name)) {
@@ -240,10 +241,12 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         final Iterator<URL> it = urls.iterator();
         return new Enumeration<URL>() {
 
+            @Override
             public boolean hasMoreElements() {
                 return it.hasNext();
             }
 
+            @Override
             public URL nextElement() {
                 return it.next();
             }

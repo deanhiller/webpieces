@@ -7,6 +7,6 @@ public enum AnonymousRouteId implements ForTestRouteId {
 	GET_CREATE_USER_PAGE,
 	POST_CREATE_USER,
 	GET_SHOW_USER,
-	SOME_EXAMPLE;
-	
+	SOME_EXAMPLE
+
 }

@@ -45,7 +45,8 @@ public class MementoImpl implements Memento {
 		this.parsedMessages = parsedMessages;
 	}
 
-	public DataWrapper getLeftOverData() {
+	@Override
+    public DataWrapper getLeftOverData() {
 		return leftOverData;
 	}
 
@@ -77,7 +78,8 @@ public class MementoImpl implements Memento {
 		this.halfParsedMessage = message;
 	}
 
-	public HttpPayload getHalfParsedMessage() {
+	@Override
+    public HttpPayload getHalfParsedMessage() {
 		return halfParsedMessage;
 	}
 

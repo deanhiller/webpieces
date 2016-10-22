@@ -142,5 +142,5 @@ public class IntegTestClientNotRead {
 			log.info("client registring for reads");
 			channel.registerForReads();
 		}
-	};
+	}
 }

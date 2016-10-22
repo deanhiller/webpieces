@@ -121,15 +121,18 @@ class TimedRequestListener implements RequestListener {
 		}
 	}
 	
-	public void clientClosedChannel(HttpSocket httpSocket) {
+	@Override
+    public void clientClosedChannel(HttpSocket httpSocket) {
 		listener.clientClosedChannel(httpSocket);
 	}
 
-	public void applyWriteBackPressure(ResponseSender responseSender) {
+	@Override
+    public void applyWriteBackPressure(ResponseSender responseSender) {
 		listener.applyWriteBackPressure(responseSender);
 	}
 
-	public void releaseBackPressure(ResponseSender responseSender) {
+	@Override
+    public void releaseBackPressure(ResponseSender responseSender) {
 		listener.releaseBackPressure(responseSender);
 	}
 

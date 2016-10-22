@@ -151,16 +151,19 @@ public class Http2EngineImpl implements Http2Engine {
         initializeFlowControl(0x0);
     }
 
+    @Override
     public Channel getUnderlyingChannel() {
         return channel;
     }
 
     // Client only
+    @Override
     public void sendHttp2Preface() {
         log.info("sending preface");
         channel.write(ByteBuffer.wrap(DatatypeConverter.parseHexBinary(prefaceHexString)));
     }
 
+    @Override
     public void sendLocalPreferredSettings() {
         Http2Settings settingsFrame = new Http2Settings();
 
@@ -172,6 +175,7 @@ public class Http2EngineImpl implements Http2Engine {
     @Override
     public void setRemoteSettings(Http2Settings frame, boolean sendAck) {
         // We've received a settings. Update remoteSettings and send an ack
+        log.info("Setting remote settings to: " + frame.getSettings());
         gotSettings.set(true);
         for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
             remoteSettings.put(entry.getKey(), entry.getValue());
@@ -203,6 +207,7 @@ public class Http2EngineImpl implements Http2Engine {
         }
     }
 
+    @Override
     public void initialize() {
 
         Timer timer = new Timer();
@@ -210,10 +215,12 @@ public class Http2EngineImpl implements Http2Engine {
         timer.schedule(new SendPing(), 5000, 5000);
     }
 
+    @Override
     public DataListener getDataListener() {
         return dataListener;
     }
 
+    @Override
     public Http2Settings getLocalRequestedSettingsFrame() {
         Http2Settings settingsFrame = new Http2Settings();
         settingsFrame.setSettings(localPreferredSettings);
@@ -586,11 +593,13 @@ public class Http2EngineImpl implements Http2Engine {
         outgoingFlowControl.put(streamId, new AtomicInteger(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
     }
 
+    @Override
     public void cleanUpPendings(String msg) {
         // TODO: deal with http2 streams to be cleaned up
     }
 
     // Client only
+    @Override
     public CompletableFuture<RequestId> sendRequest(HttpRequest request, boolean isComplete, ResponseListener l) {
 
         // Check if we are allowed to create a new stream
@@ -631,7 +640,7 @@ public class Http2EngineImpl implements Http2Engine {
     public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
         Stream responseStream = activeStreams.get(requestId.getValue());
 
-        if(responseStream == null && requestId.getValue() == 0x1) {
+        if(responseStream == null) {
             if(requestId.getValue() == 0x1) {
                 // Create a new response stream for this stream, because this is the first response after an upgrade
                 responseStream = new Stream();
@@ -991,19 +1000,12 @@ public class Http2EngineImpl implements Http2Engine {
             // Transition the stream state
             if(frame.getStreamId() != 0x0) {
                 Stream stream = activeStreams.get(frame.getStreamId());
-                // If the stream doesn't exist, create it, but we will drop
-                // everything because we don't have a listener for it
-                // TODO: make sure the lack of listener doesn't cause problems
+                // If the stream doesn't exist, create it.
                 if(stream == null) {
                     stream = new Stream();
                     stream.setStreamId(frame.getStreamId());
                     initializeFlowControl(stream.getStreamId());
-
-                    // If we're a server, actually assign the default requestlistener here
-                    if(side == SERVER)
-                    {
-                        // TOOD: get the default request listener?
-                    }
+                    activeStreams.put(stream.getStreamId(), stream);
                 }
 
                 switch (frame.getFrameType()) {
@@ -1067,6 +1069,7 @@ public class Http2EngineImpl implements Http2Engine {
                             gotPreface.set(true);
                             oldData = split.get(1);
                             log.info("got http2 preface");
+                            sendLocalPreferredSettings();
                         } else {
                             throw new GoAwayError(0, Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
                         }

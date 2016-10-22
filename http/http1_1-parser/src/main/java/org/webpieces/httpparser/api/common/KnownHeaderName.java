@@ -80,7 +80,7 @@ public enum KnownHeaderName {
 	private String name;
 	private HeaderType type;
 	
-	private KnownHeaderName(String name, HeaderType type) {
+	KnownHeaderName(String name, HeaderType type) {
 		this.name = name;
 		this.type = type;
 	}

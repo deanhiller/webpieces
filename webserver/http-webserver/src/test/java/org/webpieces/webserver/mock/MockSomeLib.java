@@ -39,7 +39,8 @@ public class MockSomeLib extends SomeLib {
 		queuedFutures.add(future2);
 	}
 	
-	public void validateUser(UserDbo user) {
+	@Override
+    public void validateUser(UserDbo user) {
 		this.lastUser = user;
 	}
 	

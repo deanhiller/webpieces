@@ -1,9 +1,9 @@
 package org.webpieces.ctx.api;
 
 public interface Flash extends FlashScope {
-    public boolean hasMessage();
+    boolean hasMessage();
 
-    public String message();
+    String message();
 
-    public void setMessage(String msg);
+    void setMessage(String msg);
 }

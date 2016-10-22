@@ -28,17 +28,13 @@ public class ConvertAscii {
 
 	public boolean isCarriageReturn(byte byteVal) {
 		int asciiInt = byteVal & 0xFF;
-		if(asciiInt == 13) 
-			return true;
-		return false;
-	}
+        return asciiInt == 13;
+    }
 
 	public boolean isLineFeed(byte byteVal) {
 		int asciiInt = byteVal & 0xFF;
-		if(asciiInt == 10) 
-			return true;
-		return false;
-	}
+        return asciiInt == 10;
+    }
 	
 	public String convertToReadableForm(byte[] msg) {
 		return convertToReadableForm(msg, 0, msg.length);

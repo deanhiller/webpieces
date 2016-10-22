@@ -10,11 +10,13 @@ import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
 public class BeansMeta implements WebAppMeta {
-	public List<Module> getGuiceModules() {
+	@Override
+    public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new EmptyModule());
 	}
 	
-	public List<RouteModule> getRouteModules() {
+	@Override
+    public List<RouteModule> getRouteModules() {
 		return Lists.newArrayList(new BeansRouteModule());
 	}
 	

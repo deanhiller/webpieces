@@ -238,7 +238,6 @@ public class Http2ParserImpl implements Http2Parser {
                 Http2FrameType frameType = Http2FrameType.fromId(getFrameTypeId(wrapperToParse));
                 Integer fixedLengthForType = fixedFrameLengthByType.get(frameType);
 
-                log.info("got header with frame payload length " + payloadLength);
                 if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) ||
                         (fixedLengthForType != null && payloadLength != fixedLengthForType) ||
                         (frameType == SETTINGS && payloadLength % 6 != 0)) {

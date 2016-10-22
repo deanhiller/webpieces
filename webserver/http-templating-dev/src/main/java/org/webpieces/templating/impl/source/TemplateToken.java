@@ -17,7 +17,7 @@ public enum TemplateToken {
     private String start;
 	private String end;
 
-	private TemplateToken(String start, String end) {
+	TemplateToken(String start, String end) {
     	this.start = start;
     	this.end = end;
     }
