@@ -16,10 +16,12 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 public class HibernateAppMeta implements WebAppMeta {
+	public static final String PERSISTENCE_UNIT= "fortest";
+	
 	public List<Module> getGuiceModules() {
 		return Lists.newArrayList(
 				new H2DbModule(),
-				new HibernateModule("fortest"),
+				new HibernateModule(PERSISTENCE_UNIT),
 				new AppModule()
 				);
 	}

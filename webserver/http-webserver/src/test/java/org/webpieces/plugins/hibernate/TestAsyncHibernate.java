@@ -84,9 +84,29 @@ public class TestAsyncHibernate {
 		readBean(redirectUrl, "dean@async.xsoftware.biz");		
 	}
 	
+	/**
+	 * Tests when we load user but not company, user.company.name in the page will then go to the
+	 * database
+	 */
 	@Test
-	public void testAsyncPageLookingEntityUp() {
-		
+	public void testDbUseWhileRenderingPage() {
+//		Integer id = TestSyncHibernate.loadDataInDb("dean2@async.xsoftware.biz");
+//		
+//		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
+//
+//		server.incomingRequest(req, new RequestId(0), true, socket);
+//		
+//		List<FullResponse> responses1 = socket.getResponses();
+//		Assert.assertEquals(0, responses1.size());
+//		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
+//		runnables.get(0).run();
+//		
+//		List<FullResponse> responses2 = socket.getResponses();
+//		Assert.assertEquals(1, responses2.size());
+//
+//		FullResponse response = responses2.get(0);
+//		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+//		response.assertContains("company name=WebPieces LLC");
 	}
 	
 	@Test

@@ -8,10 +8,12 @@ import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HibernateController {
 	
-	//private static final Logger log = LoggerFactory.getLogger(HibernateAsyncController.class);
+	private static final Logger log = LoggerFactory.getLogger(HibernateAsyncController.class);
 	
 	/**
 	 * BIG NOTE: This is NOT the way you should use hibernate but is a base case for us to 
@@ -41,6 +43,13 @@ public class HibernateController {
 	public Render display(Integer id) {
 		EntityManager mgr = Em.get();
 		UserDbo user = mgr.find(UserDbo.class, id);
+		return Actions.renderThis("user", user);
+	}
+	
+	public Render entityLoad(Integer id) {
+		EntityManager mgr = Em.get();
+		UserDbo user = mgr.find(UserDbo.class, id);	
+		log.info("loaded user");
 		return Actions.renderThis("user", user);
 	}
 }

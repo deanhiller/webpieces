@@ -64,6 +64,8 @@ public class Logger {
     /**
      * Log a message at the DEBUG level.
      *
+     * Usage: log.debug(()->"my lazy log statement")
+     * 
      * @param msg the message string to be logged
      */
     public void debug(Supplier<String> msg) {

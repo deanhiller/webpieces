@@ -92,6 +92,7 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
+		log.debug(() -> "Sending redirect response. req="+request);
 		HttpResponse response = createRedirect(httpResponse);
 
 		log.info("sending REDIRECT response responseSender="+ responseSender);
@@ -135,6 +136,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
+		log.debug(() -> "Sending render html response. req="+request);
 		View view = resp.view;
 		String packageStr = view.getPackageName();
 		//For this type of View, the template is the name of the method..
@@ -193,6 +195,7 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
+		log.debug(() -> "Sending render static html response. req="+request);
 		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, responseSender);
 		return reader.sendRenderStatic(requestInfo, renderStatic);
 	}
@@ -298,6 +301,8 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void failureRenderingInternalServerErrorPage(Throwable e) {
+		log.debug(() -> "Sending failure html response. req="+request);
+
 		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
 		//TODO: we should actually just render our own internalServerError.html page with styling and we could do that.
 		
@@ -312,6 +317,8 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	public void sendFailure(HttpException exc) {
+		log.debug(() -> "Sending failure response. req="+request);
+
 		createResponseAndSend(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", "txt", "text/plain");
 	}
 

@@ -12,10 +12,12 @@ import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HibernateAsyncController {
 	
-	//private static final Logger log = LoggerFactory.getLogger(HibernateController.class);
+	private static final Logger log = LoggerFactory.getLogger(HibernateController.class);
 	private final Executor exec;
 	
 	@Inject
@@ -58,6 +60,19 @@ public class HibernateAsyncController {
 		return Actions.renderThis("user", user);
 	}
 
+	public CompletableFuture<Render> entityLoad(Integer id) {
+		EntityManager mgr = Em.get();
+		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
+		kickOffAsyncResponse(future);
+		return future.thenApply(intVal -> runEntityLoad(mgr, id));
+	}
+	
+	private Render runEntityLoad(EntityManager mgr, Integer id) {
+		UserDbo user = mgr.find(UserDbo.class, id);
+		log.info("user loaded");
+		return Actions.renderThis("user", user);
+	}
+	
 	private void kickOffAsyncResponse(CompletableFuture<Integer> future) {
 		exec.execute(new Runnable() {
 			@Override
