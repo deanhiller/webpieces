@@ -169,7 +169,7 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
     @Override
-    public void setRemoteSettings(Http2Settings frame) {
+    public void setRemoteSettings(Http2Settings frame, boolean sendAck) {
         // We've received a settings. Update remoteSettings and send an ack
         gotSettings.set(true);
         for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
@@ -194,10 +194,12 @@ public class Http2EngineImpl implements Http2Engine {
             minimumMaxHeaderTableSizeUpdate.updateAndGet(
                     new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE)));
         }
-        Http2Settings responseFrame = new Http2Settings();
-        responseFrame.setAck(true);
-        log.info("sending settings ack: " + responseFrame);
-        channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
+        if(sendAck) {
+            Http2Settings responseFrame = new Http2Settings();
+            responseFrame.setAck(true);
+            log.info("sending settings ack: " + responseFrame);
+            channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
+        }
     }
 
     public void initialize() {
@@ -953,7 +955,7 @@ public class Http2EngineImpl implements Http2Engine {
                     localSettings.put(entry.getKey(), entry.getValue());
                 }
             } else {
-                setRemoteSettings(frame);
+                setRemoteSettings(frame, true);
             }
         }
 

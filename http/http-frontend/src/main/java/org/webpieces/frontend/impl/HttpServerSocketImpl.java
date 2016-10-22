@@ -59,7 +59,7 @@ public class HttpServerSocketImpl implements HttpServerSocket {
                 SettingsMarshaller settingsMarshaller = (SettingsMarshaller) http2Parser.getMarshaller(Http2Settings.class);
                 settingsMarshaller.unmarshalFlagsAndPayload(settingsFrame, (byte) 0x0, Optional.of(dataGen.wrapByteBuffer(settingsPayload)));
 
-                http2Engine.setRemoteSettings(settingsFrame);
+                http2Engine.setRemoteSettings(settingsFrame, false);
             } catch (Exception e) {
                 log.error("Unable to parse initial settings payload: 0x" + DatatypeConverter.printHexBinary(settingsPayload.array()), e);
             }

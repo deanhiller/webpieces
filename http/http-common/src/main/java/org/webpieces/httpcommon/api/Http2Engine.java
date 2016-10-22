@@ -24,7 +24,7 @@ public interface Http2Engine {
 
     void sendLocalPreferredSettings();
 
-    void setRemoteSettings(Http2Settings frame);
+    void setRemoteSettings(Http2Settings frame, boolean sendAck);
 
     //Client Only
     // These are both needed to give the RequestSender the ability to deal with negotiating http1.1 vs http2.

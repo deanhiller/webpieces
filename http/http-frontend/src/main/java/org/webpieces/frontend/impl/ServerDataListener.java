@@ -46,8 +46,8 @@ public class ServerDataListener implements AsyncDataListener {
     public void connectionOpened(TCPChannel tcpChannel, boolean isReadyForWrites) {
         HttpServerSocket socket = getHttpServerSocketForChannel(tcpChannel);
         // TODO: replace 'false' with ALPN check
-        //if(isReadyForWrites && tcpChannel.isSslChannel() && false) { // If ALPN, upgrade to HTTP2
-        if(true) {
+        if(isReadyForWrites && tcpChannel.isSslChannel() && false) { // If ALPN, upgrade to HTTP2
+        //if(true) {
             socket.upgradeHttp2();
             socket.startHttp2(Optional.empty());
         }
