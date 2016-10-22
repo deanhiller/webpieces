@@ -116,15 +116,14 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        // Check that we got a settings frame, a settings ack frame, a headers frame, and a data frame
+        // Check that we got a settings frame, a headers frame, and a data frame
         ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
-        Assert.assertEquals(frames.size(), 4);
+        Assert.assertEquals(3, frames.size());
         Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2Settings.class.isInstance(frames.get(1)));
-        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(2)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(3)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
     }
 
     @Test
@@ -150,17 +149,16 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        // Check that we got a settings frame, a settings ack frame, a headers frame, and a data frame
+        // Check that we got a settings frame, a headers frame, and a data frame
         ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
-        Assert.assertEquals(frames.size(), 4);
+        Assert.assertEquals(3, frames.size());
         Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2Settings.class.isInstance(frames.get(1)));
-        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(2)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(3)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
 
-        Assert.assertArrayEquals(((Http2Data) frames.get(3)).getData().createByteArray(), blahblah.getBytes());
+        Assert.assertArrayEquals(((Http2Data) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
     }
 
     @Test
@@ -190,19 +188,18 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        // Check that we got a settings frame, a settings ack frame, a headers frame, and a data frame, then a push promise frame
+        // Check that we got a settings frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
         ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
-        Assert.assertEquals(frames.size(), 7);
+        Assert.assertEquals(6, frames.size());
         Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2Settings.class.isInstance(frames.get(1)));
-        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(2)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(3)));
-        Assert.assertTrue(Http2PushPromise.class.isInstance(frames.get(4)));
-        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(5)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(6)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
+        Assert.assertTrue(Http2PushPromise.class.isInstance(frames.get(3)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(4)));
+        Assert.assertTrue(Http2Data.class.isInstance(frames.get(5)));
     }
 
 

@@ -65,6 +65,7 @@ public class TestHttp2Parser {
 
     private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
+    private static Map<Http2Settings.Parameter, Integer> settings = new HashMap<>();
 
     // https://github.com/http2jp/hpack-test-case/blob/master/nghttp2/story_00.json
     private static String basicRequestSerializationNghttp2 = "82864188f439ce75c875fa5784";
@@ -98,11 +99,13 @@ public class TestHttp2Parser {
         basicResponseHeaders.add(new HasHeaderFragment.Header("expires", "Tue, 27 Sep 2016 23:41:50 GMT"));
         basicResponseHeaders.add(new HasHeaderFragment.Header("server", "cloudflare-nginx"));
         basicResponseHeaders.add(new HasHeaderFragment.Header("cf-ray", "2e916f776c724fd5-DEN"));
+
+        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384);
     }
 
     @Test
     public void testBasicParse() {
-        ParserResult result = parser.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper(), decoder);
+        ParserResult result = parser.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper(), decoder, settings);
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertFalse(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -113,7 +116,7 @@ public class TestHttp2Parser {
     public void testParseWithSplitFrame() {
         DataWrapper fullFrames = UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames);
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 6);
-        ParserResult result = parser.parse(split.get(0), split.get(1), decoder);
+        ParserResult result = parser.parse(split.get(0), split.get(1), decoder, settings);
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertFalse(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -126,7 +129,7 @@ public class TestHttp2Parser {
         ParserResult result = parser.parse(
                 UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames.subSequence(0, 8).toString()), // oldData
                 UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames.substring(8)), // newData
-                decoder
+                decoder, settings
             );
 
         Assert.assertTrue(result.hasParsedFrames());
@@ -140,7 +143,7 @@ public class TestHttp2Parser {
         ParserResult result = parser.parse(
                 UtilsForTest.dataWrapperFromHex(dataFramesWithSomeLeftOverData),
                 dataGen.emptyWrapper(),
-                decoder);
+                decoder, settings);
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertTrue(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -153,7 +156,7 @@ public class TestHttp2Parser {
         ParserResult result = parser.parse(
                 UtilsForTest.dataWrapperFromHex(dataFramesWithABunchOfLeftOverData),
                 dataGen.emptyWrapper(),
-                decoder);
+                decoder, settings);
         Assert.assertTrue(result.hasParsedFrames());
         Assert.assertTrue(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -166,7 +169,7 @@ public class TestHttp2Parser {
         ParserResult result = parser.parse(
                 UtilsForTest.dataWrapperFromHex("00 00"),
                 dataGen.emptyWrapper(),
-                decoder);
+                decoder, settings);
         Assert.assertFalse(result.hasParsedFrames());
         Assert.assertTrue(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -179,7 +182,7 @@ public class TestHttp2Parser {
         ParserResult result = parser.parse(
                 dataGen.emptyWrapper(),
                 dataGen.emptyWrapper(),
-                decoder);
+                decoder, settings);
         Assert.assertFalse(result.hasParsedFrames());
         Assert.assertFalse(result.hasMoreData());
         List<Http2Frame> frames = result.getParsedFrames();
@@ -249,7 +252,7 @@ public class TestHttp2Parser {
                         serializedHeaderFrames,
                         UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames)));
 
-        ParserResult result = parser.parse(combined, dataGen.emptyWrapper(), decoder);
+        ParserResult result = parser.parse(combined, dataGen.emptyWrapper(), decoder, settings);
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
         Http2Frame headerFrame = result.getParsedFrames().get(4);
         Assert.assertEquals(headerFrame.getFrameType(), HEADERS);

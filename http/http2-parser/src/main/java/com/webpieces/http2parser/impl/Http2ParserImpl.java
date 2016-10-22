@@ -112,8 +112,6 @@ public class Http2ParserImpl implements Http2Parser {
         return streamIdBuffer.getInt() & 0x7FFFFFFF;
     }
 
-    List<Http2FrameType> framesThatNeedStream = Arrays.asList(DATA, HEADERS, PUSH_PROMISE);
-
     // ignores what's left over at the end of the datawrapper
     @Override
     public Http2Frame unmarshal(DataWrapper data) {
@@ -122,9 +120,6 @@ public class Http2ParserImpl implements Http2Parser {
         byte flagsByte = getFlagsByte(data);
         int streamId = getStreamId(data);
         Http2FrameType frameType = Http2FrameType.fromId(frameTypeId);
-        if (streamId == 0x0 && framesThatNeedStream.contains(frameType)) {
-            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
-        }
 
         Class<? extends Http2Frame> frameClass = getFrameClassForType(frameType);
         try {

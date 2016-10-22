@@ -1028,7 +1028,7 @@ public class Http2EngineImpl implements Http2Engine {
                     case CONTINUATION:
                         throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper());
                     default:
-                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR,
+                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), frame.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR,
                                 wrapperGen.emptyWrapper());
                 }
             } else {
