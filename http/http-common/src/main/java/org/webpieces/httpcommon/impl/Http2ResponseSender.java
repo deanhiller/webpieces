@@ -1,10 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.Http2Engine;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.*;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -12,12 +9,17 @@ import org.webpieces.nio.api.channels.Channel;
 
 import java.util.concurrent.CompletableFuture;
 
-public class Http2ResponseSender implements ResponseSender {
+class Http2ResponseSender implements ResponseSender {
     // TODO: maybe we should just make the Http2ServerEngine implement ResponseSender?
     private Http2Engine http2Engine;
 
     public Http2ResponseSender(Http2Engine http2Engine) {
         this.http2Engine = http2Engine;
+    }
+
+    @Override
+    public Protocol getProtocol() {
+        return Protocol.HTTP2;
     }
 
     @Override

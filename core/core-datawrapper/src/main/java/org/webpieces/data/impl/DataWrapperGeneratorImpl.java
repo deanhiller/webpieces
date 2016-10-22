@@ -12,6 +12,11 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 	private static final ByteBufferDataWrapper EMPTY_WRAPPER = new ByteBufferDataWrapper(ByteBuffer.allocate(0));
 
 	@Override
+	public DataWrapper wrapString(String string) {
+		return wrapByteArray(string.getBytes());
+	}
+
+	@Override
 	public DataWrapper wrapByteArray(byte[] data) {
 		return new ByteBufferDataWrapper(ByteBuffer.wrap(data));
 	}

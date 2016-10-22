@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
@@ -21,6 +22,11 @@ class Http11ResponseSender implements ResponseSender {
 	public Http11ResponseSender(Channel channel, HttpParser parser) {
 		this.channel = channel;
 		this.parser = parser;
+	}
+
+	@Override
+	public Protocol getProtocol() {
+		return Protocol.HTTP11;
 	}
 
 	@Override

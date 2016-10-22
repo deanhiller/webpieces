@@ -5,13 +5,15 @@ import java.util.List;
 
 public interface DataWrapperGenerator {
 
-	public DataWrapper emptyWrapper();
+	DataWrapper emptyWrapper();
 	
-	public DataWrapper wrapByteArray(byte[] data);
+	DataWrapper wrapByteArray(byte[] data);
 	
-	public DataWrapper wrapByteArray(byte[] data, int i, int read);
+	DataWrapper wrapByteArray(byte[] data, int i, int read);
 
-	public DataWrapper wrapByteBuffer(ByteBuffer buffer);
+	DataWrapper wrapByteBuffer(ByteBuffer buffer);
+
+	DataWrapper wrapString(String string);
 	
 	/**
 	 * Combines two data structures so they can be read as one unit easily from 
@@ -23,9 +25,9 @@ public interface DataWrapperGenerator {
 	 * @param end to be put at the end
 	 * @return
 	 */
-	public DataWrapper chainDataWrappers(DataWrapper begin, DataWrapper end);
+	DataWrapper chainDataWrappers(DataWrapper begin, DataWrapper end);
 	
-	public DataWrapper chainDataWrappers(DataWrapper begin, ByteBuffer...end);
+	DataWrapper chainDataWrappers(DataWrapper begin, ByteBuffer... end);
 	
 	/**
 	 * In some cases, we may have a DataWrapper containing the end of the message 
@@ -38,6 +40,6 @@ public interface DataWrapperGenerator {
 	 * @param splitAtPosition
 	 * @return
 	 */
-	public List<? extends DataWrapper> split(DataWrapper dataToRead, int splitAtPosition);
+	List<? extends DataWrapper> split(DataWrapper dataToRead, int splitAtPosition);
 	
 }

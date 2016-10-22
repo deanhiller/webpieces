@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
@@ -23,7 +24,12 @@ public class MockResponseSender implements ResponseSender {
 	private static final Logger log = LoggerFactory.getLogger(MockResponseSender.class);
 	private List<FullResponse> payloads = new ArrayList<>();
 	private FullResponse chunkedResponse;
-	
+
+	@Override
+	public Protocol getProtocol() {
+		return null;
+	}
+
 	@Override
 	public CompletableFuture<Void> close() {
 		return null;

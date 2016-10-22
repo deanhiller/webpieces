@@ -22,4 +22,6 @@ public interface ResponseSender {
 	CompletableFuture<Void> sendException(HttpException e);
 
 	Channel getUnderlyingChannel();
+
+	Protocol getProtocol();
 }
