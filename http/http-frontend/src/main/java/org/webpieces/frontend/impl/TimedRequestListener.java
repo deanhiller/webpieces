@@ -24,16 +24,16 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.SafeRunnable;
 
-class TimedListener implements RequestListener {
+class TimedRequestListener implements RequestListener {
 
-	private static final Logger log = LoggerFactory.getLogger(TimedListener.class);
+	private static final Logger log = LoggerFactory.getLogger(TimedRequestListener.class);
 
 	private ScheduledExecutorService timer;
 	private RequestListener listener;
 	private FrontendConfig config;
 	private Map<HttpSocket, ScheduledFuture<?>> socketToTimeout = new Hashtable<>();
 
-	TimedListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
+	TimedRequestListener(ScheduledExecutorService timer, RequestListener listener, FrontendConfig config) {
 		this.timer = timer;
 		this.listener = listener;
 		this.config = config;

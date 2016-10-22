@@ -1,10 +1,7 @@
 package org.webpieces.frontend.impl;
 
 import com.webpieces.http2parser.api.Http2Parser;
-import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.frontend.api.HttpServerSocket;
-import org.webpieces.httpcommon.api.Http2Engine;
-import org.webpieces.httpcommon.api.Http2EngineFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -14,10 +11,8 @@ import org.webpieces.nio.api.handlers.AsyncDataListener;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
-
 public class ServerDataListener implements AsyncDataListener {
-    private TimedListener timedListener;
+    private TimedRequestListener timedRequestListener;
     private Http11DataListener http11DataListener;
     private HttpParser httpParser;
     private Http2Parser http2Parser;
@@ -32,16 +27,16 @@ public class ServerDataListener implements AsyncDataListener {
                     http11DataListener,
                     new Http11ResponseSender(channel, httpParser),
                     http2Parser,
-                    timedListener);
+                    timedRequestListener);
 
             session.put("webpieces.httpServerSocket", httpServerSocket);
         }
         return httpServerSocket;
     }
 
-    public ServerDataListener(TimedListener timedListener, Http11DataListener http11DataListener, HttpParser httpParser,
+    public ServerDataListener(TimedRequestListener timedRequestListener, Http11DataListener http11DataListener, HttpParser httpParser,
                               Http2Parser http2Parser) {
-        this.timedListener = timedListener;
+        this.timedRequestListener = timedRequestListener;
         this.http11DataListener = http11DataListener;
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
@@ -52,9 +47,10 @@ public class ServerDataListener implements AsyncDataListener {
         HttpServerSocket socket = getHttpServerSocketForChannel(tcpChannel);
         // TODO: replace 'false' with ALPN check
         if(isReadyForWrites && tcpChannel.isSslChannel() && false) { // If ALPN, upgrade to HTTP2
-            socket.upgradeHttp2(Optional.empty());
+            socket.upgradeHttp2();
+            socket.startHttp2(Optional.empty());
         }
-        timedListener.openedConnection(socket, isReadyForWrites);
+        timedRequestListener.openedConnection(socket, isReadyForWrites);
     }
 
     @Override

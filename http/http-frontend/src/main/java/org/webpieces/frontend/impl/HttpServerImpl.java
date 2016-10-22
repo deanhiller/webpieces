@@ -19,7 +19,7 @@ public class HttpServerImpl implements HttpServer {
 	private AsyncServer server;
 	private AsyncDataListener dataListener;
 
-	public HttpServerImpl(TimedListener requestListener, BufferPool bufferPool, FrontendConfig config) {
+	public HttpServerImpl(TimedRequestListener requestListener, BufferPool bufferPool, FrontendConfig config) {
 		HttpParser httpParser = HttpParserFactory.createParser(bufferPool);
 		Http2Parser http2Parser = Http2ParserFactory.createParser(bufferPool);
 

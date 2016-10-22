@@ -30,7 +30,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(FrontendConfig config, RequestListener listener) {
 		preconditionCheck(config);
 		
-		TimedListener timed = new TimedListener(timer, listener, config);
+		TimedRequestListener timed = new TimedRequestListener(timer, listener, config);
 		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
 		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
@@ -48,7 +48,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpsServer(FrontendConfig config, RequestListener listener,
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
-		TimedListener timed = new TimedListener(timer, listener, config);
+		TimedRequestListener timed = new TimedRequestListener(timer, listener, config);
 		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
 		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);

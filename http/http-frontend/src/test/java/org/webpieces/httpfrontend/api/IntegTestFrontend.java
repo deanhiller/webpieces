@@ -9,11 +9,13 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.*;
+import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
 import org.webpieces.httpcommon.api.*;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
 public class IntegTestFrontend {
@@ -21,7 +23,7 @@ public class IntegTestFrontend {
 	public static void main(String[] args) throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool();
 		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, null, pool);
-		FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(8081));
+		FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(8083));
 		frontEndMgr.createHttpServer(config, new OurListener());
 		synchronized (IntegTestFrontend.class) {
 			IntegTestFrontend.class.wait();
@@ -32,6 +34,7 @@ public class IntegTestFrontend {
 		private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 		private HttpResponse responseA = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString("Here's the file"));
 		private HttpResponse pushedResponse = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString("Here's the css"));
+		private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 		private Map<RequestId, HttpRequest> idMap = new HashMap<>();
 
 		private void sendResponse(RequestId requestId, ResponseSender sender) {
@@ -39,7 +42,7 @@ public class IntegTestFrontend {
 
 			sender.sendResponse(responseA, req, requestId, true);
 			if(sender.getProtocol() == Protocol.HTTP2) {
-				sender.sendResponse(pushedResponse, req, requestId, true);
+				sender.sendResponse(pushedResponse, pushedRequest, requestId, true);
 			}
 		}
 		@Override

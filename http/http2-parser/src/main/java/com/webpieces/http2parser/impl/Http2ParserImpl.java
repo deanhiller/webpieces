@@ -282,7 +282,7 @@ public class Http2ParserImpl implements Http2Parser {
             try {
                 encoder.encodeHeader(
                         out,
-                        header.header.getBytes(),
+                        header.header.toLowerCase().getBytes(),
                         header.value.getBytes(),
                         false);
             } catch (IOException e) {

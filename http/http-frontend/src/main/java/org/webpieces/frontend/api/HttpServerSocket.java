@@ -12,5 +12,7 @@ public interface HttpServerSocket extends HttpSocket {
 
     DataListener getDataListener();
 
-    void upgradeHttp2(Optional<ByteBuffer> maybeSettingsFrame);
+    void upgradeHttp2();
+
+    void startHttp2(Optional<ByteBuffer> maybeSettingsFrame);
 }

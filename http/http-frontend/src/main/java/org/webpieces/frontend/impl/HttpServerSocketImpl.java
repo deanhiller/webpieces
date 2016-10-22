@@ -10,7 +10,10 @@ import org.webpieces.httpcommon.api.Http2EngineFactory;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -23,31 +26,40 @@ public class HttpServerSocketImpl implements HttpServerSocket {
     private DataListener dataListener;
     private ResponseSender responseSender;
     private Http2Parser http2Parser;
-    private TimedListener timedListener;
+    private TimedRequestListener timedRequestListener;
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    private Http2Engine http2Engine;
+    private static final Logger log = LoggerFactory.getLogger(HttpServerSocket.class);
 
     public HttpServerSocketImpl(Channel channel, DataListener http11DataListener, ResponseSender http11ResponseSender,
                                 Http2Parser http2Parser,
-                                TimedListener timedListener) {
+                                TimedRequestListener timedRequestListener) {
         this.channel = channel;
         this.dataListener = http11DataListener;
         this.responseSender = http11ResponseSender;
         this.http2Parser = http2Parser;
-        this.timedListener = timedListener;
+        this.timedRequestListener = timedRequestListener;
     }
 
     @Override
-    public synchronized void upgradeHttp2(Optional<ByteBuffer> maybeSettingsFrame) {
-        Http2Engine http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, channel.getRemoteAddress(), SERVER);
-        http2Engine.setRequestListener(timedListener);
+    public synchronized void upgradeHttp2() {
+        http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, channel.getRemoteAddress(), SERVER);
+        http2Engine.setRequestListener(timedRequestListener);
+        dataListener = http2Engine.getDataListener();
+        responseSender = http2Engine.getResponseSender();
+    }
+
+    public synchronized void startHttp2(Optional<ByteBuffer> maybeSettingsFrame) {
         http2Engine.sendLocalPreferredSettings();
         maybeSettingsFrame.ifPresent(settingsFrame ->
         {
-            Http2Settings settings = (Http2Settings) http2Parser.unmarshal(dataGen.wrapByteBuffer(settingsFrame));
-            http2Engine.setRemoteSettings(settings);
+            try {
+                Http2Settings settings = (Http2Settings) http2Parser.unmarshal(dataGen.wrapByteBuffer(settingsFrame));
+                http2Engine.setRemoteSettings(settings);
+            } catch (Exception e) {
+                log.error("Unable to parse initial settings frame: 0x" + DatatypeConverter.printHexBinary(settingsFrame.array()), e);
+            }
         });
-        dataListener = http2Engine.getDataListener();
-        responseSender = http2Engine.getResponseSender();
     }
 
     @Override

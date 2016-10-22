@@ -73,7 +73,7 @@ public enum KnownHeaderName {
 	
 	static {
 		for(KnownHeaderName name : KnownHeaderName.values()) {
-			lookup.put(name.getHeaderName(), name);
+			lookup.put(name.getHeaderName().toLowerCase(), name);
 		}
 	}
 	
@@ -94,6 +94,6 @@ public enum KnownHeaderName {
 	}
 	
 	public static KnownHeaderName lookup(String name) {
-		return lookup.get(name);
+		return lookup.get(name.toLowerCase());
 	}
 }

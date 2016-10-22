@@ -2,6 +2,7 @@ package org.webpieces.frontend.impl;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,11 +36,11 @@ public class Http11Layer {
 
 	private static final DataWrapperGenerator generator = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser parser;
-	private TimedListener listener;
+	private TimedRequestListener listener;
 	private FrontendConfig config;
 	private static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
 
-	Http11Layer(HttpParser parser2, TimedListener listener, FrontendConfig config) {
+	Http11Layer(HttpParser parser2, TimedRequestListener listener, FrontendConfig config) {
 		this.parser = parser2;
 		this.listener = listener;
 		this.config = config;
@@ -61,7 +62,7 @@ public class Http11Layer {
                         upgradeHeader = header.getValue();
                     }
                     if (header.getKnownName() == KnownHeaderName.HTTP2_SETTINGS) {
-                        settingsFrame = ByteBuffer.wrap(DatatypeConverter.parseBase64Binary(header.getValue()));
+                        settingsFrame = ByteBuffer.wrap(Base64.getUrlDecoder().decode(header.getValue()));
                     }
                 }
                 if (upgradeHeader != null && upgradeHeader.toLowerCase().equals("h2c")) {
@@ -77,17 +78,23 @@ public class Http11Layer {
                     response.addHeader(new Header("Connection", "Upgrade"));
                     response.addHeader(new Header("Upgrade", "h2c"));
 
-                    // Send the upgrade accept response and then switch to HTTP2
-                    getResponseSenderForChannel(channel).sendResponse(response, req, new RequestId(0), true).thenAccept(
-                            responseId -> {
-                                // Switch the socket to using HTTP2
-                                HttpServerSocket socket = getHttpServerSocketForChannel(channel);
-                                socket.upgradeHttp2(maybeSettingsFrame);
+                    ResponseSender http11Sender = getResponseSenderForChannel(channel);
+                    HttpServerSocket socket = getHttpServerSocketForChannel(channel);
+                    socket.upgradeHttp2();
 
+                    // Send the upgrade accept response using the old sender and then pass the request on
+                    // to the requestlistener with the new sender.
+                    http11Sender.sendResponse(response, req, new RequestId(0), true)
+                        .thenAccept(
+                            responseId -> {
+                                socket.startHttp2(maybeSettingsFrame);
                                 // Send the request to listener (requestid is 1 for this first request)
                                 listener.incomingRequest(req, new RequestId(0x1), true, socket.getResponseSender());
                             }
-                    );
+                        ).exceptionally(e -> {
+                            //log.error("error in sendResponse", e);
+                            return null;
+                        });
 
                     // Drop all subsequent requests?
                     break;
