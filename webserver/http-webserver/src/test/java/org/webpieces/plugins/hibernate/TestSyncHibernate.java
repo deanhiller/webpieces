@@ -19,25 +19,19 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestBasicHibernate {
+public class TestSyncHibernate {
 	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
-
+	
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
 		server = webserver.start();
 	}
-	
-	@Test
-	public void testCompletePromiseOnRequestThread() {
-		String redirectUrl = saveBean();
-		readBean(redirectUrl);
-	}
 
-	private String saveBean() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, "/save");
+	private String saveBean(String path) {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
@@ -53,7 +47,7 @@ public class TestBasicHibernate {
 		return url;
 	}
 	
-	private void readBean(String redirectUrl) {
+	private void readBean(String redirectUrl, String email) {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
@@ -63,6 +57,22 @@ public class TestBasicHibernate {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("name=SomeName email=dean@xsoftware.biz");
+		response.assertContains("name=SomeName email="+email);
 	}
+	
+	@Test
+	public void testSyncWithFilter() {
+		String redirectUrl = saveBean("/save");
+		readBean(redirectUrl, "dean@sync.xsoftware.biz");
+	}
+	
+	@Test
+	public void testSyncPageLookingEntityUp() {
+		
+	}
+	
+	@Test
+	public void testOptimisticLock() {
+	}
+	
 }

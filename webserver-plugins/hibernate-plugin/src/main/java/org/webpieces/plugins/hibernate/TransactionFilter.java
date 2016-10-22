@@ -53,6 +53,7 @@ public class TransactionFilter implements RouteFilter<Void> {
 			em.close();
 		} catch(Throwable e) {
 			closeEm(e, em);
+			throw new RuntimeException(e);
 		}
 	}
 

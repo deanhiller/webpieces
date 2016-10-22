@@ -7,7 +7,7 @@ import org.webpieces.util.threading.SessionExecutorImpl;
 
 public class TestSessionExecutor {
 
-	private MockExecutor mockExec = new MockExecutor();
+	private ExecutorSimulator mockExec = new ExecutorSimulator();
 	private SessionExecutor sessionExecutor = new SessionExecutorImpl(mockExec);
 	
 	@Test

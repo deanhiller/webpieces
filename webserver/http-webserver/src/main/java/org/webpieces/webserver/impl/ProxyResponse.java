@@ -10,15 +10,12 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 
-import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -39,6 +36,8 @@ import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
