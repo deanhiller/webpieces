@@ -134,8 +134,14 @@ public class RequestSenderImpl implements RequestSender {
 
             // For some reason we need to add a " " after the base64urlencoded settings to get this to work
             // against nghttp2.org ?
+            // TODO: check if we still need this " " now that we are only shipping the payload and not the
+            // whole frame
+            byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+
+            // strip the header
+            byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
             req.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                    Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
+                    Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
             CompletableFuture<HttpResponse> response = sendHttp11AndWaitForHeaders(req);
 

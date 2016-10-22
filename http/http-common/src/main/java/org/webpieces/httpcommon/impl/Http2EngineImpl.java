@@ -1086,6 +1086,7 @@ public class Http2EngineImpl implements Http2Engine {
                 }
                 if(GoAwayError.class.isInstance(e)) {
                     // TODO: Shut this connection down
+                    channel.close();
                 }
             }
         }

@@ -2,6 +2,7 @@ package org.webpieces.frontend.impl;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.impl.SettingsMarshaller;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.HttpServerSocket;
@@ -49,15 +50,18 @@ public class HttpServerSocketImpl implements HttpServerSocket {
         responseSender = http2Engine.getResponseSender();
     }
 
-    public synchronized void startHttp2(Optional<ByteBuffer> maybeSettingsFrame) {
+    public synchronized void startHttp2(Optional<ByteBuffer> maybeSettingsPayload) {
         http2Engine.sendLocalPreferredSettings();
-        maybeSettingsFrame.ifPresent(settingsFrame ->
+        maybeSettingsPayload.ifPresent(settingsPayload ->
         {
             try {
-                Http2Settings settings = (Http2Settings) http2Parser.unmarshal(dataGen.wrapByteBuffer(settingsFrame));
-                http2Engine.setRemoteSettings(settings);
+                Http2Settings settingsFrame = new Http2Settings();
+                SettingsMarshaller settingsMarshaller = (SettingsMarshaller) http2Parser.getMarshaller(Http2Settings.class);
+                settingsMarshaller.unmarshalFlagsAndPayload(settingsFrame, (byte) 0x0, Optional.of(dataGen.wrapByteBuffer(settingsPayload)));
+
+                http2Engine.setRemoteSettings(settingsFrame);
             } catch (Exception e) {
-                log.error("Unable to parse initial settings frame: 0x" + DatatypeConverter.printHexBinary(settingsFrame.array()), e);
+                log.error("Unable to parse initial settings payload: 0x" + DatatypeConverter.printHexBinary(settingsPayload.array()), e);
             }
         });
     }

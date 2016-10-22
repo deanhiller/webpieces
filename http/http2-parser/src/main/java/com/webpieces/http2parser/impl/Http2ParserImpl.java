@@ -43,6 +43,11 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     @Override
+    public FrameMarshaller getMarshaller(Class<? extends Http2Frame> frameClass) {
+        return dtoToMarshaller.get(frameClass);
+    }
+
+    @Override
     public DataWrapper prepareToParse() {
         return dataGen.emptyWrapper();
     }

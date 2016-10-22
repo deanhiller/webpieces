@@ -21,6 +21,8 @@ public interface Http2Parser {
     DataWrapper marshal(Http2Frame frame);
     DataWrapper marshal(List<Http2Frame> frames);
 
+    FrameMarshaller getMarshaller(Class<? extends Http2Frame> frameClass);
+
     // TODO: add a marshal to bytebuffer so we can use our bufferpool
     int getFrameLength(Http2Frame frame);
 

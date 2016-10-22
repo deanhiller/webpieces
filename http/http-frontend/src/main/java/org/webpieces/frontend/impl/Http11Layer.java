@@ -66,7 +66,7 @@ public class Http11Layer {
                     }
                 }
                 if (upgradeHeader != null && upgradeHeader.toLowerCase().equals("h2c")) {
-                    final Optional<ByteBuffer> maybeSettingsFrame = Optional.of(settingsFrame);
+                    final Optional<ByteBuffer> maybeSettingsPayload = Optional.of(settingsFrame);
 
                     // Create the upgrade response
                     HttpResponse response = new HttpResponse();
@@ -87,7 +87,7 @@ public class Http11Layer {
                     http11Sender.sendResponse(response, req, new RequestId(0), true)
                         .thenAccept(
                             responseId -> {
-                                socket.startHttp2(maybeSettingsFrame);
+                                socket.startHttp2(maybeSettingsPayload);
                                 // Send the request to listener (requestid is 1 for this first request)
                                 listener.incomingRequest(req, new RequestId(0x1), true, socket.getResponseSender());
                             }
