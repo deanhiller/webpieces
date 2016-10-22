@@ -80,6 +80,7 @@ class TimedRequestListener implements RequestListener {
 	}
 
 	void openedConnection(HttpServerSocket httpServerSocket, boolean isReadyForWrites) {
+        log.info("opened connection from " + httpServerSocket + " isReadyForWrites=" + isReadyForWrites);
 		if(!httpServerSocket.getUnderlyingChannel().isSslChannel()) {
 			scheduleTimeout(httpServerSocket);
             clientOpenChannel(httpServerSocket);

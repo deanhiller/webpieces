@@ -78,8 +78,8 @@ public class Http11Layer {
                     response.addHeader(new Header("Connection", "Upgrade"));
                     response.addHeader(new Header("Upgrade", "h2c"));
 
-                    ResponseSender http11Sender = getResponseSenderForChannel(channel);
                     HttpServerSocket socket = getHttpServerSocketForChannel(channel);
+                    ResponseSender http11Sender = socket.getResponseSender();
                     socket.upgradeHttp2();
 
                     // Send the upgrade accept response using the old sender and then pass the request on
@@ -91,10 +91,7 @@ public class Http11Layer {
                                 // Send the request to listener (requestid is 1 for this first request)
                                 listener.incomingRequest(req, new RequestId(0x1), true, socket.getResponseSender());
                             }
-                        ).exceptionally(e -> {
-                            //log.error("error in sendResponse", e);
-                            return null;
-                        });
+                        );
 
                     // Drop all subsequent requests?
                     break;
