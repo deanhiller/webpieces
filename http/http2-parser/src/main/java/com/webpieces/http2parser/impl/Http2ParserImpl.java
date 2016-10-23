@@ -411,8 +411,14 @@ public class Http2ParserImpl implements Http2Parser {
         byte[] bytes = data.createByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         try {
-            decoder.decode(in, (name, value, sensitive) ->
-                    headers.add(new HasHeaderFragment.Header(new String(name).toLowerCase(), new String(value)))
+            decoder.decode(in, (name, value, sensitive) -> {
+                        String h = new String(name);
+                        String v = new String(value);
+                        if(!h.equals(h.toLowerCase())) {
+                            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+                        }
+                        headers.add(new HasHeaderFragment.Header(h, v));
+                    }
             );
         } catch (IOException e) {
             // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment

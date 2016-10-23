@@ -830,9 +830,6 @@ public class Http2EngineImpl implements Http2Engine {
             String path = null;
 
             for(HasHeaderFragment.Header header: headers) {
-                if(!header.header.equals(header.header.toLowerCase())) {
-                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
-                }
                 if(processingSpecialHeaders) {
                     if (!header.header.startsWith(":")) {
                         processingSpecialHeaders = false;
@@ -922,6 +919,10 @@ public class Http2EngineImpl implements Http2Engine {
 
                 boolean isComplete = frame.isEndStream();
 
+                // if we have no headers must be a compression error?
+                if(frame.getHeaderList().isEmpty()) {
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.COMPRESSION_ERROR, wrapperGen.emptyWrapper());
+                }
                 if(side == CLIENT) {
                     HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
                     stream.setResponse(response);
@@ -1064,7 +1065,11 @@ public class Http2EngineImpl implements Http2Engine {
 
             // Transition the stream state
             if(frame.getStreamId() != 0x0) {
+                if(side == SERVER && frame.getStreamId() % 2 != 1) {
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                }
                 Stream stream = activeStreams.get(frame.getStreamId());
+
                 // If the stream doesn't exist, create it, if server and if streamid is odd.
                 if (stream == null) {
                     if (side == SERVER) {
