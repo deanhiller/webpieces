@@ -71,7 +71,8 @@ public class Http2EngineImpl implements Http2Engine {
     private Map<Http2Settings.Parameter, Long> localSettings = new HashMap<>();
 
     private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
-    private AtomicInteger nextStreamId;
+    private AtomicInteger nextOutgoingStreamId;
+    private AtomicInteger lastIncomingStreamId = new AtomicInteger(0);
     private ConcurrentHashMap<Integer, AtomicLong> outgoingFlowControl = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, AtomicLong> incomingFlowControl = new ConcurrentHashMap<>();
     private class PendingDataFrame {
@@ -122,10 +123,10 @@ public class Http2EngineImpl implements Http2Engine {
         this.remoteAddress = remoteAddress;
         this.side = side;
         if(side == CLIENT) {
-            this.nextStreamId = new AtomicInteger(0x1);
+            this.nextOutgoingStreamId = new AtomicInteger(0x1);
         }
         else {
-            this.nextStreamId = new AtomicInteger(0x2);
+            this.nextOutgoingStreamId = new AtomicInteger(0x2);
         }
 
         // Initialize to defaults
@@ -550,7 +551,7 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
     private int getAndIncrementStreamId() {
-        return nextStreamId.getAndAdd(2);
+        return nextOutgoingStreamId.getAndAdd(2);
     }
 
     private class SendPing extends TimerTask {
@@ -777,6 +778,8 @@ public class Http2EngineImpl implements Http2Engine {
                     throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
                 case CLOSED:
                     throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
+                case IDLE:
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
@@ -898,6 +901,12 @@ public class Http2EngineImpl implements Http2Engine {
         private void handleHeaders(Http2Headers frame, Stream stream) {
             switch (stream.getStatus()) {
                 case IDLE:
+                    long currentlyOpenStreams = countOpenRemoteOriginatedStreams();
+                    log.info("got headers with currently open streams: " + currentlyOpenStreams);
+                    if(localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
+                            currentlyOpenStreams >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+                        throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, stream.getStreamId());
+                    }
                     stream.setStatus(Stream.StreamStatus.OPEN);
                     break;
                 case HALF_CLOSED_LOCAL:
@@ -977,12 +986,19 @@ public class Http2EngineImpl implements Http2Engine {
 
             // Can get this on any stream id, creates a new stream
             if(frame.isEndHeaders()) {
+                long currentlyOpenStreams = countOpenRemoteOriginatedStreams();
+                log.info("got push promise with currently open streams: " + currentlyOpenStreams);
                 if(localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
-                        countOpenRemoteOriginatedStreams() >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+                        currentlyOpenStreams >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
                     throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, frame.getPromisedStreamId());
                 }
-                Stream promisedStream = new Stream();
                 int newStreamId = frame.getPromisedStreamId();
+                if(newStreamId <= lastIncomingStreamId.get()) {
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                }
+                lastIncomingStreamId.set(newStreamId);
+
+                Stream promisedStream = new Stream();
                 initializeFlowControl(newStreamId);
                 promisedStream.setStreamId(newStreamId);
 
@@ -1073,8 +1089,13 @@ public class Http2EngineImpl implements Http2Engine {
                 // If the stream doesn't exist, create it, if server and if streamid is odd.
                 if (stream == null) {
                     if (side == SERVER) {
+                        int streamId = frame.getStreamId();
+                        if(streamId <= lastIncomingStreamId.get()) {
+                            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                        }
+                        lastIncomingStreamId.set(streamId);
                         stream = new Stream();
-                        stream.setStreamId(frame.getStreamId());
+                        stream.setStreamId(streamId);
                         initializeFlowControl(stream.getStreamId());
                         activeStreams.put(stream.getStreamId(), stream);
                     } else {
