@@ -11,7 +11,7 @@ import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.util.filters.Service;
 
 @Singleton
-public class MyFilter implements RouteFilter<Void> {
+public class MyFilter extends RouteFilter<Void> {
 
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {

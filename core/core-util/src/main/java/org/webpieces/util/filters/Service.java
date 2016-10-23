@@ -13,17 +13,8 @@ import java.util.concurrent.CompletableFuture;
  * @param <REQ>
  * @param <RESP>
  */
-public abstract class Service<REQ, RESP> {
+public interface Service<REQ, RESP> {
 
-	public abstract CompletableFuture<RESP> invoke(REQ meta);
+	CompletableFuture<RESP> invoke(REQ meta);
 
-	public Service<REQ, RESP> addOnTop(Filter<REQ, RESP> filter) {
-		return new Service<REQ, RESP>() {
-			@Override
-			public CompletableFuture<RESP> invoke(REQ meta) {
-				return filter.filter(meta, Service.this);
-			}
-		};
-	}
-	
 }

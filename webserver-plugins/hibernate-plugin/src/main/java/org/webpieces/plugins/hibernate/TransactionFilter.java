@@ -16,7 +16,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 @Singleton
-public class TransactionFilter implements RouteFilter<Void> {
+public class TransactionFilter extends RouteFilter<Void> {
 
 	private static final Logger log = LoggerFactory.getLogger(TransactionFilter.class);
 	private EntityManagerFactory factory;

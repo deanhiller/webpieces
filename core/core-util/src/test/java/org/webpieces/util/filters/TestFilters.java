@@ -20,13 +20,13 @@ public class TestFilters {
 		MyFilter filterMiddle = new MyFilter("middle");
 		MyFilter filterTop = new MyFilter("top");
 		
-		SomeService s = new SomeService();
-		Service<Integer, String> service = s.addOnTop(filterMiddle);
-		Service<Integer, String> service2 = service.addOnTop(filterTop);
+		Service<Integer, String> service2 = filterTop
+												.chain(filterMiddle)
+												.chain(new SomeService());
 		
-		SomeService x1 = new SomeService();
-		Service<Integer, String> x2 = x1.addOnTop(filterTop);
-		Service<Integer, String> x3 = x2.addOnTop(filterMiddle);
+		Service<Integer, String> x3 = filterMiddle
+											.chain(filterTop)
+											.chain(new SomeService());
 		
 		CompletableFuture<String> future = service2.invoke(5);
 		String result = future.get();
