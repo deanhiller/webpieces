@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.IntUnaryOperator;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
@@ -71,8 +72,8 @@ public class Http2EngineImpl implements Http2Engine {
 
     private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
     private AtomicInteger nextStreamId;
-    private ConcurrentHashMap<Integer, AtomicInteger> outgoingFlowControl = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<Integer, AtomicInteger> incomingFlowControl = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, AtomicLong> outgoingFlowControl = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, AtomicLong> incomingFlowControl = new ConcurrentHashMap<>();
     private class PendingDataFrame {
         CompletableFuture<Channel> future;
         Http2Data frame;
@@ -587,10 +588,13 @@ public class Http2EngineImpl implements Http2Engine {
 
     private void incrementOutgoingWindow(int streamId, int length) {
         log.info("incrementing outgoing window for {} by {}", streamId, length);
-        if(outgoingFlowControl.get(0x0).addAndGet(length) > 2147483647)
+        if(outgoingFlowControl.get(0x0).addAndGet(length) > 2147483647L)
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
 
-        if(outgoingFlowControl.get(streamId).addAndGet(length) > 2147483647)
+        if(outgoingFlowControl.get(streamId) == null)
+            initializeFlowControl(streamId);
+
+        if(outgoingFlowControl.get(streamId).addAndGet(length) > 2147483647L)
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), streamId, Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
 
         log.info("stream {} outgoing window is {} and connection window is {}", streamId, outgoingFlowControl.get(streamId), outgoingFlowControl.get(0));
@@ -614,8 +618,8 @@ public class Http2EngineImpl implements Http2Engine {
 
     private void initializeFlowControl(int streamId) {
         // Set up flow control
-        incomingFlowControl.put(streamId, new AtomicInteger(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE).intValue()));
-        outgoingFlowControl.put(streamId, new AtomicInteger(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE).intValue()));
+        incomingFlowControl.put(streamId, new AtomicLong(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
+        outgoingFlowControl.put(streamId, new AtomicLong(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
     }
 
     @Override
@@ -1000,7 +1004,7 @@ public class Http2EngineImpl implements Http2Engine {
                 throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
             }
 
-            incrementOutgoingWindow(stream.getStreamId(), frame.getWindowSizeIncrement());
+            incrementOutgoingWindow(frame.getStreamId(), frame.getWindowSizeIncrement());
 
             // clear all queues if the connection-level stream
             if(frame.getStreamId() == 0x0) {
@@ -1062,13 +1066,15 @@ public class Http2EngineImpl implements Http2Engine {
             if(frame.getStreamId() != 0x0) {
                 Stream stream = activeStreams.get(frame.getStreamId());
                 // If the stream doesn't exist, create it, if server and if streamid is odd.
-                if(stream == null && side == SERVER && frame.getStreamId() % 2 == 1) {
-                    stream = new Stream();
-                    stream.setStreamId(frame.getStreamId());
-                    initializeFlowControl(stream.getStreamId());
-                    activeStreams.put(stream.getStreamId(), stream);
-                } else {
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                if (stream == null) {
+                    if (side == SERVER) {
+                        stream = new Stream();
+                        stream.setStreamId(frame.getStreamId());
+                        initializeFlowControl(stream.getStreamId());
+                        activeStreams.put(stream.getStreamId(), stream);
+                    } else {
+                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                    }
                 }
 
                 switch (frame.getFrameType()) {
@@ -1100,6 +1106,7 @@ public class Http2EngineImpl implements Http2Engine {
                 switch (frame.getFrameType()) {
                     case WINDOW_UPDATE:
                         handleWindowUpdate((Http2WindowUpdate) frame, null);
+                        break;
                     case SETTINGS:
                         handleSettings((Http2Settings) frame);
                         break;
@@ -1163,6 +1170,7 @@ public class Http2EngineImpl implements Http2Engine {
                     }
                 }
             } catch (Http2Error e) {
+                log.error("sending error frames " + e.toFrames(), e);
                 channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrames()).createByteArray()));
                 if(RstStreamError.class.isInstance(e)) {
                     // Mark the stream closed
