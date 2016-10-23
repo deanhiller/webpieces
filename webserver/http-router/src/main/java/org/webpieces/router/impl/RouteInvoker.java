@@ -211,13 +211,7 @@ public class RouteInvoker {
 	}
 
 	public Void continueProcessing(ResponseProcessor processor, Action controllerResponse, ResponseStreamer responseCb) {
-		if(controllerResponse instanceof RedirectResponse) {
-			//do nothing, it was called already in Actions.redirect so if there is an exception, the
-			//client code ends up in the stack trace making it easier to tell what the path was to failure
-		} else if(controllerResponse instanceof RenderResponse) {
-			//do nothing, it was called already in Actions.redirect so if there is an exception, the
-			//client code ends up in the stack trace making it easier to tell what the path was to failure
-		} else if(controllerResponse instanceof RedirectImpl) {
+		if(controllerResponse instanceof RedirectImpl) {
 			processor.createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderImpl) {
 			processor.createRenderResponse((RenderImpl)controllerResponse);

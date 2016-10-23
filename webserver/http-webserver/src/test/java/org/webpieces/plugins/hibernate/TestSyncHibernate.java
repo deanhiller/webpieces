@@ -75,8 +75,10 @@ public class TestSyncHibernate {
 	}
 	
 	/**
-	 * Tests when we load user but not company, user.company.name in the page will then go to the
-	 * database
+	 * Tests when we load user but not company, user.company.name will blow up since company was not
+	 * loaded in the controller from the database.
+	 * 
+	 * (ie. we only let you traverse the loaded graph so that we don't accidentally have 1+N queries running)
 	 */
 	@Test
 	public void testDbUseWhileRenderingPage() {
@@ -90,8 +92,7 @@ public class TestSyncHibernate {
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("company name=WebPieces LLC");
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 
 	public static Integer loadDataInDb(String email) {

@@ -9,8 +9,6 @@ import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
-import org.webpieces.router.impl.ctx.RequestLocalCtx;
-import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.webserver.async.app.AsyncRouteId;
 
 @Singleton
@@ -43,16 +41,14 @@ public class AsyncController {
 	}
 	
 	public CompletableFuture<Action> asyncMyMethod() {
-		ResponseProcessor processor = RequestLocalCtx.get();
 		return notFoundLib.someBusinessLogic().thenApply(s -> {
-			return Actions.renderView(processor, "userParamPage.html", "user", "Dean Hiller");
+			return Actions.renderView("userParamPage.html", "user", "Dean Hiller");
 		});
 	}
 	
 	public CompletableFuture<Action> asyncFail() {
-		ResponseProcessor processor = RequestLocalCtx.get();
 		return notFoundLib.someBusinessLogic().thenApply(s -> {
-			return Actions.renderView(processor, "userParamPage.html");
+			return Actions.renderView("userParamPage.html");
 		});
 	}
 	
