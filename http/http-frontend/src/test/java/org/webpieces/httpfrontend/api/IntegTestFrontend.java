@@ -33,6 +33,8 @@ public class IntegTestFrontend {
 	private static class OurListener implements RequestListener {
 		private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 		private HttpResponse responseA = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString("Here's the file"));
+		private HttpResponse responseANoBody = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
+
 		private HttpResponse pushedResponse = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString("Here's the css"));
 		private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 		private Map<RequestId, HttpRequest> idMap = new HashMap<>();
@@ -40,7 +42,12 @@ public class IntegTestFrontend {
 		private void sendResponse(RequestId requestId, ResponseSender sender) {
 			HttpRequest req = idMap.get(requestId);
 
-			sender.sendResponse(responseA, req, requestId, true);
+			if(req.getRequestLine().getMethod().getMethodAsString().equals("HEAD")) {
+				sender.sendResponse(responseANoBody, req, requestId, true);
+			} else {
+				sender.sendResponse(responseA, req, requestId, true);
+			}
+
 			if(sender.getProtocol() == Protocol.HTTP2) {
 				sender.sendResponse(pushedResponse, pushedRequest, requestId, true);
 			}

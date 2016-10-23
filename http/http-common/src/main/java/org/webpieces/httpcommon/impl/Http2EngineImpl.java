@@ -818,18 +818,43 @@ public class Http2EngineImpl implements Http2Engine {
         }
 
         private HttpRequest requestFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
-            Map<String, String> headerMap = new HashMap<>();
-            for(HasHeaderFragment.Header header: headers) {
-                headerMap.put(header.header, header.value);
-            }
             HttpRequest request = new HttpRequest();
+            boolean processingSpecialHeaders = true;
+            String method = null;
+            String scheme = null;
+            String authority = null;
+            String path = null;
 
-            // Set special headers
-            // TODO: throw if special headers are not at the front, or we get a bad special header
-            String method = headerMap.get(":method");
-            String scheme = headerMap.get(":scheme");
-            String authority = headerMap.get(":authority");
-            String path = headerMap.get(":path");
+            for(HasHeaderFragment.Header header: headers) {
+                if(!header.header.equals(header.header.toLowerCase())) {
+                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+                }
+                if(processingSpecialHeaders) {
+                    if (!header.header.startsWith(":")) {
+                        processingSpecialHeaders = false;
+                    } else {
+                        if (header.header.equals(":method") && method == null) {
+                            method = header.value;
+                        } else if (header.header.equals(":scheme") && scheme == null) {
+                            scheme = header.value;
+                        } else if (header.header.equals(":authority") && authority == null) {
+                            authority = header.value;
+                        } else if (header.header.equals(":path") && path == null) {
+                            path = header.value;
+                        } else {
+                            throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+                        }
+                    }
+                }
+                if(!processingSpecialHeaders) {
+                    if(header.header.startsWith(":")) {
+                        throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+                    }
+                    request.addHeader(new Header(header.header, header.value));
+                }
+
+            }
+
             if(method == null || scheme == null || authority == null || path == null)
                 throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
 

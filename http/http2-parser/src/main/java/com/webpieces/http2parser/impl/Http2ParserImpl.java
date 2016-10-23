@@ -252,6 +252,9 @@ public class Http2ParserImpl implements Http2Parser {
                         throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, isConnectionLevel);
                     }
                 });
+                // If we're in the middle of a header block and we don't have a frame we recognize, throw
+                if(!maybeFrameType.isPresent() && !hasHeaderFragmentList.isEmpty())
+                    throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 
                 int totalLength = payloadLength + 9;
                 if (lengthOfData < totalLength) {
@@ -322,10 +325,7 @@ public class Http2ParserImpl implements Http2Parser {
                     else {
                         // ignore this frame
                         wrapperToParse = split.get(1);
-                        // wrapperToReturn can stay unchanged because in the next pass we can ignore this
-                        // frame again. We don't want to change it because we might be in the middle
-                        // of dealing with headers. (we really shouldn't get invalid frames in the
-                        // middle of headers, but we really want to IGNORE invalid frames.)
+                        wrapperToReturn = wrapperToParse; // we set wrapperToReturn because we aren't in the middle of a headerblock
                     }
                 }
             }
