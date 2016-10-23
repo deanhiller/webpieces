@@ -2,6 +2,8 @@ package org.webpieces.webserver.impl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -48,12 +50,11 @@ public class WebServerModule implements Module {
 		return Executors.newFixedThreadPool(10, new NamedThreadFactory("fileReadCallbacks"));
 	}
 	
-//  Firefox keeps connecting pre-emptively with no requests for seconds (maybe so it is ready to just send one when needed)	
-//	@Provides
-//	@Singleton
-//	public ScheduledExecutorService provideTimer() {
-//		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
-//	}
+	@Provides
+	@Singleton
+	public ScheduledExecutorService provideTimer() {
+		return new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
+	}
 	
 	@Provides
 	@Singleton
@@ -64,8 +65,8 @@ public class WebServerModule implements Module {
 	
 	@Provides
 	@Singleton
-	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config, BufferPool pool) {
-		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), null, pool);
+	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config, BufferPool pool, ScheduledExecutorService timer) {
+		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), timer, pool);
 	}
 	
 }

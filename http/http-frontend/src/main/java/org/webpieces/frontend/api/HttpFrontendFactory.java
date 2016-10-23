@@ -24,7 +24,7 @@ public abstract class HttpFrontendFactory {
 	 * 
 	 * @return
 	 */
-	public static HttpFrontendManager createFrontEnd(String id, int threadPoolSize, ScheduledExecutorService timeout, BufferPool pool) {
+	public static HttpFrontendManager createFrontEnd(String id, int threadPoolSize, ScheduledExecutorService timer, BufferPool pool) {
 		Executor executor = Executors.newFixedThreadPool(threadPoolSize, new NamedThreadFactory(id));
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
@@ -34,7 +34,7 @@ public abstract class HttpFrontendFactory {
 		
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		
-		return createFrontEnd(svrMgr, timeout, parser);
+		return createFrontEnd(svrMgr, timer, parser);
 	}
 	
 	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, HttpParser parser) {
