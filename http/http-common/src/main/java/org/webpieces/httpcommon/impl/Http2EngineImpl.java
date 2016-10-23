@@ -44,6 +44,7 @@ import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.HALF_CLOSED_REMOTE;
+import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Http2EngineImpl implements Http2Engine {
@@ -149,6 +150,11 @@ public class Http2EngineImpl implements Http2Engine {
         this.dataListener = new Http2DataListener();
 
         initializeFlowControl(0x0);
+
+        // set some default preferred settings locally
+        // TODO: make this configurable by the customer
+        localPreferredSettings.put(SETTINGS_MAX_CONCURRENT_STREAMS, 100);
+        //localPreferredSettings.put(SETTINGS_MAX_HEADER_LIST_SIZE, 100)
     }
 
     @Override
@@ -174,7 +180,22 @@ public class Http2EngineImpl implements Http2Engine {
 
     @Override
     public void setRemoteSettings(Http2Settings frame, boolean sendAck) {
-        // We've received a settings. Update remoteSettings and send an ack
+        // We've received a settings. Check for legit-ness.
+        if(frame.getSettings().get(SETTINGS_ENABLE_PUSH) != null && (
+                frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 0 || frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 1))
+            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+
+        // 2^31 - 1 - max flow control window
+        if(frame.getSettings().get(SETTINGS_INITIAL_WINDOW_SIZE) != null &&
+                frame.getSettings().get(SETTINGS_INITIAL_WINDOW_SIZE) > 2147483647)
+            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
+
+        // frame size must be between 16384 and 2^24 - 1
+        if(frame.getSettings().get(SETTINGS_MAX_FRAME_SIZE) != null && (
+                frame.getSettings().get(SETTINGS_MAX_FRAME_SIZE) < 16384 || frame.getSettings().get(SETTINGS_MAX_FRAME_SIZE) > 1677215))
+            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+
+        // Update remoteSettings
         log.info("Setting remote settings to: " + frame.getSettings());
         gotSettings.set(true);
         for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
@@ -566,8 +587,12 @@ public class Http2EngineImpl implements Http2Engine {
 
     private void incrementOutgoingWindow(int streamId, int length) {
         log.info("incrementing outgoing window for {} by {}", streamId, length);
-        outgoingFlowControl.get(0x0).addAndGet(length);
-        outgoingFlowControl.get(streamId).addAndGet(length);
+        if(outgoingFlowControl.get(0x0).addAndGet(length) > 2147483647)
+            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
+
+        if(outgoingFlowControl.get(streamId).addAndGet(length) > 2147483647)
+            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), streamId, Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
+
         log.info("stream {} outgoing window is {} and connection window is {}", streamId, outgoingFlowControl.get(streamId), outgoingFlowControl.get(0));
     }
 
@@ -744,6 +769,10 @@ public class Http2EngineImpl implements Http2Engine {
                     if(isComplete)
                         receivedEndStream(stream);
                     break;
+                case HALF_CLOSED_REMOTE:
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
+                case CLOSED:
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
                 default:
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
@@ -851,8 +880,8 @@ public class Http2EngineImpl implements Http2Engine {
                 case RESERVED_REMOTE:
                     stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
                     break;
-                default:
-                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+                default: // HALF_CLOSED_REMOTE, or CLOSED
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
             }
 
             if(frame.isPriority()) {
@@ -906,14 +935,14 @@ public class Http2EngineImpl implements Http2Engine {
                     stream.setStatus(CLOSED);
                     break;
                 default:
-                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
             }
         }
 
         private void handlePushPromise(Http2PushPromise frame, Stream stream) {
             if(side == SERVER) {
                 // Can't get pushpromise in the server
-                throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, frame.getPromisedStreamId());
+                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
             }
 
             // Can get this on any stream id, creates a new stream
@@ -942,6 +971,10 @@ public class Http2EngineImpl implements Http2Engine {
         }
 
         private void handleWindowUpdate(Http2WindowUpdate frame, Stream stream) {
+            if(frame.getWindowSizeIncrement() == 0) {
+                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+            }
+
             incrementOutgoingWindow(stream.getStreamId(), frame.getWindowSizeIncrement());
 
             // clear all queues if the connection-level stream
@@ -952,6 +985,9 @@ public class Http2EngineImpl implements Http2Engine {
                 }
             }
             else {
+                if(stream.getStatus() == IDLE) {
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                }
                 if(outgoingDataQueue.containsKey(frame.getStreamId())) {
                     clearQueue(frame.getStreamId());
                 }
@@ -1000,12 +1036,14 @@ public class Http2EngineImpl implements Http2Engine {
             // Transition the stream state
             if(frame.getStreamId() != 0x0) {
                 Stream stream = activeStreams.get(frame.getStreamId());
-                // If the stream doesn't exist, create it.
-                if(stream == null) {
+                // If the stream doesn't exist, create it, if server and if streamid is odd.
+                if(stream == null && side == SERVER && frame.getStreamId() % 2 == 1) {
                     stream = new Stream();
                     stream.setStreamId(frame.getStreamId());
                     initializeFlowControl(stream.getStreamId());
                     activeStreams.put(stream.getStreamId(), stream);
+                } else {
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
                 }
 
                 switch (frame.getFrameType()) {
@@ -1103,7 +1141,9 @@ public class Http2EngineImpl implements Http2Engine {
                 channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrames()).createByteArray()));
                 if(RstStreamError.class.isInstance(e)) {
                     // Mark the stream closed
-                    activeStreams.get(((RstStreamError) e).getStreamId()).setStatus(CLOSED);
+                    Stream stream = activeStreams.get(((RstStreamError) e).getStreamId());
+                    if(stream != null)
+                        stream.setStatus(CLOSED);
                 }
                 if(GoAwayError.class.isInstance(e)) {
                     // TODO: Shut this connection down properly.

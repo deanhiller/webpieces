@@ -53,7 +53,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
             ByteBuffer prelude = bufferPool.createWithDataWrapper(split.get(0));
 
             castFrame.setPromisedStreamId(prelude.getInt());
-            castFrame.setHeaderFragment(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1)));
+            castFrame.setHeaderFragment(castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1), frame.getStreamId()));
             bufferPool.releaseBuffer(prelude);
         });
     }

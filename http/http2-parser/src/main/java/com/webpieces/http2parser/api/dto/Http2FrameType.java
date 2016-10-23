@@ -1,5 +1,7 @@
 package com.webpieces.http2parser.api.dto;
 
+import java.util.Optional;
+
 public enum Http2FrameType {
     DATA(0x0),
     HEADERS(0x1),
@@ -22,30 +24,30 @@ public enum Http2FrameType {
         return (byte) id;
     }
 
-    public static Http2FrameType fromId(int id) {
+    public static Optional<Http2FrameType> fromId(int id) {
         switch (id) {
             case 0x0:
-                return DATA;
+                return Optional.of(DATA);
             case 0x1:
-                return HEADERS;
+                return Optional.of(HEADERS);
             case 0x2:
-                return PRIORITY;
+                return Optional.of(PRIORITY);
             case 0x3:
-                return RST_STREAM;
+                return Optional.of(RST_STREAM);
             case 0x4:
-                return SETTINGS;
+                return Optional.of(SETTINGS);
             case 0x5:
-                return PUSH_PROMISE;
+                return Optional.of(PUSH_PROMISE);
             case 0x6:
-                return PING;
+                return Optional.of(PING);
             case 0x7:
-                return GOAWAY;
+                return Optional.of(GOAWAY);
             case 0x8:
-                return WINDOW_UPDATE;
+                return Optional.of(WINDOW_UPDATE);
             case 0x9:
-                return CONTINUATION;
+                return Optional.of(CONTINUATION);
             default:
-                return DATA; // TODO: throw here
+                return Optional.empty();
         }
     }
 }

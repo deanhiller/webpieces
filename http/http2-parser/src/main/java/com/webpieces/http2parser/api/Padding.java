@@ -8,7 +8,7 @@ public interface Padding {
     void setIsPadded(boolean isPadded);
 
     byte[] getPadding();
-    DataWrapper extractPayloadAndSetPaddingIfNeeded(DataWrapper data);
+    DataWrapper extractPayloadAndSetPaddingIfNeeded(DataWrapper data, int streamId);
     DataWrapper padDataIfNeeded(DataWrapper data);
 
 }

@@ -1,6 +1,8 @@
 package com.webpieces.http2parser.impl;
 
 import com.webpieces.http2parser.api.Padding;
+import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
@@ -38,9 +40,12 @@ public class PaddingImpl implements Padding {
     }
 
     @Override
-    public DataWrapper extractPayloadAndSetPaddingIfNeeded(DataWrapper data) {
+    public DataWrapper extractPayloadAndSetPaddingIfNeeded(DataWrapper data, int streamId) {
         if(isPadded()) {
             short padLength = (short) (data.readByteAt(0) & 0xFF);
+            if(padLength > data.getReadableSize()) {
+                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
+            }
             List<? extends DataWrapper> split1 = dataGen.split(data, 1);
             List<? extends DataWrapper> split2 = dataGen.split(split1.get(1), split1.get(1).getReadableSize() - padLength);
             setPadding(split2.get(1).createByteArray());

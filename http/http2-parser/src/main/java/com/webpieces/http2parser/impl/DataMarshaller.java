@@ -41,6 +41,6 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
 
         maybePayload.ifPresent(payload ->
                 castFrame.setData(
-                        castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(payload)));
+                        castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(payload, frame.getStreamId())));
     }
 }

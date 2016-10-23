@@ -1,6 +1,8 @@
 package com.webpieces.http2parser.impl;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
+import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 import org.webpieces.data.api.BufferPool;
@@ -46,7 +48,12 @@ public class PriorityMarshaller implements FrameMarshaller {
 
             int firstInt = payloadByteBuffer.getInt();
             castFrame.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
-            castFrame.setStreamDependency(firstInt & 0x7FFFFFFF);
+            int streamDependency = firstInt & 0x7FFFFFFF;
+            if(streamDependency == frame.getStreamId()) {
+                // Can't depend on self
+                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+            }
+            castFrame.setStreamDependency(streamDependency);
             castFrame.setWeight((short) (payloadByteBuffer.get() & 0xFF));
 
             bufferPool.releaseBuffer(payloadByteBuffer);
