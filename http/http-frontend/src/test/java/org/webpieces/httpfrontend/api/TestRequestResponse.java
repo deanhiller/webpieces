@@ -44,7 +44,7 @@ public class TestRequestResponse {
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private Http2Settings settingsFrame = new Http2Settings();
     private Decoder decoder;
-    Map<Http2Settings.Parameter, Integer> settings = new HashMap<>();
+    Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
 
     private HttpFrontendManager mgr;
 
@@ -57,7 +57,7 @@ public class TestRequestResponse {
         parser = HttpParserFactory.createParser(pool);
         http2Parser = Http2ParserFactory.createParser(pool);
         decoder = new Decoder(4096, 4096);
-        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384);
+        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
     }
 
     private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener) throws InterruptedException, ExecutionException {

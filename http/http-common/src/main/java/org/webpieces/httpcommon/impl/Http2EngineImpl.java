@@ -59,15 +59,15 @@ public class Http2EngineImpl implements Http2Engine {
 
     private HttpSide side;
 
-    private Map<Http2Settings.Parameter, Integer> localPreferredSettings = new HashMap<>();
+    private Map<Http2Settings.Parameter, Long> localPreferredSettings = new HashMap<>();
 
     // remotesettings doesn't need concurrent bc listener is vts
-    private Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+    private Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
     private AtomicBoolean gotSettings = new AtomicBoolean(false);
 
     // localsettings also doesn't need concurrent bc local settigs is only set when
     // it gets the ack from the settings that gets sent.
-    private Map<Http2Settings.Parameter, Integer> localSettings = new HashMap<>();
+    private Map<Http2Settings.Parameter, Long> localSettings = new HashMap<>();
 
     private ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
     private AtomicInteger nextStreamId;
@@ -128,24 +128,24 @@ public class Http2EngineImpl implements Http2Engine {
         }
 
         // Initialize to defaults
-        remoteSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096);
-        localSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096);
+        remoteSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096L);
+        localSettings.put(SETTINGS_HEADER_TABLE_SIZE, 4096L);
 
-        remoteSettings.put(SETTINGS_ENABLE_PUSH, 1);
-        localSettings.put(SETTINGS_ENABLE_PUSH, 1);
+        remoteSettings.put(SETTINGS_ENABLE_PUSH, 1L);
+        localSettings.put(SETTINGS_ENABLE_PUSH, 1L);
 
         // No limit for MAX_CONCURRENT_STREAMS by default so it isn't in the map
 
-        remoteSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535);
-        localSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535);
+        remoteSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535L);
+        localSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535L);
 
-        remoteSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384);
-        localSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384);
+        remoteSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384L);
+        localSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384L);
 
         // No limit for MAX_HEADER_LIST_SIZE by default, so not in the map
 
-        this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE));
-        this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE));
+        this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
+        this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
 
         this.dataListener = new Http2DataListener();
 
@@ -153,7 +153,7 @@ public class Http2EngineImpl implements Http2Engine {
 
         // set some default preferred settings locally
         // TODO: make this configurable by the customer
-        localPreferredSettings.put(SETTINGS_MAX_CONCURRENT_STREAMS, 100);
+        localPreferredSettings.put(SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
         //localPreferredSettings.put(SETTINGS_MAX_HEADER_LIST_SIZE, 100)
     }
 
@@ -198,7 +198,7 @@ public class Http2EngineImpl implements Http2Engine {
         // Update remoteSettings
         log.info("Setting remote settings to: " + frame.getSettings());
         gotSettings.set(true);
-        for(Map.Entry<Http2Settings.Parameter, Integer> entry: frame.getSettings().entrySet()) {
+        for(Map.Entry<Http2Settings.Parameter, Long> entry: frame.getSettings().entrySet()) {
             remoteSettings.put(entry.getKey(), entry.getValue());
         }
 
@@ -218,7 +218,7 @@ public class Http2EngineImpl implements Http2Engine {
                 }
             }
             minimumMaxHeaderTableSizeUpdate.updateAndGet(
-                    new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE)));
+                    new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE).intValue()));
         }
         if(sendAck) {
             Http2Settings responseFrame = new Http2Settings();
@@ -426,7 +426,7 @@ public class Http2EngineImpl implements Http2Engine {
                     );
                 } else {
                     // to big, split it, send, and recurse.
-                    List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE));
+                    List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE).intValue());
                     newFrame.setData(split.get(0));
                     log.info("queuing non-final data frame: " + newFrame);
                     return writeDataFrame(newFrame).thenCompose(
@@ -446,7 +446,7 @@ public class Http2EngineImpl implements Http2Engine {
         try {
             if (maxHeaderTableSizeNeedsUpdate.get()) {
                 // If we need to update the max header table size
-                int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE);
+                int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue();
                 if (minimumMaxHeaderTableSizeUpdate.get() < newMaxHeaderTableSize) {
                     encoder.setMaxHeaderTableSize(out, minimumMaxHeaderTableSizeUpdate.get());
                 }
@@ -614,8 +614,8 @@ public class Http2EngineImpl implements Http2Engine {
 
     private void initializeFlowControl(int streamId) {
         // Set up flow control
-        incomingFlowControl.put(streamId, new AtomicInteger(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
-        outgoingFlowControl.put(streamId, new AtomicInteger(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
+        incomingFlowControl.put(streamId, new AtomicInteger(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE).intValue()));
+        outgoingFlowControl.put(streamId, new AtomicInteger(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE).intValue()));
     }
 
     @Override
@@ -1022,7 +1022,7 @@ public class Http2EngineImpl implements Http2Engine {
         private void handleSettings(Http2Settings frame) {
             if(frame.isAck()) {
                 // we received an ack, so the settings we sent have been accepted.
-                for(Map.Entry<Http2Settings.Parameter, Integer> entry: localPreferredSettings.entrySet()) {
+                for(Map.Entry<Http2Settings.Parameter, Long> entry: localPreferredSettings.entrySet()) {
                     localSettings.put(entry.getKey(), entry.getValue());
                 }
             } else {

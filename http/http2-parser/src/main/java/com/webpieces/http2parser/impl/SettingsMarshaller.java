@@ -24,13 +24,13 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
             // If ack or empty settings
             return dataGen.emptyWrapper();
         } else {
-            Map<Http2Settings.Parameter, Integer> settings = castFrame.getSettings();
+            Map<Http2Settings.Parameter, Long> settings = castFrame.getSettings();
             ByteBuffer payload = bufferPool.nextBuffer(6 * settings.size());
 
-            for (Map.Entry<Http2Settings.Parameter, Integer> setting : settings.entrySet()) {
+            for (Map.Entry<Http2Settings.Parameter, Long> setting : settings.entrySet()) {
                 short id = setting.getKey().getId();
-                Integer value = setting.getValue();
-                payload.putShort(id).putInt(value);
+                Long value = setting.getValue();
+                payload.putShort(id).putInt(value.intValue());
             }
             payload.flip();
 
@@ -59,7 +59,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
             while (payloadByteBuffer.hasRemaining()) {
                 castFrame.setSetting(
                         Http2Settings.Parameter.fromId(payloadByteBuffer.getShort()),
-                        payloadByteBuffer.getInt());
+                        payloadByteBuffer.getInt() & 0xFFFFFFFFL);
             }
 
             bufferPool.releaseBuffer(payloadByteBuffer);

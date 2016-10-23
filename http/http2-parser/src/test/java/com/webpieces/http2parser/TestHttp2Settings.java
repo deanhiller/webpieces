@@ -25,8 +25,8 @@ public class TestHttp2Settings {
     @Test
     public void testCreateSettings() {
         Http2Settings frame = new Http2Settings();
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1);
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256);
+        frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1L);
+        frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L);
         String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(basicSettings));
 
@@ -39,7 +39,7 @@ public class TestHttp2Settings {
         Assert.assertTrue(Http2Settings.class.isInstance(frame));
 
         Http2Settings castFrame = (Http2Settings) frame;
-        Map<Http2Settings.Parameter, Integer> settings = castFrame.getSettings();
+        Map<Http2Settings.Parameter, Long> settings = castFrame.getSettings();
         Assert.assertEquals(settings.get(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH).longValue(), 1);
         Assert.assertEquals(settings.get(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS).longValue(), 256);
         Assert.assertFalse(settings.containsKey(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE));
@@ -58,8 +58,8 @@ public class TestHttp2Settings {
     public void testCreateAck() {
         Http2Settings frame = new Http2Settings();
         frame.setAck(true);
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1);
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256);
+        frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1L);
+        frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L);
 
         // If it's an ack there's no settings, even if we set them
         Assert.assertEquals(frame.getSettings().size(), 0);

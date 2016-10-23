@@ -27,9 +27,9 @@ public class ParseFramesFromFile {
         Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
         DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
         Decoder decoder = new Decoder(4096, 4096);
-        Map<Http2Settings.Parameter, Integer> settings = new HashMap<>();
+        Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
 
-        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384);
+        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
 
         while (inChannel.read(buf) != -1) {
             buf.flip();

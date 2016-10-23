@@ -216,7 +216,7 @@ public class Http2ParserImpl implements Http2Parser {
 
 
     @Override
-    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Map<Http2Settings.Parameter, Integer> settings) {
+    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Map<Http2Settings.Parameter, Long> settings) {
         DataWrapper wrapperToParse;
         List<Http2Frame> frames = new LinkedList<>();
         List<Http2Frame> hasHeaderFragmentList = new LinkedList<>();
@@ -353,13 +353,13 @@ public class Http2ParserImpl implements Http2Parser {
             LinkedList<HasHeaderFragment.Header> headers,
             Http2FrameType startingFrameType,
             int streamId,
-            Map<Http2Settings.Parameter, Integer> remoteSettings,
+            Map<Http2Settings.Parameter, Long> remoteSettings,
             Encoder encoder,
             ByteArrayOutputStream out) {
         List<Http2Frame> headerFrames = new LinkedList<>();
 
         DataWrapper serializedHeaders = serializeHeaders(headers, encoder, out);
-        int maxFrameSize = remoteSettings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
+        long maxFrameSize = remoteSettings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
         boolean firstFrame = true;
         boolean lastFrame = false;
         DataWrapper fragment;
@@ -369,7 +369,7 @@ public class Http2ParserImpl implements Http2Parser {
                     lastFrame = true;
                     fragment = serializedHeaders;
                 } else {
-                    List<? extends DataWrapper> split = dataGen.split(serializedHeaders, maxFrameSize);
+                    List<? extends DataWrapper> split = dataGen.split(serializedHeaders, (int) maxFrameSize);
                     fragment = split.get(0);
                     serializedHeaders = split.get(1);
                 }

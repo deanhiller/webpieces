@@ -65,7 +65,7 @@ public class TestHttp2Parser {
 
     private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
-    private static Map<Http2Settings.Parameter, Integer> settings = new HashMap<>();
+    private static Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
 
     // https://github.com/http2jp/hpack-test-case/blob/master/nghttp2/story_00.json
     private static String basicRequestSerializationNghttp2 = "82864188f439ce75c875fa5784";
@@ -100,7 +100,7 @@ public class TestHttp2Parser {
         basicResponseHeaders.add(new HasHeaderFragment.Header("server", "cloudflare-nginx"));
         basicResponseHeaders.add(new HasHeaderFragment.Header("cf-ray", "2e916f776c724fd5-DEN"));
 
-        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384);
+        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
     }
 
     @Test
@@ -197,9 +197,9 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+        Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
         // set a small max frame size for testing
-        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
+        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, HEADERS, 0x1, remoteSettings, encoder, out);
         Assert.assertEquals(headerFrames.size(), 2);
@@ -217,9 +217,9 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+        Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
         // set a small max frame size for testing
-        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
+        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings, encoder, out);
         Assert.assertEquals(headerFrames.size(), 2);
@@ -237,9 +237,9 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Map<Http2Settings.Parameter, Integer> remoteSettings = new HashMap<>();
+        Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
         // set a small max frame size for testing
-        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256);
+        remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings, encoder, out);
