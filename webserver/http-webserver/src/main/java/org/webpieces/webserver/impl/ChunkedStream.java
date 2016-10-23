@@ -66,7 +66,7 @@ public class ChunkedStream extends OutputStream {
 		byte[] data = str.toByteArray();
 		str = new ByteArrayOutputStream();
 		DataWrapper body = wrapperFactory.wrapByteArray(data);
-		log.info("writing "+type+" data="+body.getReadableSize());
+		log.info("writing "+type+" data="+body.getReadableSize()+" to socket="+responseSender);
 		responseSender.sendData(body, responseId, false);
 	}
 

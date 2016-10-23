@@ -23,13 +23,17 @@ public class WEBPIECESxCLASSDevServer {
 	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSServer.class);
 	
 	//NOTE: This whole project brings in jars that the main project does not have and should never
-	//have like the eclipe compiler, a classloading compilter jar(webpieces' runtimecompile.jar
+	//have like the eclipse compiler(a classloading compiler jar), webpieces runtimecompile.jar
 	//and finally the http-router-dev.jar which has the guice module that overrides certain core
-	//webserver classes to put in a place a runtime compiler so we can compiler your code as you
+	//webserver classes to put in a place a runtime compiler so we can compile your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
 		new WEBPIECESxCLASSDevServer(false).start();
 		
+		//Since we typically use only 3rd party libraries with daemon threads, that means this
+		//main thread is the ONLY non-daemon thread letting the server keep running so we need
+		//to block it and hold it up from exiting.  Modify this to release if you want an ability
+		//to remotely shutdown....
 		synchronized(WEBPIECESxCLASSDevServer.class) {
 			WEBPIECESxCLASSDevServer.class.wait();
 		}

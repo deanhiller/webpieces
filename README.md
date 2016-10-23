@@ -5,6 +5,7 @@
 This code coverage is actually not accurate or at least when we run it locally, it tells us 66% of the code is covered...
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
+I want to try something new on this project.  If you want something fixed, I will pair with you to fix it ramping up your knowledge while fixing the issue.  We do this with screenhero(remote desktop sharing and control)
 
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely 'Feature' Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
@@ -89,7 +90,6 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
-* put back timeouts in the server
 * add list, add, list, edit full example BUT with hibernate!!
 * add optimistic locking test case
 * add hibernate and embedded in-memory H2 in dev mode along with embedded http web client

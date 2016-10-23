@@ -27,6 +27,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -283,6 +284,7 @@ public class RequestReceiver implements RequestListener {
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
+		
 		ProxyResponse proxyResp = responseProvider.get();
 		HttpRequest req = new HttpRequest();
 		RouterRequest routerReq = new RouterRequest();
@@ -293,12 +295,12 @@ public class RequestReceiver implements RequestListener {
 
 	@Override
 	public void clientOpenChannel(ResponseSender responseSender) {
-		log.info("browser client open channel");
+		log.info("browser client open channel "+responseSender);
 	}
 	
 	@Override
 	public void clientClosedChannel(ResponseSender responseSender) {
-		log.info("browser client closed channel");
+		log.info("browser client closed channel "+responseSender);
 	}
 
 	@Override

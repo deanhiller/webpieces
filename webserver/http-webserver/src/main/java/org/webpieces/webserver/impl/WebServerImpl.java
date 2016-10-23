@@ -56,7 +56,7 @@ public class WebServerImpl implements WebServer {
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
 		
 		if(factory != null) {
-			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress());
+			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
 		} else {
