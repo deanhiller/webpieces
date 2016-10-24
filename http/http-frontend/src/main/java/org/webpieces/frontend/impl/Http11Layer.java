@@ -87,7 +87,7 @@ public class Http11Layer {
                     http11Sender.sendResponse(response, req, new RequestId(0), true)
                         .thenAccept(
                             responseId -> {
-                                //socket.sendLocalPreferredSettings();
+                                socket.sendLocalPreferredSettings();
                                 // Send the request to listener (requestid is 1 for this first request)
                                 listener.incomingRequest(req, new RequestId(0x1), true, socket.getResponseSender());
                             }

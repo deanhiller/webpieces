@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
@@ -51,6 +52,11 @@ public class MockResponseSender implements ResponseSender {
 		}
 
 		return null;
+	}
+
+	@Override
+	public void sendTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

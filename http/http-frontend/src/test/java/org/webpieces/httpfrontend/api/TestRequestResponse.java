@@ -58,6 +58,7 @@ public class TestRequestResponse {
         http2Parser = Http2ParserFactory.createParser(pool);
         decoder = new Decoder(4096, 4096);
         settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
+        settingsFrame.setSettings(settings);
     }
 
     private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener) throws InterruptedException, ExecutionException {
@@ -100,8 +101,12 @@ public class TestRequestResponse {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
+        byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+
+        // strip the header
+        byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
+                Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
 
@@ -133,8 +138,12 @@ public class TestRequestResponse {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
+        byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+
+        // strip the header
+        byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
+                Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
 
@@ -172,8 +181,12 @@ public class TestRequestResponse {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
+        byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+
+        // strip the header
+        byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                Base64.getUrlEncoder().encodeToString(http2Parser.marshal(settingsFrame).createByteArray()) + " "));
+                Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(responses));
 
