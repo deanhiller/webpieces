@@ -785,25 +785,55 @@ public class Http2EngineImpl implements Http2Engine {
             }
         }
 
+        private Map<String, String> processSpecialHeaders(Queue<HasHeaderFragment.Header> headers,
+                                                          List<String> specialHeaders,
+                                                          HttpMessage msg,
+                                                          int streamId) {
+            Map<String, String> specialHeaderMap = new HashMap<>();
+
+            boolean processingSpecialHeaders = true;
+            for(HasHeaderFragment.Header header: headers) {
+                if(processingSpecialHeaders) {
+                    if(!header.header.startsWith((":")))
+                    {
+                        processingSpecialHeaders = false;
+                    } else {
+                        // If we got a special header twice, or a special header we are not expecting
+                        if (specialHeaderMap.get(header.header) != null || !specialHeaders.contains(header.header)) {
+                            throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
+                        }
+                        specialHeaderMap.put(header.header, header.value);
+                    }
+                }
+                if(!processingSpecialHeaders) {
+                    // if we got a special header mixed in with the regular headers
+                    if(header.header.startsWith(":")) {
+                        throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
+                    }
+                    msg.addHeader(new Header(header.header, header.value));
+                }
+            }
+
+            // Make sure we got all the special headers
+            for(String specialHeader: specialHeaders) {
+                if(specialHeaderMap.get(specialHeader) == null) {
+                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
+                }
+            }
+            return specialHeaderMap;
+
+        }
+
         private HttpResponse responseFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
             HttpResponse response = new HttpResponse();
 
-            // TODO: throw if special headers are not at the front, or we get a bad special header
-            // Set special header
-            String statusString = null;
-            for(HasHeaderFragment.Header header: headers) {
-                if (header.header.equals(":status")) {
-                    statusString = header.value;
-                    break;
-                }
-            }
-            if(statusString == null)
-                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+            Map<String, String> specialHeaderMap = processSpecialHeaders(
+                    headers, Arrays.asList(":status"), response, stream.getStreamId());
 
             HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
             HttpResponseStatus status = new HttpResponseStatus();
             try {
-                status.setKnownStatus(KnownStatusCode.lookup(Integer.parseInt(statusString)));
+                status.setKnownStatus(KnownStatusCode.lookup(Integer.parseInt(specialHeaderMap.get(":status"))));
             } catch(NumberFormatException e) {
                 throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
@@ -814,62 +844,29 @@ public class Http2EngineImpl implements Http2Engine {
             statusLine.setVersion(version);
 
             response.setStatusLine(statusLine);
-
-            // Set all other headers
-            for(HasHeaderFragment.Header header: headers) {
-                if(!header.header.equals(":status"))
-                    response.addHeader(new Header(header.header, header.value));
-            }
-
             return response;
         }
 
         private HttpRequest requestFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
             HttpRequest request = new HttpRequest();
-            boolean processingSpecialHeaders = true;
-            String method = null;
-            String scheme = null;
-            String authority = null;
-            String path = null;
-
-            for(HasHeaderFragment.Header header: headers) {
-                if(processingSpecialHeaders) {
-                    if (!header.header.startsWith(":")) {
-                        processingSpecialHeaders = false;
-                    } else {
-                        if (header.header.equals(":method") && method == null) {
-                            method = header.value;
-                        } else if (header.header.equals(":scheme") && scheme == null) {
-                            scheme = header.value;
-                        } else if (header.header.equals(":authority") && authority == null) {
-                            authority = header.value;
-                        } else if (header.header.equals(":path") && path == null) {
-                            path = header.value;
-                        } else {
-                            throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
-                        }
-                    }
-                }
-                if(!processingSpecialHeaders) {
-                    if(header.header.startsWith(":")) {
-                        throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
-                    }
-                    request.addHeader(new Header(header.header, header.value));
-                }
-
-            }
-
-            if(method == null || scheme == null || authority == null || path == null)
-                throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+            Map<String, String> specialHeaderMap = processSpecialHeaders(
+                    headers,
+                    Arrays.asList(":method", ":path", ":authority", ":scheme"),
+                    request,
+                    stream.getStreamId());
 
             // See https://svn.tools.ietf.org/svn/wg/httpbis/specs/rfc7230.html#asterisk-form
-            if(method.toLowerCase().equals("options") && path.equals("*")) {
-                path = "";
+            if(specialHeaderMap.get(":method").toLowerCase().equals("options") && specialHeaderMap.get(":path").equals("*")) {
+                specialHeaderMap.put(":path", "");
             }
 
             HttpRequestLine requestLine = new HttpRequestLine();
-            requestLine.setUri(new HttpUri(String.format("%s://%s%s", scheme, authority, path)));
-            switch(scheme.toLowerCase()) {
+            requestLine.setUri(new HttpUri(String.format(
+                    "%s://%s%s",
+                    specialHeaderMap.get(":scheme"),
+                    specialHeaderMap.get(":authority"),
+                    specialHeaderMap.get(":scheme"))));
+            switch(specialHeaderMap.get(":scheme").toLowerCase()) {
                 case "http":
                     request.setHttpScheme(HttpRequest.HttpScheme.HTTP);
                     break;
@@ -880,20 +877,11 @@ public class Http2EngineImpl implements Http2Engine {
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
 
-            requestLine.setMethod(new HttpRequestMethod(method));
+            requestLine.setMethod(new HttpRequestMethod(specialHeaderMap.get(":method")));
             HttpVersion version = new HttpVersion();
             version.setVersion("2.0");
             requestLine.setVersion(version);
             request.setRequestLine(requestLine);
-
-            List<String> specialHeaders = Arrays.asList(":method", ":scheme", ":authority", ":path");
-
-            // Set all other headers
-            // TODO: throw if there is an additional special header
-            for(HasHeaderFragment.Header header: headers) {
-                if(!specialHeaders.contains(header.header))
-                    request.addHeader(new Header(header.header, header.value));
-            }
 
             return request;
         }
