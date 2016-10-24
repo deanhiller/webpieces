@@ -2,7 +2,7 @@ package org.webpieces.util.filters;
 
 import java.util.concurrent.CompletableFuture;
 
-public class SomeService extends Service<Integer, String> {
+public class SomeService implements Service<Integer, String> {
 
 	@Override
 	public CompletableFuture<String> invoke(Integer meta) {

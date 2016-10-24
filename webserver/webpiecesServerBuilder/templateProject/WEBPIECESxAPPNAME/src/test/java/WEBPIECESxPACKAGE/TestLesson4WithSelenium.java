@@ -62,6 +62,19 @@ public class TestLesson4WithSelenium {
 		
 	}
 	
+	//You must have firefox installed to run this test...
+	//@Ignore
+	@Test
+	public void testChunking() throws ClassNotFoundException {
+
+		driver.get("http://localhost:"+port+"");
+		
+		String pageSource = driver.getPageSource();
+		
+		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("Webpieces Webserver is the most"));
+		
+	}	
+	
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {

@@ -57,4 +57,9 @@ public abstract class MockSuperclass {
 		}
 		return params.stream();
 	}
+	
+	public void clear() {
+		calledMethods = new HashMap<>();
+		returnValues = new HashMap<>();
+	}
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
@@ -19,6 +20,7 @@ import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.basic.app.biz.UserDbo;
 import org.webpieces.webserver.tags.app.Account;
 
+@Singleton
 public class BeansController {
 	
 	@Inject

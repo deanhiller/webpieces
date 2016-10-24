@@ -17,7 +17,7 @@ import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.util.filters.Service;
 
 @Singleton
-public class HttpLoginFilter implements RouteFilter<LoginInfo> {
+public class HttpLoginFilter extends RouteFilter<LoginInfo> {
 
 	private String token;
 	private RouteId loginRoute;

@@ -1,8 +1,15 @@
 package org.webpieces.webserver.impl;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +29,12 @@ import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -35,6 +48,8 @@ import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.httpparser.api.subparsers.UrlEncodedParser;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.exceptions.BadCookieException;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
@@ -289,6 +304,7 @@ public class RequestReceiver implements RequestListener {
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
+
 		ProxyResponse proxyResp = responseProvider.get();
 		HttpRequest req = new HttpRequest();
 		RouterRequest routerReq = new RouterRequest();
@@ -298,13 +314,13 @@ public class RequestReceiver implements RequestListener {
 	}
 
 	@Override
-	public void clientOpenChannel(HttpSocket HttpSocket) {
-		log.info("browser client open channel");
+	public void clientOpenChannel(HttpSocket httpSocket) {
+		log.info("browser client open channel " + httpSocket);
 	}
 	
 	@Override
 	public void clientClosedChannel(HttpSocket httpSocket) {
-		log.info("browser client closed channel");
+		log.info("browser client closed channel" + httpSocket);
 	}
 
 	@Override

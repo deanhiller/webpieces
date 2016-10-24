@@ -4,17 +4,13 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
@@ -28,6 +24,8 @@ import org.webpieces.router.impl.RouteModuleInfo;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class DevRoutingService extends AbstractRouterService implements RoutingService {
 

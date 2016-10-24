@@ -45,7 +45,7 @@ public class ResponseProcessor {
 		this.responseCb = responseCb;
 	}
 
-	public RedirectResponse createFullRedirect(RedirectImpl action) {
+	public void createFullRedirect(RedirectImpl action) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
@@ -81,11 +81,9 @@ public class ResponseProcessor {
 		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path);
 		
 		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
-		
-		return redirectResponse;
 	}
 
-	public RenderResponse createRenderResponse(RenderImpl controllerResponse) {
+	public void createRenderResponse(RenderImpl controllerResponse) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
@@ -121,8 +119,6 @@ public class ResponseProcessor {
 		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRoute().getRouteType());
 		
 		wrapFunctionInContext(s -> responseCb.sendRenderHtml(resp));
-		
-		return resp;
 	}
 
 	private void wrapFunctionInContext(Consumer<Void> function) {

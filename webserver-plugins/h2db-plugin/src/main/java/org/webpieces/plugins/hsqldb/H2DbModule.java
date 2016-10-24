@@ -1,7 +1,5 @@
 package org.webpieces.plugins.hsqldb;
 
-import org.h2.tools.Server;
-
 import com.google.inject.AbstractModule;
 
 public class H2DbModule extends AbstractModule {

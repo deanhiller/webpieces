@@ -5,6 +5,7 @@
 This code coverage is actually not accurate or at least when we run it locally, it tells us 66% of the code is covered...
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
+I want to try something new on this project.  If you want something fixed, I will pair with you to fix it ramping up your knowledge while fixing the issue.  We do this with screenhero(remote desktop sharing and control)
 
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely 'Feature' Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
@@ -12,7 +13,7 @@ This project is essentially pieces that can be used to build any http related so
 
 HUGE WINS in using this webserver
 
-* unlike Seam/JSF and heavyweight servers, you can slap down 1000 of these as it is built for clustering and scale and being stateless!!!
+* unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases
 * be blown away with the optimistic locking pattern.  If your end users both post a change to the same entity, one will win and the other will go through a path of code where you can decide, 1. show the user his changes and the other users, 2. just tell the user it failed and to start over 3. let it overwrite the previous user code 
 * look ma, no restarting the server in development mode with complete java refactoring
 * prod server runs on :8080, dev server on :9000 all locally such that unlike play, dev server never caches files so cached files from :8080 don't interfere with development mode and dev server never caches files making development seamless(modify css file and it's up to date)
@@ -26,20 +27,23 @@ HUGE WINS in using this webserver
 * production server has no need to compile templates as they are precompiled in production mode which increases speed for end users
 * You should find, we were so anal, we cover way more developer mistakes and way more error messages on what the developer did wrong so they don't have to wonder why something is not working and waste time.  
 * Override ANY component in your web application for testing to mock remote endpoints and tests can simulate those
-* Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme)
+* Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme unlike any server before it)
 * Debug one of the tests after creating the example project and you step right into the platform code making it easier to quickly understand the underlying platform you are using and how componentized it is. (if you happen to run into a bug, this makes it way easier to look into, but of course, we never run into bugs with 3rd party software, right, so you won't need this one) That was in my sarcastic font
 * Selenium test case provided as part of the template so skip setting it up
 * Route files are not in yml but are in java so you can have for loops, dynamic routes and anything you can dream up related to http routing
 * Full form support for arrays(which is hard and play1.3.x+ never got right to make it dead simple..let's not even talk about J2EE )
-* Protects developers from the frequent caching screwup!!! This is bigger than people realize until they get bitten.  ie. you should not change any static js/css files without also renaming them so that the browser cache is avoided and it loads the new one as soon as a new version is deployed.  Nearly all webservers just let developers screw this up and then customers wonder why things are not working(and it's only specific customers that have old versions that complain making it harder to pinpoint the issue).  Finally, you can live in a world where this is fixed!!!
+* Protects developers from the frequent caching css/js/html files screwup!!! This is bigger than people realize until they get bitten.  ie. you should not change any static js/css files without also renaming them so that the browser cache is avoided and it loads the new one as soon as a new version is deployed.  Nearly all webservers just let developers screw this up and then customers wonder why things are not working(and it's only specific customers that have old versions that complain making it harder to pinpoint the issue).  Finally, you can live in a world where this is fixed!!!
 * supports multiple domains over SSL with multiple certificates but only for advanced users
-* JPA/hibernate plugin with filter all setup/working so if you backend is a database, you can crank out db models
+* JPA/hibernate plugin with filter all setup/working so if your backend is a database, you can crank out db models.  NoSQL scales better but for startups, start simple with a database
 * TODO - saving page and seamless logging in
 * TODO: seamless creation of CRUD
 * Security - cookie is hashed so can't be modified without failing next request
 * Security - Form auth token in play1.3.x+  can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it harder to miss the auth token AND check that token in forms for the developer(putting it in is automatic in play 1.3 but checking it is not)
 * State per tab rather than just per session.  All web frameworks have a location to store session state but if you go to buy a plane ticket in 3 different tabs, the three tabs can step on each other.  A location to store information for each tab is needed
 * login and authorization to pages much like Seam Frameworks method such that we can redirect the user to a login page and back to the page he requested(our advantage over seam though...when a user is logging in, he doesn't come back to realize his session times out which can be annoying for users)
+
+Downside:
+  Currently documentation is lacking but there is an example for pretty much everything in webpieces/webserver/http-webserver/src/test/java/* as we do something called feature testing(testing as user would use the system) for all paths of code.
 
 To try the webserver
 
@@ -86,10 +90,9 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
+* add list, add, list, edit full example BUT with hibernate!!
 * add optimistic locking test case
-* add async transaction filter test case (and test loading entities in webpage in synch and async versions to see if we are consistent there)
-* move transaction code to filter
-* add hibernate and embedded in-memory H2 in dev mode along with embedded http web client 
+* add hibernate and embedded in-memory H2 in dev mode along with embedded http web client
 * add jacoco to the generated webpieces project, create example project for feature testing blog
 * add checkstyle with the really good rules to all projects to fail if any are violated
 * add automatic formatter... https://github.com/diffplug/spotless so no one worries about formatting

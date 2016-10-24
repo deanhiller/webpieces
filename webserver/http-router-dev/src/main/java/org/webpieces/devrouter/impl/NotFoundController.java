@@ -1,10 +1,13 @@
 package org.webpieces.devrouter.impl;
 
+import javax.inject.Singleton;
+
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
+@Singleton
 public class NotFoundController {
 
 	public Action notFound() {

@@ -3,6 +3,8 @@ package org.webpieces.router.impl.loader;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.routing.RouteFilter;
@@ -27,9 +29,13 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		
 		Injector injector = meta.getInjector();
 		Object controllerInst = createController(injector, controllerStr);
+		
+		Singleton singleton = controllerInst.getClass().getAnnotation(Singleton.class);
+		if(singleton == null)
+			throw new IllegalArgumentException("EVERY controller must be marked with @javax.inject.Singleton not @com.google.inject.Singleton. bad controller="+controllerInst.getClass().getName());
+		
 		loader.loadInstIntoMeta(meta, controllerInst, methodStr);
 	}
-
 
 	protected abstract Object createController(Injector injector, String controllerStr);
 
@@ -59,6 +65,11 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		//If the Filter java file changed, this filterClass was reloaded from a different classloader to
 		//blow away the previous filter.  That was done upstream in the DevRoutingService
 		Class<? extends RouteFilter<T>> filterClass = info.getFilter();
+		
+		Singleton singleton = filterClass.getAnnotation(Singleton.class);
+		if(singleton == null)
+			throw new IllegalArgumentException("EVERY filter must be marked with @javax.inject.Singleton not @com.google.inject.Singleton.  bad filter="+filterClass.getName());
+		
 		RouteFilter<T> f = injector.getInstance(filterClass);
 		f.initialize(info.getInitialConfig());
 		return f;

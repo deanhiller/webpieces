@@ -9,7 +9,7 @@ import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.impl.InvokeException;
 import org.webpieces.util.filters.Service;
 
-public class ServiceProxy extends Service<MethodMeta, Action> {
+public class ServiceProxy implements Service<MethodMeta, Action> {
 
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {

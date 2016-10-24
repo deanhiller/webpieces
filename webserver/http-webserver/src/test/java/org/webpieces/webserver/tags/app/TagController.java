@@ -3,10 +3,13 @@ package org.webpieces.webserver.tags.app;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Singleton;
+
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 
+@Singleton
 public class TagController {
 	public Action verbatimTag() {
 		//The & html will be escaped so it shows up to the user as & (ie. in html it is &amp; unless verbatim is used .. 

@@ -3,6 +3,7 @@ package org.webpieces.router.api.simplesvr;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
@@ -10,6 +11,7 @@ import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
 import org.webpieces.router.api.routing.Param;
 
+@Singleton
 public class MeetingController {
 
 	private boolean isWantRedirect = false;

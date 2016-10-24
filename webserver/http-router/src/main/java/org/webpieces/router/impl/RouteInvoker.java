@@ -8,9 +8,6 @@ import java.util.concurrent.CompletionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.util.logging.SupressedExceptionLog;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
@@ -20,8 +17,6 @@ import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RedirectResponse;
-import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.BadRequestException;
@@ -34,6 +29,9 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslator;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.logging.SupressedExceptionLog;
 
 @Singleton
 public class RouteInvoker {
@@ -211,13 +209,7 @@ public class RouteInvoker {
 	}
 
 	public Void continueProcessing(ResponseProcessor processor, Action controllerResponse, ResponseStreamer responseCb) {
-		if(controllerResponse instanceof RedirectResponse) {
-			//do nothing, it was called already in Actions.redirect so if there is an exception, the
-			//client code ends up in the stack trace making it easier to tell what the path was to failure
-		} else if(controllerResponse instanceof RenderResponse) {
-			//do nothing, it was called already in Actions.redirect so if there is an exception, the
-			//client code ends up in the stack trace making it easier to tell what the path was to failure
-		} else if(controllerResponse instanceof RedirectImpl) {
+		if(controllerResponse instanceof RedirectImpl) {
 			processor.createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderImpl) {
 			processor.createRenderResponse((RenderImpl)controllerResponse);

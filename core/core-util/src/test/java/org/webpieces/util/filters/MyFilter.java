@@ -2,7 +2,7 @@ package org.webpieces.util.filters;
 
 import java.util.concurrent.CompletableFuture;
 
-public class MyFilter implements Filter<Integer, String> {
+public class MyFilter extends Filter<Integer, String> {
 
 	private String txt;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public class MockExecutor implements Executor {
+public class ExecutorSimulator implements Executor {
 
 	public List<Runnable> runnables = new ArrayList<>();
 	

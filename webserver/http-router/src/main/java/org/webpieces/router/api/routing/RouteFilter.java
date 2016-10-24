@@ -4,8 +4,8 @@ import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.util.filters.Filter;
 
-public interface RouteFilter<T> extends Filter<MethodMeta, Action> {
+public abstract class RouteFilter<T> extends Filter<MethodMeta, Action> {
 
-	void initialize(T initialConfig);
+	public abstract void initialize(T initialConfig);
 
 }

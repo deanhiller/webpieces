@@ -4,14 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public class ChunkedStream extends OutputStream {
 
@@ -50,8 +49,6 @@ public class ChunkedStream extends OutputStream {
 		if(str.size() > 0) {
 			writeDataOut();
 		}
-		
-
 	}
 	
 	@Override
@@ -67,7 +64,7 @@ public class ChunkedStream extends OutputStream {
 		byte[] data = str.toByteArray();
 		str = new ByteArrayOutputStream();
 		DataWrapper body = wrapperFactory.wrapByteArray(data);
-		log.info("writing "+type+" data="+body.getReadableSize());
+		log.info("writing "+type+" data="+body.getReadableSize()+" to socket="+responseSender);
 		responseSender.sendData(body, responseId, false);
 	}
 

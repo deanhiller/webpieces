@@ -130,6 +130,7 @@ class TimedRequestListener implements RequestListener {
 	
 	@Override
     public void clientClosedChannel(HttpSocket httpSocket) {
+		releaseTimeout(httpSocket);
 		listener.clientClosedChannel(httpSocket);
 	}
 

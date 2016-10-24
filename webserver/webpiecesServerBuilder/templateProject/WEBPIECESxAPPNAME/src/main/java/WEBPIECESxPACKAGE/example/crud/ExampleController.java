@@ -1,6 +1,7 @@
 package WEBPIECESxPACKAGE.example.crud;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
@@ -9,6 +10,7 @@ import org.webpieces.router.api.actions.Redirect;
 import WEBPIECESxPACKAGE.ExampleRouteId;
 import WEBPIECESxPACKAGE.example.RemoteService;
 
+@Singleton
 public class ExampleController {
 
 	@Inject
