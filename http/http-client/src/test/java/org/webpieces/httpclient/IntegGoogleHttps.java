@@ -1,12 +1,14 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.httpclient.api.*;
 import org.webpieces.httpcommon.api.*;
 import org.webpieces.util.logging.Logger;
@@ -104,6 +106,11 @@ public class IntegGoogleHttps {
 		public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 			log.info("received resp="+ data +" id=" + id + " last="+ isLastData);
 			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
+			log.info("received trailer" + headers +" id=" + id + " last="+ isComplete);
 		}
 
 		@Override

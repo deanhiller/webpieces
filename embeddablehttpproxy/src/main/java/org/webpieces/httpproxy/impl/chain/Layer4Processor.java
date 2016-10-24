@@ -2,11 +2,13 @@ package org.webpieces.httpproxy.impl.chain;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpclient.api.HttpClient;
@@ -93,7 +95,13 @@ public class Layer4Processor implements RequestListener {
         throw new UnsupportedOperationException();
     }
 
-    private HttpClientSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, ResponseSender channel) {
+	@Override
+	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+		// TODO: deal with trailers
+		throw new UnsupportedOperationException();
+	}
+
+	private HttpClientSocket openAndConnectSocket(InetSocketAddress addr, HttpRequest req, ResponseSender channel) {
 		HttpClientSocket socket = httpClient.openHttpSocket(""+addr.getHostName()+"-"+addr.getPort(), new Layer1CloseListener(addr));
 		log.info("connecting to addr="+addr);
 		socket.connect(addr)

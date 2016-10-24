@@ -1,5 +1,6 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
@@ -8,6 +9,7 @@ import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Layer1Response implements ResponseListener {
@@ -36,6 +38,12 @@ public class Layer1Response implements ResponseListener {
     @Override
     public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 		return responseListener.processData(responseSender, data, id, isLastData);
+    }
+
+    @Override
+    public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
+        // TODO: Handle trailers
+        throw new UnsupportedOperationException();
     }
 
     @Override
