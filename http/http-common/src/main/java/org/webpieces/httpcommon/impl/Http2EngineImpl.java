@@ -766,6 +766,8 @@ public class Http2EngineImpl implements Http2Engine {
                     boolean isComplete = frame.isEndStream();
                     int payloadLength = http2Parser.getFrameLength(frame);
                     decrementIncomingWindow(frame.getStreamId(), payloadLength);
+                    stream.checkAgainstContentLength(frame.getData().getReadableSize(), isComplete);
+
                     if(side == CLIENT)
                         stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), isComplete).thenAccept(
                                 length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
@@ -922,11 +924,17 @@ public class Http2EngineImpl implements Http2Engine {
                 }
                 if(side == CLIENT) {
                     HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
+                    if(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
+                        stream.setContentLengthHeaderValue(Long.parseLong(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH).getValue()));
+                    }
                     stream.setResponse(response);
                     stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), isComplete);
                 } else {
                     HttpRequest request = requestFromHeaders(frame.getHeaderList(), stream);
                     stream.setRequest(request);
+                    if(request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
+                        stream.setContentLengthHeaderValue(Long.parseLong(request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH).getValue()));
+                    }
                     requestListener.incomingRequest(request, stream.getRequestId(), isComplete, responseSender);
                 }
 

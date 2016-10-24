@@ -1,9 +1,12 @@
 package org.webpieces.httpcommon.impl;
 
 import com.webpieces.http2parser.api.dto.HasPriorityDetails;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpcommon.api.*;
+import org.webpieces.httpcommon.api.exceptions.GoAwayError;
+import org.webpieces.httpcommon.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
@@ -32,6 +35,9 @@ class Stream {
     private ResponseListener responseListener;
 
     private int streamId;
+    private boolean hasContentLengthHeader = false;
+    private long contentLengthHeaderValue;
+    private long currentDataLength = 0;
 
     int getStreamId() {
         return streamId;
@@ -98,5 +104,17 @@ class Stream {
 
     ResponseListener getResponseListener() {
         return responseListener;
+    }
+
+    void setContentLengthHeaderValue(long contentLengthHeaderValue) {
+        this.hasContentLengthHeader = true;
+        this.contentLengthHeaderValue = contentLengthHeaderValue;
+    }
+
+    /* Return false if we have a problem and should throw */
+    void checkAgainstContentLength(int dataLength, boolean isComplete) {
+        currentDataLength += dataLength;
+        if ((isComplete && currentDataLength != contentLengthHeaderValue) || (currentDataLength > contentLengthHeaderValue))
+            throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
     }
 }
