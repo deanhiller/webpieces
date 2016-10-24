@@ -344,8 +344,8 @@ public class Http2EngineImpl implements Http2Engine {
         CompletableFuture<Channel> future = pendingDataFrame.future;
 
         int streamId = frame.getStreamId();
-        decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
         log.info("actually writing data frame: " + frame);
+        decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
         return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenApply(
                 channel -> {
                     future.complete(channel);
@@ -356,8 +356,8 @@ public class Http2EngineImpl implements Http2Engine {
 
     private boolean canSendFrame(Http2Data dataFrame) {
         int length = http2Parser.getFrameLength(dataFrame);
-        return (outgoingFlowControl.get(dataFrame.getStreamId()).get() > length &&
-                outgoingFlowControl.get(0x0).get() > length);
+        return (outgoingFlowControl.get(dataFrame.getStreamId()).get() >= length &&
+                outgoingFlowControl.get(0x0).get() >= length);
     }
 
     private void clearQueue(int streamId) {
@@ -403,8 +403,12 @@ public class Http2EngineImpl implements Http2Engine {
                 newFrame.setStreamId(stream.getStreamId());
 
                 // writes only one frame at a time.
-                if(body.getReadableSize() <= remoteSettings.get(SETTINGS_MAX_FRAME_SIZE)) {
-                    // the body fits within one frame so send an endstream with this frame
+                int dataLength = body.getReadableSize();
+                long maxLength = min(remoteSettings.get(SETTINGS_MAX_FRAME_SIZE),
+                        min(outgoingFlowControl.get(stream.getStreamId()).get(),
+                                outgoingFlowControl.get(0x0).get()));
+                if(dataLength <= maxLength) {
+                    // the body fits within one frame and is within the flow control window
                     newFrame.setData(body);
                     if(isComplete)
                         newFrame.setEndStream(true);
@@ -427,8 +431,8 @@ public class Http2EngineImpl implements Http2Engine {
                             }
                     );
                 } else {
-                    // to big, split it, send, and recurse.
-                    List<? extends DataWrapper> split = wrapperGen.split(body, remoteSettings.get(SETTINGS_MAX_FRAME_SIZE).intValue());
+                    // to big, split it to fit within framesize or window size send, and recurse.
+                    List<? extends DataWrapper> split = wrapperGen.split(body, (int) maxLength);
                     newFrame.setData(split.get(0));
                     log.info("queuing non-final data frame: " + newFrame);
                     return writeDataFrame(newFrame).thenCompose(
@@ -888,6 +892,18 @@ public class Http2EngineImpl implements Http2Engine {
             return request;
         }
 
+        private void checkHeaders(Headers headerLookupStruct, Stream stream) {
+            if(headerLookupStruct.getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
+                stream.setContentLengthHeaderValue(Long.parseLong(headerLookupStruct.getHeader(KnownHeaderName.CONTENT_LENGTH).getValue()));
+            }
+            if(headerLookupStruct.getHeader(KnownHeaderName.CONNECTION) != null) {
+                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+            }
+            if(headerLookupStruct.getHeader(KnownHeaderName.TE) != null && !headerLookupStruct.getHeader(KnownHeaderName.TE).getValue().toLowerCase().equals("trailers")) {
+                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+            }
+        }
+
         private void handleHeaders(Http2Headers frame, Stream stream) {
             switch (stream.getStatus()) {
                 case IDLE:
@@ -924,17 +940,13 @@ public class Http2EngineImpl implements Http2Engine {
                 }
                 if(side == CLIENT) {
                     HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
-                    if(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
-                        stream.setContentLengthHeaderValue(Long.parseLong(response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH).getValue()));
-                    }
+                    checkHeaders(response.getHeaderLookupStruct(), stream);
                     stream.setResponse(response);
                     stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), isComplete);
                 } else {
                     HttpRequest request = requestFromHeaders(frame.getHeaderList(), stream);
+                    checkHeaders(request.getHeaderLookupStruct(), stream);
                     stream.setRequest(request);
-                    if(request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
-                        stream.setContentLengthHeaderValue(Long.parseLong(request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH).getValue()));
-                    }
                     requestListener.incomingRequest(request, stream.getRequestId(), isComplete, responseSender);
                 }
 
