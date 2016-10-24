@@ -1,9 +1,11 @@
 package org.webpieces.httpcommon.api;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -58,6 +60,15 @@ public interface RequestSender {
      * @return
      */
     CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete);
+
+    /**
+     * If we want to send headers after all the data is done.
+     *
+     * @param headers
+     * @param id
+     * @param isComplete
+     */
+    void sendTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete);
 
     void failure(Throwable e);
 }

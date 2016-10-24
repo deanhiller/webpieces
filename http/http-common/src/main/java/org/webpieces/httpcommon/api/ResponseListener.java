@@ -1,9 +1,11 @@
 package org.webpieces.httpcommon.api;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface ResponseListener {
@@ -53,10 +55,20 @@ public interface ResponseListener {
 	 *
 	 * @param data
 	 * @param id
-	 * @param isLastData
+	 * @param isComplete
 	 */
 	// maybe add optional chunk or chunk extension, or not
-	CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData);
+	CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isComplete);
+
+	/**
+	 * At the end of a response we might have more headers. Here they are.
+	 *
+	 * @param headers
+	 * @param id
+	 * @param isComplete
+	 * @return
+	 */
+	void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete);
 
 	void failure(Throwable e);
 	

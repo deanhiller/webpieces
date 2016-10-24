@@ -1,5 +1,6 @@
 package org.webpieces.httpfrontend.api;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.ResponseSender;
@@ -8,6 +9,7 @@ import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class MockRequestListener implements RequestListener {
@@ -21,6 +23,10 @@ public class MockRequestListener implements RequestListener {
 	@Override
 	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
 		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
 	}
 
 	@Override

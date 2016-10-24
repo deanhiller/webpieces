@@ -1,9 +1,11 @@
 package org.webpieces.httpcommon.api;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface RequestListener {
@@ -39,7 +41,9 @@ public interface RequestListener {
 	 * @return
 	 */
     CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender);
-	
+
+	void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender);
+
 	/**
 	 * In the event the client sends a bad unparseable request, OR your RequestListener
 	 * throws an exception, we call this method to pass in the status you 'should' return to

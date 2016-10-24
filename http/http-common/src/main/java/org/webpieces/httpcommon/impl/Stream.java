@@ -5,11 +5,13 @@ import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpcommon.api.*;
-import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
 
@@ -38,6 +40,9 @@ class Stream {
     private boolean hasContentLengthHeader = false;
     private long contentLengthHeaderValue;
     private long currentDataLength = 0;
+
+    private List<String> trailerHeaders = new ArrayList<>();
+    private boolean trailerEnabled;
 
     int getStreamId() {
         return streamId;
@@ -116,5 +121,18 @@ class Stream {
         currentDataLength += dataLength;
         if ((isComplete && currentDataLength != contentLengthHeaderValue) || (currentDataLength > contentLengthHeaderValue))
             throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
+    }
+
+    void addTrailerHeader(String header) {
+        trailerEnabled = true;
+        trailerHeaders.add(header);
+    }
+
+    boolean isTrailerEnabled() {
+        return trailerEnabled;
+    }
+
+    public List<String> getTrailerHeaders() {
+        return trailerHeaders;
     }
 }

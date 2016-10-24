@@ -1,8 +1,10 @@
 package org.webpieces.frontend.impl;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
@@ -43,10 +45,10 @@ class Http11ResponseSender implements ResponseSender {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isLastData) {
+	public CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isComplete) {
 		// Create a chunk from the data, then send.
 		HttpChunk chunk;
-		if(isLastData) {
+		if(isComplete) {
 			chunk = new HttpLastChunk();
 		} else
 		{
@@ -54,6 +56,18 @@ class Http11ResponseSender implements ResponseSender {
 		}
 		chunk.setBody(data);
 		return channel.write(parser.marshalToByteBuffer(chunk)).thenAccept(c -> {});
+	}
+
+	@Override
+	public void sendTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete) {
+		if(!isComplete) {
+			throw new RuntimeException("can't sendTrailer that isnot completeing the response");
+		}
+		HttpLastChunk lastChunk = new HttpLastChunk();
+		for(HasHeaderFragment.Header header: headerList) {
+			lastChunk.addHeader(new Header(header.header, header.value));
+		}
+		channel.write(parser.marshalToByteBuffer(lastChunk));
 	}
 
 	@Override

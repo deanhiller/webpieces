@@ -1,7 +1,9 @@
 package org.webpieces.httpclient.impl;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseListener;
@@ -43,6 +45,10 @@ public class CompletableListener implements ResponseListener {
 	@Override
 	public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
 		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
 	}
 
 	@Override

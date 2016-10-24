@@ -1,9 +1,11 @@
 package org.webpieces.httpfrontend.api;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -67,6 +69,13 @@ public class IntegTestFrontend {
 				sendResponse(id, sender);
 			}
 			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+			if(isComplete) {
+				sendResponse(id, sender);
+			}
 		}
 
 		@Override

@@ -1,5 +1,6 @@
 package org.webpieces.httpclient.impl;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -8,6 +9,7 @@ import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class CatchResponseListener implements ResponseListener {
@@ -21,6 +23,15 @@ public class CatchResponseListener implements ResponseListener {
 	}
 
 	@Override
+	public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
+		try {
+			listener.incomingTrailer(headers, id, isComplete);
+		} catch(Throwable e) {
+			log.error("exception", e);
+		}
+	}
+
+	@Override
 	public void incomingResponse(HttpResponse resp, HttpRequest req, ResponseId id, boolean isComplete) {
 		try {
 			listener.incomingResponse(resp, req, id, isComplete);
@@ -31,10 +42,15 @@ public class CatchResponseListener implements ResponseListener {
 
 	@Override
 	public CompletableFuture<Void> incomingData(DataWrapper data, ResponseId id, boolean isLastData) {
-		return listener.incomingData(data, id, isLastData).exceptionally(e -> {
+		try {
+			return listener.incomingData(data, id, isLastData).exceptionally(e -> {
+				log.error("exception", e);
+				return null;
+			});
+		} catch(Throwable e) {
 			log.error("exception", e);
-			return null;
-		});
+			return CompletableFuture.completedFuture(null);
+		}
 	}
 
 	@Override

@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.HttpServerSocket;
@@ -94,6 +95,19 @@ public class RequestReceiver implements RequestListener {
 		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());
 	}
 
+	private void completeRequest(RequestId id, ResponseSender sender) {
+		// Now we're done, remove it so that another request with the same id can come in
+		RequestCollectingData collector = requestsStillCollecting.get(id);
+		requestsStillCollecting.remove(id);
+
+		handleCompleteRequest(collector.req, id, sender);
+
+		// Complete all the futures because we're done dealing with this data.
+		for(CompletableFuture<Void> fut: collector.futures) {
+			fut.complete(null);
+		}
+	}
+
 	@Override
 	public CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender) {
 		RequestCollectingData collector = requestsStillCollecting.get(id);
@@ -102,17 +116,17 @@ public class RequestReceiver implements RequestListener {
 		collector.futures.add(future);
 
 		if(isComplete) {
-			// Now we're done, remove it so that another request with the same id can come in
-			requestsStillCollecting.remove(id);
-
-			handleCompleteRequest(collector.req, id, sender);
-
-			// Complete all the futures because we're done dealing with this data.
-			for(CompletableFuture<Void> fut: collector.futures) {
-				fut.complete(null);
-			}
+			completeRequest(id, sender);
 		}
 		return future;
+	}
+
+	// We don't actually support any trailer headers, so we ignore them.
+	@Override
+	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+		if(isComplete) {
+			completeRequest(id, sender);
+		}
 	}
 
 	private void handleCompleteRequest(HttpRequest req, RequestId requestId, ResponseSender responseSender) {

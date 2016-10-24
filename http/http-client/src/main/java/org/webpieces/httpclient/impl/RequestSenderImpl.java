@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -212,11 +213,20 @@ public class RequestSenderImpl implements RequestSender {
                 acceptingRequest.set(false);
 
             // TODO: create a chunk out of the data
-            throw new IllegalArgumentException("sendData not implemented for HTTP/1.1");
+            throw new UnsupportedOperationException("sendData not implemented for HTTP/1.1");
         }
         else {
             return http2Engine.sendData(id, data, isComplete);
         }
+    }
+
+    @Override
+    public void sendTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete) {
+        if(protocol == HTTP11) {
+            if(isComplete)
+                acceptingRequest.set(false);
+        }
+        throw new UnsupportedOperationException("sendTrailer not implemented");
     }
 
     @Override

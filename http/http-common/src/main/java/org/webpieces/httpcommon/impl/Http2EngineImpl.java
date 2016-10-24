@@ -46,6 +46,7 @@ import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.HALF_CLOSED_REMOTE;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
+import static org.webpieces.httpparser.api.common.KnownHeaderName.TRAILER;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Http2EngineImpl implements Http2Engine {
@@ -902,9 +903,15 @@ public class Http2EngineImpl implements Http2Engine {
             if(headerLookupStruct.getHeader(KnownHeaderName.TE) != null && !headerLookupStruct.getHeader(KnownHeaderName.TE).getValue().toLowerCase().equals("trailers")) {
                 throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
             }
+            if(headerLookupStruct.getHeaders(TRAILER) != null) {
+                for(Header header: headerLookupStruct.getHeaders(TRAILER)) {
+                    stream.addTrailerHeader(header.getValue().toLowerCase());
+                }
+            }
         }
 
         private void handleHeaders(Http2Headers frame, Stream stream) {
+            boolean isTrailer = false;
             switch (stream.getStatus()) {
                 case IDLE:
                     long currentlyOpenStreams = countOpenRemoteOriginatedStreams();
@@ -921,6 +928,13 @@ public class Http2EngineImpl implements Http2Engine {
                 case RESERVED_REMOTE:
                     stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
                     break;
+                case OPEN:
+                    if(!stream.isTrailerEnabled()) {
+                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
+                    } else {
+                        isTrailer = true;
+                    }
+                    break;
                 default: // HALF_CLOSED_REMOTE, or CLOSED
                     throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
             }
@@ -934,20 +948,37 @@ public class Http2EngineImpl implements Http2Engine {
 
                 boolean isComplete = frame.isEndStream();
 
+                if(isTrailer) {
+                    // Make sure that the headers match what we are expecting.
+                    List<String> allowedTrailerHeaders = stream.getTrailerHeaders();
+                    for(HasHeaderFragment.Header header: frame.getHeaderList()) {
+                        if(!allowedTrailerHeaders.contains(header.header))
+                            throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
+                    }
+                }
+
                 // if we have no headers must be a compression error?
                 if(frame.getHeaderList().isEmpty()) {
                     throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.COMPRESSION_ERROR, wrapperGen.emptyWrapper());
                 }
                 if(side == CLIENT) {
-                    HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
-                    checkHeaders(response.getHeaderLookupStruct(), stream);
-                    stream.setResponse(response);
-                    stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), isComplete);
+                    if(isTrailer) {
+                        stream.getResponseListener().incomingTrailer(frame.getHeaderList(), stream.getResponseId(), isComplete);
+                    } else {
+                        HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
+                        checkHeaders(response.getHeaderLookupStruct(), stream);
+                        stream.setResponse(response);
+                        stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), isComplete);
+                    }
                 } else {
-                    HttpRequest request = requestFromHeaders(frame.getHeaderList(), stream);
-                    checkHeaders(request.getHeaderLookupStruct(), stream);
-                    stream.setRequest(request);
-                    requestListener.incomingRequest(request, stream.getRequestId(), isComplete, responseSender);
+                    if(isTrailer) {
+                        requestListener.incomingTrailer(frame.getHeaderList(), stream.getRequestId(), isComplete, responseSender);
+                    } else {
+                        HttpRequest request = requestFromHeaders(frame.getHeaderList(), stream);
+                        checkHeaders(request.getHeaderLookupStruct(), stream);
+                        stream.setRequest(request);
+                        requestListener.incomingRequest(request, stream.getRequestId(), isComplete, responseSender);
+                    }
                 }
 
                 if (isComplete)

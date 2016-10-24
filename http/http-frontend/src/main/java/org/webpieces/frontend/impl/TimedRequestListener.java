@@ -1,12 +1,14 @@
 package org.webpieces.frontend.impl;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpcommon.api.HttpSocket;
@@ -62,7 +64,12 @@ class TimedRequestListener implements RequestListener {
         return listener.incomingData(data, id, isComplete, sender);
     }
 
-    @Override
+	@Override
+	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+		listener.incomingTrailer(headers, id, isComplete, sender);
+	}
+
+	@Override
     public void clientOpenChannel(HttpSocket HttpSocket) {
         listener.clientOpenChannel(HttpSocket);
     }
