@@ -243,20 +243,22 @@ public class ProxyResponse implements ResponseStreamer {
 
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 
+		boolean compressed = false;
+		Compression usingCompression;
+		if(compression == null) {
+			usingCompression = new NoCompression();
+		} else {
+			usingCompression = compression;
+			compressed = true;
+			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
+		}
 
+		boolean isCompressed = compressed;
+		
 		// Send the headers and get the responseid.
 		responseSender.sendResponse(resp, request, false).thenAccept(responseId -> {
-			boolean compressed = false;
-			Compression usingCompression;
-			if(compression == null) {
-				usingCompression = new NoCompression();
-			} else {
-				usingCompression = compression;
-				compressed = true;
-				resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
-			}
 
-			OutputStream chunkedStream = new ChunkedStream(responseSender, config.getMaxBodySize(), compressed, responseId);
+			OutputStream chunkedStream = new ChunkedStream(responseSender, config.getMaxBodySize(), isCompressed, responseId);
 
 			try(OutputStream chainStream = usingCompression.createCompressionStream(chunkedStream)) {
 				//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
