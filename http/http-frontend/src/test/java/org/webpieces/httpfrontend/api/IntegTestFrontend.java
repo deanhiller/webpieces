@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.BufferCreationPool;
@@ -19,12 +21,14 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.util.threading.NamedThreadFactory;
 
 public class IntegTestFrontend {
 
 	public static void main(String[] args) throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool();
-		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, null, pool);
+		ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
+		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
 		FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(8083));
 		frontEndMgr.createHttpServer(config, new OurListener());
 		synchronized (IntegTestFrontend.class) {
