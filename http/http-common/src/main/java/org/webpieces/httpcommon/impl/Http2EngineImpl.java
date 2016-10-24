@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -76,17 +77,21 @@ public class Http2EngineImpl implements Http2Engine {
     private AtomicInteger lastIncomingStreamId = new AtomicInteger(0);
     private ConcurrentHashMap<Integer, AtomicLong> outgoingFlowControl = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, AtomicLong> incomingFlowControl = new ConcurrentHashMap<>();
-    private class PendingDataFrame {
-        CompletableFuture<Channel> future;
-        Http2Data frame;
+    private class PendingData {
+        CompletableFuture<Void> future;
+        DataWrapper data;
+        boolean isComplete;
+        Stream stream;
 
-        PendingDataFrame(CompletableFuture<Channel> future, Http2Data frame) {
+        PendingData(CompletableFuture<Void> future, DataWrapper data, boolean isComplete, Stream stream) {
             this.future = future;
-            this.frame = frame;
+            this.data = data;
+            this.isComplete = isComplete;
+            this.stream = stream;
         }
     }
 
-    private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<PendingDataFrame>> outgoingDataQueue = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, ConcurrentLinkedDeque<PendingData>> outgoingDataQueue = new ConcurrentHashMap<>();
 
     private Encoder encoder;
     private Decoder decoder;
@@ -284,7 +289,7 @@ public class Http2EngineImpl implements Http2Engine {
     @Override
     public CompletableFuture<Void> sendData(RequestId id, DataWrapper data, boolean isComplete) {
         Stream stream = activeStreams.get(id.getValue());
-        return sendDataFrames(data, isComplete, stream);
+        return sendDataFrames(data, isComplete, stream, false);
     }
 
     private LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
@@ -340,83 +345,76 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
 
-    private CompletableFuture<Channel> actuallyWriteDataFrame(PendingDataFrame pendingDataFrame) {
-        Http2Data frame = pendingDataFrame.frame;
-        CompletableFuture<Channel> future = pendingDataFrame.future;
+    private void clearQueue(int streamId) {
+        ConcurrentLinkedDeque<PendingData> queue = outgoingDataQueue.get(streamId);
+        while (queue != null && !queue.isEmpty() && outgoingFlowControl.get(streamId).get() > 0) {
+            PendingData pendingData = queue.poll();
+            log.info("sending data from the queue: " + pendingData.data);
+            sendDataFrames(pendingData.data, pendingData.isComplete, pendingData.stream, true)
+                    .thenAccept(v -> pendingData.future.complete(null));
+        }
+    }
 
+    private CompletableFuture<Void> writeDataFrame(Http2Data frame) {
         int streamId = frame.getStreamId();
         log.info("actually writing data frame: " + frame);
         decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
-        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenApply(
-                channel -> {
-                    future.complete(channel);
-                    return channel;
-                }
-        );
+        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenAccept(c -> {});
     }
 
-    private boolean canSendFrame(Http2Data dataFrame) {
-        int length = http2Parser.getFrameLength(dataFrame);
-        return (outgoingFlowControl.get(dataFrame.getStreamId()).get() >= length &&
-                outgoingFlowControl.get(0x0).get() >= length);
+    private boolean isQueueEmpty(Stream stream) {
+        ConcurrentLinkedDeque<PendingData> queue = outgoingDataQueue.get(stream.getStreamId());
+        return (queue == null || queue.isEmpty());
     }
 
-    private void clearQueue(int streamId) {
-        ConcurrentLinkedQueue<PendingDataFrame> queue = outgoingDataQueue.get(streamId);
-        if (!queue.isEmpty()) {
-            synchronized (queue) {
-                PendingDataFrame pendingDataFrame = queue.peek();
-                if(pendingDataFrame != null) {
-                    int length = http2Parser.getFrameLength(pendingDataFrame.frame);
-                    if (outgoingFlowControl.get(streamId).get() > length &&
-                            outgoingFlowControl.get(0x0).get() > length) {
-                        // Will write one frame, then write more frames
-                        queue.poll();
-                        actuallyWriteDataFrame(pendingDataFrame).thenAccept(channel -> clearQueue(streamId));
-                    }
-                }
-            }
+    private CompletableFuture<Void> queueData(DataWrapper body, boolean isComplete, Stream stream, boolean putAtFrontOfQueue) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        PendingData pendingData = new PendingData(future, body, isComplete, stream);
+        ConcurrentLinkedDeque<PendingData> queue = outgoingDataQueue.get(stream.getStreamId());
+        if (queue == null) {
+            queue = new ConcurrentLinkedDeque<>();
+            outgoingDataQueue.put(stream.getStreamId(), queue);
         }
-    }
 
-    private CompletableFuture<Channel> writeDataFrame(Http2Data dataFrame) {
-        int streamId = dataFrame.getStreamId();
-        if(!outgoingDataQueue.contains(streamId)) {
-            outgoingDataQueue.put(streamId, new ConcurrentLinkedQueue<>());
-        }
-        CompletableFuture<Channel> future = new CompletableFuture<>();
-        PendingDataFrame pendingDataFrame = new PendingDataFrame(future, dataFrame);
-
-        if(canSendFrame(dataFrame) && outgoingDataQueue.get(streamId).isEmpty()) {
-            return actuallyWriteDataFrame(pendingDataFrame);
+        if(putAtFrontOfQueue) {
+            log.info("placing data at the front of the queue: " + body);
+            queue.addFirst(pendingData);
         } else {
-            log.info("adding frame to the queue:" + pendingDataFrame);
-            outgoingDataQueue.get(streamId).add(pendingDataFrame);
-            return future;
+            log.info("placing data at the back of the queue: " + body);
+            queue.addLast(pendingData);
         }
+        return future;
     }
 
-    private CompletableFuture<Void> sendDataFrames(DataWrapper body, boolean isComplete, Stream stream) {
+    private CompletableFuture<Void> sendDataFrames(DataWrapper body, boolean isComplete, Stream stream, boolean wasFrontOfQueue) {
         switch(stream.getStatus()) {
             case OPEN:
             case HALF_CLOSED_REMOTE:
-                Http2Data newFrame = new Http2Data();
-                newFrame.setStreamId(stream.getStreamId());
+                // If there's things on the queue and we didn't get this from the front of the queue,
+                // queue this data.
+                if(!isQueueEmpty(stream) && !wasFrontOfQueue) {
+                    log.info("queueing data: " + body);
+                    return queueData(body, isComplete, stream, false);
+                }
 
-                // writes only one frame at a time.
-                int dataLength = body.getReadableSize();
                 long maxLength = min(remoteSettings.get(SETTINGS_MAX_FRAME_SIZE),
                         min(outgoingFlowControl.get(stream.getStreamId()).get(),
                                 outgoingFlowControl.get(0x0).get()));
+                int dataLength = body.getReadableSize();
+
+                Http2Data newFrame = new Http2Data();
+                newFrame.setStreamId(stream.getStreamId());
+
                 if(dataLength <= maxLength) {
+                    // writes only one frame at a time.
                     // the body fits within one frame and is within the flow control window
                     newFrame.setData(body);
                     if(isComplete)
                         newFrame.setEndStream(true);
 
-                    log.info("queuing final data frame: (but might not complete the request)" + newFrame);
+                    log.info("writing final data frame: (but might not complete the request)" + newFrame);
                     return writeDataFrame(newFrame).thenAccept(
-                            channel -> {
+                            v -> {
                                 if (isComplete) {
                                     switch(stream.getStatus()) {
                                         case OPEN:
@@ -432,13 +430,19 @@ public class Http2EngineImpl implements Http2Engine {
                             }
                     );
                 } else {
-                    // to big, split it to fit within framesize or window size send, and recurse.
-                    List<? extends DataWrapper> split = wrapperGen.split(body, (int) maxLength);
-                    newFrame.setData(split.get(0));
-                    log.info("queuing non-final data frame: " + newFrame);
-                    return writeDataFrame(newFrame).thenCompose(
-                            channel ->  sendDataFrames(split.get(1), isComplete, stream)
-                    );
+                    // too big, if possible, split it to fit within framesize or window size send, and recurse.
+                    if(maxLength > 0) {
+                        // We have space in the window, send something.
+                        List<? extends DataWrapper> split = wrapperGen.split(body, (int) maxLength);
+                        newFrame.setData(split.get(0));
+                        log.info("writing non-final data frame: " + newFrame);
+                        return writeDataFrame(newFrame).thenCompose(
+                                v -> sendDataFrames(split.get(1), isComplete, stream, wasFrontOfQueue)
+                        );
+                    } else {
+                        // If this data was in the queue, then put it back at the front of the queue.
+                        return queueData(body, isComplete, stream, wasFrontOfQueue);
+                    }
                 }
             default:
                 throw new ClientError(
@@ -656,7 +660,7 @@ public class Http2EngineImpl implements Http2Engine {
         LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
         return sendHeaderFrames(headers, newStream)
                 .thenCompose(
-                        channel -> sendDataFrames(request.getBodyNonNull(), isComplete, newStream))
+                        channel -> sendDataFrames(request.getBodyNonNull(), isComplete, newStream, false))
                 .thenApply(channel -> new RequestId(thisStreamId));
 
     }
@@ -722,7 +726,7 @@ public class Http2EngineImpl implements Http2Engine {
 
     private CompletableFuture<ResponseId> actuallySendResponse(HttpResponse response, Stream stream, boolean isComplete) {
         return sendHeaderFrames(responseToHeaders(response), stream)
-                .thenAccept(v -> sendDataFrames(response.getBodyNonNull(), isComplete, stream))
+                .thenAccept(v -> sendDataFrames(response.getBodyNonNull(), isComplete, stream, false))
                 .thenApply(v -> stream.getResponseId()).exceptionally(e -> {
                     log.error("can't send header frames", e);
                     return stream.getResponseId();
@@ -742,7 +746,7 @@ public class Http2EngineImpl implements Http2Engine {
             // TODO: use the right exception here
             throw new RuntimeException("invalid responseid: " + responseId);
         }
-        return sendDataFrames(data, isComplete, responseStream);
+        return sendDataFrames(data, isComplete, responseStream, false);
     }
 
     private class Http2DataListener implements DataListener {
@@ -1064,7 +1068,7 @@ public class Http2EngineImpl implements Http2Engine {
 
             // clear all queues if the connection-level stream
             if(frame.getStreamId() == 0x0) {
-                for (Map.Entry<Integer, ConcurrentLinkedQueue<PendingDataFrame>> entry : outgoingDataQueue.entrySet()) {
+                for (Map.Entry<Integer, ConcurrentLinkedDeque<PendingData>> entry : outgoingDataQueue.entrySet()) {
                     if (!entry.getValue().isEmpty())
                         clearQueue(entry.getKey());
                 }
