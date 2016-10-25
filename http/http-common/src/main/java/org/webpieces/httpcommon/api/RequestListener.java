@@ -14,11 +14,10 @@ public interface RequestListener {
 	 * This is the main method that is invoked on every incoming http request on every channel giving
 	 * you the channel it came in from.
      *
-     * We encode if is https or httpv2 in the request itself.
-	 *
 	 * The RequestId is only used in HTTP/2 -- in HTTP/1.1 all incomingData requests that come in are for the
 	 * incomingRequest that came in immediately preceding, because multiplexing is not permitted.
-	 *  @param req
+	 *
+	 * @param req
      * @param requestId
 	 * @param isComplete true if this request contains the entire payload as well or false if just headers.
 	 *
@@ -42,6 +41,15 @@ public interface RequestListener {
 	 */
     CompletableFuture<Void> incomingData(DataWrapper data, RequestId id, boolean isComplete, ResponseSender sender);
 
+	/**
+	 * It's possible to send headers after all the data has been sent. If so, then the last incomingData has
+	 * isComplete set to false, and incomingTrailer has isComplete set to true.
+	 *
+	 * @param headers
+	 * @param id
+	 * @param isComplete
+	 * @param sender
+	 */
 	void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender);
 
 	/**
