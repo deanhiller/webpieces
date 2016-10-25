@@ -12,17 +12,35 @@ import java.util.concurrent.CompletableFuture;
 public interface Http2Engine {
     enum HttpSide { CLIENT, SERVER }
 
+    /**
+     * Starts a timer to send a ping to the remote side every 5 seconds, to measure latency.
+     *
+     */
     void startPing();
 
+
+    /**
+     * Gets the datalistener that's active for the engine.
+     *
+     * @return
+     */
     DataListener getDataListener();
 
-    Http2Settings getLocalRequestedSettingsFrame();
 
-    void cleanUpPendings(String msg);
-
+    /**
+     * Gets the Channel that this engine is running on.
+     *
+     * @return
+     */
     Channel getUnderlyingChannel();
 
-    void sendLocalRequestedSettings();
 
-    void setRemoteSettings(Http2Settings frame, boolean sendAck);
+    /**
+     * Send the settings that we want to the remote side. Note that this doesn't
+     * actually set those settings until we receive an 'ack' for those settings.
+     *
+     * TODO: When we set settings using the HTTP2-Settings header in an upgrade request, set our local settings appropriately.
+     * (i.e. don't want for the ack)
+     */
+    void sendLocalRequestedSettings();
 }

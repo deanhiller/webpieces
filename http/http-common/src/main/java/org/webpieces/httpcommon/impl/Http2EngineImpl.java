@@ -163,8 +163,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
     }
 
-    @Override
-    public void setRemoteSettings(Http2Settings frame, boolean sendAck) {
+    void setRemoteSettings(Http2Settings frame, boolean sendAck) {
         // We've received a settings. Check for legit-ness.
         if(frame.getSettings().get(SETTINGS_ENABLE_PUSH) != null && (
                 frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 0 || frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 1))
@@ -226,8 +225,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         return dataListener;
     }
 
-    @Override
-    public Http2Settings getLocalRequestedSettingsFrame() {
+    Http2Settings getLocalRequestedSettingsFrame() {
         Http2Settings settingsFrame = new Http2Settings();
         settingsFrame.setSettings(localRequestedSettings);
         return settingsFrame;
@@ -571,11 +569,6 @@ public abstract class Http2EngineImpl implements Http2Engine {
         // Set up flow control
         incomingFlowControl.put(streamId, new AtomicLong(localSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
         outgoingFlowControl.put(streamId, new AtomicLong(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
-    }
-
-    @Override
-    public void cleanUpPendings(String msg) {
-        // TODO: deal with http2 streams to be cleaned up
     }
 
     LinkedList<HasHeaderFragment.Header> responseToHeaders(HttpResponse response) {

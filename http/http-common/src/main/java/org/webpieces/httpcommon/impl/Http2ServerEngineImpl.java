@@ -4,6 +4,7 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.*;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -132,5 +133,10 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     void sideSpecificHandleRstStream(Http2RstStream frame, Stream stream) {
         // TODO: change incomingError to failure and fix the exception types
         responseSender.sendException(null);
+    }
+
+    @Override
+    public void setRemoteSettings(Http2Settings frame, boolean sendAck) {
+        super.setRemoteSettings(frame, sendAck);
     }
 }

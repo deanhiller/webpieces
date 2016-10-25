@@ -1,10 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.Http2Data;
-import com.webpieces.http2parser.api.dto.Http2Headers;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.*;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.Http2ClientEngine;
 import org.webpieces.httpcommon.api.RequestId;
@@ -24,13 +21,22 @@ import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS;
-import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 
 public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2ClientEngine {
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
 
     public Http2ClientEngineImpl(Http2Parser http2Parser, Channel channel, InetSocketAddress remoteAddress) {
         super(http2Parser, channel, remoteAddress, HttpSide.CLIENT);
+    }
+
+    @Override
+    public void cleanUpPendings(String msg) {
+        // TODO: deal with http2 streams to be cleaned up
+    }
+
+    @Override
+    public Http2Settings getLocalRequestedSettingsFrame() {
+        return super.getLocalRequestedSettingsFrame();
     }
 
     @Override
