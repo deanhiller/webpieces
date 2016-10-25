@@ -11,7 +11,7 @@ import org.webpieces.nio.api.handlers.AsyncDataListener;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-public class ServerDataListener implements AsyncDataListener {
+class ServerDataListener implements AsyncDataListener {
     private TimedRequestListener timedRequestListener;
     private Http11DataListener http11DataListener;
     private HttpParser httpParser;
@@ -34,8 +34,8 @@ public class ServerDataListener implements AsyncDataListener {
         return httpServerSocket;
     }
 
-    public ServerDataListener(TimedRequestListener timedRequestListener, Http11DataListener http11DataListener, HttpParser httpParser,
-                              Http2Parser http2Parser) {
+    ServerDataListener(TimedRequestListener timedRequestListener, Http11DataListener http11DataListener, HttpParser httpParser,
+                       Http2Parser http2Parser) {
         this.timedRequestListener = timedRequestListener;
         this.http11DataListener = http11DataListener;
         this.httpParser = httpParser;
@@ -53,7 +53,6 @@ public class ServerDataListener implements AsyncDataListener {
         // are going to have ALPN "soon" I don't think it is worth it.
         //if(true) {
             socket.upgradeHttp2(Optional.empty());
-            //socket.sendLocalPreferredSettings(Optional.empty());
         }
         timedRequestListener.openedConnection(socket, isReadyForWrites);
     }
