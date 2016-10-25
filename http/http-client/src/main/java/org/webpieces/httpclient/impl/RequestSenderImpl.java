@@ -50,7 +50,7 @@ public class RequestSenderImpl implements RequestSender {
     private AtomicBoolean negotiationDone = new AtomicBoolean(false);
     private AtomicBoolean negotiationStarted = new AtomicBoolean(false);
     private CompletableFuture<Channel> negotiationDoneNotifier = new CompletableFuture<>();
-    private Http2Engine http2Engine;
+    private Http2ClientEngine http2ClientEngine;
     private Http2Parser http2Parser;
 
     // HTTP 1.1
@@ -76,12 +76,12 @@ public class RequestSenderImpl implements RequestSender {
                              TCPChannel channel) {
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
-        this.http2Engine = Http2EngineFactory.createHttp2Engine(http2Parser, channel, addr, Http2Engine.HttpSide.CLIENT);
+        this.http2ClientEngine = Http2EngineFactory.createHttp2ClientEngine(http2Parser, channel, addr);
         this.channel = channel;
         this.addr = addr;
 
         dataListener = SwitchableDataListenerFactory.createSwitchableDataListener(socket, closeListener);
-        dataListener.put(HTTP2, this.http2Engine.getDataListener());
+        dataListener.put(HTTP2, this.http2ClientEngine.getDataListener());
         dataListener.put(HTTP11, new Http11DataListener());
     }
 
@@ -100,12 +100,12 @@ public class RequestSenderImpl implements RequestSender {
     private void enableHttp2() {
         protocol = HTTP2;
         dataListener.setProtocol(HTTP2);
-        http2Engine.sendHttp2Preface();
-        http2Engine.sendLocalRequestedSettings();
+        http2ClientEngine.sendHttp2Preface();
+        http2ClientEngine.sendLocalRequestedSettings();
         negotiationDone.set(true);
 
         // Initialize connection level flow control
-        http2Engine.startPing();
+        http2ClientEngine.startPing();
     }
 
     // These hosts can support http2, no need to try to upgrade.
@@ -131,7 +131,7 @@ public class RequestSenderImpl implements RequestSender {
             log.info("attempting http11 upgrade");
             req.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
             req.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
-            Http2Settings settingsFrame = this.http2Engine.getLocalRequestedSettingsFrame();
+            Http2Settings settingsFrame = this.http2ClientEngine.getLocalRequestedSettingsFrame();
 
             // For some reason we need to add a " " after the base64urlencoded settings to get this to work
             // against nghttp2.org ?
@@ -169,7 +169,7 @@ public class RequestSenderImpl implements RequestSender {
                     // to the http2 engine
                     DataWrapper leftOverData = ((RequestSenderImpl.Http11DataListener) dataListener.getDataListener(HTTP11))
                             .getLeftOverData();
-                    return http2Engine.createInitialStream(r, req, listener, leftOverData);
+                    return http2ClientEngine.createInitialStream(r, req, listener, leftOverData);
                 }
             });
         }
@@ -216,7 +216,7 @@ public class RequestSenderImpl implements RequestSender {
             throw new UnsupportedOperationException("sendData not implemented for HTTP/1.1");
         }
         else {
-            return http2Engine.sendData(id, data, isComplete);
+            return http2ClientEngine.sendData(id, data, isComplete);
         }
     }
 
@@ -274,7 +274,7 @@ public class RequestSenderImpl implements RequestSender {
         if (protocol == HTTP11) {
             return sendHttp11Request(request, isComplete, l);
         } else { // HTTP2
-            return http2Engine.sendRequest(request, isComplete, l);
+            return http2ClientEngine.sendRequest(request, isComplete, l);
         }
     }
 
@@ -288,7 +288,7 @@ public class RequestSenderImpl implements RequestSender {
         }
 
         // TODO: Deal with open streams
-        http2Engine.cleanUpPendings(msg);
+        http2ClientEngine.cleanUpPendings(msg);
     }
 
 

@@ -13,10 +13,10 @@ import java.util.concurrent.CompletableFuture;
 
 class Http2ResponseSender implements ResponseSender {
     // TODO: maybe we should just make the Http2ServerEngine implement ResponseSender?
-    private Http2Engine http2Engine;
+    private Http2ServerEngine http2ServerEngine;
 
-    public Http2ResponseSender(Http2Engine http2Engine) {
-        this.http2Engine = http2Engine;
+    Http2ResponseSender(Http2ServerEngine http2ServerEngine) {
+        this.http2ServerEngine = http2ServerEngine;
     }
 
     @Override
@@ -32,12 +32,12 @@ class Http2ResponseSender implements ResponseSender {
 
     @Override
     public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
-        return http2Engine.sendResponse(response, request, requestId, isComplete);
+        return http2ServerEngine.sendResponse(response, request, requestId, isComplete);
     }
 
     @Override
     public CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isComplete) {
-        return http2Engine.sendData(data, id, isComplete);
+        return http2ServerEngine.sendData(data, id, isComplete);
     }
 
     @Override
@@ -54,7 +54,7 @@ class Http2ResponseSender implements ResponseSender {
 
     @Override
     public Channel getUnderlyingChannel() {
-        return http2Engine.getUnderlyingChannel();
+        return http2ServerEngine.getUnderlyingChannel();
     }
 }
 
