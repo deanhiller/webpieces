@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,7 +61,7 @@ public class Http2EngineImpl implements Http2Engine {
 
     private HttpSide side;
 
-    private Map<Http2Settings.Parameter, Long> localPreferredSettings = new HashMap<>();
+    private Map<Http2Settings.Parameter, Long> localRequestedSettings = new HashMap<>();
 
     // remotesettings doesn't need concurrent bc listener is vts
     private Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
@@ -161,8 +160,8 @@ public class Http2EngineImpl implements Http2Engine {
 
         // set some default preferred settings locally
         // TODO: make this configurable by the customer
-        localPreferredSettings.put(SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
-        //localPreferredSettings.put(SETTINGS_MAX_HEADER_LIST_SIZE, 100)
+        localRequestedSettings.put(SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
+        //localRequestedSettings.put(SETTINGS_MAX_HEADER_LIST_SIZE, 100)
     }
 
     @Override
@@ -178,10 +177,10 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
     @Override
-    public void sendLocalPreferredSettings() {
+    public void sendLocalRequestedSettings() {
         Http2Settings settingsFrame = new Http2Settings();
 
-        settingsFrame.setSettings(localPreferredSettings);
+        settingsFrame.setSettings(localRequestedSettings);
         log.info("sending settings: " + settingsFrame);
         channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
     }
@@ -237,7 +236,7 @@ public class Http2EngineImpl implements Http2Engine {
     }
 
     @Override
-    public void initialize() {
+    public void startPing() {
 
         Timer timer = new Timer();
         // in 5 seconds send a ping every 5 seconds
@@ -252,7 +251,7 @@ public class Http2EngineImpl implements Http2Engine {
     @Override
     public Http2Settings getLocalRequestedSettingsFrame() {
         Http2Settings settingsFrame = new Http2Settings();
-        settingsFrame.setSettings(localPreferredSettings);
+        settingsFrame.setSettings(localRequestedSettings);
         return settingsFrame;
     }
 
@@ -1086,7 +1085,7 @@ public class Http2EngineImpl implements Http2Engine {
         private void handleSettings(Http2Settings frame) {
             if(frame.isAck()) {
                 // we received an ack, so the settings we sent have been accepted.
-                for(Map.Entry<Http2Settings.Parameter, Long> entry: localPreferredSettings.entrySet()) {
+                for(Map.Entry<Http2Settings.Parameter, Long> entry: localRequestedSettings.entrySet()) {
                     localSettings.put(entry.getKey(), entry.getValue());
                 }
             } else {
@@ -1208,7 +1207,7 @@ public class Http2EngineImpl implements Http2Engine {
                             gotPreface.set(true);
                             oldData = split.get(1);
                             log.info("got http2 preface");
-                            sendLocalPreferredSettings();
+                            sendLocalRequestedSettings();
                         } else {
                             throw new GoAwayError(0, Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
                         }

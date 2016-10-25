@@ -27,10 +27,10 @@ public class WEBPIECESxCLASSSSLFactory implements SSLEngineFactory {
 	
 	@Override
 	public SSLEngine createSslEngine() {
-		// Create/initialize the SSLContext with key material
+		// Create/startPing the SSLContext with key material
 		try(InputStream keySt = WEBPIECESxCLASSSSLFactory.class.getResourceAsStream(serverKeystore)) {
 			char[] passphrase = password.toCharArray();
-			// First initialize the key and trust material.
+			// First startPing the key and trust material.
 			KeyStore ks = KeyStore.getInstance("JKS");
 			ks.load(keySt, passphrase);
 			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");

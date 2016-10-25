@@ -101,11 +101,11 @@ public class RequestSenderImpl implements RequestSender {
         protocol = HTTP2;
         dataListener.setProtocol(HTTP2);
         http2Engine.sendHttp2Preface();
-        http2Engine.sendLocalPreferredSettings();
+        http2Engine.sendLocalRequestedSettings();
         negotiationDone.set(true);
 
         // Initialize connection level flow control
-        http2Engine.initialize();
+        http2Engine.startPing();
     }
 
     // These hosts can support http2, no need to try to upgrade.

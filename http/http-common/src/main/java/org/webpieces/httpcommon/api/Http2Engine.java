@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 public interface Http2Engine {
     enum HttpSide { CLIENT, SERVER }
 
-    void initialize();
+    void startPing();
 
     DataListener getDataListener();
 
@@ -22,7 +22,7 @@ public interface Http2Engine {
 
     Channel getUnderlyingChannel();
 
-    void sendLocalPreferredSettings();
+    void sendLocalRequestedSettings();
 
     void setRemoteSettings(Http2Settings frame, boolean sendAck);
 

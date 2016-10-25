@@ -21,10 +21,10 @@ public class SSLEngineFactoryForTest implements SSLEngineFactory {
 
 	public SSLEngine createSslEngine() {
 		try {
-			// Create/initialize the SSLContext with key material
+			// Create/startPing the SSLContext with key material
 	
 			char[] passphrase = password.toCharArray();
-			// First initialize the key and trust material.
+			// First startPing the key and trust material.
 			KeyStore ks = KeyStore.getInstance("JKS");
 			ks.load(new FileInputStream(serverKeystore), passphrase);
 			SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -47,9 +47,9 @@ public class SSLEngineFactoryForTest implements SSLEngineFactory {
 
 	public SSLEngine createEngineForSocket() {
 		try {
-			// Create/initialize the SSLContext with key material
+			// Create/startPing the SSLContext with key material
 			char[] passphrase = password.toCharArray();
-			// First initialize the key and trust material.
+			// First startPing the key and trust material.
 			KeyStore ks = KeyStore.getInstance("JKS");
 			ks.load(new FileInputStream(clientKeystore), passphrase);
 			SSLContext sslContext = SSLContext.getInstance("TLS");
