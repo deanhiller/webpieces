@@ -1,6 +1,7 @@
 package org.webpieces.frontend.impl;
 
 import com.webpieces.http2parser.api.Http2Parser;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.channels.Channel;
@@ -16,6 +17,7 @@ class ServerDataListener implements AsyncDataListener {
     private Http11DataListener http11DataListener;
     private HttpParser httpParser;
     private Http2Parser http2Parser;
+    private FrontendConfig frontendConfig;
 
     private HttpServerSocket getHttpServerSocketForChannel(Channel channel) {
         ChannelSession session = channel.getSession();
@@ -35,23 +37,19 @@ class ServerDataListener implements AsyncDataListener {
     }
 
     ServerDataListener(TimedRequestListener timedRequestListener, Http11DataListener http11DataListener, HttpParser httpParser,
-                       Http2Parser http2Parser) {
+                       Http2Parser http2Parser, FrontendConfig frontendConfig) {
         this.timedRequestListener = timedRequestListener;
         this.http11DataListener = http11DataListener;
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
+        this.frontendConfig = frontendConfig;
     }
 
     @Override
     public void connectionOpened(TCPChannel tcpChannel, boolean isReadyForWrites) {
         HttpServerSocket socket = getHttpServerSocketForChannel(tcpChannel);
         // TODO: replace 'false' with ALPN check
-        if(isReadyForWrites && tcpChannel.isSslChannel() && false) { // If ALPN, upgrade to HTTP2
-        // if we want h2spec to work we just need to enable this if(true) here.
-        // we could either make this configurable or make it so that if the http11
-        // code sees the HTTP/2 preface then it switches to HTTP/2 but since we
-        // are going to have ALPN "soon" I don't think it is worth it.
-        //if(true) {
+        if((isReadyForWrites && tcpChannel.isSslChannel() && false) || frontendConfig.alwaysHttp2) { // If ALPN, upgrade to HTTP2
             socket.upgradeHttp2(Optional.empty());
         }
         timedRequestListener.openedConnection(socket, isReadyForWrites);

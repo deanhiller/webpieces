@@ -24,11 +24,20 @@ public class FrontendConfig {
 	 * The max size a client may send.  I advise not too large a limit here or DOS attacks become easier in that
 	 * you can send very large request to eat up memory of the server.
 	 * 
-	 * This is the max size of any http request(headers that is) or any chunk being uploaded
+	 * This is the max size of any http request(headers that is) or any chunk being uploaded.
+	 *
+	 * TODO: Incorporate this into HTTP/2 MAX_HEADER_LIST_SIZE and enforce MAX_HEADER_LIST_SIZE
 	 */
 	public int maxHeaderSize = 4096;
 	
 	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
+
+	/**
+	 * This turns on HTTP/2 by default, so HTTP/1.1 won't work. Only needed for testing with
+	 * 'h2spec' over cleartext. Will be made obsolete once we have ALPN.
+	 *
+	 */
+	public boolean alwaysHttp2 = false;
 
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;
@@ -40,4 +49,5 @@ public class FrontendConfig {
 		asyncServerConfig.bindAddr = bindAddr;
 		maxConnectToRequestTimeoutMs = connectToRequestTimeout;
 	}
+
 }

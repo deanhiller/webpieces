@@ -30,6 +30,8 @@ public class IntegTestFrontend {
 		ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
 		HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
 		FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(8083));
+		// Set this to true to test with h2spec
+		config.alwaysHttp2 = true;
 		frontEndMgr.createHttpServer(config, new OurListener());
 		synchronized (IntegTestFrontend.class) {
 			IntegTestFrontend.class.wait();

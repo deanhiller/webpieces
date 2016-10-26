@@ -30,7 +30,7 @@ public class HttpServerImpl implements HttpServer {
 		Http11Layer http11Layer = new Http11Layer(httpParser, requestListener, config);
 		Http11DataListener http11DataListener = new Http11DataListener(http11Layer);
 
-		dataListener = new ServerDataListener(requestListener, http11DataListener, httpParser, http2Parser);
+		dataListener = new ServerDataListener(requestListener, http11DataListener, httpParser, http2Parser, config);
 	}
 	
 	void init(AsyncServer asyncServer) {
