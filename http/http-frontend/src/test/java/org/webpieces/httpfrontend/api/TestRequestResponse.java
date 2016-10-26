@@ -80,6 +80,7 @@ public class TestRequestResponse {
         ByteBuffer buffer = parser.marshalToByteBuffer(request);
         dataListener.incomingData(mockServerChannel, buffer);
 
+        // TODO: fix this to wait until we're done, not just sleep, which is fragile.
         Thread.sleep(1000);
 
         return mockServerChannel.getWriteLog();
