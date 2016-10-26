@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class TestRequestResponse extends MockServer {
+public class TestRequestResponse {
 
     private HttpParser httpParser;
     private Http2Parser http2Parser;
@@ -56,15 +56,16 @@ public class TestRequestResponse extends MockServer {
 
     private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener)
             throws InterruptedException, ExecutionException {
-        DataListener dataListener = getMockServerDataListener(80, false, mockRequestListener);
+        MockServer mockServer = new MockServer(80, false, mockRequestListener);
+        DataListener dataListener = mockServer.getDataListener();
 
         ByteBuffer buffer = httpParser.marshalToByteBuffer(request);
-        dataListener.incomingData(getMockServerChannel(), buffer);
+        dataListener.incomingData(mockServer.getMockServerChannel(), buffer);
 
         // TODO: fix this to wait until we're done, not just sleep, which is fragile.
         Thread.sleep(1000);
 
-        return getMockServerChannel().getWriteLog();
+        return mockServer.getMockServerChannel().getWriteLog();
     }
 
     @Test

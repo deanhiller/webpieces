@@ -16,16 +16,17 @@ import java.util.concurrent.ExecutionException;
 
 public class MockServer {
     private MockTcpChannel mockServerChannel = new MockTcpChannel();
-    private MockTcpServerChannel mockChannel = new MockTcpServerChannel();
-    private MockChannelManager mockChanMgr = new MockChannelManager();
-    private MockTimer timer = new MockTimer();
+    private DataListener dataListener;
 
-    DataListener getMockServerDataListener(
+    public MockServer(
             int port,
             boolean alwaysHttp2,
             MockRequestListener mockRequestListener)
             throws InterruptedException, ExecutionException
     {
+        MockTcpServerChannel mockChannel = new MockTcpServerChannel();
+        MockChannelManager mockChanMgr = new MockChannelManager();
+        MockTimer timer = new MockTimer();
         BufferCreationPool pool = new BufferCreationPool();
 
         mockChanMgr.addTcpSvrChannel(mockChannel);
@@ -46,7 +47,11 @@ public class MockServer {
         ConnectionListener listener = listeners[0];
         CompletableFuture<DataListener> future = listener.connected(mockServerChannel, true);
 
-        return future.get();
+        dataListener = future.get();
+    }
+
+    public DataListener getDataListener() {
+        return dataListener;
     }
 
     MockTcpChannel getMockServerChannel() {
