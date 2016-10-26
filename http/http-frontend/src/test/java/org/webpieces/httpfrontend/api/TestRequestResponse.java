@@ -34,56 +34,37 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class TestRequestResponse {
-    private MockTcpChannel mockServerChannel = new MockTcpChannel();
-    private MockTcpServerChannel mockChannel = new MockTcpServerChannel();
-    private MockChannelManager mockChanMgr = new MockChannelManager();
-    private MockTimer timer = new MockTimer();
-    private HttpParser parser;
+public class TestRequestResponse extends MockServer {
+
+    private HttpParser httpParser;
     private Http2Parser http2Parser;
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private Http2Settings settingsFrame = new Http2Settings();
     private Decoder decoder;
-    Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
-
-    private HttpFrontendManager mgr;
+    private Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
 
     @Before
     public void setup() {
-        mockChanMgr.addTcpSvrChannel(mockChannel);
-        AsyncServerManager svrManager = AsyncServerMgrFactory.createAsyncServer(mockChanMgr);
         BufferCreationPool pool = new BufferCreationPool();
-        mgr = HttpFrontendFactory.createFrontEnd(svrManager, timer, pool);
-        parser = HttpParserFactory.createParser(pool);
+
+        httpParser = HttpParserFactory.createParser(pool);
         http2Parser = Http2ParserFactory.createParser(pool);
         decoder = new Decoder(4096, 4096);
         settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
         settingsFrame.setSettings(settings);
     }
 
-    private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener) throws InterruptedException, ExecutionException {
-        FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
-        config.maxConnectToRequestTimeoutMs = 5000;
+    private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener)
+            throws InterruptedException, ExecutionException {
+        DataListener dataListener = getMockServerDataListener(80, false, mockRequestListener);
 
-        mgr.createHttpServer(config , mockRequestListener);
-
-        ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
-        Assert.assertEquals(1, listeners.length);
-
-        MockFuture<?> mockFuture = new MockFuture<>();
-        timer.addMockFuture(mockFuture);
-        ConnectionListener listener = listeners[0];
-        CompletableFuture<DataListener> future = listener.connected(mockServerChannel, true);
-
-        DataListener dataListener = future.get();
-
-        ByteBuffer buffer = parser.marshalToByteBuffer(request);
-        dataListener.incomingData(mockServerChannel, buffer);
+        ByteBuffer buffer = httpParser.marshalToByteBuffer(request);
+        dataListener.incomingData(getMockServerChannel(), buffer);
 
         // TODO: fix this to wait until we're done, not just sleep, which is fragile.
         Thread.sleep(1000);
 
-        return mockServerChannel.getWriteLog();
+        return getMockServerChannel().getWriteLog();
     }
 
     @Test
@@ -111,8 +92,8 @@ public class TestRequestResponse {
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
 
-        Memento memento = parser.prepareToParse();
-        parser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
+        Memento memento = httpParser.prepareToParse();
+        httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
         List<HttpPayload> parsedMessages = memento.getParsedMessages();
         DataWrapper leftOverData = memento.getLeftOverData();
 
@@ -148,8 +129,8 @@ public class TestRequestResponse {
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
 
-        Memento memento = parser.prepareToParse();
-        parser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
+        Memento memento = httpParser.prepareToParse();
+        httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
         List<HttpPayload> parsedMessages = memento.getParsedMessages();
         DataWrapper leftOverData = memento.getLeftOverData();
 
@@ -191,8 +172,8 @@ public class TestRequestResponse {
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(responses));
 
-        Memento memento = parser.prepareToParse();
-        parser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
+        Memento memento = httpParser.prepareToParse();
+        httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
         List<HttpPayload> parsedMessages = memento.getParsedMessages();
         DataWrapper leftOverData = memento.getLeftOverData();
 
