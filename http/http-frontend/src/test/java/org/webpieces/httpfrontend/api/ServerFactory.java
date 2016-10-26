@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-public class ServerFactory {
+class ServerFactory {
     static void createTestServer(int port, boolean alwaysHttp2) {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
