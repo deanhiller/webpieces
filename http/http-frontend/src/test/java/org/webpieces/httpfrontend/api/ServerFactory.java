@@ -8,6 +8,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
 import org.webpieces.httpcommon.api.*;
@@ -27,14 +28,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 class ServerFactory {
-    static void createTestServer(int port, boolean alwaysHttp2) {
+    static int createTestServer(boolean alwaysHttp2) {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
-        FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(port));
+        FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(0));
         // Set this to true to test with h2spec
         config.alwaysHttp2 = alwaysHttp2;
-        frontEndMgr.createHttpServer(config, new OurListener());
+        HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
+        return server.getUnderlyingChannel().getLocalAddress().getPort();
     }
 
     private static class OurListener implements RequestListener {

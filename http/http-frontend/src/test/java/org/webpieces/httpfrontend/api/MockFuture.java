@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class MockFuture<V> implements ScheduledFuture<V> {
+class MockFuture<V> implements ScheduledFuture<V> {
 
 	private boolean isCancelled;
 

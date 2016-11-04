@@ -13,6 +13,7 @@ import java.util.List;
 
 public class TestH2Spec {
     String h2SpecPath;
+    int port;
 
     @Before
     public void setup() {
@@ -27,12 +28,12 @@ public class TestH2Spec {
             throw new RuntimeException("Must install h2spec. Requires GO 1.5+. See https://github.com/summerwind/h2spec and https://golang.org/dl/");
         }
 
-        ServerFactory.createTestServer(8084, true);
+        port = ServerFactory.createTestServer(true);
     }
 
     private boolean passH2SpecTest(String testNumber) {
         try {
-            ProcessBuilder pb = new ProcessBuilder(h2SpecPath, "-p", "8084", "-S", "-s", testNumber);
+            ProcessBuilder pb = new ProcessBuilder(h2SpecPath, "-p", Integer.toString(port), "-S", "-s", testNumber);
             pb.redirectErrorStream(true);
             Process process = pb.start();
             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
