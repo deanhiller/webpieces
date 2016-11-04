@@ -36,8 +36,8 @@ public class TestIntegTimeoutConnection {
 		
 		FrontendConfig config = new FrontendConfig("tcpServer", new InetSocketAddress(0));
 		config.maxConnectToRequestTimeoutMs = 1000;
-		MockRequestListener mockRequestListener = new MockRequestListener();
-		HttpServer server = mgr.createHttpServer(config, mockRequestListener);
+		RequestListenerForTest requestListenerForTest = new RequestListenerForTest();
+		HttpServer server = mgr.createHttpServer(config, requestListenerForTest);
 		
 		int port = server.getUnderlyingChannel().getLocalAddress().getPort();
 		
@@ -58,7 +58,7 @@ public class TestIntegTimeoutConnection {
 		Thread.sleep(2000);
 		
 		Assert.assertTrue(listener.isClosed());
-		Assert.assertTrue(mockRequestListener.isClosed());
+		Assert.assertTrue(requestListenerForTest.isClosed());
 	}
 
 	@Test
@@ -69,8 +69,8 @@ public class TestIntegTimeoutConnection {
 		
 		FrontendConfig config = new FrontendConfig("tcpServer", new InetSocketAddress(0));
 		config.maxConnectToRequestTimeoutMs = 1000;
-		MockRequestListener mockRequestListener = new MockRequestListener();
-		HttpServer server = mgr.createHttpsServer(config, mockRequestListener, new SSLEngineFactoryForTest());
+		RequestListenerForTest requestListenerForTest = new RequestListenerForTest();
+		HttpServer server = mgr.createHttpsServer(config, requestListenerForTest, new SSLEngineFactoryForTest());
 		
 		int port = server.getUnderlyingChannel().getLocalAddress().getPort();
 		
@@ -91,6 +91,6 @@ public class TestIntegTimeoutConnection {
 		Thread.sleep(2000);
 		
 		Assert.assertTrue(listener.isClosed());
-		Assert.assertTrue(mockRequestListener.isClosed());
+		Assert.assertTrue(requestListenerForTest.isClosed());
 	}
 }

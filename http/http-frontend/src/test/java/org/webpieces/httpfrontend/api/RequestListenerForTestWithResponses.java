@@ -12,16 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class MockRequestListenerWithResponses extends MockRequestListener {
+class RequestListenerForTestWithResponses extends RequestListenerForTest {
     List<HttpResponse> responseList;
     Map<RequestId, HttpRequest> requestMap = new HashMap<>();
 
-    MockRequestListenerWithResponses(HttpResponse response) {
+    RequestListenerForTestWithResponses(HttpResponse response) {
         responseList = new ArrayList<>();
         responseList.add(response);
     }
 
-    public MockRequestListenerWithResponses(List<HttpResponse> responseList) {
+    RequestListenerForTestWithResponses(List<HttpResponse> responseList) {
         this.responseList = responseList;
     }
 

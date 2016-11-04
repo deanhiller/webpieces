@@ -31,7 +31,7 @@ public class TestTimeoutConnection {
 	private MockTcpServerChannel mockChannel = new MockTcpServerChannel();
 	private MockChannelManager mockChanMgr = new MockChannelManager();
 	private MockTimer timer = new MockTimer();
-	private MockRequestListener mockRequestListener = new MockRequestListener();
+	private RequestListenerForTest requestListenerForTest = new RequestListenerForTest();
 
 	private HttpFrontendManager mgr;
 	
@@ -54,7 +54,7 @@ public class TestTimeoutConnection {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
 		config.maxConnectToRequestTimeoutMs = (int) timeout;
 
-		mgr.createHttpServer(config , mockRequestListener );
+		mgr.createHttpServer(config , requestListenerForTest);
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
 		Assert.assertEquals(1, listeners.length);
@@ -88,7 +88,7 @@ public class TestTimeoutConnection {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
 		config.maxConnectToRequestTimeoutMs = (int) timeout;
 
-		mgr.createHttpServer(config , mockRequestListener );
+		mgr.createHttpServer(config , requestListenerForTest);
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
 		Assert.assertEquals(1, listeners.length);

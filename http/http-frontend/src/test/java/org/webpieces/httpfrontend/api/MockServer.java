@@ -15,21 +15,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class MockServer {
-    private MockTcpChannel mockServerChannel = new MockTcpChannel();
+    private MockTcpChannel mockTcpChannel = new MockTcpChannel();
     private DataListener dataListener;
 
     public MockServer(
             int port,
             boolean alwaysHttp2,
-            MockRequestListener mockRequestListener)
+            RequestListenerForTest requestListenerForTest)
             throws InterruptedException, ExecutionException
     {
-        MockTcpServerChannel mockChannel = new MockTcpServerChannel();
+        MockTcpServerChannel mockTcpServerChannel = new MockTcpServerChannel();
         MockChannelManager mockChanMgr = new MockChannelManager();
         MockTimer timer = new MockTimer();
         BufferCreationPool pool = new BufferCreationPool();
 
-        mockChanMgr.addTcpSvrChannel(mockChannel);
+        mockChanMgr.addTcpSvrChannel(mockTcpServerChannel);
         AsyncServerManager svrManager = AsyncServerMgrFactory.createAsyncServer(mockChanMgr);
         HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(svrManager, timer, pool);
 
@@ -37,7 +37,7 @@ public class MockServer {
         config.maxConnectToRequestTimeoutMs = 5000;
         config.alwaysHttp2 = alwaysHttp2;
 
-        mgr.createHttpServer(config, mockRequestListener);
+        mgr.createHttpServer(config, requestListenerForTest);
 
         ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
         Assert.assertEquals(1, listeners.length);
@@ -45,16 +45,16 @@ public class MockServer {
         MockFuture<?> mockFuture = new MockFuture<>();
         timer.addMockFuture(mockFuture);
         ConnectionListener listener = listeners[0];
-        CompletableFuture<DataListener> future = listener.connected(mockServerChannel, true);
+        CompletableFuture<DataListener> future = listener.connected(mockTcpChannel, true);
 
         dataListener = future.get();
     }
 
-    public DataListener getDataListener() {
+    DataListener getDataListener() {
         return dataListener;
     }
 
-    MockTcpChannel getMockServerChannel() {
-        return mockServerChannel;
+    MockTcpChannel getMockTcpChannel() {
+        return mockTcpChannel;
     }
 }

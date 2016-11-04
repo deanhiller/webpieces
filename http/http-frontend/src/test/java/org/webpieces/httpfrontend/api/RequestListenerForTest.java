@@ -12,7 +12,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class MockRequestListener implements RequestListener {
+class RequestListenerForTest implements RequestListener {
 
 	private boolean isClosed;
 

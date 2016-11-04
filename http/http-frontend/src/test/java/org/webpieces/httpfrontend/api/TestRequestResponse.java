@@ -8,15 +8,10 @@ import com.webpieces.http2parser.api.dto.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.asyncserver.api.AsyncServerManager;
-import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontendFactory;
-import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
 import org.webpieces.httpparser.api.HttpParser;
@@ -25,13 +20,10 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.*;
-import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class TestRequestResponse {
@@ -54,25 +46,25 @@ public class TestRequestResponse {
         settingsFrame.setSettings(settings);
     }
 
-    private ByteBuffer processRequestWithRequestListener(HttpRequest request, MockRequestListener mockRequestListener)
+    private ByteBuffer processRequestWithRequestListener(HttpRequest request, RequestListenerForTest requestListenerForTest)
             throws InterruptedException, ExecutionException {
-        MockServer mockServer = new MockServer(80, false, mockRequestListener);
+        MockServer mockServer = new MockServer(80, false, requestListenerForTest);
         DataListener dataListener = mockServer.getDataListener();
 
         ByteBuffer buffer = httpParser.marshalToByteBuffer(request);
-        dataListener.incomingData(mockServer.getMockServerChannel(), buffer);
+        dataListener.incomingData(mockServer.getMockTcpChannel(), buffer);
 
         // TODO: fix this to wait until we're done, not just sleep, which is fragile.
         Thread.sleep(1000);
 
-        return mockServer.getMockServerChannel().getWriteLog();
+        return mockServer.getMockTcpChannel().getWriteLog();
     }
 
     @Test
     public void testSimpleHttp11Request() throws InterruptedException, ExecutionException {
         HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(response));
         Assert.assertEquals("HTTP/1.1 200 OK\r\n" +
                 "Content-Length: 0\r\n" +
                 "\r\n", new String(bytesWritten.array()));
@@ -91,7 +83,7 @@ public class TestRequestResponse {
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
                 Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(response));
 
         Memento memento = httpParser.prepareToParse();
         httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
@@ -128,7 +120,7 @@ public class TestRequestResponse {
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
                 Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(response));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(response));
 
         Memento memento = httpParser.prepareToParse();
         httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
@@ -171,7 +163,7 @@ public class TestRequestResponse {
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
                 Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new MockRequestListenerWithResponses(responses));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(responses));
 
         Memento memento = httpParser.prepareToParse();
         httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
