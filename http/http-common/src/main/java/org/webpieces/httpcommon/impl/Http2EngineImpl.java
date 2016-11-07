@@ -149,11 +149,6 @@ public abstract class Http2EngineImpl implements Http2Engine {
         this.dataListener = new Http2DataListener();
 
         initializeFlowControl(0x0);
-
-        // set some default preferred settings locally
-        // TODO: make this configurable by the customer
-        localRequestedSettings.put(SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
-        //localRequestedSettings.put(SETTINGS_MAX_HEADER_LIST_SIZE, 100)
     }
 
     @Override

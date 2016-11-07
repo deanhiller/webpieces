@@ -28,7 +28,7 @@ public class TestH2Spec {
             throw new RuntimeException("Must install h2spec. Requires GO 1.5+. See https://github.com/summerwind/h2spec and https://golang.org/dl/");
         }
 
-        port = ServerFactory.createTestServer(true);
+        port = ServerFactory.createTestServer(true, 100L);
     }
 
     private boolean passH2SpecTest(String testNumber) {

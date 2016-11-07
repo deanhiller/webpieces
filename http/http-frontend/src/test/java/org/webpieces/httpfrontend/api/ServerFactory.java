@@ -23,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -31,13 +32,14 @@ class ServerFactory {
     static final String MAIN_RESPONSE = "Here's the file";
     static final String PUSHED_RESPONSE = "Here's the css";
 
-    static int createTestServer(boolean alwaysHttp2) {
+    static int createTestServer(boolean alwaysHttp2, Long maxConcurrentStreams) {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
         FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(0));
         // Set this to true to test with h2spec
         config.alwaysHttp2 = alwaysHttp2;
+        config.maxConcurrentStreams = Optional.of(maxConcurrentStreams);
         HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
         return server.getUnderlyingChannel().getLocalAddress().getPort();
     }

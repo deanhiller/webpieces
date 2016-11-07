@@ -54,7 +54,7 @@ public class TestEndToEnd {
 
   @Before
   public void setUp() {
-    serverPort = ServerFactory.createTestServer(false);
+    serverPort = ServerFactory.createTestServer(false, 100L);
   }
 
   @Test
