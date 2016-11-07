@@ -75,7 +75,8 @@ class HttpServerSocketImpl implements HttpServerSocket {
     }
 
     @Override
-    public void sendLocalPreferredSettings() {
+    public void sendLocalRequestedSettings() {
+        log.info("Sending local requested settings");
         http2ServerEngine.sendLocalRequestedSettings();
     }
 

@@ -14,5 +14,5 @@ public interface HttpServerSocket extends HttpSocket {
 
     void upgradeHttp2(Optional<ByteBuffer> maybeSettingsFrame);
 
-    void sendLocalPreferredSettings();
+    void sendLocalRequestedSettings();
 }

@@ -12,7 +12,7 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
-public class MockTcpChannel implements TCPChannel {
+class MockTcpChannel implements TCPChannel {
 
 	private boolean isClosed;
 	private ChannelSessionImpl session = new ChannelSessionImpl();

@@ -195,12 +195,8 @@ public class TestEndToEnd {
         .forEach(dw -> Assert.assertEquals(dw.getReadableSize(), 1));
   }
 
-  // This test is flaky. It's not the test itself that is flaky though
-  // I think it's the server or the client.
-  // The problem is that the server waits for the preface before sending settings
-  // but it isn't waiting for the preface before sending the response to the request
-  // in the upgrade request so the response might get sent before the settings
-  // are sent.
+  // This test is flaky because the client sometimes loses the server settings that
+  // get sent as soon as the upgrade has gone through.
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
