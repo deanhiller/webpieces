@@ -197,6 +197,10 @@ public class TestEndToEnd {
 
   // This test is flaky. It's not the test itself that is flaky though
   // I think it's the server or the client.
+  // The problem is that the server waits for the preface before sending settings
+  // but it isn't waiting for the preface before sending the response to the request
+  // in the upgrade request so the response might get sent before the settings
+  // are sent.
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
