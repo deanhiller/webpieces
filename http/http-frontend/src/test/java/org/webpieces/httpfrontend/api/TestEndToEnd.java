@@ -102,6 +102,7 @@ public class TestEndToEnd {
       return dataGen.chainDataWrappers(head, chainDataWrappers(listOfWrappers));
     }
   }
+
   @Test
   public void testRequestWithWindowSizeOne() throws InterruptedException, ExecutionException {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
@@ -153,5 +154,26 @@ public class TestEndToEnd {
     secondResponse.stream()
         .map(x -> (DataWrapper) x)
         .forEach(dw -> Assert.assertEquals(dw.getReadableSize(), 1));
+  }
+
+  @Test
+  public void testRequestNoPush() throws InterruptedException, ExecutionException  {
+    Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
+    http2SettingsMap.put(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 0L);
+
+    HttpClient client = createHttpClient(http2SettingsMap);
+    HttpClientSocket socket = client.openHttpSocket("testClient");
+
+    InetSocketAddress addr = new InetSocketAddress("localhost", serverPort);
+    RequestSender requestSender = socket.connect(addr).get();
+    HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
+    MockResponseListener mockResponseListener = new MockResponseListener();
+
+    requestSender.sendRequest(request, true, mockResponseListener);
+    ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(1000, 1);
+
+    // We get only one response because push is disabled
+    Assert.assertEquals(responses.size(), 1);
+
   }
 }

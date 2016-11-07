@@ -174,7 +174,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     void setRemoteSettings(Http2Settings frame, boolean sendAck) {
         // We've received a settings. Check for legit-ness.
         if(frame.getSettings().get(SETTINGS_ENABLE_PUSH) != null && (
-                frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 0 || frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 1))
+                frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 0 && frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 1))
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
 
         // 2^31 - 1 - max flow control window
