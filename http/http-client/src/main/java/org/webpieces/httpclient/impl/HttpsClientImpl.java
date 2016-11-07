@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+
 import org.webpieces.httpclient.api.*;
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpcommon.api.RequestSender;
@@ -22,12 +24,14 @@ public class HttpsClientImpl implements HttpClient {
 	private HttpParser httpParser;
 	private Http2Parser http2Parser;
 	private HttpsSslEngineFactory factory;
+	private Http2SettingsMap http2SettingsMap;
 
-	public HttpsClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, HttpsSslEngineFactory factory) {
+	public HttpsClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, HttpsSslEngineFactory factory, Http2SettingsMap http2SettingsMap) {
 		this.mgr = mgr;
 		this.httpParser = httpParser;
 		this.http2Parser = http2Parser;
 		this.factory = factory;
+		this.http2SettingsMap = http2SettingsMap;
 	}
 
 	@Override
@@ -63,7 +67,7 @@ public class HttpsClientImpl implements HttpClient {
 
 	@Override
 	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpClientSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener);
+		return new HttpClientSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener, http2SettingsMap);
 	}
 
 

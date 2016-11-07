@@ -13,6 +13,9 @@ import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.dto.Http2Settings;
+
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
@@ -28,6 +31,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
     private TCPChannel channel;
     private HttpParser httpParser;
     private Http2Parser http2Parser;
+    private Http2SettingsMap http2SettingsMap;
 
     private CompletableFuture<RequestSender> connectFuture;
     private boolean isClosed;
@@ -39,15 +43,22 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
     private RequestSenderImpl requestSender;
 
-    public HttpClientSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser httpParser,
-                                Http2Parser http2Parser,
-                                CloseListener closeListener) {
+    public HttpClientSocketImpl(
+        ChannelManager mgr,
+        String idForLogging,
+        HttpsSslEngineFactory factory,
+        HttpParser httpParser,
+        Http2Parser http2Parser,
+        CloseListener closeListener,
+        Http2SettingsMap http2SettingsMap)
+    {
         this.factory = factory;
         this.mgr = mgr;
         this.idForLogging = idForLogging;
         this.closeListener = closeListener;
         this.http2Parser = http2Parser;
         this.httpParser = httpParser;
+        this.http2SettingsMap = http2SettingsMap;
     }
 
     @Override
@@ -65,12 +76,15 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
             channel = mgr.createTCPChannel(idForLogging, engine);
         }
 
-        requestSender = new RequestSenderImpl(this,
-                this.httpParser,
-                this.http2Parser,
-                closeListener,
-                addr,
-                channel);
+        requestSender = new RequestSenderImpl(
+            this,
+            this.httpParser,
+            this.http2Parser,
+            closeListener,
+            addr,
+            channel,
+            http2SettingsMap
+            );
         DataListener dataListener;
 
         if (isRecording) {

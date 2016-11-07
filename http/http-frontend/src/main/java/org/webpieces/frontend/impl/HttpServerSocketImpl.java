@@ -5,6 +5,7 @@ import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.impl.SettingsMarshaller;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpcommon.api.Http2EngineFactory;
 import org.webpieces.httpcommon.api.Http2ServerEngine;
@@ -30,21 +31,24 @@ class HttpServerSocketImpl implements HttpServerSocket {
     private TimedRequestListener timedRequestListener;
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private Http2ServerEngine http2ServerEngine;
+    private FrontendConfig frontendConfig;
     private static final Logger log = LoggerFactory.getLogger(HttpServerSocket.class);
 
     HttpServerSocketImpl(Channel channel, DataListener http11DataListener, ResponseSender http11ResponseSender,
                          Http2Parser http2Parser,
-                         TimedRequestListener timedRequestListener) {
+                         TimedRequestListener timedRequestListener,
+                         FrontendConfig frontendConfig) {
         this.channel = channel;
         this.dataListener = http11DataListener;
         this.responseSender = http11ResponseSender;
         this.http2Parser = http2Parser;
         this.timedRequestListener = timedRequestListener;
+        this.frontendConfig = frontendConfig;
     }
 
     @Override
     public void upgradeHttp2(Optional<ByteBuffer> maybeSettingsPayload) {
-        http2ServerEngine = Http2EngineFactory.createHttp2ServerEngine(http2Parser, channel, channel.getRemoteAddress());
+        http2ServerEngine = Http2EngineFactory.createHttp2ServerEngine(http2Parser, channel, channel.getRemoteAddress(), frontendConfig.getHttp2Settings());
         http2ServerEngine.setRequestListener(timedRequestListener);
         dataListener = http2ServerEngine.getDataListener();
         responseSender = http2ServerEngine.getResponseSender();

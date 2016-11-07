@@ -1,6 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
@@ -22,8 +23,12 @@ import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS
 public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2ServerEngine {
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
 
-    public Http2ServerEngineImpl(Http2Parser http2Parser, Channel channel, InetSocketAddress remoteAddress) {
-        super(http2Parser, channel, remoteAddress, HttpSide.SERVER);
+    public Http2ServerEngineImpl(
+        Http2Parser http2Parser,
+        Channel channel,
+        InetSocketAddress remoteAddress,
+        Http2SettingsMap http2SettingsMap) {
+        super(http2Parser, channel, remoteAddress, http2SettingsMap, HttpSide.SERVER);
     }
 
     private RequestListener requestListener;

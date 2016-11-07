@@ -108,13 +108,16 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
 
     public Http2EngineImpl(
-        Http2Parser http2Parser, 
-        Channel channel, 
-        InetSocketAddress remoteAddress, 
-        HttpSide side) {
+        Http2Parser http2Parser,
+        Channel channel,
+        InetSocketAddress remoteAddress,
+        Http2SettingsMap http2SettingsMap,
+        HttpSide side)
+    {
         this.http2Parser = http2Parser;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
+        this.localRequestedSettings = http2SettingsMap;
         this.side = side;
         if(side == CLIENT) {
             this.nextOutgoingStreamId = new AtomicInteger(0x1);

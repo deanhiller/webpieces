@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.httpclient.api.*;
 import org.webpieces.httpcommon.api.*;
@@ -82,7 +83,7 @@ public class IntegGoogleHttps {
 			client = HttpClientFactory.createHttpClient(mgr, httpParser, http2Parser);
 		else {
 			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
-			client = HttpClientFactory.createHttpsClient(mgr, httpParser, http2Parser, sslFactory);
+			client = HttpClientFactory.createHttpsClient(mgr, httpParser, http2Parser, sslFactory, new Http2SettingsMap());
 		}
 		return client;
 	}

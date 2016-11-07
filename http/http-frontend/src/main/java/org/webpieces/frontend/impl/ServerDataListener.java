@@ -25,11 +25,13 @@ class ServerDataListener implements AsyncDataListener {
         if(httpServerSocket == null) {
             // Default to HTTP/1.1 but pass in the parser so that we can upgrade to http2.
             httpServerSocket = new HttpServerSocketImpl(
-                    channel,
-                    http11DataListener,
-                    new Http11ResponseSender(channel, httpParser),
-                    http2Parser,
-                    timedRequestListener);
+                channel,
+                http11DataListener,
+                new Http11ResponseSender(channel, httpParser),
+                http2Parser,
+                timedRequestListener,
+                frontendConfig
+                );
 
             session.put("webpieces.httpServerSocket", httpServerSocket);
         }

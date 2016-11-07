@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -68,15 +69,18 @@ public class RequestSenderImpl implements RequestSender {
     private AtomicBoolean acceptingRequest = new AtomicBoolean(false);
 
 
-    public RequestSenderImpl(HttpClientSocket socket,
-                             HttpParser httpParser,
-                             Http2Parser http2Parser,
-                             CloseListener closeListener,
-                             InetSocketAddress addr,
-                             TCPChannel channel) {
+    public RequestSenderImpl(
+        HttpClientSocket socket,
+        HttpParser httpParser,
+        Http2Parser http2Parser,
+        CloseListener closeListener,
+        InetSocketAddress addr,
+        TCPChannel channel,
+        Http2SettingsMap http2SettingsMap
+    ) {
         this.httpParser = httpParser;
         this.http2Parser = http2Parser;
-        this.http2ClientEngine = Http2EngineFactory.createHttp2ClientEngine(http2Parser, channel, addr);
+        this.http2ClientEngine = Http2EngineFactory.createHttp2ClientEngine(http2Parser, channel, addr, http2SettingsMap);
         this.channel = channel;
         this.addr = addr;
 

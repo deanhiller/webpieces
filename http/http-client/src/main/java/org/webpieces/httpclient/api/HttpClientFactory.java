@@ -5,6 +5,8 @@ import java.util.concurrent.Executors;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.httpclient.impl.HttpClientImpl;
 import org.webpieces.httpclient.impl.HttpsClientImpl;
@@ -24,7 +26,7 @@ public abstract class HttpClientFactory {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 		
-		return createHttpsClient(mgr, httpParser, http2Parser, sslFactory);
+		return createHttpsClient(mgr, httpParser, http2Parser, sslFactory, new Http2SettingsMap());
 	}
 	
 	public static HttpClient createHttpClient(int numThreads) {
@@ -32,13 +34,21 @@ public abstract class HttpClientFactory {
 	}
 	
 	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser) {
-		return createHttpsClient(mgr, httpParser, http2Parser, null);
+		return createHttpsClient(mgr, httpParser, http2Parser, null, new Http2SettingsMap());
 	}
 
-	public static HttpClient createHttpsClient(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, HttpsSslEngineFactory factory) {
+	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, Http2SettingsMap http2SettingsMap) {
+		return createHttpsClient(mgr, httpParser, http2Parser, null, http2SettingsMap);
+	}
+
+	public static HttpClient createHttpsClient(ChannelManager mgr,
+																							HttpParser httpParser,
+																							Http2Parser http2Parser,
+																							HttpsSslEngineFactory factory,
+																							Http2SettingsMap http2SettingsMap) {
 		if(factory != null)
-			return new HttpsClientImpl(mgr, httpParser, http2Parser, factory);
+			return new HttpsClientImpl(mgr, httpParser, http2Parser, factory, http2SettingsMap);
 		else
-			return new HttpClientImpl(mgr, httpParser, http2Parser);
+			return new HttpClientImpl(mgr, httpParser, http2Parser, http2SettingsMap);
 	}
 }

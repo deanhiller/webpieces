@@ -10,6 +10,8 @@ import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -21,11 +23,13 @@ public class HttpClientImpl implements HttpClient {
 	private ChannelManager mgr;
 	private HttpParser httpParser;
 	private Http2Parser http2Parser;
+	private Http2SettingsMap http2SettingsMap;
 
-	public HttpClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser) {
+	public HttpClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, Http2SettingsMap http2SettingsMap) {
 		this.mgr = mgr;
 		this.httpParser = httpParser;
 		this.http2Parser = http2Parser;
+		this.http2SettingsMap = http2SettingsMap;
 	}
 
 	@Override
@@ -61,7 +65,7 @@ public class HttpClientImpl implements HttpClient {
 	
 	@Override
 	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpClientSocketImpl(mgr, idForLogging, null, httpParser, http2Parser, listener);
+		return new HttpClientSocketImpl(mgr, idForLogging, null, httpParser, http2Parser, listener, http2SettingsMap);
 	}
 
 }
