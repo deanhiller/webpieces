@@ -14,11 +14,23 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 class MockResponseListener implements ResponseListener {
 
   private ConcurrentHashMap<ResponseId, List<Object>> responseLog = new ConcurrentHashMap<>();
   private ConcurrentHashMap<ResponseId, Boolean> completed = new ConcurrentHashMap<>();
+  private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
+  private int delayMs = 0;
+
+  public MockResponseListener(int delayMs) {
+    this.delayMs = delayMs;
+  }
+
+  public MockResponseListener() {
+  }
 
   private List<Object> responseListForId(ResponseId id) {
     List<Object> list = responseLog.get(id);
@@ -38,7 +50,12 @@ class MockResponseListener implements ResponseListener {
       synchronized (this) { this.notifyAll(); }
     }
 
-    return CompletableFuture.completedFuture(null);
+    CompletableFuture<Void> future = new CompletableFuture<>();
+
+    // Wait a little bit before completing
+    scheduledExecutorService.schedule(() -> future.complete(null), delayMs, TimeUnit.MILLISECONDS);
+
+    return future;
   }
 
   @Override

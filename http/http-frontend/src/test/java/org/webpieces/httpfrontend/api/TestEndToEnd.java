@@ -114,10 +114,12 @@ public class TestEndToEnd {
     InetSocketAddress addr = new InetSocketAddress("localhost", serverPort);
     RequestSender requestSender = socket.connect(addr).get();
     HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
-    MockResponseListener mockResponseListener = new MockResponseListener();
+
+    // Create a response listener that delays dealing with data.
+    MockResponseListener mockResponseListener = new MockResponseListener(500);
 
     requestSender.sendRequest(request, true, mockResponseListener);
-    ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(1000, 2);
+    ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(10000, 2);
 
     // We got two responses (one regular and one push)
     Assert.assertEquals(responses.size(), 2);
