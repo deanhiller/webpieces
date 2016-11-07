@@ -934,16 +934,13 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
             // Transition the stream state
             if(frame.getStreamId() != 0x0) {
-                if(side == SERVER && frame.getStreamId() % 2 != 1) {
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                }
                 Stream stream = activeStreams.get(frame.getStreamId());
 
                 // If the stream doesn't exist, create it, if server and if streamid is odd.
                 if (stream == null) {
                     if (side == SERVER) {
                         int streamId = frame.getStreamId();
-                        if(streamId <= lastIncomingStreamId.get()) {
+                        if(streamId <= lastIncomingStreamId.get() || frame.getStreamId() % 2 != 1) {
                             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
                         }
                         lastIncomingStreamId.set(streamId);
