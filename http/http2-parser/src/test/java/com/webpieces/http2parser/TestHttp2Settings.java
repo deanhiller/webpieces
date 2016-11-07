@@ -4,8 +4,7 @@ import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Map;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 
 public class TestHttp2Settings {
     static private String basicSettings =
@@ -39,7 +38,7 @@ public class TestHttp2Settings {
         Assert.assertTrue(Http2Settings.class.isInstance(frame));
 
         Http2Settings castFrame = (Http2Settings) frame;
-        Map<Http2Settings.Parameter, Long> settings = castFrame.getSettings();
+        Http2SettingsMap settings = castFrame.getSettings();
         Assert.assertEquals(settings.get(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH).longValue(), 1);
         Assert.assertEquals(settings.get(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS).longValue(), 256);
         Assert.assertFalse(settings.containsKey(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE));

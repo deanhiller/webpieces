@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.webpieces.http2parser.api.Http2SettingsMap;
+
 public class Http2Settings extends Http2Frame {
     public enum Parameter {
         SETTINGS_HEADER_TABLE_SIZE(0x1),
@@ -68,21 +70,21 @@ public class Http2Settings extends Http2Frame {
 
     // id 16bits
     // value 32bits
-    private Map<Http2Settings.Parameter, Long> settings = new LinkedHashMap<>();
+    private Http2SettingsMap settings = new Http2SettingsMap();
 
     public void setSetting(Http2Settings.Parameter param, Long value) {
         settings.put(param, value);
     }
 
-    public void setSettings(Map<Parameter, Long> settings) {
+    public void setSettings(Http2SettingsMap settings) {
         this.settings = settings;
     }
 
-    public Map<Http2Settings.Parameter, Long> getSettings() {
+    public Http2SettingsMap getSettings() {
         if (!ack) {
             return settings;
         } else {
-            return Collections.emptyMap();
+            return new Http2SettingsMap();
         }
     }
 

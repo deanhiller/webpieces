@@ -3,6 +3,7 @@ package com.webpieces.http2parser;
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
@@ -27,7 +28,7 @@ public class ParseFramesFromFile {
         Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
         DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
         Decoder decoder = new Decoder(4096, 4096);
-        Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
+        Http2SettingsMap settings = new Http2SettingsMap();
 
         settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
 

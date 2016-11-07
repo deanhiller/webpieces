@@ -216,7 +216,7 @@ public class Http2ParserImpl implements Http2Parser {
 
 
     @Override
-    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Map<Http2Settings.Parameter, Long> settings) {
+    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Http2SettingsMap settings) {
         DataWrapper wrapperToParse;
         List<Http2Frame> frames = new LinkedList<>();
         List<Http2Frame> hasHeaderFragmentList = new LinkedList<>();
@@ -353,7 +353,7 @@ public class Http2ParserImpl implements Http2Parser {
             LinkedList<HasHeaderFragment.Header> headers,
             Http2FrameType startingFrameType,
             int streamId,
-            Map<Http2Settings.Parameter, Long> remoteSettings,
+            Http2SettingsMap remoteSettings,
             Encoder encoder,
             ByteArrayOutputStream out) {
         List<Http2Frame> headerFrames = new LinkedList<>();

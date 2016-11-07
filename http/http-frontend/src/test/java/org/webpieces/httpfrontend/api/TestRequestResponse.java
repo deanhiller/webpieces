@@ -3,6 +3,7 @@ package org.webpieces.httpfrontend.api;
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
 import org.junit.Assert;
@@ -33,7 +34,7 @@ public class TestRequestResponse {
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private Http2Settings settingsFrame = new Http2Settings();
     private Decoder decoder;
-    private Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
+    private Http2SettingsMap settings = new Http2SettingsMap();
 
     @Before
     public void setup() {

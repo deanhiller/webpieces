@@ -4,6 +4,7 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.*;
 import com.webpieces.http2parser.api.ParserResult;
 import org.junit.Assert;
@@ -65,7 +66,7 @@ public class TestHttp2Parser {
 
     private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
-    private static Map<Http2Settings.Parameter, Long> settings = new HashMap<>();
+    private static Http2SettingsMap settings = new Http2SettingsMap();
 
     // https://github.com/http2jp/hpack-test-case/blob/master/nghttp2/story_00.json
     private static String basicRequestSerializationNghttp2 = "82864188f439ce75c875fa5784";
@@ -197,7 +198,7 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
+        Http2SettingsMap remoteSettings = new Http2SettingsMap();
         // set a small max frame size for testing
         remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -217,7 +218,7 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
+        Http2SettingsMap remoteSettings = new Http2SettingsMap();
         // set a small max frame size for testing
         remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -237,7 +238,7 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
+        Http2SettingsMap remoteSettings = new Http2SettingsMap();
         // set a small max frame size for testing
         remoteSettings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();

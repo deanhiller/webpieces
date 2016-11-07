@@ -63,6 +63,7 @@ public class TestEndToEnd {
 
     requestSender.sendRequest(request, true, mockResponseListener);
     ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(1000, 2);
+
     // We got two responses (one regular and one push)
     Assert.assertEquals(responses.size(), 2);
 

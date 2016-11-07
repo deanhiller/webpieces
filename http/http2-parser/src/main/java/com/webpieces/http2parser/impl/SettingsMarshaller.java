@@ -1,5 +1,6 @@
 package com.webpieces.http2parser.impl;
 
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.webpieces.data.api.BufferPool;
@@ -24,7 +25,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
             // If ack or empty settings
             return dataGen.emptyWrapper();
         } else {
-            Map<Http2Settings.Parameter, Long> settings = castFrame.getSettings();
+            Http2SettingsMap settings = castFrame.getSettings();
             ByteBuffer payload = bufferPool.nextBuffer(6 * settings.size());
 
             for (Map.Entry<Http2Settings.Parameter, Long> setting : settings.entrySet()) {

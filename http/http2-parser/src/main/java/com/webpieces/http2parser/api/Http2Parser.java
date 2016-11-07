@@ -26,13 +26,13 @@ public interface Http2Parser {
     // TODO: add a marshal to bytebuffer so we can use our bufferpool
     int getFrameLength(Http2Frame frame);
 
-    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Map<Http2Settings.Parameter, Long> settings);
+    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Http2SettingsMap settings);
 
     DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers, Encoder encoder, ByteArrayOutputStream out);
     List<Http2Frame> createHeaderFrames(LinkedList<HasHeaderFragment.Header> headers,
                                         Http2FrameType frameType,
                                         int streamId,
-                                        Map<Http2Settings.Parameter, Long> remoteSettings,
+                                        Http2SettingsMap remoteSettings,
                                         Encoder encoder,
                                         ByteArrayOutputStream out);
 

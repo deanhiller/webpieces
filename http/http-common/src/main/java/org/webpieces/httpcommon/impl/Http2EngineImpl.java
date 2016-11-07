@@ -3,6 +3,7 @@ package org.webpieces.httpcommon.impl;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.*;
@@ -61,15 +62,15 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     private HttpSide side;
 
-    private Map<Http2Settings.Parameter, Long> localRequestedSettings = new HashMap<>();
+    private Http2SettingsMap localRequestedSettings = new Http2SettingsMap();
 
     // remotesettings doesn't need concurrent bc listener is vts
-    Map<Http2Settings.Parameter, Long> remoteSettings = new HashMap<>();
+    Http2SettingsMap remoteSettings = new Http2SettingsMap();
     private AtomicBoolean gotSettings = new AtomicBoolean(false);
 
-    // localsettings also doesn't need concurrent bc local settigs is only set when
+    // localsettings also doesn't need concurrent bc local settings is only set when
     // it gets the ack from the settings that gets sent.
-    private Map<Http2Settings.Parameter, Long> localSettings = new HashMap<>();
+    private Http2SettingsMap localSettings = new Http2SettingsMap();
 
     ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
     private AtomicInteger nextOutgoingStreamId;
@@ -106,7 +107,11 @@ public abstract class Http2EngineImpl implements Http2Engine {
     private DataWrapper additionalDebugData;
 
 
-    public Http2EngineImpl(Http2Parser http2Parser, Channel channel, InetSocketAddress remoteAddress, HttpSide side) {
+    public Http2EngineImpl(
+        Http2Parser http2Parser, 
+        Channel channel, 
+        InetSocketAddress remoteAddress, 
+        HttpSide side) {
         this.http2Parser = http2Parser;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
