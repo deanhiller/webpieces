@@ -39,6 +39,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 public class TestEndToEnd {
   private int serverPort;
   private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+  private Http2SettingsMap basicClientSettings;
 
   private static HttpClient createHttpClient(Http2SettingsMap http2SettingsMap) {
     BufferPool pool2 = new BufferCreationPool();
@@ -55,11 +56,13 @@ public class TestEndToEnd {
   @Before
   public void setUp() {
     serverPort = ServerFactory.createTestServer(false, 100L);
+    basicClientSettings = new Http2SettingsMap();
+    basicClientSettings.put(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
   }
 
   @Test
   public void testSimpleRequest() throws InterruptedException, ExecutionException {
-    HttpClient client = createHttpClient(new Http2SettingsMap());
+    HttpClient client = createHttpClient(basicClientSettings);
     HttpClientSocket socket = client.openHttpSocket("testClient");
 
     InetSocketAddress addr = new InetSocketAddress("localhost", serverPort);
@@ -90,6 +93,40 @@ public class TestEndToEnd {
     // The data should have the main response
     Assert.assertTrue(DataWrapper.class.isInstance(secondResponse.get(1)));
     Assert.assertArrayEquals(((DataWrapper) secondResponse.get(1)).createByteArray(), ServerFactory.PUSHED_RESPONSE.getBytes());
+  }
+
+  @Test
+  public void testMultipleRequests() throws InterruptedException, ExecutionException {
+    HttpClient client = createHttpClient(basicClientSettings);
+    HttpClientSocket socket = client.openHttpSocket("testClient");
+
+    InetSocketAddress addr = new InetSocketAddress("localhost", serverPort);
+    RequestSender requestSender = socket.connect(addr).get();
+    HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
+    MockResponseListener mockResponseListener = new MockResponseListener();
+
+    requestSender.sendRequest(request, true, mockResponseListener);
+    ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(1000, 2);
+
+    // We got two responses (one regular and one push)
+    Assert.assertEquals(responses.size(), 2);
+
+    // Now make a bunch of requests
+    mockResponseListener.clear();
+
+    // Have to make a new request because the client munges the request when making the upgrade
+    // TODO: fix that
+    HttpRequest cleanRequest = Requests.createRequest(KnownHttpMethod.GET, "/");
+
+    requestSender.sendRequest(cleanRequest, true, mockResponseListener);
+    requestSender.sendRequest(cleanRequest, true, mockResponseListener);
+    requestSender.sendRequest(cleanRequest, true, mockResponseListener);
+    requestSender.sendRequest(cleanRequest, true, mockResponseListener);
+
+    // Should get 8 responses
+    ConcurrentHashMap<ResponseId, List<Object>> responsesTwo = mockResponseListener.getResponseLog(1000, 8);
+    Assert.assertEquals(responsesTwo.size(), 8);
+
   }
 
   private DataWrapper chainDataWrappers(List<DataWrapper> listOfWrappers) {
@@ -158,6 +195,8 @@ public class TestEndToEnd {
         .forEach(dw -> Assert.assertEquals(dw.getReadableSize(), 1));
   }
 
+  // This test is flaky. It's not the test itself that is flaky though
+  // I think it's the server or the client.
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();

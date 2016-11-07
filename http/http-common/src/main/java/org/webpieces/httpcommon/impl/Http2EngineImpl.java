@@ -62,7 +62,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     private HttpSide side;
 
-    private Http2SettingsMap localRequestedSettings = new Http2SettingsMap();
+    private Http2SettingsMap localRequestedSettings;
 
     // remotesettings doesn't need concurrent bc listener is vts
     Http2SettingsMap remoteSettings = new Http2SettingsMap();

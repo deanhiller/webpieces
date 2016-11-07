@@ -3,6 +3,8 @@ package org.webpieces.frontend.impl;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.impl.SettingsMarshaller;
+
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend.api.FrontendConfig;
@@ -58,7 +60,12 @@ class HttpServerSocketImpl implements HttpServerSocket {
             try {
                 Http2Settings settingsFrame = new Http2Settings();
                 SettingsMarshaller settingsMarshaller = (SettingsMarshaller) http2Parser.getMarshaller(Http2Settings.class);
-                settingsMarshaller.unmarshalFlagsAndPayload(settingsFrame, (byte) 0x0, Optional.of(dataGen.wrapByteBuffer(settingsPayload)));
+                Optional<DataWrapper> maybePayload;
+                if(settingsPayload.hasRemaining())
+                    maybePayload = Optional.of(dataGen.wrapByteBuffer(settingsPayload));
+                else
+                    maybePayload = Optional.empty();
+                settingsMarshaller.unmarshalFlagsAndPayload(settingsFrame, (byte) 0x0, maybePayload);
 
                 http2ServerEngine.setRemoteSettings(settingsFrame, false);
             } catch (Exception e) {

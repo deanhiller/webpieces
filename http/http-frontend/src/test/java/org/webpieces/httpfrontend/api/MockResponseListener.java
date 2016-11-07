@@ -100,4 +100,9 @@ class MockResponseListener implements ResponseListener {
   public void failure(Throwable e) {
 
   }
+
+  public void clear() {
+    completed.clear();
+    responseLog.clear();
+  }
 }
