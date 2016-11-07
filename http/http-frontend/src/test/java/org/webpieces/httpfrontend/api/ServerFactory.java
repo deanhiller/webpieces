@@ -28,6 +28,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 class ServerFactory {
+    static final String MAIN_RESPONSE = "Here's the file";
+    static final String PUSHED_RESPONSE = "Here's the css";
+
     static int createTestServer(boolean alwaysHttp2) {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
@@ -41,10 +44,10 @@ class ServerFactory {
 
     private static class OurListener implements RequestListener {
         private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-        private HttpResponse responseA = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString("Here's the file"));
+        private HttpResponse responseA = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString(MAIN_RESPONSE));
         private HttpResponse responseANoBody = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
 
-        private HttpResponse pushedResponse = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString("Here's the css"));
+        private HttpResponse pushedResponse = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString(PUSHED_RESPONSE));
         private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
         private Map<RequestId, HttpRequest> idMap = new HashMap<>();
 
