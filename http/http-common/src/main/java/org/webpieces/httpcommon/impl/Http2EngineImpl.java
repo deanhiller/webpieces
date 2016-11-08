@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,6 +69,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     // remotesettings doesn't need concurrent bc listener is vts
     Http2SettingsMap remoteSettings = new Http2SettingsMap();
     private AtomicBoolean gotSettings = new AtomicBoolean(false);
+    private CountDownLatch settingsLatch = new CountDownLatch(1);
 
     // localsettings also doesn't need concurrent bc local settings is only set when
     // it gets the ack from the settings that gets sent.
@@ -185,6 +188,8 @@ public abstract class Http2EngineImpl implements Http2Engine {
         // Update remoteSettings
         log.info("Setting remote settings to: " + frame.getSettings());
         gotSettings.set(true);
+        settingsLatch.countDown();
+
         for(Map.Entry<Http2Settings.Parameter, Long> entry: frame.getSettings().entrySet()) {
             remoteSettings.put(entry.getKey(), entry.getValue());
         }
@@ -934,7 +939,16 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         private void handleFrame(Http2Frame frame) {
             if(frame.getFrameType() != SETTINGS && !gotSettings.get()) {
-                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                // If we haven't gotten the settings, let's wait a little bit because another thread
+                // might have the settings frame and hasn't gotten around to processing it yet.
+                try {
+                    log.info("Waiting for settings frame to arrive");
+                    if (!settingsLatch.await(500, TimeUnit.MILLISECONDS))
+                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                } catch (InterruptedException e) {
+                    log.error("Caught exception while waiting for settings frame", e);
+                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
+                }
             }
 
             // Transition the stream state

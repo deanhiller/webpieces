@@ -232,7 +232,11 @@ http2 parser. The peeking into the http11 parser's leftoverdata and the request 
 to deal with that, but apparently it doesn't... it does appear to get leftover data but that leftoverdata
 doesn't get turned into a settings frame.
 
-   */
+This might be fixed. The problem I think was that the thread processing the settings frame hadn't gotten
+around to it when the headers frame came in, so I added a thing so that if the settings frame hasn't
+been processed we wait 500ms for the settings frame to be processed.
+
+*/
 
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {
