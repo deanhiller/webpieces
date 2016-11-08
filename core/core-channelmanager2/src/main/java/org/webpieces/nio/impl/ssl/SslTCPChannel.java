@@ -176,6 +176,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		
 		private ByteBuffer setupSSLEngineImpl(Channel channel, ByteBuffer b) throws SSLException {
 			if(sslFactory instanceof SSLEngineFactoryWithHost) {
+				// Does this mean we're creating an SSL client?
 				SSLEngineFactoryWithHost sslFactoryWithHost = (SSLEngineFactoryWithHost) sslFactory;
 				ParseResult result = parser.fetchServerNamesIfEntirePacketAvailable(b);
 				List<String> sniServerNames = result.getNames();
@@ -188,6 +189,11 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				
 				String host = sniServerNames.get(0);
 				SSLEngine engine = sslFactoryWithHost.createSslEngine(host);
+
+				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
+				return result.getBuffer(); // return the full accumulated packet(which may just be the buffer passed in above)
+			} else {
+				SSLEngine engine = sslFactory.createSslEngine();
 				ALPN.put(engine, new ALPN.ServerProvider() {
 					@Override
 					public void unsupported() {
@@ -208,10 +214,6 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 						}
 					}
 				});
-				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
-				return result.getBuffer(); // return the full accumulated packet(which may just be the buffer passed in above)
-			} else {
-				SSLEngine engine = sslFactory.createSslEngine();
 				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
 				return b;
 			}
