@@ -1054,10 +1054,10 @@ public abstract class Http2EngineImpl implements Http2Engine {
                     catch (ParseException e) {
                         if(e.isConnectionLevel()) {
                             if(e.hasStream()) {
-                                throw new GoAwayError(lastClosedLocalOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), wrapperGen.emptyWrapper());
+                                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), wrapperGen.emptyWrapper());
                             }
                             else {
-                                throw new GoAwayError(lastClosedLocalOriginatedStream().orElse(0), e.getErrorCode(), wrapperGen.emptyWrapper());
+                                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), e.getErrorCode(), wrapperGen.emptyWrapper());
                             }
                         } else {
                             throw new RstStreamError(e.getErrorCode(), e.getStreamId());
