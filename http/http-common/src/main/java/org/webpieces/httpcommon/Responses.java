@@ -21,4 +21,11 @@ public class Responses {
         resp.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, Integer.toString(body.getReadableSize())));
         return resp;
     }
+
+    public static HttpResponse copyResponseExceptBody(HttpResponse response) {
+        HttpResponse newResponse = new HttpResponse();
+        newResponse.setStatusLine(response.getStatusLine());
+        response.getHeaders().forEach(newResponse::addHeader);
+        return newResponse;
+    }
 }

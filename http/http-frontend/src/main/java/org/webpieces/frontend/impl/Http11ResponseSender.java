@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.Responses;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
@@ -13,6 +14,7 @@ import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.*;
 import org.webpieces.nio.api.channels.Channel;
 
@@ -35,13 +37,35 @@ class Http11ResponseSender implements ResponseSender {
 	public CompletableFuture<Void> close() {
 		return channel.close().thenAccept(c -> {});
 	}
-	
+
+	private CompletableFuture<Void> actuallySendResponse(HttpResponse response) {
+		ByteBuffer data = parser.marshalToByteBuffer(response);
+		return channel.write(data).thenAccept(c -> {});
+
+	}
 	@Override
 	public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
-		ByteBuffer data = parser.marshalToByteBuffer(response);
 		// HTTP/1.1 doesn't need responseids
 		ResponseId id = new ResponseId(0);
-		return channel.write(data).thenApply(c -> id);
+
+		if(isComplete) {
+			return actuallySendResponse(response)
+					.thenApply(v -> id);
+		} else {
+			HttpResponse responseNoBody = Responses.copyResponseExceptBody(response);
+			DataWrapper body = response.getBodyNonNull();
+			// If we're not already chunked, make it chunked.
+			Header transferEncodingHeader = responseNoBody.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING);
+			if(transferEncodingHeader == null || !transferEncodingHeader.getValue().equalsIgnoreCase("chunked")) {
+				responseNoBody.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+			}
+			return actuallySendResponse(responseNoBody)
+					.thenAccept(v -> {
+						if(body.getReadableSize() != 0)
+							sendData(body, id, false);
+					})
+					.thenApply(v -> id);
+		}
 	}
 
 	@Override

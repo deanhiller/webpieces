@@ -198,8 +198,9 @@ public class TestEndToEnd {
   // This test is flaky because the client sometimes loses the server settings that
   // get sent as soon as the upgrade has gone through.
 
-  // A success looks like this:
   /*
+
+A success looks like this:
 
 16:03:13.380 [frontEnd2] INFO org.webpieces.frontend.api.HttpServerSocket - Sending local requested settings
 16:03:13.380 [frontEnd2] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending settings: Http2Settings{ack=false, settings={SETTINGS_MAX_CONCURRENT_STREAMS=100, SETTINGS_MAX_HEADER_LIST_SIZE=4096, SETTINGS_MAX_FRAME_SIZE=16921}} Http2Frame{streamId=0}
@@ -208,13 +209,30 @@ public class TestEndToEnd {
 16:03:13.387 [clientThread2] INFO org.webpieces.httpcommon.impl.Http2ServerEngineImpl - sending preface
 16:03:13.387 [clientThread2] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending settings: Http2Settings{ack=false, settings={SETTINGS_ENABLE_PUSH=0}} Http2Frame{streamId=0}
 
-   */
+A failure looks like this:
 
-  // I can't replicate a failure after adding a bit of logging. In the last failure I saw we got something like this:
-  // 16:03:13.386 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=71
-  // 16:03:13.386 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=24 (not sure this # is right)
-  // so it looks like the settings frame showed up before the upgrade succeeded so the settings frame ended up going to the http11 parser
-  // not the http2 parser. However the peeking into leftOverData and the request body should have resolved this. Somehow it didn't.
+10:12:12.573 [frontEnd1] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - got http2 upgrade with settings: 000200000000
+10:12:12.576 [frontEnd1] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - Setting remote settings to: {SETTINGS_ENABLE_PUSH=0}
+10:12:12.581 [frontEnd2] INFO org.webpieces.frontend.api.HttpServerSocket - Sending local requested settings
+10:12:12.581 [frontEnd2] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending settings: Http2Settings{ack=false, settings={SETTINGS_MAX_FRAME_SIZE=16921, SETTINGS_MAX_CONCURRENT_STREAMS=100, SETTINGS_MAX_HEADER_LIST_SIZE=4096}} Http2Frame{streamId=0}
+10:12:12.582 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=71
+10:12:12.583 [clientThread3] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=27
+10:12:12.583 [frontEnd2] INFO org.webpieces.httpcommon.impl.Stream - 1: IDLE -> HALF_CLOSED_REMOTE
+10:12:12.584 [main] INFO org.webpieces.httpclient.impl.RequestSenderImpl - upgrade succeeded
+10:12:12.588 [main] INFO org.webpieces.httpcommon.impl.Http2ServerEngineImpl - sending preface
+10:12:12.588 [main] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending settings: Http2Settings{ack=false, settings={SETTINGS_ENABLE_PUSH=0}} Http2Frame{streamId=0}
+10:12:12.590 [main] INFO org.webpieces.httpcommon.impl.Stream - 1: IDLE -> HALF_CLOSED_LOCAL
+10:12:12.590 [main] INFO org.webpieces.httpcommon.impl.Http2ServerEngineImpl - got leftover data that we're passing on to the http2 parser
+10:12:12.597 [frontEnd2] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending header frames: [Http2Headers{endStream=false, endHeaders=true, priority=false, priorityDetails=PriorityDetails{streamDependencyIsExclusive=false, streamDependency=0, weight=0}, headerFragment=org.webpieces.data.impl.ByteBufferDataWrapper@409529e8, headerList=null, padding=com.webpieces.http2parser.impl.PaddingImpl@26e0011d} Http2Frame{streamId=1}]
+10:12:12.601 [frontEnd2] INFO org.webpieces.httpcommon.impl.Http2ServerEngineImpl - push promise not permitted by client, ignoring pushed response
+10:12:12.602 [frontEnd4] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - got http2 preface
+
+Because it seems that the settings frame that the server is sending back is going into thte http11 parser not the
+http2 parser. The peeking into the http11 parser's leftoverdata and the request body should be able
+to deal with that, but apparently it doesn't... it does appear to get leftover data but that leftoverdata
+doesn't get turned into a settings frame.
+
+   */
 
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {

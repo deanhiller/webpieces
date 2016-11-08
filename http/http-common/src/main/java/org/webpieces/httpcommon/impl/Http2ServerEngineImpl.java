@@ -95,7 +95,11 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
 
     private CompletableFuture<ResponseId> actuallySendResponse(HttpResponse response, Stream stream, boolean isComplete) {
         return sendHeaderFrames(responseToHeaders(response), stream)
-                .thenAccept(v -> sendDataFrames(response.getBodyNonNull(), isComplete, stream, false))
+                .thenAccept(v -> {
+                    // Don't send an empty dataframe that is not completing.
+                    if (response.getBodyNonNull().getReadableSize() != 0 || isComplete)
+                        sendDataFrames(response.getBodyNonNull(), isComplete, stream, false);
+                })
                 .thenApply(v -> stream.getResponseId()).exceptionally(e -> {
                     log.error("can't send header frames", e);
                     return stream.getResponseId();

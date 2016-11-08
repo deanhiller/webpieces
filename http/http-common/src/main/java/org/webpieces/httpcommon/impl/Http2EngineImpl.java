@@ -332,6 +332,8 @@ public abstract class Http2EngineImpl implements Http2Engine {
         switch(stream.getStatus()) {
             case OPEN:
             case HALF_CLOSED_REMOTE:
+                int dataLength = body.getReadableSize();
+
                 // If there's things on the queue and we didn't get this from the front of the queue,
                 // queue this data.
                 if(!isQueueEmpty(stream) && !wasFrontOfQueue) {
@@ -342,7 +344,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
                 long maxLength = min(remoteSettings.get(SETTINGS_MAX_FRAME_SIZE),
                         min(outgoingFlowControl.get(stream.getStreamId()).get(),
                                 outgoingFlowControl.get(0x0).get()));
-                int dataLength = body.getReadableSize();
+
 
                 Http2Data newFrame = new Http2Data();
                 newFrame.setStreamId(stream.getStreamId());

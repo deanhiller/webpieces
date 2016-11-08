@@ -93,9 +93,13 @@ public class StaticFileReader {
 	    }
 	    	    
 	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(), KnownStatusCode.HTTP_200_OK, extension, "application/octet-stream");
-	    HttpResponse response = tuple.response; 
-	    
-		response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+	    HttpResponse response = tuple.response;
+
+		// we shouldn't have to add chunked because the responseSender will add chunked for us
+		// if isComplete is false
+
+		// response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+
 		//On startup, we protect developers from breaking clients.  In http, all files that change
 		//must also change names/url so that clients automatically get the new version right away.
 		//This also means, we set the cache time to one year and browsers will automatically evict 

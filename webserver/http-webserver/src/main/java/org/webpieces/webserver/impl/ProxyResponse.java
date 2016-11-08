@@ -248,7 +248,10 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ responseSender);
 
-		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		// we shouldn't have to add chunked because the responseSender will add chunked for us
+		// if isComplete is false
+
+		// resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 
 		boolean compressed = false;
 		Compression usingCompression;

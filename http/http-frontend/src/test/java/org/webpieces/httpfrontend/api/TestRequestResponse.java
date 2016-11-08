@@ -15,6 +15,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
@@ -35,6 +36,7 @@ public class TestRequestResponse {
     private Http2Settings settingsFrame = new Http2Settings();
     private Decoder decoder;
     private Http2SettingsMap settings = new Http2SettingsMap();
+    private static String blahblah = "blah blah blah";
 
     @Before
     public void setup() {
@@ -61,19 +63,14 @@ public class TestRequestResponse {
         return mockServer.getMockTcpChannel().getWriteLog();
     }
 
-    @Test
-    public void testSimpleHttp11Request() throws InterruptedException, ExecutionException {
-        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
+    private void simpleHttp11RequestWithListener(RequestListenerForTest listener) throws InterruptedException, ExecutionException {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(response));
-        Assert.assertEquals("HTTP/1.1 200 OK\r\n" +
-                "Content-Length: 0\r\n" +
-                "\r\n", new String(bytesWritten.array()));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
+        Assert.assertTrue(new String(bytesWritten.array()).contains("HTTP/1.1 200 OK\r\n" +
+            "Content-Length: 0\r\n"));
     }
 
-    @Test
-    public void testUpgradeHttp2Request() throws InterruptedException, ExecutionException {
-        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
+    private void upgradeHttp2RequestWithListener(RequestListenerForTest listener) throws InterruptedException, ExecutionException {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
@@ -82,9 +79,9 @@ public class TestRequestResponse {
         // strip the header
         byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+            Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(response));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
 
         Memento memento = httpParser.prepareToParse();
         httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
@@ -107,10 +104,7 @@ public class TestRequestResponse {
         Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
     }
 
-    @Test
-    public void testHttp2ResponseWithData() throws InterruptedException, ExecutionException {
-        String blahblah = "blah blah blah";
-        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapByteArray(blahblah.getBytes()));
+    private void http2ResponseWithData(RequestListenerForTest listener) throws InterruptedException, ExecutionException {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
@@ -119,9 +113,9 @@ public class TestRequestResponse {
         // strip the header
         byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+            Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(response));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
 
         Memento memento = httpParser.prepareToParse();
         httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
@@ -146,13 +140,8 @@ public class TestRequestResponse {
         Assert.assertArrayEquals(((Http2Data) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
     }
 
-    @Test
-    public void testHttp2WithPushPromiseResponses() throws InterruptedException, ExecutionException {
-        String blahblah = "blah blah blah";
-        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapByteArray(blahblah.getBytes()));
-        List<HttpResponse> responses = new ArrayList<>();
-        responses.add(response);
-        responses.add(response);
+    private void http2WithPushPromise(RequestListenerForTest listener) throws InterruptedException, ExecutionException {
+
 
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
@@ -162,9 +151,9 @@ public class TestRequestResponse {
         // strip the header
         byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
         request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+            Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
 
-        ByteBuffer bytesWritten = processRequestWithRequestListener(request, new RequestListenerForTestWithResponses(responses));
+        ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
 
         Memento memento = httpParser.prepareToParse();
         httpParser.parse(memento, dataGen.wrapByteBuffer(bytesWritten));
@@ -189,6 +178,50 @@ public class TestRequestResponse {
         Assert.assertTrue(Http2PushPromise.class.isInstance(frames.get(3)));
         Assert.assertTrue(Http2Headers.class.isInstance(frames.get(4)));
         Assert.assertTrue(Http2Data.class.isInstance(frames.get(5)));
+    }
+
+    @Test
+    public void testSimpleHttp11Request() throws InterruptedException, ExecutionException {
+        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
+        RequestListenerForTest listenerChunked = new RequestListenerForTestWithResponses(response, true);
+        simpleHttp11RequestWithListener(listenerChunked);
+
+        RequestListenerForTest listenerNotChunked = new RequestListenerForTestWithResponses(response, false);
+        simpleHttp11RequestWithListener(listenerNotChunked);
+    }
+
+    @Test
+    public void testUpgradeHttp2Request() throws InterruptedException, ExecutionException {
+        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
+        RequestListenerForTest listenerChunked = new RequestListenerForTestWithResponses(response, true);
+        upgradeHttp2RequestWithListener(listenerChunked);
+
+        RequestListenerForTest listenerNotChunked = new RequestListenerForTestWithResponses(response, false);
+        upgradeHttp2RequestWithListener(listenerNotChunked);
+    }
+
+    @Test
+    public void testHttp2ResponseWithData() throws InterruptedException, ExecutionException {
+        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapByteArray(blahblah.getBytes()));
+        RequestListenerForTest listenerChunked = new RequestListenerForTestWithResponses(response, true);
+        http2ResponseWithData(listenerChunked);
+
+        RequestListenerForTest listenerNotChunked = new RequestListenerForTestWithResponses(response, false);
+        http2ResponseWithData(listenerNotChunked);
+    }
+
+    @Test
+    public void testHttp2WithPushPromiseResponses() throws InterruptedException, ExecutionException {
+        HttpResponse response = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapByteArray(blahblah.getBytes()));
+        List<HttpResponse> responses = new ArrayList<>();
+        responses.add(response);
+        responses.add(response);
+
+        RequestListenerForTest listenerChunked = new RequestListenerForTestWithResponses(responses, true);
+        http2WithPushPromise(listenerChunked);
+
+        RequestListenerForTest listenerNotChunked = new RequestListenerForTestWithResponses(responses, false);
+        http2WithPushPromise(listenerNotChunked);
     }
 
 
