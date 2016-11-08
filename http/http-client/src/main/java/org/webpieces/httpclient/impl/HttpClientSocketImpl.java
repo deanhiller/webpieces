@@ -3,6 +3,7 @@ package org.webpieces.httpclient.impl;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLEngine;
@@ -73,7 +74,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
             channel = mgr.createTCPChannel(idForLogging);
         } else {
             SSLEngine engine = factory.createSslEngine(addr.getHostName(), addr.getPort());
-            channel = mgr.createTCPChannel(idForLogging, engine);
+            channel = mgr.createTCPChannel(idForLogging, engine, Arrays.asList("h2", "http/1.1"));
         }
 
         requestSender = new RequestSenderImpl(

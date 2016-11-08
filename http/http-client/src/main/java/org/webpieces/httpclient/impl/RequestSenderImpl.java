@@ -10,7 +10,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
@@ -33,6 +32,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.impl.ssl.SslTCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -114,10 +114,15 @@ public class RequestSenderImpl implements RequestSender {
     }
 
     // These hosts can support http2, no need to try to upgrade.
-    private boolean defaultToHttp2(InetSocketAddress addr, TCPChannel channel) {
+    private boolean enableHttp2NoUpgrade(InetSocketAddress addr, TCPChannel channel) {
+        if(channel.isSslChannel()) {
+            SslTCPChannel sslChannel = (SslTCPChannel) channel;
+            if(sslChannel.getAlpnProtocol().equalsIgnoreCase("h2")) {
+                log.info("ALPN says http2");
+                return true;
+            }
+        }
         return Arrays.asList("nghttp2.org").contains(addr.getHostName());
-
-        // TODO: check channel for ALPN 'h2'
     }
 
     private CompletableFuture<RequestId> negotiateHttpVersion(HttpRequest req, boolean isComplete, ResponseListener listener) {
@@ -125,8 +130,8 @@ public class RequestSenderImpl implements RequestSender {
         // If we set this to true, then everyting is copacetic with http://nghttp2.org, but
         // if we set it to false and do upgrade negotation, then the first request succeeds
         // but subsequent requests give us RstStream responses from the server.
-        if (defaultToHttp2(addr, channel)) { // We don't know how to check ALPN yet, but if we do, put that check here
-            log.info("setting http2 because of defaultToHttp2");
+        if (enableHttp2NoUpgrade(addr, channel)) { // We don't know how to check ALPN yet, but if we do, put that check here
+            log.info("setting http2 because of enableHttp2NoUpgrade");
             enableHttp2();
             negotiationDone.set(true);
             negotiationDoneNotifier.complete(channel);
