@@ -255,7 +255,28 @@ been processed we wait 500ms for the settings frame to be processed.
     ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(1000, 1);
 
     // We get only one response because push is disabled
-    Assert.assertEquals(responses.size(), 1);
+    Assert.assertEquals(1, responses.size());
+
+  }
+
+  @Test
+  public void testRequestOneStream() throws InterruptedException, ExecutionException  {
+    Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
+    http2SettingsMap.put(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 0L);
+
+    HttpClient client = createHttpClient(http2SettingsMap);
+    HttpClientSocket socket = client.openHttpSocket("testClient");
+
+    InetSocketAddress addr = new InetSocketAddress("localhost", serverPort);
+    RequestSender requestSender = socket.connect(addr).get();
+    HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
+    MockResponseListener mockResponseListener = new MockResponseListener();
+
+    requestSender.sendRequest(request, true, mockResponseListener);
+    ConcurrentHashMap<ResponseId, List<Object>> responses = mockResponseListener.getResponseLog(1000, 1);
+
+    // We get only one response because only one stream is allowed
+    Assert.assertEquals(1, responses.size());
 
   }
 }

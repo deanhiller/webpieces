@@ -65,13 +65,16 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
         // If we already have a response stored in the responseStream then we've already sent a response for this
         // stream and we need to send a push promise and create a new stream
         if(responseStream.getResponse() != null) { // If push promise, do some stuff (send PUSH_PROMISE frames, set up the new stream id, etc)
+            log.info("creating a pushed response stream");
             if(remoteSettings.get(SETTINGS_ENABLE_PUSH) == 0) {
                 // Enable push is not permitted, so ignore this response and return a -1 response id
                 log.info("push promise not permitted by client, ignoring pushed response");
                 return CompletableFuture.completedFuture(new ResponseId(0));
             }
+            long openStreams = countOpenLocalOriginatedStreams();
+            log.info("{} streams are open originated locally", openStreams);
             if(remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS) != null &&
-                    countOpenLocalOriginatedStreams() > remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+                     openStreams >= remoteSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
                 // Too many open streams already, so going to drop this push promise
                 log.info("max concurrent streams exceeded, ignoring pushed response");
                 return CompletableFuture.completedFuture(new ResponseId(0));
