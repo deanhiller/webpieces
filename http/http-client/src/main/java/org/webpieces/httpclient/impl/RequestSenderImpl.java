@@ -161,7 +161,8 @@ public class RequestSenderImpl implements RequestSender {
                     // If the response is chunked then it is probably not complete.
                     // TODO: make sure this is right. would be nicer to grab the isComplete
                     // out of the incomingResponse call to the CompletableListener in
-                    // sendHttp11AndWaitForHeaders I think.
+                    // sendHttp11AndWaitForHeaders I think. We don't really support
+                    // chunked requests yet anyway, so.
                     listener.incomingResponse(r, req, new ResponseId(0), !r.isHasChunkedTransferHeader());
                     // Request id is 0 for HTTP/1.1
                     return new RequestId(0);
@@ -312,7 +313,7 @@ public class RequestSenderImpl implements RequestSender {
 
         @Override
         public void incomingData(Channel channel, ByteBuffer b) {
-            log.info("size="+b.remaining());
+            log.info("http11 incomingData -> size="+b.remaining());
             DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
             memento = httpParser.parse(memento, wrapper);
 

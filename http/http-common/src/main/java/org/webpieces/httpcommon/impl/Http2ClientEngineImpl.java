@@ -92,10 +92,16 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
         // Send the content of the response to the datalistener, if any
         // Not likely to happen but just in case
         if(responseBody.getReadableSize() > 0)
+        {
+            log.info("got a responsebody that we're passing on to the http2 parser");
             dataListener.incomingData(getUnderlyingChannel(), ByteBuffer.wrap(responseBody.createByteArray()));
+        }
 
         if(leftOverData.getReadableSize() > 0)
+        {
+            log.info("got leftover data that we're passing on to the http2 parser");
             dataListener.incomingData(getUnderlyingChannel(), ByteBuffer.wrap(leftOverData.createByteArray()));
+        }
 
         return new RequestId(initialStreamId);
     }
