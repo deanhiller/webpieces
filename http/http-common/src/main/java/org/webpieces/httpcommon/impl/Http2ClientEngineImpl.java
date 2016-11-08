@@ -99,7 +99,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
 
         if(leftOverData.getReadableSize() > 0)
         {
-            log.info("got leftover data that we're passing on to the http2 parser");
+            log.info("got leftover data (size="+leftOverData.getReadableSize()+") that we're passing on to the http2 parser");
             dataListener.incomingData(getUnderlyingChannel(), ByteBuffer.wrap(leftOverData.createByteArray()));
         }
 
