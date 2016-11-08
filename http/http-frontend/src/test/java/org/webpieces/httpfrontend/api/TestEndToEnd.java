@@ -197,6 +197,25 @@ public class TestEndToEnd {
 
   // This test is flaky because the client sometimes loses the server settings that
   // get sent as soon as the upgrade has gone through.
+
+  // A success looks like this:
+  /*
+
+16:03:13.380 [frontEnd2] INFO org.webpieces.frontend.api.HttpServerSocket - Sending local requested settings
+16:03:13.380 [frontEnd2] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending settings: Http2Settings{ack=false, settings={SETTINGS_MAX_CONCURRENT_STREAMS=100, SETTINGS_MAX_HEADER_LIST_SIZE=4096, SETTINGS_MAX_FRAME_SIZE=16921}} Http2Frame{streamId=0}
+16:03:13.386 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=71
+16:03:13.387 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - upgrade succeeded
+16:03:13.387 [clientThread2] INFO org.webpieces.httpcommon.impl.Http2ServerEngineImpl - sending preface
+16:03:13.387 [clientThread2] INFO org.webpieces.httpcommon.impl.Http2EngineImpl - sending settings: Http2Settings{ack=false, settings={SETTINGS_ENABLE_PUSH=0}} Http2Frame{streamId=0}
+
+   */
+
+  // I can't replicate a failure after adding a bit of logging. In the last failure I saw we got something like this:
+  // 16:03:13.386 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=71
+  // 16:03:13.386 [clientThread2] INFO org.webpieces.httpclient.impl.RequestSenderImpl - http11 incomingData -> size=24 (not sure this # is right)
+  // so it looks like the settings frame showed up before the upgrade succeeded so the settings frame ended up going to the http11 parser
+  // not the http2 parser. However the peeking into leftOverData and the request body should have resolved this. Somehow it didn't.
+
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
