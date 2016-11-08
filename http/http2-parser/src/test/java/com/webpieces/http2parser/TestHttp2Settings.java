@@ -27,9 +27,20 @@ public class TestHttp2Settings {
         frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1L);
         frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L);
         String hexFrame = UtilsForTest.frameToHex(frame);
-        Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(basicSettings));
 
-        UtilsForTest.testBidiFromBytes(hexFrame);
+        // We can't test bidi for settings frames because the order in which
+        // settings show up is non-deterministic.
+        // we'll just parse it and make sure that the settings we set are set.
+
+        Http2Frame parsedFrame = UtilsForTest.frameFromHex(hexFrame);
+        Assert.assertTrue(Http2Settings.class.isInstance(frame));
+        Http2Settings castFrame = (Http2Settings) parsedFrame;
+        Assert.assertEquals(1L, castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH).longValue());
+        Assert.assertEquals(256L, castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS).longValue());
+        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE));
+        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_INITIAL_WINDOW_SIZE));
+        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE));
+        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_MAX_HEADER_LIST_SIZE));
     }
 
     @Test
