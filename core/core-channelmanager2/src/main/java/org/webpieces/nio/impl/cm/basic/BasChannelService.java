@@ -1,5 +1,6 @@
 package org.webpieces.nio.impl.cm.basic;
 
+import java.util.List;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.data.api.BufferPool;
@@ -68,7 +69,17 @@ class BasChannelService implements ChannelManager {
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
 		throw new UnsupportedOperationException("SSL not supported at this level.");
 	}
-	
+
+	@Override
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory, List<String> supportedAlpnProtocols) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
+
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngine engine, List<String> supportedAlpnProtocols) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
+
 	@Override
     public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);

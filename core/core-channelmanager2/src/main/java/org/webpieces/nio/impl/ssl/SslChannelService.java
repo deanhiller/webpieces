@@ -1,5 +1,7 @@
 package org.webpieces.nio.impl.ssl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.net.ssl.SSLEngine;
@@ -33,12 +35,17 @@ public class SslChannelService implements ChannelManager {
 	}
 	
 	@Override
-	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory) {
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory, List<String> supportedAlpnProtocols) {
 		if(factory == null || connectionListener == null || id == null)
 			throw new IllegalArgumentException("no arguments can be null");
-		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory);
+		ConnectionListener wrapperConnectionListener = new SslConnectionListener(connectionListener, pool, factory, supportedAlpnProtocols);
 		//because no methods return futures in this type of class, we do not need to proxy him....
 		return mgr.createTCPServerChannel(id, wrapperConnectionListener);
+	}
+
+	@Override
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory) {
+		return createTCPServerChannel(id, connectionListener, factory, new ArrayList<>());
 	}
 
 	@Override
@@ -47,14 +54,19 @@ public class SslChannelService implements ChannelManager {
 	}
 	
 	@Override
-	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
+	public TCPChannel createTCPChannel(String id, SSLEngine engine, List<String> supportedAlpnProtocols) {
 		if(engine == null || id == null)
 			throw new IllegalArgumentException("no arguments can be null");
 		Function<SslListener, AsyncSSLEngine> function = l -> AsyncSSLFactory.create(id, engine, pool, l);
 		
 		TCPChannel channel = mgr.createTCPChannel(id);
-		SslTCPChannel sslChannel = new SslTCPChannel(function, channel);
+		SslTCPChannel sslChannel = new SslTCPChannel(function, channel, supportedAlpnProtocols);
 		return sslChannel;
+	}
+
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
+		return createTCPChannel(id, engine, new ArrayList<>());
 	}
 
 	@Override

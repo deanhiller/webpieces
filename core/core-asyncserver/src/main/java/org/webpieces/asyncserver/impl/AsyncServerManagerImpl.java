@@ -1,5 +1,8 @@
 package org.webpieces.asyncserver.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.asyncserver.api.AsyncServer;
@@ -18,14 +21,14 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 
 	@Override
 	public AsyncServer createTcpServer(
-			AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory) {
+			AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory, List<String> supportedAlpnProtocols) {
 		if(sslFactory == null)
 			throw new IllegalArgumentException("SSLEngineFactory is null but must be supplied");
-		return createTcpServerImpl(config, listener, sslFactory);
+		return createTcpServerImpl(config, listener, sslFactory, supportedAlpnProtocols);
 	}
 	
 	private AsyncServer createTcpServerImpl(AsyncConfig config,
-			AsyncDataListener listener, SSLEngineFactory sslFactory) {
+			AsyncDataListener listener, SSLEngineFactory sslFactory, List<String> supportedAlpnProtocols) {
 		String id = config.id;
 		ConnectedChannels connectedChannels = new ConnectedChannels();
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
@@ -33,7 +36,7 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 
 		TCPServerChannel serverChannel;
 		if(sslFactory != null)
-			serverChannel = channelManager.createTCPServerChannel(id, connectionListener, sslFactory);
+			serverChannel = channelManager.createTCPServerChannel(id, connectionListener, sslFactory, supportedAlpnProtocols);
 		else
 			serverChannel = channelManager.createTCPServerChannel(id, connectionListener);
 
@@ -47,7 +50,12 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 	}
 
 	@Override
+	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory) {
+		return createTcpServer(config, listener, sslFactory, new ArrayList<>());
+	}
+
+	@Override
 	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener) {
-		return createTcpServerImpl(config, listener, null);
+		return createTcpServerImpl(config, listener, null, null);
 	}
 }

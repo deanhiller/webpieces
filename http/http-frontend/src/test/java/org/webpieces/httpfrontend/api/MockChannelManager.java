@@ -1,5 +1,6 @@
 package org.webpieces.httpfrontend.api;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.net.ssl.SSLEngine;
@@ -40,6 +41,16 @@ public class MockChannelManager extends MockSuperclass implements ChannelManager
 
 	@Override
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {
+		return null;
+	}
+
+	@Override
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory, List<String> supportedAlpnProtocols) {
+		return null;
+	}
+
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngine engine, List<String> supportedAlpnProtocols) {
 		return null;
 	}
 

@@ -1,5 +1,6 @@
 package org.webpieces.frontend.impl;
 
+import java.util.Arrays;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.data.api.BufferPool;
@@ -53,7 +54,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		TimedRequestListener timed = new TimedRequestListener(timer, listener, config);
 		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
 		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
-		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
+		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory, Arrays.asList("h2", "http/1.1"));
 		frontend.init(tcpServer);
 		log.info("now listening for incoming https requests");
 		return frontend;

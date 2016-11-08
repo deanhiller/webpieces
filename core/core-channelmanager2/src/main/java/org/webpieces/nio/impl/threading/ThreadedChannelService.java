@@ -1,5 +1,6 @@
 package org.webpieces.nio.impl.threading;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.SSLEngine;
@@ -65,4 +66,13 @@ public class ThreadedChannelService implements ChannelManager {
 		throw new UnsupportedOperationException("SSL not supported at this level.");
 	}
 
+	@Override
+	public TCPServerChannel createTCPServerChannel(String id, ConnectionListener connectionListener, SSLEngineFactory factory, List<String> supportedAlpnProtocols) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
+
+	@Override
+	public TCPChannel createTCPChannel(String id, SSLEngine engine, List<String> supportedAlpnProtocols) {
+		throw new UnsupportedOperationException("SSL not supported at this level.");
+	}
 }

@@ -1,5 +1,6 @@
 package org.webpieces.nio.api;
 
+import java.util.List;
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -37,6 +38,10 @@ public interface ChannelManager {
 
     public TCPServerChannel createTCPServerChannel(
     		String id, ConnectionListener connectionListener, SSLEngineFactory factory);
+
+	  public TCPServerChannel createTCPServerChannel(
+				String id, ConnectionListener connectionListener, SSLEngineFactory factory, List<String> supportedAlpnProtocols);
+
     
     /**
      * Returns a non-blocking TCPChannel.
@@ -47,6 +52,8 @@ public interface ChannelManager {
     public TCPChannel createTCPChannel(String id);
 
     public TCPChannel createTCPChannel(String id, SSLEngine engine);
+
+	  public TCPChannel createTCPChannel(String id, SSLEngine engine, List<String> supportedAlpnProtocols);
     
     /**
      * Creates a UDPChannel that can connect to a peer and receive/send data from/to
