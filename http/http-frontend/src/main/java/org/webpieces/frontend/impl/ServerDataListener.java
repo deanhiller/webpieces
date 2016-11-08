@@ -8,6 +8,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
+import org.webpieces.nio.impl.ssl.SslTCPChannel;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
@@ -47,11 +48,19 @@ class ServerDataListener implements AsyncDataListener {
         this.frontendConfig = frontendConfig;
     }
 
+    private boolean isHttp2AlpnChannel(Channel channel) {
+        if(channel.isSslChannel()) {
+            SslTCPChannel sslChannel = (SslTCPChannel) channel;
+            if(sslChannel.getAlpnProtocol().equalsIgnoreCase("h2")) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public void connectionOpened(TCPChannel tcpChannel, boolean isReadyForWrites) {
         HttpServerSocket socket = getHttpServerSocketForChannel(tcpChannel);
-        // TODO: replace 'false' with ALPN check
-        if((isReadyForWrites && tcpChannel.isSslChannel() && false) || frontendConfig.alwaysHttp2) { // If ALPN, upgrade to HTTP2
+        if((isReadyForWrites && isHttp2AlpnChannel(tcpChannel)) || frontendConfig.alwaysHttp2) { // If ALPN, upgrade to HTTP2
             socket.upgradeHttp2(Optional.empty());
         }
         timedRequestListener.openedConnection(socket, isReadyForWrites);

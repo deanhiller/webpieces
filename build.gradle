@@ -56,6 +56,7 @@ ext {
        'hibernate':       'org.hibernate:hibernate-core:5.2.3.Final',
        'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
        'h2db':            'com.h2database:h2:1.4.192',
+       'alpn-boot':       'org.mortbay.jetty.alpn:alpn-boot:8.1.6.v20151105' // For JDK 1.8.0u65
     ]
 
 }
@@ -370,4 +371,3 @@ task build(dependsOn: ':jacocoTestReport')
 task clean() << {
    delete "${buildDir}"
 }
-

@@ -13,6 +13,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 
+import org.eclipse.jetty.alpn.ALPN;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
@@ -41,6 +42,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
 	private ClientHelloParser parser;
+	private String alpnProtocol;
 	
 	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel) {
 		super(realChannel);
@@ -186,6 +188,26 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 				
 				String host = sniServerNames.get(0);
 				SSLEngine engine = sslFactoryWithHost.createSslEngine(host);
+				ALPN.put(engine, new ALPN.ServerProvider() {
+					@Override
+					public void unsupported() {
+						ALPN.remove(engine);
+					}
+
+					@Override
+					public String select(List<String> list) throws SSLException {
+						ALPN.remove(engine);
+						if(list.contains("h2")) {
+							alpnProtocol = "h2";
+							return "h2";
+						} else if(list.contains("http/1.1")) {
+							alpnProtocol = "http/1.1";
+							return "http/1.1";
+						} else {
+							throw new SSLException("no supported ALPN protocol in list: " + list);
+						}
+					}
+				});
 				sslEngine = AsyncSSLFactory.create(realChannel+"", engine, pool, sslListener);
 				return result.getBuffer(); // return the full accumulated packet(which may just be the buffer passed in above)
 			} else {
@@ -262,6 +284,10 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	@Override
 	public boolean isSslChannel() {
 		return true;
+	}
+
+	public String getAlpnProtocol() {
+		return alpnProtocol;
 	}
 
 }
