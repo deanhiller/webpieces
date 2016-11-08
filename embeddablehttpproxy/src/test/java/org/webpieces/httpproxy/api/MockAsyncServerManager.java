@@ -31,4 +31,8 @@ public class MockAsyncServerManager implements AsyncServerManager {
 		return null;
 	}
 
+	@Override
+	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener, SSLEngineFactory sslFactory, List<String> supportedAlpnProtocols) {
+		return null;
+	}
 }
