@@ -39,7 +39,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
     private HttpsSslEngineFactory factory;
     private ChannelManager mgr;
     private String idForLogging;
-    private boolean isRecording = true;
+    private boolean isRecording = false;
 
     private RequestSenderImpl requestSender;
 
