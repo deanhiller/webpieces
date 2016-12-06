@@ -163,13 +163,16 @@ public class TestDevRefreshPageWithNoRestarting {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		
+
+		//platform should convert request into a development not found page which has an iframe
+		//of the original page with a query param to tell platform to display original 
+		//page requested 
 		response.assertContains("<iframe src=\"/notFound?webpiecesShowPage=true");
 	}
 	
 	@Test
 	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound?webpiecesShowPage");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotFound?webpiecesShowPage");
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		verify404PageContents("value1=something1");
 
@@ -180,7 +183,7 @@ public class TestDevRefreshPageWithNoRestarting {
 	
 	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notfound/notfound?webpiecesShowPage=true");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotfound?webpiecesShowPage=true");
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		verify404PageContents("value1=something1");
 		
@@ -188,6 +191,30 @@ public class TestDevRefreshPageWithNoRestarting {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		verify404PageContents("value2=something2");
+	}
+
+	@Test
+	public void testNotFoundFilterModified() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
+		server.incomingRequest(req, new RequestId(0), true, socket);
+
+		verify303("http://myhost.com/home");
+		
+		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		verify303("http://myhost.com/filter");
+	}
+
+	private void verify303(String url) {
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals(url, response.getRedirectUrl());
+		socket.clear();
 	}
 	
 	@Test

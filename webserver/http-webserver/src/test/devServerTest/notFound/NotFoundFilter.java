@@ -16,7 +16,7 @@ public class NotFoundFilter extends RouteFilter<Void> {
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
 		if(meta.getCtx().getRequest().relativePath.startsWith("/enableFilter")) {
-			return CompletableFuture.completedFuture(Actions.redirect(DevRouteId.HOME));
+			return CompletableFuture.completedFuture(Actions.redirect(DevRouteId.FILTER_ROUTE));
 		}
 		return nextFilter.invoke(meta);
 	}
