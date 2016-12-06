@@ -82,10 +82,10 @@ public class GroovyScriptGenerator {
 				creator.printMessage(token, sourceCode);
 				break;
 			case ACTION:
-				creator.printAction(false);
+				creator.printAction(token, sourceCode, false, callbacks);
 				break;
 			case ABSOLUTE_ACTION:
-				creator.printAction(true);
+				creator.printAction(token, sourceCode, true, callbacks);
 				break;
 			case COMMENT:
 				creator.unprintUpToLastNewLine();

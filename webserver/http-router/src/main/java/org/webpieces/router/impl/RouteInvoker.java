@@ -15,6 +15,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RenderStaticResponse;
@@ -41,12 +42,15 @@ public class RouteInvoker {
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
+	private RouterConfig config;
 	
 	@Inject
 	public RouteInvoker(ParamToObjectTranslator argumentTranslator, 
-						ObjectToParamTranslator reverseTranslator) {
+						ObjectToParamTranslator reverseTranslator,
+						RouterConfig config) {
 		this.argumentTranslator = argumentTranslator;
 		this.reverseTranslator = reverseTranslator;
+		this.config = config;
 	}
 
 	public void invoke(
@@ -183,7 +187,7 @@ public class RouteInvoker {
 		requestCtx.setMessages(messages);
 		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
-		if(meta.getRoute().isCheckSecureToken()) {
+		if(config.isTokenCheckOn() && meta.getRoute().isCheckSecureToken()) {
 			String token = requestCtx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
 			String formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);
 			if(formToken == null)

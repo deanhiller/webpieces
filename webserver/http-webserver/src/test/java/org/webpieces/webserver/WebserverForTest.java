@@ -39,6 +39,10 @@ public class WebserverForTest {
 	private WebServer webServer;
 
 	public WebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
+		this(platformOverrides, appOverrides, usePortZero, metaFile, true);
+	}
+	
+	public WebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile, boolean tokenCheckOn) {
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 		
@@ -68,7 +72,8 @@ public class WebserverForTest {
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 											.setCachedCompressedDirectory(cacheDir)
-											.setSecretKey(SecretKeyInfo.generateForTest());
+											.setSecretKey(SecretKeyInfo.generateForTest())
+											.setTokenCheckOn(tokenCheckOn);
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);

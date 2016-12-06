@@ -11,6 +11,7 @@ import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.templating.impl.tags.ParseTagArgs;
 import org.webpieces.templating.impl.tags.TagGen;
 
 public class ScriptWriter {
@@ -156,8 +157,15 @@ public class ScriptWriter {
 		}
 	}
 
-	public void printAction(boolean b) {
-		
+	public void printAction(TokenImpl token, ScriptOutputImpl sourceCode, boolean isAbsolute, CompileCallback callbacks) {
+		if(isAbsolute)
+			throw new UnsupportedOperationException("not supported yet.  Need to modify to use the Host header as input as the domain");
+
+		String expr = token.getCleanValue();
+
+		String groovySnippet = ParseTagArgs.translateRouteId(expr, token, callbacks);
+		//fetchUrl('VERBATIM_ROUTE_ID', [:], 'at org.webpieces.webserver.tags.app.aHrefTag.html(aHrefTag.html:5)')
+		sourceCode.println("       __out.print("+groovySnippet+");", token);
 	}
 
 	/**

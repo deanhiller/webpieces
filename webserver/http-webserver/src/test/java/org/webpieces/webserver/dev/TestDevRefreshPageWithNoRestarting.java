@@ -10,12 +10,11 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
+import org.webpieces.httpcommon.Requests;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -23,7 +22,8 @@ import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
-import org.webpieces.httpcommon.Requests;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
@@ -155,25 +155,27 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 
 	@Test
-	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound?webpiecesShowPage");
+	public void testNotFoundDisplaysWithIframeANDSpecialUrl() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		List<FullResponse> responses = socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
-		socket.clear();
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		
+		response.assertContains("<iframe src=\"/notFound?webpiecesShowPage=true");
+	}
+	
+	@Test
+	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound?webpiecesShowPage");
 		server.incomingRequest(req, new RequestId(0), true, socket);
-		
-		responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
+		verify404PageContents("value1=something1");
 
-		response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
+		server.incomingRequest(req, new RequestId(0), true, socket);
+
+		verify404PageContents("value1=something1");
 	}
 	
 	@Test
@@ -234,4 +236,5 @@ public class TestDevRefreshPageWithNoRestarting {
 		response.assertContains(contents);
 		socket.clear();
 	}
+	
 }

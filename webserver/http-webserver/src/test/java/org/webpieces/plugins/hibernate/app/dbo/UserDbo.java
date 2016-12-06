@@ -28,7 +28,7 @@ import javax.persistence.Table;
        }
 )
 @NamedQueries({
-	@NamedQuery(name = "findAllField", query = "select u from UserDbo as u"),
+	@NamedQuery(name = "findAllUsers", query = "select u from UserDbo as u"),
 	@NamedQuery(name = "findByEmailId", query = "select u from UserDbo as u where u.email=:email") })
 public class UserDbo {
 

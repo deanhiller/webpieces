@@ -95,6 +95,9 @@ TODO:
 * add hibernate and embedded in-memory H2 in dev mode along with embedded http web client
 * add jacoco to the generated webpieces project, create example project for feature testing blog
 * add checkstyle with the really good rules to all projects to fail if any are violated
+  * add too many lines per method (70), too many lines per file(700)
+  * add one to detect forgetting @ManyToOne without Lazy and @OneToOne without Lazy 
+  * etc. etc.
 * add automatic formatter... https://github.com/diffplug/spotless so no one worries about formatting
 * test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl

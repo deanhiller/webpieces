@@ -45,6 +45,7 @@ public class TestAHrefTag {
 		response.assertContains("<a href=`/verbatim` id=`myid`>My link</a>".replace('`', '"'));
 		response.assertContains("<a href=`/if`>My render link</a>".replace('`', '"'));
 		response.assertContains("<a href=`/redirect/Dean+Hiller`>The link</a>".replace('`', '"'));
+		response.assertContains("Link but no ahref='/redirect/Dean+Hiller'");
 	}
 	
 

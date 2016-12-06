@@ -1,0 +1,19 @@
+<html>
+  <head>
+  </head>
+  <body>
+  	List of users </br>
+    <table style="width:100%">
+       	<tr>
+    		<th>Firstname</th>
+    		<th>Lastname</th> 
+    		<th>Actions</th>
+  		</tr>
+    	#{list items:users, as:'user'}#
+    	    <td>#{user.firstName}#</td>
+    		<td>#{user.lastName}#</td> 
+    		<td>@{</td>
+    	#{/list}#
+    </table>
+  </body>
+</html>

@@ -11,6 +11,13 @@ import org.webpieces.router.impl.RegExUtil;
 public class TestRegEx {
 
 	@Test
+	public void testOptionalCapture() {
+		Pattern pattern = Pattern.compile("/public/(?<path>[^/]+)");
+		Matcher matcher = pattern.matcher("/public/ddd");
+		Assert.assertTrue(matcher.matches());
+	}
+	
+	@Test
 	public void testGroupMatch() {
 		Pattern pattern = Pattern.compile("^/public/(?<resource>.*)$");
 		Matcher matcher = pattern.matcher("/public/some/other/path.txt");

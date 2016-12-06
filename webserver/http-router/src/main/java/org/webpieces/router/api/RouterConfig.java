@@ -29,6 +29,12 @@ public class RouterConfig {
 
 	private boolean isCookiesSecure = false;
 
+	/**
+	 * Option to turn token checking off mainly for testing as it disables ALL token checking which usually
+	 * you never want to turn all of it off.  Default is for tokenCheck to be on(true)
+	 */
+	private boolean tokenCheckOn = true;
+	
 	//location of precompressed static files(css, js, html, etc. etc....no jpg, png compressed)
 	private File cachedCompressedDirectory = new File(System.getProperty("java.io.tmpdir")+"/webpiecesCache");
 	//compression type to put in cachedCompressedDirectory
@@ -119,4 +125,13 @@ public class RouterConfig {
 		this.startupCompression = startupCompression;
 		return this;
 	}
+	public boolean isTokenCheckOn() {
+		return tokenCheckOn;
+	}
+	public RouterConfig setTokenCheckOn(boolean tokenCheckOff) {
+		this.tokenCheckOn = tokenCheckOff;
+		return this;
+	}
+	
+	
 }

@@ -17,6 +17,8 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.jdbc.api.JdbcApi;
+import org.webpieces.jdbc.api.JdbcFactory;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.dbo.CompanyDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
@@ -33,8 +35,12 @@ public class TestSyncHibernate {
 	
 	@Before
 	public void setUp() {
+		//clear in-memory database
+		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+		jdbc.dropAllTablesFromDatabase();
+		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile, false);
 		server = webserver.start();
 	}
 
@@ -82,7 +88,7 @@ public class TestSyncHibernate {
 	 */
 	@Test
 	public void testDbUseWhileRenderingPage() {
-		Integer id = loadDataInDb("dean2@sync.xsoftware.biz");
+		Integer id = loadDataInDb();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/dynamic/"+id);
 
@@ -95,7 +101,8 @@ public class TestSyncHibernate {
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 
-	public static Integer loadDataInDb(String email) {
+	public static Integer loadDataInDb() {
+		String email = "dean2@sync.xsoftware.biz";
 		//populate database....
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_UNIT);
 		EntityManager mgr = factory.createEntityManager();
@@ -118,6 +125,17 @@ public class TestSyncHibernate {
 		tx.commit();
 		
 		return user.getId();
+	}
+	
+	/**
+	 * Add/Edit uses MultiRoute for one RouteId for both so reversing the route depends on the 
+	 * paramters passed to the routeId
+	 */
+	@Test
+	public void testReverseAddAndEditFromRouteId() {
+		loadDataInDb();
+		
+		
 	}
 	
 	@Test

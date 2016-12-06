@@ -21,6 +21,11 @@ public class ChainFilters {
 				
 				return resp;
 			}
+			
+			@Override
+			public String toString() {
+				return filter +"->"+svc;
+			}
 		};
 	}
 }

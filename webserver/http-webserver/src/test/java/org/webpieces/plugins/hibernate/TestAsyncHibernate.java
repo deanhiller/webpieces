@@ -14,6 +14,8 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.jdbc.api.JdbcApi;
+import org.webpieces.jdbc.api.JdbcFactory;
 import org.webpieces.mock.lib.MockExecutor;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
@@ -31,9 +33,13 @@ public class TestAsyncHibernate {
 	
 	@Before
 	public void setUp() {
+		//clear in-memory database
+		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+		jdbc.dropAllTablesFromDatabase();
+		
 		mockExecutor.clear();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new TestOverrides(), false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new TestOverrides(), false, metaFile, false);
 		server = webserver.start();
 	}
 
@@ -91,7 +97,7 @@ public class TestAsyncHibernate {
 	 */
 	@Test
 	public void testDbUseWhileRenderingPage() {
-		Integer id = TestSyncHibernate.loadDataInDb("dean2@async.xsoftware.biz");
+		Integer id = TestSyncHibernate.loadDataInDb();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
 

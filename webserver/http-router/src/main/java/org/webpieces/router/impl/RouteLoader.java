@@ -135,6 +135,11 @@ public class RouteLoader {
 		for(RouteMeta m : metas) {
 			controllerFinder.loadFiltersIntoMeta(m, m.getFilters(), true);
 		}
+		RouteMeta notFound = routerBuilder.getNotFoundMeta();
+		controllerFinder.loadFiltersIntoMeta(notFound, notFound.getFilters(), true);
+
+		RouteMeta internalErrorMeta = routerBuilder.getInternalErrorMeta();
+		controllerFinder.loadFiltersIntoMeta(internalErrorMeta, internalErrorMeta.getFilters(), true);
 		
 		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
 			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouteModules());
@@ -184,13 +189,13 @@ public class RouteLoader {
 	public MatchResult fetchNotFoundRoute() {
 		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
-		return new MatchResult(notfoundRoute, notfoundRoute.getService222());
+		return new MatchResult(notfoundRoute);
 	}
 
 	public MatchResult fetchInternalErrorRoute() {
 		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
-		return new MatchResult(internalErrorRoute, internalErrorRoute.getService222());
+		return new MatchResult(internalErrorRoute);
 	}
 
 	public String convertToUrl(String routeId, Map<String, String> args) {

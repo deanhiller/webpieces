@@ -31,6 +31,8 @@ public class RouterBuilder implements Router {
 	private ReverseRoutes reverseRoutes;
 	private List<StaticRoute> staticRoutes = new ArrayList<>();
 	private List<FilterInfo<?>> routeFilters = new ArrayList<>();
+	private List<FilterInfo<?>> notFoundFilters = new ArrayList<>();
+	private List<FilterInfo<?>> internalErrorFilters = new ArrayList<>();
 	private ControllerLoader finder;
 
 	private String routerPath;
@@ -78,6 +80,18 @@ public class RouterBuilder implements Router {
 		addRoute(route, routeId);
 	}
 
+	@Override
+	public void addMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId routeId) {
+		Route route = new MultiRouteImpl(method, paths, controllerMethod, routeId, false);
+		addRoute(route, routeId);
+	}
+
+	@Override
+	public void addHttpsMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId routeId) {
+		Route route = new MultiRouteImpl(method, paths, controllerMethod, routeId, false);
+		addRoute(route, routeId);
+	}
+	
 	@Override
 	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		boolean checkSecureToken = false;
@@ -135,7 +149,19 @@ public class RouterBuilder implements Router {
 		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, type);
 		routeFilters.add(info);
 	}
+	
+	@Override
+	public <T> void addNotFoundFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type) {
+		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, type);
+		notFoundFilters.add(info);
+	}
 
+	@Override
+	public <T> void addInternalErrorFilter(Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type) {
+		FilterInfo<T> info = new FilterInfo<>("", filter, initialConfig, type);
+		internalErrorFilters.add(info);
+	}
+	
 	@Override
 	public Router getScopedRouter(String path) {
 		if(path == null || path.length() == 0)
@@ -193,6 +219,12 @@ public class RouterBuilder implements Router {
 			List<FilterInfo<?>> filters = findMatchingFilters(path, meta.getRoute().isHttpsRoute());
 			meta.setFilters(filters);
 		}
+		
+		RouteMeta errorMeta = this.info.getInternalErrorRoute();
+		errorMeta.setFilters(internalErrorFilters);
+		
+		RouteMeta notFoundMeta = this.info.getPageNotfoundRoute();
+		notFoundMeta.setFilters(notFoundFilters);
 	}
 
 	public List<FilterInfo<?>> findMatchingFilters(String path, boolean isHttps) {
@@ -208,6 +240,14 @@ public class RouterBuilder implements Router {
 			}
 		}
 		return matchingFilters;
+	}
+
+	public RouteMeta getNotFoundMeta() {
+		return info.getPageNotfoundRoute();
+	}
+
+	public RouteMeta getInternalErrorMeta() {
+		return info.getInternalErrorRoute();
 	}
 
 }

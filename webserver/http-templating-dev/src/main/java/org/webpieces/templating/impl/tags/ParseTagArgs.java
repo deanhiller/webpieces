@@ -41,35 +41,44 @@ public abstract class ParseTagArgs implements GroovyGen {
 		return tagArgs;
 	}
 
-	private String replaceRouteIds(Token token, String tagArgs, int indexOfSpace, CompileCallback callback) {
+	public static String replaceRouteIds(Token token, String tagArgs, int indexOfSpace, CompileCallback callback) {
 		int atIndex = tagArgs.indexOf("@[");
 		int nextAtIndex = tagArgs.indexOf("]@");
 		if(nextAtIndex < 0)
 			throw new IllegalArgumentException("Missing closing ]@ on the route."+token.getSourceLocation(true));
 
-		int firstCommaLocation = tagArgs.indexOf(",", atIndex);
 		String prefix = tagArgs.substring(0, atIndex);
+		String routeInfo = tagArgs.substring(atIndex+2, nextAtIndex);
 		String leftover = tagArgs.substring(nextAtIndex+2);
+		
+		String groovyCode = translateRouteId(routeInfo, token, callback);
+		
+		String groovy = prefix + groovyCode + leftover;
+		return groovy;
+	}
+
+	public static String translateRouteId(String routeText, Token token, CompileCallback callback) {
+
+		int firstCommaLocation = routeText.indexOf(",");
 		String route;
 		String args;
-		if(firstCommaLocation > 0 && firstCommaLocation < nextAtIndex) {
-			route = tagArgs.substring(atIndex+2, firstCommaLocation);
-			args = tagArgs.substring(firstCommaLocation+1, nextAtIndex);
+		if(firstCommaLocation > 0) {
+			route = routeText.substring(0, firstCommaLocation);
+			args = routeText.substring(firstCommaLocation+1);
 			args = "["+args+"]";
 		} else {
-			route = tagArgs.substring(atIndex+2, nextAtIndex);
+			route = routeText;
 			args = "[:]";
 		}
-		
+
 		//TODO: This is not proper as it will break if there is a Map in a Map...but it works for now on validating the key names
 		List<String> argNames = fetchArgNames(args, token);
 		callback.routeIdFound(route, argNames, token.getSourceLocation(false));
 		
-		String groovy = prefix + "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation(false)+"')" + leftover;
-		return groovy;
+		return "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation(false)+"')";
 	}
-
-	private List<String> fetchArgNames(String args, Token token) {
+	
+	private static List<String> fetchArgNames(String args, Token token) {
 		List<String> names = new ArrayList<>();
 		if("[:]".equals(args))
 			return names;

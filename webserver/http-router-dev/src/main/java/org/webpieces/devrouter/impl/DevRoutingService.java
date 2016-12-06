@@ -110,9 +110,10 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			//This is actually a callback from the below code's iframe!!!
 			if(origMeta.getControllerInstance() == null) {
 				finder.loadControllerIntoMetaObject(origMeta, false);
+				finder.loadFiltersIntoMeta(origMeta, origMeta.getFilters(), false);
 			}
 
-			Service<MethodMeta, Action> svc = routeLoader.createNotFoundService(origMeta, req);
+			Service<MethodMeta, Action> svc = origMeta.getService222();
 			return new NotFoundInfo(origResult, svc, req);
 		}
 
@@ -122,7 +123,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
 		RouteModuleInfo info = new RouteModuleInfo("", null);
 		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
-		MatchResult result = new MatchResult(meta, meta.getService222());
+		MatchResult result = new MatchResult(meta);
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
@@ -145,7 +146,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
-			finder.loadFiltersIntoMeta(meta, new ArrayList<>(), false);
+			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
 		}
 		
 		return result;
