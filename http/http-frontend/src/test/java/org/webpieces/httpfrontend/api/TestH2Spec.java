@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestH2Spec {
@@ -48,6 +49,7 @@ public class TestH2Spec {
         }
     }
 
+    @Ignore
     @Test
     public void testH2Spec() {
         // Skipping 5.4.1 and 4.3 for now, because they fail.
