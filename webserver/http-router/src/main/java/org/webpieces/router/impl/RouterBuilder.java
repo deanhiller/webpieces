@@ -81,18 +81,6 @@ public class RouterBuilder implements Router {
 	}
 
 	@Override
-	public void addMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId routeId) {
-		Route route = new MultiRouteImpl(method, paths, controllerMethod, routeId, false);
-		addRoute(route, routeId);
-	}
-
-	@Override
-	public void addHttpsMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId routeId) {
-		Route route = new MultiRouteImpl(method, paths, controllerMethod, routeId, false);
-		addRoute(route, routeId);
-	}
-	
-	@Override
 	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		boolean checkSecureToken = false;
 		if(method == HttpMethod.POST)

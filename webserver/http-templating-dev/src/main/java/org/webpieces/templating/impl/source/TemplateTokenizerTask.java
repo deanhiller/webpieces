@@ -1,5 +1,6 @@
 package org.webpieces.templating.impl.source;
 
+import static org.webpieces.templating.impl.source.TemplateToken.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,70 +55,70 @@ public class TemplateTokenizerTask {
             
             switch (state) {
                 case PLAIN:
-                    if (c == '%' && c1 == '{') {
-                        found(TemplateToken.SCRIPT, 2, lineNumber);
-                    } else if (c == '$' && c1 == '{') {
-                        found(TemplateToken.EXPR, 2, lineNumber);
-                    } else if (c == '#' && c1 == '{' && c2 == '/') {
-                        found(TemplateToken.END_TAG, 3, lineNumber);
-                    } else if (c == '#' && c1 == '{') {
-                        found(TemplateToken.START_TAG, 2, lineNumber);
-                    } else if (c == '&' && c1 == '{') {
-                        found(TemplateToken.MESSAGE, 2, lineNumber);
-                    } else if (c == '@' && c1 == '@' && c2 == '{') {
-                        found(TemplateToken.ABSOLUTE_ACTION, 3, lineNumber);
-                    } else if (c == '@' && c1 == '{') {
-                        found(TemplateToken.ACTION, 2, lineNumber);
-                    } else if (c == '*' && c1 == '{') {
-                        found(TemplateToken.COMMENT, 2, lineNumber);
+                    if (SCRIPT.matchesStart(c, c1, c2)) {
+                        found(SCRIPT, 2, lineNumber);
+                    } else if (EXPR.matchesStart(c, c1, c2)) {
+                        found(EXPR, 2, lineNumber);
+                    } else if (END_TAG.matchesStart(c, c1, c2)) {
+                        found(END_TAG, 3, lineNumber);
+                    } else if (START_TAG.matchesStart(c, c1, c2)) {
+                        found(START_TAG, 2, lineNumber);
+                    } else if (MESSAGE.matchesStart(c, c1, c2)) {
+                        found(MESSAGE, 2, lineNumber);
+                    } else if (ABSOLUTE_ACTION.matchesStart(c, c1, c2)) {
+                        found(ABSOLUTE_ACTION, 3, lineNumber);
+                    } else if (ACTION.matchesStart(c, c1, c2)) {
+                        found(ACTION, 2, lineNumber);
+                    } else if (COMMENT.matchesStart(c, c1, c2)) {
+                        found(COMMENT, 2, lineNumber);
                     } else if(c == '\n') {
                     	//We do this so any plain tokens that are all whitespace can be discarded...
-                    	found(TemplateToken.PLAIN, 1, lineNumber, false, true);
+                    	found(PLAIN, 1, lineNumber, false, true);
                     }
                     break;
                 case SCRIPT:
-                    if (c == '}' && c1 == '%') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
+                    if (SCRIPT.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 2, lineNumber);
                     }
                     break;
                 case COMMENT:
-                    if (c == '}' && c1 == '*') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
+                    if (COMMENT.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 2, lineNumber);
                     }
                     break;
                 case START_TAG:
-                    if (c == '}' && c1 == '#') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
-                    } else if (c == '/' && c1 == '}' && c2 == '#') {
-                        found(TemplateToken.PLAIN, 3, lineNumber, true, false);
+                    if (START_TAG.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 2, lineNumber);
+                    } else if (START_END_TAG.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 3, lineNumber, true, false);
                     }
                     break;
                 case END_TAG:
-                    if (c == '}' && c1 == '#') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
+                    if (END_TAG.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 2, lineNumber);
                     }
                     break;
                 case EXPR:
-                    if (c == '}' && c1 == '$') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
+                    if (EXPR.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 2, lineNumber);
                     }
                     break;
                 case ACTION:
-                    if (c == '}' && c1 == '@') {
-                        found(TemplateToken.PLAIN, 2, lineNumber);
+                    if (ACTION.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 2, lineNumber);
                     }
                     break;
                 case ABSOLUTE_ACTION:
-                    if (c == '}' && c1 == '@' && c2 == '@') {
-                        found(TemplateToken.PLAIN, 3, lineNumber);
+                    if (ABSOLUTE_ACTION.matchesEnd(c, c1, c2)) {
+                        found(PLAIN, 3, lineNumber);
                     }
                     break;
                 case MESSAGE:
                 	if (c == '&' && c1 == '{') {
                 		startTokenCount++; //For nested i18n tags
-                	} else if (c == '}' && c1 == '&') {
-                		if(startTokenCount == 0) {                		
-                			found(TemplateToken.PLAIN, 2, lineNumber);
+                	} else if (MESSAGE.matchesEnd(c, c1, c2)) {
+                		if(startTokenCount == 0) {
+                			found(PLAIN, 2, lineNumber);
                 		} else
                 			startTokenCount--;
                     }
@@ -131,7 +132,7 @@ public class TemplateTokenizerTask {
             left = pageSource.length() - end;
         }
         
-        if(state != TemplateToken.PLAIN) {
+        if(state != PLAIN) {
         	TokenImpl token = tokens.get(tokens.size()-1);
         	int lastLine = token.endLineNumber;
         	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end token of='"+state.getEnd()+"'"
@@ -139,7 +140,7 @@ public class TemplateTokenizerTask {
         }
         
         end++;
-        found(TemplateToken.EOF, 0, lineNumber);
+        found(EOF, 0, lineNumber);
         return tokens;
 	}
 	
@@ -181,7 +182,7 @@ public class TemplateTokenizerTask {
 	private void found(TemplateToken newState, int skip, int endLineNumber, boolean isOpenCloseTag, boolean hasNewLine) {
 		TemplateToken finalState = state;
 		if(isOpenCloseTag)
-			finalState = TemplateToken.START_END_TAG;
+			finalState = START_END_TAG;
 		
 		--end;
 		int endValue = end;

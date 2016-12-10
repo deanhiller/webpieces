@@ -1,5 +1,6 @@
 package org.webpieces.router.api.actions;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class Actions {
 	 * 
 	 * @return
 	 */
-	public static Redirect redirectFlashAll(RouteId routeId, RequestContext ctx, String ... secureFieldNames) {
+	public static Redirect redirectFlashAllSecure(RouteId routeId, RequestContext ctx, String ... secureFieldNames) {
 		Set<String> mySet = new HashSet<>(Arrays.asList(secureFieldNames));
 		ctx.moveFormParamsToFlash(mySet);
 		ctx.getFlash().keep();
@@ -58,8 +59,29 @@ public class Actions {
 		return redirect(routeId);
 	}
 
+	public static Redirect redirectFlashAll2(RouteId routeId, RequestContext ctx, Object ... args) {
+		ctx.moveFormParamsToFlash(new HashSet<>());
+		ctx.getFlash().keep();
+		ctx.getValidation().keep();
+		return redirect(routeId, args);
+	}
+	
 	public static Redirect redirectToUrl(String url) {
 		throw new UnsupportedOperationException("not done here yet");
 	}
-	
+
+	public static void redirectFlashAllAddEdit(RouteId addRoute, RouteId editRoute,
+			RequestContext context, String idKey, Integer idValue, Object ... args) {
+		if(idValue == null) {
+			redirectFlashAll2(addRoute, context, args);
+		} else {
+			Object[] allArgs = new Object[args.length+2];
+			allArgs[0] = idKey;
+			allArgs[1] = idValue;
+			System.arraycopy(args, 0, allArgs, 2, args.length);
+			
+			redirectFlashAll2(editRoute, context, allArgs);
+		}
+	}
+
 }

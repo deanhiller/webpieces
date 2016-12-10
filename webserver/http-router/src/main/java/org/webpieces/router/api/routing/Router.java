@@ -1,6 +1,5 @@
 package org.webpieces.router.api.routing;
 
-import java.util.List;
 import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
@@ -22,8 +21,6 @@ public interface Router {
 
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
-	void addMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId addRoute);
-
 	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
 	
 	/**
@@ -32,8 +29,6 @@ public interface Router {
 	 */
 	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
 	void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
-
-	void addHttpsMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId addRoute);
 
 	/**
 	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in

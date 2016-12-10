@@ -115,6 +115,8 @@ public class TestSyncHibernate {
 		UserDbo user = new UserDbo();
 		user.setEmail(email);
 		user.setName("SomeName");
+		user.setFirstName("Dean");
+		user.setLastName("Hill");
 		user.setCompany(company);
 		
 		mgr.persist(company);
@@ -127,15 +129,50 @@ public class TestSyncHibernate {
 		return user.getId();
 	}
 	
-	/**
-	 * Add/Edit uses MultiRoute for one RouteId for both so reversing the route depends on the 
-	 * paramters passed to the routeId
-	 */
 	@Test
 	public void testReverseAddAndEditFromRouteId() {
 		loadDataInDb();
 		
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/list");
+
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("<a href=`/user/add`>Add User</a>".replace("`", "\""));
+		response.assertContains("<a href=`/user/edit/1`>Edit</a>".replace("`", "\""));
+	}
+
+	@Test
+	public void testRenderAddPage() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/add");
+
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("name='' email=''");
+	}
+
+	@Test
+	public void testRenderEditPage() {
+		int id = loadDataInDb();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/edit/"+id);
+
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
 	
 	@Test

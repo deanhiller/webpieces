@@ -7,21 +7,21 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLEngine;
 
-import org.webpieces.httpclient.api.*;
+import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpcommon.api.RequestSender;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
+
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
 
 
 public class HttpClientSocketImpl implements HttpClientSocket, Closeable {

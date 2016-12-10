@@ -1,5 +1,8 @@
 package org.webpieces.plugins.hibernate.app;
 
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.ADD_USER_PAGE;
+import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAGE;
+
 import java.util.List;
 
 import javax.inject.Singleton;
@@ -12,6 +15,7 @@ import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
+import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -30,7 +34,7 @@ public class CrudController {
 	
 	public Render userAddEdit(Integer id) {
 		if(id == null) {
-			return Actions.renderThis();
+			return Actions.renderThis("user", new UserDbo());
 		}
 		
 		EntityManager mgr = Em.get();
@@ -38,14 +42,17 @@ public class CrudController {
 		return Actions.renderThis("user", user);
 	}
 	
-	public Redirect postSaveUser(UserDbo user) {
+	public Redirect postSaveUser(UserDbo user, RouteId addEditRoute) {
 		if(user.getPassword().length() < 4) {
 			Current.validation().addError("password", "Value is too short");
 		}
 		
 		if(Current.validation().hasErrors()) {
+			log.info("page has errors");
 			Current.flash().setMessage("Errors in form below");
-			return Actions.redirectFlashAll(HibernateRouteId.ADD_EDIT_USER_PAGE, Current.getContext());
+			Actions.redirectFlashAllAddEdit(
+					ADD_USER_PAGE, EDIT_USER_PAGE, Current.getContext(), 
+					"id", user.getId(), "other", "value", "key3", "value3");
 		}
 		
 		Current.flash().setMessage("User successfully saved");

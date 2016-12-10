@@ -74,7 +74,7 @@ public class BeansController {
 		
 		RequestContext ctx = Current.getContext();
 		if(Current.validation().hasErrors()) {
-			return Actions.redirectFlashAll(BeansRouteId.USER_FORM_ROUTE, ctx, "password");
+			return Actions.redirectFlashAllSecure(BeansRouteId.USER_FORM_ROUTE, ctx, "password");
 		}
 		
 		lib.saveUser(user);
@@ -110,7 +110,7 @@ public class BeansController {
 		Current.validation().addError("user.accounts[0].addresses[0].street", "This is too ugly a street name");
 		if(Current.validation().hasErrors()) {
 			RequestContext ctx = Current.getContext();
-			return Actions.redirectFlashAll(BeansRouteId.ARRAY_FORM_ROUTE, ctx, "password");
+			return Actions.redirectFlashAllSecure(BeansRouteId.ARRAY_FORM_ROUTE, ctx, "password");
 		}
 		
 		return Actions.redirect(BeansRouteId.ARRAY_FORM_ROUTE);

@@ -1,6 +1,5 @@
 package org.webpieces.router.api.routing;
 
-import java.util.List;
 import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
@@ -46,10 +45,6 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addRoute(methods, path, controllerMethod, routeId);
 	}
 
-	public void addMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId addRoute) {
-		router.addMultiRoute(method, paths, controllerMethod, addRoute);
-	}
-	
 	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		router.addHttpsRoute(method, path, controllerMethod, routeId);
 	}
@@ -62,10 +57,6 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addHttpsRoute(methods, path, controllerMethod, routeId);
 	}
 
-	public void addHttpsMultiRoute(HttpMethod method, List<String> paths, String controllerMethod, RouteId addRoute) {
-		router.addHttpsMultiRoute(method, paths, controllerMethod, addRoute);
-	}
-	
 	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {
 		router.addStaticDir(urlPath, fileSystemPath, isOnClassPath);
 	}
