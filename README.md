@@ -72,6 +72,12 @@ To try the webserver
 9. In a browser go to http://localhost:9000
 10. refactor your code like crazy and hit the website again(no restart needed)
 
+To try modifying/contributing to the actual webserver
+1. clone webpieces
+2. The automated build runs "./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PexcludeSelenium=true -PexcludeH2Spec=true" as it can't run the selenium tests or H2Spec tests at this time
+3. If you have selenium setup and h2spec, you can just run "./gradlew test" in which parallel=true and configureondemand=true so it's a faster build
+4. debugging with eclipse works better than intellij.  intellij IDE support is better than eclipse(so pick your poison but it works in both)
+
 Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
  * Server push - sending responses before requests even come based on the first page requests (pre-emptively send what you know they will need)

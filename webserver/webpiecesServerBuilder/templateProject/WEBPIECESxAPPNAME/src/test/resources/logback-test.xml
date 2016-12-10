@@ -12,9 +12,9 @@
     </filter>
 
     <encoder>
-      <!-- %caller{1} becomes clickable in eclipse(and I think intellij too) so
+      <!-- %caller{1..2} becomes clickable in eclipse(and I think intellij too) so
            users can click right to where the statement is logged -->
-      <pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n
+      <pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n
       </pattern>
     </encoder>
   </appender>
@@ -27,7 +27,7 @@
     </filter>
 
     <encoder>
-      <pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n
+      <pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n
       </pattern>
     </encoder>
     <target>System.err</target>
