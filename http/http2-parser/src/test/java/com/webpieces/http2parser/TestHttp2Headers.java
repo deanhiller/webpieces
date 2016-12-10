@@ -1,18 +1,16 @@
 package com.webpieces.http2parser;
 
-import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.*;
-import org.junit.Assert;
-import org.junit.Test;
+import static com.webpieces.http2parser.UtilsForTest.parser;
 
 import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
-import static com.webpieces.http2parser.UtilsForTest.parser;
+import org.junit.Test;
+
+import com.twitter.hpack.Decoder;
+import com.twitter.hpack.Encoder;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.Http2Headers;
 
 public class TestHttp2Headers {
     private static LinkedList<HasHeaderFragment.Header> basicRequestHeaders = new LinkedList<>();

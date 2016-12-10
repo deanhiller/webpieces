@@ -1,16 +1,17 @@
 package org.webpieces.httpproxy.impl.responsechain;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.ResponseListener;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 
 public class Layer1Response implements ResponseListener {
 

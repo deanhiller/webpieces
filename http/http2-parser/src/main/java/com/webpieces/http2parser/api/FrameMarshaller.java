@@ -1,9 +1,10 @@
 package com.webpieces.http2parser.api;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import java.util.Optional;
+
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.Optional;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public interface FrameMarshaller {
     DataWrapper marshalPayload(Http2Frame frame);

@@ -1,5 +1,8 @@
 package org.webpieces.httpcommon;
 
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -13,9 +16,6 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
-
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Requests {
 

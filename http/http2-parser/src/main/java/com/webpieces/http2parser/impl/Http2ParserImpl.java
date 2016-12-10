@@ -1,9 +1,26 @@
 package com.webpieces.http2parser.impl;
 
-import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.*;
-import com.webpieces.http2parser.api.dto.*;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.CONTINUATION;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.PING;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.PRIORITY;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.RST_STREAM;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.WINDOW_UPDATE;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
@@ -11,13 +28,28 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.*;
-
-import static com.webpieces.http2parser.api.dto.Http2FrameType.*;
+import com.twitter.hpack.Decoder;
+import com.twitter.hpack.Encoder;
+import com.webpieces.http2parser.api.FrameMarshaller;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.HasHeaderList;
+import com.webpieces.http2parser.api.dto.Http2Continuation;
+import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2FrameType;
+import com.webpieces.http2parser.api.dto.Http2GoAway;
+import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.Http2Ping;
+import com.webpieces.http2parser.api.dto.Http2Priority;
+import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();

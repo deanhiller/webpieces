@@ -1,10 +1,11 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2RstStream;
 
 public class TestHttp2RstStream {
     private static String connectError =

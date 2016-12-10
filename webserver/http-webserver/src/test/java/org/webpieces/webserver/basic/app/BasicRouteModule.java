@@ -1,6 +1,6 @@
 package org.webpieces.webserver.basic.app;
 
-import static org.webpieces.ctx.api.HttpMethod.*;
+import static org.webpieces.ctx.api.HttpMethod.GET;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 

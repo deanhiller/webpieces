@@ -1,17 +1,16 @@
 package com.webpieces.http2parser.api;
 
+import java.io.ByteArrayOutputStream;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.webpieces.data.api.DataWrapper;
+
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-import org.webpieces.data.api.DataWrapper;
-
-import java.io.ByteArrayOutputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 public interface Http2Parser {
     DataWrapper prepareToParse();

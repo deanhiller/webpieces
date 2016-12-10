@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpclient.api.HttpClient;
@@ -33,6 +32,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 
 public class Layer4Processor implements RequestListener {
 

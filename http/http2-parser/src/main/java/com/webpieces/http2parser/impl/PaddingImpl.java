@@ -1,12 +1,13 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.Padding;
-import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import java.util.List;
+
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import java.util.List;
+import com.webpieces.http2parser.api.Padding;
+import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 
 public class PaddingImpl implements Padding {
     private byte[] padding = null;

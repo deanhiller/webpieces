@@ -4,8 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.webpieces.data.api.BufferPool;
-
 public class MockPool implements BufferPool {
 
 	public Set<ByteBuffer> releasedBuffers = new HashSet<>();

@@ -1,9 +1,10 @@
 package com.webpieces.http2parser.api;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import java.util.List;
+
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.List;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public interface ParserResult {
     boolean hasParsedFrames();

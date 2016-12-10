@@ -1,11 +1,12 @@
 package org.webpieces.httpcommon.api;
 
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import java.util.concurrent.CompletableFuture;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public interface Http2ServerEngine extends Http2Engine {
     // TODO: Figure out if the sendResponse/sendData/sendTrailer should just be in ResponseSender and Http2ServerEngineImpl

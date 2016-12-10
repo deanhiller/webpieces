@@ -9,8 +9,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
@@ -19,6 +17,8 @@ import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.ctx.CookieScopeImpl;
 import org.webpieces.router.impl.ctx.SecureCookie;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 

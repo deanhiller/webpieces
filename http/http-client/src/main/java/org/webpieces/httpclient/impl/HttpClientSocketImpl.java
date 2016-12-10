@@ -127,4 +127,10 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
             return null;
         });
     }
+
+	@Override
+	public String toString() {
+		return "HttpClientSocket["+idForLogging+", channel="+channel+"]";
+	}
+    
 }

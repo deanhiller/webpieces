@@ -1,14 +1,15 @@
 package com.webpieces.http2parser;
 
-import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
-import org.junit.Test;
+import static com.webpieces.http2parser.UtilsForTest.parser;
 
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 
-import static com.webpieces.http2parser.UtilsForTest.parser;
+import org.junit.Test;
+
+import com.twitter.hpack.Encoder;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.Http2PushPromise;
 
 public class TestHttp2PushPromise {
     private static LinkedList<HasHeaderFragment.Header> basicRequestHeaders = new LinkedList<>();

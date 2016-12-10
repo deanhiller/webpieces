@@ -1,11 +1,12 @@
 package org.webpieces.httpcommon.api;
 
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import java.util.concurrent.CompletableFuture;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public interface Http2ClientEngine extends Http2Engine {
     // These are both needed to give the RequestSender the ability to deal with negotiating http1.1 vs http2.

@@ -1,8 +1,9 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.FrameMarshaller;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapperGenerator;
+
+import com.webpieces.http2parser.api.FrameMarshaller;
 
 abstract class FrameMarshallerImpl implements FrameMarshaller {
     BufferPool bufferPool;

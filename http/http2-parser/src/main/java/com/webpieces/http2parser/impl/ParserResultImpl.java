@@ -1,10 +1,11 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.ParserResult;
+import java.util.List;
+
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.List;
+import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public class ParserResultImpl implements ParserResult {
     final private List<Http2Frame> frames;

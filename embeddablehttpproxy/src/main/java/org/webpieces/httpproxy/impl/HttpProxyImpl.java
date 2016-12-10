@@ -4,13 +4,13 @@ import java.net.InetSocketAddress;
 
 import javax.inject.Inject;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.httpproxy.api.HttpProxy;
 import org.webpieces.httpproxy.impl.chain.Layer4Processor;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HttpProxyImpl implements HttpProxy {
 

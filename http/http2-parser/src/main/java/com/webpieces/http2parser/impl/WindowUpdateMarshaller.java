@@ -1,13 +1,14 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import java.nio.ByteBuffer;
-import java.util.Optional;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
 
 public class WindowUpdateMarshaller extends FrameMarshallerImpl {
 

@@ -1,8 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
+import org.webpieces.data.api.DataWrapper;
+
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
-import org.webpieces.data.api.DataWrapper;
 
 public class Http2Data extends Http2Frame {
 

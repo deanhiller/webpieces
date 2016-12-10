@@ -1,7 +1,7 @@
 package org.webpieces.webserver.api;
 
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.ProdRouterModule;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.webserver.impl.WebServerModule;

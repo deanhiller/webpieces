@@ -3,12 +3,13 @@ package org.webpieces.httpcommon.api;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
+
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 
 public interface ResponseSender {
 

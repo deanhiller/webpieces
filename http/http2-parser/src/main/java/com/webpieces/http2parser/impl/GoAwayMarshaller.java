@@ -1,15 +1,16 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Optional;
+
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Optional;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2GoAway;
 
 public class GoAwayMarshaller extends FrameMarshallerImpl {
     GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {

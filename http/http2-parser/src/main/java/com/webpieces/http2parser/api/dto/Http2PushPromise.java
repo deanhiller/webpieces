@@ -1,10 +1,11 @@
 package com.webpieces.http2parser.api.dto;
 
-import com.webpieces.http2parser.api.Padding;
-import com.webpieces.http2parser.api.PaddingFactory;
+import java.util.LinkedList;
+
 import org.webpieces.data.api.DataWrapper;
 
-import java.util.LinkedList;
+import com.webpieces.http2parser.api.Padding;
+import com.webpieces.http2parser.api.PaddingFactory;
 
 public class Http2PushPromise extends Http2Frame implements HasHeaderFragment, HasHeaderList {
     @Override

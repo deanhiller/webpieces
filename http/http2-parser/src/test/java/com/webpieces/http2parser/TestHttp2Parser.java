@@ -1,12 +1,11 @@
 package com.webpieces.http2parser;
 
-import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.*;
-import com.webpieces.http2parser.api.ParserResult;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
+
+import java.io.ByteArrayOutputStream;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
@@ -14,14 +13,18 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import static com.webpieces.http2parser.UtilsForTest.parser;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
+import com.twitter.hpack.Decoder;
+import com.twitter.hpack.Encoder;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2FrameType;
+import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class TestHttp2Parser {
     private static String aBunchOfDataFrames =

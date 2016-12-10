@@ -1,9 +1,10 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.dto.Http2Data;
-import com.webpieces.http2parser.api.dto.Http2Frame;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public class TestHttp2Data{
     private static String unpaddedDataFrame =

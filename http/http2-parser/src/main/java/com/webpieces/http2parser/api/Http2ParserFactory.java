@@ -1,8 +1,9 @@
 package com.webpieces.http2parser.api;
 
 
-import com.webpieces.http2parser.impl.Http2ParserImpl;
 import org.webpieces.data.api.BufferPool;
+
+import com.webpieces.http2parser.impl.Http2ParserImpl;
 
 public class Http2ParserFactory {
     public static Http2Parser createParser(BufferPool bufferPool) {

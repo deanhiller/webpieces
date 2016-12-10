@@ -1,16 +1,17 @@
 package com.webpieces.http2parser.impl;
 
+import java.nio.ByteBuffer;
+import java.util.Optional;
+
+import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Priority;
-import org.webpieces.data.api.BufferPool;
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-
-import java.nio.ByteBuffer;
-import java.util.Optional;
 
 public class PriorityMarshaller implements FrameMarshaller {
     private BufferPool bufferPool;

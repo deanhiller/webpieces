@@ -1,11 +1,11 @@
 package org.webpieces.httpcommon.api.exceptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RstStreamError extends Http2Error {
     private Http2ErrorCode errorCode;

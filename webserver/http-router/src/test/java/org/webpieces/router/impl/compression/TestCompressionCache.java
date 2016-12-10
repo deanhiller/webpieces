@@ -9,11 +9,11 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.StaticRoute;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 
 import com.google.inject.Binder;

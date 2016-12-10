@@ -3,8 +3,6 @@ package org.webpieces.router.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
@@ -14,6 +12,8 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 @Singleton
 public class ProdRouterService extends AbstractRouterService implements RoutingService {

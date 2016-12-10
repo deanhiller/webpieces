@@ -10,8 +10,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.httpparser.api.HttpParserFactory;
@@ -28,6 +26,8 @@ import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 @Singleton
 public class ResponseCreator {
 

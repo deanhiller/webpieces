@@ -8,8 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
@@ -30,6 +28,8 @@ import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

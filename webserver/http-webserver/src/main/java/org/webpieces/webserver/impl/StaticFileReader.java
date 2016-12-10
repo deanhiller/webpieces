@@ -18,8 +18,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -33,6 +31,8 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
@@ -141,7 +141,7 @@ public class StaticFileReader {
 					.thenAccept(responseId -> info.setResponseId(responseId))
 					.thenCompose(v -> readLoop(info, file, asyncFile, 0))
 					.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures
-					.thenAccept(s -> log.info("got:", s));
+					.thenAccept(s -> empty());
 		} catch(Throwable e) {
 			//cannot do this on success since it is completing on another thread...
 			handleClose(info, true, null);
@@ -149,6 +149,8 @@ public class StaticFileReader {
 		}
 	}
 
+	private void empty() {}
+	
 	private Path fetchFile(String msg, String fullFilePath) {
 		Path file = Paths.get(fullFilePath);
 		File f = file.toFile();

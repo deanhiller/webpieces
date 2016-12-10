@@ -6,13 +6,13 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.httpcommon.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
@@ -32,7 +32,7 @@ public class TestAsyncWebServer {
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, metaFile);
 		server = webserver.start();		
 	}
 	
@@ -59,6 +59,10 @@ public class TestAsyncWebServer {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 
+		//no response yet...
+		List<FullResponse> responses1 = socket.getResponses();
+		Assert.assertEquals(0, responses1.size());
+		
 		//now have the server complete processing
 		future.complete(5);
 		

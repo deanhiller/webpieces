@@ -1,13 +1,14 @@
 package org.webpieces.httpcommon.api.exceptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.webpieces.data.api.DataWrapper;
+
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
-import org.webpieces.data.api.DataWrapper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class GoAwayError extends Http2Error {
     private int lastStreamId;

@@ -1,8 +1,10 @@
 package org.webpieces.frontend.impl;
 
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.impl.SettingsMarshaller;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -17,12 +19,9 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.impl.SettingsMarshaller;
 
 
 class HttpServerSocketImpl implements HttpServerSocket {
@@ -101,4 +100,9 @@ class HttpServerSocketImpl implements HttpServerSocket {
     public DataListener getDataListener() {
         return dataListener;
     }
+    
+	@Override
+	public String toString() {
+		return "HttpSvrSocket["+channel+"]";
+	}
 }

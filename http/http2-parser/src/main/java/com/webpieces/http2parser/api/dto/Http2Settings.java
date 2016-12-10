@@ -1,9 +1,5 @@
 package com.webpieces.http2parser.api.dto;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.webpieces.http2parser.api.Http2SettingsMap;
 
 public class Http2Settings extends Http2Frame {

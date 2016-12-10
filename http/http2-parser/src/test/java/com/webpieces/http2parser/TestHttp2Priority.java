@@ -1,9 +1,10 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Priority;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2Priority;
 
 public class TestHttp2Priority {
     static private String priorityFrame =

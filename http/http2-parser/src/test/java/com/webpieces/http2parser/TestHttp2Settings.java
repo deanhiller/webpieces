@@ -1,10 +1,11 @@
 package com.webpieces.http2parser;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Settings;
 import org.junit.Assert;
 import org.junit.Test;
+
 import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class TestHttp2Settings {
     static private String basicSettings =

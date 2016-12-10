@@ -13,7 +13,6 @@ import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpServerException;
-import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;

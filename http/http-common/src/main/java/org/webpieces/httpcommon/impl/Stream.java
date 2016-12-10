@@ -1,19 +1,21 @@
 package org.webpieces.httpcommon.impl;
 
-import com.webpieces.http2parser.api.dto.HasPriorityDetails;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.webpieces.httpcommon.api.*;
-import org.webpieces.httpcommon.api.exceptions.RstStreamError;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-
+import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.ResponseListener;
+import org.webpieces.httpcommon.api.exceptions.RstStreamError;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+
+import com.webpieces.http2parser.api.dto.HasPriorityDetails;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 
 class Stream {
     private static final Logger log = LoggerFactory.getLogger(Stream.class);

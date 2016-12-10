@@ -1,12 +1,13 @@
 package com.webpieces.http2parser.impl;
 
-import com.webpieces.http2parser.api.dto.Http2Continuation;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import java.util.Optional;
+
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import java.util.Optional;
+import com.webpieces.http2parser.api.dto.Http2Continuation;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public class ContinuationMarshaller extends FrameMarshallerImpl {
     ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {

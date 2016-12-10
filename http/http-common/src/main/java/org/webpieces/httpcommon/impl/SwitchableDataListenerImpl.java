@@ -1,5 +1,11 @@
 package org.webpieces.httpcommon.impl;
 
+import static org.webpieces.httpcommon.api.Protocol.HTTP11;
+
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.webpieces.httpcommon.api.CloseListener;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.Protocol;
@@ -8,12 +14,6 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.webpieces.httpcommon.api.Protocol.HTTP11;
 
 
 public class SwitchableDataListenerImpl implements SwitchableDataListener {
