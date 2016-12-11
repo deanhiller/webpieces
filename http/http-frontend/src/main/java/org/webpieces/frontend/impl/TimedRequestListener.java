@@ -83,7 +83,7 @@ class TimedRequestListener implements RequestListener {
 		
 		log.info("closing socket="+httpSocket+" due to response code="+exc.getStatusCode());
         ((HttpServerSocket) httpSocket).getResponseSender().close();
-		listener.clientClosedChannel(httpSocket);
+		listener.channelClosed(httpSocket, false);
 	}
 
 	void openedConnection(HttpServerSocket httpServerSocket, boolean isReadyForWrites) {
@@ -129,9 +129,9 @@ class TimedRequestListener implements RequestListener {
 	}
 	
 	@Override
-    public void clientClosedChannel(HttpSocket httpSocket) {
+    public void channelClosed(HttpSocket httpSocket, boolean browserClosed) {
 		releaseTimeout(httpSocket);
-		listener.clientClosedChannel(httpSocket);
+		listener.channelClosed(httpSocket, browserClosed);
 	}
 
 	@Override
@@ -143,8 +143,5 @@ class TimedRequestListener implements RequestListener {
     public void releaseBackPressure(ResponseSender responseSender) {
 		listener.releaseBackPressure(responseSender);
 	}
-
-	
-
 
 }

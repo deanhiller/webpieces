@@ -158,7 +158,7 @@ public class Http11Layer {
 	}
 	
 	void farEndClosed(Channel channel) {
-		listener.clientClosedChannel(getHttpServerSocketForChannel(channel));
+		listener.channelClosed(getHttpServerSocketForChannel(channel), true);
 	}
 
 	void applyWriteBackPressure(Channel channel) {

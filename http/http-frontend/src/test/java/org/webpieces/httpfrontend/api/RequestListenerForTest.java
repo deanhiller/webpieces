@@ -38,7 +38,7 @@ class RequestListenerForTest implements RequestListener {
 	}
 	
 	@Override
-	public void clientClosedChannel(HttpSocket httpSocket) {
+	public void channelClosed(HttpSocket httpSocket, boolean browserClosed) {
 		isClosed = true;
 	}
 

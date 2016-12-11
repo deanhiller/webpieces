@@ -92,4 +92,9 @@ public abstract class SslChannel implements Channel {
 		return channel.getMaxBytesBackupSize();
 	}
 
+	@Override
+	public String toString() {
+		return "ssl" + channel;
+	}
+
 }

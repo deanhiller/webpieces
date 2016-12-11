@@ -92,9 +92,14 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			return realChannel.close();
 		}
 		sslEngine.close();
-		return closeFuture;
+		return closeFuture.thenApply(channel -> actuallyCloseSocket(channel, realChannel));
 	}
 
+	private Channel actuallyCloseSocket(Channel sslChannel, Channel realChannel) {
+		realChannel.close();
+		return sslChannel;
+	}
+	
 	private class OurSslListener implements SslListener {
 		@Override
 		public void encryptedLinkEstablished() {

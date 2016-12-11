@@ -99,7 +99,7 @@ class ServerFactory {
         }
 
         @Override
-        public void clientClosedChannel(HttpSocket httpSocket) {
+        public void channelClosed(HttpSocket httpSocket, boolean browserClosed) {
         }
 
         @Override

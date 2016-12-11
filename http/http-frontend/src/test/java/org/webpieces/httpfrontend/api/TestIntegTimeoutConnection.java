@@ -53,7 +53,7 @@ public class TestIntegTimeoutConnection {
 		connect.get(10, TimeUnit.SECONDS);
 
 		//Find something to mock and fire the timer from inside AsyncSvrManager so we can change this
-		//to sleep(1000) ...sleep is required since we are doing this over teh socket :( and it involves nic buffers
+		//to sleep(1000) ...sleep is required since we are doing this over the socket :( and it involves nic buffers
 		//BUT we really want to make sure someone doesn't break this feature
 		Thread.sleep(2000);
 		

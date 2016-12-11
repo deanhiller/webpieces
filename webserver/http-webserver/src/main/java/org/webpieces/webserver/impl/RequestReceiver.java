@@ -29,6 +29,7 @@ import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -101,6 +102,7 @@ public class RequestReceiver implements RequestListener {
 		headersSupported.add(KnownHeaderName.REFERER.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.ORIGIN.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CACHE_CONTROL.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.PRAGMA.getHeaderName().toLowerCase());
 		
 		//we don't do redirects or anything like that yet...
 		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());
@@ -299,6 +301,11 @@ public class RequestReceiver implements RequestListener {
 		
 		//If status is a 5xx, send it into the routingService to be displayed back to the user
 		
+		//in the case of ssl timeout, we can't send anything since ssl engine/connection is not established so we can't encrypt
+		if(httpSocket.getUnderlyingChannel().isSslChannel() && exc instanceof HttpClientException) {
+			return;
+		}
+		
 		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 
 		ProxyResponse proxyResp = responseProvider.get();
@@ -315,8 +322,8 @@ public class RequestReceiver implements RequestListener {
 	}
 	
 	@Override
-	public void clientClosedChannel(HttpSocket httpSocket) {
-		log.info("browser client closed channel" + httpSocket);
+	public void channelClosed(HttpSocket httpSocket, boolean browserClosed) {
+		log.info("channel closed" + httpSocket+" browser closed="+browserClosed);
 	}
 
 	@Override

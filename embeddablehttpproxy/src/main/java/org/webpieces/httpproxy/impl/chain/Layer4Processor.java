@@ -120,8 +120,8 @@ public class Layer4Processor implements RequestListener {
 	}
 	
 	@Override
-	public void clientClosedChannel(HttpSocket httpSocket) {
-		log.info("browser client closed channel");
+	public void channelClosed(HttpSocket httpSocket, boolean browserClosed) {
+		log.info("browser client closed channel="+browserClosed);
 	}
 
 	private class SocketExpiredListener implements RemovalListener<SocketAddress, HttpClientSocket> {

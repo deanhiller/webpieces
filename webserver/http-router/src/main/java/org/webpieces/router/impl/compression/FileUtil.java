@@ -5,24 +5,38 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
-
 public class FileUtil {
-	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	public byte[] readFileContents(FileInputStream in, String urlPath, File src) throws IOException {
-		DataWrapper fileContents = wrapperFactory.emptyWrapper();
-		byte[] data = new byte[4000];
-		int read;
-		while((read = in.read(data)) > 0) {
-			DataWrapper piece = wrapperFactory.wrapByteArray(data, 0, read);
-			fileContents = wrapperFactory.chainDataWrappers(fileContents, piece);
-		}
+	/**
+	 * Ideally, we should NOT have urlPath here but for testing, it allows us to verify some very useful information so we 
+	 * don't break a very important piece of the system that we would never see broken in dev server mode. 
+	 */
+	public byte[] readFileContents(String urlPath, File src) throws IOException {
+		long len = src.length();
+		if(len > Integer.MAX_VALUE)
+			throw new UnsupportedOperationException("File to large to process");
 		
-		byte[] allData = fileContents.createByteArray();
-		return allData;
+		try (FileInputStream in = new FileInputStream(src)) {
+			int size = (int) len;
+	
+	        if (size == 0) {
+	            return new byte[0];
+	        }
+	
+	        final byte[] data = new byte[size];
+	        int offset = 0;
+	        int readed;
+	
+	        while (offset < size && (readed = in.read(data, offset, size - offset)) != -1) {
+	            offset += readed;
+	        }
+	
+	        if (offset != size) {
+	            throw new IOException("Unexpected readed size. current: " + offset + ", excepted: " + size);
+	        }
+	
+	        return data;
+		}
 	}
 
 	public void writeFile(OutputStream compressionOut, byte[] allData, String urlPath, File src) throws IOException {

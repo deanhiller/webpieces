@@ -343,8 +343,12 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 
 	@Override
 	public void close() {
-
 		clientInitiated = true;
+		if(mem.getConnectionState() == ConnectionState.NOT_STARTED) {
+			listener.closed(true);
+			return;
+		}
+		
 		mem.compareSet(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING);
 		
 		SSLEngine engine = mem.getEngine();

@@ -132,16 +132,16 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		if(lastModified > lastModifiedSrc && previousHash != null)
 			return; //no need to check anything as destination was written after this source file
 		
-		try (FileInputStream in = new FileInputStream(src)) {
-				byte[] allData = fileUtil.readFileContents(in, urlPath, src);
+		try {
+				byte[] allData = fileUtil.readFileContents(urlPath, src);
 				String hash = Security.hash(allData);
 				
 				if(previousHash != null) {
 					if(!hash.equals(previousHash))
 						throw new IllegalStateException("Your app modified the file="+src.getAbsolutePath()+" from the last release BUT"
-								+ " you did not change the name of the fil nor url path meaning your customer will never get the new version"
+								+ " you did not change the name of the file nor the url path meaning your customer will never get the new version"
 								+ " until the cache expires which can be a month out.  (Modify the names of files/url path when changing them)\n"
-								+ "existing compressed file="+destination);
+								+ "existing compressed file="+destination+"\nprevious hash="+previousHash+" currentHash="+hash);
 					log.info("Previous file is the same, no need to compress to="+destination);
 					return;
 				}
@@ -161,8 +161,9 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private void writeFile(File destination, Compression compression, byte[] allData, String urlPath, File src) throws FileNotFoundException, IOException {
-		try(FileOutputStream out = new FileOutputStream(destination);
-			 OutputStream compressionOut = compression.createCompressionStream(out);) {
+		FileOutputStream out = new FileOutputStream(destination);
+		try(OutputStream compressionOut = compression.createCompressionStream(out)) 
+		{
 			fileUtil.writeFile(compressionOut, allData, urlPath, src);			
 		}
 	}

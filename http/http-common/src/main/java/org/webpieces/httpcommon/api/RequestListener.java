@@ -73,7 +73,7 @@ public interface RequestListener {
 	 *
 	 * @param httpSocket
 	 */
-	void clientClosedChannel(HttpSocket httpSocket);
+	void channelClosed(HttpSocket httpSocket, boolean browserClosed);
 
 	/**
 	 * As you sendResponse back to the client, this is called if writes are backing up in which case

@@ -1,7 +1,6 @@
 package org.webpieces.router.impl.compression;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -13,9 +12,9 @@ public class TestFileUtilProxy extends FileUtil {
 	private List<FileInfo> compressedFiles = new ArrayList<>();
 	
 	@Override
-	public byte[] readFileContents(FileInputStream in, String urlPath, File src) throws IOException {
+	public byte[] readFileContents(String urlPath, File src) throws IOException {
 		readFiles.add(new FileInfo(urlPath, src));
-		return super.readFileContents(in, urlPath, src);
+		return super.readFileContents(urlPath, src);
 	}
 
 	@Override
