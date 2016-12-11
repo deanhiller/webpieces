@@ -1,5 +1,6 @@
 package org.webpieces.templating.api;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class TemplateCompileConfig {
 	private Set<String> customTagsFromPlugin = new HashSet<>();
 	private List<VirtualFile> srcPaths = new ArrayList<>();
 	private boolean isMustReadClassFromFileSystem;
+	private File groovySrcWriteDirectory;
 
 	public TemplateCompileConfig(boolean isMustReadClassFromFileSystem) {
 		this.isMustReadClassFromFileSystem = isMustReadClassFromFileSystem;
@@ -70,6 +72,14 @@ public class TemplateCompileConfig {
 		this.isMustReadClassFromFileSystem = isMustReadClassFromFileSystem;
 		return this;
 	}
-	
+
+	public TemplateCompileConfig setGroovySrcWriteDirectory(File groovySrcGen) {
+		this.groovySrcWriteDirectory = groovySrcGen;
+		return this;
+	}
+
+	public File getGroovySrcWriteDirectory() {
+		return groovySrcWriteDirectory;
+	}
 	
 }

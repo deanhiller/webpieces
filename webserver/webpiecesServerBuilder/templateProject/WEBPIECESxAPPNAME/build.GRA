@@ -15,7 +15,7 @@ apply plugin: 'application'
 apply plugin: 'org.webpieces.templatecompiler'
 
 sourceSets {
-    //For testing, we need to put the html files on the classpath which are co-located with the controllers
+    //For debugging in IDE(for tests and server), we need to put the html files on the classpath which are co-located with the controllers
     test {
         resources {
             //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**

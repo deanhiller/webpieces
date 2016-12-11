@@ -52,10 +52,17 @@ public class TemplateCompilerTask extends AbstractCompile {
 	}
 
 	public void compileImpl(TemplateCompileOptions options) throws IOException {
+		
+        File buildDir = getProject().getBuildDir();
+        //need to make customizable...
+        File groovySrcGen = new File(buildDir, "groovysrc"); 
+        System.out.println("groovy src directory="+groovySrcGen);
+        		
 		Charset encoding = Charset.forName(options.getEncoding());
 		TemplateCompileConfig config = new TemplateCompileConfig(false);
 		config.setFileEncoding(encoding);
 		config.setPluginClient(true);
+		config.setGroovySrcWriteDirectory(groovySrcGen);
 		System.out.println("custom tags="+options.getCustomTags());
 		config.setCustomTagsFromPlugin(options.getCustomTags());
     	Injector injector = Guice.createInjector(new DevTemplateModule(config));
