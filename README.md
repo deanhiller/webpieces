@@ -96,10 +96,6 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
-* ask jacoco team about code coverage on generated class file as it appears to not work and then get generated project close to 80% code covered
-* add checkstyle with the really good rules to all projects to fail if any are violated
-* add automatic formatter... https://github.com/diffplug/spotless so no one worries about formatting
-
 * add list, add, list, edit full example BUT with hibernate!!
 * add optimistic locking test case
 * add hibernate and embedded in-memory H2 in dev mode along with embedded http web GUI
@@ -113,6 +109,7 @@ TODO:
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
 * write an escapehtml tag
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
+* ask jacoco team about code coverage on generated class file as it appears to not work and then get generated project close to 80% code covered
 
 * ALPN is next????
 
