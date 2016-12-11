@@ -17,14 +17,56 @@ page at http://checkstyle.sourceforge.net/config.html -->
     <property name="message" value='All TODOs should be named.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
   </module-->
 
+  <module name="FileLength">
+    <property name="max" value="756"/>
+    <property name="fileExtensions" value=".java"/>
+  </module>
+
   <!-- All Java AST specific tests live under TreeWalker module. -->
   <module name="TreeWalker">
 
     <module name="RegexpSinglelineJava">
       <property name="format" value="@(One|Many)ToOne(?!\([^)]*fetch)"/>
+      <!-- Because as apps evolve you will want to add many queries, you do not want to lock yourself into EAGER EVER as you want the
+           option for new queries to do lazy or eager.  Therefore, always use fetch type lazy and IF you need eager in some query cases,
+           have those queries be written to eagerly fetch -->
       <property name="message" value="Please declare the fetch type to LAZY.  Eager should only be done in JPQL"/>
       <property name="ignoreComments" value="true"/>
     </module>
+
+    <!-- shorter methods are easy to read forcing developers to create tables of contents in their methods -->
+    <module name="MethodLength">
+      <property name="tokens" value="METHOD_DEF"/>
+      <property name="max" value="70"/>
+      <property name="countEmpty" value="false"/>
+    </module>
+
+    <module name="AnonInnerLength">
+      <property name="max" value="16"/>
+    </module>
+
+    <module name="OuterTypeNumber"/>
+
+    <module name="ParameterNumber">
+      <property name="max" value="7"/>
+      <property name="tokens" value="METHOD_DEF"/>
+    </module>
+
+    <module name="ParameterNumber">
+      <property name="max" value="7"/>
+      <property name="tokens" value="CTOR_DEF"/>
+    </module>
+
+    <module name="NestedForDepth">
+      <property name="max" value="4"/>
+    </module>
+    <module name="NestedIfDepth">
+      <property name="max" value="4"/>
+    </module>
+
+    <module name="StringLiteralEquality"/>
+    <module name="NoFinalizer"/>
+    <module name="EqualsHashCode"/>
 
     <!--
     NAMING CHECKS

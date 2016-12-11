@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
 
-This code coverage is actually not accurate or at least when we run it locally, it tells us 66% of the code is covered...
+Codecov.io has a bug that incorrectly reports code coverage lower than what it is(so we are actually higher than this number)
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 I want to try something new on this project.  If you want something fixed, I will pair with you to fix it ramping up your knowledge while fixing the issue.  We do this with screenhero(remote desktop sharing and control)
@@ -98,9 +98,6 @@ Pieces
 TODO:
 * ask jacoco team about code coverage on generated class file as it appears to not work and then get generated project close to 80% code covered
 * add checkstyle with the really good rules to all projects to fail if any are violated
-  * add too many lines per method (70), too many lines per file(700)
-  * add one to detect forgetting @ManyToOne without Lazy and @OneToOne without Lazy 
-  * etc. etc.
 * add automatic formatter... https://github.com/diffplug/spotless so no one worries about formatting
 
 * add list, add, list, edit full example BUT with hibernate!!
