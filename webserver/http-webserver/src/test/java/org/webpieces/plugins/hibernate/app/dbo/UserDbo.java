@@ -50,7 +50,7 @@ public class UserDbo {
 	@JoinColumn(nullable=false)
 	private CompanyDbo company;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	private UserDbo manager;
 	
 	@OneToMany(mappedBy = "manager")

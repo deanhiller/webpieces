@@ -35,17 +35,14 @@ public class ForTestSslClientEngineFactory implements HttpsSslEngineFactory {
 			public X509Certificate[] getAcceptedIssuers() {
 				return new X509Certificate[0];
 			}
-
 			@Override
 			public void checkClientTrusted(X509Certificate[] arg0, String authType) throws CertificateException {
 				log.info("authType(client)="+authType);
 			}
-
 			@Override
 			public void checkServerTrusted(X509Certificate[] arg0, String authType) throws CertificateException {
 				log.info("authType(server)="+authType);
 			}
-
 		} };
 
 		// Ignore differences between given hostname and certificate hostname

@@ -237,6 +237,10 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		final HandshakeStatus hsStatus3 = hsStatus;
 		log.trace(()->mem+"[sockToEngine] reset pos="+data2.position()+" lim="+data2.limit()+" status="+status2+" hs="+hsStatus3);
 
+		cleanAndFire(hsStatus, status, encryptedData);
+	}
+
+	private void cleanAndFire(HandshakeStatus hsStatus, Status status, ByteBuffer encryptedData) {
 		if(!encryptedData.hasRemaining())
 			pool.releaseBuffer(encryptedData);
 		

@@ -85,33 +85,32 @@ Some HTTP/2 features
  * Multiplexing multiple requests over TCP connection
 
 Pieces
- * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer)
+ * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer including netty!!!)
  * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers together)
  * http/http1_1-parser - An asynchronous http parser that can accept partial payloads (ie. nio payloads don't have full messages).  Can be used with ANY nio library.
  * http/http2-parser - An asynchronous http2 parser with all the advantages of no "head of line blocking" issues and pre-emptively sending responses, etc. etc.
  * http/httpclient - http client built on above core components
  * http/http-frontend - An very thin http library.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end)
- * embeddablehttpproxy - build on http-frontend and http client
- * webserver/http-webserver - a webserver with http 2 support
+ * embeddablehttpproxy - built on http-frontend and http client
+ * webserver/http-webserver - a webserver with http 2 support and tons of overriddable pieces via guice
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
-* add list, add, list, edit full example BUT with hibernate!!
-* add optimistic locking test case
-* add hibernate and embedded in-memory H2 in dev mode along with embedded http web client
-* add jacoco to the generated webpieces project, create example project for feature testing blog
+* ask jacoco team about code coverage on generated class file as it appears to not work and then get generated project close to 80% code covered
 * add checkstyle with the really good rules to all projects to fail if any are violated
   * add too many lines per method (70), too many lines per file(700)
   * add one to detect forgetting @ManyToOne without Lazy and @OneToOne without Lazy 
   * etc. etc.
 * add automatic formatter... https://github.com/diffplug/spotless so no one worries about formatting
+
+* add list, add, list, edit full example BUT with hibernate!!
+* add optimistic locking test case
+* add hibernate and embedded in-memory H2 in dev mode along with embedded http web GUI
 * test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
-* catch-all route with POST as in /{controller}/{action}   {controller}.post{action}
 * Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be css but could be css+html for easier construction of themes
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
-* CRUD - create re-usable CRUD routes in a scoped re-usable routerModule vs. global POST route as well?
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly

@@ -82,6 +82,7 @@ allprojects {
 
 subprojects {
    apply plugin: 'java'
+   apply plugin: 'checkstyle'
    apply plugin: 'eclipse'
    apply plugin: 'idea'
    apply plugin: 'signing'
@@ -105,6 +106,10 @@ subprojects {
    }
    //doing this modifies the mvn artifact id and we can't seem to reset it
    //archivesBaseName = "webpieces-${it.name}"
+
+   checkstyle {
+       configFile = rootProject.file('config/checkstyle.xml')
+   }
 
    repositories {
        mavenCentral()

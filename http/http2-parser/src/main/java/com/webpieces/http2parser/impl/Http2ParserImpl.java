@@ -303,23 +303,7 @@ public class Http2ParserImpl implements Http2Parser {
                         // as the initial frame. This if block is just checking for error conditions. Actual
                         // processing of the header frames is in the if block that follows.
                         if (!hasHeaderFragmentList.isEmpty()) {
-                            if (frameType != CONTINUATION) {
-                                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
-                            }
-                            switch (hasHeaderFragmentList.get(0).getFrameType()) {
-                                case PUSH_PROMISE:
-                                    if (frame.getStreamId() != ((Http2PushPromise) hasHeaderFragmentList.get(0)).getPromisedStreamId()) {
-                                        throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
-                                    }
-                                    break;
-                                case HEADERS:
-                                    if (frame.getStreamId() != hasHeaderFragmentList.get(0).getStreamId()) {
-                                        throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
-                                    }
-                                    break;
-                                default:
-                                    throw new ParseException(Http2ErrorCode.INTERNAL_ERROR); // This should not happen
-                            }
+                            checkForBadFrames(hasHeaderFragmentList, frameType, frame);
                         }
 
                         // If this is a header frame, we have to make sure we get all the header
@@ -331,17 +315,9 @@ public class Http2ParserImpl implements Http2Parser {
                             }
                             hasHeaderFragmentList.add(frame);
                             if (((HasHeaderFragment) frame).isEndHeaders()) {
-                                // Now we set the full header list on the first frame and just return that
-                                Http2Frame firstFrame = hasHeaderFragmentList.get(0);
-                                DataWrapper allSerializedHeaders = dataGen.emptyWrapper();
-                                for (Http2Frame iterFrame : hasHeaderFragmentList) {
-                                    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, ((HasHeaderFragment) iterFrame).getHeaderFragment());
-                                }
-                                ((HasHeaderList) firstFrame).setHeaderList(deserializeHeaders(allSerializedHeaders, decoder));
-                                ((HasHeaderFragment) firstFrame).setEndHeaders(true); // fake setting end headers
-                                frames.add(firstFrame);
-
-                                hasHeaderFragmentList.clear();
+                                doSomething(decoder, frames, hasHeaderFragmentList);
+                                
+                                
                                 wrapperToParse = split.get(1);
                                 wrapperToReturn = wrapperToParse;
                             } else {
@@ -363,6 +339,40 @@ public class Http2ParserImpl implements Http2Parser {
             }
         }
     }
+
+	private void doSomething(Decoder decoder, List<Http2Frame> frames, List<Http2Frame> hasHeaderFragmentList) {
+		// Now we set the full header list on the first frame and just return that
+		Http2Frame firstFrame = hasHeaderFragmentList.get(0);
+		DataWrapper allSerializedHeaders = dataGen.emptyWrapper();
+		for (Http2Frame iterFrame : hasHeaderFragmentList) {
+		    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, ((HasHeaderFragment) iterFrame).getHeaderFragment());
+		}
+		((HasHeaderList) firstFrame).setHeaderList(deserializeHeaders(allSerializedHeaders, decoder));
+		((HasHeaderFragment) firstFrame).setEndHeaders(true); // fake setting end headers
+		frames.add(firstFrame);
+
+		hasHeaderFragmentList.clear();
+	}
+
+	private void checkForBadFrames(List<Http2Frame> hasHeaderFragmentList, Http2FrameType frameType, Http2Frame frame) {
+		if (frameType != CONTINUATION) {
+		    throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+		}
+		switch (hasHeaderFragmentList.get(0).getFrameType()) {
+		    case PUSH_PROMISE:
+		        if (frame.getStreamId() != ((Http2PushPromise) hasHeaderFragmentList.get(0)).getPromisedStreamId()) {
+		            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+		        }
+		        break;
+		    case HEADERS:
+		        if (frame.getStreamId() != hasHeaderFragmentList.get(0).getStreamId()) {
+		            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+		        }
+		        break;
+		    default:
+		        throw new ParseException(Http2ErrorCode.INTERNAL_ERROR); // This should not happen
+		}
+	}
 
     @Override
     public DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers, Encoder encoder, ByteArrayOutputStream out) {

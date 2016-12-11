@@ -33,33 +33,42 @@ public class TemplateCompilerPlugin implements Plugin<ProjectInternal> {
     }
     
     private void configureSourceSetDefaults(Project project, final JavaBasePlugin javaBasePlugin) {
-        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(new Action<SourceSet>() {
-            public void execute(SourceSet sourceSet) {
-                final DefaultTemplateSourceSet templateSourceSet = new DefaultTemplateSourceSet(((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
-                new DslObject(sourceSet).getConvention().getPlugins().put("templates", templateSourceSet);
-
-                templateSourceSet.getTemplatesSrc().srcDir("src/"+sourceSet.getName()+"/java");
-                sourceSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
-                    public boolean isSatisfiedBy(FileTreeElement element) {
-                        return templateSourceSet.getTemplatesSrc().contains(element.getFile());
-                    }
-                });
-                sourceSet.getAllJava().source(templateSourceSet.getTemplatesSrc());
-                sourceSet.getAllSource().source(templateSourceSet.getTemplatesSrc());
-
-                String compileTaskName = sourceSet.getCompileTaskName("templates");
-                TemplateCompilerTask compile = project.getTasks().create(compileTaskName, TemplateCompilerTask.class);
-                javaBasePlugin.configureForSourceSet(sourceSet, compile);
-                compile.setGroup("Build");
-                compile.setDescription("Compiles the " + sourceSet.getName() + " Html or other template files source.");
-                compile.dependsOn(sourceSet.getCompileJavaTaskName());
-
-                compile.setSource(templateSourceSet.getTemplatesSrc());
-
-                project.getTasks().getByName(sourceSet.getClassesTaskName()).dependsOn(compileTaskName);
-            }
-        });
+        project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().all(new CompileAction(project, javaBasePlugin));
     }
-    
+
+    private class CompileAction implements Action<SourceSet> {
+        private Project project;
+		private JavaBasePlugin javaBasePlugin;
+
+		public CompileAction(Project project, JavaBasePlugin javaBasePlugin) {
+			this.project = project;
+			this.javaBasePlugin = javaBasePlugin;
+		}
+
+		public void execute(SourceSet sourceSet) {
+            final DefaultTemplateSourceSet templateSourceSet = new DefaultTemplateSourceSet(((DefaultSourceSet) sourceSet).getDisplayName(), sourceDirectorySetFactory);
+            new DslObject(sourceSet).getConvention().getPlugins().put("templates", templateSourceSet);
+
+            templateSourceSet.getTemplatesSrc().srcDir("src/"+sourceSet.getName()+"/java");
+            sourceSet.getResources().getFilter().exclude(new Spec<FileTreeElement>() {
+                public boolean isSatisfiedBy(FileTreeElement element) {
+                    return templateSourceSet.getTemplatesSrc().contains(element.getFile());
+                }
+            });
+            sourceSet.getAllJava().source(templateSourceSet.getTemplatesSrc());
+            sourceSet.getAllSource().source(templateSourceSet.getTemplatesSrc());
+
+            String compileTaskName = sourceSet.getCompileTaskName("templates");
+            TemplateCompilerTask compile = project.getTasks().create(compileTaskName, TemplateCompilerTask.class);
+            javaBasePlugin.configureForSourceSet(sourceSet, compile);
+            compile.setGroup("Build");
+            compile.setDescription("Compiles the " + sourceSet.getName() + " Html or other template files source.");
+            compile.dependsOn(sourceSet.getCompileJavaTaskName());
+
+            compile.setSource(templateSourceSet.getTemplatesSrc());
+
+            project.getTasks().getByName(sourceSet.getClassesTaskName()).dependsOn(compileTaskName);
+        }    	
+    }
 
 }

@@ -55,26 +55,7 @@ public class TemplateTokenizerTask {
             
             switch (state) {
                 case PLAIN:
-                    if (SCRIPT.matchesStart(c, c1, c2)) {
-                        found(SCRIPT, 2, lineNumber);
-                    } else if (EXPR.matchesStart(c, c1, c2)) {
-                        found(EXPR, 2, lineNumber);
-                    } else if (END_TAG.matchesStart(c, c1, c2)) {
-                        found(END_TAG, 3, lineNumber);
-                    } else if (START_TAG.matchesStart(c, c1, c2)) {
-                        found(START_TAG, 2, lineNumber);
-                    } else if (MESSAGE.matchesStart(c, c1, c2)) {
-                        found(MESSAGE, 2, lineNumber);
-                    } else if (ABSOLUTE_ACTION.matchesStart(c, c1, c2)) {
-                        found(ABSOLUTE_ACTION, 3, lineNumber);
-                    } else if (ACTION.matchesStart(c, c1, c2)) {
-                        found(ACTION, 2, lineNumber);
-                    } else if (COMMENT.matchesStart(c, c1, c2)) {
-                        found(COMMENT, 2, lineNumber);
-                    } else if(c == '\n') {
-                    	//We do this so any plain tokens that are all whitespace can be discarded...
-                    	found(PLAIN, 1, lineNumber, false, true);
-                    }
+                	processStartTagMatches(lineNumber, c, c1, c2);
                     break;
                 case SCRIPT:
                     if (SCRIPT.matchesEnd(c, c1, c2)) {
@@ -142,6 +123,29 @@ public class TemplateTokenizerTask {
         end++;
         found(EOF, 0, lineNumber);
         return tokens;
+	}
+
+	private void processStartTagMatches(int lineNumber, char c, char c1, char c2) {
+		if (SCRIPT.matchesStart(c, c1, c2)) {
+		    found(SCRIPT, 2, lineNumber);
+		} else if (EXPR.matchesStart(c, c1, c2)) {
+		    found(EXPR, 2, lineNumber);
+		} else if (END_TAG.matchesStart(c, c1, c2)) {
+		    found(END_TAG, 3, lineNumber);
+		} else if (START_TAG.matchesStart(c, c1, c2)) {
+		    found(START_TAG, 2, lineNumber);
+		} else if (MESSAGE.matchesStart(c, c1, c2)) {
+		    found(MESSAGE, 2, lineNumber);
+		} else if (ABSOLUTE_ACTION.matchesStart(c, c1, c2)) {
+		    found(ABSOLUTE_ACTION, 3, lineNumber);
+		} else if (ACTION.matchesStart(c, c1, c2)) {
+		    found(ACTION, 2, lineNumber);
+		} else if (COMMENT.matchesStart(c, c1, c2)) {
+		    found(COMMENT, 2, lineNumber);
+		} else if(c == '\n') {
+			//We do this so any plain tokens that are all whitespace can be discarded...
+			found(PLAIN, 1, lineNumber, false, true);
+		}
 	}
 	
 //	/** 

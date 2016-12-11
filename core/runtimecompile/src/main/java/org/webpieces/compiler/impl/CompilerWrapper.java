@@ -116,6 +116,144 @@ public class CompilerWrapper {
 		}
     }
 
+    private class INameEnvironmentImpl implements INameEnvironment {
+    	private ClassDefinitionLoader loader;
+
+		public INameEnvironmentImpl(ClassDefinitionLoader loader) {
+    		this.loader = loader;
+		}
+
+		@Override
+        public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
+            final StringBuffer result = new StringBuffer();
+            for (int i = 0; i < compoundTypeName.length; i++) {
+                if (i != 0) {
+                    result.append('.');
+                }
+                result.append(compoundTypeName[i]);
+            }
+            return findType(result.toString());
+        }
+
+        @Override
+        public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
+            final StringBuffer result = new StringBuffer();
+            for (int i = 0; i < packageName.length; i++) {
+                result.append(packageName[i]);
+                result.append('.');
+            }
+            result.append(typeName);
+            return findType(result.toString());
+        }
+
+        private NameEnvironmentAnswer findType(final String name) {
+            try {
+
+                char[] fileName = name.toCharArray();
+                VirtualFile file = fileLookup.getJava(name);
+                CompileClassMeta applicationClass = appClassMgr.getOrCreateApplicationClass(name, file);
+
+                // ApplicationClass exists
+                if (applicationClass != null) {
+
+                    if (applicationClass.javaByteCode != null) {
+                    	//if class byte code exist because we are already compiled, return the compiled byte code
+                        ClassFileReader classFileReader = new ClassFileReader(applicationClass.javaByteCode, fileName, true);
+                        return new NameEnvironmentAnswer(classFileReader, null);
+                    }
+                    // Cascade compilation
+                    ICompilationUnit compilationUnit = new CompilationUnit(name);
+                    return new NameEnvironmentAnswer(compilationUnit, null);
+                }
+
+                // So it's a standard class
+                byte[] bytes = loader.getClassDefinition(name);
+                if (bytes != null) {
+                    ClassFileReader classFileReader = new ClassFileReader(bytes, fileName, true);
+                    return new NameEnvironmentAnswer(classFileReader, null);
+                }
+
+                // So it does not exist
+                return null;
+            } catch (ClassFormatException e) {
+                // Something very very bad
+            	throw new IllegalArgumentException(e);
+            }
+        }
+
+        @Override
+        public boolean isPackage(char[][] parentPackageName, char[] packageName) {
+            // Rebuild something usable
+            StringBuilder sb = new StringBuilder();
+            if (parentPackageName != null) {
+                for (char[] p : parentPackageName) {
+                    sb.append(new String(p));
+                    sb.append(".");
+                }
+            }
+            sb.append(new String(packageName));
+            String name = sb.toString();
+            if (appClassMgr.getApplicationClass(name) != null) {
+                return false;
+            } else if (loader.getClassDefinition(name) != null) {
+            	// Check if thera a .java or .class for this ressource
+            	//We need to avoid this call since it reads in byte code
+            	//If something causes this we throw an exception so we are told and can quickly fix this
+            	//We could create a packageCache<String, Boolean> to avoid calling loader.getClassDefinition!!!
+            	throw new IllegalStateException("this is reading in bytecode which I would like to avoid...do we hit this situation?");
+//                packagesCache.put(name, false);
+//                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void cleanup() {
+        }
+    }
+    
+    private class ICompilerRequestorImpl implements ICompilerRequestor {
+
+        @Override
+        public void acceptResult(CompilationResult result) {
+            // If error
+            if (result.hasErrors()) {
+                for (IProblem problem: result.getErrors()) {
+                    String className = new String(problem.getOriginatingFileName()).replace("/", ".");
+                    className = className.substring(0, className.length() - 5);
+                    String message = problem.getMessage();
+                    if (problem.getID() == IProblem.CannotImportPackage) {
+                        // Non sense !
+                        message = problem.getArguments()[0] + " cannot be resolved";
+                    }
+                    CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
+                    VirtualFile javaFile = applicationClass.javaFile;
+                    throw new CompilationException(javaFile, config.getFileEncoding(), message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+                }
+            }
+            // Something has been compiled
+            ClassFile[] clazzFiles = result.getClassFiles();
+            for (int i = 0; i < clazzFiles.length; i++) {
+                final ClassFile clazzFile = clazzFiles[i];
+                final char[][] compoundName = clazzFile.getCompoundName();
+                final StringBuffer clazzName = new StringBuffer();
+                for (int j = 0; j < compoundName.length; j++) {
+                    if (j != 0) {
+                        clazzName.append('.');
+                    }
+                    clazzName.append(compoundName[j]);
+                }
+
+                log.trace(()->"Received Success eclipse Compiled result for=" + clazzName);
+
+                String name = clazzName.toString();
+                VirtualFile file = fileLookup.getJava(name);
+                CompileClassMeta appClass = appClassMgr.getOrCreateApplicationClass(name, file);
+                appClass.compiled(clazzFile.getBytes());
+            }
+        }    	
+    }
+    
     /**
      * Please compile this className
      */
@@ -132,141 +270,11 @@ public class CompilerWrapper {
         /**
          * To find types ...
          */
-        INameEnvironment nameEnvironment = new INameEnvironment() {
-
-            @Override
-            public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
-                final StringBuffer result = new StringBuffer();
-                for (int i = 0; i < compoundTypeName.length; i++) {
-                    if (i != 0) {
-                        result.append('.');
-                    }
-                    result.append(compoundTypeName[i]);
-                }
-                return findType(result.toString());
-            }
-
-            @Override
-            public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
-                final StringBuffer result = new StringBuffer();
-                for (int i = 0; i < packageName.length; i++) {
-                    result.append(packageName[i]);
-                    result.append('.');
-                }
-                result.append(typeName);
-                return findType(result.toString());
-            }
-
-            private NameEnvironmentAnswer findType(final String name) {
-                try {
-
-                    char[] fileName = name.toCharArray();
-                    VirtualFile file = fileLookup.getJava(name);
-                    CompileClassMeta applicationClass = appClassMgr.getOrCreateApplicationClass(name, file);
-
-                    // ApplicationClass exists
-                    if (applicationClass != null) {
-
-                        if (applicationClass.javaByteCode != null) {
-                        	//if class byte code exist because we are already compiled, return the compiled byte code
-                            ClassFileReader classFileReader = new ClassFileReader(applicationClass.javaByteCode, fileName, true);
-                            return new NameEnvironmentAnswer(classFileReader, null);
-                        }
-                        // Cascade compilation
-                        ICompilationUnit compilationUnit = new CompilationUnit(name);
-                        return new NameEnvironmentAnswer(compilationUnit, null);
-                    }
-
-                    // So it's a standard class
-                    byte[] bytes = loader.getClassDefinition(name);
-                    if (bytes != null) {
-                        ClassFileReader classFileReader = new ClassFileReader(bytes, fileName, true);
-                        return new NameEnvironmentAnswer(classFileReader, null);
-                    }
-
-                    // So it does not exist
-                    return null;
-                } catch (ClassFormatException e) {
-                    // Something very very bad
-                	throw new IllegalArgumentException(e);
-                }
-            }
-
-            @Override
-            public boolean isPackage(char[][] parentPackageName, char[] packageName) {
-                // Rebuild something usable
-                StringBuilder sb = new StringBuilder();
-                if (parentPackageName != null) {
-                    for (char[] p : parentPackageName) {
-                        sb.append(new String(p));
-                        sb.append(".");
-                    }
-                }
-                sb.append(new String(packageName));
-                String name = sb.toString();
-                if (appClassMgr.getApplicationClass(name) != null) {
-                    return false;
-                } else if (loader.getClassDefinition(name) != null) {
-                	// Check if thera a .java or .class for this ressource
-                	//We need to avoid this call since it reads in byte code
-                	//If something causes this we throw an exception so we are told and can quickly fix this
-                	//We could create a packageCache<String, Boolean> to avoid calling loader.getClassDefinition!!!
-                	throw new IllegalStateException("this is reading in bytecode which I would like to avoid...do we hit this situation?");
-//                    packagesCache.put(name, false);
-//                    return false;
-                }
-                return true;
-            }
-
-            @Override
-            public void cleanup() {
-            }
-        };
-
+        INameEnvironment nameEnvironment = new INameEnvironmentImpl(loader);
         /**
          * Compilation result
          */
-        ICompilerRequestor compilerRequestor = new ICompilerRequestor() {
-
-            @Override
-            public void acceptResult(CompilationResult result) {
-                // If error
-                if (result.hasErrors()) {
-                    for (IProblem problem: result.getErrors()) {
-                        String className = new String(problem.getOriginatingFileName()).replace("/", ".");
-                        className = className.substring(0, className.length() - 5);
-                        String message = problem.getMessage();
-                        if (problem.getID() == IProblem.CannotImportPackage) {
-                            // Non sense !
-                            message = problem.getArguments()[0] + " cannot be resolved";
-                        }
-                        CompileClassMeta applicationClass = appClassMgr.getApplicationClass(className);
-                        VirtualFile javaFile = applicationClass.javaFile;
-                        throw new CompilationException(javaFile, config.getFileEncoding(), message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
-                    }
-                }
-                // Something has been compiled
-                ClassFile[] clazzFiles = result.getClassFiles();
-                for (int i = 0; i < clazzFiles.length; i++) {
-                    final ClassFile clazzFile = clazzFiles[i];
-                    final char[][] compoundName = clazzFile.getCompoundName();
-                    final StringBuffer clazzName = new StringBuffer();
-                    for (int j = 0; j < compoundName.length; j++) {
-                        if (j != 0) {
-                            clazzName.append('.');
-                        }
-                        clazzName.append(compoundName[j]);
-                    }
-
-                    log.trace(()->"Received Success eclipse Compiled result for=" + clazzName);
-
-                    String name = clazzName.toString();
-                    VirtualFile file = fileLookup.getJava(name);
-                    CompileClassMeta appClass = appClassMgr.getOrCreateApplicationClass(name, file);
-                    appClass.compiled(clazzFile.getBytes());
-                }
-            }
-        };
+        ICompilerRequestor compilerRequestor = new ICompilerRequestorImpl();
 
         /**
          * The JDT compiler
