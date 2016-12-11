@@ -12,7 +12,7 @@ public class SeleniumOverridesForTest implements Module {
 	private TemplateCompileConfig templateConfig;
 	
 	public SeleniumOverridesForTest() {
-		this(new TemplateCompileConfig());
+		this(new TemplateCompileConfig(PlatformOverridesForTest.isGradleRunning()));
 	}
 	
 	public SeleniumOverridesForTest(TemplateCompileConfig templateCompileConfig) {
@@ -21,9 +21,11 @@ public class SeleniumOverridesForTest implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
-		//This actually helps us test the full cycle of gradle plugin compile to using
-		//the compiled template where the ProdTemplateService would test 'less' code
-		//so we get more bang for our buck in code coverage...
+                //By using the DevTemplateService, we do not need to re-run the gradle build and generate html
+                //files every time we change the html code AND instead can just run the test in our IDE.
+                //That said, there is a setting when this test runs in gradle that skips this step and runs the
+                //production groovy *.class file that will be run in production (ie. the test run in the IDE
+                //and run in gradle differ just a little :( )
 		binder.bind(TemplateService.class).to(DevTemplateService.class);
 		binder.bind(TemplateCompileConfig.class).toInstance(templateConfig);
 	}

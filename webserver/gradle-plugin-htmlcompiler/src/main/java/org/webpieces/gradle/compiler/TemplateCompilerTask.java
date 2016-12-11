@@ -53,7 +53,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 
 	public void compileImpl(TemplateCompileOptions options) throws IOException {
 		Charset encoding = Charset.forName(options.getEncoding());
-		TemplateCompileConfig config = new TemplateCompileConfig();
+		TemplateCompileConfig config = new TemplateCompileConfig(false);
 		config.setFileEncoding(encoding);
 		config.setPluginClient(true);
 		System.out.println("custom tags="+options.getCustomTags());

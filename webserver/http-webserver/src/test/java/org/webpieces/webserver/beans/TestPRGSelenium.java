@@ -9,7 +9,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
@@ -39,9 +38,8 @@ public class TestPRGSelenium {
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config), new AppOverridesModule(), true, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(), new AppOverridesModule(), true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

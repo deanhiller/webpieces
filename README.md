@@ -13,7 +13,7 @@ This project is essentially pieces that can be used to build any http related so
 
 HUGE WINS in using this webserver
 
-* built in code coverage (for java and the generated html groovy)
+* your project is automatically setup with code coverage (for java and the generated html groovy)
 * built in 'very loose' checkstyle such that developers don't create 70+ line methods or 700+ line files or nasty anti-arrow pattern if statements
 * unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases
 * be blown away with the optimistic locking pattern.  If your end users both post a change to the same entity, one will win and the other will go through a path of code where you can decide, 1. show the user his changes and the other users, 2. just tell the user it failed and to start over 3. let it overwrite the previous user code 

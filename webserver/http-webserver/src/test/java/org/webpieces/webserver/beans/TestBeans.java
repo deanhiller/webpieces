@@ -14,7 +14,6 @@ import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
@@ -39,9 +38,8 @@ public class TestBeans {
 
 	@Before
 	public void setUp() {
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), new AppOverridesModule(), false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, metaFile);
 		server = webserver.start();
 	}
 

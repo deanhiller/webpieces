@@ -15,7 +15,6 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
@@ -29,9 +28,8 @@ public class TestHttps {
 
 	@Before
 	public void setUp() {
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("httpsMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
 		server = webserver.start();
 	}
 

@@ -11,7 +11,6 @@ import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -42,11 +41,10 @@ public class TestSynchronousErrors {
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), new AppOverridesModule(), false, null);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, null);
 		server = webserver.start();
 	}
 	

@@ -55,7 +55,7 @@ public class TestDevSynchronousErrors {
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(filePath1+"/src/test/java"));
 		
-		TemplateCompileConfig templateConfig = new TemplateCompileConfig();
+		TemplateCompileConfig templateConfig = new TemplateCompileConfig(false);
 
 		Module platformOverrides = Modules.combine(
 				new DevTemplateModule(templateConfig),

@@ -11,7 +11,6 @@ import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
@@ -29,8 +28,7 @@ public class TestIncludeTypeTags {
 	
 	@Before
 	public void setUp() {
-		TemplateCompileConfig config = new TemplateCompileConfig();
-		Module allOverrides = Modules.combine(new PlatformOverridesForTest(config), new TagOverridesModule(TagOverrideLookupForTesting.class));
+		Module allOverrides = Modules.combine(new PlatformOverridesForTest(), new TagOverridesModule(TagOverrideLookupForTesting.class));
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(allOverrides, null, false, metaFile);
 		server = webserver.start();

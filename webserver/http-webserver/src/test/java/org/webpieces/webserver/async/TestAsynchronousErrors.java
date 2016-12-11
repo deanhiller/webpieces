@@ -13,7 +13,6 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
@@ -45,9 +44,8 @@ public class TestAsynchronousErrors {
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(config), new AppOverridesModule(), false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, metaFile);
 		server = webserver.start();
 	}
 	

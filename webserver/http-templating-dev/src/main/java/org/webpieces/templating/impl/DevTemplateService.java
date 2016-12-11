@@ -46,6 +46,13 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 	}
 	
 	private Template loadTemplateImpl(String fullTemplatePath, String templateFullClassName) throws IOException, ClassNotFoundException {
+		if(config.isMustReadClassFromFileSystem()) {
+			//shortcut for tests that use PlatformOverridesForTest to ensure we test the production groovy class files AND
+			//it ensures we give code coverage numbers on those class files as well.
+			Class<?> compiledTemplate = DevTemplateService.class.getClassLoader().loadClass(templateFullClassName);
+			return new TemplateImpl(htmlTagLookup, compiledTemplate);
+		}
+		
 		VirtualFile theResource = null;
 		List<VirtualFile> srcPaths = config.getSrcPaths();
 		for(VirtualFile f : srcPaths) {

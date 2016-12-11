@@ -10,7 +10,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
@@ -38,9 +37,8 @@ public class TestScopesSelenium {
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config), null, true, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(), null, true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

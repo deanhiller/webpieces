@@ -16,8 +16,10 @@ public class TemplateCompileConfig {
 	private boolean isPluginClient = false;
 	private Set<String> customTagsFromPlugin = new HashSet<>();
 	private List<VirtualFile> srcPaths = new ArrayList<>();
+	private boolean isMustReadClassFromFileSystem;
 
-	public TemplateCompileConfig() {
+	public TemplateCompileConfig(boolean isMustReadClassFromFileSystem) {
+		this.isMustReadClassFromFileSystem = isMustReadClassFromFileSystem;
 	}
 	
 	public TemplateCompileConfig(List<VirtualFile> srcPaths) {
@@ -59,4 +61,15 @@ public class TemplateCompileConfig {
 		this.srcPaths = srcPaths;
 		return this;
 	}
+
+	public boolean isMustReadClassFromFileSystem() {
+		return isMustReadClassFromFileSystem;
+	}
+
+	public TemplateCompileConfig setMustReadClassFromFileSystem(boolean isMustReadClassFromFileSystem) {
+		this.isMustReadClassFromFileSystem = isMustReadClassFromFileSystem;
+		return this;
+	}
+	
+	
 }

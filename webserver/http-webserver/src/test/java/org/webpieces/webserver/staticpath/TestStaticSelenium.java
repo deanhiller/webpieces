@@ -7,7 +7,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
@@ -34,9 +33,8 @@ public class TestStaticSelenium {
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
-		TemplateCompileConfig config = new TemplateCompileConfig();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("staticMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(config), null, true, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(), null, true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
