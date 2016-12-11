@@ -18,7 +18,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
   </module-->
 
   <module name="FileLength">
-    <property name="max" value="700"/>
+    <property name="max" value="756"/>
     <property name="fileExtensions" value=".java"/>    
   </module>
 
@@ -58,10 +58,10 @@ page at http://checkstyle.sourceforge.net/config.html -->
     </module>
 
     <module name="NestedForDepth">
-      <property name="max" value="3"/>
+      <property name="max" value="4"/>
     </module>
     <module name="NestedIfDepth">
-      <property name="max" value="3"/>
+      <property name="max" value="4"/>
     </module>
 
     <module name="StringLiteralEquality"/>

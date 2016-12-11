@@ -2,18 +2,15 @@ package org.webpieces.httpcommon.impl;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_ENABLE_PUSH;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_INITIAL_WINDOW_SIZE;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS;
 import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE;
 import static java.lang.Math.min;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.HALF_CLOSED_REMOTE;
-import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
 import static org.webpieces.httpparser.api.common.KnownHeaderName.TRAILER;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
@@ -35,13 +32,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.IntUnaryOperator;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -49,7 +43,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.Http2Engine;
 import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
-import org.webpieces.httpcommon.api.exceptions.Http2Error;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.common.Header;
@@ -75,50 +68,45 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.Http2Ping;
-import com.webpieces.http2parser.api.dto.Http2Priority;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
 
 public abstract class Http2EngineImpl implements Http2Engine {
-    private static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
-    private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
+    static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     static String prefaceHexString = "505249202a20485454502f322e300d0a0d0a534d0d0a0d0a";
 
-    private Channel channel;
+    Channel channel;
     DataListener dataListener;
-    private Http2Parser http2Parser;
+    Http2Parser http2Parser;
     private InetSocketAddress remoteAddress;
 
-    private HttpSide side;
+    HttpSide side;
 
-    private Http2SettingsMap localRequestedSettings;
+    Http2SettingsMap localRequestedSettings;
 
     // remotesettings doesn't need concurrent bc listener is vts
     Http2SettingsMap remoteSettings = new Http2SettingsMap();
-    private AtomicBoolean gotSettings = new AtomicBoolean(false);
-    private CountDownLatch settingsLatch = new CountDownLatch(1);
+    AtomicBoolean gotSettings = new AtomicBoolean(false);
+    CountDownLatch settingsLatch = new CountDownLatch(1);
 
     // localsettings also doesn't need concurrent bc local settings is only set when
     // it gets the ack from the settings that gets sent.
-    private Http2SettingsMap localSettings = new Http2SettingsMap();
+    Http2SettingsMap localSettings = new Http2SettingsMap();
 
     ConcurrentHashMap<Integer, Stream> activeStreams = new ConcurrentHashMap<>();
     private AtomicInteger nextOutgoingStreamId;
-    private AtomicInteger lastIncomingStreamId = new AtomicInteger(0);
+    AtomicInteger lastIncomingStreamId = new AtomicInteger(0);
     private ConcurrentHashMap<Integer, AtomicLong> outgoingFlowControl = new ConcurrentHashMap<>();
     private ConcurrentHashMap<Integer, AtomicLong> incomingFlowControl = new ConcurrentHashMap<>();
-    private class PendingData {
+    class PendingData {
         CompletableFuture<Void> future;
         DataWrapper data;
         boolean isComplete;
@@ -132,20 +120,20 @@ public abstract class Http2EngineImpl implements Http2Engine {
         }
     }
 
-    private ConcurrentHashMap<Integer, ConcurrentLinkedDeque<PendingData>> outgoingDataQueue = new ConcurrentHashMap<>();
+    ConcurrentHashMap<Integer, ConcurrentLinkedDeque<PendingData>> outgoingDataQueue = new ConcurrentHashMap<>();
 
     private Encoder encoder;
-    private Decoder decoder;
+    Decoder decoder;
     private AtomicBoolean maxHeaderTableSizeNeedsUpdate = new AtomicBoolean(false);
     private AtomicInteger minimumMaxHeaderTableSizeUpdate = new AtomicInteger(Integer.MAX_VALUE);
 
     // TODO: figure out how to deal with the goaway. For now we're just
     // going to record what they told us.
     // these don't have to be concurrent-safe because the datalistener is virtually single threaded.
-    private boolean remoteGoneAway = false;
-    private int goneAwayLastStreamId;
-    private Http2ErrorCode goneAwayErrorCode;
-    private DataWrapper additionalDebugData;
+    boolean remoteGoneAway = false;
+    int goneAwayLastStreamId;
+    Http2ErrorCode goneAwayErrorCode;
+    DataWrapper additionalDebugData;
 
 
     public Http2EngineImpl(
@@ -187,7 +175,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
         this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
 
-        this.dataListener = new Http2DataListener();
+        this.dataListener = new Http2DataListener(this);
 
         initializeFlowControl(0x0);
     }
@@ -330,7 +318,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     }
 
 
-    private void clearQueue(int streamId) {
+    void clearQueue(int streamId) {
         ConcurrentLinkedDeque<PendingData> queue = outgoingDataQueue.get(streamId);
         while (queue != null && !queue.isEmpty() && outgoingFlowControl.get(streamId).get() > 0) {
             PendingData pendingData = queue.poll();
@@ -515,7 +503,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
             return open && server;
         }).count();
     }
-    private long countOpenRemoteOriginatedStreams() {
+    long countOpenRemoteOriginatedStreams() {
         if(side == CLIENT)
             return countOpenStreams(SERVER);
         else
@@ -534,7 +522,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
                 .max(Comparator.comparingInt(Map.Entry::getKey)).map(entry -> entry.getKey());
     }
 
-    private Optional<Integer> lastClosedRemoteOriginatedStream() {
+    Optional<Integer> lastClosedRemoteOriginatedStream() {
         if(side == CLIENT)
             return lastClosedStream(SERVER);
         else
@@ -571,7 +559,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         log.info("stream {} outgoing window is {} and connection window is {}", streamId, outgoingFlowControl.get(streamId), outgoingFlowControl.get(0));
     }
 
-    private void decrementIncomingWindow(int streamId, int length) {
+    void decrementIncomingWindow(int streamId, int length) {
         log.info("decrementing incoming window for {} by {}", streamId, length);
         if(incomingFlowControl.get(0x0).addAndGet(- length) < 0) {
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR,
@@ -583,7 +571,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         log.info("stream {} incoming window is {} and connection window is {}", streamId, incomingFlowControl.get(streamId), incomingFlowControl.get(0));
     }
 
-    private void incrementOutgoingWindow(int streamId, int length) {
+    void incrementOutgoingWindow(int streamId, int length) {
         log.info("incrementing outgoing window for {} by {}", streamId, length);
         if(outgoingFlowControl.get(0x0).addAndGet(length) > 2147483647L)
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
@@ -634,7 +622,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     abstract void sideSpecificHandleRstStream(Http2RstStream frame, Stream stream);
 
-    private void receivedEndStream(Stream stream) {
+    void receivedEndStream(Stream stream) {
         // Make sure status can accept ES
         switch(stream.getStatus()) {
             case OPEN:
@@ -763,379 +751,6 @@ public abstract class Http2EngineImpl implements Http2Engine {
             for(Header header: headerLookupStruct.getHeaders(TRAILER)) {
                 stream.addTrailerHeader(header.getValue().toLowerCase());
             }
-        }
-    }
-
-    private class Http2DataListener implements DataListener {
-        private DataWrapper oldData = http2Parser.prepareToParse();
-        private AtomicBoolean gotPreface = new AtomicBoolean(false);
-
-        private void handleData(Http2Data frame, Stream stream) {
-            // Only allowable if stream is open or half closed local
-            switch(stream.getStatus()) {
-                case OPEN:
-                case HALF_CLOSED_LOCAL:
-                    int payloadLength = http2Parser.getFrameLength(frame);
-                    decrementIncomingWindow(frame.getStreamId(), payloadLength);
-                    stream.checkAgainstContentLength(frame.getData().getReadableSize(), frame.isEndStream());
-
-                    sideSpecificHandleData(frame, payloadLength, stream);
-
-                    if(frame.isEndStream())
-                        receivedEndStream(stream);
-                    break;
-                case HALF_CLOSED_REMOTE:
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
-                case CLOSED:
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
-                case IDLE:
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                default:
-                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
-            }
-        }
-
-        private void handleHeaders(Http2Headers frame, Stream stream) {
-            boolean isTrailer = false;
-            switch (stream.getStatus()) {
-                case IDLE:
-                    long currentlyOpenStreams = countOpenRemoteOriginatedStreams();
-                    log.info("got headers with currently open streams: " + currentlyOpenStreams);
-                    if(localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
-                            currentlyOpenStreams >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
-                        throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, stream.getStreamId());
-                    }
-                    stream.setStatus(Stream.StreamStatus.OPEN);
-                    break;
-                case HALF_CLOSED_LOCAL:
-                    // No status change in this case
-                    break;
-                case RESERVED_REMOTE:
-                    stream.setStatus(Stream.StreamStatus.HALF_CLOSED_LOCAL);
-                    break;
-                case OPEN:
-                    if(!stream.isTrailerEnabled()) {
-                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
-                    } else {
-                        isTrailer = true;
-                    }
-                    break;
-                default: // HALF_CLOSED_REMOTE, or CLOSED
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, wrapperGen.emptyWrapper());
-            }
-
-            if(frame.isPriority()) {
-                stream.setPriorityDetails(frame.getPriorityDetails());
-            }
-
-            if(frame.isEndHeaders()) {
-                // the parser has already accumulated the headers in the frame for us.
-
-                boolean isComplete = frame.isEndStream();
-
-                if(isTrailer) {
-                    // Make sure that the headers match what we are expecting.
-                    List<String> allowedTrailerHeaders = stream.getTrailerHeaders();
-                    for(HasHeaderFragment.Header header: frame.getHeaderList()) {
-                        if(!allowedTrailerHeaders.contains(header.header))
-                            throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
-                    }
-                }
-
-                // if we have no headers must be a compression error?
-                if(frame.getHeaderList().isEmpty()) {
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.COMPRESSION_ERROR, wrapperGen.emptyWrapper());
-                }
-                sideSpecificHandleHeaders(frame, isTrailer, stream);
-
-                if (isComplete)
-                    receivedEndStream(stream);
-
-            }
-            else {
-                throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper());
-            }
-        }
-
-
-        private void handlePriority(Http2Priority frame, Stream stream) {
-            // Can be received in any state. We aren't doing anything with this right now.
-            stream.setPriorityDetails(frame.getPriorityDetails());
-        }
-
-        private void handleRstStream(Http2RstStream frame, Stream stream) {
-            switch(stream.getStatus()) {
-                case OPEN:
-                case HALF_CLOSED_REMOTE:
-                case HALF_CLOSED_LOCAL:
-                case RESERVED_LOCAL:
-                case RESERVED_REMOTE:
-                case CLOSED:
-                    sideSpecificHandleRstStream(frame, stream);
-                    stream.setStatus(CLOSED);
-                    break;
-                default:
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-            }
-        }
-
-        private void handlePushPromise(Http2PushPromise frame, Stream stream) {
-            if(side == SERVER) {
-                // Can't get pushpromise in the server
-                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-            }
-
-            // Can get this on any stream id, creates a new stream
-            if(frame.isEndHeaders()) {
-                long currentlyOpenStreams = countOpenRemoteOriginatedStreams();
-                log.info("got push promise with currently open streams: " + currentlyOpenStreams);
-                if(localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
-                        currentlyOpenStreams >= localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
-                    throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, frame.getPromisedStreamId());
-                }
-                int newStreamId = frame.getPromisedStreamId();
-                if(newStreamId <= lastIncomingStreamId.get()) {
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                }
-                lastIncomingStreamId.set(newStreamId);
-
-                Stream promisedStream = new Stream();
-                initializeFlowControl(newStreamId);
-                promisedStream.setStreamId(newStreamId);
-
-                // TODO: make sure streamid is valid
-                // TODO: close all lower numbered even IDLE streams
-                activeStreams.put(newStreamId, promisedStream);
-
-                // Uses the same listener as the stream it came in on
-                promisedStream.setResponseListener(stream.getResponseListener());
-                HttpRequest request = requestFromHeaders(frame.getHeaderList(), promisedStream);
-                promisedStream.setRequest(request);
-                promisedStream.setStatus(Stream.StreamStatus.RESERVED_REMOTE);
-            } else {
-                throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper());
-            }
-        }
-
-        private void handleWindowUpdate(Http2WindowUpdate frame, Stream stream) {
-            if(frame.getWindowSizeIncrement() == 0) {
-                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-            }
-
-            incrementOutgoingWindow(frame.getStreamId(), frame.getWindowSizeIncrement());
-
-            // clear all queues if the connection-level stream
-            if(frame.getStreamId() == 0x0) {
-                for (Map.Entry<Integer, ConcurrentLinkedDeque<PendingData>> entry : outgoingDataQueue.entrySet()) {
-                    if (!entry.getValue().isEmpty())
-                        clearQueue(entry.getKey());
-                }
-            }
-            else {
-                if(stream.getStatus() == IDLE) {
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                }
-                if(outgoingDataQueue.containsKey(frame.getStreamId())) {
-                    clearQueue(frame.getStreamId());
-                }
-            }
-        }
-
-        private void handleSettings(Http2Settings frame) {
-            if(frame.isAck()) {
-                // we received an ack, so the settings we sent have been accepted.
-                for(Map.Entry<Http2Settings.Parameter, Long> entry: localRequestedSettings.entrySet()) {
-                    localSettings.put(entry.getKey(), entry.getValue());
-                }
-            } else {
-                setRemoteSettings(frame, true);
-            }
-        }
-
-        // TODO: actually deal with this goaway stuff where necessary
-        private void handleGoAway(Http2GoAway frame) {
-            remoteGoneAway = true;
-            goneAwayLastStreamId = frame.getLastStreamId();
-            goneAwayErrorCode = frame.getErrorCode();
-            additionalDebugData = frame.getDebugData();
-            farEndClosed(channel);
-        }
-
-        private void handlePing(Http2Ping frame) {
-            if(!frame.isPingResponse()) {
-                // Send the same frame back, setting ping response
-                frame.setIsPingResponse(true);
-                log.info("sending ping response: " + frame);
-                channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
-            } else {
-                // measure latency from the ping that was sent. The opaqueData we sent is
-                // System.nanoTime() so we just measure the difference
-                long latency = System.nanoTime() - frame.getOpaqueData();
-                log.info("Ping: {} ms", latency * 1e-6);
-            }
-        }
-
-        private void handleFrame(Http2Frame frame) {
-            if(frame.getFrameType() != SETTINGS && !gotSettings.get()) {
-                // If we haven't gotten the settings, let's wait a little bit because another thread
-                // might have the settings frame and hasn't gotten around to processing it yet.
-                try {
-                    log.info("Waiting for settings frame to arrive");
-                    if (!settingsLatch.await(500, TimeUnit.MILLISECONDS))
-                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                } catch (InterruptedException e) {
-                    log.error("Caught exception while waiting for settings frame", e);
-                    throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                }
-            }
-
-            // Transition the stream state
-            if(frame.getStreamId() != 0x0) {
-                Stream stream = activeStreams.get(frame.getStreamId());
-
-                // If the stream doesn't exist, create it, if server and if streamid is odd.
-                if (stream == null) {
-                    if (side == SERVER) {
-                        int streamId = frame.getStreamId();
-                        if(streamId <= lastIncomingStreamId.get() || frame.getStreamId() % 2 != 1) {
-                            throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                        }
-                        lastIncomingStreamId.set(streamId);
-                        stream = new Stream();
-                        stream.setStreamId(streamId);
-                        initializeFlowControl(stream.getStreamId());
-                        activeStreams.put(stream.getStreamId(), stream);
-                    } else {
-                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                    }
-                }
-
-                switch (frame.getFrameType()) {
-                    case DATA:
-                        handleData((Http2Data) frame, stream);
-                        break;
-                    case HEADERS:
-                        handleHeaders((Http2Headers) frame, stream);
-                        break;
-                    case PRIORITY:
-                        handlePriority((Http2Priority) frame, stream);
-                        break;
-                    case RST_STREAM:
-                        handleRstStream((Http2RstStream) frame, stream);
-                        break;
-                    case PUSH_PROMISE:
-                        handlePushPromise((Http2PushPromise) frame, stream);
-                        break;
-                    case WINDOW_UPDATE:
-                        handleWindowUpdate((Http2WindowUpdate) frame, stream);
-                        break;
-                    case CONTINUATION:
-                        throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.emptyWrapper());
-                    default:
-                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), frame.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR,
-                                wrapperGen.emptyWrapper());
-                }
-            } else {
-                switch (frame.getFrameType()) {
-                    case WINDOW_UPDATE:
-                        handleWindowUpdate((Http2WindowUpdate) frame, null);
-                        break;
-                    case SETTINGS:
-                        handleSettings((Http2Settings) frame);
-                        break;
-                    case GOAWAY:
-                        handleGoAway((Http2GoAway) frame);
-                        break;
-                    case PING:
-                        handlePing((Http2Ping) frame);
-                        break;
-                    default:
-                        throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR,
-                                wrapperGen.emptyWrapper());
-                }
-            }
-        }
-
-        @Override
-        public void incomingData(Channel channel, ByteBuffer b) {
-            DataWrapper newData = wrapperGen.wrapByteBuffer(b);
-            try {
-                // TODO: turn the preface into a frame type.
-                // First check to make sure we got our preface
-                if(side == SERVER && !gotPreface.get()) {
-                    // check to make sure we got the preface.
-                    DataWrapper combined = wrapperGen.chainDataWrappers(oldData, newData);
-                    int prefaceLength = prefaceHexString.length()/2;
-                    if(combined.getReadableSize() >= prefaceLength) {
-                        List<? extends DataWrapper> split = wrapperGen.split(combined, prefaceLength);
-                        if(Arrays.equals(split.get(0).createByteArray(), (DatatypeConverter.parseHexBinary(prefaceHexString)))) {
-                            gotPreface.set(true);
-                            oldData = split.get(1);
-                            log.info("got http2 preface");
-                            sendLocalRequestedSettings();
-                        } else {
-                            throw new GoAwayError(0, Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
-                        }
-                    } else {
-                        oldData = combined;
-                    }
-                } else { // Either we got the preface or we don't need it
-                    try {
-                        ParserResult parserResult = http2Parser.parse(oldData, newData, decoder, localSettings);
-
-                        for (Http2Frame frame : parserResult.getParsedFrames()) {
-                            log.info("got frame=" + frame);
-                            handleFrame(frame);
-                        }
-                        oldData = parserResult.getMoreData();
-                    }
-                    catch (ParseException e) {
-                        if(e.isConnectionLevel()) {
-                            if(e.hasStream()) {
-                                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), wrapperGen.emptyWrapper());
-                            }
-                            else {
-                                throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), e.getErrorCode(), wrapperGen.emptyWrapper());
-                            }
-                        } else {
-                            throw new RstStreamError(e.getErrorCode(), e.getStreamId());
-                        }
-                    }
-                }
-            } catch (Http2Error e) {
-                log.error("sending error frames " + e.toFrames(), e);
-                channel.write(ByteBuffer.wrap(http2Parser.marshal(e.toFrames()).createByteArray()));
-                if(RstStreamError.class.isInstance(e)) {
-                    // Mark the stream closed
-                    Stream stream = activeStreams.get(((RstStreamError) e).getStreamId());
-                    if(stream != null)
-                        stream.setStatus(CLOSED);
-                }
-                if(GoAwayError.class.isInstance(e)) {
-                    // TODO: Shut this connection down properly.
-                    channel.close();
-                }
-            }
-        }
-
-        @Override
-        public void farEndClosed(Channel channel) {
-            // TODO: deal with this
-        }
-
-        @Override
-        public void failure(Channel channel, ByteBuffer data, Exception e) {
-            // TODO: deal with this
-        }
-
-        @Override
-        public void applyBackPressure(Channel channel) {
-
-        }
-
-        @Override
-        public void releaseBackPressure(Channel channel) {
-
         }
     }
 }

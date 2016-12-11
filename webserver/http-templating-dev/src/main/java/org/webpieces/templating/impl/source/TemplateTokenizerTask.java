@@ -41,74 +41,7 @@ public class TemplateTokenizerTask {
 		int lineNumber = 1;
 		int left = pageSource.length() - end;
         while(left != 0) {
-            char c = pageSource.charAt(end);
-            char c1 = left > 1 ? pageSource.charAt(end+1) : 0;
-            char c2 = left > 2 ? pageSource.charAt(end + 2) : 0;
-            
-            if(c == '\n') {
-            	newLineMarks.add(end);
-            	lineNumber++;
-            }
-            
-            //advance one character for next time...
-            end++;
-            
-            switch (state) {
-                case PLAIN:
-                	processStartTagMatches(lineNumber, c, c1, c2);
-                    break;
-                case SCRIPT:
-                    if (SCRIPT.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 2, lineNumber);
-                    }
-                    break;
-                case COMMENT:
-                    if (COMMENT.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 2, lineNumber);
-                    }
-                    break;
-                case START_TAG:
-                    if (START_TAG.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 2, lineNumber);
-                    } else if (START_END_TAG.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 3, lineNumber, true, false);
-                    }
-                    break;
-                case END_TAG:
-                    if (END_TAG.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 2, lineNumber);
-                    }
-                    break;
-                case EXPR:
-                    if (EXPR.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 2, lineNumber);
-                    }
-                    break;
-                case ACTION:
-                    if (ACTION.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 2, lineNumber);
-                    }
-                    break;
-                case ABSOLUTE_ACTION:
-                    if (ABSOLUTE_ACTION.matchesEnd(c, c1, c2)) {
-                        found(PLAIN, 3, lineNumber);
-                    }
-                    break;
-                case MESSAGE:
-                	if (c == '&' && c1 == '{') {
-                		startTokenCount++; //For nested i18n tags
-                	} else if (MESSAGE.matchesEnd(c, c1, c2)) {
-                		if(startTokenCount == 0) {
-                			found(PLAIN, 2, lineNumber);
-                		} else
-                			startTokenCount--;
-                    }
-                    break;
-                case EOF:
-                case START_END_TAG:
-                	throw new RuntimeException("Should not reach here");
-                	
-            }
+            lineNumber = processNext3Chars(lineNumber, left);
             
             left = pageSource.length() - end;
         }
@@ -123,6 +56,78 @@ public class TemplateTokenizerTask {
         end++;
         found(EOF, 0, lineNumber);
         return tokens;
+	}
+
+	private int processNext3Chars(int lineNumber, int left) {
+		char c = pageSource.charAt(end);
+		char c1 = left > 1 ? pageSource.charAt(end+1) : 0;
+		char c2 = left > 2 ? pageSource.charAt(end + 2) : 0;
+		
+		if(c == '\n') {
+			newLineMarks.add(end);
+			lineNumber++;
+		}
+		
+		//advance one character for next time...
+		end++;
+		
+		switch (state) {
+		    case PLAIN:
+		    	processStartTagMatches(lineNumber, c, c1, c2);
+		        break;
+		    case SCRIPT:
+		        if (SCRIPT.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 2, lineNumber);
+		        }
+		        break;
+		    case COMMENT:
+		        if (COMMENT.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 2, lineNumber);
+		        }
+		        break;
+		    case START_TAG:
+		        if (START_TAG.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 2, lineNumber);
+		        } else if (START_END_TAG.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 3, lineNumber, true, false);
+		        }
+		        break;
+		    case END_TAG:
+		        if (END_TAG.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 2, lineNumber);
+		        }
+		        break;
+		    case EXPR:
+		        if (EXPR.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 2, lineNumber);
+		        }
+		        break;
+		    case ACTION:
+		        if (ACTION.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 2, lineNumber);
+		        }
+		        break;
+		    case ABSOLUTE_ACTION:
+		        if (ABSOLUTE_ACTION.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 3, lineNumber);
+		        }
+		        break;
+		    case MESSAGE:
+		    	if (c == '&' && c1 == '{') {
+		    		startTokenCount++; //For nested i18n tags
+		    	} else if (MESSAGE.matchesEnd(c, c1, c2)) {
+		    		if(startTokenCount == 0) {
+		    			found(PLAIN, 2, lineNumber);
+		    		} else
+		    			startTokenCount--;
+		        }
+		        break;
+		    case EOF:
+		    case START_END_TAG:
+		    	throw new RuntimeException("Should not reach here");
+		    	
+		}
+		return lineNumber;
 	}
 
 	private void processStartTagMatches(int lineNumber, char c, char c1, char c2) {
