@@ -1,1 +1,27 @@
-bin/
+# never check in class files
+*.class
+
+# eclipse output files
+**/eclipse-output
+**/.project
+**/.classpath
+**/.settings
+#This is only here as the gradle build plugin is ignore the eclipse defaultOutput
+**/bin
+
+#gradle output files
+**/output
+/.gradle/
+
+#Intellij Idea files
+*.iml
+.idea
+
+#Do I need these too...
+#*.iws
+#*.ipr
+
+# What is this.  it popped up on mac (not using intellij)
+.DS_Store
+
+build/
