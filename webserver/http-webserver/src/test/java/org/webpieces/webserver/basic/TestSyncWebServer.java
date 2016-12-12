@@ -58,6 +58,7 @@ public class TestSyncWebServer {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
+		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
 	}	
 
 	@Test
@@ -73,5 +74,35 @@ public class TestSyncWebServer {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("red");
 		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testRedirectRawRelativeUrl() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawurlredirect");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals(0, response.getBody().getReadableSize());
+		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
+	}
+	
+	@Test
+	public void testRedirectRawAbsoluteUrl() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawabsoluteurlredirect");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals(0, response.getBody().getReadableSize());
+		Assert.assertEquals("https://something.com/hi", response.getRedirectUrl());
 	}
 }

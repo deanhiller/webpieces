@@ -11,6 +11,8 @@ import com.google.inject.Provides;
 
 public class HibernateModule extends AbstractModule {
 
+	public static final String PERSISTENCE_TEST_UNIT = "fortest";
+	
 	private String persistenceUnit;
 
 	public HibernateModule(String persistenceUnit) {

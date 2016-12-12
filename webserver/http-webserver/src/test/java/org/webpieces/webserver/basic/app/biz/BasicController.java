@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.app.BasicRouteId;
 
@@ -29,6 +30,13 @@ public class BasicController {
 		return Actions.redirect(BasicRouteId.RENDER_PAGE);
 	}
 
+	public Redirect redirectRawUrl() {
+		return Actions.redirectToUrl("/myroute");
+	}
+	public Redirect redirectRawAbsoluteUrl() {
+		return Actions.redirectToUrl("https://something.com/hi");
+	}
+	
 	public Action throwNotFound() {
 		throw new NotFoundException("not found");
 	}

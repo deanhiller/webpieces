@@ -3,20 +3,21 @@ package WEBPIECESxPACKAGE;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
+import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.plugins.hsqldb.H2DbPlugin;
+import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
-
-import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.WEBPIECESxCLASSServer;
 
 public class WEBPIECESxCLASSDevServer {
 
@@ -67,6 +68,14 @@ public class WEBPIECESxCLASSDevServer {
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
 		
+		List<WebAppMeta> plugins = Lists.newArrayList(
+				//This is only for the development server to expose a GUI to use http://localhost:9000/@db
+				new H2DbPlugin(),
+				//if you want to use hibernate in production, move this to 
+				//WEBPIECESxCLASSServer.java otherwise remove dependency on hibernate in build.gradle file
+				//make sure you use a H2 persistence unit for dev and some other db persistence unit for production
+				new HibernatePlugin("fortest") 
+				);
 		
 		ServerConfig config = new ServerConfig();
 		if(usePortZero) {
@@ -86,7 +95,7 @@ public class WEBPIECESxCLASSDevServer {
 		config.setStaticFileCacheTimeSeconds(null);
 		
 		config.setMetaFile(metaFile);
-		server = new WEBPIECESxCLASSServer(platformOverrides, null, config);
+		server = new WEBPIECESxCLASSServer(platformOverrides, null, plugins, config);
 	}
 	
 	public static String modifyForIDE(String filePath1) {

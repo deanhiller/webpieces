@@ -4,4 +4,7 @@ dependencies {
   //This contains development overrides that pulls in the eclipse compiler...
   compile deps['web-devrouter']
   compile deps['web-devtemplating']
+  
+  //optional plugin for if you use H2 which supplies a GUI to access in memory database during development
+  compile deps['plugin-h2']
 }

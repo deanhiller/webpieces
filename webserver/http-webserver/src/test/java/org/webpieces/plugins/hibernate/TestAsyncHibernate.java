@@ -17,12 +17,16 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.jdbc.api.JdbcApi;
 import org.webpieces.jdbc.api.JdbcFactory;
 import org.webpieces.mock.lib.MockExecutor;
+import org.webpieces.plugins.hsqldb.H2DbPlugin;
+import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
@@ -37,9 +41,18 @@ public class TestAsyncHibernate {
 		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 		jdbc.dropAllTablesFromDatabase();
 		
+		List<WebAppMeta> plugins = Lists.newArrayList(
+				new HibernatePlugin(HibernateModule.PERSISTENCE_TEST_UNIT), 
+				new H2DbPlugin());
+
 		mockExecutor.clear();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new TestOverrides(), false, metaFile, false);
+		TestConfig config = new TestConfig();
+		config.setPlatformOverrides(new PlatformOverridesForTest());
+		config.setAppOverrides(new TestOverrides());
+		config.setMetaFile(metaFile);
+		config.setPlugins(plugins);
+		WebserverForTest webserver = new WebserverForTest(config);
 		server = webserver.start();
 	}
 

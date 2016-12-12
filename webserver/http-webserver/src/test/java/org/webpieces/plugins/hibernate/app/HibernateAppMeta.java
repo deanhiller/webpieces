@@ -5,9 +5,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.webpieces.plugins.hibernate.HibernateModule;
-import org.webpieces.plugins.hibernate.HibernateRouteModule;
-import org.webpieces.plugins.hsqldb.H2DbModule;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 
@@ -16,23 +13,15 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 
 public class HibernateAppMeta implements WebAppMeta {
-	public static final String PERSISTENCE_UNIT= "fortest";
 
     @Override
     public List<Module> getGuiceModules() {
-		return Lists.newArrayList(
-				new H2DbModule(),
-				new HibernateModule(PERSISTENCE_UNIT),
-				new AppModule()
-				);
+		return Lists.newArrayList(new AppModule());
 	}
 	
 	@Override
     public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(
-				new HibernateRouteModule(),
-				new HibernateTestRouteModule()
-				);
+		return Lists.newArrayList(new HibernateTestRouteModule());
 	}
 	
 	private class AppModule implements Module {

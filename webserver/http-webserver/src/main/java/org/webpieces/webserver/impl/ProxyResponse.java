@@ -113,8 +113,9 @@ public class ProxyResponse implements ResponseStreamer {
 		response.setStatusLine(statusLine);
 		
 		String url = httpResponse.redirectToPath;
-		
-		if(httpResponse.domain != null && httpResponse.isHttps != null) {
+		if(url.startsWith("http")) {
+			//do nothing
+		} else if(httpResponse.domain != null && httpResponse.isHttps != null) {
 			String prefix = "http://";
 			if(httpResponse.isHttps)
 				prefix = "https://";

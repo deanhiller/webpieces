@@ -22,6 +22,7 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
@@ -217,6 +218,8 @@ public class RouteInvoker {
 			processor.createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderImpl) {
 			processor.createRenderResponse((RenderImpl)controllerResponse);
+		} else if(controllerResponse instanceof RawRedirect) {
+			processor.createRawRedirect((RawRedirect)controllerResponse);
 		} else {
 			throw new UnsupportedOperationException("Not yet done but could "
 					+ "call into the Action witht the responseCb to handle so apps can decide what to send back");

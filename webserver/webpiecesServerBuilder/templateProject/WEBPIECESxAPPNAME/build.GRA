@@ -35,7 +35,9 @@ sourceSets {
 dependencies {
   //add maven dependencies here
   compile deps['web-webserver']
-
+  //optional plugin for if you use hibernate
+  compile deps['plugin-hibernate']
+  
   //IF you add dependencies on other projects locally, you need to modify WEBPIECESxCLASSDevServer.java to include those
   //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
 

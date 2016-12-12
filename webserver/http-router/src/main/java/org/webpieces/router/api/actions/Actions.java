@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 
@@ -66,7 +67,8 @@ public class Actions {
 	}
 	
 	public static Redirect redirectToUrl(String url) {
-		throw new UnsupportedOperationException("not done here yet");
+		RawRedirect redirect = new RawRedirect(url);
+		return redirect;
 	}
 
 	public static void redirectFlashAllAddEdit(RouteId addRoute, RouteId editRoute,

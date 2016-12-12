@@ -19,6 +19,9 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
 
     dependencies {
         compile project(':webserver:http-webserver')
+        //we start people off with the hibernate plugin but it's easy enough to just delete this line and 
+        //delete the code that no longer compiles to remove it
+        compile project(':webserver-plugins:hibernate-plugin')
 
         testCompile project(':webserver:http-webserver-test')
         testCompile deps['selenium']
@@ -40,6 +43,10 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev') {
         compile project(':webserver:http-router-dev')
         compile project(':webserver:http-templating-dev')
         compile project(':webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME')
+
+        //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
+        //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
+        compile project(':webserver-plugins:h2db-plugin')
     }
     
     //task uploadArchives(overwrite: true) << {

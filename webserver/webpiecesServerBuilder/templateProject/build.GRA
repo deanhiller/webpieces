@@ -20,6 +20,8 @@ ext {
        'web-webserver-test': "org.webpieces:http-webserver-test:${webpiecesVersion}",
        'web-devrouter':      "org.webpieces:http-router-dev:${webpiecesVersion}",
        'web-devtemplating':  "org.webpieces:http-templating-dev:${webpiecesVersion}",
+       'plugin-hibernate':   "org.webpieces:hibernate-plugin:${webpiecesVersion}",
+       'plugin-h2':          "org.webpieces:h2db-plugin:${webpiecesVersion}",
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
 
        //These next two are in case you have libraries that want to use an

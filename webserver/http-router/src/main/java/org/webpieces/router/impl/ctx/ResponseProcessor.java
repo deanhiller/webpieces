@@ -22,6 +22,7 @@ import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
@@ -45,6 +46,18 @@ public class ResponseProcessor {
 		this.responseCb = responseCb;
 	}
 
+	public void createRawRedirect(RawRedirect controllerResponse) {
+		String url = controllerResponse.getUrl();
+		if(url.startsWith("http")) {
+			wrapFunctionInContext(s -> responseCb.sendRedirect(new RedirectResponse(url)));
+			return;
+		}
+
+		RouterRequest request = ctx.getRequest();
+		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, url);
+		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
+	}
+	
 	public void createFullRedirect(RedirectImpl action) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");

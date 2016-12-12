@@ -13,21 +13,23 @@ import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.jdbc.api.JdbcApi;
 import org.webpieces.jdbc.api.JdbcFactory;
-import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.dbo.CompanyDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
+import org.webpieces.plugins.hsqldb.H2DbPlugin;
+import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
+
+import com.google.common.collect.Lists;
 
 public class TestSyncHibernate {
 	private MockResponseSender socket = new MockResponseSender();
@@ -39,8 +41,16 @@ public class TestSyncHibernate {
 		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 		jdbc.dropAllTablesFromDatabase();
 		
+		List<WebAppMeta> plugins = Lists.newArrayList(
+				new HibernatePlugin(HibernateModule.PERSISTENCE_TEST_UNIT), 
+				new H2DbPlugin());
+
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile, false);
+		TestConfig config = new TestConfig();
+		config.setPlatformOverrides(new PlatformOverridesForTest());
+		config.setMetaFile(metaFile);
+		config.setPlugins(plugins);
+		WebserverForTest webserver = new WebserverForTest(config);
 		server = webserver.start();
 	}
 
@@ -56,9 +66,7 @@ public class TestSyncHibernate {
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		socket.clear();
 		
-		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
-		String url = header.getValue();
-		return url;
+		return response.getRedirectUrl();
 	}
 	
 	private void readBean(String redirectUrl, String email) {
@@ -104,7 +112,7 @@ public class TestSyncHibernate {
 	public static Integer loadDataInDb() {
 		String email = "dean2@sync.xsoftware.biz";
 		//populate database....
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_UNIT);
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateModule.PERSISTENCE_TEST_UNIT);
 		EntityManager mgr = factory.createEntityManager();
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();

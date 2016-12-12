@@ -15,6 +15,8 @@ public class BasicRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/throwNotFound",     "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
 		addRoute(GET , "/badtemplate",       "biz/BasicController.badTemplate", BasicRouteId.BAD_TEMPLATE);
 		addRoute(GET , "/somejson",          "biz/BasicController.jsonFile", BasicRouteId.JSON_ROUTE);
+		addRoute(GET , "/rawurlredirect",    "biz/BasicController.redirectRawUrl", BasicRouteId.REDIRECT_RAW_URL);
+		addRoute(GET , "/rawabsoluteurlredirect",    "biz/BasicController.redirectRawAbsoluteUrl", BasicRouteId.REDIRECT_ABSOLUTE_URL);
 
 		addRoute(GET , "/null",              "biz/BasicController.returnNull", BasicRouteId.NULL_ROUTE);
 

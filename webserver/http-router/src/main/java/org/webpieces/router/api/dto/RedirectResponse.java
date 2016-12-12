@@ -8,6 +8,10 @@ public class RedirectResponse implements Redirect {
 	public String domain;
 	public String redirectToPath;
 
+	public RedirectResponse(String redirectToPath) {
+		this.redirectToPath = redirectToPath;
+	}
+	
 	public RedirectResponse(Boolean isHttps, String domain, String redirectToPath) {
 		this.isHttps = isHttps;
 		this.domain = domain;

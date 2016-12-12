@@ -49,7 +49,7 @@ public class TestLesson1BasicRequestResponse {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig());
+		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(new PlatformOverridesForTest(), new AppOverridesModule(), null, new ServerConfig());
 		server = webserver.start();
 	}
 	

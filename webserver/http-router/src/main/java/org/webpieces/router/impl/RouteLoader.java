@@ -2,6 +2,7 @@ package org.webpieces.router.impl;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +102,15 @@ public class RouteLoader {
 		List<Module> guiceModules = routerModule.getGuiceModules();
 		
 		Module module = Modules.combine(guiceModules);
+		if(config.getPlugins() != null) {
+			for(WebAppMeta plugin : config.getPlugins()) {
+				List<Module> modules = new ArrayList<>();
+				modules.addAll(plugin.getGuiceModules());
+				modules.add(module);
+				module = Modules.combine(modules);
+			}
+		}
+
 		if(config.getWebappOverrides() != null)
 			module = Modules.override(module).with(config.getWebappOverrides());
 		
@@ -117,7 +127,16 @@ public class RouteLoader {
 		routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		invoker.init(reverseRoutes);
 		
-		for(RouteModule module : rm.getRouteModules()) {
+		
+		List<RouteModule> all = new ArrayList<>();
+		all.addAll(rm.getRouteModules()); //the core application routes
+		if(config.getPlugins() != null) {
+			for(WebAppMeta plugin : config.getPlugins()) {
+				all.addAll(plugin.getRouteModules());
+			}
+		}
+		
+		for(RouteModule module : all) {
 			String packageName = getPackage(module.getClass());
 			RouteModuleInfo info = new RouteModuleInfo(packageName, module.getI18nBundleName());
 			RouterBuilder.currentPackage.set(info);

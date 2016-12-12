@@ -10,8 +10,6 @@ import java.util.Base64;
 import java.util.List;
 
 import org.webpieces.httpcommon.api.RequestListener;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.routing.RouteModule;
@@ -19,6 +17,8 @@ import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -83,7 +83,7 @@ public class WEBPIECESxCLASSServer {
 	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
-		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, new ServerConfig());
+		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, null, new ServerConfig());
 		
 		server.start();
 		
@@ -95,12 +95,16 @@ public class WEBPIECESxCLASSServer {
 
 	private WebServer webServer;
 
-	public WEBPIECESxCLASSServer(Module platformOverrides, Module appOverrides, ServerConfig svrConfig) {
+	public WEBPIECESxCLASSServer(
+			Module platformOverrides, 
+			Module appOverrides, 
+			List<WebAppMeta> devPlugins, 
+			ServerConfig svrConfig) {
 		String filePath = System.getProperty("user.dir");
 		log.info("original user.dir before modification="+filePath);
 
 		modifyUserDirForManyEnvironments(filePath);
-				
+
 		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
 		if(metaFile == null)
@@ -113,6 +117,10 @@ public class WEBPIECESxCLASSServer {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
+		List<WebAppMeta> allPlugins = Lists.newArrayList();
+		if(devPlugins != null)
+			allPlugins.addAll(devPlugins);
+		
 		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
 		
 		//Different pieces of the server have different configuration objects where settings are set
@@ -122,6 +130,7 @@ public class WEBPIECESxCLASSServer {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
+											.setPlugins(allPlugins)
 											.setSecretKey(signingKey);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)

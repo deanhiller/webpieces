@@ -25,7 +25,7 @@ public class TestLesson5RouteValidation {
 		serverConfig.setHttpsPort(0); //bind to any port
 		serverConfig.setValidateRouteIdsOnStartup(true);
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, serverConfig);
+		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, null, serverConfig);
 		
 		//Start server to force validation
 		server.start();

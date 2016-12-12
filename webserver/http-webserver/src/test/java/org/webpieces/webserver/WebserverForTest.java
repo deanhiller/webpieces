@@ -39,41 +39,42 @@ public class WebserverForTest {
 	private WebServer webServer;
 
 	public WebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile) {
-		this(platformOverrides, appOverrides, usePortZero, metaFile, true);
+		this(new TestConfig(platformOverrides, appOverrides, usePortZero, metaFile, true));
 	}
 	
-	public WebserverForTest(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile, boolean tokenCheckOn) {
+	public WebserverForTest(TestConfig testConfig) {
 		String filePath = System.getProperty("user.dir");
 		log.info("property user.dir="+filePath);
 		
+		VirtualFile metaFile = testConfig.getMetaFile();
 		//Tests can override this...
-		if(metaFile == null)
+		if(testConfig.getMetaFile() == null)
 			metaFile = new VirtualFileClasspath("basicMeta.txt", WebserverForTest.class.getClassLoader());
-		
+
 		int httpPort = 8080;
 		int httpsPort = 8443;
-		if(usePortZero) {
+		if(testConfig.isUsePortZero()) {
 			httpPort = 0;
 			httpsPort = 0;
 		}
 		
-		
 		File cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestCache");
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
-				.setPlatformOverrides(platformOverrides)
+				.setPlatformOverrides(testConfig.getPlatformOverrides())
 				.setHttpListenAddress(new InetSocketAddress(httpPort))
 				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
 				.setSslEngineFactory(new SSLEngineFactoryWebServerTesting())
 				.setFunctionToConfigureServerSocket(s -> configure(s));
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
-											.setWebappOverrides(appOverrides)
+											.setWebappOverrides(testConfig.getAppOverrides())
+											.setPlugins(testConfig.getPlugins())
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 											.setCachedCompressedDirectory(cacheDir)
 											.setSecretKey(SecretKeyInfo.generateForTest())
-											.setTokenCheckOn(tokenCheckOn);
+											.setTokenCheckOn(testConfig.isUseTokenCheck());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
