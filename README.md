@@ -37,12 +37,13 @@ HUGE WINS in using this webserver
 * Protects developers from the frequent caching css/js/html files screwup!!! This is bigger than people realize until they get bitten.  ie. you should not change any static js/css files without also renaming them so that the browser cache is avoided and it loads the new one as soon as a new version is deployed.  Nearly all webservers just let developers screw this up and then customers wonder why things are not working(and it's only specific customers that have old versions that complain making it harder to pinpoint the issue).  Finally, you can live in a world where this is fixed!!!
 * supports multiple domains over SSL with multiple certificates but only for advanced users
 * JPA/hibernate plugin with filter all setup/working so if your backend is a database, you can crank out db models.  NoSQL scales better but for startups, start simple with a database
-* TODO - saving page and seamless logging in
-* TODO: seamless creation of CRUD
+* NoSql works AMAZINGLY when using nosql asynch clients as this server supports complete async controllers
+* CRUD in routemodules can be done with one method call to create all routes(list, edit and add, post, and delete) or you can vary it with a subset easily
+* no session timeout on login EVER(unlike JSF and seam frameworks)
+* going to a secure page can redirect you to login and once logged in automatically redirect you back to your original page
 * Security - cookie is hashed so can't be modified without failing next request
-* Security - Form auth token in play1.3.x+  can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it harder to miss the auth token AND check that token in forms for the developer(putting it in is automatic in play 1.3 but checking it is not)
+* Security - Form auth token in play1.3.x+  can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it near impossible to miss the auth token AND check that token in forms for the developer(putting it in is automatic in play 1.3 but checking it is not leaving a hole if you don't know and many don't know)
 * State per tab rather than just per session.  All web frameworks have a location to store session state but if you go to buy a plane ticket in 3 different tabs, the three tabs can step on each other.  A location to store information for each tab is needed
-* login and authorization to pages much like Seam Frameworks method such that we can redirect the user to a login page and back to the page he requested(our advantage over seam though...when a user is logging in, he doesn't come back to realize his session times out which can be annoying for users)
 
 Downside:
   Currently documentation is lacking but there is an example for pretty much everything in webpieces/webserver/http-webserver/src/test/java/* as we do something called feature testing(testing as user would use the system) for all paths of code.
@@ -98,24 +99,18 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
-* add list, add, list, edit full example BUT with hibernate!!
+* add edit, add, list, delete full example BUT with hibernate!!
 * add optimistic locking test case
-* add hibernate and embedded in-memory H2 in dev mode along with embedded http web GUI
-* test and figure out multiple example projects with secure cookie.
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
-* implement error, errorClass, errors, ifError, ifErrors, jsAction, jsRoute, option, select,
-* Need to test theory of a theme can be a unique controllers/views set AND then many unique views on that set.  a theme does not just have to be css but could be css+html for easier construction of themes
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
-* bring back Hotswap for the dev server ONCE the projectTemplate is complete and we are generating projects SUCH that we can add a startup target that adds the Hotswap agent propertly
 * write an escapehtml tag
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
 * ask jacoco team about code coverage on generated class file as it appears to not work and then get generated project close to 80% code covered
+* question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
 
 * ALPN is next????
-
-* start createing a real website!!!! AND on https
 
 Other longterm TODO:
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
@@ -123,10 +118,7 @@ Other longterm TODO:
    * escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
 * tab state
 * http2
-* metrics
-* dynamic JMX
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
-
 
 Examples.....
 
@@ -138,7 +130,7 @@ ${user.account.address}$
 @[ROUTE_ID, user:account.user.name, arg:'flag']@
 @@[ROUTE_ID, user:account.user.name, arg:'flag']@@
 
-The last two are specia and can be used between tag tokens and between i18n tokens like so...
+The last two are special and can be used between tag tokens and between i18n tokens like so...
  
 In an href tag..                                                  #{a href:@[ROUTE, user:user, arg:'flag']@}#Some Link#{/a}# 
 In text..                                                This is some text @[ROUTE, user:user, arg:'flag']@
