@@ -6,14 +6,14 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.ddl.api.JdbcApi;
+import org.webpieces.ddl.api.JdbcConstants;
+import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.jdbc.api.JdbcApi;
-import org.webpieces.jdbc.api.JdbcFactory;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.plugins.hibernate.JdbcConstants;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -50,6 +50,7 @@ public class TestLesson2Errors {
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+	private static String PU = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
@@ -62,7 +63,7 @@ public class TestLesson2Errors {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(
-				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
+				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, PU));
 		server = webserver.start();
 	}
 	

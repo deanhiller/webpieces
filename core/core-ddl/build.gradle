@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':core:core-util')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='an api to run DDL commands from java'
+}

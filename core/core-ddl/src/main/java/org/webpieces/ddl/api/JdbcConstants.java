@@ -1,4 +1,4 @@
-package org.webpieces.plugins.hibernate;
+package org.webpieces.ddl.api;
 
 public class JdbcConstants {
 	public static String jdbcUrl = "jdbc:log4jdbc:h2:mem:test";

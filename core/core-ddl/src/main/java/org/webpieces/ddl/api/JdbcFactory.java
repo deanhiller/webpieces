@@ -1,6 +1,6 @@
-package org.webpieces.jdbc.api;
+package org.webpieces.ddl.api;
 
-import org.webpieces.jdbc.impl.JdbcApiImpl;
+import org.webpieces.ddl.impl.JdbcApiImpl;
 
 public class JdbcFactory {
 

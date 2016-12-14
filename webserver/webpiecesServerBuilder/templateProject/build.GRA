@@ -20,6 +20,7 @@ ext {
        'web-webserver-test': "org.webpieces:http-webserver-test:${webpiecesVersion}",
        'web-devrouter':      "org.webpieces:http-router-dev:${webpiecesVersion}",
        'web-devtemplating':  "org.webpieces:http-templating-dev:${webpiecesVersion}",
+       'ddl-api':            "org.webpieces:core-ddl:${webpiecesVersion}",
        'plugin-hibernate':   "org.webpieces:hibernate-plugin:${webpiecesVersion}",
        'plugin-h2':          "org.webpieces:h2db-plugin:${webpiecesVersion}",
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',

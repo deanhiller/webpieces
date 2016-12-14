@@ -8,10 +8,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.webpieces.jdbc.api.JdbcApi;
-import org.webpieces.jdbc.api.JdbcFactory;
+import org.webpieces.ddl.api.JdbcApi;
+import org.webpieces.ddl.api.JdbcConstants;
+import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.plugins.hibernate.JdbcConstants;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.SeleniumOverridesForTest;
 
@@ -25,6 +25,7 @@ public class TestLesson4WithSelenium {
 	
 	private static WebDriver driver;
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+	private static String PU = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
@@ -51,7 +52,7 @@ public class TestLesson4WithSelenium {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(
-				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
+				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, PU));
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

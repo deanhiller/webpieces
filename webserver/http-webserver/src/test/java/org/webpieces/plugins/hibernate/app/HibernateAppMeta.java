@@ -6,14 +6,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.google.inject.Binder;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.plugins.hsqldb.H2DbPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Binder;
 import com.google.inject.Module;
 
 public class HibernateAppMeta implements WebAppMeta {

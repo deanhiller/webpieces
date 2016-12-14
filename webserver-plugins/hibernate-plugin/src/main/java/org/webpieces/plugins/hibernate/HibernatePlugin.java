@@ -11,7 +11,7 @@ import com.google.inject.Module;
 public class HibernatePlugin implements Plugin {
 
 	public static final String PERSISTENCE_UNIT_KEY = "hibernate.persistenceunit.key";
-	public static final String PERSISTENCE_TEST_UNIT = "fortest";
+	public static final String PERSISTENCE_TEST_UNIT = "fortest222";
 			
 	private String persistenceUnit;
 

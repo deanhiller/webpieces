@@ -1,12 +1,12 @@
-package org.webpieces.jdbc.impl;
+package org.webpieces.ddl.impl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.webpieces.jdbc.api.JdbcApi;
-import org.webpieces.jdbc.api.SqlRuntimeException;
+import org.webpieces.ddl.api.JdbcApi;
+import org.webpieces.ddl.api.SqlRuntimeException;
 
 public class JdbcApiImpl implements JdbcApi {
 

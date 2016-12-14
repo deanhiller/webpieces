@@ -1,4 +1,4 @@
-package org.webpieces.jdbc.api;
+package org.webpieces.ddl.api;
 
 public interface JdbcApi {
 
