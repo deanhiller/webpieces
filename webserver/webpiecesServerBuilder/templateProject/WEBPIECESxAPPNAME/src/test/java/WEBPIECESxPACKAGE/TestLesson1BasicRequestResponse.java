@@ -19,6 +19,8 @@ import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -39,6 +41,8 @@ import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
  */
 public class TestLesson1BasicRequestResponse {
 
+	private final static Logger log = LoggerFactory.getLogger(TestLesson1BasicRequestResponse.class);
+	
 	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
@@ -51,6 +55,7 @@ public class TestLesson1BasicRequestResponse {
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
+		log.info("Setting up test");
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//clear in-memory database

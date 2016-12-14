@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.webpieces.webserver.tags.app.Account;
 
-public class UserDbo {
+public class UserDto {
 
 	private String firstName;
 	private String lastName;

@@ -18,7 +18,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
-import org.webpieces.webserver.basic.app.biz.UserDbo;
+import org.webpieces.webserver.basic.app.biz.UserDto;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.FullResponse;
@@ -138,7 +138,7 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
-		UserDbo user = mockSomeOtherLib.getUser();
+		UserDto user = mockSomeOtherLib.getUser();
 		Assert.assertEquals(555, user.getAddress().getZipCode());
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
@@ -162,10 +162,10 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
-		UserDbo savedUser = mockSomeOtherLib.getUser();
+		UserDto savedUser = mockSomeOtherLib.getUser();
 		Assert.assertEquals(null, savedUser); //user was not 
 
-		UserDbo user = mockSomeLib.getUser();
+		UserDto user = mockSomeLib.getUser();
 		Assert.assertEquals(0, user.getAddress().getZipCode()); //this is not set since it was invalid
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
@@ -221,7 +221,7 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 
-		UserDbo user = mockSomeLib.getUser();
+		UserDto user = mockSomeLib.getUser();
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals(3, user.getAccounts().size());
 		Assert.assertEquals("Account2Name", user.getAccounts().get(1).getName());
@@ -246,7 +246,7 @@ public class TestBeans {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
-		UserDbo user = mockSomeLib.getUser();
+		UserDto user = mockSomeLib.getUser();
 		Assert.assertEquals("D&D", user.getFirstName());
 		Assert.assertEquals(3, user.getAccounts().size());
 		Assert.assertEquals("Account2Name", user.getAccounts().get(1).getName());

@@ -4,6 +4,7 @@
    <persistence-unit name="webpieces-persistence" transaction-type="RESOURCE_LOCAL">
 
       <description>Persistence Unit</description>
+	  <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
       <properties>
          <!-- property name="javax.persistence.jdbc.driver" value="org.h2.Driver" /-->

@@ -17,7 +17,7 @@ import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.webserver.basic.app.biz.Address;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
-import org.webpieces.webserver.basic.app.biz.UserDbo;
+import org.webpieces.webserver.basic.app.biz.UserDto;
 import org.webpieces.webserver.tags.app.Account;
 
 @Singleton
@@ -68,7 +68,7 @@ public class BeansController {
 		return Actions.renderThis();
 	}
 	
-	public Redirect postUser(UserDbo user, String password) {
+	public Redirect postUser(UserDto user, String password) {
 		//Validate any other stuff you need here adding errors and such
 		lib1.validateUser(user);
 		
@@ -86,9 +86,9 @@ public class BeansController {
 	}
 	
 	public Action arrayForm() {
-		UserDbo user = new UserDbo();
+		UserDto user = new UserDto();
 		//Add how many relatives you want added(adding null is fine here unless you have defaults in the user object
-		//in which case you could add new UserDbo as well
+		//in which case you could add new UserDto as well
 		for(int i = 0; i < 3; i++) {
 			Account acc = new Account();
 			if(i == 0)
@@ -105,7 +105,7 @@ public class BeansController {
 		return Actions.renderThis("user", user);
 	}
 	
-	public Redirect postArray(UserDbo user, List<UserDbo> users) {
+	public Redirect postArray(UserDto user, List<UserDto> users) {
 		lib1.validateUser(user);
 		Current.validation().addError("user.accounts[0].addresses[0].street", "This is too ugly a street name");
 		if(Current.validation().hasErrors()) {

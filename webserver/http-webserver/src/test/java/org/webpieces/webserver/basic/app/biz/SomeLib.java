@@ -8,6 +8,6 @@ public class SomeLib {
 		return CompletableFuture.completedFuture(33);
 	}
 
-	public void validateUser(UserDbo user) {
+	public void validateUser(UserDto user) {
 	}
 }
