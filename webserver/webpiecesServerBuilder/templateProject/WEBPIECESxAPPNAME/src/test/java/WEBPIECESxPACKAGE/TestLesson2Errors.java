@@ -10,6 +10,10 @@ import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.jdbc.api.JdbcApi;
+import org.webpieces.jdbc.api.JdbcFactory;
+import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.plugins.hibernate.JdbcConstants;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -18,8 +22,8 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.example.RemoteService;
-import WEBPIECESxPACKAGE.example.SomeLibrary;
+import WEBPIECESxPACKAGE.base.example.RemoteService;
+import WEBPIECESxPACKAGE.base.example.SomeLibrary;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 
@@ -45,15 +49,20 @@ public class TestLesson2Errors {
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
+	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
+		//clear in-memory database
+		jdbc.dropAllTablesFromDatabase();
+		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(new PlatformOverridesForTest(), new AppOverridesModule(), null, new ServerConfig(0, 0));
+		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(
+				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
 		server = webserver.start();
 	}
 	

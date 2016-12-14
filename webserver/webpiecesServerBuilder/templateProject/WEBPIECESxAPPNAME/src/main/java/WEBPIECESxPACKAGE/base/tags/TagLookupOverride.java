@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE.example.tags;
+package WEBPIECESxPACKAGE.base.tags;
 
 import org.webpieces.templating.api.HtmlTagLookup;
 

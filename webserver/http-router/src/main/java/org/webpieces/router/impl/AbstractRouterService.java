@@ -1,13 +1,19 @@
 package org.webpieces.router.impl;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 
 public abstract class AbstractRouterService implements RoutingService {
 	
@@ -39,5 +45,25 @@ public abstract class AbstractRouterService implements RoutingService {
 	@Override
 	public String convertToUrl(String routeId, Map<String, String> args) {
 		return routeLoader.convertToUrl(routeId, args);
+	}
+	
+	protected void runStartupHooks(Injector injector) {
+		log.info("Running startup hooks for server");
+		
+		Key<Set<Startable>> key = Key.get(new TypeLiteral<Set<Startable>>(){});
+		Set<Startable> startupHooks = injector.getInstance(key);
+		for(Startable s : startupHooks) {
+			runStartupHook(s);
+		}
+	}
+
+	private void runStartupHook(Startable s) {
+		try {
+			log.info("starting startup hook="+s.getClass().getSimpleName());
+			s.start();
+			log.info("Successfully ran startup hook="+s.getClass().getSimpleName());
+		} catch(Throwable e) {
+			throw new RuntimeException("Startup hook="+s.getClass().getSimpleName()+" failed", e);
+		}
 	}
 }

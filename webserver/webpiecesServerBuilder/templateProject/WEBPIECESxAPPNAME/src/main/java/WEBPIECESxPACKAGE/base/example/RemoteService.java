@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE.example;
+package WEBPIECESxPACKAGE.base.example;
 
 import java.util.concurrent.CompletableFuture;
 

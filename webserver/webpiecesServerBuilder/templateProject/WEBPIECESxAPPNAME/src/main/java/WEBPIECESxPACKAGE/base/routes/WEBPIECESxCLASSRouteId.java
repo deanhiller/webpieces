@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package WEBPIECESxPACKAGE.base.routes;
 
 import org.webpieces.router.api.routing.RouteId;
 

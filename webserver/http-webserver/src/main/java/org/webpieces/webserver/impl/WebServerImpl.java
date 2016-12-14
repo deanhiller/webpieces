@@ -45,7 +45,6 @@ public class WebServerImpl implements WebServer {
 	@Override
 	public RequestListener start() {
 		log.info("starting server");
-
 		routingService.start();
 
 		//validate html route id's and params on startup if 'org.webpieces.routeId.txt' exists
@@ -54,7 +53,7 @@ public class WebServerImpl implements WebServer {
 		FrontendConfig svrChanConfig = new FrontendConfig("http", config.getHttpListenAddress());
 		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
-		
+
 		if(factory != null) {
 			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();

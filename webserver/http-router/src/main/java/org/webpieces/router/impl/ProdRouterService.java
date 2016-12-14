@@ -35,7 +35,7 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 	public void start() {
 		log.info("Starting PROD server with NO compiling classloader");
 		
-		routeLoader.load(loader);
+		routeLoader.load(loader, injector -> runStartupHooks(injector));
 		started = true;
 	}
 

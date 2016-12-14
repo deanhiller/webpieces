@@ -69,7 +69,6 @@ public class WebserverForTest {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile )
 											.setWebappOverrides(testConfig.getAppOverrides())
-											.setPlugins(testConfig.getPlugins())
 											.setFileEncoding(CHAR_SET_TO_USE)
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 											.setCachedCompressedDirectory(cacheDir)

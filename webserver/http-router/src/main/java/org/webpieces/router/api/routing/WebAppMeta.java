@@ -1,13 +1,12 @@
 package org.webpieces.router.api.routing;
 
 import java.util.List;
+import java.util.Map;
 
-import com.google.inject.Module;
+public interface WebAppMeta extends Plugin {
 
-public interface WebAppMeta {
+	void initialize(Map<String, String> props);
 
-	public List<Module> getGuiceModules();
-	
-	public List<RouteModule> getRouteModules();
+	public List<Plugin> getPlugins();
 	
 }

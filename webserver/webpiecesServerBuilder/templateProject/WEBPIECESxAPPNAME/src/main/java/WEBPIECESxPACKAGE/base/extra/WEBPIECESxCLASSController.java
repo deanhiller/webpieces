@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE;
+package WEBPIECESxPACKAGE.base.extra;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -6,7 +6,8 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
-import WEBPIECESxPACKAGE.example.SomeLibrary;
+import WEBPIECESxPACKAGE.base.example.SomeLibrary;
+import WEBPIECESxPACKAGE.base.routes.WEBPIECESxCLASSRouteId;
 
 @Singleton
 public class WEBPIECESxCLASSController {

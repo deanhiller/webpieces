@@ -1,4 +1,4 @@
-package org.webpieces.plugins.hibernate.app.dbo;
+package WEBPIECESxPACKAGE.base.crud;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +29,10 @@ public class CompanyDbo {
 	private String beginDayOfWeek;
 
 	private String getEmailYesOrNo;
+	
+	public CompanyDbo() {
+		System.out.println("here I am.  cl="+getClass().getClassLoader());
+	}
 	
 	public int getId() {
 		return id;

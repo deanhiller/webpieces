@@ -2,12 +2,18 @@ package WEBPIECESxPACKAGE;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.webpieces.jdbc.api.JdbcApi;
+import org.webpieces.jdbc.api.JdbcFactory;
+import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.plugins.hibernate.JdbcConstants;
 import org.webpieces.webserver.test.Asserts;
 
 import WEBPIECESxPACKAGE.ServerConfig;
 import WEBPIECESxPACKAGE.WEBPIECESxCLASSServer;
 
 public class TestLesson3BasicStart {
+
+	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 
 	//talk to, you will need to change this test and pass in appOverridesModule to override those 
@@ -20,8 +26,11 @@ public class TestLesson3BasicStart {
 	public void testBasicProdStartup() throws InterruptedException, IOException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
+		//clear in-memory database
+		jdbc.dropAllTablesFromDatabase();
+		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, null, new ServerConfig(0, 0));
+		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
 		//In this case, we bind a port
 		server.start();
 
@@ -34,7 +43,7 @@ public class TestLesson3BasicStart {
 		// non-guice singletons).  A guice singleton is only a singleton within the scope of a server
 		//while a java singleton....well, pretty much sucks.  Google "Singletons are evil".
 		
-		WEBPIECESxCLASSServer server2 = new WEBPIECESxCLASSServer(null, null, null, new ServerConfig(0, 0));
+		WEBPIECESxCLASSServer server2 = new WEBPIECESxCLASSServer(null, null, new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
 		//In this case, we bind a port
 		server2.start();
 		System.out.println("bound port="+server.getUnderlyingHttpChannel().getLocalAddress());

@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE.example;
+package WEBPIECESxPACKAGE.base.example;
 
 public class SomeLibrary {
 

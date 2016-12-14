@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE.example.tags;
+package WEBPIECESxPACKAGE.base.tags;
 
 import javax.inject.Inject;
 
@@ -12,7 +12,7 @@ public class MyHtmlTagLookup extends HtmlTagLookup {
 	public MyHtmlTagLookup(TemplateConfig config) {
 		super(config);
 		//add any custom tags you like here...
-		put(new CustomTag("/WEBPIECESxPACKAGE/example/tags/mytag.tag"));
+		put(new CustomTag("/WEBPIECESxPACKAGE/base/tags/mytag.tag"));
 	}
 
 }

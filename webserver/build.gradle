@@ -23,6 +23,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
         //delete the code that no longer compiles to remove it
         compile project(':webserver-plugins:hibernate-plugin')
 
+        testCompile project(':webserver-plugins:h2db-plugin')
         testCompile project(':webserver:http-webserver-test')
         testCompile deps['selenium']
     }

@@ -2,13 +2,13 @@ package org.webpieces.plugins.hsqldb;
 
 import java.util.List;
 
+import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-public class H2DbPlugin implements WebAppMeta {
+public class H2DbPlugin implements Plugin {
 
 	@Override
 	public List<Module> getGuiceModules() {

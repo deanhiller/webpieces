@@ -1,6 +1,6 @@
 package WEBPIECESxPACKAGE.mock;
 
-import WEBPIECESxPACKAGE.example.SomeLibrary;
+import WEBPIECESxPACKAGE.base.example.SomeLibrary;
 
 public class MockSomeLibrary extends SomeLibrary {
 

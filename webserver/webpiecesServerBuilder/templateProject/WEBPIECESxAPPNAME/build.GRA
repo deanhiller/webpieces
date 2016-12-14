@@ -41,6 +41,9 @@ dependencies {
   //IF you add dependencies on other projects locally, you need to modify WEBPIECESxCLASSDevServer.java to include those
   //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
 
+  //optional plugin for H2 for testing to swap to in-memory database making things easy/fast to clear the db
+  testCompile deps['plugin-h2']
+
   //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
   //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code. For 
   //production jars, the html files are compiled to *.class files

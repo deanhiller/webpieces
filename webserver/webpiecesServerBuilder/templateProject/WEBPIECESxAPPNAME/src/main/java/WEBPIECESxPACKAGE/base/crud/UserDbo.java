@@ -1,4 +1,4 @@
-package org.webpieces.plugins.hibernate.app.dbo;
+package WEBPIECESxPACKAGE.base.crud;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,8 +147,8 @@ public class UserDbo {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<UserDbo> findAllField(EntityManager mgr) {
-		Query query = mgr.createNamedQuery("findAll");
+	public static List<UserDbo> findAll(EntityManager mgr) {
+		Query query = mgr.createNamedQuery("findAllUsers");
 		return query.getResultList();
 	}
 

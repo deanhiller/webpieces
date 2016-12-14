@@ -1,7 +1,10 @@
 package WEBPIECESxPACKAGE;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.util.file.VirtualFile;
 
 public class ServerConfig {
@@ -11,13 +14,16 @@ public class ServerConfig {
 	private int httpPort = 8080;
 	private int httpsPort = 8443;
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
+	private Map<String, String> webAppMetaProperties = new HashMap<>();
 
-	public ServerConfig(int httpPort, int httpsPort) {
+	public ServerConfig(int httpPort, int httpsPort, String persistenceUnit) {
+		this(persistenceUnit);
 		this.httpPort = httpPort;
 		this.httpsPort = httpsPort;
 	}
 	
-	public ServerConfig() {
+	public ServerConfig(String persistenceUnit) {
+		webAppMetaProperties.put(HibernatePlugin.PERSISTENCE_UNIT_KEY, persistenceUnit);
 	}
 	
 	public VirtualFile getMetaFile() {
@@ -51,4 +57,9 @@ public class ServerConfig {
 	public void setStaticFileCacheTimeSeconds(Long staticFileCacheTimeSeconds) {
 		this.staticFileCacheTimeSeconds = staticFileCacheTimeSeconds;
 	}
+
+	public Map<String, String> getWebAppMetaProperties() {
+		return webAppMetaProperties;
+	}
+	
 }

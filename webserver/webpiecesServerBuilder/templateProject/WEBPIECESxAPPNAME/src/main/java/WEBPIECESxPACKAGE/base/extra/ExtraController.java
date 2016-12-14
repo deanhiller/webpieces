@@ -1,11 +1,11 @@
-package WEBPIECESxPACKAGE.example.extra;
+package WEBPIECESxPACKAGE.base.extra;
 
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
-import WEBPIECESxPACKAGE.WEBPIECESxCLASSRouteId;
+import WEBPIECESxPACKAGE.base.routes.WEBPIECESxCLASSRouteId;
 
 @Singleton
 public class ExtraController {
