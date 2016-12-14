@@ -6,14 +6,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
-import org.webpieces.webserver.basic.app.biz.UserDbo;
+import org.webpieces.webserver.basic.app.biz.UserDto;
 
 public class MockSomeOtherLib extends SomeOtherLib {
 
 	private boolean throwNotFound;
 	private boolean throwRuntime;
 	private List<CompletableFuture<Integer>> queueFuture = new ArrayList<>();
-	private UserDbo lastUser;
+	private UserDto lastUser;
 
 	@Override
 	public CompletableFuture<Integer> someBusinessLogic() {
@@ -40,11 +40,11 @@ public class MockSomeOtherLib extends SomeOtherLib {
 	}
 
 	@Override
-	public void saveUser(UserDbo user) {
+	public void saveUser(UserDto user) {
 		this.lastUser = user;
 	}
 	
-	public UserDbo getUser() {
+	public UserDto getUser() {
 		return lastUser;
 	}
 	

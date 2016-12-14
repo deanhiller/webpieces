@@ -11,11 +11,10 @@ import javax.persistence.Query;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
-import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
+import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
-import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -28,21 +27,21 @@ public class CrudController {
 		EntityManager mgr = Em.get();
 		Query query = mgr.createNamedQuery("findAllUsers");
 		@SuppressWarnings("unchecked")
-		List<UserDbo> users = query.getResultList();
+		List<UserTestDbo> users = query.getResultList();
 		return Actions.renderThis("users", users);
 	}
 	
 	public Render userAddEdit(Integer id) {
 		if(id == null) {
-			return Actions.renderThis("user", new UserDbo());
+			return Actions.renderThis("user", new UserTestDbo());
 		}
 		
 		EntityManager mgr = Em.get();
-		UserDbo user = mgr.find(UserDbo.class, id);
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);
 		return Actions.renderThis("user", user);
 	}
 	
-	public Redirect postSaveUser(UserDbo user, RouteId addEditRoute) {
+	public Redirect postSaveUser(UserTestDbo user) {
 		if(user.getPassword().length() < 4) {
 			Current.validation().addError("password", "Value is too short");
 		}
@@ -63,7 +62,7 @@ public class CrudController {
 	}
 	
     public Redirect postDeleteUser(Integer id) {
-    	UserDbo user = Em.get().getReference(UserDbo.class, id);
+    	UserTestDbo user = Em.get().getReference(UserTestDbo.class, id);
     	Em.get().remove(user);
     	Em.get().flush();
     	

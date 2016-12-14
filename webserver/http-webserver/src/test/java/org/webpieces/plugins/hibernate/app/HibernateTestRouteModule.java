@@ -9,7 +9,6 @@ import static org.webpieces.plugins.hibernate.app.HibernateRouteId.LIST_USERS;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.SAVE_USER;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
-import org.webpieces.router.api.routing.RouteId;
 
 public class HibernateTestRouteModule extends AbstractRouteModule {
 
@@ -27,17 +26,6 @@ public class HibernateTestRouteModule extends AbstractRouteModule {
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
-	}
-
-	public void addCrud(String entity, String controller,  
-			RouteId listRoute, RouteId addRoute, RouteId editRoute, RouteId saveRoute, RouteId deleteRoute) {
-		
-		String entityWithCapital = entity.substring(0, 1).toUpperCase() + entity.substring(1);
-		addRoute(GET , "/"+entity+"/list",        controller+"."+entity+"List", listRoute);
-		addRoute(GET , "/"+entity+"/add",         controller+"."+entity+"AddEdit", addRoute);
-		addRoute(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute);
-		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, saveRoute);
-		addRoute(POST, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
 	}
 
 }

@@ -10,26 +10,24 @@ import javax.persistence.Persistence;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.ddl.api.JdbcApi;
+import org.webpieces.ddl.api.JdbcConstants;
+import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.jdbc.api.JdbcApi;
-import org.webpieces.jdbc.api.JdbcFactory;
-import org.webpieces.plugins.hibernate.app.dbo.CompanyDbo;
-import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
-import org.webpieces.plugins.hsqldb.H2DbPlugin;
-import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
+import org.webpieces.plugins.hibernate.app.dbo.CompanyTestDbo;
+import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
-
-import com.google.common.collect.Lists;
 
 public class TestSyncHibernate {
 	private MockResponseSender socket = new MockResponseSender();
@@ -41,15 +39,10 @@ public class TestSyncHibernate {
 		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 		jdbc.dropAllTablesFromDatabase();
 		
-		List<WebAppMeta> plugins = Lists.newArrayList(
-				new HibernatePlugin(HibernateModule.PERSISTENCE_TEST_UNIT), 
-				new H2DbPlugin());
-
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		TestConfig config = new TestConfig();
 		config.setPlatformOverrides(new PlatformOverridesForTest());
 		config.setMetaFile(metaFile);
-		config.setPlugins(plugins);
 		WebserverForTest webserver = new WebserverForTest(config);
 		server = webserver.start();
 	}
@@ -112,15 +105,15 @@ public class TestSyncHibernate {
 	public static Integer loadDataInDb() {
 		String email = "dean2@sync.xsoftware.biz";
 		//populate database....
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateModule.PERSISTENCE_TEST_UNIT);
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);
 		EntityManager mgr = factory.createEntityManager();
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
 
-		CompanyDbo company = new CompanyDbo();
+		CompanyTestDbo company = new CompanyTestDbo();
 		company.setName("WebPieces LLC");
 		
-		UserDbo user = new UserDbo();
+		UserTestDbo user = new UserTestDbo();
 		user.setEmail(email);
 		user.setName("SomeName");
 		user.setFirstName("Dean");
@@ -150,13 +143,13 @@ public class TestSyncHibernate {
 		
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("<a href=`/user/add`>Add User</a>".replace("`", "\""));
+		response.assertContains("<a href=`/user/new`>Add User</a>".replace("`", "\""));
 		response.assertContains("<a href=`/user/edit/1`>Edit</a>".replace("`", "\""));
 	}
 
 	@Test
 	public void testRenderAddPage() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/add");
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/new");
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		

@@ -1,6 +1,7 @@
 package org.webpieces.devrouter.impl;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -27,9 +28,13 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.google.inject.Injector;
+
 public class DevRoutingService extends AbstractRouterService implements RoutingService {
 
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
+	private static final Consumer<Injector> NO_OP = whatever -> {};
+	
 	private long lastFileTimestamp;
 	private RouteLoader routeLoader;
 	private DevClassForName classLoader;
@@ -50,7 +55,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	@Override
 	public void start() {
 		log.info("Starting DEVELOPMENT server with CompilingClassLoader and HotSwap");
-		loadOrReload();
+		loadOrReload(injector -> runStartupHooks(injector)); 
 		started = true;
 	}
 
@@ -164,7 +169,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 
 		log.info("text file changed so need to reload RouterModules.java implementation");
 
-		routerModule = routeLoader.load(classLoader);
+		routerModule = routeLoader.load(classLoader, NO_OP);
 		lastFileTimestamp = metaTextFile.lastModified();
 		return true;
 	}
@@ -179,10 +184,10 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			return;
 		
 		log.info("classloader change so we need to reload all router classes");
-		loadOrReload();
+		loadOrReload(NO_OP);
 	}
 
-	private void loadOrReload() {
-		routerModule = routeLoader.load(classLoader);		
+	private void loadOrReload(Consumer<Injector> startupHook) {
+		routerModule = routeLoader.load(classLoader, startupHook);
 	}
 }

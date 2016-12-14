@@ -6,8 +6,6 @@ import java.util.List;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.plugins.hsqldb.H2DbPlugin;
-import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -15,7 +13,6 @@ import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
@@ -54,7 +51,7 @@ public class WEBPIECESxCLASSDevServer {
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(directory+"/WEBPIECESxAPPNAME/src/main/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(directory + "/WEBPIECESxAPPNAME/src/main/resources/appmeta.txt");
+		VirtualFile metaFile = new VirtualFileImpl(directory + "/WEBPIECESxAPPNAME/src/main/resources/appmetadev.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...
@@ -68,16 +65,7 @@ public class WEBPIECESxCLASSDevServer {
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
 		
-		List<WebAppMeta> plugins = Lists.newArrayList(
-				//This is only for the development server to expose a GUI to use http://localhost:9000/@db
-				new H2DbPlugin(),
-				//if you want to use hibernate in production, move this to 
-				//WEBPIECESxCLASSServer.java otherwise remove dependency on hibernate in build.gradle file
-				//make sure you use a H2 persistence unit for dev and some other db persistence unit for production
-				new HibernatePlugin("fortest") 
-				);
-		
-		ServerConfig config = new ServerConfig();
+		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
 		if(usePortZero) {
 			config.setHttpPort(0);
 			config.setHttpsPort(0);
@@ -93,9 +81,9 @@ public class WEBPIECESxCLASSDevServer {
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website
 		config.setStaticFileCacheTimeSeconds(null);
-		
 		config.setMetaFile(metaFile);
-		server = new WEBPIECESxCLASSServer(platformOverrides, null, plugins, config);
+		
+		server = new WEBPIECESxCLASSServer(platformOverrides, null, config);
 	}
 	
 	public static String modifyForIDE(String filePath1) {

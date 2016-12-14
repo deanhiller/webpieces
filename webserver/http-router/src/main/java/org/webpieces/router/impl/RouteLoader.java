@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -18,6 +19,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
@@ -65,15 +67,15 @@ public class RouteLoader {
 		this.objectTranslator = objectTranslator;
 	}
 	
-	public WebAppMeta load(ClassForName loader) {
+	public WebAppMeta load(ClassForName loader, Consumer<Injector> startupFunction) {
 		try {
-			return loadImpl(loader);
+			return loadImpl(loader, startupFunction);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private WebAppMeta loadImpl(ClassForName loader) throws IOException {
+	private WebAppMeta loadImpl(ClassForName loader, Consumer<Injector> startupFunction) throws IOException {
 		log.info("loading the master "+WebAppMeta.class.getSimpleName()+" class file");
 
 		VirtualFile fileWithMetaClassName = config.getMetaFile();
@@ -89,21 +91,32 @@ public class RouteLoader {
 		if(!(obj instanceof WebAppMeta))
 			throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMeta.class.getSimpleName());
 
-		log.info(WebAppMeta.class.getSimpleName()+" loaded");
+		log.info(WebAppMeta.class.getSimpleName()+" loaded.  initializing next");
 
 		WebAppMeta routerModule = (WebAppMeta) obj;
+		routerModule.initialize(config.getWebAppMetaProperties());
+		log.info(WebAppMeta.class.getSimpleName()+" initialized.");
+		
 		Injector injector = createInjector(routerModule);
 
+		startupFunction.accept(injector);
+		
 		loadAllRoutes(routerModule, injector);
 		return routerModule;
 	}
 
 	public Injector createInjector(WebAppMeta routerModule) {
 		List<Module> guiceModules = routerModule.getGuiceModules();
+		if(guiceModules == null)
+			guiceModules = new ArrayList<>();
+		
+		guiceModules.add(new EmptyPluginModule());
 		
 		Module module = Modules.combine(guiceModules);
-		if(config.getPlugins() != null) {
-			for(WebAppMeta plugin : config.getPlugins()) {
+		
+		List<Plugin> plugins = routerModule.getPlugins();
+		if(plugins != null) {
+			for(Plugin plugin : plugins) {
 				List<Module> modules = new ArrayList<>();
 				modules.addAll(plugin.getGuiceModules());
 				modules.add(module);
@@ -130,8 +143,10 @@ public class RouteLoader {
 		
 		List<RouteModule> all = new ArrayList<>();
 		all.addAll(rm.getRouteModules()); //the core application routes
-		if(config.getPlugins() != null) {
-			for(WebAppMeta plugin : config.getPlugins()) {
+		
+		List<Plugin> plugins = rm.getPlugins();
+		if(plugins != null) {
+			for(Plugin plugin : plugins) {
 				all.addAll(plugin.getRouteModules());
 			}
 		}
@@ -146,6 +161,8 @@ public class RouteLoader {
 			RouterBuilder.injector.set(null);
 		}
 		
+		log.info("added all routes to router.  Applying Filters");
+
 		reverseRoutes.finalSetup();
 		
 		routerBuilder.applyFilters();
@@ -165,7 +182,7 @@ public class RouteLoader {
 		else if(!routerBuilder.getRouterInfo().isInternalSvrErrorRouteSet())
 			throw new IllegalStateException("None of the RouteModule implementations called top level router.setInternalSvrErrorRoute.  Modules="+rm.getRouteModules());
 			
-		log.info("added all routes to router");
+		log.info("all filters applied");
 		
 		compressionCacheSetup.setupCache(routerBuilder.getStaticRoutes());
 	}

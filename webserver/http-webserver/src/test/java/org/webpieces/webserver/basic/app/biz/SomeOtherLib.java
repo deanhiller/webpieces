@@ -8,7 +8,7 @@ public class SomeOtherLib {
 		return CompletableFuture.completedFuture(99);
 	}
 
-	public void saveUser(UserDbo user) {
+	public void saveUser(UserDto user) {
 		//save the user for real
 	}
 }

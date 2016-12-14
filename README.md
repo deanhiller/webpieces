@@ -99,7 +99,7 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
-* add edit, add, list, delete full example BUT with hibernate!!
+* add the real CRUD example to project template SINCE we need it anyways as well
 * add optimistic locking test case
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)

@@ -4,8 +4,8 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import org.webpieces.plugins.hibernate.Em;
-import org.webpieces.plugins.hibernate.app.dbo.CompanyDbo;
-import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
+import org.webpieces.plugins.hibernate.app.dbo.CompanyTestDbo;
+import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
@@ -26,10 +26,10 @@ public class HibernateController {
 		
 		EntityManager mgr = Em.get();
 		
-		CompanyDbo company = new CompanyDbo();
+		CompanyTestDbo company = new CompanyTestDbo();
 		company.setName("WebPieces LLC");
 		
-		UserDbo user = new UserDbo();
+		UserTestDbo user = new UserTestDbo();
 		user.setEmail("dean@sync.xsoftware.biz");
 		user.setName("SomeName");
 		user.setCompany(company);
@@ -44,13 +44,13 @@ public class HibernateController {
 	
 	public Render display(Integer id) {
 		EntityManager mgr = Em.get();
-		UserDbo user = mgr.find(UserDbo.class, id);
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);
 		return Actions.renderThis("user", user);
 	}
 	
 	public Render entityLoad(Integer id) {
 		EntityManager mgr = Em.get();
-		UserDbo user = mgr.find(UserDbo.class, id);	
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);	
 		log.info("loaded user");
 		return Actions.renderThis("user", user);
 	}

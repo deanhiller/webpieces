@@ -3,10 +3,8 @@ package org.webpieces.router.api;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
-import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
 
@@ -43,7 +41,7 @@ public class RouterConfig {
 	//compression type to put in cachedCompressedDirectory
 	private String startupCompression = "gzip";
 
-	private List<WebAppMeta> plugins = new ArrayList<>();
+	private Map<String, String> webAppMetaProperties;
 
 	public VirtualFile getMetaFile() {
 		return metaFile;
@@ -137,12 +135,12 @@ public class RouterConfig {
 		this.tokenCheckOn = tokenCheckOff;
 		return this;
 	}
-	public RouterConfig setPlugins(List<WebAppMeta> plugins) {
-		this.plugins = plugins;
+	public RouterConfig setWebAppMetaProperties(Map<String, String> webAppMetaProperties) {
+		this.webAppMetaProperties = webAppMetaProperties;
 		return this;
 	}
-	public List<WebAppMeta> getPlugins() {
-		return plugins;
+	public Map<String, String> getWebAppMetaProperties() {
+		return webAppMetaProperties;
 	}
 	
 }

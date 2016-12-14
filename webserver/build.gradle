@@ -11,7 +11,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
         test {
             resources {
                 //This ADDS src/main/java/**/*.html
-                srcDirs = ["src/main/java"]
+                srcDirs = ["src/main/java", "src/test/resources"]
                 excludes = ["**/*.java"]
             }
         }
@@ -23,12 +23,22 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
         //delete the code that no longer compiles to remove it
         compile project(':webserver-plugins:hibernate-plugin')
 
+        testCompile project(':core:core-ddl')
+        testCompile project(':webserver-plugins:h2db-plugin')
         testCompile project(':webserver:http-webserver-test')
         testCompile deps['selenium']
     }
 
     //task uploadArchives(overwrite: true) << {
     //}
+
+//ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
+//and scan for classes with @Entity in the directory OR jar with that xml file only
+//maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
+//this screws tools in many situations like this one so this puts it back so the output is at
+//least put to the same location
+sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
+compileJava.doLast { tasks.processResources.execute() }
 
     test {
         if (project.hasProperty('excludeSelenium')) {

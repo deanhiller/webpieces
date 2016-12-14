@@ -2,7 +2,7 @@ package WEBPIECESxPACKAGE.mock;
 
 import java.util.concurrent.CompletableFuture;
 
-import WEBPIECESxPACKAGE.example.RemoteService;
+import WEBPIECESxPACKAGE.base.example.RemoteService;
 
 public class MockRemoteSystem extends RemoteService {
 

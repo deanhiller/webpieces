@@ -6,6 +6,9 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.ddl.api.JdbcApi;
+import org.webpieces.ddl.api.JdbcConstants;
+import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
@@ -15,6 +18,9 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -23,7 +29,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.example.RemoteService;
+import WEBPIECESxPACKAGE.base.example.RemoteService;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 
 /**
@@ -35,6 +41,8 @@ import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
  */
 public class TestLesson1BasicRequestResponse {
 
+	private final static Logger log = LoggerFactory.getLogger(TestLesson1BasicRequestResponse.class);
+	
 	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
@@ -42,14 +50,22 @@ public class TestLesson1BasicRequestResponse {
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 
+	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+	private static String PU = HibernatePlugin.PERSISTENCE_TEST_UNIT;
+	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
+		log.info("Setting up test");
 		Asserts.assertWasCompiledWithParamNames("test");
+		
+		//clear in-memory database
+		jdbc.dropAllTablesFromDatabase();
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(new PlatformOverridesForTest(), new AppOverridesModule(), null, new ServerConfig());
+		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(
+				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(PU));
 		server = webserver.start();
 	}
 	

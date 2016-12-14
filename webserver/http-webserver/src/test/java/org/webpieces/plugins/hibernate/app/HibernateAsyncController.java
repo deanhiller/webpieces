@@ -8,8 +8,8 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import org.webpieces.plugins.hibernate.Em;
-import org.webpieces.plugins.hibernate.app.dbo.CompanyDbo;
-import org.webpieces.plugins.hibernate.app.dbo.UserDbo;
+import org.webpieces.plugins.hibernate.app.dbo.CompanyTestDbo;
+import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
@@ -34,10 +34,10 @@ public class HibernateAsyncController {
 	}
 		
 	public Redirect runSave(EntityManager mgr) {
-		CompanyDbo company = new CompanyDbo();
+		CompanyTestDbo company = new CompanyTestDbo();
 		company.setName("WebPieces LLC");
 		
-		UserDbo user = new UserDbo();
+		UserTestDbo user = new UserTestDbo();
 		user.setEmail("dean@async.xsoftware.biz");
 		user.setName("SomeName");
 		user.setCompany(company);
@@ -58,7 +58,7 @@ public class HibernateAsyncController {
 	}
 	
 	private Render runDisplay(EntityManager mgr, Integer id) {
-		UserDbo user = mgr.find(UserDbo.class, id);
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);
 		return Actions.renderThis("user", user);
 	}
 
@@ -70,7 +70,7 @@ public class HibernateAsyncController {
 	}
 	
 	private Render runEntityLoad(EntityManager mgr, Integer id) {
-		UserDbo user = mgr.find(UserDbo.class, id);
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);
 		log.info("user loaded");
 		return Actions.renderThis("user", user);
 	}

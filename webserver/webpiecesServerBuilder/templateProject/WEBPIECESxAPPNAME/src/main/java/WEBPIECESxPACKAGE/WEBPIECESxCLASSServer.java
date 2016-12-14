@@ -7,13 +7,10 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.routing.RouteModule;
-import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -24,56 +21,23 @@ import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-import WEBPIECESxPACKAGE.example.WEBPIECESxCLASSRouteModule;
-import WEBPIECESxPACKAGE.example.tags.TagLookupOverride;
+import WEBPIECESxPACKAGE.base.tags.TagLookupOverride;
 
 /**
- * Except for changing WEBPIECESxCLASSMeta inner class, changes to this one bootstrap class
- * and any classes you refer to here WILL require a restart when you are running the 
- * DevelopmentServer.  This class should try to remain pretty thin.
- * 
- * @author dhiller
- *
+ * Changes to any class in this package (or any classes these classes reference) WILL require a 
+ * restart when you are running the DevelopmentServer.  This class should try to remain pretty
+ * thin and you should avoid linking any classes in this package to classes outside this
+ * package(This is only true if you want to keep using the development server).  In production,
+ * we do not play any classloader games at all(unlike play framework) avoiding any prod issues.
  */
 public class WEBPIECESxCLASSServer {
 	
-	//This is where the list of Guice Modules go as well as the list of RouterModules which is the
-	//core of anything you want to plugin to your web app.  To make re-usable components, you create
-	//GuiceModule paired with a RouterModule and app developers can plug both in here.  In some cases,
-	//only a RouterModule is needed and in others only a GuiceModule is needed.
-	//BIG NOTE: The webserver loads this class from the appmeta.txt file which is passed in the
-	//start method below.  This is a hook for the Development server to work that is a necessary evil
-	public static class WEBPIECESxCLASSMeta implements WebAppMeta {
-
-		//When using the Development Server, changes to this inner class will be recompiled automatically
-		//when needed..  Changes to the outer class will not take effect until a restart
-		//In production, we don't have a compiler on the classpath nor any funny classloaders so that
-		//production is very very clean and the code for this non-dev server is very easy to step through
-		//if you have a production issue
-		@Override
-        public List<Module> getGuiceModules() {
-			return Lists.newArrayList(new WEBPIECESxCLASSGuiceModule());
-		}
-		
-		@Override
-        public List<RouteModule> getRouteModules() {
-			return Lists.newArrayList(new WEBPIECESxCLASSRouteModule());
-		}
-
-		//ALL APPLICATION plugins are added to classpath as a jar and then depending on the plugin has a RouteModule
-		//and/or a GuiceModule depending on the plugin that you configure and add to your list of modules
-		//in this inner class.  Then there are platform plugins which are plugged in using the main methods below
-	}
-	
-	
 	/*******************************************************************************
-	 * When running the dev server, changes below this line require a server restart(you can try not to but it won't work)
-	 * Changes above this line in the WEBPIECESxCLASSMeta inner class WILL work....those changes will be recompiled and
-	 * loaded
+	 * When running the dev server, changes to this file AND to any files in this package
+	 * require a server restart(you can try not to but it won't work)
 	 *******************************************************************************/
 	
 	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSServer.class);
@@ -83,14 +47,19 @@ public class WEBPIECESxCLASSServer {
 	//Welcome to YOUR main method as webpieces webserver is just a library you use that you can
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
-		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, null, new ServerConfig());
-		
-		server.start();
-		
-		synchronized (WEBPIECESxCLASSServer.class) {
-			//wait forever so server doesn't shut down..
-			WEBPIECESxCLASSServer.class.wait();
-		}	
+		try {
+			WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, new ServerConfig("production"));
+			
+			server.start();
+			
+			synchronized (WEBPIECESxCLASSServer.class) {
+				//wait forever so server doesn't shut down..
+				WEBPIECESxCLASSServer.class.wait();
+			}	
+		} catch(Throwable e) {
+			log.error("Failed to startup.  exiting jvm", e);
+			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
+		}
 	}
 
 	private WebServer webServer;
@@ -98,7 +67,6 @@ public class WEBPIECESxCLASSServer {
 	public WEBPIECESxCLASSServer(
 			Module platformOverrides, 
 			Module appOverrides, 
-			List<WebAppMeta> devPlugins, 
 			ServerConfig svrConfig) {
 		String filePath = System.getProperty("user.dir");
 		log.info("original user.dir before modification="+filePath);
@@ -117,10 +85,6 @@ public class WEBPIECESxCLASSServer {
 			allOverrides = Modules.combine(platformOverrides, allOverrides);
 		}
 		
-		List<WebAppMeta> allPlugins = Lists.newArrayList();
-		if(devPlugins != null)
-			allPlugins.addAll(devPlugins);
-		
 		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
 		
 		//Different pieces of the server have different configuration objects where settings are set
@@ -130,7 +94,7 @@ public class WEBPIECESxCLASSServer {
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
-											.setPlugins(allPlugins)
+											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
 											.setSecretKey(signingKey);
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)

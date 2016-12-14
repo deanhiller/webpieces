@@ -50,7 +50,11 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
     private final int pathHash;
 
 	private FileLookup fileLookup;
+
+	private final int instance;
     
+	private static int lastUsedInstanceNumber = 0;
+	
     public CompilingClassloader(CompileConfig config, CompilerWrapper compiler, FileLookup fileLookup) {
         super(CompilingClassloader.class.getClassLoader());
     	this.config = config;
@@ -75,6 +79,11 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
         } catch (MalformedURLException e) {
         	throw new RuntimeException(e);
             //throw new UnexpectedException(e);
+        }
+        
+        synchronized(CompilingClassloader.class) {
+        	this.instance = lastUsedInstanceNumber;
+        	lastUsedInstanceNumber++;
         }
     }
 
@@ -321,7 +330,7 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
 
     @Override
     public String toString() {
-        return "[CompilingClassLoader " + appClassMgr+"]";
+        return "[CompilingClassLoader " + appClassMgr+", instance="+instance+"]";
     }
 
 }
