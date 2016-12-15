@@ -156,7 +156,7 @@ public class RouteLoader {
 			RouteModuleInfo info = new RouteModuleInfo(packageName, module.getI18nBundleName());
 			RouterBuilder.currentPackage.set(info);
 			RouterBuilder.injector.set(injector);
-			module.configure(routerBuilder, packageName);
+			module.configure(routerBuilder);
 			RouterBuilder.currentPackage.set(null);
 			RouterBuilder.injector.set(null);
 		}

@@ -16,9 +16,9 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-public class WEBPIECESxCLASSDevServer {
+public class DevelopmentServer {
 
-	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSServer.class);
+	private static final Logger log = LoggerFactory.getLogger(Server.class);
 	
 	//NOTE: This whole project brings in jars that the main project does not have and should never
 	//have like the eclipse compiler(a classloading compiler jar), webpieces runtimecompile.jar
@@ -26,20 +26,20 @@ public class WEBPIECESxCLASSDevServer {
 	//webserver classes to put in a place a runtime compiler so we can compile your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
-		new WEBPIECESxCLASSDevServer(false).start();
+		new DevelopmentServer(false).start();
 		
 		//Since we typically use only 3rd party libraries with daemon threads, that means this
 		//main thread is the ONLY non-daemon thread letting the server keep running so we need
 		//to block it and hold it up from exiting.  Modify this to release if you want an ability
 		//to remotely shutdown....
-		synchronized(WEBPIECESxCLASSDevServer.class) {
-			WEBPIECESxCLASSDevServer.class.wait();
+		synchronized(DevelopmentServer.class) {
+			DevelopmentServer.class.wait();
 		}
 	}
 	
-	private WEBPIECESxCLASSServer server;
+	private Server server;
 
-	public WEBPIECESxCLASSDevServer(boolean usePortZero) {
+	public DevelopmentServer(boolean usePortZero) {
 		String filePath1 = System.getProperty("user.dir");
 		log.info("running from dir="+filePath1);
 		
@@ -56,11 +56,11 @@ public class WEBPIECESxCLASSDevServer {
 		
 		//html and json template file encoding...
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths)
-														.setFileEncoding(WEBPIECESxCLASSServer.ALL_FILE_ENCODINGS);
+														.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		
 		//java source files encoding...
 		CompileConfig devConfig = new CompileConfig(srcPaths)
-										.setFileEncoding(WEBPIECESxCLASSServer.ALL_FILE_ENCODINGS);
+										.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
@@ -83,7 +83,7 @@ public class WEBPIECESxCLASSDevServer {
 		config.setStaticFileCacheTimeSeconds(null);
 		config.setMetaFile(metaFile);
 		
-		server = new WEBPIECESxCLASSServer(platformOverrides, null, config);
+		server = new Server(platformOverrides, null, config);
 	}
 	
 	public static String modifyForIDE(String filePath1) {

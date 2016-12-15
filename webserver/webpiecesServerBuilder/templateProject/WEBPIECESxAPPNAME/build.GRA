@@ -52,6 +52,9 @@ dependencies {
   //optional plugin for H2 for testing to swap to in-memory database making things easy/fast to clear the db
   testCompile deps['plugin-h2']
 
+  //A library that does everything mockito does but in just one class(so therefore, way easier to debug)
+  testCompile deps['core-mock']
+
   //For testing, we need to bring in web-webserver-test such that we can debug in the IDE as this just ensures
   //we use the htmlcompiler on-demand rather than waiting for the gradle plugin to invoke the same code. For 
   //production jars, the html files are compiled to *.class files

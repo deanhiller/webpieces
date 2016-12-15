@@ -29,7 +29,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.example.RemoteService;
+import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 
 /**
@@ -64,7 +64,7 @@ public class TestLesson1BasicRequestResponse {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(
+		Server webserver = new Server(
 				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(PU));
 		server = webserver.start();
 	}

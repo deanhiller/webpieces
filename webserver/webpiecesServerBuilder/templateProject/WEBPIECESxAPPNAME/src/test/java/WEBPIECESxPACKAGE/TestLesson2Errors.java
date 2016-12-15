@@ -22,8 +22,8 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.example.RemoteService;
-import WEBPIECESxPACKAGE.base.example.SomeLibrary;
+import WEBPIECESxPACKAGE.base.libs.RemoteService;
+import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
 import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
 import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
 
@@ -62,7 +62,7 @@ public class TestLesson2Errors {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WEBPIECESxCLASSServer webserver = new WEBPIECESxCLASSServer(
+		Server webserver = new Server(
 				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, PU));
 		server = webserver.start();
 	}
@@ -73,8 +73,8 @@ public class TestLesson2Errors {
 	 */
 	@Test
 	public void testWebAppHasBugRenders500Route() {
-		mockLibrary.throwException(new RuntimeException("test internal bug page"));
-		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/absolute");
+		mockLibrary.addExceptionToThrow(new RuntimeException("test internal bug page"));
+		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/");
 		
 		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
 		

@@ -7,7 +7,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class BasicRouteModule extends AbstractRouteModule {
 
 	@Override
-	protected void configure(String currentPackage) {
+	protected void configure() {
 		addRoute(GET , "/",                  "biz/BasicController.someMethod", BasicRouteId.SOME_ROUTE);
 		addRoute(GET , "/redirect/{id}",     "biz/BasicController.redirect", BasicRouteId.REDIRECT_PAGE);
 		addRoute(GET , "/redirectint/{id}",  "biz/BasicController.redirectWithInt", BasicRouteId.REDIRECT2);

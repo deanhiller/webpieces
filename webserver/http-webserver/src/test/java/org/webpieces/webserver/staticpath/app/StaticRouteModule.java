@@ -7,7 +7,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class StaticRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(String currentPackage) {
+	public void configure() {
 		addRoute(GET , "/pageparam",         "StaticController.home", StaticRouteId.PAGE_PARAM);
 		
 		String property = System.getProperty("user.dir");

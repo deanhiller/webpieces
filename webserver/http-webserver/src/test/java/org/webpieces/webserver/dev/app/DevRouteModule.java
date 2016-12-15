@@ -8,7 +8,7 @@ import org.webpieces.router.api.routing.PortType;
 public class DevRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(String currentPackage) {
+	public void configure() {
 		addRoute(GET , "/home",               "DevController.home", DevRouteId.HOME);
 		
 		addRoute(GET , "/causeError",         "DevController.causeError", DevRouteId.CAUSE_ERROR);

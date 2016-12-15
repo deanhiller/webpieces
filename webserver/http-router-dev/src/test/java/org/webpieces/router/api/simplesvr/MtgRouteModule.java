@@ -9,7 +9,7 @@ import org.webpieces.router.api.routing.Router;
 public class MtgRouteModule implements RouteModule {
 	
 	@Override
-	public void configure(Router router, String packageName) {
+	public void configure(Router router) {
 
 		//A typical CRUD list of routes is
 		//   1. GET list users or     GET  /listusers

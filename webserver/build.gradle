@@ -24,6 +24,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
         compile project(':webserver-plugins:hibernate-plugin')
 
         testCompile project(':core:core-ddl')
+        testCompile project(':core:core-mock')
         testCompile project(':webserver-plugins:h2db-plugin')
         testCompile project(':webserver:http-webserver-test')
         testCompile deps['selenium']

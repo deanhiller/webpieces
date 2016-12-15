@@ -13,7 +13,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class HibernateTestRouteModule extends AbstractRouteModule {
 
 	@Override
-	protected void configure(String currentPackage) {
+	protected void configure() {
 		addRoute(POST, "/save",          "HibernateController.save", HibernateRouteId.SAVE_ENTITY);
 		addRoute(GET , "/get/{id}",      "HibernateController.display", HibernateRouteId.DISPLAY_ENTITY);
 		addRoute(GET , "/dynamic/{id}",  "HibernateController.entityLoad", HibernateRouteId.ENTITY_LOAD);
@@ -22,7 +22,7 @@ public class HibernateTestRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/async/get/{id}",    "HibernateAsyncController.display", HibernateRouteId.ASYNC_DISPLAY_ENTITY);
 		addRoute(GET , "/async/dynamic/{id}","HibernateAsyncController.entityLoad", HibernateRouteId.ASYNC_ENTITY_LOAD);
 		
-		addCrud("user", "CrudController", LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, DELETE_USER);
+		addCrud("user", "CrudTestController", LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, DELETE_USER);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");

@@ -9,7 +9,7 @@ import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.webserver.test.Asserts;
 
 import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.WEBPIECESxCLASSServer;
+import WEBPIECESxPACKAGE.Server;
 
 public class TestLesson3BasicStart {
 
@@ -31,7 +31,7 @@ public class TestLesson3BasicStart {
 		jdbc.dropAllTablesFromDatabase();
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, new ServerConfig(0, 0, PU));
+		Server server = new Server(null, null, new ServerConfig(0, 0, PU));
 		//In this case, we bind a port
 		server.start();
 
@@ -44,7 +44,7 @@ public class TestLesson3BasicStart {
 		// non-guice singletons).  A guice singleton is only a singleton within the scope of a server
 		//while a java singleton....well, pretty much sucks.  Google "Singletons are evil".
 		
-		WEBPIECESxCLASSServer server2 = new WEBPIECESxCLASSServer(null, null, new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
+		Server server2 = new Server(null, null, new ServerConfig(0, 0, HibernatePlugin.PERSISTENCE_TEST_UNIT));
 		//In this case, we bind a port
 		server2.start();
 		System.out.println("bound port="+server.getUnderlyingHttpChannel().getLocalAddress());

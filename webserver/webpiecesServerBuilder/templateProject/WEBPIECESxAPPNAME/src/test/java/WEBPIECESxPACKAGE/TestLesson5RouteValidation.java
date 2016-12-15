@@ -6,7 +6,7 @@ import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.webserver.test.Asserts;
 
 import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.WEBPIECESxCLASSServer;
+import WEBPIECESxPACKAGE.Server;
 
 public class TestLesson5RouteValidation {
 
@@ -26,7 +26,7 @@ public class TestLesson5RouteValidation {
 		serverConfig.setHttpsPort(0); //bind to any port
 		serverConfig.setValidateRouteIdsOnStartup(true);
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, serverConfig);
+		Server server = new Server(null, null, serverConfig);
 		
 		//Start server to force validation
 		server.start();

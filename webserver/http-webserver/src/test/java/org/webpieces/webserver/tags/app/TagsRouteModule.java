@@ -9,7 +9,7 @@ import org.webpieces.webserver.basic.app.BasicRouteId;
 public class TagsRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(String currentPackage) {
+	public void configure() {
 		addRoute(GET , "/verbatim",          "TagController.verbatimTag", TagsRouteId.VERBATIM_ROUTE_ID);
 
 		addRoute(GET , "/if",                "TagController.ifTag", TagsRouteId.IF_ROUTE_ID);

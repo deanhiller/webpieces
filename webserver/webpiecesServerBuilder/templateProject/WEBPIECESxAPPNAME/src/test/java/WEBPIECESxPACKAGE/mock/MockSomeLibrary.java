@@ -1,19 +1,23 @@
 package WEBPIECESxPACKAGE.mock;
 
-import WEBPIECESxPACKAGE.base.example.SomeLibrary;
+import org.webpieces.mock.MethodEnum;
+import org.webpieces.mock.MockSuperclass;
 
-public class MockSomeLibrary extends SomeLibrary {
+import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
 
-	private RuntimeException runtimeException;
+public class MockSomeLibrary extends MockSuperclass implements SomeLibrary {
 
-	public void throwException(RuntimeException runtimeException) {
-		this.runtimeException = runtimeException;
+	public static enum Method implements MethodEnum {
+		DO_SOMETHING
+	}
+	
+	@Override
+	public void doSomething(int something) {
+		super.calledMethod(Method.DO_SOMETHING, something);
 	}
 
-	@Override
-	public void doSomething() {
-		if(runtimeException != null)
-			throw runtimeException;
+	public void addExceptionToThrow(RuntimeException exc) {
+		super.addExceptionToThrow(Method.DO_SOMETHING, exc);
 	}
 
 }

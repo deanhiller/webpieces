@@ -8,7 +8,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class BeansRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(String currentPackage) {
+	public void configure() {
 		addRoute(GET , "/pageparam",         "BeansController.pageParam", BeansRouteId.PAGE_PARAM);
 		addRoute(GET , "/pageparam_async",   "BeansController.pageParamAsync", BeansRouteId.PAGE_PARAM_ASYNC);
 

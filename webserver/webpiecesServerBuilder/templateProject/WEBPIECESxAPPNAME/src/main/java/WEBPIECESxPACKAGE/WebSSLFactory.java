@@ -10,14 +10,14 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.SSLEngineFactory;
 
-public class WEBPIECESxCLASSSSLFactory implements SSLEngineFactory {
+public class WebSSLFactory implements SSLEngineFactory {
 	
 	private String serverKeystore = "/keystore.jks";
 	private	String password = "password";
 	
-	public WEBPIECESxCLASSSSLFactory() {
+	public WebSSLFactory() {
 		//since this bites a lot of people, let's read in the keystor early
-		try(InputStream keySt = WEBPIECESxCLASSSSLFactory.class.getResourceAsStream(serverKeystore)) {
+		try(InputStream keySt = WebSSLFactory.class.getResourceAsStream(serverKeystore)) {
 			if(keySt == null)
 				throw new IllegalStateException("keystore was not found");
 		} catch(IOException e) {
@@ -28,7 +28,7 @@ public class WEBPIECESxCLASSSSLFactory implements SSLEngineFactory {
 	@Override
 	public SSLEngine createSslEngine() {
 		// Create/startPing the SSLContext with key material
-		try(InputStream keySt = WEBPIECESxCLASSSSLFactory.class.getResourceAsStream(serverKeystore)) {
+		try(InputStream keySt = WebSSLFactory.class.getResourceAsStream(serverKeystore)) {
 			char[] passphrase = password.toCharArray();
 			// First startPing the key and trust material.
 			KeyStore ks = KeyStore.getInstance("JKS");

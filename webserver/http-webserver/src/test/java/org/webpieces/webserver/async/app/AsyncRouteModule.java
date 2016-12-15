@@ -7,7 +7,7 @@ import org.webpieces.router.api.routing.Router;
 public class AsyncRouteModule implements RouteModule {
 
 	@Override
-	public void configure(Router router, String currentPackage) {
+	public void configure(Router router) {
 		
 		router.addRoute(HttpMethod.GET, "/",                 "../../basic/app/biz/AsyncController.someMethod", AsyncRouteId.SOME_ROUTE);
 		router.addRoute(HttpMethod.GET, "/redirect/{id}",    "../../basic/app/biz/AsyncController.redirect", AsyncRouteId.REDIRECT_PAGE);

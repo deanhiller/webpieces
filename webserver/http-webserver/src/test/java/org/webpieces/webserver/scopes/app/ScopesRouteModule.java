@@ -7,7 +7,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class ScopesRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(String currentPackage) {
+	public void configure() {
 		addRoute(GET , "/home",               "ScopesController.home", ScopesRouteId.HOME);
 
 		addRoute(GET , "/displaysession",     "ScopesController.displaySession", ScopesRouteId.DISPLAY_SESSION);

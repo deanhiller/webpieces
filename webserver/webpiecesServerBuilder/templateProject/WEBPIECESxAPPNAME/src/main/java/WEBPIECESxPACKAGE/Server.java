@@ -33,14 +33,14 @@ import WEBPIECESxPACKAGE.base.tags.TagLookupOverride;
  * package(This is only true if you want to keep using the development server).  In production,
  * we do not play any classloader games at all(unlike play framework) avoiding any prod issues.
  */
-public class WEBPIECESxCLASSServer {
+public class Server {
 	
 	/*******************************************************************************
 	 * When running the dev server, changes to this file AND to any files in this package
 	 * require a server restart(you can try not to but it won't work)
 	 *******************************************************************************/
 	
-	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSServer.class);
+	private static final Logger log = LoggerFactory.getLogger(Server.class);
 	
 	public static final Charset ALL_FILE_ENCODINGS = StandardCharsets.UTF_8;
 	
@@ -48,13 +48,13 @@ public class WEBPIECESxCLASSServer {
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			WEBPIECESxCLASSServer server = new WEBPIECESxCLASSServer(null, null, new ServerConfig("production"));
+			Server server = new Server(null, null, new ServerConfig("production"));
 			
 			server.start();
 			
-			synchronized (WEBPIECESxCLASSServer.class) {
+			synchronized (Server.class) {
 				//wait forever so server doesn't shut down..
-				WEBPIECESxCLASSServer.class.wait();
+				Server.class.wait();
 			}	
 		} catch(Throwable e) {
 			log.error("Failed to startup.  exiting jvm", e);
@@ -64,7 +64,7 @@ public class WEBPIECESxCLASSServer {
 
 	private WebServer webServer;
 
-	public WEBPIECESxCLASSServer(
+	public Server(
 			Module platformOverrides, 
 			Module appOverrides, 
 			ServerConfig svrConfig) {
@@ -76,7 +76,7 @@ public class WEBPIECESxCLASSServer {
 		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
 		if(metaFile == null)
-			metaFile = new VirtualFileClasspath("appmeta.txt", WEBPIECESxCLASSServer.class.getClassLoader());
+			metaFile = new VirtualFileClasspath("appmeta.txt", Server.class.getClassLoader());
 
 		//This override is only needed if you want to add your own Html Tags to re-use
 		//you can delete this code if you are not adding your own html tags
@@ -100,7 +100,7 @@ public class WEBPIECESxCLASSServer {
 										.setPlatformOverrides(allOverrides)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
-										.setSslEngineFactory(new WEBPIECESxCLASSSSLFactory())
+										.setSslEngineFactory(new WebSSLFactory())
 										.setFunctionToConfigureServerSocket(s -> configure(s))
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
 										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());

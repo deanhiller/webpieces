@@ -9,7 +9,7 @@ import org.webpieces.router.api.routing.Router;
 public class NoMethodRouteModule implements RouteModule {
 	
 	@Override
-	public void configure(Router router, String packageName) {
+	public void configure(Router router) {
 		//We cannot do this or the compiler in dev router will compile it too early for testing
 		//String controllerName = SomeController.class.getName();
 

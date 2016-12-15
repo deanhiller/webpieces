@@ -1,7 +1,7 @@
 package WEBPIECESxPACKAGE.base.crud;
 
-import static WEBPIECESxPACKAGE.base.routes.ExampleRouteId.ADD_USER_FORM;
-import static WEBPIECESxPACKAGE.base.routes.ExampleRouteId.EDIT_USER_FORM;
+import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_ADD_USER_FORM;
+import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 
 import java.util.List;
 
@@ -15,14 +15,12 @@ import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
-
-import WEBPIECESxPACKAGE.base.routes.ExampleRouteId; 
+import org.webpieces.util.logging.LoggerFactory; 
 
 @Singleton
-public class ExampleController {
+public class CrudUserController {
 
-	private static Logger log = LoggerFactory.getLogger(ExampleController.class);
+	private static Logger log = LoggerFactory.getLogger(CrudUserController.class);
 	
 	public Action userList() {
 		EntityManager mgr = Em.get();
@@ -51,7 +49,7 @@ public class ExampleController {
 			log.info("page has errors");
 			Current.flash().setMessage("Errors in form below");
 			Actions.redirectFlashAllAddEdit(
-					ADD_USER_FORM, EDIT_USER_FORM, Current.getContext(), 
+					GET_ADD_USER_FORM, GET_EDIT_USER_FORM, Current.getContext(), 
 					"id", user.getId(), "other", "value", "key3", "value3");
 		}
 		
@@ -59,12 +57,12 @@ public class ExampleController {
 		Em.get().merge(user);
         Em.get().flush();
         
-		return Actions.redirect(ExampleRouteId.LIST_USERS);
+		return Actions.redirect(CrudUserRouteId.LIST_USERS);
 	}
 	
 	public Redirect postDeleteUser(int id) {
 		UserDbo ref = Em.get().getReference(UserDbo.class, id);
 		Em.get().remove(ref);
-		return Actions.redirect(ExampleRouteId.LIST_USERS);
+		return Actions.redirect(CrudUserRouteId.LIST_USERS);
 	}
 }

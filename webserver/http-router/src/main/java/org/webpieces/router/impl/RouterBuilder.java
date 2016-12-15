@@ -1,5 +1,9 @@
 package org.webpieces.router.impl;
 
+import static org.webpieces.ctx.api.HttpMethod.DELETE;
+import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
+
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,6 +162,19 @@ public class RouterBuilder implements Router {
 		return new RouterBuilder(path, subInfo, reverseRoutes, finder, urlEncoding);
 	}
 
+	@Override
+	public void addCrud(String entity, String controller,  
+			RouteId listRoute, RouteId addRoute, RouteId editRoute, RouteId saveRoute, RouteId deleteRoute) {
+		
+		String entityWithCapital = entity.substring(0, 1).toUpperCase() + entity.substring(1);
+		addRoute(GET , "/"+entity+"/list",        controller+"."+entity+"List", listRoute);
+		addRoute(GET , "/"+entity+"/new",         controller+"."+entity+"AddEdit", addRoute);
+		addRoute(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute);
+		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, saveRoute);
+		//		addRoute(PUT, "/"+entity+"/post/{id}",        controller+".postSave"+entityWithCapital, saveRoute);
+		addRoute(DELETE, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
+	}
+	
 	public AllRoutingInfo getRouterInfo() {
 		return info;
 	}

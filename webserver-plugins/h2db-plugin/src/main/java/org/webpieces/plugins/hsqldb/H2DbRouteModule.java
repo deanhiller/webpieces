@@ -6,7 +6,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class H2DbRouteModule extends AbstractRouteModule {
 	
 	@Override
-	protected void configure(String currentPackage) {
+	protected void configure() {
 		addRoute(HttpMethod.GET, "/@db", "H2DbController.renderDatabaseGui", H2DbRouteId.GET_DATABASE_PAGE);
 	}
 

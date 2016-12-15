@@ -19,7 +19,6 @@ import com.google.inject.Module;
 //start method below.  This is a hook for the Development server to work that is a necessary evil
 public class WEBPIECESxCLASSMeta implements WebAppMeta {
 
-
 	private String persistenceUnit;
 
 	@Override
@@ -34,19 +33,22 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 	//if you have a production issue
 	@Override
     public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new WEBPIECESxCLASSGuiceModule());
+		return Lists.newArrayList(new GuiceModule());
 	}
 	
 	@Override
     public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new WEBPIECESxCLASSRouteModule());
+		return Lists.newArrayList(
+				new AppRouteModule(),
+				new BackendRouteModule()
+				);
 	}
 
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.newArrayList(
 				//if you want to remove hibernate, just remove it first from the build file and then remove
-				//all the compile error code
+				//all the compile error code(it will remove move than half of the jar size of the web app actually)
 				new HibernatePlugin(persistenceUnit)
 				);
 	}

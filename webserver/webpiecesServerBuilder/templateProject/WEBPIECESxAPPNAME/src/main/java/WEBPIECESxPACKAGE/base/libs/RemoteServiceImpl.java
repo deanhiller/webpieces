@@ -1,14 +1,20 @@
-package WEBPIECESxPACKAGE.base.example;
+package WEBPIECESxPACKAGE.base.libs;
 
 import java.util.concurrent.CompletableFuture;
 
-public class RemoteService {
+public class RemoteServiceImpl implements RemoteService {
 
-	public CompletableFuture<Integer> fetchRemoteValue() {
+	@Override
+	public CompletableFuture<Integer> fetchRemoteValue(String s, int i)  {
 		//Here a remote service usually returns an uncompleted future and completes it when the remote
 		//service returns it's value unblocking this thread for others to use.
 		
 		//In this case we just return a completely future though.
 		return CompletableFuture.completedFuture(33);
 	}
+
+	@Override
+	public void sendData(int num) {
+	}
+
 }

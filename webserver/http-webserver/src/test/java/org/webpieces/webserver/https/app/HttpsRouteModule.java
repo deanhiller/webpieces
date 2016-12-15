@@ -12,7 +12,7 @@ public class HttpsRouteModule extends AbstractRouteModule {
 
 	public static final String LOGIN_TOKEN = "userId";
 	@Override
-	public void configure(String currentPackage) {
+	public void configure() {
 		
 		addHttpsRoute(GET , "/secureRoute",         "HttpsController.home", HttpsRouteId.HOME);
 		addHttpsRoute(GET , "/login",               "HttpsController.login", HttpsRouteId.LOGIN);

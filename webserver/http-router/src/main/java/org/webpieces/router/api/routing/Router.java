@@ -66,5 +66,9 @@ public interface Router {
 	 * @return
 	 */
 	Router getScopedRouter(String path);
+	
+	void addCrud(String entity, String controller, 
+			RouteId listRoute, RouteId addRoute, RouteId editRoute,
+			RouteId saveRoute, RouteId deleteRoute);
 
 }

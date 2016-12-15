@@ -9,7 +9,7 @@ import org.webpieces.router.api.routing.AbstractRouteModule;
 public class CommonRouteModule extends AbstractRouteModule {
 
 	@Override
-	public void configure(String packageName) {
+	public void configure() {
 		//We cannot do this or the compiler in dev router will compile it too early for testing
 		//String controllerName = SomeController.class.getName();
 
@@ -21,4 +21,5 @@ public class CommonRouteModule extends AbstractRouteModule {
 		setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
 		setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
 	}
+
 }

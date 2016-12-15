@@ -19,7 +19,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 @Singleton
-public class CrudController {
+public class CrudTestController {
 	
 	private static final Logger log = LoggerFactory.getLogger(HibernateAsyncController.class);
 	
