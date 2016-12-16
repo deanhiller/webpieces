@@ -7,6 +7,8 @@ import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
@@ -19,6 +21,7 @@ import com.google.inject.Module;
 //start method below.  This is a hook for the Development server to work that is a necessary evil
 public class WEBPIECESxCLASSMeta implements WebAppMeta {
 
+	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSMeta.class);
 	private String persistenceUnit;
 
 	@Override
@@ -46,6 +49,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 
 	@Override
 	public List<Plugin> getPlugins() {
+		log.info("classloader for meta="+this.getClass().getClassLoader());
 		return Lists.newArrayList(
 				//if you want to remove hibernate, just remove it first from the build file and then remove
 				//all the compile error code(it will remove move than half of the jar size of the web app actually)

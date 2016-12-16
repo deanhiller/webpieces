@@ -50,6 +50,7 @@ public class DevelopmentServer {
         //not need to be recompiled each change so don't need to be listed here.
 		List<VirtualFile> srcPaths = new ArrayList<>();
 		srcPaths.add(new VirtualFileImpl(directory+"/WEBPIECESxAPPNAME/src/main/java"));
+		srcPaths.add(new VirtualFileImpl(directory+"/WEBPIECESxAPPNAME-dev/src/main/java"));
 		
 		VirtualFile metaFile = new VirtualFileImpl(directory + "/WEBPIECESxAPPNAME/src/main/resources/appmetadev.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());

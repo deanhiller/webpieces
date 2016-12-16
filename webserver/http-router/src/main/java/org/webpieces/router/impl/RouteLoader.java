@@ -87,22 +87,33 @@ public class RouteLoader {
 		
 		log.info(WebAppMeta.class.getSimpleName()+" class to load="+moduleName);
 		Class<?> clazz = loader.clazzForName(moduleName);
-		Object obj = newInstance(clazz);
-		if(!(obj instanceof WebAppMeta))
-			throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMeta.class.getSimpleName());
-
-		log.info(WebAppMeta.class.getSimpleName()+" loaded.  initializing next");
-
-		WebAppMeta routerModule = (WebAppMeta) obj;
-		routerModule.initialize(config.getWebAppMetaProperties());
-		log.info(WebAppMeta.class.getSimpleName()+" initialized.");
 		
-		Injector injector = createInjector(routerModule);
-
-		startupFunction.accept(injector);
+		//In development mode, the ClassLoader here will be the CompilingClassLoader so stuff it into the thread context
+		//just in case plugins will need it(most won't, hibernate will)
+		ClassLoader original = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
 		
-		loadAllRoutes(routerModule, injector);
-		return routerModule;
+			Object obj = newInstance(clazz);
+			if(!(obj instanceof WebAppMeta))
+				throw new IllegalArgumentException("name="+moduleName+" does not implement "+WebAppMeta.class.getSimpleName());
+	
+			log.info(WebAppMeta.class.getSimpleName()+" loaded.  initializing next");
+	
+			WebAppMeta routerModule = (WebAppMeta) obj;
+			routerModule.initialize(config.getWebAppMetaProperties());
+			log.info(WebAppMeta.class.getSimpleName()+" initialized.");
+			
+			Injector injector = createInjector(routerModule);
+	
+			startupFunction.accept(injector);
+			
+			loadAllRoutes(routerModule, injector);
+			
+			return routerModule;
+		} finally {
+			Thread.currentThread().setContextClassLoader(original);
+		}
 	}
 
 	public Injector createInjector(WebAppMeta routerModule) {

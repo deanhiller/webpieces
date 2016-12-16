@@ -8,12 +8,15 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
 import org.webpieces.router.api.Startable;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import WEBPIECESxPACKAGE.base.crud.CompanyDbo;
 import WEBPIECESxPACKAGE.base.crud.UserDbo;
 
 public class PopulateDatabase implements Startable {
 
+	private static final Logger log = LoggerFactory.getLogger(PopulateDatabase.class);
 	private EntityManagerFactory factory;
 
 	@Inject
@@ -52,6 +55,8 @@ public class PopulateDatabase implements Startable {
 		user2.setFirstName("Bob");
 		user2.setLastName("LastBob");
 		user2.setCompany(company);		
+		
+		log.info("classloader="+company.getClass().getClassLoader());
 		
 		mgr.persist(company);
 		mgr.persist(user1);

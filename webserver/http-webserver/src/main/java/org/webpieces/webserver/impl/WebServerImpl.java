@@ -78,7 +78,7 @@ public class WebServerImpl implements WebServer {
 		if(!config.isValidateRouteIdsOnStartup()) {
 			//This should be done in one unit test that boots the server to verify
 			//all routes in all pages exist and have no typos
-			log.info("Not validating routeIds");
+			log.info("Not validating routeIds due to configuration");
 			return;
 		}
 		String file = "/org.webpieces.routeId.txt";
