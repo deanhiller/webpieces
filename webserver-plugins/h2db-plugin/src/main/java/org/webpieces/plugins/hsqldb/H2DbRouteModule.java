@@ -7,7 +7,7 @@ public class H2DbRouteModule extends AbstractRouteModule {
 	
 	@Override
 	protected void configure() {
-		addRoute(HttpMethod.GET, "/@db", "H2DbController.renderDatabaseGui", H2DbRouteId.GET_DATABASE_PAGE);
+		addRoute(HttpMethod.GET, "/@db", "H2DbController.databaseGui", H2DbRouteId.GET_DATABASE_PAGE);
 	}
 
 }

@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.actions.Render;
 
 @Singleton
 public class H2DbController {
@@ -16,7 +16,9 @@ public class H2DbController {
 		this.config = config;
 	}
 	
-	public Redirect renderDatabaseGui() {
-		return Actions.redirectToUrl("http://localhost:"+config.getPort());
+	public Render databaseGui() {
+		return Actions.renderThis("port", config.getPort());
+		
+		//return Actions.redirectToUrl("http://localhost:"+config.getPort());
 	}
 }
