@@ -75,11 +75,18 @@ public class TemplateTokenizerTask {
 		    case PLAIN:
 		    	processStartTagMatches(lineNumber, c, c1, c2);
 		        break;
+		        
+		        
 		    case SCRIPT:
 		        if (SCRIPT.matchesEnd(c, c1, c2)) {
 		            found(PLAIN, 2, lineNumber);
 		        }
 		        break;
+		    case PREMPTIVE_SEND_SCRIPT:
+		        if (PREMPTIVE_SEND_SCRIPT.matchesEnd(c, c1, c2)) {
+		            found(PLAIN, 3, lineNumber);
+		        }
+		        break;		        
 		    case COMMENT:
 		        if (COMMENT.matchesEnd(c, c1, c2)) {
 		            found(PLAIN, 2, lineNumber);
@@ -133,6 +140,8 @@ public class TemplateTokenizerTask {
 	private void processStartTagMatches(int lineNumber, char c, char c1, char c2) {
 		if (SCRIPT.matchesStart(c, c1, c2)) {
 		    found(SCRIPT, 2, lineNumber);
+		} else if (PREMPTIVE_SEND_SCRIPT.matchesStart(c, c1, c2)) {
+			found(PREMPTIVE_SEND_SCRIPT, 3, lineNumber);		    
 		} else if (EXPR.matchesStart(c, c1, c2)) {
 		    found(EXPR, 2, lineNumber);
 		} else if (END_TAG.matchesStart(c, c1, c2)) {

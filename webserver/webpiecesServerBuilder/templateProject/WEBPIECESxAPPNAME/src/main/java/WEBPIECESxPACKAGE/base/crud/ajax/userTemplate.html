@@ -1,0 +1,32 @@
+#{extends 'main.html' /}
+#{set tab:'dashboard'/}
+#{set title:'MyDashboard'/}
+#{set templateName:'userTemplate'/}
+	
+<div id="content">
+  <div class="container"> 
+  	
+<div class="sidebar lt">
+	<div class="t"></div>
+	<div class="m">
+		
+
+		<script type="text/javascript" language="JavaScript">
+   		    function setTabClass(id, className) {
+   		        var obj = document.getElementById(id);
+      			     if (obj != null) {
+       		        obj.className = className;
+       		    }
+			}
+       		setTabClass("subtab_" + "#{get 'subtab' /}", "cutter");
+   		</script>
+	</div>
+</div>
+
+<div class="content rt">
+ <link href="/res/css/custom.css" rel="stylesheet" /> 
+	#{doLayout /}
+</div>
+
+</div>
+</div>

@@ -86,7 +86,9 @@ public abstract class ParseTagArgs implements GroovyGen {
 		String noBracketsArgs = args.substring(1, args.length()-1);
 		String[] split = noBracketsArgs.split("[:,]");
 		if(split.length % 2 != 0)
-			throw new IllegalArgumentException("The groovy Map appears to be invalid as splitting on [:,] results in"
+			throw new IllegalArgumentException("One of a few issues occurred with your code\n"
+					+ " 1. You forgot to close with ]@ token.  The body of the token looks like this(if this looks wrong, fix it)='''"+token.getCleanValue()+"'''\n"
+					+ " 2. The groovy Map appears to be invalid as splitting on [:,] results in"
 					+ " an odd amount of elements and it shold be key:value,key2:value "+token.getSourceLocation(true));
 		for(int i = 0; i < split.length; i+=2) {
 			names.add(split[i]);

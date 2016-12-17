@@ -2,11 +2,18 @@
   <head>
   </head>
   <body>
+    *{ Both of the next two lines are the SAME thing.... }*
     #{a href:@[VERBATIM_ROUTE_ID]@, id:'myid'}#My link#{/a}#
-    #{a href:@[TagsRouteId.IF_ROUTE_ID]@}#My render link#{/a}#  
+    <a href="@[VERBATIM_ROUTE_ID]@" id="myid">My link2</a>
+    
+    #{a href:@[TagsRouteId.IF_ROUTE_ID]@}#My render link#{/a}#
+    <a href="@[TagsRouteId.IF_ROUTE_ID]@">My render link2</a>  
+      
     #{a href:@[org.webpieces.webserver.tags.app.TagsRouteId.ELSE_ROUTE_ID]@}#My link#{/a}#
     
     #{a href:@[REDIRECT_PAGE, id:user]@}#The link#{/a}#
+    
+    <a href="@[REDIRECT_PAGE, id:user]@">PureALink</a>
     
     *{This next line is for when you need the link in javascript most of the time}*
     Link but no ahref='@[REDIRECT_PAGE, id:user]@'

@@ -1,6 +1,37 @@
-#{extends 'template.html'/}#
+#{extends 'userTemplate.html' /}#
+#{set subtab:'userlist'/}#
 
-This is would fetch the list of users.  The 'user saved successfully' message would be in the template as a flash message such that if you 
-hit this page directly, it does not show that message but if you just saved a user, it will show that message
+<h4>Users</h4>
 
-#{a href:@[GET_USER_FORM]@}#Add User#{/a}#
+<table class="table">
+    <thead>
+        <tr>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        #{list items:users, as:'entity'}#
+            <tr>
+                <td>${entity.firstName}$</td>
+                <td>${entity.lastName}$</td>
+                <td>${entity.email}$</td>
+                <td>
+                        <a href="@[GET_EDIT_USER_FORM, id:entity.id]@" data-toggle="modal" class="btn" id="editLink_${entity_index-1}$"> Edit </a>
+                        <a href="@[POST_DELETE_USER, id:entity.id]@" class="btn" id="deletePattern_${entity_index-1}$"> Delete </a>
+                </td>
+            </tr>
+        #{/list}#
+        #{else}#
+        <tr>
+            <td colspan="4">
+            There are no users, Add one now please.
+            </td>
+        </tr>
+        #{/else}#
+    </tbody>
+</table>
+
+<a href="@[GET_ADD_USER_FORM]@" class="btn btn-primary" id="addLink">Add User</a>

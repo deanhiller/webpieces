@@ -1,0 +1,62 @@
+*{ I believe this form will go in two different modal popups OR maybe just one...not sure yet...if one modal popup,
+   perhaps we can push it down into this file }*
+
+#{form @postAddEdit(), class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}
+   <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+         <h4 id="myModalLabel"> User </h4>
+    </div>
+    <div class="modal-body">
+        #{if flash.error}
+        <div class="row-fluid">
+            <div class="offset3 span6 alert alert-error">
+                <h4>Oops....</h4>
+                ${flash.error}
+            </div>
+        </div>
+        #{/} 
+    	
+    	<input type="hidden" name="entity.id" value="${entity?.id}"/>
+        
+        #{field 'entity.firstName'}
+        <div class="control-group ${field.errorClass}">
+            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>FirstName</label>
+            <div class="controls">
+                <input id="entityTable" type="text" name="${field.name}" value="${field.value}" class="input-xlarge">
+                <span class="help-block">${field.error}</span>
+            </div>
+        </div>
+        #{/field}
+        #{field 'entity.lastName'}
+        <div class="control-group ${field.errorClass}">
+            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>LastName</label>
+            <div class="controls">
+                <input id="entityTable" type="text" name="${field.name}" value="${field.value}" class="input-xlarge">
+                <span class="help-block">${field.error}</span>
+            </div>
+        </div>
+        #{/field}
+        #{field 'entity.email'}
+        <div class="control-group ${field.errorClass}">
+            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>Email</label>
+            <div class="controls">
+                <input id="entityTable" type="text" name="${field.name}" value="${field.value}" class="input-xlarge">
+                <span class="help-block">${field.error}</span>
+            </div>
+        </div>
+        #{/field}
+        #{field 'entity.status'}
+        <div class="control-group ${field.errorClass}">
+            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>Status</label>
+            <div class="controls">
+            	#{select field.name, items: EnumSet.allOf(models.EntityStatus.class), value: field.value, labelProperty:'guiLabel' /}
+                <span class="help-block">${field.error}</span>
+            </div>
+        </div>
+        #{/field}
+   </div>
+    <div class="modal-footer">
+        <input type="submit" name="submit" value="&{'link.save'}" class="btn btn-primary" />
+        <button class="btn" data-dismiss="modal" aria-hidden="true">&{'link.close'}</button>
+    </div>
+#{/form}

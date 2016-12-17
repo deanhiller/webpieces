@@ -5,6 +5,8 @@ public enum TemplateToken {
     EOF(null, null),            //end of file
     PLAIN(null, null),          //normal text
     SCRIPT("%{", "}%"),         // %{...}%
+    //for http2 such that server can pre-emptive send data
+    PREMPTIVE_SEND_SCRIPT("%%{", "}%%"),         // %%{...}%%
     EXPR("${", "}$"),           // ${...}$
     START_TAG("#{", "}#"),      // #{...}#
     END_TAG("#{/", "}#"),       // #{/...}#
@@ -13,7 +15,7 @@ public enum TemplateToken {
     ACTION("@[", "]@"),         // @[...]@
     ABSOLUTE_ACTION("@@[", "]@@"), // @@[...]@@
     COMMENT("*{", "}*");          // *{...}*
-    
+	
     private String start;
 	private String end;
 

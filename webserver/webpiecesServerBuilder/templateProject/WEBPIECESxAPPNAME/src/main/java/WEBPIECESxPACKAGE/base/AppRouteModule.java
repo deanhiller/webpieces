@@ -6,7 +6,9 @@ import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
+import static org.webpieces.ctx.api.HttpMethod.DELETE;
 import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 
@@ -32,6 +34,14 @@ public class AppRouteModule extends AbstractRouteModule {
 		addRoute(GET, "/async",         "examples/ExamplesController.myAsyncMethod", ASYNC_ROUTE); //for advanced users who want to release threads to do more work
 
 		//basic crud example(which just calls the same methods above for Create/Read/Update/Delete and the GET render page views as well)
+		//it adds all these routes
+		//addRoute(GET ,   "/user/list",        "crud/CrudUserController.userList", listRoute);
+		//addRoute(GET ,   "/user/new",         "crud/CrudUserController.userAddEdit", addRoute);
+		//addRoute(GET ,   "/user/edit/{id}",   "crud/CrudUserController.userAddEdit", editRoute);
+		//addRoute(POST,   "/user/post",        "crud/CrudUserController.postSaveUser", saveRoute);
+		//addRoute(DELETE, "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
+		//Not sure on this next one yet as we re-use the post route(it's easier for the webapp developer that way)
+		//XXXX(maybe not this one) addRoute(PUT, "/user/post/{id}",      "crud/CrudUserController.postSaveUser", saveRoute);
 		addCrud("user", "crud/CrudUserController",
 				LIST_USERS, GET_ADD_USER_FORM, GET_EDIT_USER_FORM,
 				POST_USER_FORM, POST_DELETE_USER);

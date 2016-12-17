@@ -41,8 +41,11 @@ public class TestAHrefTag {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<a href=`/verbatim` id=`myid`>My link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/verbatim` id=`myid`>My link2</a>".replace('`', '"'));
 		response.assertContains("<a href=`/if`>My render link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/if`>My render link2</a>".replace('`', '"'));
 		response.assertContains("<a href=`/redirect/Dean+Hiller`>The link</a>".replace('`', '"'));
+		response.assertContains("<a href=`/redirect/Dean+Hiller`>PureALink</a>".replace('`', '"'));
 		response.assertContains("Link but no ahref='/redirect/Dean+Hiller'");
 	}
 	

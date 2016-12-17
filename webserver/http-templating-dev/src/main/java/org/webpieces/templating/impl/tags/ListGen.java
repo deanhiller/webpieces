@@ -15,6 +15,12 @@ public class ListGen extends ParseTagArgs {
 	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
 		super.generateStartAttrs(sourceCode, token, uniqueId, callback);
 		
+		String tagBody = token.getCleanValue();
+		if(!tagBody.contains("items:"))
+			throw new IllegalArgumentException("#{list}# tag must have 'items:' attribute. "+token.getSourceLocation(true));			
+		else if(!tagBody.contains("items:"))
+			throw new IllegalArgumentException("#{list}# tag must have 'as:' attribute. "+token.getSourceLocation(true));
+		
 		String srcLocation = token.getSourceLocation(false);
 		StringBuilder s = new StringBuilder();
         s.append("if(!_attrsXXX['as']) {\n");
