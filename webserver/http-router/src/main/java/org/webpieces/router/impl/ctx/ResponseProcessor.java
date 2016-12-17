@@ -127,6 +127,8 @@ public class ResponseProcessor {
 
         // Add context as a page arg:
         pageArgs.put("_context", ctx);
+        pageArgs.put("_session", ctx.getSession());
+        pageArgs.put("_flash", ctx.getFlash());
 
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRoute().getRouteType());

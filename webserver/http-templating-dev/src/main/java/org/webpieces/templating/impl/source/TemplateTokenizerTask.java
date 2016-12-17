@@ -50,7 +50,8 @@ public class TemplateTokenizerTask {
         	TokenImpl token = tokens.get(tokens.size()-1);
         	int lastLine = token.endLineNumber;
         	throw new IllegalArgumentException("File="+filePath+" has an issue.  It is missing an end token of='"+state.getEnd()+"'"
-        			+ " where the start token was on line number="+lastLine+" and start token of the tag looks like='"+state.getStart()+"'");
+        			+ " where the start token was on line number="+lastLine+" and start token of the tag looks like='"+state.getStart()+"'"
+        			+token.getSourceLocation(true));
         }
         
         end++;
@@ -208,6 +209,9 @@ public class TemplateTokenizerTask {
 			endValue++;
 		
         TokenImpl lastToken = new TokenImpl(filePath, begin, endValue, finalState, beginLineNumber, endLineNumber, pageSource);
+        if(finalState != PLAIN) {
+        	lastToken.verifyContentsHaveNoStartTag();
+        }
         
         begin = end += skip;
         beginLineNumber = endLineNumber;
