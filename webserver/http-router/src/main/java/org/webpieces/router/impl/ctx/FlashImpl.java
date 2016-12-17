@@ -35,7 +35,7 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 		put("_message", msg);
 	}
 
-	public String message() {
+	public String getMessage() {
 		return get("_message");
 	}
 }

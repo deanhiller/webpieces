@@ -114,11 +114,11 @@
 		<script type="text/javascript" language="JavaScript">
        		$("li#tab_#{get 'tab'/}# > a").addClass("active");
   		</script>
-  		
-	#{if _flash.success}#
+
+	#{if _flash.message}#
 		<div class="row-fluid">
 			<div class="offset3 span6 alert alert-error">
-				${_flash.success}$
+				${_flash.message}$
 			</div>
 		</div>
 	#{/if}#

@@ -172,7 +172,13 @@ public class RouterBuilder implements Router {
 		addRoute(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute);
 		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, saveRoute);
 		//		addRoute(PUT, "/"+entity+"/post/{id}",        controller+".postSave"+entityWithCapital, saveRoute);
-		addRoute(DELETE, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
+		
+		//NOTE: Browsers don't support DELETE.  POST might make more sense here for delete but GET is way way less html
+		//code(ok, 1 line instead of 3).  There are hacks with javascript to support DELETE but seriously, we should just
+		//KISS and YAGNI (google that if you don't know).  
+		//HOWEVER, If you don't like this, copy and paste this method and modify to be a POST OR DELETE and add the 
+		//javascript for next time
+		addRoute(GET, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
 	}
 	
 	public AllRoutingInfo getRouterInfo() {

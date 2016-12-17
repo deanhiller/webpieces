@@ -32,19 +32,21 @@ public class CrudUserController {
 	
 	public Action userAddEdit(Integer id) {
 		if(id == null) {
-			return Actions.renderThis("user", new UserDbo());
+			return Actions.renderThis("entity", new UserDbo());
 		}
 		
 		EntityManager mgr = Em.get();
 		UserDbo user = mgr.find(UserDbo.class, id);
-		return Actions.renderThis("user", user);
+		return Actions.renderThis("entity", user);
 	}
 
 	public Redirect postSaveUser(UserDbo user) {
 		if(user.getPassword().length() < 4) {
 			Current.validation().addError("password", "Value is too short");
 		}
-		
+
+		//all errors are grouped and now if there are errors redirect AND fill in
+		//the form with what the user typed in along with errors
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
 			Current.flash().setMessage("Errors in form below");
@@ -54,6 +56,7 @@ public class CrudUserController {
 		}
 		
 		Current.flash().setMessage("User successfully saved");
+		Current.flash().keep();
 		Em.get().merge(user);
         Em.get().flush();
         
@@ -63,6 +66,9 @@ public class CrudUserController {
 	public Redirect postDeleteUser(int id) {
 		UserDbo ref = Em.get().getReference(UserDbo.class, id);
 		Em.get().remove(ref);
+		Em.get().flush();
+		Current.flash().setMessage("User deleted");
+		Current.flash().keep();
 		return Actions.redirect(CrudUserRouteId.LIST_USERS);
 	}
 }
