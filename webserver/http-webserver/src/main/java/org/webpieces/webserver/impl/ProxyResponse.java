@@ -220,8 +220,9 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime);
 		HttpResponse resp = tuple.response;
-		//for security, banking pages, all dynamic pages, we tell browser not to store them
-		resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
+		//This would force the browser back button to re-request the page as it would never have the page
+		//and is good to use to hide banking information type pages
+		//resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
 
 		log.debug(()->"content about to be sent back="+content);
 		
