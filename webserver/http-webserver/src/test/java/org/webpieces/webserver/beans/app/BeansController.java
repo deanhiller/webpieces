@@ -74,6 +74,7 @@ public class BeansController {
 		
 		RequestContext ctx = Current.getContext();
 		if(Current.validation().hasErrors()) {
+			Current.flash().setMessage("Invalid values below");
 			return Actions.redirectFlashAllSecure(BeansRouteId.USER_FORM_ROUTE, ctx, "password");
 		}
 		

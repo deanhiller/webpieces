@@ -5,6 +5,6 @@
     <title>Title</title>
 </head>
     <body>
-        #{if _context.getFlash().hasMessage()}#Msg: ${_context.getFlash().message()}$#{/if}#
+        #{if _flash.message}#Msg: ${_flash.message}$#{/if}#
     </body>
 </html>

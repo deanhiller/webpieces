@@ -77,7 +77,7 @@ public class TestBeans {
 
 
 	@Test
-    public void testFlasMessage() {
+    public void testFlashMessage() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 

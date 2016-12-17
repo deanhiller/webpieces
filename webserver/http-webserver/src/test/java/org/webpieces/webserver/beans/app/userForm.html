@@ -4,6 +4,9 @@
   <body>
     Add User<br/>
     
+    #{if _flash.message}#Msg: ${_flash.message}$#{/if}#
+    
+    
 #{form action:@[POST_USER_ROUTE]@}#
 
 #{field 'user.firstName'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge"/>#{/field}#

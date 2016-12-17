@@ -79,7 +79,7 @@ public class TestPRGSelenium {
 		userInput = driver.findElement(By.name("user.firstName"));
 		String userName = userInput.getAttribute("value");
 		Assert.assertEquals("Dean Hiller", userName);
-		
+
 		passwordElem = driver.findElement(By.name("password"));
 		String password = passwordElem.getAttribute("value");
 		Assert.assertEquals("", password);
@@ -90,7 +90,8 @@ public class TestPRGSelenium {
 		
 		String pageSource3 = driver.getPageSource();
 		Assert.assertFalse("pageSource="+pageSource3, pageSource3.contains("null"));
-		
+		//ensure error message is there
+		Assert.assertTrue("pageSource="+pageSource3, pageSource3.contains("Msg: Invalid values below"));		
 	}
 	
 	//You must have firefox installed to run this test...
