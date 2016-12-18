@@ -20,7 +20,11 @@ public class BeansRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/adduser",           "BeansController.userForm", BeansRouteId.USER_FORM_ROUTE);
 		addRoute(POST, "/postuser",          "BeansController.postUser", BeansRouteId.POST_USER_ROUTE);
 		addRoute(GET , "/listusers",         "BeansController.listUsers", BeansRouteId.LIST_USERS_ROUTE);
-		
+
+		addRoute(POST, "/postusernullable",  "BeansController.postUserNullable", BeansRouteId.POST_USER_NULLABLE_ROUTE, false);
+
+		addRoute(GET , "/getuser",           "BeansController.userParamGetRequest", BeansRouteId.USER_GET_ROUTE);
+
 		addRoute(GET , "/arrayForm",         "BeansController.arrayForm", BeansRouteId.ARRAY_FORM_ROUTE);
 		addRoute(POST, "/postArray",         "BeansController.postArray", BeansRouteId.POST_ARRAY_ROUTE);
 		

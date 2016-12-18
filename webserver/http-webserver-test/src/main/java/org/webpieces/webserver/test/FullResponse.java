@@ -152,4 +152,30 @@ public class FullResponse {
 		return header.getValue();
 	}
 
+	/**
+	 * Example request cookie from chrome
+	 * Cookie: webSession=1-gzvc03bKRP2YYvWySwgENREwFSg=:__ST=3a2fda5dad7547d3b15b1f61bd3d12f5; webFlash=1:_message=Invalid+values+below&user.address.zipCode=Text+instead+of+number&__secureToken=3a2fda5dad7547d3b15b1f61bd3d12f5&user.firstName=Dean+Hiller; webErrors=1:user.address.zipCode=Could+not+convert+value
+	 * @return
+	 */
+	public Header createCookieRequestHeader() {
+		List<Header> headers = response.getHeaderLookupStruct().getHeaders(KnownHeaderName.SET_COOKIE);
+		String fullRequestCookie = "";
+		boolean firstLine = true;
+		for(Header header : headers) {
+			String value = header.getValue();
+			if(value.contains(";")) {
+				String[] split = value.split(";");
+				value = split[0];
+			}
+			
+			if(firstLine)
+				fullRequestCookie += value;
+			else
+				fullRequestCookie += "; "+value;
+				
+		}
+		
+		return new Header(KnownHeaderName.COOKIE, fullRequestCookie);
+	}
+
 }

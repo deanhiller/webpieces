@@ -14,6 +14,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.routing.Nullable;
 import org.webpieces.webserver.basic.app.biz.Address;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -69,6 +70,14 @@ public class BeansController {
 		}
 		
 		lib.saveUser(user);
+		return Actions.redirect(BeansRouteId.LIST_USERS_ROUTE);
+	}
+
+	public Redirect postUserNullable(@Nullable UserDto user, String password) {
+		return Actions.redirect(BeansRouteId.LIST_USERS_ROUTE);
+	}
+
+	public Redirect userParamGetRequest(UserDto user, String password) {
 		return Actions.redirect(BeansRouteId.LIST_USERS_ROUTE);
 	}
 	

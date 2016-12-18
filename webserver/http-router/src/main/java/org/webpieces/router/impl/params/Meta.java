@@ -8,4 +8,5 @@ public interface Meta {
 
 	Class<?> getFieldClass();
 
+	void validateNullValue();
 }

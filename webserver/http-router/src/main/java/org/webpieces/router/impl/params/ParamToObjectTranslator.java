@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.params;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -16,6 +17,8 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.router.api.exceptions.ClientDataError;
+import org.webpieces.router.api.exceptions.DataMismatchException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
@@ -43,10 +46,31 @@ public class ParamToObjectTranslator {
 	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
-	
 	public Object[] createArgs(MatchResult result, RouterRequest req, Validation validator) {
+		try {
+			return createArgsImpl(result, req, validator);
+		} catch(DataMismatchException e) {
+			if(req.method == HttpMethod.GET) {
+				//For GET with query params or path urls, if we can't convert, it should be a 404...
+				//This is because a human user typed in the wrong url so they should get back not found
+				throw new NotFoundException(e);
+			} else {
+				//For POST with multipart, this should be a 500 because a human user does NOT type in post
+				//urls and instead the developer typed in the wrong url and an issue needs to be fixed(or 
+				//some hacker is doing something so internal error there is fine as well)
+				if(req.multiPartFields.size() > 0)
+					throw new IllegalArgumentException(e);
+				else //for apis that POST, this is a client error(or developer error when testing)
+					throw new ClientDataError(e);
+			}
+		}
+	}
+
+	protected Object[] createArgsImpl(MatchResult result, RouterRequest req, Validation validator) {
 		RouteMeta meta = result.getMeta();
-		Parameter[] paramMetas = meta.getMethod().getParameters();
+		Method method = meta.getMethod();
+		Parameter[] paramMetas = method.getParameters();
+		Annotation[][] paramAnnotations = method.getParameterAnnotations();
 		
 		ParamTreeNode paramTree = new ParamTreeNode();
 		
@@ -61,8 +85,10 @@ public class ParamToObjectTranslator {
 		treeCreator.createTree(paramTree, result.getPathParams(), FromEnum.URL_PATH);
 		
 		List<Object> args = new ArrayList<>();
-		for(Parameter paramMeta : paramMetas) {
-			ParamMeta fieldMeta = new ParamMeta(paramMeta);
+		for(int i = 0; i < paramMetas.length; i++) {
+			Parameter paramMeta = paramMetas[i];
+			Annotation[] annotations = paramAnnotations[i];
+			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
 			ParamNode paramNode = paramTree.get(name);
 			Object arg = translate(req, meta, paramNode, fieldMeta, validator);
@@ -131,6 +157,9 @@ public class ParamToObjectTranslator {
 			ValueNode v = (ValueNode) valuesToUse;
 			String fullName = v.getFullName();
 			throw new IllegalArgumentException("Could not convert incoming value="+v.getValue()+" of key name="+fullName+" field="+fieldMeta);
+		} else if(valuesToUse == null) {
+			fieldMeta.validateNullValue(); //validate if null is ok or not
+			return null;
 		} else if(!(valuesToUse instanceof ParamTreeNode)) {
 			throw new IllegalStateException("Bug, must be missing a case. v="+valuesToUse+" type to field="+fieldMeta);
 		}
@@ -215,15 +244,7 @@ public class ParamToObjectTranslator {
 				String s = "The method='"+method+"' requires that "+fieldMeta+" be of type="
 						+paramTypeToCreate2+" but the request did not contain any value in query params, path "
 						+ "params nor multi-part form fields with a value and we can't convert null to a primitive";
-				if(req.method == HttpMethod.GET) {
-					//For GET with query params or path urls, if we can't convert, it should be a 404...
-					//This is because a human user typed in the wrong url so they should get back not found
-					throw new NotFoundException(s);
-				} else {
-					//For POST with multipart, this should be a 500 because a human user does NOT type in post
-					//urls and instead the developer typed in the wrong url and an issue needs to be fixed
-					throw new IllegalArgumentException(s);
-				}
+				throw new DataMismatchException(s);
 			}
 		}
 	}

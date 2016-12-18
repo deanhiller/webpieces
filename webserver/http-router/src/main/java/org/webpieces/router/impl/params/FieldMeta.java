@@ -84,5 +84,12 @@ public class FieldMeta implements Meta {
 	public String toString() {
 		return "FieldMeta [field=" + field + "]";
 	}
+
+	@Override
+	public void validateNullValue() {
+		//by default fields are nullable(not required) UNLESS @Required annotation
+		//is used
+		throw new UnsupportedOperationException("need to implement/test");
+	}
 	
 }

@@ -22,4 +22,9 @@ public class GenericMeta implements Meta {
 		return type2;
 	}
 
+	@Override
+	public void validateNullValue() {
+		throw new UnsupportedOperationException("If this happens, let us know.  I don't think this case is possible");
+	}
+
 }

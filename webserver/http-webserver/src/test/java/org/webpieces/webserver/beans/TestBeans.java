@@ -227,14 +227,81 @@ public class TestBeans {
 	}
 	
 	/*
-	 * Have the controller method be postUser(UserDbo user) BUT then in the html have
+	 * Have the controller method be postUser(UserDbo user, String password) BUT then in the html have
 	 * entity.name, entity.age, entity.password INSTEAD of user.name, etc. such that there
 	 * is a mismatch and verify there is a clean error for that
+	 * 
+	 * GET /adduser HTTP/1.1
+	 * Host: localhost:59786
+	 * User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0
+	 * Accept: text/html,application/xhtml+xml,application/xml;q=0.9,XX/XX;q=0.8
+	 * Accept-Language: en-US,en;q=0.5
+	 * Accept-Encoding: gzip, deflate
+	 * Referer: http://localhost:59786/adduser
+	 * Cookie: webSession=1-gzvc03bKRP2YYvWySwgENREwFSg=:__ST=3a2fda5dad7547d3b15b1f61bd3d12f5; webFlash=1:_message=Invalid+values+below&user.address.zipCode=Text+instead+of+number&__secureToken=3a2fda5dad7547d3b15b1f61bd3d12f5&user.firstName=Dean+Hiller; webErrors=1:user.address.zipCode=Could+not+convert+value
+	 * Connection: keep-alive
 	 */
-//	@Test
-//	public void testDeveloperMistypesBeanNameVsFormNames() {
-//		throw new UnsupportedOperationException("not supported yet");
-//	}
+	@Test
+	public void testDeveloperMistypesBeanNameVsFormNames() {
+		HttpRequest req = Requests.createPostRequest("/postuser", 
+				"entity.firstName", "D&D", 
+				"entity.lastName", "Hiller",
+				"entity.fullName", "Dean Hiller",
+				"password", "hi"
+				);
+		
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+	}
+	
+	@Test
+	public void testDeveloperMistypesBeanNameVsFormNamesButNullableIsUsed() {
+		HttpRequest req = Requests.createPostRequest("/postusernullable", 
+				"entity.firstName", "D&D", 
+				"entity.lastName", "Hiller",
+				"entity.fullName", "Dean Hiller",
+				"password", "hi"
+				);
+		
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+	}
+	
+	@Test
+	public void testQueryParamsToUserBean() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser");
+		
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+	}
+	
+	@Test
+	public void testBeanMissingForGetSoNotFoundResults() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser?user.firstName=jeff&password=as");
+		
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+	}
 	
 	private class AppOverridesModule implements Module {
 		@Override
