@@ -7,6 +7,7 @@ import org.webpieces.webserver.tags.app.Account;
 
 public class UserDto {
 
+	private Integer id;
 	private String firstName;
 	private String lastName;
 	private String fullName;
@@ -42,5 +43,11 @@ public class UserDto {
 	}
 	public void setAccounts(List<Account> accounts) {
 		this.accounts = accounts;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Integer getId() {
+		return id;
 	}
 }

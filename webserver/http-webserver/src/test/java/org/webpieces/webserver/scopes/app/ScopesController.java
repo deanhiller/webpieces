@@ -6,6 +6,10 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Session;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.actions.FlashAndRedirect;
+import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.actions.Render;
+import org.webpieces.webserver.basic.app.biz.UserDto;
 
 @Singleton
 public class ScopesController {
@@ -72,6 +76,43 @@ public class ScopesController {
 		return Actions.renderThis();
 	}
 	
+	public Action userAddEdit(Integer id) {
+		if(id == null) {
+			return Actions.renderThis("entity", new UserDto());
+		}
+
+		//lookup from database typically not create user
+		UserDto user = new UserDto();
+		user.setId(555);
+		user.setFirstName("Dean");
+		user.setLastName("Hiller");
+		return Actions.renderThis("entity", user);
+	}
+	
+	//very typical post for adding user to database
+	public Redirect postSaveUser(UserDto user) {
+		if(user.getFirstName().length() < 3) {
+			Current.validation().addError("user.firstName", "First name must be more than 2 characters");
+		}
+
+		//all errors are grouped and now if there are errors redirect AND fill in
+		//the form with what the user typed in along with errors
+		if(Current.validation().hasErrors()) {
+			Current.flash().setMessage("Errors in form below");
+			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
+			redirect.setIdFieldAndValue("id", user.getId());
+			return Actions.redirectFlashAll(ScopesRouteId.ADD_USER, ScopesRouteId.EDIT_USER, redirect);
+		}
+		
+		Current.flash().setMessage("User successfully saved");
+		Current.flash().keep();
+		
+		return Actions.redirect(ScopesRouteId.LIST_USER);
+	}
+	
+	public Render userList() {
+		return Actions.renderThis();
+	}
 	
 //	addRoute(GET , "/home",               "ScopesController.home", ScopesRouteId.HOME);
 //

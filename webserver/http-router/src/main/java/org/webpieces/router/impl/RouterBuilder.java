@@ -161,6 +161,15 @@ public class RouterBuilder implements Router {
 		return new RouterBuilder(path, subInfo, reverseRoutes, finder, urlEncoding);
 	}
 
+	/*
+	 * Adds routes like the following all in one method
+	 * 
+	 * 	//addRoute(GET ,   "/user/list",        "crud/CrudUserController.userList", listRoute);
+	 *	//addRoute(GET ,   "/user/new",         "crud/CrudUserController.userAddEdit", addRoute);
+	 *	//addRoute(GET ,   "/user/edit/{id}",   "crud/CrudUserController.userAddEdit", editRoute);
+	 *	//addRoute(POST,   "/user/post",        "crud/CrudUserController.postSaveUser", saveRoute);
+	 *	//addRoute(GET,    "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
+	 */
 	@Override
 	public void addCrud(String entity, String controller,  
 			RouteId listRoute, RouteId addRoute, RouteId editRoute, RouteId saveRoute, RouteId deleteRoute) {

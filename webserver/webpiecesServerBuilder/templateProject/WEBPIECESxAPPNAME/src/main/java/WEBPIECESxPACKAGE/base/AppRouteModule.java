@@ -1,14 +1,17 @@
 package WEBPIECESxPACKAGE.base;
 
-import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.*;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_ADD_USER_FORM;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
-import static org.webpieces.ctx.api.HttpMethod.DELETE;
+import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.ASYNC_ROUTE;
+import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.LIST_EXAMPLES;
+import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE;
+import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE2;
+import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE3;
+import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.REDIRECT_PAGE;
 import static org.webpieces.ctx.api.HttpMethod.GET;
-import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 
@@ -22,7 +25,7 @@ public class AppRouteModule extends AbstractRouteModule {
 		//addRoute(GET ,   "/user/new",         "crud/CrudUserController.userAddEdit", addRoute);
 		//addRoute(GET ,   "/user/edit/{id}",   "crud/CrudUserController.userAddEdit", editRoute);
 		//addRoute(POST,   "/user/post",        "crud/CrudUserController.postSaveUser", saveRoute);
-		//addRoute(DELETE, "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
+		//addRoute(GET,    "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
 		//Not sure on this next one yet as we re-use the post route(it's easier for the webapp developer that way)
 		//XXXX(maybe not this one) addRoute(PUT, "/user/post/{id}",      "crud/CrudUserController.postSaveUser", saveRoute);
 		addCrud("user", "crud/CrudUserController",

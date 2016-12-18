@@ -117,6 +117,27 @@ public class TestBeans {
 		Assert.assertEquals("Coolness Dr.", user.getAddress().getStreet());
 	}
 
+	/**
+	 * Found this bug where it blew up translating 'null' to 'null' and tried to convert it
+	 *  to int instead, so added test then fixed
+	 */
+	@Test
+	public void testNullIdFromForm() {
+		HttpRequest req = Requests.createPostRequest("/postuser2",
+				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
+				);
+		
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		//should not have any errors and should redirect back to list of users page..
+		Assert.assertEquals("http://myhost.com/listusers", response.getRedirectUrl());
+	}
+	
 	@Test
 	public void testInvalidComplexBean() {
 		HttpRequest req = Requests.createPostRequest("/postuser2", 

@@ -113,10 +113,66 @@ public class TestScopes {
         response.assertContains("Msg: it worked");
     }
     
+	//we hit an issue where validation errors are sticking around so create a test here and
+	//fix it.
 	//need to test out validation errors don't stick around or validation.hasErrors will stay forever true
 	//even when entity is finally ok
-//	@Test
-//	public void testValidationErrorDoesNotPersist() {
-//		throw new UnsupportedOperationException("need to implement");
-//	}
+	@Test
+	public void testValidationErrorDoesNotPersist() {
+		//POST first resulting in redirect with errors
+		//RENDER page WITH errors, verify errors are there
+		//POST again with valid data and verify POST succeeds
+		
+		FullResponse response1 = runInvalidPost();
+		FullResponse response2 = runGetUserFormWithErrors(response1);
+		
+		Header header = response2.createCookieRequestHeader();
+		HttpRequest req = Requests.createPostRequest("/user/post", 
+				"user.id", "",
+				"user.firstName", "Dean", //valid firstname
+				"user.lastName", "Hiller",
+				"user.fullName", "Dean Hiller",
+				"user.address.zipCode", "555",
+				"user.address.street", "Coolness Dr.");		
+		req.addHeader(header);
+
+		//Did not need to finish test right now
+	}
+
+	private FullResponse runInvalidPost() {
+		HttpRequest req = Requests.createPostRequest("/user/post", 
+				"user.firstName", "D", //invalid first name
+				"user.lastName", "Hiller",
+				"user.fullName", "Dean Hiller",
+				"user.address.zipCode", "555",
+				"user.address.street", "Coolness Dr.");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		socket.clear();
+		return response;
+	}
+	
+	private FullResponse runGetUserFormWithErrors(FullResponse response1) {
+		Assert.assertEquals("http://myhost.com/user/new", response1.getRedirectUrl());
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/new");
+        Header cookieHeader = response1.createCookieRequestHeader();
+        req.addHeader(cookieHeader);
+        
+        server.incomingRequest(req, new RequestId(0), true, socket);
+
+        List<FullResponse> responses = socket.getResponses();
+        Assert.assertEquals(1, responses.size());
+
+        FullResponse response = responses.get(0);
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        response.assertContains("First name must be more than 2 characters");
+        socket.clear();
+		return response;
+	}
 }

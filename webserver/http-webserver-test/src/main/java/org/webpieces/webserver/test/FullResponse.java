@@ -168,9 +168,10 @@ public class FullResponse {
 				value = split[0];
 			}
 			
-			if(firstLine)
+			if(firstLine) {
+				firstLine = false;
 				fullRequestCookie += value;
-			else
+			} else
 				fullRequestCookie += "; "+value;
 				
 		}

@@ -1,9 +1,9 @@
 package org.webpieces.webserver.scopes.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
-import org.webpieces.webserver.beans.app.BeansRouteId;
 
 public class ScopesRouteModule extends AbstractRouteModule {
 
@@ -18,6 +18,11 @@ public class ScopesRouteModule extends AbstractRouteModule {
 		
 		addRoute(GET , "/flashmessage",      "ScopesController.flashMessage", ScopesRouteId.FLASH_MESSAGE);
 		addRoute(GET , "/validationerror",   "ScopesController.validationError", ScopesRouteId.VALIDATION_ERROR);
+
+		addRoute(GET ,   "/user/new",         "ScopesController.userAddEdit", ScopesRouteId.ADD_USER);
+		addRoute(GET ,   "/user/edit/{id}",   "ScopesController.userAddEdit", ScopesRouteId.EDIT_USER);
+		addRoute(POST,   "/user/post",        "ScopesController.postSaveUser", ScopesRouteId.POST_USER, false);
+		addRoute(GET ,   "/user/list",        "ScopesController.userList", ScopesRouteId.LIST_USER);
 
 		//Tab state starts when TabState.start() is called in the code
 		//Tab state ends when TabState.end() is called in the code
