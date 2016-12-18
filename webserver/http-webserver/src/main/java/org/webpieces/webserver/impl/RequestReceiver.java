@@ -306,7 +306,8 @@ public class RequestReceiver implements RequestListener {
 			return;
 		}
 		
-		log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
+		if(!(exc instanceof HttpClientException))
+			log.error("Need to clean this up and render good 500 page for real bugs. thread="+Thread.currentThread().getName(), exc);
 
 		ProxyResponse proxyResp = responseProvider.get();
 		HttpRequest req = new HttpRequest();

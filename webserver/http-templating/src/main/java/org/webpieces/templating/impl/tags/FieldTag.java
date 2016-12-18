@@ -19,9 +19,11 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 
 	private Pattern pattern = Pattern.compile("\\[(.*?)\\]"); //for arrays only
 	private String fieldHtmlPath;
+	private String errorClass;
 
-	public FieldTag(String fieldHtmlPath) {
+	public FieldTag(String fieldHtmlPath, String errorClass) {
 		this.fieldHtmlPath = fieldHtmlPath;
+		this.errorClass = errorClass;
 	}
 
 	@Override
@@ -86,7 +88,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         field.put("i18nKey", result.i18nName); //different from fieldName only for Arrays
         field.put("flash", flashValue);
         field.put("error", validation.getError(fieldName));
-        field.put("errorClass", field.get("error") != null ? "hasError" : "");
+        field.put("errorClass", field.get("error") != null ? errorClass : "");
         String[] pieces = fieldName.split("\\.");
         Object pageArgValue = null;
         Object obj = pageArgs.get(pieces[0]);

@@ -43,7 +43,7 @@ public class TestFieldTag {
 		//This can be a bit brittle if people change field.tag but we HAVE to verify this html was not escaped on accident as it was previously
 		response.assertContains("<div class=`controls`>".replace('`', '"'));
 		response.assertContains("<input type=`text` name=`user` value=`Dean` class=`input-xlarge`/>".replace('`', '"'));
-		response.assertContains("<span id=`user_errorMsg` class=`errorMsg`></span>".replace('`', '"'));
+		response.assertContains("<span id=`user_errorMsg` class=`help-block`></span>".replace('`', '"'));
 	}
 
 }

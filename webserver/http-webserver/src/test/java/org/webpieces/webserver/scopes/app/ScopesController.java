@@ -62,6 +62,17 @@ public class ScopesController {
 		return Actions.renderThis();
 	}
 	
+	public Action flashMessage() {
+		Current.flash().setMessage("it worked");
+		return Actions.renderThis();
+	}
+
+	public Action validationError() {
+		Current.validation().setGlobalError("it failed");
+		return Actions.renderThis();
+	}
+	
+	
 //	addRoute(GET , "/home",               "ScopesController.home", ScopesRouteId.HOME);
 //
 //	addRoute(GET , "/displaysession",     "ScopesController.displaySession", ScopesRouteId.DISPLAY_SESSION);

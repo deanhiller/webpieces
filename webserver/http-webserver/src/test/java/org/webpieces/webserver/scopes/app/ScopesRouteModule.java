@@ -3,6 +3,7 @@ package org.webpieces.webserver.scopes.app;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.webserver.beans.app.BeansRouteId;
 
 public class ScopesRouteModule extends AbstractRouteModule {
 
@@ -15,6 +16,9 @@ public class ScopesRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/sessionTooLarge",    "ScopesController.sessionTooLarge", ScopesRouteId.SESSION_TOO_LARGE);
 		addRoute(GET , "/receiveTooLarge",    "ScopesController.receiveLongSession", ScopesRouteId.RECEIVE_TOO_LARGE);
 		
+		addRoute(GET , "/flashmessage",      "ScopesController.flashMessage", ScopesRouteId.FLASH_MESSAGE);
+		addRoute(GET , "/validationerror",   "ScopesController.validationError", ScopesRouteId.VALIDATION_ERROR);
+
 		//Tab state starts when TabState.start() is called in the code
 		//Tab state ends when TabState.end() is called in the code
 		//Tab id is either 

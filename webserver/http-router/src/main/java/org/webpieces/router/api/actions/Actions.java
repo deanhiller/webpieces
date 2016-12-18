@@ -58,7 +58,15 @@ public class Actions {
 		ctx.getValidation().keep();
 		return redirect(routeId);
 	}
-
+	
+	public static Redirect redirectFlashAllSecure(RouteId routeId, RequestContext ctx, Object[] args, String ... secureFieldNames) {
+		Set<String> mySet = new HashSet<>(Arrays.asList(secureFieldNames));
+		ctx.moveFormParamsToFlash(mySet);
+		ctx.getFlash().keep();
+		ctx.getValidation().keep();
+		return redirect(routeId, args);
+	}
+	
 	public static Redirect redirectFlashAll2(RouteId routeId, RequestContext ctx, Object ... args) {
 		ctx.moveFormParamsToFlash(new HashSet<>());
 		ctx.getFlash().keep();
@@ -71,17 +79,19 @@ public class Actions {
 		return redirect;
 	}
 
-	public static void redirectFlashAllAddEdit(RouteId addRoute, RouteId editRoute,
-			RequestContext context, String idKey, Integer idValue, Object ... args) {
-		if(idValue == null) {
-			redirectFlashAll2(addRoute, context, args);
+	public static Redirect redirectFlashAll(RouteId addRoute, RouteId editRoute, FlashAndRedirect redirect) {
+		if(redirect.getIdValue() == null) {
+			//If id is null, this is an add(not an edit) so redirect back to add route
+			return redirectFlashAllSecure(addRoute, redirect.getContext(), redirect.getPageArgs(), redirect.getSecureFields());
 		} else {
+			//If id is not null, this is an edit(not an add) so redirect back to edit route
+			String[] args = redirect.getPageArgs();
 			Object[] allArgs = new Object[args.length+2];
-			allArgs[0] = idKey;
-			allArgs[1] = idValue;
+			allArgs[0] = redirect.getIdField();
+			allArgs[1] = redirect.getIdValue();
 			System.arraycopy(args, 0, allArgs, 2, args.length);
 			
-			redirectFlashAll2(editRoute, context, allArgs);
+			return redirectFlashAllSecure(editRoute, redirect.getContext(), allArgs, redirect.getSecureFields());
 		}
 	}
 

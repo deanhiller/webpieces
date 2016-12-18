@@ -54,16 +54,6 @@ public class BeansController {
 		return future;
 	}
 
-	public Action flashMessage() {
-		Current.flash().setMessage("it worked");
-		return Actions.renderThis();
-	}
-
-	public Action validationError() {
-		Current.validation().setGlobalError("it failed");
-		return Actions.renderThis();
-	}
-
 	public Action userForm() {
 		return Actions.renderThis();
 	}

@@ -75,33 +75,6 @@ public class TestBeans {
 		response.assertContains("Or we can try to get a flash: testflashvalue");
 	}
 
-
-	@Test
-    public void testFlashMessage() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
-
-        List<FullResponse> responses = mockResponseSender.getResponses();
-        Assert.assertEquals(1, responses.size());
-
-        FullResponse response = responses.get(0);
-        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-        response.assertContains("Msg: it worked");
-    }
-
-    @Test
-    public void testValidationError() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/validationerror");
-        server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
-
-        List<FullResponse> responses = mockResponseSender.getResponses();
-        Assert.assertEquals(1, responses.size());
-
-        FullResponse response = responses.get(0);
-        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-        response.assertContains("Err: it failed");
-    }
-
 	@Test
 	public void testPostFailDueToSecureTokenCheck() {
 		HttpRequest req = Requests.createPostRequest("/postuser", 
@@ -252,6 +225,16 @@ public class TestBeans {
 		Assert.assertEquals("Account2Name", user.getAccounts().get(1).getName());
 		Assert.assertEquals(56, user.getAccounts().get(2).getAddresses().get(0).getNumber());
 	}
+	
+	/*
+	 * Have the controller method be postUser(UserDbo user) BUT then in the html have
+	 * entity.name, entity.age, entity.password INSTEAD of user.name, etc. such that there
+	 * is a mismatch and verify there is a clean error for that
+	 */
+//	@Test
+//	public void testDeveloperMistypesBeanNameVsFormNames() {
+//		throw new UnsupportedOperationException("not supported yet");
+//	}
 	
 	private class AppOverridesModule implements Module {
 		@Override

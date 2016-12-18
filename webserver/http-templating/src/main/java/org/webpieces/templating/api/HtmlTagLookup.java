@@ -28,7 +28,7 @@ public class HtmlTagLookup {
 		put(new FormTag(config.getDefaultFormAcceptEncoding()));
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());
-		put(new FieldTag(config.getFieldTagTemplatePath()));
+		put(new FieldTag(config.getFieldTagTemplatePath(), "error"));
 	}
 
 	protected void put(HtmlTag tag) {

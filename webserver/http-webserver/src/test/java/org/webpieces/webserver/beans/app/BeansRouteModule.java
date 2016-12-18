@@ -12,10 +12,6 @@ public class BeansRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/pageparam",         "BeansController.pageParam", BeansRouteId.PAGE_PARAM);
 		addRoute(GET , "/pageparam_async",   "BeansController.pageParamAsync", BeansRouteId.PAGE_PARAM_ASYNC);
 
-
-		addRoute(GET , "/flashmessage",      "BeansController.flashMessage", BeansRouteId.FLASH_MESSAGE);
-		addRoute(GET , "/validationerror",   "BeansController.validationError", BeansRouteId.VALIDATION_ERROR);
-
 		addRoute(GET , "/urlencoding/{user}","BeansController.urlEncoding", BeansRouteId.URLENCODE);
 
 		addRoute(POST, "/postuser2",        "BeansController.postUser", BeansRouteId.POST_USER2_ROUTE, false); //insecure

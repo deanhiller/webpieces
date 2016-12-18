@@ -13,6 +13,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.actions.FlashAndRedirect;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
@@ -48,10 +49,10 @@ public class CrudTestController {
 		
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
-			Current.flash().setMessage("Errors in form below");
-			Actions.redirectFlashAllAddEdit(
-					ADD_USER_PAGE, EDIT_USER_PAGE, Current.getContext(), 
-					"id", user.getId(), "other", "value", "key3", "value3");
+			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
+			redirect.setIdFieldAndValue("id", user.getId());
+			redirect.setPageAndRouteArguments("other", "value", "key3", "value3");
+			Actions.redirectFlashAll(ADD_USER_PAGE, EDIT_USER_PAGE, redirect);
 		}
 		
 		Current.flash().setMessage("User successfully saved");

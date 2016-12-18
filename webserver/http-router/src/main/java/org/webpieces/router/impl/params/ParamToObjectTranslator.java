@@ -217,9 +217,11 @@ public class ParamToObjectTranslator {
 						+ "params nor multi-part form fields with a value and we can't convert null to a primitive";
 				if(req.method == HttpMethod.GET) {
 					//For GET with query params or path urls, if we can't convert, it should be a 404...
+					//This is because a human user typed in the wrong url so they should get back not found
 					throw new NotFoundException(s);
 				} else {
-					//For POST with multipart, this should be a 500
+					//For POST with multipart, this should be a 500 because a human user does NOT type in post
+					//urls and instead the developer typed in the wrong url and an issue needs to be fixed
 					throw new IllegalArgumentException(s);
 				}
 			}

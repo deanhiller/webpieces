@@ -13,6 +13,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.actions.FlashAndRedirect;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory; 
@@ -40,9 +41,13 @@ public class CrudUserController {
 		return Actions.renderThis("entity", user);
 	}
 
-	public Redirect postSaveUser(UserDbo user) {
-		if(user.getPassword().length() < 4) {
-			Current.validation().addError("password", "Value is too short");
+	public Redirect postSaveUser(UserDbo entity) {
+		if(entity.getPassword().length() < 4) {
+			Current.validation().addError("entity.password", "Value is too short");
+		} 
+		
+		if(entity.getFirstName().length() < 3) {
+			Current.validation().addError("entity.firstName", "First name must be more than 2 characters");
 		}
 
 		//all errors are grouped and now if there are errors redirect AND fill in
@@ -50,14 +55,16 @@ public class CrudUserController {
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
 			Current.flash().setMessage("Errors in form below");
-			Actions.redirectFlashAllAddEdit(
-					GET_ADD_USER_FORM, GET_EDIT_USER_FORM, Current.getContext(), 
-					"id", user.getId(), "other", "value", "key3", "value3");
+			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
+			redirect.setSecureFields("entity.password"); //make sure secure fields are not put in flash cookie!!!
+			redirect.setIdFieldAndValue("id", entity.getId());
+			return Actions.redirectFlashAll(GET_ADD_USER_FORM, GET_EDIT_USER_FORM, redirect);
 		}
 		
 		Current.flash().setMessage("User successfully saved");
 		Current.flash().keep();
-		Em.get().merge(user);
+		
+		Em.get().merge(entity);
         Em.get().flush();
         
 		return Actions.redirect(CrudUserRouteId.LIST_USERS);
