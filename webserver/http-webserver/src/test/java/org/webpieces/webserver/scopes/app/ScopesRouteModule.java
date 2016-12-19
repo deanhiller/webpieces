@@ -17,7 +17,6 @@ public class ScopesRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/receiveTooLarge",    "ScopesController.receiveLongSession", ScopesRouteId.RECEIVE_TOO_LARGE);
 		
 		addRoute(GET , "/flashmessage",      "ScopesController.flashMessage", ScopesRouteId.FLASH_MESSAGE);
-		addRoute(GET , "/validationerror",   "ScopesController.validationError", ScopesRouteId.VALIDATION_ERROR);
 
 		addRoute(GET ,   "/user/new",         "ScopesController.userAddEdit", ScopesRouteId.ADD_USER);
 		addRoute(GET ,   "/user/edit/{id}",   "ScopesController.userAddEdit", ScopesRouteId.EDIT_USER);

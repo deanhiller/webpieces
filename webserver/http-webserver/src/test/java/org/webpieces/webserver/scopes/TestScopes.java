@@ -87,19 +87,6 @@ public class TestScopes {
 		Assert.assertEquals("http://myhost.com/displaySession", url);
 	}
 
-    @Test
-    public void testValidationError() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/validationerror");
-        server.incomingRequest(req, new RequestId(0), true, socket);
-
-        List<FullResponse> responses = socket.getResponses();
-        Assert.assertEquals(1, responses.size());
-
-        FullResponse response = responses.get(0);
-        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-        response.assertContains("Err: it failed");
-    }
-    
 	@Test
     public void testFlashMessage() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
