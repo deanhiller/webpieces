@@ -11,7 +11,6 @@ import org.webpieces.router.api.Startable;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import WEBPIECESxPACKAGE.base.crud.CompanyDbo;
 import WEBPIECESxPACKAGE.base.crud.UserDbo;
 
 public class PopulateDatabase implements Startable {
@@ -38,27 +37,20 @@ public class PopulateDatabase implements Startable {
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
 
-
-		CompanyDbo company = new CompanyDbo();
-		company.setName("WebPieces LLC");
-		
 		UserDbo user1 = new UserDbo();
 		user1.setEmail("dean@somewhere.com");
 		user1.setName("SomeName");
 		user1.setFirstName("Dean");
 		user1.setLastName("Hill");
-		user1.setCompany(company);
 
 		UserDbo user2 = new UserDbo();
 		user2.setEmail("bob@somewhere.com");
 		user2.setName("Bob'sName");
 		user2.setFirstName("Bob");
 		user2.setLastName("LastBob");
-		user2.setCompany(company);		
 		
-		log.info("classloader="+company.getClass().getClassLoader());
+		log.info("classloader="+user1.getClass().getClassLoader());
 		
-		mgr.persist(company);
 		mgr.persist(user1);
 		mgr.persist(user2);
 

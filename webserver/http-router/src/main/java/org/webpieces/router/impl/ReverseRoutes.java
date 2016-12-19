@@ -36,7 +36,7 @@ public class ReverseRoutes {
 		RouteMeta existingRoute = routeIdToRoute.get(routeId);
 		if(existingRoute != null) {
 			throw new IllegalStateException("You cannot use a RouteId twice.  routeId="+routeId
-					+" first time="+existingRoute.getRoute().getPath()+" second time="+meta.getRoute().getPath());
+					+" first time="+existingRoute.getRoute().getFullPath()+" second time="+meta.getRoute().getFullPath());
 		}
 		
 		routeIdToRoute.put(routeId, meta);
@@ -140,7 +140,7 @@ public class ReverseRoutes {
 	public String convertToUrl(String routeId, Map<String, String> args) {
 		RouteMeta routeMeta = get(routeId);
 		Route route = routeMeta.getRoute();
-		String path = route.getPath();
+		String path = route.getFullPath();
 		List<String> pathParamNames = route.getPathParamNames();
 		for(String param : pathParamNames) {
 			String val = args.get(param);

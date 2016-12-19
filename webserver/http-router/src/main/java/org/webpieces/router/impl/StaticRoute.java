@@ -22,13 +22,16 @@ public class StaticRoute implements Route {
 	private List<String> pathParamNames = new ArrayList<>();
 	private String uniqueStaticRouteId;
 
-	public StaticRoute(int staticRouteId, String urlPath, String fileSystemPath, boolean isOnClassPath) {
+	public StaticRoute(int staticRouteId, UrlPath url, String fileSystemPath, boolean isOnClassPath) {
 		this.fileSystemPath = fileSystemPath;
 		this.isOnClassPath = isOnClassPath;
 		
+		String urlSubPath = url.getSubPath();
+		this.urlPath = url.getFullPath();
+
 		//very big conflict between domain/path/path/path
-		if(!urlPath.startsWith("/"))
-			throw new IllegalArgumentException("static resource url paths must start with / and can't have domain name at this time="+urlPath);
+		if(!urlSubPath.startsWith("/"))
+			throw new IllegalArgumentException("static resource url paths must start with / and can't have domain name at this time="+urlSubPath);
 		else if(isOnClassPath) {
 			if(!fileSystemPath.startsWith("/"))
 				throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
@@ -43,14 +46,13 @@ public class StaticRoute implements Route {
 		if(!f.exists())
 			throw new IllegalArgumentException("File="+getCanonicalPath(f)+" does not exist");
 
-		this.urlPath = urlPath;
-		if(urlPath.endsWith("/")) {
+		if(urlSubPath.endsWith("/")) {
 			this.isFile = false;
 			if(!fileSystemPath.endsWith("/"))
 				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
 			else if(!f.isDirectory())
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a directory and must be for static directories");
-			this.patternToMatch = Pattern.compile("^"+urlPath+"(?<resource>.*)$");
+			this.patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
 			this.pathParamNames.add("resource");
 		} else {
 			this.isFile = true;
@@ -58,10 +60,10 @@ public class StaticRoute implements Route {
 				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
 			else if(!f.isFile())
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a file and must be for static file route");
-			this.patternToMatch = Pattern.compile("^"+urlPath+"$");
+			this.patternToMatch = Pattern.compile("^"+urlSubPath+"$");
 		}
 		
-		String postFix = urlPath.replace("/", "-");
+		String postFix = urlSubPath.replace("/", "-");
 		this.uniqueStaticRouteId = staticRouteId+postFix;
 	}
 
@@ -74,7 +76,7 @@ public class StaticRoute implements Route {
 	}
 
 	@Override
-	public String getPath() {
+	public String getFullPath() {
 		return urlPath;
 	}
 

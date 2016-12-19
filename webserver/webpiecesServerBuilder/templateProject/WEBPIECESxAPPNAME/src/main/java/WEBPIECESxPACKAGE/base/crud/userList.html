@@ -20,7 +20,7 @@
                 <td>${entity.email}$</td>
                 <td>
                 	<a href="@[GET_EDIT_USER_FORM, id:entity.id]@" class="btn" id="editLink_${entity_index-1}$"> &{'Edit', 'link.edit'}& </a>
-                	<a href="@[POST_DELETE_USER, id:entity.id]@" class="btn" id="eletePattern_${entity_index-1}$"> &{'Delete', 'link.delete'}& </a>
+                	<a href="@[CONFIRM_DELETE_USER, id:entity.id]@" class="btn" id="eletePattern_${entity_index-1}$"> &{'Delete', 'link.delete'}& </a>
                 </td>
             </tr>
         #{/list}#

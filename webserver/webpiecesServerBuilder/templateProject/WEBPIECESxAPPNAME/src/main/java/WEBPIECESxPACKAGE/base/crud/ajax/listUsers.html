@@ -2,18 +2,18 @@
 
 <h4>Users</h4>
 
-<div id="addEditPatternModal" class="modal hide #{if showPopup}in#{/if}" tabindex="-1" 
+<div id="addEditPatternModal" class="modal hide #{if _flash.showPopup}#in#{/if}#" tabindex="-1" 
      role="dialog" data-backdrop="true" aria-labelledby="addEditModalLabel" 
-     aria-hidden="#{if showPopup}false#{/if}#{else}true#{/else}"
-     #{if showPopup}style="display: block;"#{/if}>
-    #{if showPopup}
-        #{include './ajaxAddEdit.html'/}
+     aria-hidden="#{if _flash.showPopup}#false#{/if}##{else}#true#{/else}#"
+    #{if _flash.showPopup}#style="display: block;"#{/if}#>
+    #{if _flash.showPopup}#
+        #{include './ajaxAddEdit.html'/}#
         <script type="text/javascript">
            $(document).ready(function() { 
                $("#addEditPatternModal").modal('show');   
            });
         </script>
-    #{/if}
+    #{/if}#
 </div>
 <div id="deletePatternModal"></div>
 <table class="table">
@@ -27,32 +27,31 @@
         </tr>
     </thead>
     <tbody>
-        #{list users, as:'entity'}
+        #{list users, as:'entity'}#
             <tr>
-                <td>${entity.firstName}</td>
-                <td>${entity.lastName}</td>
-                <td>${entity.email}</td>
-                <td>${entity.status.guiLabel}</td>
+                <td>${entity.firstName}$</td>
+                <td>${entity.lastName}$</td>
+                <td>${entity.email}$</td>
                 <td>
-                        <a href="#" data-toggle="modal" class="btn" id="editLink_${entity_index-1}">
+                        <a href="#" data-toggle="modal" class="btn" id="editLink_${entity_index-1}$">
                             Edit
                         </a>
                         <script type="text/javascript">
                             var getAddEditPattern= #{jsAction @ajaxAddEdit(':id') /}
                              $(document).ready(function() {	
-                                 $("#editLink_${entity_index-1}").click(function(e){
-                                     $('#addEditPatternModal').load(getAddEditPattern({id:${entity.id}}),function(){
+                                 $("#editLink_${entity_index-1}$").click(function(e){
+                                     $('#addEditPatternModal').load(getAddEditPattern({id:${entity.id}$}),function(){
                                          $("#addEditPatternModal").modal('show');	
                                       });
                                  });
                        	    });
                         </script>
-                        <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity_index-1}"> Delete </a>
+                        <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity_index-1}$"> Delete </a>
                         <script type="text/javascript">
-							    var getDeletePattern= #{jsAction @ajaxDelete(':id') /}
+							    var getDeletePattern= #{jsAction @ajaxDelete(':id') /}#
 							    $(document).ready(function() {	
-							        $("#deletePattern_${entity_index-1}").click(function(e){
-							            $('#deletePatternModal').load(getDeletePattern({id:'${entity.id}'}),function(){
+							        $("#deletePattern_${entity_index-1}$").click(function(e){
+							            $('#deletePatternModal').load(getDeletePattern({id:'${entity.id}$'}),function(){
 							                 $("#myDeletePattern").modal('show');	
 							            });
 							        });
@@ -60,20 +59,20 @@
                        </script>
                    </td>
             </tr>
-        #{/list}
-        #{else}
+        #{/list}#
+        #{else}#
         <tr>
             <td colspan="4">
             There are no users, Add one now please.
             </td>
         </tr>
-        #{/else}
+        #{/else}#
     </tbody>
 </table>
 
 <a href="#" class="btn btn-primary" id="addLink">Add User</a>
 <script type="text/javascript">
-var getAddEditPattern= #{jsAction @ajaxAddEdit(':id') /}
+var getAddEditPattern= #{jsAction @ajaxAddEdit(':id') /}#
 $(document).ready(function() {	
      $("#addLink").click(function(e){
          $('#addEditPatternModal').load(getAddEditPattern(),function(){

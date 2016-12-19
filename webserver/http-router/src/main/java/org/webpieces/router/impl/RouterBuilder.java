@@ -53,7 +53,7 @@ public class RouterBuilder implements Router {
 	}
 	
 	public void addRoute(Route r, RouteId routeId) {
-		log.info("scope:'"+routerPath+"' adding route="+r.getPath()+" method="+r.getControllerMethodString());
+		log.info("scope:'"+routerPath+"' adding route="+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 
@@ -67,19 +67,22 @@ public class RouterBuilder implements Router {
 		boolean checkSecureToken = false;
 		if(method == HttpMethod.POST)
 			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
-		Route route = new RouteImpl(method, path, controllerMethod, routeId, false, checkSecureToken);
+		UrlPath p = new UrlPath(routerPath, path);
+		Route route = new RouteImpl(method, p, controllerMethod, routeId, false, checkSecureToken);
 		addRoute(route, routeId);
 	}
 
 	@Override
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
-		Route route = new RouteImpl(method, path, controllerMethod, routeId, false, checkToken);
-		addRoute(route, routeId);		
+		UrlPath p = new UrlPath(routerPath, path);
+		Route route = new RouteImpl(method, p, controllerMethod, routeId, false, checkToken);
+		addRoute(route, routeId);
 	}
 	
 	@Override
 	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(methods, path, controllerMethod, routeId, false, false);
+		UrlPath p = new UrlPath(routerPath, path);
+		Route route = new RouteImpl(methods, p, controllerMethod, routeId, false, false);
 		addRoute(route, routeId);
 	}
 
@@ -88,20 +91,23 @@ public class RouterBuilder implements Router {
 		boolean checkSecureToken = false;
 		if(method == HttpMethod.POST)
 			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
-		Route route = new RouteImpl(method, path, controllerMethod, routeId, true, checkSecureToken);
+		UrlPath p = new UrlPath(routerPath, path);
+		Route route = new RouteImpl(method, p, controllerMethod, routeId, true, checkSecureToken);
 		addRoute(route, routeId);
 	}
 
 	@Override
 	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId,
 			boolean checkToken) {
-		Route route = new RouteImpl(method, path, controllerMethod, routeId, true, checkToken);
+		UrlPath p = new UrlPath(routerPath, path);
+		Route route = new RouteImpl(method, p, controllerMethod, routeId, true, checkToken);
 		addRoute(route, routeId);
 	}
 	
 	@Override
 	public void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		Route route = new RouteImpl(methods, path, controllerMethod, routeId, true, false);
+		UrlPath p = new UrlPath(routerPath, path);
+		Route route = new RouteImpl(methods, p, controllerMethod, routeId, true, false);
 		addRoute(route, routeId);
 	}
 
@@ -116,7 +122,7 @@ public class RouterBuilder implements Router {
 	public void addStaticFile(String urlPath, String fileSystemPath, boolean isOnClassPath) {
 		if(urlPath.endsWith("/"))
 			throw new IllegalArgumentException("Static file so urlPath must NOT end with a /");
-		
+
 		addStaticRoute(urlPath, fileSystemPath, isOnClassPath);
 	}
 
@@ -124,9 +130,9 @@ public class RouterBuilder implements Router {
 		if(isOnClassPath)
 			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
 		
-		StaticRoute route = new StaticRoute(getUniqueId(), urlPath, fileSystemPath, isOnClassPath);
+		StaticRoute route = new StaticRoute(getUniqueId(), new UrlPath(routerPath, urlPath), fileSystemPath, isOnClassPath);
 		staticRoutes.add(route);
-		log.info("scope:'"+routerPath+"' adding static route="+route.getPath()+" fileSystemPath="+route.getFileSystemPath());
+		log.info("scope:'"+routerPath+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, injector.get(), currentPackage.get(), urlEncoding);
 		info.addRoute(meta);
 	}
@@ -137,7 +143,8 @@ public class RouterBuilder implements Router {
 	
 	@Override
 	public <T> void addFilter(String path, Class<? extends RouteFilter<T>> filter, T initialConfig, PortType type) {
-		FilterInfo<T> info = new FilterInfo<>(path, filter, initialConfig, type);
+		String totalPath = routerPath+path;
+		FilterInfo<T> info = new FilterInfo<>(totalPath, filter, initialConfig, type);
 		routeFilters.add(info);
 	}
 	
@@ -158,7 +165,7 @@ public class RouterBuilder implements Router {
 		if(path == null || path.length() == 0)
 			throw new IllegalArgumentException("path must be non-null and length must be greater than 0");
 		AllRoutingInfo subInfo = info.addScope(path);
-		return new RouterBuilder(path, subInfo, reverseRoutes, finder, urlEncoding);
+		return new RouterBuilder(this.routerPath+path, subInfo, reverseRoutes, finder, urlEncoding);
 	}
 
 	/*
@@ -184,7 +191,7 @@ public class RouterBuilder implements Router {
 		//KISS and YAGNI (google that if you don't know).  
 		//HOWEVER, If you don't like this, copy and paste this method and modify to be a POST OR DELETE and add the 
 		//javascript for next time
-		addRoute(GET, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
+		addRoute(POST, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
 	}
 	
 	public AllRoutingInfo getRouterInfo() {
@@ -204,7 +211,7 @@ public class RouterBuilder implements Router {
 	public void setNotFoundRoute(Route r) {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
-		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getPath()+" method="+r.getControllerMethodString());
+		log.info("scope:'"+routerPath+"' adding PAGE_NOT_FOUND route="+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setPageNotFoundRoute(meta);
@@ -219,7 +226,7 @@ public class RouterBuilder implements Router {
 	public void setInternalSvrErrorRoute(Route r) {
 		if(!"".equals(this.routerPath))
 			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
-		log.info("scope:'"+routerPath+"' adding INTERNAL_SVR_ERROR route="+r.getPath()+" method="+r.getControllerMethodString());
+		log.info("scope:'"+routerPath+"' adding INTERNAL_SVR_ERROR route="+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), urlEncoding);
 		finder.loadControllerIntoMetaObject(meta, true);
 		info.setInternalSvrErrorRoute(meta);
@@ -232,7 +239,7 @@ public class RouterBuilder implements Router {
 	public void applyFilters() {
 		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
 		for(RouteMeta meta : metas) {
-			String path = meta.getRoute().getPath();
+			String path = meta.getRoute().getFullPath();
 			List<FilterInfo<?>> filters = findMatchingFilters(path, meta.getRoute().isHttpsRoute());
 			meta.setFilters(filters);
 		}

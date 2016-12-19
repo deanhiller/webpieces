@@ -1,7 +1,7 @@
-package WEBPIECESxPACKAGE.base.crud;
+package WEBPIECESxPACKAGE.base.crud.ajax;
 
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_ADD_USER_FORM;
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
+import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_ADD_USER_FORM;
+import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_EDIT_USER_FORM;
 
 import java.util.List;
 
@@ -17,12 +17,14 @@ import org.webpieces.router.api.actions.FlashAndRedirect;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory; 
+import org.webpieces.util.logging.LoggerFactory;
+
+import WEBPIECESxPACKAGE.base.crud.UserDbo; 
 
 @Singleton
-public class CrudUserController {
+public class AjaxCrudUserController {
 
-	private static Logger log = LoggerFactory.getLogger(CrudUserController.class);
+	private static Logger log = LoggerFactory.getLogger(AjaxCrudUserController.class);
 	
 	public Action userList() {
 		EntityManager mgr = Em.get();
@@ -59,7 +61,7 @@ public class CrudUserController {
 			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
 			redirect.setSecureFields("entity.password"); //make sure secure fields are not put in flash cookie!!!
 			redirect.setIdFieldAndValue("id", entity.getId());
-			return Actions.redirectFlashAll(GET_ADD_USER_FORM, GET_EDIT_USER_FORM, redirect);
+			return Actions.redirectFlashAll(AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM, redirect);
 		}
 		
 		Current.flash().setMessage("User successfully saved");
@@ -68,7 +70,7 @@ public class CrudUserController {
 		Em.get().merge(entity);
         Em.get().flush();
         
-		return Actions.redirect(CrudUserRouteId.LIST_USERS);
+		return Actions.redirect(AjaxCrudUserRouteId.AJAX_LIST_USERS);
 	}
 
 	public Render confirmDeleteUser(int id) {
@@ -82,6 +84,6 @@ public class CrudUserController {
 		Em.get().flush();
 		Current.flash().setMessage("User deleted");
 		Current.flash().keep();
-		return Actions.redirect(CrudUserRouteId.LIST_USERS);
+		return Actions.redirect(AjaxCrudUserRouteId.AJAX_LIST_USERS);
 	}
 }

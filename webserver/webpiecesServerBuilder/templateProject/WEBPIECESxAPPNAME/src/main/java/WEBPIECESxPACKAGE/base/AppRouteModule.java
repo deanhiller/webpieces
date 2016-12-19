@@ -5,6 +5,8 @@ import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
+import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.CONFIRM_DELETE_USER;
+
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.ASYNC_ROUTE;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.LIST_EXAMPLES;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE;
@@ -19,19 +21,6 @@ public class AppRouteModule extends AbstractRouteModule {
 
 	@Override
 	public void configure() {
-		//basic crud example(which just calls the same methods above for Create/Read/Update/Delete and the GET render page views as well)
-		//it adds all these routes
-		//addRoute(GET ,   "/user/list",        "crud/CrudUserController.userList", listRoute);
-		//addRoute(GET ,   "/user/new",         "crud/CrudUserController.userAddEdit", addRoute);
-		//addRoute(GET ,   "/user/edit/{id}",   "crud/CrudUserController.userAddEdit", editRoute);
-		//addRoute(POST,   "/user/post",        "crud/CrudUserController.postSaveUser", saveRoute);
-		//addRoute(GET,    "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
-		//Not sure on this next one yet as we re-use the post route(it's easier for the webapp developer that way)
-		//XXXX(maybe not this one) addRoute(PUT, "/user/post/{id}",      "crud/CrudUserController.postSaveUser", saveRoute);
-		addCrud("user", "crud/CrudUserController",
-				LIST_USERS, GET_ADD_USER_FORM, GET_EDIT_USER_FORM,
-				POST_USER_FORM, POST_DELETE_USER);
-		
 		//You can always do a platform override on ControllerResolver.java as well to resolve the controller String in some other
 		//way.  The controller string is the 3rd parameter in the addRoute calls
 		

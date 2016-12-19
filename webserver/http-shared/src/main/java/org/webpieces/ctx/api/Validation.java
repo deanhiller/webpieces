@@ -8,10 +8,4 @@ public interface Validation extends FlashScope {
 
 	boolean hasErrors();
 
-	boolean hasGlobalError();
-
-	String globalError();
-
-	void setGlobalError(String error);
-
 }

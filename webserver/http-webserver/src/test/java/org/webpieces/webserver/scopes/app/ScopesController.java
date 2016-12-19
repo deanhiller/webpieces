@@ -71,11 +71,6 @@ public class ScopesController {
 		return Actions.renderThis();
 	}
 
-	public Action validationError() {
-		Current.validation().setGlobalError("it failed");
-		return Actions.renderThis();
-	}
-	
 	public Action userAddEdit(Integer id) {
 		if(id == null) {
 			return Actions.renderThis("entity", new UserDto());

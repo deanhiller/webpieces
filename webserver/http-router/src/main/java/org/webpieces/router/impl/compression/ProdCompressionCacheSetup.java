@@ -63,13 +63,13 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		if(route.isFile()) {
 			File file = new File(route.getFileSystemPath());
 			log.info("setting up cache for file="+file);
-			maybeAddFileToCache(p, file, new File(routeCache, file.getName()+".gz"), route.getPath());
+			maybeAddFileToCache(p, file, new File(routeCache, file.getName()+".gz"), route.getFullPath());
 			return;
 		}
 
 		File directory = new File(route.getFileSystemPath());
 		log.info("setting up cache for directory="+directory);
-		String urlPrefix = route.getPath();
+		String urlPrefix = route.getFullPath();
 		transferAndCompress(p, directory, routeCache, urlPrefix);
 		
 		store(metaFile, p);

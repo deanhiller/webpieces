@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.StaticRoute;
+import org.webpieces.router.impl.UrlPath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
@@ -62,7 +63,7 @@ public class TestCompressionCache {
 
 	private List<StaticRoute> runBasicServerOnce(File stagingDir) {
 		List<StaticRoute> routes = new ArrayList<>();
-		routes.add(new StaticRoute(0, "/public/", stagingDir.getAbsolutePath()+"/", false));
+		routes.add(new StaticRoute(0, new UrlPath("", "/public/"), stagingDir.getAbsolutePath()+"/", false));
 		cache.setupCache(routes);
 		Assert.assertEquals(2, proxy.getReadFiles().size());
 		Assert.assertEquals(2, proxy.getCompressedFiles().size());
@@ -79,7 +80,7 @@ public class TestCompressionCache {
 		runBasicServerOnce(stagingDir);
 		
 		List<StaticRoute> routes2 = new ArrayList<>();
-		routes2.add(new StaticRoute(0, "/public1.4/", stagingDir.getAbsolutePath()+"/", false));
+		routes2.add(new StaticRoute(0, new UrlPath("", "/public1.4/"), stagingDir.getAbsolutePath()+"/", false));
 
 		//if server is just restarted(no file changes), we should skip reading files...
 		cache.setupCache(routes2);

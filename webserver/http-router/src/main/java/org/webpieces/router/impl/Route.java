@@ -9,7 +9,7 @@ import org.webpieces.router.api.dto.RouteType;
 
 public interface Route {
 
-	String getPath();
+	String getFullPath();
 
 	boolean matchesMethod(HttpMethod method);
 	

@@ -25,14 +25,14 @@ public class RouteImpl implements Route {
 	private String controllerMethodString;
 	private boolean checkSecureToken;
 
-	public RouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
+	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
 		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure, checkSecureToken);
 	}
 	
-	public RouteImpl(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
-		this.path = path;
+	public RouteImpl(Set<HttpMethod> methods, UrlPath path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
+		this.path = path.getFullPath();
 		this.methods = methods;
-		RegExResult result = RegExUtil.parsePath(path);
+		RegExResult result = RegExUtil.parsePath(path.getSubPath());
 		this.patternToMatch = Pattern.compile(result.regExToMatch);
 		this.argNames = result.argNames;
 		this.isHttpsRoute = isSecure;
@@ -70,7 +70,7 @@ public class RouteImpl implements Route {
 		return matcher;
 	}
 
-	public String getPath() {
+	public String getFullPath() {
 		return path;
 	}
 

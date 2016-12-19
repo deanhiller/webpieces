@@ -82,7 +82,7 @@ public class ResponseProcessor {
 			throw new IllegalReturnValueException("Method='"+method+"' returns a Redirect action with wrong number of arguments.  args="+keySet.size()+" when it should be size="+argNames.size());
 		}
 
-		String path = route.getPath();
+		String path = route.getFullPath();
 		
 		for(String name : argNames) {
 			String value = keysToValues.get(name);
