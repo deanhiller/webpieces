@@ -11,7 +11,7 @@ import org.webpieces.router.api.Startable;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import WEBPIECESxPACKAGE.base.crud.UserDbo;
+import WEBPIECESxPACKAGE.base.libs.UserDbo;
 
 public class PopulateDatabase implements Startable {
 

@@ -1,5 +1,8 @@
 package org.webpieces.router.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +23,24 @@ public class RegExUtil {
 
 			String firstPart = regEx.substring(0, index);
 			String varName = regEx.substring(index+1, next);
+			
+			validateName(varName);
+			
 			argNames.add(varName);
 			String lastPart = regEx.substring(next+1);
 			
 			regEx = firstPart + "(?<"+varName+">[^/]+)" + lastPart;
+		}
+	}
+
+	private static void validateName(String varName) {
+		try {
+			String encodedName = URLEncoder.encode(varName, StandardCharsets.UTF_8.name());
+			if(!varName.equals(encodedName))
+				throw new IllegalArgumentException("The variable name="+varName+" is not correct and would need to be url encoded."
+						+ "  Please only use normal variable names allowing safe javascript");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

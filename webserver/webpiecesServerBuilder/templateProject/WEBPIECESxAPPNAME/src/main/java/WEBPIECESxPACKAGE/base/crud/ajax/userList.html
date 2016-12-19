@@ -1,4 +1,4 @@
-#{extends './userTemplate.html' /}
+#{extends '../base/userTemplate.html' /}#
 
 <h4>Users</h4>
 
@@ -37,6 +37,24 @@
                             Edit
                         </a>
                         <script type="text/javascript">
+                        *{
+                            var getAddEditPattern= function(options) {
+                            	var pattern = '/ourpattern/ajaxAddEdit/:id';
+                            	for(key in options) {
+                            		var val = options[key];
+                            		var nextVal = ( (val===undefined || val===null) ? '' : val)
+                            		pattern = pattern.replace(':' + encodeURIComponent(key), nextVal);
+                            	}
+                            	return pattern;
+                            }
+                             $(document).ready(function() {	
+                                 $("#editLink_0").click(function(e){
+                                     $('#addEditPatternModal').load(getAddEditPattern({id:500}),function(){
+                                         $("#addEditPatternModal").modal('show');	
+                                      });
+                                 });
+                       	    });
+                        }*
                             var getAddEditPattern= #{jsAction @ajaxAddEdit(':id') /}
                              $(document).ready(function() {	
                                  $("#editLink_${entity_index-1}$").click(function(e){
@@ -48,6 +66,26 @@
                         </script>
                         <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity_index-1}$"> Delete </a>
                         <script type="text/javascript">
+                        *{
+
+						    var getDeletePattern= function(options) {
+						    	var pattern = '/ourpattern/ajaxDelete/{id}';
+						    	for(key in options) {
+						    		var val = options[key];
+						    		var nextVal = (val===undefined || val===null) ? '' : val
+						    		pattern = pattern.replace('{'+key+'}', nextVal);
+						    	}
+						    	return pattern;
+						    }
+						    $(document).ready(function() {	
+						        $("#deletePattern_0").click(function(e){
+						            $('#deletePatternModal').load(getDeletePattern({id:'500'}),function(){
+						                 $("#myDeletePattern").modal('show');	
+						            });
+						        });
+						  	});
+                   
+                        }*
 							    var getDeletePattern= #{jsAction @ajaxDelete(':id') /}#
 							    $(document).ready(function() {	
 							        $("#deletePattern_${entity_index-1}$").click(function(e){

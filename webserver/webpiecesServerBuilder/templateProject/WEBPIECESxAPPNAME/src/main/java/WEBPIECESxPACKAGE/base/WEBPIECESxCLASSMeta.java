@@ -43,6 +43,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
     public List<RouteModule> getRouteModules() {
 		return Lists.newArrayList(
 				new CrudRouteModule(),
+				new AjaxCrudRouteModule(),
 				new AppRouteModule(),
 				new BackendRouteModule()
 				);

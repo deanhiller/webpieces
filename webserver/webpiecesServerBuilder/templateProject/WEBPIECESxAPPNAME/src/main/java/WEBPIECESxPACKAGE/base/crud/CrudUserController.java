@@ -17,7 +17,9 @@ import org.webpieces.router.api.actions.FlashAndRedirect;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory; 
+import org.webpieces.util.logging.LoggerFactory;
+
+import WEBPIECESxPACKAGE.base.libs.UserDbo; 
 
 @Singleton
 public class CrudUserController {
@@ -37,8 +39,7 @@ public class CrudUserController {
 			return Actions.renderThis("entity", new UserDbo());
 		}
 		
-		EntityManager mgr = Em.get();
-		UserDbo user = mgr.find(UserDbo.class, id);
+		UserDbo user = Em.get().find(UserDbo.class, id);
 		return Actions.renderThis("entity", user);
 	}
 
