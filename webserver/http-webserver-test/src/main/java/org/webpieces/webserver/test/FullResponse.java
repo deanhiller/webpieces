@@ -168,6 +168,10 @@ public class FullResponse {
 				value = split[0];
 			}
 			
+			String[] keyVal = value.split("=");
+			if(keyVal.length <= 1)
+				continue; //skip adding this cookie as it was cleared out
+			
 			if(firstLine) {
 				firstLine = false;
 				fullRequestCookie += value;

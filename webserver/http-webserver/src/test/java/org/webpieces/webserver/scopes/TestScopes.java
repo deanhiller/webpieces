@@ -99,11 +99,10 @@ public class TestScopes {
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("Msg: it worked");
     }
-    
-	//we hit an issue where validation errors are sticking around so create a test here and
-	//fix it.
-	//need to test out validation errors don't stick around or validation.hasErrors will stay forever true
-	//even when entity is finally ok
+
+	//A basic POST form with invalid field, redirect to error page and load AND THEN
+	//POST form with valid data and expect success redirect
+	//This tests out the Validation scoped cookie
 	@Test
 	public void testValidationErrorDoesNotPersist() {
 		//POST first resulting in redirect with errors
@@ -123,7 +122,14 @@ public class TestScopes {
 				"user.address.street", "Coolness Dr.");		
 		req.addHeader(header);
 
-		//Did not need to finish test right now
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		Assert.assertEquals("http://myhost.com/user/list", response.getRedirectUrl());
 	}
 
 	private FullResponse runInvalidPost() {
