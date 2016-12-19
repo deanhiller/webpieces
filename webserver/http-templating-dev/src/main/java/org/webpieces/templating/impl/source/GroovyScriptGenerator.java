@@ -74,6 +74,7 @@ public class GroovyScriptGenerator {
 				break;
 			case SCRIPT:
 				creator.printScript(token, sourceCode);
+				break;
 			case PREMPTIVE_SEND_SCRIPT:
 				creator.printPremptiveSendScript(token, sourceCode);				
 				break;
