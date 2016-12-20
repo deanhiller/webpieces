@@ -8,7 +8,6 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
 import org.webpieces.plugins.hibernate.Em;
-import org.webpieces.plugins.hibernate.app.dbo.CompanyTestDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
@@ -34,15 +33,10 @@ public class HibernateAsyncController {
 	}
 		
 	public Redirect runSave(EntityManager mgr) {
-		CompanyTestDbo company = new CompanyTestDbo();
-		company.setName("WebPieces LLC");
-		
 		UserTestDbo user = new UserTestDbo();
 		user.setEmail("dean@async.xsoftware.biz");
 		user.setName("SomeName");
-		user.setCompany(company);
 		
-		mgr.persist(company);
 		mgr.persist(user);
 
 		mgr.flush();

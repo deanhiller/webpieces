@@ -3,8 +3,8 @@ package org.webpieces.plugins.hibernate.app;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 
+import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
-import org.webpieces.plugins.hibernate.app.dbo.CompanyTestDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
@@ -26,15 +26,10 @@ public class HibernateController {
 		
 		EntityManager mgr = Em.get();
 		
-		CompanyTestDbo company = new CompanyTestDbo();
-		company.setName("WebPieces LLC");
-		
 		UserTestDbo user = new UserTestDbo();
 		user.setEmail("dean@sync.xsoftware.biz");
 		user.setName("SomeName");
-		user.setCompany(company);
 		
-		mgr.persist(company);
 		mgr.persist(user);
 
 		mgr.flush();
@@ -53,5 +48,13 @@ public class HibernateController {
 		UserTestDbo user = mgr.find(UserTestDbo.class, id);	
 		log.info("loaded user");
 		return Actions.renderThis("user", user);
+	}
+	
+	public Redirect postMergeUserTest(UserTestDbo user) {
+		Current.flash().setMessage("User successfully saved");
+		Em.get().merge(user);
+        Em.get().flush();
+        
+		return Actions.redirect(HibernateRouteId.LIST_USERS);
 	}
 }

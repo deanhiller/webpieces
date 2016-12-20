@@ -9,6 +9,7 @@ import javax.persistence.Persistence;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
@@ -20,7 +21,6 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
-import org.webpieces.plugins.hibernate.app.dbo.CompanyTestDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.TestConfig;
@@ -89,7 +89,7 @@ public class TestSyncHibernate {
 	 */
 	@Test
 	public void testDbUseWhileRenderingPage() {
-		Integer id = loadDataInDb();
+		Integer id = loadDataInDb().getId();
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/dynamic/"+id);
 
@@ -102,7 +102,7 @@ public class TestSyncHibernate {
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 
-	public static Integer loadDataInDb() {
+	public static UserTestDbo loadDataInDb() {
 		String email = "dean2@sync.xsoftware.biz";
 		//populate database....
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);
@@ -110,24 +110,19 @@ public class TestSyncHibernate {
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
 
-		CompanyTestDbo company = new CompanyTestDbo();
-		company.setName("WebPieces LLC");
-		
 		UserTestDbo user = new UserTestDbo();
 		user.setEmail(email);
 		user.setName("SomeName");
 		user.setFirstName("Dean");
 		user.setLastName("Hill");
-		user.setCompany(company);
 		
-		mgr.persist(company);
 		mgr.persist(user);
 
 		mgr.flush();
 		
 		tx.commit();
 		
-		return user.getId();
+		return user;
 	}
 	
 	@Test
@@ -163,7 +158,7 @@ public class TestSyncHibernate {
 
 	@Test
 	public void testRenderEditPage() {
-		int id = loadDataInDb();
+		int id = loadDataInDb().getId();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/edit/"+id);
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
@@ -176,6 +171,42 @@ public class TestSyncHibernate {
 		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
 	
+	//not implemented yet
+	@Ignore
+	@Test
+	public void testHibernatePostPartialDataDoesntBlowDataAway() {
+		UserTestDbo user = loadDataInDb();
+		HttpRequest req = Requests.createPostRequest("/testmerge",
+				"user.id", user.getId()+"",
+				"user.name", "blah1",
+				"user.firstName", "blah2");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		UserTestDbo user2 = load(user.getId());
+		Assert.assertEquals("blah1", user2.getName()); //name changed
+		Assert.assertEquals("blah2", user2.getFirstName()); //firstname changed
+		Assert.assertEquals(user.getLastName(), user2.getLastName()); //lastname remained the same
+	}
+	
+	private UserTestDbo load(Integer id) {
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);
+		EntityManager mgr = factory.createEntityManager();
+		EntityTransaction tx = mgr.getTransaction();
+		tx.begin();
+
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);
+		
+		tx.commit();
+		
+		return user;
+	}
 	@Test
 	public void testOptimisticLock() {
 	}

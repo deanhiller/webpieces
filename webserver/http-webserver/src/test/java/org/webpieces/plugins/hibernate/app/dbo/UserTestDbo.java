@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -45,10 +44,6 @@ public class UserTestDbo {
 	private String name;
 	private String firstName;
 	private String lastName;
-
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
-	private CompanyTestDbo company;
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	private UserTestDbo manager;
@@ -88,14 +83,6 @@ public class UserTestDbo {
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public CompanyTestDbo getCompany() {
-		return company;
-	}
-
-	public void setCompany(CompanyTestDbo company) {
-		this.company = company;
 	}
 
 	public String getEmail() {

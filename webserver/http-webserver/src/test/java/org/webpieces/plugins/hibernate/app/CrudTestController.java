@@ -62,6 +62,11 @@ public class CrudTestController {
 		return Actions.redirect(HibernateRouteId.LIST_USERS);
 	}
 	
+	public Render confirmDeleteUser(Integer id) {
+		UserTestDbo user = Em.get().find(UserTestDbo.class, id);
+		return Actions.renderThis("user", user);
+	}
+	
     public Redirect postDeleteUser(Integer id) {
     	UserTestDbo user = Em.get().getReference(UserTestDbo.class, id);
     	Em.get().remove(user);
