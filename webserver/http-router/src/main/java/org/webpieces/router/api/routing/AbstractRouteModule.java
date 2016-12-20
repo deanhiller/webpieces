@@ -89,9 +89,10 @@ public abstract class AbstractRouteModule implements RouteModule {
 		return router.getScopedRouter(path);
 	}
 
-	public void addCrud(String entity, String controller, RouteId listRoute, RouteId addRoute, RouteId editRoute,
-			RouteId saveRoute, RouteId deleteRoute) {
-		router.addCrud(entity, controller, listRoute, addRoute, editRoute, saveRoute, deleteRoute);
+	public void addCrud(String entity, String controller, 
+			RouteId listRoute, RouteId addRoute, RouteId editRoute,
+			RouteId saveRoute, RouteId confirmDelete, RouteId deleteRoute) {
+		router.addCrud(entity, controller, listRoute, addRoute, editRoute, saveRoute, confirmDelete, deleteRoute);
 	}	
 	
 

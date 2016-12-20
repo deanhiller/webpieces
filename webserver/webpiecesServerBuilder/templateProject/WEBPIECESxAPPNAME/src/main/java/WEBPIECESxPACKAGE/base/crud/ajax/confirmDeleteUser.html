@@ -1,4 +1,4 @@
-#{form @postDelete(), class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}
+#{form action:@[AJAX_POST_DELETE_USER, id:entity.id]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
   
      <div id="myDeletePattern" class="modal hide" data-backdrop="true" tabindex="-1" role="dialog" data-backdrop="false" aria-labelledby="deleteModalLabel" aria-hidden="true">
        <div class="modal-header">
@@ -6,11 +6,9 @@
            <h4 id="myModalLabel">Delete</h4>
        </div>
        
-       <input type="hidden" name="entity.id" value="${entity?.id}"/>
-
        <div id="deletePattern_content" class="modal-body">
          <p>
-             Are you sure you want to delete ${entity?.email} ?
+             Are you sure you want to delete ${entity?.email}$ ?
           </p>
 	   </div>
 		<div class="modal-footer">
@@ -19,4 +17,4 @@
 		</div>
 	  </div>
 	  
-#{/form}
+#{/form}#

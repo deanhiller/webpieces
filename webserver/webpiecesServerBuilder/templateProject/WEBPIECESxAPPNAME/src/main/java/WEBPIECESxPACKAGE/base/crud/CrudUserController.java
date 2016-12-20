@@ -56,7 +56,6 @@ public class CrudUserController {
 		//the form with what the user typed in along with errors
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
-			Current.flash().setMessage("Errors in form below");
 			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
 			redirect.setSecureFields("entity.password"); //make sure secure fields are not put in flash cookie!!!
 			redirect.setIdFieldAndValue("id", entity.getId());

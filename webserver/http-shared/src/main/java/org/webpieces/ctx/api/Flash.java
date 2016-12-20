@@ -6,4 +6,8 @@ public interface Flash extends FlashScope {
     String getMessage();
 
     void setMessage(String msg);
+
+	void setShowEditPopup(boolean b);
+
+	boolean isShowEditPopup();
 }

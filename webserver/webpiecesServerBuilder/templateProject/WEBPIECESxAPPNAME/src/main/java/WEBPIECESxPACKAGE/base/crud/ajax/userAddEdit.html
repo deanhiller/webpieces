@@ -1,23 +1,29 @@
 *{ I believe this form will go in two different modal popups OR maybe just one...not sure yet...if one modal popup,
    perhaps we can push it down into this file }*
 
-#{form @[AJAX_POST_USER_FORM]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}
+#{form action:@[AJAX_POST_USER_FORM]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
    <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
          <h4 id="myModalLabel"> User </h4>
     </div>
     <div class="modal-body">
-        #{if flash.error}
+        #{if _flash.error}#
         <div class="row-fluid">
             <div class="offset3 span6 alert alert-error">
                 <h4>Oops....</h4>
-                ${flash.error}
+                ${_flash.error}$
             </div>
         </div>
-        #{/} 
+        #{/if}#
     	
-    	<input type="hidden" name="entity.id" value="${entity?.id}"/>
+    	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
         
+        #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
+
+        *{
         #{field 'entity.firstName'}
         <div class="control-group ${field.errorClass}">
             <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>FirstName</label>
@@ -54,9 +60,12 @@
             </div>
         </div>
         #{/field}
+        }*
+        
+        
    </div>
     <div class="modal-footer">
-        <input type="submit" name="submit" value="&{'link.save'}" class="btn btn-primary" />
-        <button class="btn" data-dismiss="modal" aria-hidden="true">&{'link.close'}</button>
+        <input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
+        <button class="btn" data-dismiss="modal" aria-hidden="true">&{'Close', 'link.close'}&</button>
     </div>
-#{/form}
+#{/form}#

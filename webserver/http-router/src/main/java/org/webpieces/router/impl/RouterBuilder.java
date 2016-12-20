@@ -179,13 +179,16 @@ public class RouterBuilder implements Router {
 	 */
 	@Override
 	public void addCrud(String entity, String controller,  
-			RouteId listRoute, RouteId addRoute, RouteId editRoute, RouteId saveRoute, RouteId deleteRoute) {
+			RouteId listRoute, RouteId addRoute, RouteId editRoute, 
+			RouteId saveRoute, RouteId confirmDelete, RouteId deleteRoute) {
 		String entityWithCapital = entity.substring(0, 1).toUpperCase() + entity.substring(1);
 		addRoute(GET , "/"+entity+"/list",        controller+"."+entity+"List", listRoute);
 		addRoute(GET , "/"+entity+"/new",         controller+"."+entity+"AddEdit", addRoute);
 		addRoute(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute);
 		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, saveRoute);
 		
+		//get the confirm delete page
+		addRoute(GET,  "/"+entity+"/confirmdelete/{id}", controller+".confirmDelete"+entityWithCapital, confirmDelete);
 		//NOTE: Browsers don't support DELETE.  POST might make more sense here for delete but GET is way way less html
 		//code(ok, 1 line instead of 3).  There are hacks with javascript to support DELETE but seriously, we should just
 		//KISS and YAGNI (google that if you don't know).  

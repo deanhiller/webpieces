@@ -1,7 +1,6 @@
 package WEBPIECESxPACKAGE.base.crud.ajax;
 
-import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_ADD_USER_FORM;
-import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_EDIT_USER_FORM;
+import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_LIST_USERS;
 
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
-import org.webpieces.router.api.actions.FlashAndRedirect;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
@@ -31,7 +29,10 @@ public class AjaxCrudUserController {
 		Query query = mgr.createNamedQuery("findAllUsers");
 		@SuppressWarnings("unchecked")
 		List<UserDbo> users = query.getResultList();
-		return Actions.renderThis("users", users);
+		boolean showEditPopup = Current.flash().isShowEditPopup();
+		return Actions.renderThis(
+				"users", users,
+				"showPopup", showEditPopup);
 	}
 	
 	public Action userAddEdit(Integer id) {
@@ -57,10 +58,8 @@ public class AjaxCrudUserController {
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
 			Current.flash().setMessage("Errors in form below");
-			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
-			redirect.setSecureFields("entity.password"); //make sure secure fields are not put in flash cookie!!!
-			redirect.setIdFieldAndValue("id", entity.getId());
-			return Actions.redirectFlashAll(AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM, redirect);
+			Current.flash().setShowEditPopup(true); //ensures we show the edit popup for listUsers on redisplay
+			return Actions.redirectFlashAllSecure(AJAX_LIST_USERS, Current.getContext(), "password");
 		}
 		
 		Current.flash().setMessage("User successfully saved");

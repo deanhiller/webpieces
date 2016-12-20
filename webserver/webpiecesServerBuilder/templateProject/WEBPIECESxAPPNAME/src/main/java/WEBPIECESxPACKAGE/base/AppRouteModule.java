@@ -1,12 +1,5 @@
 package WEBPIECESxPACKAGE.base;
 
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_ADD_USER_FORM;
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
-import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.CONFIRM_DELETE_USER;
-
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.ASYNC_ROUTE;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.LIST_EXAMPLES;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE;

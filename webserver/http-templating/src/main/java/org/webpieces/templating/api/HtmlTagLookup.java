@@ -11,6 +11,7 @@ import org.webpieces.templating.impl.tags.FieldTag;
 import org.webpieces.templating.impl.tags.FormTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
+import org.webpieces.templating.impl.tags.JsActionTag;
 import org.webpieces.templating.impl.tags.RenderPageArgsTag;
 import org.webpieces.templating.impl.tags.RenderTagArgsTag;
 import org.webpieces.templating.impl.tags.TemplateLoaderTag;
@@ -28,6 +29,7 @@ public class HtmlTagLookup {
 		put(new FormTag(config.getDefaultFormAcceptEncoding()));
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());
+		put(new JsActionTag());
 		put(new FieldTag(config.getFieldTagTemplatePath(), "error"));
 	}
 

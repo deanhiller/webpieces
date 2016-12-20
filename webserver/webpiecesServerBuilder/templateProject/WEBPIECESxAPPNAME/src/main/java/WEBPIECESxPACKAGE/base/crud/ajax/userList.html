@@ -1,13 +1,14 @@
-#{extends '../base/userTemplate.html' /}#
+#{extends '../../userTemplate.html' /}#
+#{set subtab:'userlist'/}#
 
 <h4>Users</h4>
 
-<div id="addEditPatternModal" class="modal hide #{if _flash.showPopup}#in#{/if}#" tabindex="-1" 
+<div id="addEditPatternModal" class="modal hide #{if showPopup}#in#{/if}#" tabindex="-1" 
      role="dialog" data-backdrop="true" aria-labelledby="addEditModalLabel" 
-     aria-hidden="#{if _flash.showPopup}#false#{/if}##{else}#true#{/else}#"
-    #{if _flash.showPopup}#style="display: block;"#{/if}#>
-    #{if _flash.showPopup}#
-        #{include './ajaxAddEdit.html'/}#
+     aria-hidden="#{if showPopup}#false#{/if}##{else}#true#{/else}#"
+    #{if showPopup}#style="display: block;"#{/if}#>
+    #{if showPopup}#
+        #{renderPageArgs 'userAddEdit.html'/}#
         <script type="text/javascript">
            $(document).ready(function() { 
                $("#addEditPatternModal").modal('show');   
@@ -22,12 +23,11 @@
             <th>FirstName</th>
             <th>LastName</th>
             <th>Email</th>
-            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        #{list users, as:'entity'}#
+        #{list items:users, as:'entity'}#
             <tr>
                 <td>${entity.firstName}$</td>
                 <td>${entity.lastName}$</td>
@@ -55,7 +55,7 @@
                                  });
                        	    });
                         }*
-                            var getAddEditPattern= #{jsAction @ajaxAddEdit(':id') /}
+                            var getAddEditPattern= #{jsAction @[AJAX_EDIT_USER_FORM, id:':id:']@ /}#
                              $(document).ready(function() {	
                                  $("#editLink_${entity_index-1}$").click(function(e){
                                      $('#addEditPatternModal').load(getAddEditPattern({id:${entity.id}$}),function(){
@@ -86,7 +86,7 @@
 						  	});
                    
                         }*
-							    var getDeletePattern= #{jsAction @ajaxDelete(':id') /}#
+							    var getDeletePattern= #{jsAction @[AJAX_CONFIRM_DELETE_USER, id:'{id}']@ /}#
 							    $(document).ready(function() {	
 							        $("#deletePattern_${entity_index-1}$").click(function(e){
 							            $('#deletePatternModal').load(getDeletePattern({id:'${entity.id}$'}),function(){
@@ -110,7 +110,26 @@
 
 <a href="#" class="btn btn-primary" id="addLink">Add User</a>
 <script type="text/javascript">
-var getAddEditPattern= #{jsAction @ajaxAddEdit(':id') /}#
+*{
+	var getAddEditPattern= function(options) {
+		var pattern = '/ourpattern/ajaxAddEdit/:id';
+		for(key in options) {
+			var val = options[key];
+			var nextVal = (val===undefined || val===null) ? '' : val
+			pattern = pattern.replace(':' + encodeURIComponent(key), nextVal);
+		}
+		return pattern;
+	}
+	$(document).ready(function() {	
+	     $("#addLink").click(function(e){
+	         $('#addEditPatternModal').load(getAddEditPattern(),function(){
+	              $("#addEditPatternModal").modal('show');	
+	         });
+	     });
+	});
+}*
+
+var getAddEditPattern= #{jsAction @[AJAX_ADD_USER_FORM]@ /}#
 $(document).ready(function() {	
      $("#addLink").click(function(e){
          $('#addEditPatternModal').load(getAddEditPattern(),function(){

@@ -38,4 +38,17 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 	public String getMessage() {
 		return get("_message");
 	}
+
+	@Override
+	public void setShowEditPopup(boolean b) {
+		put("_showEditPopup", b+"");
+	}
+
+	@Override
+	public boolean isShowEditPopup() {
+		String str = get("_showEditPopup");
+		if(str == null)
+			return false;
+		return Boolean.parseBoolean(str);
+	}
 }
