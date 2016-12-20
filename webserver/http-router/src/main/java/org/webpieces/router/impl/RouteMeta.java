@@ -117,6 +117,8 @@ public class RouteMeta {
 	}
 
 	public void setService(Service<MethodMeta, Action> svc) {
+		if(this.filtersAndMethodToCall != null)
+			throw new IllegalStateException("Service was already set on this RouteMeta="+this+".  It should only be set once on startup");
 		this.filtersAndMethodToCall = svc;
 	}
 

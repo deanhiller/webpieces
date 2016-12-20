@@ -13,7 +13,6 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
@@ -92,14 +91,7 @@ public class MetaLoader {
 		meta.setMethodParamNames(paramNames);
 		meta.setControllerInstance(controllerInst);
 		meta.setMethod(controllerMethod);
-		//At this point, in production mode, we don't know the filters yet.  We do this so we can fail with the
-		//stack trace in the users code so we have to wait to load the actual service with filters
-		//meta.setService(svc);
-		RouteType routeType = meta.getRoute().getRouteType();
-		if(routeType == RouteType.INTERNAL_SERVER_ERROR || routeType == RouteType.NOT_FOUND) {
-			//internal server error route and not found routes do not have 'fixed' filters.
-			meta.setService(new ServiceProxy());
-		}
+
 	}
 
 	/**

@@ -144,9 +144,9 @@ public class RouteInvoker {
 					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
 			SupressedExceptionLog.log(exc);
 			
-			RouteMeta result = errorRoutes.fetchInternalServerErrorRoute();
-			MatchResult res = new MatchResult(result);
-			return invokeImpl(res, result.getService222(), requestCtx, responseCb);
+			RouteMeta meta = errorRoutes.fetchInternalServerErrorRoute();
+			MatchResult res = new MatchResult(meta);
+			return invokeImpl(res, meta.getService222(), requestCtx, responseCb);
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...

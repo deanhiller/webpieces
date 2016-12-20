@@ -23,6 +23,7 @@ import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RouteModuleInfo;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.ServiceProxy;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -130,6 +131,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
+			meta.setService(new ServiceProxy());
 		}
 		
 		String reason = "Your route was not found in routes table";
