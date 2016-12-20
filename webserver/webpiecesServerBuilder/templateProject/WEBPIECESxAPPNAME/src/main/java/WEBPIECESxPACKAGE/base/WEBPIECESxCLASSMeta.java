@@ -28,7 +28,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 	public void initialize(Map<String, String> props) {
 		persistenceUnit = props.get(HibernatePlugin.PERSISTENCE_UNIT_KEY);
 	}
-	
+
 	//When using the Development Server, changes to this inner class will be recompiled automatically
 	//when needed..  Changes to the outer class will not take effect until a restart
 	//In production, we don't have a compiler on the classpath nor any funny classloaders so that
@@ -38,14 +38,13 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
     public List<Module> getGuiceModules() {
 		return Lists.newArrayList(new GuiceModule());
 	}
-	
+
 	@Override
     public List<RouteModule> getRouteModules() {
 		return Lists.newArrayList(
 				new CrudRouteModule(),
 				new AjaxCrudRouteModule(),
-				new AppRouteModule(),
-				new BackendRouteModule()
+				new AppRouteModule()
 				);
 	}
 
@@ -54,7 +53,8 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 		log.info("classloader for meta="+this.getClass().getClassLoader());
 		return Lists.newArrayList(
 				//if you want to remove hibernate, just remove it first from the build file and then remove
-				//all the compile error code(it will remove move than half of the jar size of the web app actually)
+				//all the compile error code(it will remove more than half of the jar size of the web app actually due
+				//to transitive dependencies)
 				new HibernatePlugin(persistenceUnit)
 				);
 	}

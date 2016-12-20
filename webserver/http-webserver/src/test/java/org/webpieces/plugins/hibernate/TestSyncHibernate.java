@@ -171,7 +171,6 @@ public class TestSyncHibernate {
 		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
 	
-	//not implemented yet
 	@Ignore
 	@Test
 	public void testHibernatePostPartialDataDoesntBlowDataAway() {

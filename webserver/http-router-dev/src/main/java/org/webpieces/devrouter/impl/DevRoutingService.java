@@ -100,7 +100,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		}
 
 		@Override
-		public MatchResult fetchInternalServerErrorRoute() {
+		public RouteMeta fetchInternalServerErrorRoute() {
 			return fetchInternalErrorRoute(req);
 		}
 		
@@ -108,8 +108,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	
 	public NotFoundInfo fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
 		//Production app's notFound route TBD and used in iframe later
-		MatchResult origResult = routeLoader.fetchNotFoundRoute();
-		RouteMeta origMeta = origResult.getMeta();
+		RouteMeta origMeta = routeLoader.fetchNotFoundRoute();
 
 		if(req.queryParams.containsKey("webpiecesShowPage")) {
 			//This is actually a callback from the below code's iframe!!!
@@ -119,7 +118,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 			}
 
 			Service<MethodMeta, Action> svc = origMeta.getService222();
-			return new NotFoundInfo(origResult, svc, req);
+			return new NotFoundInfo(origMeta, svc, req);
 		}
 
 		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
@@ -128,7 +127,6 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
 		RouteModuleInfo info = new RouteModuleInfo("", null);
 		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
-		MatchResult result = new MatchResult(meta);
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
@@ -142,19 +140,18 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		newRequest.multiPartFields.put("webpiecesError", "Exception message="+reason);
 		newRequest.multiPartFields.put("url", req.relativePath);
 		
-		return new NotFoundInfo(result, result.getMeta().getService222(), newRequest);
+		return new NotFoundInfo(meta, meta.getService222(), newRequest);
 	}
 
-	public MatchResult fetchInternalErrorRoute(RouterRequest req) {
-		MatchResult result = routeLoader.fetchInternalErrorRoute();
+	public RouteMeta fetchInternalErrorRoute(RouterRequest req) {
+		RouteMeta meta = routeLoader.fetchInternalErrorRoute();
 		
-		RouteMeta meta = result.getMeta();
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
 			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
 		}
 		
-		return result;
+		return meta;
 	}
 	/**
 	 * Only used with DevRouterConfig which is not on classpath in prod mode

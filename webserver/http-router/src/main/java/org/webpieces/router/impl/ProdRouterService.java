@@ -63,16 +63,16 @@ public class ProdRouterService extends AbstractRouterService implements RoutingS
 
 		public NotFoundInfo fetchNotfoundRoute(NotFoundException e) {
 			//not found is normal in prod mode so we don't log that and only log warnings in dev mode
-			MatchResult result = routeLoader.fetchNotFoundRoute();
+			RouteMeta result = routeLoader.fetchNotFoundRoute();
 
 			//every request for not found route must apply filters(unlike other routes).  There are tests
 			//for this use case with the LoginFitler in TestHttps
-			Service<MethodMeta, Action> svc = routeLoader.createNotFoundService(result.getMeta(), req);
+			Service<MethodMeta, Action> svc = routeLoader.createNotFoundService(result, req);
 			
 			return new NotFoundInfo(result, svc, req);
 		}
 		
-		public MatchResult fetchInternalServerErrorRoute() {
+		public RouteMeta fetchInternalServerErrorRoute() {
 			return routeLoader.fetchInternalErrorRoute();
 		}
 	}

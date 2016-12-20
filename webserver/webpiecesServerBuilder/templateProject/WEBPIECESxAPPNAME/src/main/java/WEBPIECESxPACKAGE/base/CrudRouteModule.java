@@ -6,7 +6,6 @@ import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_EDIT_USER_FORM;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
-import static org.webpieces.ctx.api.HttpMethod.GET;
 
 import org.webpieces.router.api.routing.ScopedRouteModule;
 

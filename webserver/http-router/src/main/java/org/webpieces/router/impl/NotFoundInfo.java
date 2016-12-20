@@ -7,17 +7,17 @@ import org.webpieces.util.filters.Service;
 
 public class NotFoundInfo {
 
-	private MatchResult result;
+	private RouteMeta result;
 	private RouterRequest req;
 	private Service<MethodMeta, Action> service;
 
-	public NotFoundInfo(MatchResult result,  Service<MethodMeta, Action> service, RouterRequest req) {
+	public NotFoundInfo(RouteMeta result,  Service<MethodMeta, Action> service, RouterRequest req) {
 		this.result = result;
 		this.service = service;
 		this.req = req;
 	}
 
-	public MatchResult getResult() {
+	public RouteMeta getResult() {
 		return result;
 	}
 

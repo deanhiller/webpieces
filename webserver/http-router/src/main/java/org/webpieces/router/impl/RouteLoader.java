@@ -233,16 +233,16 @@ public class RouteLoader {
 		invoker.invoke(result, routerRequest, responseCb, errorRoutes, requestCtx);
 	}
 
-	public MatchResult fetchNotFoundRoute() {
+	public RouteMeta fetchNotFoundRoute() {
 		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
-		return new MatchResult(notfoundRoute);
+		return notfoundRoute;
 	}
 
-	public MatchResult fetchInternalErrorRoute() {
+	public RouteMeta fetchInternalErrorRoute() {
 		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
-		return new MatchResult(internalErrorRoute);
+		return internalErrorRoute;
 	}
 
 	public String convertToUrl(String routeId, Map<String, String> args) {
