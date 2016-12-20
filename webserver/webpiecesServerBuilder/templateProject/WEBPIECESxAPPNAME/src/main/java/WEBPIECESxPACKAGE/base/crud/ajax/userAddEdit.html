@@ -23,33 +23,6 @@
         #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
 
         *{
-        #{field 'entity.firstName'}
-        <div class="control-group ${field.errorClass}">
-            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>FirstName</label>
-            <div class="controls">
-                <input id="entityTable" type="text" name="${field.name}" value="${field.value}" class="input-xlarge">
-                <span class="help-block">${field.error}</span>
-            </div>
-        </div>
-        #{/field}
-        #{field 'entity.lastName'}
-        <div class="control-group ${field.errorClass}">
-            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>LastName</label>
-            <div class="controls">
-                <input id="entityTable" type="text" name="${field.name}" value="${field.value}" class="input-xlarge">
-                <span class="help-block">${field.error}</span>
-            </div>
-        </div>
-        #{/field}
-        #{field 'entity.email'}
-        <div class="control-group ${field.errorClass}">
-            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>Email</label>
-            <div class="controls">
-                <input id="entityTable" type="text" name="${field.name}" value="${field.value}" class="input-xlarge">
-                <span class="help-block">${field.error}</span>
-            </div>
-        </div>
-        #{/field}
         #{field 'entity.status'}
         <div class="control-group ${field.errorClass}">
             <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>Status</label>
