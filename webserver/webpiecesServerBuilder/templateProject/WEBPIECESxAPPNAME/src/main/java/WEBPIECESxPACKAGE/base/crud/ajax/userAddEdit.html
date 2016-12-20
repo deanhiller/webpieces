@@ -7,14 +7,13 @@
          <h4 id="myModalLabel"> User </h4>
     </div>
     <div class="modal-body">
-        #{if _flash.error}#
-        <div class="row-fluid">
-            <div class="offset3 span6 alert alert-error">
-                <h4>Oops....</h4>
-                ${_flash.error}$
-            </div>
-        </div>
-        #{/if}#
+		#{if _flash.error}#
+			<div class="row-fluid">
+				<div class="offset3 span6 alert alert-error">
+					${_flash.error}$
+				</div>
+			</div>
+		#{/if}#
     	
     	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
         

@@ -57,7 +57,7 @@ public class AjaxCrudUserController {
 		//the form with what the user typed in along with errors
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
-			Current.flash().setMessage("Errors in form below");
+			Current.flash().setError("Errors in form below");
 			Current.flash().setShowEditPopup(true); //ensures we show the edit popup for listUsers on redisplay
 			return Actions.redirectFlashAllSecure(AJAX_LIST_USERS, Current.getContext(), "password");
 		}

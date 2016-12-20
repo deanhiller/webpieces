@@ -40,6 +40,16 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 	}
 
 	@Override
+	public String getError() {
+		return get("_error");
+	}
+
+	@Override
+	public void setError(String msg) {
+		put("_error", msg);
+	}
+	
+	@Override
 	public void setShowEditPopup(boolean b) {
 		put("_showEditPopup", b+"");
 	}
