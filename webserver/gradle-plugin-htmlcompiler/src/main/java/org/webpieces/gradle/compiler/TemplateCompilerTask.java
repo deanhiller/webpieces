@@ -182,8 +182,17 @@ public class TemplateCompilerTask extends AbstractCompile {
 		public void routeIdFound(String routeId, List<String> argNames, String sourceLocation) {
 			String argStr = "";
 			for(String s: argNames) {
+				if(s.contains(":"))
+					throw new RuntimeException("bug, argument should not contain : character.  argNames="+argNames+" arg="+s);					
+				
 				argStr += ","+s;
 			}
+
+			if(routeId.contains(":"))
+				throw new RuntimeException("bug, route should not contain : character");
+			else if(sourceLocation.contains(":")) {
+				sourceLocation = sourceLocation.replace(":", "-");
+			}			
 			
 			try {
 				routeOut.write(routeId+":"+argStr+":"+sourceLocation+"\n");

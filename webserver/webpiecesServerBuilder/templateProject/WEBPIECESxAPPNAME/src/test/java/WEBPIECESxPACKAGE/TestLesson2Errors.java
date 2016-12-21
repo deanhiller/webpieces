@@ -50,7 +50,7 @@ public class TestLesson2Errors {
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private static String PU = HibernatePlugin.PERSISTENCE_TEST_UNIT;
+	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
@@ -63,7 +63,7 @@ public class TestLesson2Errors {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
-				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, PU));
+				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
 		server = webserver.start();
 	}
 	

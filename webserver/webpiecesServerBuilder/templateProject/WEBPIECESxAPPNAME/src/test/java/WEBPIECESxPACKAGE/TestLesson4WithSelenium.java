@@ -25,7 +25,7 @@ public class TestLesson4WithSelenium {
 	
 	private static WebDriver driver;
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private static String PU = HibernatePlugin.PERSISTENCE_TEST_UNIT;
+	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	//see below comments in AppOverrideModule
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
@@ -52,7 +52,7 @@ public class TestLesson4WithSelenium {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
-				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, PU));
+				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

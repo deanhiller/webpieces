@@ -107,6 +107,7 @@ public class WebServerImpl implements WebServer {
 		while((line=bufReader.readLine())!=null) {
 			if("".equals(line.trim()))
 				continue;
+
 			
 			String[] split = line.split(":");
 			String routeId = split[0];
@@ -117,7 +118,7 @@ public class WebServerImpl implements WebServer {
 			if(!"".equals(args.trim())) {
 				String[] argArray = args.split(",");
 				for(String arg : argArray) {
-					argsWithFakeValues.put(arg, "fakeValue");
+					argsWithFakeValues.put(arg.trim(), "fakeValue");
 				}
 			}
 		
@@ -128,7 +129,7 @@ public class WebServerImpl implements WebServer {
 				if(firstException == null)
 					firstException = e;
 				
-				errorMsg += "\n\nError "+(count++) + ": "+e.getMessage() +" location="+location; 
+				errorMsg += "\n\nError "+(count++) + ": "+e.getMessage() +" location="+location+"\n entire line="+line; 
 			}
 		}
 		

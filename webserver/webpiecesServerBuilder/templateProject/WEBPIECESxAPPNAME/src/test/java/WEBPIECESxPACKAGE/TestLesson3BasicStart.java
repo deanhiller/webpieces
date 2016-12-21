@@ -14,7 +14,7 @@ import WEBPIECESxPACKAGE.Server;
 public class TestLesson3BasicStart {
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
-	private static String PU = HibernatePlugin.PERSISTENCE_TEST_UNIT;
+	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	//This exercises full startup with no mocking in place whatsoever BUT as you add remote systems to 
 	//talk to, you will need to change this test and pass in appOverridesModule to override those 
@@ -31,7 +31,7 @@ public class TestLesson3BasicStart {
 		jdbc.dropAllTablesFromDatabase();
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		Server server = new Server(null, null, new ServerConfig(0, 0, PU));
+		Server server = new Server(null, null, new ServerConfig(0, 0, pUnit));
 		//In this case, we bind a port
 		server.start();
 

@@ -44,11 +44,18 @@ public class CrudUserController {
 	}
 
 	public Redirect postSaveUser(UserDbo entity, String password) {
-		if(password.length() < 4) {
+		//TODO: if we wire in JSR303 bean validation into the platform, it could be 
+		//done there as well though would
+		//need to figure out how to do i18n for the messages in that case
+		if(password == null) {
+			Current.validation().addError("password", "password is required");
+		} else if(password.length() < 4) {
 			Current.validation().addError("password", "Value is too short");
-		} 
+		}
 		
-		if(entity.getFirstName().length() < 3) {
+		if(entity.getFirstName() == null) {
+			Current.validation().addError("entity.firstName", "First name is required");
+		} else if(entity.getFirstName().length() < 3) {
 			Current.validation().addError("entity.firstName", "First name must be more than 2 characters");
 		}
 

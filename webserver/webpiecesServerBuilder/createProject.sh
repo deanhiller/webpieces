@@ -6,5 +6,5 @@ cd $DIR
 ./gradlew installDist
 
 echo $DIR
-./build/install/webpiecesServerBuilder/bin/webpiecesServerBuilder
+./build/install/webpiecesServerBuilder/bin/webpiecesServerBuilder $@
 

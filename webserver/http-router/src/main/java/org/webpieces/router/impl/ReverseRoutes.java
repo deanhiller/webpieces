@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
@@ -144,8 +145,15 @@ public class ReverseRoutes {
 		List<String> pathParamNames = route.getPathParamNames();
 		for(String param : pathParamNames) {
 			String val = args.get(param);
-			if(val == null)
-				throw new RouteNotFoundException("missing argument.  param="+param+" is required to exist(and cannot be null as well).");
+			if(val == null) {
+				String strArgs = "";
+				for(Entry<String, String> entry : args.entrySet()) {
+					boolean equals = entry.getKey().equals(param);
+					strArgs = " ARG:'"+entry.getKey()+"'='"+entry.getValue()+"'   equals="+equals+"\n";
+				}
+				throw new RouteNotFoundException("missing argument.  param="+param+" is required"
+						+ " to exist(and cannot be null as well).  route="+routeId+" args="+strArgs);
+			}
 			String encodedVal = urlEncode(val);
 			path = path.replace("{"+param+"}", encodedVal);
 		}

@@ -53,7 +53,8 @@ public class RouterRequest {
 	public String toString() {
 		return "RouterRequest [isHttps=" + isHttps + ", \nisSendAheadNextResponses=" + isSendAheadNextResponses
 				+ ", \nrelativePath=" + relativePath + ", \ndomain=" + domain + ", \nmethod=" + method + ", \nqueryParams=\n"
-				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + "\n]";
+				+ queryParams + ", \nmultiPartFields=\n" + multiPartFields + "\n"
+				+ "cookies="+cookies+"\n]";
 	}
 	
 }

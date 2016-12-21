@@ -6,25 +6,44 @@ import java.util.Scanner;
 
 public class ProjectCreator {
 
-	public static void main(String[] args) throws IOException {
-		new ProjectCreator().start();
+	private String version;
+
+	public ProjectCreator(String version) {
+		this.version = version;
 	}
 
-	private void start() throws IOException {
+	public static void main(String[] args) throws IOException {
 		String version = System.getProperty("webpieces.version");
 		if(version == null)
 			throw new IllegalArgumentException("We must have the version on project creation");
-		System.out.println("Starting up VERSION="+version);
+		System.out.println("Starting up VERSION="+version+" args.length="+args.length);
+
+		ProjectCreator creator = new ProjectCreator(version);
+		if(args.length > 0)
+			creator.createProject(args);
+		else
+			creator.start();
+	}
+
+	private void createProject(String[] args) throws IOException {
+		if(args.length != 3)
+			throw new IllegalArgumentException("./createProject {className} {package} {Directory} is the format");
 		
+		String className = args[0];
+		String packageStr = args[1];
+		String dir = args[2];
+		createProject(className, packageStr, dir);
+	}
+
+	private void start() throws IOException {
 		try (Scanner scanner = new Scanner(System.in)) {
 		    //  prompt for the user's name
 		    System.out.print("Enter your camel case app name(used in class file names): ");
 	
 		    // get their input as a String
 		    String appClassName = scanner.next();
-		    String justAppName = appClassName.toLowerCase();
-		    
-		    String appDirectoryName = justAppName+"-all";
+		    String appDirectoryNameTmp = appClassName.toLowerCase()+"-all";
+
 		    
 		    System.out.println("Enter your package with . separating each package(ie. org.webpieces.myapp): ");
 		    String packageStr = scanner.next();
@@ -33,28 +52,35 @@ public class ProjectCreator {
 		    String currentDir = System.getProperty("user.dir");
 		    System.out.println("your current directory is '"+currentDir+"'");
 		    System.out.println("Enter the path relative to the above directory or use an absolute directory for where");
-		    System.out.println("we will create a directory called="+appDirectoryName+" OR will re-use an existing directory called "+ appDirectoryName+" to fill it in");
+		    System.out.println("we will create a directory called="+appDirectoryNameTmp+" OR will re-use an existing directory called "+ appDirectoryNameTmp+" to fill it in");
 		    String directory = scanner.next();
 		    
-			//we only allow execution from the jar file right now due to this...(so running this in the IDE probably won't work)
-			String path = ProjectCreator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			File jarFile = new File(path);
-			System.out.println("Running from jar file="+jarFile);
-
-			File webpiecesDir = jarFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
-			System.out.println("Base Directory="+webpiecesDir);
-
-			if(packageStr.contains("/") || packageStr.contains("\\"))
-				throw new IllegalArgumentException("package must contain '.' character and no '/' nor '\\' characters");
-			
-			File dirTheUserTypedIn = new File(directory);
-			setupDirectory(dirTheUserTypedIn);
-
-			File appDir = new File(dirTheUserTypedIn, appDirectoryName);
-			setupDirectory(appDir);
-			
-		    new FileCopy(webpiecesDir, appClassName, justAppName, packageStr, appDir, version).createProject();
+		    createProject(appClassName, packageStr, directory);
 		}
+	}
+
+	private void createProject(String appClassName, String packageStr, String directory) throws IOException {
+		String justAppName = appClassName.toLowerCase();
+		String appDirectoryName = justAppName+"-all";
+		
+		//we only allow execution from the jar file right now due to this...(so running this in the IDE probably won't work)
+		String path = ProjectCreator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		File jarFile = new File(path);
+		System.out.println("Running from jar file="+jarFile);
+
+		File webpiecesDir = jarFile.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+		System.out.println("Base Directory="+webpiecesDir);
+
+		if(packageStr.contains("/") || packageStr.contains("\\"))
+			throw new IllegalArgumentException("package must contain '.' character and no '/' nor '\\' characters");
+		
+		File dirTheUserTypedIn = new File(directory);
+		setupDirectory(dirTheUserTypedIn);
+
+		File appDir = new File(dirTheUserTypedIn, appDirectoryName);
+		setupDirectory(appDir);
+		
+		new FileCopy(webpiecesDir, appClassName, justAppName, packageStr, appDir, version).createProject();
 	}
 
 	private void setupDirectory(File dirTheUserTypedIn) throws IOException {
