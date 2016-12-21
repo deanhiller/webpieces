@@ -89,6 +89,7 @@ public class TestSyncHibernate {
 	@Test
 	public void testDbUseWhileRenderingPage() {
 		Integer id = loadDataInDb().getId();
+		verifyLazyLoad(id);
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/dynamic/"+id);
 
@@ -109,19 +110,41 @@ public class TestSyncHibernate {
 		EntityTransaction tx = mgr.getTransaction();
 		tx.begin();
 
+		UserTestDbo manager = new UserTestDbo();
+		manager.setEmail("asdf@asf.com");
+		manager.setName("somadsf");
+		
 		UserTestDbo user = new UserTestDbo();
 		user.setEmail(email);
 		user.setName("SomeName");
 		user.setFirstName("Dean");
 		user.setLastName("Hill");
+		user.setManager(manager);
 		
+		mgr.persist(manager);
 		mgr.persist(user);
 
 		mgr.flush();
 		
 		tx.commit();
-		
 		return user;
+	}
+	
+	public static void verifyLazyLoad(int id) {
+		//verify lazy load is working so we know test is testing what it should be
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);
+		EntityManager mgr = factory.createEntityManager();
+		EntityTransaction tx = mgr.getTransaction();
+		tx.begin();
+
+		UserTestDbo user = mgr.find(UserTestDbo.class, id);
+		UserTestDbo manager = user.getManager();
+
+		Assert.assertEquals("somadsf", manager.getName());
+
+		mgr.flush();
+		
+		tx.commit();
 	}
 	
 	@Test

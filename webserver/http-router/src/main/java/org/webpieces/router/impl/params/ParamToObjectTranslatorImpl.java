@@ -169,10 +169,12 @@ public class ParamToObjectTranslatorImpl {
 		ParamTreeNode tree = (ParamTreeNode) valuesToUse;
 		EntityLookup pluginLookup = fetchPluginLoader(fieldClass);
 		
-		Object bean;
-		if(pluginLookup != null)
-			bean = pluginLookup.find(fieldClass, tree, objectTranslator);
-		else
+		Object bean = null;
+		if(pluginLookup != null) {
+			bean = pluginLookup.find(fieldClass, tree, objectTranslator, c -> createBean(c));
+			if(bean == null)
+				throw new IllegalStateException("plugin="+pluginLookup.getClass()+" failed to create bean.  This is a plugin bug");
+		} else 
 			bean = createBean(fieldClass);
 		
 		for(Map.Entry<String, ParamNode> entry: tree.entrySet()) {
@@ -205,7 +207,7 @@ public class ParamToObjectTranslatorImpl {
 		return findBeanFieldType(superclass, key, classList);
 	}
 
-	private Object createBean(Class<?> paramTypeToCreate) {
+	private <T> T createBean(Class<T> paramTypeToCreate) {
 		try {
 			return paramTypeToCreate.newInstance();
 		} catch (InstantiationException e) {

@@ -6,7 +6,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
 
 import org.hibernate.metamodel.internal.EntityTypeImpl;
 import org.webpieces.router.api.EntityLookup;
@@ -39,7 +38,8 @@ public class HibernateLookup implements EntityLookup {
 	}
 
 	@Override
-	public <T> T find(Class<T> paramTypeToCreate, ParamTreeNode tree, ObjectTranslator translator) {
+	public <T> T find(Class<T> paramTypeToCreate, ParamTreeNode tree, 
+			ObjectTranslator translator, Function<Class<T>, T> beanCreate) {
 		EntityManager entityManager = Em.get();
 		Metamodel metamodel = entityManager.getMetamodel();
 		ManagedType<T> managedType = metamodel.managedType(paramTypeToCreate);
@@ -54,6 +54,8 @@ public class HibernateLookup implements EntityLookup {
 					+ "let us know so we can pair with you on this and I can add better error messaging)");
 		ValueNode node = (ValueNode) paramNode;
 		String value = node.getValue();
+		if(value == null)
+			return beanCreate.apply(paramTypeToCreate);
 		
 		Function<String, Object> unmarshaller = translator.getUnmarshaller(idClazz);
 		Object id = unmarshaller.apply(value);

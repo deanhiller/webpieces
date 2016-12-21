@@ -104,6 +104,7 @@ public class TestAsyncHibernate {
 	@Test
 	public void testDbUseWhileRenderingPage() {
 		Integer id = TestSyncHibernate.loadDataInDb().getId();
+		TestSyncHibernate.verifyLazyLoad(id);
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
 

@@ -112,7 +112,16 @@ public class CompilingClassloader extends ClassLoader implements ClassDefinition
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
     public Class<?> loadApplicationClass(String name) {
-
+    	//We must intern the name so it becomes the SAME EXACT lock in case the
+    	//same name is passed in.  ie. name1.intern() == name2.intern() so while
+    	//you can use name.equals(name2), you could also do name1.intern() == name2.intern() as
+    	//they intern returns the same object
+    	synchronized (name.intern()) {
+			return loadApplicationClassImpl(name);
+		}
+    }
+    
+    public Class<?> loadApplicationClassImpl(String name) {
         Class<?> maybeAlreadyLoaded = super.findLoadedClass(name);
         if(maybeAlreadyLoaded != null) {
             return maybeAlreadyLoaded;

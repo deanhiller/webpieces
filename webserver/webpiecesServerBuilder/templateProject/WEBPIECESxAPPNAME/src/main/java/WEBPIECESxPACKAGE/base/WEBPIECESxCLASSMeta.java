@@ -13,6 +13,9 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
+import WEBPIECESxPACKAGE.base.crud.CrudRouteModule;
+import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRouteModule;
+
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
 //GuiceModule paired with a RouterModule and app developers can plug both in here.  In some cases,

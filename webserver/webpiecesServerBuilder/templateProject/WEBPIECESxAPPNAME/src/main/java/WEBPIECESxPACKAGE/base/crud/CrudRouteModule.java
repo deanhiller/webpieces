@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE.base;
+package WEBPIECESxPACKAGE.base.crud;
 
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.CONFIRM_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.GET_ADD_USER_FORM;
@@ -32,7 +32,7 @@ public class CrudRouteModule extends ScopedRouteModule {
 		CrudRouteIds routeIds = new CrudRouteIds(
 				LIST_USERS, GET_ADD_USER_FORM, GET_EDIT_USER_FORM,
 				POST_USER_FORM, CONFIRM_DELETE_USER, POST_DELETE_USER);
-		addCrud("user", "crud/CrudUserController", routeIds);
+		addCrud("user", "CrudUserController", routeIds);
 	}
 
 }
