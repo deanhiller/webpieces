@@ -1,5 +1,6 @@
 package org.webpieces.router.impl;
 
+import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.Startable;
 
 import com.google.inject.Binder;
@@ -12,6 +13,9 @@ public class EmptyPluginModule implements Module {
 	public void configure(Binder binder) {
 		//creates an empty binder in case app installs ZERO plugins
 		Multibinder.newSetBinder(binder, Startable.class);
+		
+		Multibinder.newSetBinder(binder, EntityLookup.class);
+
 	}
 
 }

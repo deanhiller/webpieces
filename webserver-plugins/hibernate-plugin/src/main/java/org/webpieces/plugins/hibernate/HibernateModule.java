@@ -11,11 +11,13 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.hibernate.cfg.AvailableSettings;
+import org.webpieces.router.api.EntityLookup;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.multibindings.Multibinder;
 
 public class HibernateModule extends AbstractModule {
 
@@ -31,6 +33,8 @@ public class HibernateModule extends AbstractModule {
 	
 	@Override
 	protected void configure() {
+		Multibinder<EntityLookup> uriBinder = Multibinder.newSetBinder(binder(), EntityLookup.class);
+	    uriBinder.addBinding().to(HibernateLookup.class);
 	}
 
 	@Singleton

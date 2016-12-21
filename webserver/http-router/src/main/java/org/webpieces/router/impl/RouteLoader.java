@@ -10,11 +10,7 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import org.webpieces.ctx.api.FlashSub;
-import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.ctx.api.Session;
-import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
@@ -23,12 +19,8 @@ import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
-import org.webpieces.router.impl.ctx.FlashImpl;
-import org.webpieces.router.impl.ctx.SessionImpl;
-import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
-import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -46,25 +38,23 @@ public class RouteLoader {
 	private final RouteInvoker invoker;
 	private final ControllerLoader controllerFinder;
 	private CompressionCacheSetup compressionCacheSetup;
-	private CookieTranslator cookieTranslator;
-	private ObjectTranslator objectTranslator;
 	
 	protected RouterBuilder routerBuilder;
+
+	private PluginSetup pluginSetup;
 	
 	@Inject
 	public RouteLoader(RouterConfig config, 
 						RouteInvoker invoker,
 						ControllerLoader controllerFinder,
 						CompressionCacheSetup compressionCacheSetup,
-						CookieTranslator cookieTranslator,
-						ObjectTranslator objectTranslator
+						PluginSetup pluginSetup
 	) {
 		this.config = config;
 		this.invoker = invoker;
 		this.controllerFinder = controllerFinder;
 		this.compressionCacheSetup = compressionCacheSetup;
-		this.cookieTranslator = cookieTranslator;
-		this.objectTranslator = objectTranslator;
+		this.pluginSetup = pluginSetup;
 	}
 	
 	public WebAppMeta load(ClassForName loader, Consumer<Injector> startupFunction) {
@@ -89,7 +79,9 @@ public class RouteLoader {
 		Class<?> clazz = loader.clazzForName(moduleName);
 		
 		//In development mode, the ClassLoader here will be the CompilingClassLoader so stuff it into the thread context
-		//just in case plugins will need it(most won't, hibernate will)
+		//just in case plugins will need it(most won't, hibernate will).  In production, this is really a no-op and does
+		//nothing.  I don't like dev code existing in production :( so perhaps we should abstract this out at some 
+		//point perhaps with a lambda of a lambda function
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
@@ -105,8 +97,8 @@ public class RouteLoader {
 			log.info(WebAppMeta.class.getSimpleName()+" initialized.");
 			
 			Injector injector = createInjector(routerModule);
-	
-			startupFunction.accept(injector);
+				
+			pluginSetup.wireInPluginPoints(injector, startupFunction);
 			
 			loadAllRoutes(routerModule, injector);
 			
@@ -224,13 +216,8 @@ public class RouteLoader {
 	}
 	
 	public void invokeRoute(MatchResult result, RouterRequest routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
-		Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(objectTranslator));
-		FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(objectTranslator));
-		Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(objectTranslator));
-		RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
-
 		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
-		invoker.invoke(result, routerRequest, responseCb, errorRoutes, requestCtx);
+		invoker.invoke(result, routerRequest, responseCb, errorRoutes);
 	}
 
 	public RouteMeta fetchNotFoundRoute() {

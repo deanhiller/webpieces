@@ -8,13 +8,12 @@ public class MethodMeta {
 
 	private Object controllerInstance;
 	private Method method;
-	private Object[] arguments;
 	private RequestContext ctx;
 
-	public MethodMeta(Object controllerInstance, Method method, Object[] arguments, RequestContext ctx) {
+	public MethodMeta(
+			Object controllerInstance, Method method, RequestContext ctx) {
 		this.controllerInstance = controllerInstance;
 		this.method = method;
-		this.arguments = arguments;
 		this.ctx = ctx;
 	}
 
@@ -24,10 +23,6 @@ public class MethodMeta {
 
 	public Method getMethod() {
 		return method;
-	}
-
-	public Object[] getArguments() {
-		return arguments;
 	}
 
 	public RequestContext getCtx() {

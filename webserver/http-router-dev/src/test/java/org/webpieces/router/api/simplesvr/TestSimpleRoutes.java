@@ -3,6 +3,7 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Assert;
@@ -90,7 +91,7 @@ public class TestSimpleRoutes {
 	public void testBasicRoute() {
 		RouterRequest req = createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
 		server.incomingCompleteRequest(req, mockResponseStream);
 		
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
@@ -106,7 +107,7 @@ public class TestSimpleRoutes {
 	public void testOneParamRoute() {
 		RouterRequest req = createHttpRequest(HttpMethod.POST, "/meeting");
 		MockResponseStream mockResponseStream = new MockResponseStream();
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
 		server.incomingCompleteRequest(req, mockResponseStream);
 		
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();

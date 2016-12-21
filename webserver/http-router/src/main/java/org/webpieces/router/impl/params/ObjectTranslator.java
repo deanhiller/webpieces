@@ -6,6 +6,15 @@ import java.util.function.Function;
 
 import javax.inject.Singleton;
 
+/**
+ * This is THE class to translate objects to strings and strings to objects.  Overriding this, you can also add types 
+ * to translate as well like jodatime dates or java.util.Dates etc.  This translator applies to EVERYTHING in the
+ * platform OR if it doesn't, that is a bug(I don't think we missed any locations).  This includes rendering in 
+ * templates, path parames, etc. etc.
+ * 
+ * @author dhiller
+ *
+ */
 @Singleton
 public class ObjectTranslator {
 

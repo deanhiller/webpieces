@@ -6,17 +6,23 @@ import java.util.Set;
 public class RequestContext {
 
 	public static final String SECURE_TOKEN_FORM_NAME = "__secureToken";
-	
+
+	//incoming router request
+	private RouterRequest request;
+	//the params parsed from the request url if any
+	private Map<String, String> pathParams;
+
 	private Validation validation;
 	private FlashSub flash;
 	private Session session;
-	private RouterRequest request;
 	private Messages messages;
 
-	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request) {
+	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, Map<String, String> pathParams) {
+		this.request = request;
+		this.pathParams = pathParams;
+
 		this.validation = validation;
 		this.flash = flash;
-		this.request = request;
 		this.session = session;
 	}
 	
@@ -40,6 +46,10 @@ public class RequestContext {
 		return messages;
 	}
 	
+	public Map<String, String> getPathParams() {
+		return pathParams;
+	}
+
 	/**
 	 * 
 	 * @param secureFieldNames fieldNames that are secure and should NOT be transferred to flash
@@ -52,5 +62,5 @@ public class RequestContext {
 	public void setMessages(Messages messages) {
 		this.messages = messages;
 	}
-	
+
 }

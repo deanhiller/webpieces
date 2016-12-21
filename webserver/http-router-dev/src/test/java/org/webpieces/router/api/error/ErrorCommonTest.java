@@ -3,6 +3,7 @@ package org.webpieces.router.api.error;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Assert;
@@ -63,7 +64,7 @@ public class ErrorCommonTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/user/5553");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
 		server.incomingCompleteRequest(req, mockResponseStream);
 			
 		Exception e = mockResponseStream.getOnlyException();
@@ -81,7 +82,7 @@ public class ErrorCommonTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
 		server.incomingCompleteRequest(req, mockResponseStream);
 
 		verifyNotFoundRendered(mockResponseStream);
@@ -104,7 +105,7 @@ public class ErrorCommonTest {
 		RouterRequest req = RequestCreation.createHttpRequest(HttpMethod.GET, "/postroute");
 		MockResponseStream mockResponseStream = new MockResponseStream();
 		
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
 		server.incomingCompleteRequest(req, mockResponseStream);
 
 		verifyNotFoundRendered(mockResponseStream);

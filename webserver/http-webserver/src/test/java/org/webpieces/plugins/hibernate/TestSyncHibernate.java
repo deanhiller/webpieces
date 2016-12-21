@@ -9,7 +9,6 @@ import javax.persistence.Persistence;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
@@ -171,7 +170,6 @@ public class TestSyncHibernate {
 		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
 	
-	@Ignore
 	@Test
 	public void testHibernatePostPartialDataDoesntBlowDataAway() {
 		UserTestDbo user = loadDataInDb();

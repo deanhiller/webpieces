@@ -10,29 +10,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.DataMismatchException;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.MatchResult;
-import org.webpieces.router.impl.RouteMeta;
 
-public class ParamToObjectTranslator {
+@Singleton
+public class ParamToObjectTranslatorImpl {
 
 	//private static final Logger log = LoggerFactory.getLogger(ArgumentTranslator.class);
 	private ParamValueTreeCreator treeCreator;
-	private ObjectTranslator primitiveConverter;
+	private ObjectTranslator objectTranslator;
+	private Set<EntityLookup> lookupHooks;
 
 	@Inject
-	public ParamToObjectTranslator(ParamValueTreeCreator treeCreator, ObjectTranslator primitiveConverter) {
+	public ParamToObjectTranslatorImpl(ParamValueTreeCreator treeCreator, ObjectTranslator primitiveConverter) {
 		this.treeCreator = treeCreator;
-		this.primitiveConverter = primitiveConverter;
+		this.objectTranslator = primitiveConverter;
 	}
 	
 	//ok, here are a few different scenarios to consider
@@ -46,9 +50,10 @@ public class ParamToObjectTranslator {
 	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
-	public Object[] createArgs(MatchResult result, RouterRequest req, Validation validator) {
+	public Object[] createArgs(Method m, RequestContext ctx) {
+		RouterRequest req = ctx.getRequest();
 		try {
-			return createArgsImpl(result, req, validator);
+			return createArgsImpl(m, ctx);
 		} catch(DataMismatchException e) {
 			if(req.method == HttpMethod.GET) {
 				//For GET with query params or path urls, if we can't convert, it should be a 404...
@@ -66,9 +71,8 @@ public class ParamToObjectTranslator {
 		}
 	}
 
-	protected Object[] createArgsImpl(MatchResult result, RouterRequest req, Validation validator) {
-		RouteMeta meta = result.getMeta();
-		Method method = meta.getMethod();
+	protected Object[] createArgsImpl(Method method, RequestContext ctx) {
+		RouterRequest req = ctx.getRequest();
 		Parameter[] paramMetas = method.getParameters();
 		Annotation[][] paramAnnotations = method.getParameterAnnotations();
 		
@@ -82,7 +86,7 @@ public class ParamToObjectTranslator {
 		//next multi-part params
 		treeCreator.createTree(paramTree, req.multiPartFields, FromEnum.FORM_MULTIPART);
 		//lastly path params
-		treeCreator.createTree(paramTree, result.getPathParams(), FromEnum.URL_PATH);
+		treeCreator.createTree(paramTree, ctx.getPathParams(), FromEnum.URL_PATH);
 		
 		List<Object> args = new ArrayList<>();
 		for(int i = 0; i < paramMetas.length; i++) {
@@ -91,7 +95,7 @@ public class ParamToObjectTranslator {
 			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
 			ParamNode paramNode = paramTree.get(name);
-			Object arg = translate(req, meta, paramNode, fieldMeta, validator);
+			Object arg = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
 			args.add(arg);
 		}
 		return args.toArray();
@@ -115,17 +119,15 @@ public class ParamToObjectTranslator {
 		return newForm;
 	}
 
-	private Object translate(RouterRequest req, RouteMeta meta, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
+	private Object translate(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
 		Class<?> fieldClass = fieldMeta.getFieldClass();
-		Function<String, Object> converter = primitiveConverter.getUnmarshaller(fieldClass);
+		Function<String, Object> converter = objectTranslator.getUnmarshaller(fieldClass);
 		if(converter != null) {
-			return convert(req, meta, valuesToUse, fieldMeta, converter, validator);
+			return convert(req, method, valuesToUse, fieldMeta, converter, validator);
 		} else if(fieldClass.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
 		} else if(fieldClass.isEnum()) {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
-		} else if(isPluginManaged(fieldClass)) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
@@ -145,7 +147,7 @@ public class ParamToObjectTranslator {
 			for(ParamNode node : paramNodes) {
 				Object bean = null;
 				if(node != null)
-					bean = translate(req, meta, node, genMeta, validator);
+					bean = translate(req, method, node, genMeta, validator);
 					
 				list.add(bean);
 			}
@@ -163,16 +165,23 @@ public class ParamToObjectTranslator {
 		} else if(!(valuesToUse instanceof ParamTreeNode)) {
 			throw new IllegalStateException("Bug, must be missing a case. v="+valuesToUse+" type to field="+fieldMeta);
 		}
-		
-		Object bean = createBean(fieldClass);
+
 		ParamTreeNode tree = (ParamTreeNode) valuesToUse;
+		EntityLookup pluginLookup = fetchPluginLoader(fieldClass);
+		
+		Object bean;
+		if(pluginLookup != null)
+			bean = pluginLookup.find(fieldClass, tree, objectTranslator);
+		else
+			bean = createBean(fieldClass);
+		
 		for(Map.Entry<String, ParamNode> entry: tree.entrySet()) {
 			String key = entry.getKey();
 			ParamNode value = entry.getValue();
 			Field field = findBeanFieldType(bean.getClass(), key, new ArrayList<>());
 			
 			FieldMeta nextFieldMeta = new FieldMeta(field);
-			Object translatedValue = translate(req, meta, value, nextFieldMeta, validator);
+			Object translatedValue = translate(req, method, value, nextFieldMeta, validator);
 			
 			nextFieldMeta.setValueOnBean(bean, translatedValue);
 		}
@@ -206,9 +215,8 @@ public class ParamToObjectTranslator {
 		}
 	}
 
-	private Object convert(RouterRequest req, RouteMeta routeMeta, ParamNode valuesToUse, Meta fieldMeta, Function<String, Object> converter, Validation validator) {
+	private Object convert(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Function<String, Object> converter, Validation validator) {
 		Class<?> paramTypeToCreate = fieldMeta.getFieldClass();
-		Method method = routeMeta.getMethod();
 		if(fieldMeta instanceof ParamMeta) {
 			//for params only not fields as with fields, we just don't set the field and skip it...before we call a method,
 			//we MUST have a value to set
@@ -249,11 +257,16 @@ public class ParamToObjectTranslator {
 		}
 	}
 
-	private boolean isPluginManaged(Class<?> paramTypeToCreate) {
-		//TODO: implement so we can either
-		// load existing from db from hidden id field in the form
-		// create a new db object that is filled in that can easily be saved
-		return false;
+	private EntityLookup fetchPluginLoader(Class<?> paramTypeToCreate) {
+		for(EntityLookup lookup : lookupHooks) {
+			if(lookup.isManaged(paramTypeToCreate))
+				return lookup;
+		}
+		return null;
+	}
+
+	public void install(Set<EntityLookup> lookupHooks) {
+		this.lookupHooks = lookupHooks;
 	}
 
 }

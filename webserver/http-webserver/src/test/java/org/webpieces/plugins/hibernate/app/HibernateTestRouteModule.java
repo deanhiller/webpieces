@@ -10,6 +10,7 @@ import static org.webpieces.plugins.hibernate.app.HibernateRouteId.LIST_USERS;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.SAVE_USER;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.CrudRouteIds;
 
 public class HibernateTestRouteModule extends AbstractRouteModule {
 
@@ -25,7 +26,8 @@ public class HibernateTestRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/async/get/{id}",    "HibernateAsyncController.display", HibernateRouteId.ASYNC_DISPLAY_ENTITY);
 		addRoute(GET , "/async/dynamic/{id}","HibernateAsyncController.entityLoad", HibernateRouteId.ASYNC_ENTITY_LOAD);
 		
-		addCrud("user", "CrudTestController", LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
+		CrudRouteIds routeIds = new CrudRouteIds(LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
+		addCrud("user", "CrudTestController", routeIds);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");

@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.routing.CrudRouteIds;
 import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.RouteId;
@@ -178,14 +179,19 @@ public class RouterBuilder implements Router {
 	 *	//addRoute(GET,    "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
 	 */
 	@Override
-	public void addCrud(String entity, String controller,  
-			RouteId listRoute, RouteId addRoute, RouteId editRoute, 
-			RouteId saveRoute, RouteId confirmDelete, RouteId deleteRoute) {
+	public void addCrud(String entity, String controller, CrudRouteIds routeIds) {
+		RouteId listRoute = routeIds.getListRoute();
+		RouteId addRoute = routeIds.getAddRoute();
+		RouteId editRoute = routeIds.getEditRoute(); 
+		RouteId postSaveRoute = routeIds.getPostSaveRoute();
+		RouteId confirmDelete = routeIds.getConfirmDelete();
+		RouteId postDeleteRoute = routeIds.getPostDeleteRoute();
+		
 		String entityWithCapital = entity.substring(0, 1).toUpperCase() + entity.substring(1);
 		addRoute(GET , "/"+entity+"/list",        controller+"."+entity+"List", listRoute);
 		addRoute(GET , "/"+entity+"/new",         controller+"."+entity+"AddEdit", addRoute);
 		addRoute(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute);
-		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, saveRoute);
+		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, postSaveRoute);
 		
 		//get the confirm delete page
 		addRoute(GET,  "/"+entity+"/confirmdelete/{id}", controller+".confirmDelete"+entityWithCapital, confirmDelete);
@@ -194,7 +200,7 @@ public class RouterBuilder implements Router {
 		//KISS and YAGNI (google that if you don't know).  
 		//HOWEVER, If you don't like this, copy and paste this method and modify to be a POST OR DELETE and add the 
 		//javascript for next time
-		addRoute(POST, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, deleteRoute);
+		addRoute(POST, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, postDeleteRoute);
 	}
 	
 	public AllRoutingInfo getRouterInfo() {

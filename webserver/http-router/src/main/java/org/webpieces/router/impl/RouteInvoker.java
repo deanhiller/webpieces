@@ -1,6 +1,7 @@
 package org.webpieces.router.impl;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -13,6 +14,7 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Session;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
@@ -25,11 +27,13 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
+import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
-import org.webpieces.router.impl.params.ParamToObjectTranslator;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -39,22 +43,36 @@ import org.webpieces.util.logging.SupressedExceptionLog;
 public class RouteInvoker {
 
 	private static final Logger log = LoggerFactory.getLogger(RouteInvoker.class);
-	private ParamToObjectTranslator argumentTranslator;
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
 	private RouterConfig config;
+	private CookieTranslator cookieTranslator;
+	private ObjectTranslator objectTranslator;
 	
 	@Inject
-	public RouteInvoker(ParamToObjectTranslator argumentTranslator, 
-						ObjectToParamTranslator reverseTranslator,
-						RouterConfig config) {
-		this.argumentTranslator = argumentTranslator;
+	public RouteInvoker(
+		ObjectToParamTranslator reverseTranslator,
+		RouterConfig config,
+		CookieTranslator cookieTranslator,
+		ObjectTranslator objectTranslator
+	) {
 		this.reverseTranslator = reverseTranslator;
 		this.config = config;
+		this.cookieTranslator = cookieTranslator;
+		this.objectTranslator = objectTranslator;
 	}
 
-	public void invoke(
+	public void invoke(MatchResult result, RouterRequest routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+		Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(objectTranslator));
+		FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(objectTranslator));
+		Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(objectTranslator));
+		RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest, result.getPathParams());
+		
+		invokeImpl(result, routerRequest, responseCb, errorRoutes, requestCtx);
+	}
+	
+	public void invokeImpl(
 			MatchResult result, RouterRequest req, ResponseStreamer responseCb, ErrorRoutes errorRoutes, RequestContext requestCtx) {
 		try {
 			//We convert all exceptions from invokeAsync into CompletableFuture..
@@ -76,7 +94,7 @@ public class RouteInvoker {
 			NotFoundInfo notFoundInfo = errorRoutes.fetchNotfoundRoute(exc);
 			RouteMeta notFoundResult = notFoundInfo.getResult();
 			RouterRequest overridenRequest = notFoundInfo.getReq();
-			RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest);
+			RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest, new HashMap<>());
 			
 			//http 404...(unless an exception happens in calling this code and that then goes to 500)
 			CompletableFuture<Void> future = notFound(notFoundResult, notFoundInfo.getService(), exc, overridenCtx, responseCb);
@@ -180,15 +198,12 @@ public class RouteInvoker {
 			throw new IllegalStateException("Someone screwed up, as controllerInstance should not be null at this point, bug");
 		Method method = meta.getMethod();
 
-//		Service<MethodMeta, Action> service = meta.getService222();
-//		if(service == null)
-//			throw new IllegalStateException("Bug, service should never be null at this point");
+		if(service == null)
+			throw new IllegalStateException("Bug, service should never be null at this point");
 		
-		Validation validation = requestCtx.getValidation();
 		RouterRequest req = requestCtx.getRequest();
 		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
 		requestCtx.setMessages(messages);
-		Object[] arguments = argumentTranslator.createArgs(result, req, validation);
 
 		if(config.isTokenCheckOn() && meta.getRoute().isCheckSecureToken()) {
 			String token = requestCtx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
@@ -205,7 +220,7 @@ public class RouteInvoker {
 		Current.setContext(requestCtx);
 		CompletableFuture<Action> response;
 		try {
-			response = invokeMethod(service, obj, method, arguments);
+			response = invokeMethod(service, obj, method);
 		} finally {
 			RequestLocalCtx.set(null);
 			Current.setContext(null);
@@ -229,8 +244,8 @@ public class RouteInvoker {
 		return null;
 	}
 	
-	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, Object[] arguments) {
-		MethodMeta meta = new MethodMeta(obj, m, arguments, Current.getContext());
+	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m) {
+		MethodMeta meta = new MethodMeta(obj, m, Current.getContext());
 		return service.invoke(meta);
 	}
 

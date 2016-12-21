@@ -7,10 +7,17 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.impl.InvokeException;
+import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
 public class ServiceProxy implements Service<MethodMeta, Action> {
 
+	private ParamToObjectTranslatorImpl translator;
+
+	public ServiceProxy(ParamToObjectTranslatorImpl translator) {
+		this.translator = translator;
+	}
+	
 	@Override
 	public CompletableFuture<Action> invoke(MethodMeta meta) {
 		try {
@@ -33,7 +40,7 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		
 		Method m = meta.getMethod();
 		Object obj = meta.getControllerInstance();
-		Object[] arguments = meta.getArguments();
+		Object[] arguments = translator.createArgs(m, meta.getCtx());
 		
 		Object retVal = m.invoke(obj, arguments);
 		if(retVal == null) {

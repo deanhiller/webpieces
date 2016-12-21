@@ -7,6 +7,7 @@ import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.LIST_USERS;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
 
+import org.webpieces.router.api.routing.CrudRouteIds;
 import org.webpieces.router.api.routing.ScopedRouteModule;
 
 public class CrudRouteModule extends ScopedRouteModule {
@@ -27,9 +28,11 @@ public class CrudRouteModule extends ScopedRouteModule {
 		//addRoute(POST,   "/user/post",        "crud/CrudUserController.postSaveUser", saveRoute);
 		//addRoute(GET,    "/user/confirmdelete/{id}", "crud/CrudUserController.confirmDeleteUser", confirmDelete);
 		//addRoute(POST,   "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
-		addCrud("user", "crud/CrudUserController",
+		
+		CrudRouteIds routeIds = new CrudRouteIds(
 				LIST_USERS, GET_ADD_USER_FORM, GET_EDIT_USER_FORM,
 				POST_USER_FORM, CONFIRM_DELETE_USER, POST_DELETE_USER);
+		addCrud("user", "crud/CrudUserController", routeIds);
 	}
 
 }

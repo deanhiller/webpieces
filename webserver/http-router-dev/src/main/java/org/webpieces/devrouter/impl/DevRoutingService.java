@@ -24,6 +24,7 @@ import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RouteModuleInfo;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.ServiceProxy;
+import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -42,14 +43,19 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	private WebAppMeta routerModule;
 	private RouterConfig config;
 	private ControllerLoader finder;
+	private ParamToObjectTranslatorImpl translator;
 
 	@Inject
-	public DevRoutingService(RouteLoader routeConfig, RouterConfig config, DevClassForName loader, ControllerLoader finder) {
+	public DevRoutingService(
+			RouteLoader routeConfig, RouterConfig config, DevClassForName loader, ControllerLoader finder,
+			ParamToObjectTranslatorImpl translator
+	) {
 		super(routeConfig);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.classLoader = loader;
 		this.finder = finder;
+		this.translator = translator;
 		this.lastFileTimestamp = config.getMetaFile().lastModified();
 	}
 
@@ -131,7 +137,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
-			meta.setService(new ServiceProxy());
+			meta.setService(new ServiceProxy(translator));
 		}
 		
 		String reason = "Your route was not found in routes table";

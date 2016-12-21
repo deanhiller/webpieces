@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
@@ -17,11 +18,19 @@ import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
 @Singleton
 public class MetaLoader {
 
+	private ParamToObjectTranslatorImpl translator;
+
+	@Inject
+	public MetaLoader(ParamToObjectTranslatorImpl translator) {
+		this.translator = translator;
+	}
+	
 	public void loadInstIntoMeta(RouteMeta meta, Object controllerInst, String methodStr) {
 		Method[] methods = controllerInst.getClass().getMethods();
 		List<Method> matches = new ArrayList<>();
@@ -114,7 +123,7 @@ public class MetaLoader {
 	}
 
 	public Service<MethodMeta, Action> loadFilters(List<RouteFilter<?>> filters) {
-		Service<MethodMeta, Action> svc = new ServiceProxy();
+		Service<MethodMeta, Action> svc = new ServiceProxy(translator);
 		for(RouteFilter<?> f : filters) {
 			svc = ChainFilters.addOnTop(svc, f);
 		}
