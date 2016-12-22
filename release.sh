@@ -7,11 +7,11 @@ cd $DIR
 ./runAllTesting.sh
 if [ $? -eq 0 ]
 then
-  echo "Successfully RAN ALL TESTING"
+  echo "Successfully RAN ALL TESTING $?"
 else
-  echo "TESTING SYSTEM Failed(don't release this)"
+  echo "TESTING SYSTEM Failed(don't release this) $?"
   exit $?
 fi
 
 #MUST turn parallel builds off for release or it fails!!!
-./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -PprojVersion=$@ clean release
+./gradlew --stacktrace -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -PprojVersion=$@ clean release

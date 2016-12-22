@@ -8,9 +8,9 @@ cd $DIR
 ./gradlew clean build release
 if [ $? -eq 0 ]
 then
-  echo "Successfully BUILT FAKE RELEASE"
+  echo "Successfully BUILT FAKE RELEASE $?"
 else
-  echo "Build Failed"
+  echo "BUILDING FAKE RELEASE FAILED $?"
   exit $?
 fi
 
