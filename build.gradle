@@ -230,8 +230,9 @@ subprojects {
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
-      afterTest { descr ->
-        logger.warn("Test complete ${descr.className} : ${descr.name}")
+      afterTest { descr, result ->
+        def totalTime = result.endTime - result.startTime
+        logger.warn("Test complete ${descr.className} : ${descr.name} TOTAL TIME=${totalTime}")
       }
       testLogging {
         events "failed"
@@ -339,7 +340,7 @@ closeRepository.dependsOn('uploadArchives2')
 promoteRepository.dependsOn('closeRepository')
 promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
-  Thread.sleep(15000)
+  Thread.sleep(25000)
   println("done sleeping go promote repo now");
 }
 

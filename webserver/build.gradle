@@ -38,7 +38,10 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
 //this screws tools in many situations like this one so this puts it back so the output is at
 //least put to the same location
 sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-compileJava.doLast { tasks.processResources.execute() }
+compileJava.doLast { 
+   tasks.processResources.execute() 
+   logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
+}
 
     test {
         if (project.hasProperty('excludeSelenium')) {

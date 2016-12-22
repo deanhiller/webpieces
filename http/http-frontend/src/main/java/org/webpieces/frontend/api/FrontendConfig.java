@@ -15,9 +15,10 @@ public class FrontendConfig {
 	
 	/**
 	 * When a client connects, they must send a request in this amount of time.  null means disabled.
-	 * telnet google.com 443 yeilds an 11 second timeout while telnet google.com 80 yeilds a 60 second timeout
+	 * telnet google.com 443 yeilds an 11 second timeout while telnet google.com 80 yeilds a 
+	 * 60 second timeout so wait until 65 seconds 
 	 */
-	public Integer maxConnectToRequestTimeoutMs = 60000;
+	public Integer maxConnectToRequestTimeoutMs = 65000;
 	
 	/**
 	 * null means keep alive will be disabled
