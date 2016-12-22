@@ -230,6 +230,9 @@ subprojects {
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }
+      afterTest { descr ->
+        logger.warn("Test complete ${descr.className} : ${descr.name}")
+      }
       testLogging {
         events "failed"
         exceptionFormat "full"

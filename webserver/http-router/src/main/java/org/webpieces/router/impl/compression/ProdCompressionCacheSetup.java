@@ -129,8 +129,10 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		//if hash is not there, the user may have changed the url so need to recalculate new hashes for new keys
 		//There is a test for this...
 		String previousHash = p.getProperty(urlPath); 
-		if(lastModified > lastModifiedSrc && previousHash != null)
+		if(lastModified > lastModifiedSrc && previousHash != null) {
+			log.info("timestamp later than src so skipping writing to="+destination);
 			return; //no need to check anything as destination was written after this source file
+		}
 		
 		try {
 				byte[] allData = fileUtil.readFileContents(urlPath, src);
@@ -142,7 +144,13 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 								+ " you did not change the name of the file nor the url path meaning your customer will never get the new version"
 								+ " until the cache expires which can be a month out.  (Modify the names of files/url path when changing them)\n"
 								+ "existing compressed file="+destination+"\nprevious hash="+previousHash+" currentHash="+hash);
+					
+					else if(!destination.exists())
+						throw new IllegalStateException("Previously existing file is missing="+destination+" Your file cache was corrupted.  If you"
+								+ " delete the cache you risk users not getting new files if css or js files were changed");
+
 					log.info("Previous file is the same, no need to compress to="+destination);
+					
 					return;
 				}
 

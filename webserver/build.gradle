@@ -19,8 +19,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
 
     dependencies {
         compile project(':webserver:http-webserver')
-        //we start people off with the hibernate plugin but it's easy enough to just delete this line and 
-        //delete the code that no longer compiles to remove it
+        //we start people off with the hibernate plugin 
         compile project(':webserver-plugins:hibernate-plugin')
 
         testCompile project(':core:core-ddl')

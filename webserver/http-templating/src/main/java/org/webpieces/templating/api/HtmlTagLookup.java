@@ -30,7 +30,11 @@ public class HtmlTagLookup {
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());
 		put(new JsActionTag());
-		put(new FieldTag(config.getFieldTagTemplatePath(), "error"));
+		addFieldTag(config);
+	}
+
+	protected void addFieldTag(TemplateConfig config) {
+		put(new FieldTag(config.getFieldTagTemplatePath(), "error"));		
 	}
 
 	protected void put(HtmlTag tag) {

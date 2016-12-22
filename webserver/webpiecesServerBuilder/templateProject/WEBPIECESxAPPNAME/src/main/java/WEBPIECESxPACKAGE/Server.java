@@ -78,6 +78,9 @@ public class Server {
 		if(metaFile == null)
 			metaFile = new VirtualFileClasspath("appmeta.txt", Server.class.getClassLoader());
 
+		if(!metaFile.exists())
+			throw new RuntimeException("file not found="+metaFile);
+		
 		//This override is only needed if you want to add your own Html Tags to re-use
 		//you can delete this code if you are not adding your own html tags
 		Module allOverrides = new TagLookupOverride();

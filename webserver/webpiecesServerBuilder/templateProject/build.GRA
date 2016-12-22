@@ -25,7 +25,7 @@ ext {
        'plugin-hibernate':   "org.webpieces:hibernate-plugin:${webpiecesVersion}",
        'plugin-h2':          "org.webpieces:h2db-plugin:${webpiecesVersion}",
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
-
+       'h2db':            'com.h2database:h2:1.4.192',
        //These next two are in case you have libraries that want to use an
        //http-client or a nio library...
        'web-channelmgr':  "org.webpieces:core-channelmanager2:${webpiecesVersion}",

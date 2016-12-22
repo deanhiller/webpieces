@@ -57,8 +57,6 @@ public class TestLesson4WithSelenium {
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}
 	
-
-	
 	//You must have firefox installed to run this test...
 	//@Ignore
 	@Test
