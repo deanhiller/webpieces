@@ -57,18 +57,18 @@ To try the webserver
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
     NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
-    A. eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
+..* eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
        eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
        go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
        'Store information about method parameters'
-    B. gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
+..* gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
        NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
 6. IF Intellij, you will have a bit more pain during development.  The first steps are to
-    A. From Welcome screen, choose Import Project
-    B. Select your folder {yourapp}-all and click ok
-    C. Choose 'Import project from external model' and choose gradle and click next
-    D. Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
-    E. Open Preferences, expand "Build, Execution, and Deployment", expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+..* From Welcome screen, choose Import Project
+..* Select your folder {yourapp}-all and click ok
+..* Choose 'Import project from external model' and choose gradle and click next
+..* Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
+..* Open Preferences, expand "Build, Execution, and Deployment", expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
 7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
      the webserver (even in debug mode)
