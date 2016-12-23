@@ -1,5 +1,6 @@
 package org.webpieces.httpparser.api;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -38,6 +39,12 @@ public class TestChunkedParsing {
 		}
 	}
 	
+	private byte[] unwrap(ByteBuffer buffer) {
+		byte[] data = new byte[buffer.remaining()];
+		buffer.get(data);
+		return data;
+	}
+	
 	@Test
 	public void testBasic() {
 		String chunkedData = "4\r\nWiki\r\n5\r\npedia\r\nE\r\n in\r\n\r\nchunks.\r\n0\r\n\r\n";
@@ -45,7 +52,7 @@ public class TestChunkedParsing {
 		HttpResponse resp = TestResponseParsing.createOkResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 		
-		byte[] bytes = parser.marshalToBytes(resp);
+		byte[] bytes = unwrap(parser.marshalToByteBuffer(resp));
 		byte[] chunked = chunkedData.getBytes();
 		
 		byte[] all = new byte[bytes.length+chunked.length];
@@ -80,10 +87,10 @@ public class TestChunkedParsing {
 		HttpResponse resp = TestResponseParsing.createOkResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 		
-		byte[] bytes = parser.marshalToBytes(resp);
+		byte[] bytes = unwrap(parser.marshalToByteBuffer(resp));
 		byte[] chunked = chunkedData.getBytes();
 		HttpResponse resp400 = create400Response();
-		byte[] tail = parser.marshalToBytes(resp400);
+		byte[] tail = unwrap(parser.marshalToByteBuffer(resp400));
 		
 		byte[] all = new byte[bytes.length+chunked.length+tail.length];
 		System.arraycopy(bytes, 0, all, 0, bytes.length);
@@ -121,10 +128,10 @@ public class TestChunkedParsing {
 		HttpResponse resp = TestResponseParsing.createOkResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 		
-		byte[] bytes = parser.marshalToBytes(resp);
+		byte[] bytes = unwrap(parser.marshalToByteBuffer(resp));
 		byte[] chunked = chunkedData.getBytes();
 		HttpResponse resp400 = create400Response();
-		byte[] tail = parser.marshalToBytes(resp400);
+		byte[] tail = unwrap(parser.marshalToByteBuffer(resp400));
 		
 		int lengthOfChunked1stHalf = 15;
 		int lengthOfChunked2ndHalf = chunked.length - 15;
@@ -169,7 +176,7 @@ public class TestChunkedParsing {
 		chunk.addExtension(new HttpChunkExtension("something"));
 		chunk.setBody(payload1);
 		
-		byte[] payload = parser.marshalToBytes(chunk);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(chunk));
 		String str = new String(payload);
 
 		Assert.assertEquals("a;asdf=value;something\r\n0123456789\r\n", str);
@@ -181,7 +188,7 @@ public class TestChunkedParsing {
 		
 		Assert.assertEquals("0;this=that\r\ncustomer: value\r\n\r\n", lastPayload);
 		
-		byte[] lastBytes = parser.marshalToBytes(lastChunk);
+		byte[] lastBytes = unwrap(parser.marshalToByteBuffer(lastChunk));
 		String lastPayloadFromBytes = new String(lastBytes, HttpParserFactory.iso8859_1);
 		
 		Assert.assertEquals("0;this=that\r\ncustomer: value\r\n\r\n", lastPayloadFromBytes);

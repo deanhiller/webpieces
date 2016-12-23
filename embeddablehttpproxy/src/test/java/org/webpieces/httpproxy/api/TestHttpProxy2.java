@@ -42,6 +42,12 @@ public class TestHttpProxy2 {
 		dataListener = serverListeners.get(0);
 	}
 	
+	private byte[] unwrap(ByteBuffer buffer) {
+		byte[] data = new byte[buffer.remaining()];
+		buffer.get(data);
+		return data;
+	}
+	
 	@Test
 	public void testBasicProxy() throws IOException, ClassNotFoundException {
 		HttpRequestLine requestLine = new HttpRequestLine();
@@ -49,7 +55,7 @@ public class TestHttpProxy2 {
 		requestLine.setUri(new HttpUri("http://www.deano.com"));
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine);
-		byte[] array = parser.marshalToBytes(req);
+		byte[] array = unwrap(parser.marshalToByteBuffer(req));
 		
 		ByteBuffer buffer = ByteBuffer.wrap(array);
 		

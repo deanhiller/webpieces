@@ -8,12 +8,6 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 public interface HttpParser {
 
 	ByteBuffer marshalToByteBuffer(HttpPayload request);
-	
-	//TODO: This needs to change!!!  We need to pass in a data structure that 
-	//we can write to so it could be a byte[] or it could be a ByteBuffer
-	//or anything else but we also need to know the size ahead of time or?
-    byte[] marshalToBytes(HttpPayload request);
-	
 	String marshalToString(HttpPayload request);
 	
 	/**

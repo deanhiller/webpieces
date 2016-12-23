@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -53,7 +51,6 @@ import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-    private static final Logger log = LoggerFactory.getLogger(Http2ParserImpl.class);
 
     private final BufferPool bufferPool;
     private final Map<Class<? extends Http2Frame>, FrameMarshaller> dtoToMarshaller = new HashMap<>();
@@ -81,14 +78,6 @@ public class Http2ParserImpl implements Http2Parser {
     @Override
     public DataWrapper prepareToParse() {
         return dataGen.emptyWrapper();
-    }
-
-    // includes header length
-    private int peekLengthOfFrame(DataWrapper data) {
-        ByteBuffer lengthBytes = ByteBuffer.wrap(data.readBytesAt(0, 3));
-        int length = lengthBytes.getShort() << 8;
-        length |= lengthBytes.get();
-        return length + 9; // add 9 bytes for the header
     }
 
     private Class<? extends Http2Frame> getFrameClassForType(Http2FrameType type) {

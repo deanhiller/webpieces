@@ -249,7 +249,7 @@ public class RequestSenderImpl implements RequestSender {
     }
 
     private CompletableFuture<RequestId> sendHttp11Request(HttpRequest request, boolean isComplete, ResponseListener l) {
-        ByteBuffer wrap = ByteBuffer.wrap(httpParser.marshalToBytes(request));
+    	ByteBuffer wrap = httpParser.marshalToByteBuffer(request);
 
         // TODO: confirm that if isComplete is false that the transfer-encoding is chunked, otherwise throw
         if(!isComplete)

@@ -57,7 +57,6 @@ public class HttpParserImpl implements HttpParser {
 		return buffer;
 	}
 	
-	@Override
 	public byte[] marshalToBytes(HttpPayload payload) {
 		if(payload.getMessageType() == HttpMessageType.CHUNK || payload.getMessageType() == HttpMessageType.LAST_CHUNK) {
 			return chunkedBytes((HttpChunk)payload);

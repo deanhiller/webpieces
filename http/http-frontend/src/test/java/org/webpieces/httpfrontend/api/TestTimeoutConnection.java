@@ -112,6 +112,12 @@ public class TestTimeoutConnection {
 		Assert.assertTrue(mockFuture.isCancelled());
 	}
 
+	private byte[] unwrap(ByteBuffer buffer) {
+		byte[] data = new byte[buffer.remaining()];
+		buffer.get(data);
+		return data;
+	}
+	
 	private ByteBuffer createHttpRequest() {
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(KnownHttpMethod.POST);
@@ -122,7 +128,7 @@ public class TestTimeoutConnection {
 		
 		HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
 		
-		byte[] bytes = parser.marshalToBytes(request);
+		byte[] bytes = unwrap(parser.marshalToByteBuffer(request));
 		return ByteBuffer.wrap(bytes);
 	}
 }

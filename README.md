@@ -15,7 +15,7 @@ This project is essentially pieces that can be used to build any http related so
 
 * your project is automatically setup with code coverage (for java and the generated html groovy)
 * built in 'very loose' checkstyle such that developers don't create 70+ line methods or 700+ line files or nasty anti-arrow pattern if statements
-* unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases
+* unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases.  with Seam/JSF, you lock your users to one node and when that goes out, if they are in the middle of buying a plane ticket, they are pretty much screwed.(ie. not a good design for large scale)
 * be blown away with the optimistic locking pattern.  If your end users both post a change to the same entity, one will win and the other will go through a path of code where you can decide, 1. show the user his changes and the other users, 2. just tell the user it failed and to start over 3. let it overwrite the previous user code 
 * look ma, no restarting the server in development mode with complete java refactoring
 * prod server runs on :8080, dev server on :9000 all locally such that unlike play, dev server never caches files so cached files from :8080 don't interfere with development mode and dev server never caches files making development seamless(modify css file and it's up to date)

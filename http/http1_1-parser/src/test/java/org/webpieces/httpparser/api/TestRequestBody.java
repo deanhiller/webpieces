@@ -1,5 +1,7 @@
 package org.webpieces.httpparser.api;
 
+import java.nio.ByteBuffer;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
@@ -21,12 +23,18 @@ public class TestRequestBody {
 	
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
+	private byte[] unwrap(ByteBuffer buffer) {
+		byte[] data = new byte[buffer.remaining()];
+		buffer.get(data);
+		return data;
+	}
+	
 	@Test
 	public void testBody() {
 		HttpRequest request = createPostRequestWithBody();
 		byte[] expected = request.getBody().createByteArray();
 		
-		byte[] data = parser.marshalToBytes(request);
+		byte[] data = unwrap(parser.marshalToByteBuffer(request));
 		DataWrapper wrap1 = dataGen.wrapByteArray(data);
 		
 		Memento memento = parser.prepareToParse();
@@ -46,7 +54,7 @@ public class TestRequestBody {
 		HttpRequest request = createPostRequestWithBody();
 		byte[] expected = request.getBody().createByteArray();
 		
-		byte[] data = parser.marshalToBytes(request);
+		byte[] data = unwrap(parser.marshalToByteBuffer(request));
 		
 		byte[] first = new byte[data.length - 20];
 		byte[] second = new byte[data.length - first.length];
@@ -85,10 +93,10 @@ public class TestRequestBody {
 		HttpRequest request = createPostRequestWithBody();
 		byte[] expected = request.getBody().createByteArray();
 		
-		byte[] data = parser.marshalToBytes(request);
+		byte[] data = unwrap(parser.marshalToByteBuffer(request));
 		
 		HttpRequest request2 = TestRequestParsing.createPostRequest();
-		byte[] payload = parser.marshalToBytes(request2);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(request2));
 		
 		byte[] first = new byte[data.length - 20];
 		byte[] second = new byte[data.length - first.length + payload.length];
@@ -121,7 +129,7 @@ public class TestRequestBody {
 		HttpRequest request = createPostRequestWithBody();
 		byte[] expected = request.getBody().createByteArray();
 		
-		byte[] data = parser.marshalToBytes(request);
+		byte[] data = unwrap(parser.marshalToByteBuffer(request));
 		
 		byte[] first = new byte[20];
 		byte[] second = new byte[10];

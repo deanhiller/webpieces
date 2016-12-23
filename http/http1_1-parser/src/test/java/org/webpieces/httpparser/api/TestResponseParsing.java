@@ -1,5 +1,7 @@
 package org.webpieces.httpparser.api;
 
+import java.nio.ByteBuffer;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
@@ -24,6 +26,12 @@ public class TestResponseParsing {
 	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
+	private byte[] unwrap(ByteBuffer buffer) {
+		byte[] data = new byte[buffer.remaining()];
+		buffer.get(data);
+		return data;
+	}
+	
 	@Test
 	public void testBasic() {
 		HttpResponseStatus status = new HttpResponseStatus();
@@ -46,7 +54,7 @@ public class TestResponseParsing {
 	@Test
 	public void testAsciiConverter() {
 		HttpResponse response = createOkResponse();
-		byte[] payload = parser.marshalToBytes(response);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(response));
 		ConvertAscii converter = new ConvertAscii();
 		String readableForm = converter.convertToReadableForm(payload);
 		Assert.assertEquals(
@@ -76,7 +84,7 @@ public class TestResponseParsing {
 	@Test
 	public void testPartialHttpMessage() {
 		HttpResponse response = createOkResponse();
-		byte[] payload = parser.marshalToBytes(response);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(response));
 		
 		byte[] firstPart = new byte[10];
 		byte[] secondPart = new byte[payload.length-firstPart.length];
@@ -106,7 +114,7 @@ public class TestResponseParsing {
 	@Test
 	public void test2AndHalfHttpMessages() {
 		HttpResponse response = createOkResponse();
-		byte[] payload = parser.marshalToBytes(response);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(response));
 		
 		byte[] first = new byte[2*payload.length + 20];
 		byte[] second = new byte[payload.length - 20];
@@ -139,7 +147,7 @@ public class TestResponseParsing {
 	@Test
 	public void testHalfThenTwoHalvesNext() {
 		HttpResponse request = createOkResponse();
-		byte[] payload = parser.marshalToBytes(request);
+		byte[] payload = unwrap(parser.marshalToByteBuffer(request));
 		
 		byte[] first = new byte[20];
 		byte[] second = new byte[payload.length];
