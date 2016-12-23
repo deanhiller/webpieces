@@ -99,25 +99,21 @@ Pieces
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 TODO:
-* add the real CRUD example to project template SINCE we need it anyways as well
+* more fully integrate the http2 stack
+* add file hashes of all app/text file types such that we auto put it in the query params AND on file changes, we auto load new resource avoiding cache(and make sure it works in development mode)
+* perhaps we want more testing around the CRUD examples
 * add optimistic locking test case
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
+* Tab state (rather than just global session, but per tab state to put data)
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
-* write an escapehtml tag
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
-* ask jacoco team about code coverage on generated class file as it appears to not work and then get generated project close to 80% code covered
+* codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
-
-* ALPN is next????
-
-Other longterm TODO:
+* tweak example project close to 80% code covered
+* escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
-* using the webserver and creating examples in the example app (may actually need some tags as well like render as is)
-   * escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
-* tab state
-* http2
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
 
 Examples.....
@@ -144,6 +140,7 @@ __getMessage(args)
 
 DOCUMENTATION Notes:
 
+* Section on links to tests/html files as examples
 * Section on Generator Tags and RuntimeTags and html.tag files
 * Section on object to string and string to object bindings
 * Section on overriding platform
@@ -163,19 +160,14 @@ DOCUMENTATION Notes:
 
 
 Checklist of Release testing (This would be good to automate)
-* ./gradle release # release locally
-*  cd webserver/output/webpiecesServerBuilder
-* ./createProject.sh
-* cd {app directory}
-* ./gradlew test # verify all tests pass as they should because they did when running ./gradlew release(though the environment differs just slightly)
-* ./gradlew assembleDist
-* cd {appname}-prod/output/distributions
-* unzip zip file
-* cd {appname}-prod/bin
-* run {appname}-prod script
-* hit http://localhost:8080 and then click the link
+* ./runAllTesting.sh
+* cd webserver/output/mytest-all/mytest/output/distributions/mytest
+* run ./bin/mytest
+* hit http://localhost:8080 and click around
 
-* import into eclipse or intellij  (2 ways to import into eclipse and 2 ways to import in intellij and all 4 need to be tested :( )
+* import into eclipse or intellij  
+ (There used to be 2 ways to import into eclipse and 2 ways to import in intellij but now instead always just use gradle plugin as generator
+  has some corner case bugs for our gradle configuration)
 * open up project {appname}-dev and go into src/main/java and run the dev server
 * hit the webpage
 * refactor a bunch of code

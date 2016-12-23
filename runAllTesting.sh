@@ -36,5 +36,8 @@ else
   exit $?
 fi
 
+cd mytest/output/distributions
+unzip mytest.zip
+
 #TODO: startup the server in background and run test to grep out success in log files
 
