@@ -11,7 +11,7 @@ A project containing all the web pieces (WITH apis) to create a web server (and 
 
 This project is essentially pieces that can be used to build any http related software and full stacks as well.  
 
-HUGE WINS in using this webserver
+#### Advantages of webpieces
 
 * your project is automatically setup with code coverage (for java and the generated html groovy)
 * built in 'very loose' checkstyle such that developers don't create 70+ line methods or 700+ line files or nasty anti-arrow pattern if statements
@@ -45,10 +45,10 @@ HUGE WINS in using this webserver
 * Security - Form auth token in play1.3.x+  can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it near impossible to miss the auth token AND check that token in forms for the developer(putting it in is automatic in play 1.3 but checking it is not leaving a hole if you don't know and many don't know)
 * State per tab rather than just per session.  All web frameworks have a location to store session state but if you go to buy a plane ticket in 3 different tabs, the three tabs can step on each other.  A location to store information for each tab is needed
 
-Downside:
+#### Downsides
   Currently documentation is lacking but there is an example for pretty much everything in webpieces/webserver/http-webserver/src/test/java/* as we do something called feature testing(testing as user would use the system) for all paths of code.
 
-To try the webserver
+#### Steps to try the webserver
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
@@ -75,20 +75,20 @@ To try the webserver
 9. In a browser go to http://localhost:9000
 10. refactor your code like crazy and hit the website again(no restart needed)
 
-To try modifying/contributing to the actual webserver
+#### To try modifying/contributing to the actual webserver
 
 1. clone webpieces
 2. The automated build runs "./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PexcludeSelenium=true -PexcludeH2Spec=true" as it can't run the selenium tests or H2Spec tests at this time
 3. If you have selenium setup and h2spec, you can just run "./gradlew test" in which parallel=true and configureondemand=true so it's a faster build
 4. debugging with eclipse works better than intellij.  intellij IDE support is better than eclipse(so pick your poison but it works in both)
 
-Some HTTP/2 features
+#### Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
  * Server push - sending responses before requests even come based on the first page requests (pre-emptively send what you know they will need)
  * Data compression of HTTP headers
  * Multiplexing multiple requests over TCP connection
 
-Pieces
+#### Pieces of Webpieces
  * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer including netty!!!)
  * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers together)
  * http/http1_1-parser - An asynchronous http parser that can accept partial payloads (ie. nio payloads don't have full messages).  Can be used with ANY nio library.
@@ -99,7 +99,7 @@ Pieces
  * webserver/http-webserver - a webserver with http 2 support and tons of overriddable pieces via guice
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
-TODO:
+#### TODO:
 * more fully integrate the http2 stack
 * add file hashes of all app/text file types such that we auto put it in the query params AND on file changes, we auto load new resource avoiding cache(and make sure it works in development mode)
 * perhaps we want more testing around the CRUD examples
@@ -117,8 +117,9 @@ TODO:
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
 
-Examples.....
+#### Examples.....
 
+```
 ${user.account.address}$
 *{ comment ${user.account.address}$ is not executed }*
 &{'This is account %1', 'i18nkey', user.account.name}&  // Default text, key, arguments
@@ -126,20 +127,18 @@ ${user.account.address}$
 #{if user}#User does exist#{/if}#{elseif}#User does not exist#{/if}#
 @[ROUTE_ID, user:account.user.name, arg:'flag']@
 @@[ROUTE_ID, user:account.user.name, arg:'flag']@@
+```
 
 The last two are special and can be used between tag tokens and between i18n tokens like so...
- 
+
+``` 
 In an href tag..                                                  #{a href:@[ROUTE, user:user, arg:'flag']@}#Some Link#{/a}# 
 In text..                                                This is some text @[ROUTE, user:user, arg:'flag']@
 In basic i18n tag                    &{'Hi, this link is text %1', 'key1', @[ROUTE, user:user, arg:'flag']@}&
 In i18n tag...    &{'Hi %1, <a href="%2">Some link text</a>', 'key', arg1, @[ROUTE, user:user, arg:'flag']@}&
+```
 
-generates.....
-__getMessage(args)
-
-
-
-DOCUMENTATION Notes:
+#### DOCUMENTATION Notes:
 
 * Section on links to tests/html files as examples
 * Section on Generator Tags and RuntimeTags and html.tag files
@@ -160,7 +159,7 @@ DOCUMENTATION Notes:
 * unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
 
 
-Checklist of Release testing (This would be good to automate)
+#### Checklist of Release testing (This would be good to automate)
 * ./runAllTesting.sh
 * cd webserver/output/mytest-all/mytest/output/distributions/mytest
 * run ./bin/mytest
