@@ -63,7 +63,7 @@ To try the webserver
        'Store information about method parameters'
   * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
        NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
-6. IF Intellij, you will have a bit more pain during development.  The first steps are to
+6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better).  The first steps are to
   * From Welcome screen, choose Import Project
   * Select your folder {yourapp}-all and click ok
   * Choose 'Import project from external model' and choose gradle and click next
