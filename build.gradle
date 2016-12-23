@@ -6,8 +6,10 @@ buildscript {
 
     dependencies {
         classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
         classpath 'gradle.plugin.co.riiid:gradle-github-plugin:0.4.2'
+        //we created a pull request on this but until then, use our customer forked one
+        classpath fileTree(dir: 'gradle/deanslib', includes: ['gradle-nexus-staging-plugin-0.5.4-SNAPSHOT.jar'])
+        //classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
     }
 }
 
@@ -340,7 +342,7 @@ closeRepository.dependsOn('uploadArchives2')
 promoteRepository.dependsOn('closeRepository')
 promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
-  Thread.sleep(25000)
+  Thread.sleep(30000)
   println("done sleeping go promote repo now");
 }
 
