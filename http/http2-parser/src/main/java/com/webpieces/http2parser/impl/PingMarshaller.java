@@ -12,7 +12,7 @@ import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Ping;
 
 public class PingMarshaller extends FrameMarshallerImpl {
-    PingMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+    public PingMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool, dataGen);
     }
 

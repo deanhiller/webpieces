@@ -575,20 +575,20 @@ public class HttpParserImpl implements HttpParser {
 		return response;
 	}
 
-	@Override
-	public HttpPayload unmarshal(byte[] msg) {
-		Memento memento = prepareToParse();
-		DataWrapper dataWrapper = dataGen.wrapByteArray(msg);
-		Memento parsedData = parse(memento, dataWrapper);
-		if(parsedData.getStatus() == ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA)
-			throw new IllegalArgumentException("There is more data than one http message.  Use unmarshalAsync instead");
-		else if(parsedData.getStatus() == ParsedStatus.NEED_MORE_DATA)
-			throw new IllegalArgumentException("This http message is not complete.  Use unmarshalAsynch instead or "
-					+ "fix client code to pass in complete http message(or report a bug if it is this libraries fault)");
-		
-		List<HttpPayload> messages = parsedData.getParsedMessages();
-		if(messages.size() != 1)
-			throw new IllegalArgumentException("You passed in data for more than one http messages.  number of http messages="+messages.size());
-		return messages.get(0);
-	}
+//	@Override
+//	public HttpPayload unmarshal(byte[] msg) {
+//		Memento memento = prepareToParse();
+//		DataWrapper dataWrapper = dataGen.wrapByteArray(msg);
+//		Memento parsedData = parse(memento, dataWrapper);
+//		if(parsedData.getStatus() == ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA)
+//			throw new IllegalArgumentException("There is more data than one http message.  Use unmarshalAsync instead");
+//		else if(parsedData.getStatus() == ParsedStatus.NEED_MORE_DATA)
+//			throw new IllegalArgumentException("This http message is not complete.  Use unmarshalAsynch instead or "
+//					+ "fix client code to pass in complete http message(or report a bug if it is this libraries fault)");
+//		
+//		List<HttpPayload> messages = parsedData.getParsedMessages();
+//		if(messages.size() != 1)
+//			throw new IllegalArgumentException("You passed in data for more than one http messages.  number of http messages="+messages.size());
+//		return messages.get(0);
+//	}
 }

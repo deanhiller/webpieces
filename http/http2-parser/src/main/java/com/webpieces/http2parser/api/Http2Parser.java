@@ -13,6 +13,7 @@ import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
 
 public interface Http2Parser {
+	
     DataWrapper prepareToParse();
 
     Http2Frame unmarshal(DataWrapper data);

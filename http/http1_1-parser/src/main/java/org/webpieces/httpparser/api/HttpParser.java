@@ -34,13 +34,4 @@ public interface HttpParser {
 	 */
     Memento parse(Memento state, DataWrapper moreData);
 	
-	/**
-	 * When you know you have the complete http message, then you can simply
-	 * use this method
-	 * 
-	 * @param msg
-	 * @return
-	 */
-	//TODO: convert api to DataWrapper?
-    HttpPayload unmarshal(byte[] msg);
 }

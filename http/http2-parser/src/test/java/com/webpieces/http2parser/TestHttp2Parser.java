@@ -127,7 +127,23 @@ public class TestHttp2Parser {
         Assert.assertTrue(frames.size() == 4);
     }
 
-
+//    @Test
+//    public void testHigherSplit() {
+//        DataWrapper fullFrames = UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames);
+//        List<? extends DataWrapper> split = dataGen.split(fullFrames, 12);
+//        
+//        DataWrapper old = parser.prepareToParse();
+//        ParserResult result = parser.parse(old, split.get(0), decoder, settings);
+//        Assert.assertFalse(result.hasParsedFrames());
+//        Assert.assertFalse(result.hasMoreData());
+//        
+//        ParserResult nextResult = parser.parse(result.getMoreData(), split.get(1), decoder, settings);
+//        Assert.assertTrue(nextResult.hasParsedFrames());
+//        Assert.assertFalse(nextResult.hasMoreData());
+//        List<Http2Frame> frames = nextResult.getParsedFrames();
+//        Assert.assertTrue(frames.size() == 4);        
+//    }
+    
     @Test
     public void testBasicParseWithPriorData() {
         ParserResult result = parser.parse(
