@@ -24,4 +24,19 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
         DataWrapper dataPayload = castFrame.getPadding().padDataIfNeeded(castFrame.getData());
 		return super.createFrame(frame, value, dataPayload);
 	}
+
+	@Override
+	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+        Http2Data frame = new Http2Data();
+        super.fillInFrameHeader(state, frame);
+        
+        byte flags = state.getFrameHeaderData().getFlagsByte();
+        frame.setEndStream((flags & 0x1) == 0x1);
+        frame.getPadding().setIsPadded((flags & 0x8) == 0x8);
+
+        DataWrapper data = frame.getPadding().extractPayloadAndSetPaddingIfNeeded(framePayloadData, frame.getStreamId());
+        frame.setData(data);
+        
+		return frame;
+	}
 }

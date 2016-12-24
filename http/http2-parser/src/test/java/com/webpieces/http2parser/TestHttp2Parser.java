@@ -15,7 +15,9 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
@@ -62,6 +64,7 @@ public class TestHttp2Parser {
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
+    private static Http2Parser2 parser2 = Http2ParserFactory.createParser2(new BufferCreationPool());
 
     private static LinkedList<HasHeaderFragment.Header> basicRequestHeaders = new LinkedList<>();
     private static LinkedList<HasHeaderFragment.Header> basicResponseHeaders = new LinkedList<>();
@@ -143,6 +146,21 @@ public class TestHttp2Parser {
 //        List<Http2Frame> frames = nextResult.getParsedFrames();
 //        Assert.assertTrue(frames.size() == 4);        
 //    }
+    
+    @Test
+    public void testHigherSplit2() {
+        DataWrapper fullFrames = UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames);
+        List<? extends DataWrapper> split = dataGen.split(fullFrames, 12);
+        
+        Http2Memento state = parser2.prepareToParse(decoder);
+        parser2.parse(state, split.get(0));
+        Assert.assertEquals(0, state.getParsedMessages().size());
+        Assert.assertTrue(state.getLeftOverData().getReadableSize() > 0);
+        
+        parser2.parse(state, split.get(1));
+        Assert.assertEquals(4, state.getParsedMessages().size());
+        Assert.assertFalse(state.getLeftOverData().getReadableSize() > 0);
+    }
     
     @Test
     public void testBasicParseWithPriorData() {

@@ -23,4 +23,16 @@ public class ContinuationMarshaller extends AbstractFrameMarshaller implements F
 		return super.createFrame(frame, value, dataPayload);
 	}
 
+	@Override
+	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+        Http2Continuation frame = new Http2Continuation();
+        super.fillInFrameHeader(state, frame);
+
+        byte flags = state.getFrameHeaderData().getFlagsByte();
+        frame.setEndHeaders((flags & 0x4) == 0x4);
+        frame.setHeaderFragment(framePayloadData);
+        
+        return frame;
+	}
+
 }

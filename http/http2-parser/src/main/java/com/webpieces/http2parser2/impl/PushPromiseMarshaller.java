@@ -1,6 +1,7 @@
 package com.webpieces.http2parser2.impl;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
@@ -33,6 +34,25 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
         DataWrapper payload = castFrame.getPadding().padDataIfNeeded(finalDW);
         
 		return super.createFrame(frame, value, payload);
+	}
+
+	@Override
+	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+        Http2PushPromise frame = new Http2PushPromise();
+		super.fillInFrameHeader(state, frame);
+
+		byte flags = state.getFrameHeaderData().getFlagsByte();
+        frame.setEndHeaders((flags & 0x4) == 0x4);
+        frame.getPadding().setIsPadded((flags & 0x8) == 0x8);
+
+        List<? extends DataWrapper> split = dataGen.split(framePayloadData, 4);
+        ByteBuffer prelude = bufferPool.createWithDataWrapper(split.get(0));
+
+        frame.setPromisedStreamId(prelude.getInt());
+        frame.setHeaderFragment(frame.getPadding().extractPayloadAndSetPaddingIfNeeded(split.get(1), frame.getStreamId()));
+        bufferPool.releaseBuffer(prelude);
+            
+		return frame;
 	}
 
 }

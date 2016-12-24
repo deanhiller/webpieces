@@ -7,6 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2Headers;
 
 public class AbstractFrameMarshaller {
 
@@ -36,4 +37,9 @@ public class AbstractFrameMarshaller {
         DataWrapper frameHeader = dataGen.wrapByteBuffer(header);
         return dataGen.chainDataWrappers(frameHeader, payload);
     }
+
+	public void fillInFrameHeader(Http2MementoImpl state, Http2Frame frame) {
+		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
+		frame.setStreamId(frameHeaderData.getStreamId());
+	}
 }

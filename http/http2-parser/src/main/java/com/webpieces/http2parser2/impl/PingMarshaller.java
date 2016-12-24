@@ -30,4 +30,18 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 		return createFrame(frame, value, dataPayload);
 	}
 
+	@Override
+	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+        Http2Ping frame = new Http2Ping();
+		super.fillInFrameHeader(state, frame);
+		
+		byte flags = state.getFrameHeaderData().getFlagsByte();
+        frame.setIsPingResponse((flags & 0x1) == 0x1);
+
+        ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);
+        frame.setOpaqueData(payloadByteBuffer.getLong());
+        bufferPool.releaseBuffer(payloadByteBuffer);
+        return frame;
+	}
+
 }

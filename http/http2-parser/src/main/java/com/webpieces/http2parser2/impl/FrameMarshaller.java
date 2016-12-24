@@ -7,4 +7,6 @@ import com.webpieces.http2parser.api.dto.Http2Frame;
 public interface FrameMarshaller {
 
 	public DataWrapper marshal(Http2Frame frame);
+
+	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData);
 }

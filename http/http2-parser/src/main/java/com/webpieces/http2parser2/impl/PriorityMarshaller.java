@@ -6,6 +6,8 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
+import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 
@@ -29,6 +31,28 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
         DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
         
 		return super.createFrame(frame, (byte)0, dataPayload);
+	}
+
+	@Override
+	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+        Http2Priority frame = new Http2Priority();
+		super.fillInFrameHeader(state, frame);
+
+        ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);
+
+        int firstInt = payloadByteBuffer.getInt();
+        frame.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
+        int streamDependency = firstInt & 0x7FFFFFFF;
+        if(streamDependency == frame.getStreamId()) {
+            // Can't depend on self
+            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+        }
+        frame.setStreamDependency(streamDependency);
+        frame.setWeight((short) (payloadByteBuffer.get() & 0xFF));
+
+        bufferPool.releaseBuffer(payloadByteBuffer);
+
+        return frame;
 	}
 
 }
