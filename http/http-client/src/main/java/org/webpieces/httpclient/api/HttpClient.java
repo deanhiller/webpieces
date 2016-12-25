@@ -11,10 +11,13 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 public interface HttpClient {
 
 	/*
-	 * This can be used ONLY if 'you' know that the far end does NOT sended a chunked download. 
+	 * This can be used ONLY if 'you' know that the far end does NOT send a chunked download. 
 	 * The reason is in a chunked download, we don't want to blow up your RAM.  Some apis like
-	 * twitters streaming api and we would never ever be done and have a full response.  Others
-	 * are just a very very large download you don't want existing in RAM anyways.
+	 * twitters streaming api would never be done sending chunks and would never have a full
+	 * response.  Others are just a very very large download you don't want existing in RAM anyways.
+	 * 
+	 * For chunked downloads, prefer
+	 *       sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener l);
 	 * 
 	 * @param request
 	 */
