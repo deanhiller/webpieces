@@ -33,13 +33,13 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
                 headersDW);
         DataWrapper payload = castFrame.getPadding().padDataIfNeeded(finalDW);
         
-		return super.createFrame(frame, value, payload);
+		return super.marshalFrame(frame, value, payload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2PushPromise frame = new Http2PushPromise();
-		super.fillInFrameHeader(state, frame);
+		super.unmarshalFrame(state, frame);
 
 		byte flags = state.getFrameHeaderData().getFlagsByte();
         frame.setEndHeaders((flags & 0x4) == 0x4);

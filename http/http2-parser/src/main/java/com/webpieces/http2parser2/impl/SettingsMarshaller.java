@@ -8,6 +8,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 
@@ -42,13 +44,20 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 			dataPayload = dataGen.wrapByteBuffer(payload);
 		}
-		return super.createFrame(frame, flags, dataPayload);
+		return super.marshalFrame(frame, flags, dataPayload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper payload) {
+		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
+		int payloadLength = frameHeaderData.getPayloadLength();
+		int streamId = frameHeaderData.getStreamId();
+        if(payloadLength % 6 != 0) {
+            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+        }
+        
 		Http2Settings frame = new Http2Settings();
-		super.fillInFrameHeader(state, frame);
+		super.unmarshalFrame(state, frame);
 
 		byte flags = state.getFrameHeaderData().getFlagsByte();
 		frame.setAck((flags & 0x1) == 0x1);

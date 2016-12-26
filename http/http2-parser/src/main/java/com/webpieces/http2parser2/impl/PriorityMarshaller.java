@@ -1,5 +1,10 @@
 package com.webpieces.http2parser2.impl;
 
+import static com.webpieces.http2parser.api.dto.Http2FrameType.PING;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.PRIORITY;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.RST_STREAM;
+import static com.webpieces.http2parser.api.dto.Http2FrameType.WINDOW_UPDATE;
+
 import java.nio.ByteBuffer;
 
 import org.webpieces.data.api.BufferPool;
@@ -30,13 +35,19 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 
         DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
         
-		return super.createFrame(frame, (byte)0, dataPayload);
+		return super.marshalFrame(frame, (byte)0, dataPayload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
+		int streamId = frameHeaderData.getStreamId();
+		if(state.getFrameHeaderData().getPayloadLength() > 5)
+			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
+		
         Http2Priority frame = new Http2Priority();
-		super.fillInFrameHeader(state, frame);
+		super.unmarshalFrame(state, frame);
 
         ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);
 

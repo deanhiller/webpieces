@@ -20,13 +20,13 @@ public class ContinuationMarshaller extends AbstractFrameMarshaller implements F
         if (castFrame.isEndHeaders()) value |= 0x4;
         
         DataWrapper dataPayload = castFrame.getHeaderFragment();
-		return super.createFrame(frame, value, dataPayload);
+		return super.marshalFrame(frame, value, dataPayload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2Continuation frame = new Http2Continuation();
-        super.fillInFrameHeader(state, frame);
+        super.unmarshalFrame(state, frame);
 
         byte flags = state.getFrameHeaderData().getFlagsByte();
         frame.setEndHeaders((flags & 0x4) == 0x4);

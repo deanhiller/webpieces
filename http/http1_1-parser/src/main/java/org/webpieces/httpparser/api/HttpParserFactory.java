@@ -6,6 +6,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.httpparser.impl.HttpParserImpl;
 import org.webpieces.httpparser.impl.subparsers.HeaderPriorityParserImpl;
+import org.webpieces.httpparser.impl.subparsers.HttpStatefulParserImpl;
 
 public class HttpParserFactory {
 
@@ -20,6 +21,10 @@ public class HttpParserFactory {
 		//like api depending on implementation, we need reflection here to create this
 		//instance...
 		return new HttpParserImpl(pool);
+	}
+	
+	public static HttpStatefulParser createStatefulParser(HttpParser statelessParser) {
+		return new HttpStatefulParserImpl(statelessParser);
 	}
 	
 	public static HeaderPriorityParser createHeaderParser() {

@@ -30,13 +30,13 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
                 dataGen.wrapByteBuffer(prelude),
                 castFrame.getDebugData()
         );		
-		return super.createFrame(frame, (byte)0, payload);
+		return super.marshalFrame(frame, (byte)0, payload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2GoAway frame = new Http2GoAway();
-        super.fillInFrameHeader(state, frame);
+        super.unmarshalFrame(state, frame);
         
         List<? extends DataWrapper> split = dataGen.split(framePayloadData, 8);
         ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));

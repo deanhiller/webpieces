@@ -45,13 +45,13 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
                 preludeDW,
                 castFrame.getHeaderFragment());
         DataWrapper payload = castFrame.getPadding().padDataIfNeeded(unpadded);        
-        return super.createFrame(frame, value, payload);
+        return super.marshalFrame(frame, value, payload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2Headers frame = new Http2Headers();
-        super.fillInFrameHeader(state, frame);
+        super.unmarshalFrame(state, frame);
 
         byte flagsByte = state.getFrameHeaderData().getFlagsByte();
         frame.setEndStream((flagsByte & 0x1) == 0x1);

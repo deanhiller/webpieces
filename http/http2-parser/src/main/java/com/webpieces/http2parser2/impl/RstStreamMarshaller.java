@@ -6,6 +6,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
+import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
@@ -24,13 +25,19 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		payload.flip();
 
 		DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
-		return super.createFrame(frame, (byte) 0, dataPayload);
+		return super.marshalFrame(frame, (byte) 0, dataPayload);
 	}
 
 	@Override
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
+		int streamId = frameHeaderData.getStreamId();
+		if(state.getFrameHeaderData().getPayloadLength() > 4)
+			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
+		
 		Http2RstStream frame = new Http2RstStream();
-		super.fillInFrameHeader(state, frame);
+		super.unmarshalFrame(state, frame);
 
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);
 		frame.setErrorCode(Http2ErrorCode.fromInteger(payloadByteBuffer.getInt()));

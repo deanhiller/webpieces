@@ -15,7 +15,8 @@ public class Http2MementoImpl implements Http2Memento {
 
 	private ParsingState parsingState = ParsingState.NEED_PARSE_FRAME_HEADER;
 	private Decoder decoder;
-	private Http2SettingsMap http2SettingsMap;
+	private Http2SettingsMap localSettings;
+	private Http2SettingsMap remoteSettings;
 	private DataWrapper leftOverData;
 	private List<Http2Payload> parsedMessages = new ArrayList<>();
 	private Http2ParsedStatus parsedStatus;
@@ -23,7 +24,7 @@ public class Http2MementoImpl implements Http2Memento {
 
 	public Http2MementoImpl(Decoder decoder, Http2SettingsMap http2SettingsMap, DataWrapper emptyWrapper) {
 		this.decoder = decoder;
-		this.http2SettingsMap = http2SettingsMap;
+		this.localSettings = http2SettingsMap;
 		this.leftOverData = emptyWrapper;
 	}
 
