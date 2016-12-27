@@ -152,7 +152,7 @@ public class TestHttp2Parser {
         DataWrapper fullFrames = UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames);
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 12);
         
-        Http2Memento state = parser2.prepareToParse(decoder);
+        Http2Memento state = parser2.prepareToParse();
         parser2.parse(state, split.get(0));
         Assert.assertEquals(0, state.getParsedMessages().size());
         Assert.assertTrue(state.getLeftOverData().getReadableSize() > 0);

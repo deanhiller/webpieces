@@ -11,14 +11,12 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParsedStatus;
 import com.webpieces.http2parser.api.Http2Parser2;
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
-import com.webpieces.http2parser.api.dto.Http2Payload;
+import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 
 public class Http2Parser2Impl implements Http2Parser2 {
 
@@ -41,8 +39,8 @@ public class Http2Parser2Impl implements Http2Parser2 {
 	}
 
 	@Override
-	public Http2Memento prepareToParse(Decoder decoder) {
-		return new Http2MementoImpl(decoder, new Http2SettingsMap(), dataGen.emptyWrapper());
+	public Http2Memento prepareToParse() {
+		return new Http2MementoImpl(dataGen.emptyWrapper());
 	}
 
 	@Override
@@ -77,22 +75,25 @@ public class Http2Parser2Impl implements Http2Parser2 {
     	List<? extends DataWrapper> split = dataGen.split(allData, payloadLen);
     	DataWrapper framePayloadData = split.get(0);
 
-    	Http2Payload parsedPayload;
+    	Http2Frame frame;
 		Optional<Http2FrameType> optFrameType = Http2FrameType.fromId(headerData.getFrameTypeId());
 		if(optFrameType.isPresent()) {
 			Http2FrameType frameType = optFrameType.get();
 			FrameMarshaller marshaller = dtoToMarshaller.get(frameType);
 			if(marshaller == null)
 				throw new IllegalArgumentException("bug, our developer forgot to add marshaller and only added the enum="+frameType);
-			Http2Frame frame = marshaller.unmarshal(state, framePayloadData);
-			parsedPayload = new Http2Payload(false, frame);
+			frame = marshaller.unmarshal(state, framePayloadData);
     	} else {
-    		parsedPayload = new Http2Payload(true, null);
+    		frame = new Http2UnknownFrame(
+    				headerData.getFlagsByte(),
+    				headerData.getFrameTypeId(),
+    				headerData.getStreamId(),
+    				framePayloadData);
     	}
 
     	state.setFrameHeaderData(null); //reset header data
     	state.setLeftOverData(split.get(1)); //set leftover data
-    	state.addParsedPayload(parsedPayload);
+    	state.addParsedFrame(frame);
     	state.setParsingState(ParsingState.NEED_PARSE_FRAME_HEADER);
 
 		return true;

@@ -40,13 +40,31 @@ public class Http2Settings extends Http2Frame {
             }
         }
     }
+    
+	/* flags */
+    private boolean ack = false; /* 0x1 */
+    /* payload */
+
+    // id 16bits
+    // value 32bits
+    private Http2SettingsMap settings = new Http2SettingsMap();
+    
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.SETTINGS;
     }
 
-    /* flags */
-    private boolean ack = false; /* 0x1 */
+    @Override
+	public void setStreamId(int streamId) {
+    	if(streamId == 0)
+    		return; //nothing to do as we are fixed at 0
+    	throw new UnsupportedOperationException("Http2Settings can never be any other stream id except 0 which is already set");
+	}
+
+	@Override
+	public int getStreamId() {
+		return 0;
+	}
 
     public boolean isAck() {
         return ack;
@@ -59,14 +77,6 @@ public class Http2Settings extends Http2Frame {
         if(ack)
             this.settings.clear();
     }
-
-
-
-    /* payload */
-
-    // id 16bits
-    // value 32bits
-    private Http2SettingsMap settings = new Http2SettingsMap();
 
     public void setSetting(Http2Settings.Parameter param, Long value) {
         settings.put(param, value);

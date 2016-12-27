@@ -38,6 +38,9 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() > 8)
 			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+		else if(streamId != 0)
+			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, false);
+
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
         Http2Ping frame = new Http2Ping();

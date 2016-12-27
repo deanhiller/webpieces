@@ -52,9 +52,6 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int payloadLength = frameHeaderData.getPayloadLength();
 		int streamId = frameHeaderData.getStreamId();
-        if(payloadLength % 6 != 0) {
-            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
-        }
         
 		Http2Settings frame = new Http2Settings();
 		super.unmarshalFrame(state, frame);
@@ -62,6 +59,15 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		byte flags = state.getFrameHeaderData().getFlagsByte();
 		frame.setAck((flags & 0x1) == 0x1);
 
+		if(frame.isAck()) {
+	        if(payloadLength != 0) {
+	            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+	        }
+		} else if(payloadLength % 6 != 0) {
+            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+        } else if(streamId != 0)
+            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, false);
+        
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
 		while (payloadByteBuffer.hasRemaining()) {

@@ -5,12 +5,13 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
 
 ./runAllTesting.sh
-if [ $? -eq 0 ]
+test_result=$?
+if [ $test_result -eq 0 ]
 then
   echo "Successfully RAN ALL TESTING $?"
 else
-  echo "TESTING SYSTEM Failed(don't release this) $?"
-  exit $?
+  echo "TESTING SYSTEM Failed(don't release this) $test_result"
+  exit $test_result
 fi
 
 #MUST turn parallel builds off for release or it fails!!!

@@ -8,7 +8,21 @@ public class Http2Ping extends Http2Frame {
 
     /* flags */
     private boolean isPingResponse = false; /* 0x1 */
+    /* payload */
+    private long opaqueData = 0x0;
+    
+    @Override
+	public void setStreamId(int streamId) {
+    	if(streamId == 0)
+    		return; //nothing to do as we are fixed at 0
+    	throw new UnsupportedOperationException("Http2Settings can never be any other stream id except 0 which is already set");
+	}
 
+	@Override
+	public int getStreamId() {
+		return 0;
+	}
+	
     public boolean isPingResponse() {
         return isPingResponse;
     }
@@ -16,9 +30,6 @@ public class Http2Ping extends Http2Frame {
     public void setIsPingResponse(boolean isPingResponse) {
         this.isPingResponse = isPingResponse;
     }
-
-    /* payload */
-    private long opaqueData = 0x0;
 
     public long getOpaqueData() {
         return opaqueData;

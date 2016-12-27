@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.Http2Payload;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public interface Http2Memento {
 
@@ -15,7 +15,7 @@ public interface Http2Memento {
 	 * give you back all the parsed messages so far
 	 * @return
 	 */
-	List<Http2Payload> getParsedMessages();
+	List<Http2Frame> getParsedMessages();
 	
 	/**
 	 * We need a way to reach in to get the leftover data so that the http2 parser can take over from

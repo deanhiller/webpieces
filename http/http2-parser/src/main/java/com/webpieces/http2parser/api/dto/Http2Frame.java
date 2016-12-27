@@ -15,6 +15,8 @@ public abstract class Http2Frame {
     public void setStreamId(int streamId) {
         // Clear the MSB because streamId can only be 31 bits
         this.streamId = streamId & 0x7FFFFFFF;
+        if(this.streamId != streamId) 
+        	throw new RuntimeException("your stream id is too large");
     }
 
     public int getStreamId() {
