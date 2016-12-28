@@ -104,19 +104,12 @@ public interface Channel extends RegisterableChannel {
      */
     public ChannelSession getSession();
    
-    /**
-     * It is important if far end stops reading that we timeout such that you don't wait forever.
-     * 
-     * @param timeout
-     */
-	public void setWriteTimeoutMs(int timeout);
-	
-	public int getWriteTimeoutMs();
-
 	/**
      * It is important if far end stops reading that we only backup writes to a certain point and then
-     * fail so you don't blow your RAM and keep trying to write.  The default will be set to 10 writes.  
-     * 	 
+     * fail so you don't blow your RAM and keep trying to write.  The default will be set to 500_000 bytes.  
+     * 
+     * Something similar to slowloris https://en.wikipedia.org/wiki/Slowloris_(computer_security) but with 
+     * the tweak that one could simply not read responses as the client	 
 	 */
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup);
 	

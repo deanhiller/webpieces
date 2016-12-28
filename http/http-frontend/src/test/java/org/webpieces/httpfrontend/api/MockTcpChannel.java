@@ -110,16 +110,6 @@ class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public void setWriteTimeoutMs(int timeout) {
-		
-	}
-
-	@Override
-	public int getWriteTimeoutMs() {
-		return 0;
-	}
-
-	@Override
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
 	}
 

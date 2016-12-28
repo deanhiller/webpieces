@@ -12,7 +12,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
@@ -20,6 +20,7 @@ import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpproxy.api.ProxyConfig;
@@ -133,7 +134,7 @@ public class Layer4Processor implements RequestListener {
 		}
 	}
 	
-	private class Layer1CloseListener implements CloseListener {
+	private class Layer1CloseListener implements ServerListener {
 		private SocketAddress addr;
 
 		public Layer1CloseListener(SocketAddress addr) {
@@ -145,6 +146,7 @@ public class Layer4Processor implements RequestListener {
 			log.info("socket addr="+addr+" closed, invalidating cache");
 			cache.invalidate(addr);
 		}
+
 	}
 
 	@Override

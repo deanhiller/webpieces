@@ -9,7 +9,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
-import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
@@ -35,7 +35,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
     private CompletableFuture<RequestSender> connectFuture;
     private boolean isClosed;
-    private CloseListener closeListener;
+    private ServerListener closeListener;
     private HttpsSslEngineFactory factory;
     private ChannelManager mgr;
     private String idForLogging;
@@ -49,7 +49,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
         HttpsSslEngineFactory factory,
         HttpParser httpParser,
         Http2Parser http2Parser,
-        CloseListener closeListener,
+        ServerListener closeListener,
         Http2SettingsMap http2SettingsMap)
     {
         this.factory = factory;

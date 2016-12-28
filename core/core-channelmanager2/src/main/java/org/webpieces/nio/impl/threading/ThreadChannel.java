@@ -114,14 +114,6 @@ public class ThreadChannel implements Channel {
 		return tcpChannel.getSession();
 	}
 
-	public void setWriteTimeoutMs(int timeout) {
-		tcpChannel.setWriteTimeoutMs(timeout);
-	}
-
-	public int getWriteTimeoutMs() {
-		return tcpChannel.getWriteTimeoutMs();
-	}
-
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
 		tcpChannel.setMaxBytesWriteBackupSize(maxBytesBackup);
 	}

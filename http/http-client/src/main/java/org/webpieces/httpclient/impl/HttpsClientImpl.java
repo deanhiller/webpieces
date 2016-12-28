@@ -7,7 +7,7 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 
 import org.webpieces.httpclient.api.*;
-import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.util.logging.Logger;
@@ -66,7 +66,7 @@ public class HttpsClientImpl implements HttpClient {
 	}
 
 	@Override
-	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
+	public HttpClientSocket openHttpSocket(String idForLogging, ServerListener listener) {
 		return new HttpClientSocketImpl(mgr, idForLogging, factory, httpParser, http2Parser, listener, http2SettingsMap);
 	}
 

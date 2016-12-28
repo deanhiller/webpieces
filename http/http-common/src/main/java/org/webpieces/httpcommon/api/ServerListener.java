@@ -1,7 +1,7 @@
 package org.webpieces.httpcommon.api;
 
-public interface CloseListener {
+public interface ServerListener {
 
 	void farEndClosed(HttpSocket socket);
-
+	
 }

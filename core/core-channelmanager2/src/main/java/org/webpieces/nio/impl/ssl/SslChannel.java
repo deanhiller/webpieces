@@ -76,14 +76,6 @@ public abstract class SslChannel implements Channel {
 		return channel.getSession();
 	}
 
-	public void setWriteTimeoutMs(int timeout) {
-		channel.setWriteTimeoutMs(timeout);
-	}
-
-	public int getWriteTimeoutMs() {
-		return channel.getWriteTimeoutMs();
-	}
-
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
 		channel.setMaxBytesWriteBackupSize(maxBytesBackup);
 	}

@@ -120,11 +120,11 @@ public class IntegGoogleHttps {
 		}
 	}
 	
-	private class OurCloseListener implements CloseListener {
+	private class OurCloseListener implements ServerListener {
 		@Override
 		public void farEndClosed(HttpSocket socket) {
 			log.info(socket+" far end closed");
 		}
-		
+
 	}
 }

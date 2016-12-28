@@ -25,11 +25,6 @@ public class HttpStatefulParserImpl implements HttpStatefulParser {
 	}
 
 	@Override
-	public String marshalToString(HttpPayload request) {
-		return parser.marshalToString(request);
-	}
-
-	@Override
 	public List<HttpPayload> parse(DataWrapper moreData) {
 		memento = parser.parse(memento, moreData);
 		return memento.getParsedMessages();

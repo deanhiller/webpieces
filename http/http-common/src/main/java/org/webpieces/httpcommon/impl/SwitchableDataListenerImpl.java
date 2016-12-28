@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.SwitchableDataListener;
@@ -22,9 +22,9 @@ public class SwitchableDataListenerImpl implements SwitchableDataListener {
     private Protocol protocol = HTTP11;
     private Map<Protocol, DataListener> dataListenerMap = new HashMap<>();
     private HttpSocket socket;
-    private CloseListener closeListener;
+    private ServerListener closeListener;
 
-    public SwitchableDataListenerImpl(HttpSocket socket, CloseListener closeListener) {
+    public SwitchableDataListenerImpl(HttpSocket socket, ServerListener closeListener) {
         this.socket = socket;
         this.closeListener = closeListener;
     }

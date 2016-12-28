@@ -16,8 +16,9 @@ public class SessionExecutorImpl implements SessionExecutor {
 	private static final Logger log = LoggerFactory.getLogger(SessionExecutorImpl.class);
 	private Executor executor;
 	private Map<Object, List<Runnable>> cachedRunnables = new HashMap<>();
+	private int counter;
+	private boolean runInline = false;
 	private Set<Object> currentlyRunning = new HashSet<>();
-	//private int counter = 0;
 
 	public SessionExecutorImpl(Executor executor) {
 		this.executor = executor;
@@ -32,9 +33,18 @@ public class SessionExecutorImpl implements SessionExecutor {
 			} else {
 				currentlyRunning.add(key);
 			}
+			
+			if(counter >= 10000) //TODO: externalize this setting
+				runInline = true; //switch on running inline for quite a while until threadpool catches up
+			else if(counter <= 500)
+				runInline = false; //switch off running inline as we are pretty much caught up
 		}
-		
-		executor.execute(new RunnableWithKey(key, r));
+
+		if(runInline) {
+			new RunnableWithKey(key, r).run();
+		} else {
+			executor.execute(new RunnableWithKey(key, r));
+		}
 	}
 
 	private void executeNext(Object key) {
@@ -46,15 +56,16 @@ public class SessionExecutorImpl implements SessionExecutor {
 				return;
 			}
 			nextRunnable = list.remove(0);
-//			counter++;
-//			if(counter % 1000 == 0)
-//				log.info("list size="+list.size());
+			counter--;
 			if(list.isEmpty()) {
 				cachedRunnables.remove(key);
 			}
 		}
 		
-		executor.execute(nextRunnable);
+		if(runInline)
+			nextRunnable.run();
+		else
+			executor.execute(nextRunnable);
 	}
 	
 	private class RunnableWithKey implements Runnable {
@@ -85,5 +96,6 @@ public class SessionExecutorImpl implements SessionExecutor {
 			cachedRunnables.put(key, list);
 		}
 		list.add(r);
+		counter++;
 	}
 }

@@ -16,7 +16,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.Http2ClientEngine;
 import org.webpieces.httpcommon.api.Http2EngineFactory;
 import org.webpieces.httpcommon.api.Protocol;
@@ -81,7 +81,7 @@ public class RequestSenderImpl implements RequestSender {
         HttpClientSocket socket,
         HttpParser httpParser,
         Http2Parser http2Parser,
-        CloseListener closeListener,
+        ServerListener closeListener,
         InetSocketAddress addr,
         TCPChannel channel,
         Http2SettingsMap http2SettingsMap

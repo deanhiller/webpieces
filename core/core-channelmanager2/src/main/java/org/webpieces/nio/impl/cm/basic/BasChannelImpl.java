@@ -41,7 +41,6 @@ public abstract class BasChannelImpl
 	private boolean isConnecting = false;
 	private boolean isClosed = false;
 	private boolean doNotAllowWrites;
-	private int writeTimeoutMs = 5_000;
 	private int maxBytesWaitingSize = 500_000; //0.5 megabyte before telling client to backpressure the channel
 	private AtomicBoolean applyingBackpressure = new AtomicBoolean(false);
 	private boolean isRegisterdForReads;
@@ -392,16 +391,6 @@ public abstract class BasChannelImpl
     	return session;
     }
 
-	@Override
-	public void setWriteTimeoutMs(int timeout) {
-		this.writeTimeoutMs = timeout;
-	}
-
-	@Override
-	public int getWriteTimeoutMs() {
-		return writeTimeoutMs;
-	}   
-    
 	@Override
 	public void setMaxBytesWriteBackupSize(int maxQueueSize) {
 		this.maxBytesWaitingSize = maxQueueSize;

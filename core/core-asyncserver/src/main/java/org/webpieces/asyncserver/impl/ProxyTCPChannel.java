@@ -100,16 +100,6 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getSession();
 	}
 
-	@Override
-	public void setWriteTimeoutMs(int timeout) {
-		channel.setWriteTimeoutMs(timeout);
-	}
-
-	@Override
-	public int getWriteTimeoutMs() {
-		return channel.getWriteTimeoutMs();
-	}
-
 	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
 		channel.setMaxBytesWriteBackupSize(maxBytesBackup);
 	}

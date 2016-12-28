@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpclient.api.*;
-import org.webpieces.httpcommon.api.CloseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.util.logging.Logger;
@@ -64,7 +64,7 @@ public class HttpClientImpl implements HttpClient {
 	}
 	
 	@Override
-	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
+	public HttpClientSocket openHttpSocket(String idForLogging, ServerListener listener) {
 		return new HttpClientSocketImpl(mgr, idForLogging, null, httpParser, http2Parser, listener, http2SettingsMap);
 	}
 
