@@ -1,19 +1,17 @@
 package com.webpieces.http2parser2.impl.stateful;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.highlevel.Http2Payload;
+import org.webpieces.javasm.api.Memento;
 
 public class Stream {
 
-	public void addFrame(Http2Frame f) {
+	private Memento currentState;
+
+	public Stream(Memento currentState) {
+		this.currentState = currentState;
 	}
 
-	public boolean isClosed() {
-		return false;
-	}
-
-	public Http2Payload getPayloads() {
-		return null;
+	public Memento getCurrentState() {
+		return currentState;
 	}
 
 }

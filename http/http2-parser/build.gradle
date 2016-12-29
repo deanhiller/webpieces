@@ -1,6 +1,7 @@
 dependencies {
     compile deps['twitter-hpack']
     compile project(':core:core-datawrapper')
+    compile project(':core:core-statemachine')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

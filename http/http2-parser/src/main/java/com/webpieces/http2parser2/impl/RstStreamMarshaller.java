@@ -32,7 +32,7 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
-		if(state.getFrameHeaderData().getPayloadLength() > 4)
+		if(state.getFrameHeaderData().getPayloadLength() == 4)
 			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		

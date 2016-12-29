@@ -118,7 +118,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
         int payloadLength =  getLength(frameHeader);
         int streamId = getStreamId(frameHeader);
         byte frameTypeId = frameHeader.readByteAt(3);
-        byte flagsByte = frameHeader.readByteAt(4);;
+        byte flagsByte = frameHeader.readByteAt(4);
         
         state.setFrameHeaderData(new FrameHeaderData(payloadLength, streamId, frameTypeId, flagsByte));
 		state.setParsingState(ParsingState.NEED_PARSE_BODY);

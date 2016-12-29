@@ -17,7 +17,6 @@ public class SessionExecutorImpl implements SessionExecutor {
 	private Executor executor;
 	private Map<Object, List<Runnable>> cachedRunnables = new HashMap<>();
 	private int counter;
-	private boolean runInline = false;
 	private Set<Object> currentlyRunning = new HashSet<>();
 
 	public SessionExecutorImpl(Executor executor) {
@@ -34,17 +33,11 @@ public class SessionExecutorImpl implements SessionExecutor {
 				currentlyRunning.add(key);
 			}
 			
-			if(counter >= 10000) //TODO: externalize this setting
-				runInline = true; //switch on running inline for quite a while until threadpool catches up
-			else if(counter <= 500)
-				runInline = false; //switch off running inline as we are pretty much caught up
+			if(counter >= 10000)
+				log.warn("Session executor is falling behind on incoming data, possibly add back pressure", new RuntimeException());
 		}
 
-		if(runInline) {
-			new RunnableWithKey(key, r).run();
-		} else {
-			executor.execute(new RunnableWithKey(key, r));
-		}
+		executor.execute(new RunnableWithKey(key, r));
 	}
 
 	private void executeNext(Object key) {
@@ -62,10 +55,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 			}
 		}
 		
-		if(runInline)
-			nextRunnable.run();
-		else
-			executor.execute(nextRunnable);
+		executor.execute(nextRunnable);
 	}
 	
 	private class RunnableWithKey implements Runnable {

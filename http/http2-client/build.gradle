@@ -1,0 +1,9 @@
+dependencies {
+    compile project(':core:core-channelmanager2') 
+    compile project(':http:http2-parser')
+    compile project(':core:core-statemachine')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Strictly an http/2 client for when you know the server does http2 keeping it KISS'
+}
