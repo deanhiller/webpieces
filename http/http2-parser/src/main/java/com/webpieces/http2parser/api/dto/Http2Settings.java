@@ -1,7 +1,7 @@
 package com.webpieces.http2parser.api.dto;
 
+import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.highlevel.Http2Payload;
 
 public class Http2Settings extends AbstractHttp2Frame {
     public enum Parameter {

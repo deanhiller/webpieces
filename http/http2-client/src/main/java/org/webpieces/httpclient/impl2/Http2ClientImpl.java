@@ -7,8 +7,8 @@ import org.webpieces.httpclient.api.Http2Socket;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPChannel;
 
+import com.webpieces.http2engine.api.Http2HighLevelFactory;
 import com.webpieces.http2parser.api.Http2Parser2;
-import com.webpieces.http2parser.api.highlevel.Http2HighLevelFactory;
 
 public class Http2ClientImpl implements Http2Client {
 

@@ -12,9 +12,9 @@ import org.webpieces.httpclient.api.dto.Http2Request;
 import org.webpieces.httpclient.api.dto.Http2Response;
 import org.webpieces.nio.api.channels.TCPChannel;
 
+import com.webpieces.http2engine.api.Http2HighLevelFactory;
+import com.webpieces.http2engine.api.Http2StatefulParser;
 import com.webpieces.http2parser.api.Http2Parser2;
-import com.webpieces.http2parser.api.highlevel.Http2HighLevelFactory;
-import com.webpieces.http2parser.api.highlevel.Http2StatefulParser;
 
 public class Http2SocketImpl implements Http2Socket {
 

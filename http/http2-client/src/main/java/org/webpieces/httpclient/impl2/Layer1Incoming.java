@@ -14,9 +14,9 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.Http2FullHeaders;
+import com.webpieces.http2engine.api.Http2StatefulParser;
 import com.webpieces.http2parser.api.dto.Http2Data;
-import com.webpieces.http2parser.api.highlevel.Http2FullHeaders;
-import com.webpieces.http2parser.api.highlevel.Http2StatefulParser;
 
 public class Layer1Incoming implements DataListener {
 

@@ -3,11 +3,11 @@ package com.webpieces.http2parser.api;
 
 import org.webpieces.data.api.BufferPool;
 
-import com.webpieces.http2parser.api.highlevel.Http2StatefulParser;
-import com.webpieces.http2parser.api.highlevel.ResultListener;
+import com.webpieces.http2engine.api.Http2StatefulParser;
+import com.webpieces.http2engine.api.ResultListener;
+import com.webpieces.http2engine.impl.Level0ConnectionParser;
 import com.webpieces.http2parser.impl.Http2ParserImpl;
 import com.webpieces.http2parser2.impl.Http2Parser2Impl;
-import com.webpieces.http2parser2.impl.stateful.Level0ConnectionParser;
 
 public class Http2ParserFactory {
 	
