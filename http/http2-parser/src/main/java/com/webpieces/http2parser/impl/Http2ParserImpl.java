@@ -28,6 +28,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2engine.impl.HeaderSettings;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
@@ -46,8 +47,10 @@ import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Http2ParserImpl implements Http2Parser {
@@ -238,7 +241,7 @@ public class Http2ParserImpl implements Http2Parser {
 
 
     @Override
-    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Http2SettingsMap settings) {
+    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings) {
         DataWrapper wrapperToParse;
         List<AbstractHttp2Frame> frames = new LinkedList<>();
         List<AbstractHttp2Frame> hasHeaderFragmentList = new LinkedList<>();
@@ -266,7 +269,9 @@ public class Http2ParserImpl implements Http2Parser {
                 maybeFrameType.ifPresent(frameType -> {
                     Integer fixedLengthForType = fixedFrameLengthByType.get(frameType);
 
-                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) ||
+                    long maxFrame = fetchMaxFrameSize(settings);
+                    
+                    if(payloadLength > maxFrame ||
                             (fixedLengthForType != null && payloadLength != fixedLengthForType) ||
                             (frameType == SETTINGS && payloadLength % 6 != 0)) {
                         boolean isConnectionLevel = connectionLevelFrames.contains(frameType) || streamId == 0x0;
@@ -330,6 +335,16 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
+	private long fetchMaxFrameSize(List<Http2Setting> settings) {
+		for(Http2Setting s : settings) {
+			if(s.getKnownName() == SettingsParameter.SETTINGS_MAX_FRAME_SIZE)
+				return s.getValue();
+		}
+		
+		//otherwise return default
+		return HeaderSettings.DEFAULT.getMaxFrameSize();
+	}
+
 	private void doSomething(Decoder decoder, List<AbstractHttp2Frame> frames, List<AbstractHttp2Frame> hasHeaderFragmentList) {
 		// Now we set the full header list on the first frame and just return that
 		AbstractHttp2Frame firstFrame = hasHeaderFragmentList.get(0);
@@ -391,7 +406,7 @@ public class Http2ParserImpl implements Http2Parser {
         List<AbstractHttp2Frame> headerFrames = new LinkedList<>();
 
         DataWrapper serializedHeaders = serializeHeaders(headers, encoder, out);
-        long maxFrameSize = remoteSettings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
+        long maxFrameSize = remoteSettings.get(SettingsParameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
         boolean firstFrame = true;
         boolean lastFrame = false;
         DataWrapper fragment;

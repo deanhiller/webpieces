@@ -34,7 +34,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 
 public class TestEndToEnd {
   private int serverPort;
@@ -57,7 +57,7 @@ public class TestEndToEnd {
   public void setUp() {
     serverPort = ServerFactory.createTestServer(false, 100L);
     basicClientSettings = new Http2SettingsMap();
-    basicClientSettings.put(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
+    basicClientSettings.put(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 100L);
   }
 
   @Test
@@ -143,7 +143,7 @@ public class TestEndToEnd {
   @Test
   public void testRequestWithWindowSizeOne() throws InterruptedException, ExecutionException {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
-    http2SettingsMap.put(Http2Settings.Parameter.SETTINGS_INITIAL_WINDOW_SIZE, 1L);
+    http2SettingsMap.put(SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE, 1L);
 
     HttpClient client = createHttpClient(http2SettingsMap);
     HttpClientSocket socket = client.openHttpSocket("testClient");
@@ -241,7 +241,7 @@ been processed we wait 500ms for the settings frame to be processed.
   @Test
   public void testRequestNoPush() throws InterruptedException, ExecutionException  {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
-    http2SettingsMap.put(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 0L);
+    http2SettingsMap.put(SettingsParameter.SETTINGS_ENABLE_PUSH, 0L);
 
     HttpClient client = createHttpClient(http2SettingsMap);
     HttpClientSocket socket = client.openHttpSocket("testClient");
@@ -262,7 +262,7 @@ been processed we wait 500ms for the settings frame to be processed.
   @Test
   public void testRequestOneStream() throws InterruptedException, ExecutionException  {
     Http2SettingsMap http2SettingsMap = new Http2SettingsMap();
-    http2SettingsMap.put(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 0L);
+    http2SettingsMap.put(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 0L);
 
     HttpClient client = createHttpClient(http2SettingsMap);
     HttpClientSocket socket = client.openHttpSocket("testClient");

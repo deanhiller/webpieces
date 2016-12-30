@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.webpieces.data.api.BufferCreationPool;
@@ -13,10 +14,10 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.Http2Setting;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 
 public class ParseFramesFromFile {
     public static void main(String[] args) throws Exception {
@@ -27,9 +28,9 @@ public class ParseFramesFromFile {
         Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
         DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
         Decoder decoder = new Decoder(4096, 4096);
-        Http2SettingsMap settings = new Http2SettingsMap();
+        List<Http2Setting> settings = new ArrayList<>();
 
-        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
+        settings.add(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 16384L));
 
         while (inChannel.read(buf) != -1) {
             buf.flip();

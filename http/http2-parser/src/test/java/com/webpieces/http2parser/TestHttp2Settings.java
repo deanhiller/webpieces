@@ -1,11 +1,15 @@
 package com.webpieces.http2parser;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 
 public class TestHttp2Settings {
     static private String basicSettings =
@@ -25,8 +29,8 @@ public class TestHttp2Settings {
     @Test
     public void testCreateSettings() {
         Http2Settings frame = new Http2Settings();
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1L);
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L);
+        frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, 1L));
+        frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L));
         String hexFrame = UtilsForTest.frameToHex(frame);
 
         // We can't test bidi for settings frames because the order in which
@@ -36,12 +40,17 @@ public class TestHttp2Settings {
         AbstractHttp2Frame parsedFrame = UtilsForTest.frameFromHex(hexFrame);
         Assert.assertTrue(Http2Settings.class.isInstance(frame));
         Http2Settings castFrame = (Http2Settings) parsedFrame;
-        Assert.assertEquals(1L, castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH).longValue());
-        Assert.assertEquals(256L, castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS).longValue());
-        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE));
-        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_INITIAL_WINDOW_SIZE));
-        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE));
-        Assert.assertNull(castFrame.getSettings().get(Http2Settings.Parameter.SETTINGS_MAX_HEADER_LIST_SIZE));
+        
+        List<Http2Setting> settings = castFrame.getSettings();
+        Assert.assertEquals(2, settings.size());
+        
+        Http2Setting setting1 = settings.get(0);
+        Assert.assertEquals(SettingsParameter.SETTINGS_ENABLE_PUSH, setting1.getKnownName());
+        Assert.assertEquals(1L, setting1.getValue());
+        
+        Http2Setting setting2 = settings.get(1);
+        Assert.assertEquals(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, setting2.getKnownName());
+        Assert.assertEquals(256L, setting2.getValue());        
     }
 
     @Test
@@ -50,10 +59,16 @@ public class TestHttp2Settings {
         Assert.assertTrue(Http2Settings.class.isInstance(frame));
 
         Http2Settings castFrame = (Http2Settings) frame;
-        Http2SettingsMap settings = castFrame.getSettings();
-        Assert.assertEquals(settings.get(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH).longValue(), 1);
-        Assert.assertEquals(settings.get(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS).longValue(), 256);
-        Assert.assertFalse(settings.containsKey(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE));
+        List<Http2Setting> settings = castFrame.getSettings();
+        Assert.assertEquals(2, settings.size());
+        
+        Http2Setting setting1 = settings.get(0);
+        Assert.assertEquals(SettingsParameter.SETTINGS_ENABLE_PUSH, setting1.getKnownName());
+        Assert.assertEquals(1L, setting1.getValue());
+        
+        Http2Setting setting2 = settings.get(1);
+        Assert.assertEquals(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, setting2.getKnownName());
+        Assert.assertEquals(256L, setting2.getValue());   
     }
 
     @Test
@@ -69,12 +84,9 @@ public class TestHttp2Settings {
     public void testCreateAck() {
         Http2Settings frame = new Http2Settings();
         frame.setAck(true);
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_ENABLE_PUSH, 1L);
-        frame.setSetting(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L);
-
-        // If it's an ack there's no settings, even if we set them
-        Assert.assertEquals(frame.getSettings().size(), 0);
-
+        frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, 1L));
+        frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L));
+        
         String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(ackFrame));
 

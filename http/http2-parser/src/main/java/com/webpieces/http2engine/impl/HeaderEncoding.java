@@ -19,20 +19,22 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 public class HeaderEncoding {
     private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Encoder encoder;
+	private int maxFrameSize;
 
-    public HeaderEncoding(Encoder encoder) {
-		this.encoder = encoder;
+    public HeaderEncoding(int maxHeaderTableSize, int maxFrameSize) {
+		encoder = new Encoder(maxHeaderTableSize);
+		this.maxFrameSize = maxFrameSize;
     }
     
-    public List<Http2Frame> createPushPromises(List<Http2Header> headers, int streamId, int promisedStreamId, long maxFrameSize) {
+    public List<Http2Frame> createPushPromises(List<Http2Header> headers, int streamId, int promisedStreamId) {
     	Http2PushPromise promise = new Http2PushPromise();
     	promise.setStreamId(streamId);
     	promise.setPromisedStreamId(promisedStreamId);
     	
-    	return createHeaderFrames(promise, headers, maxFrameSize);
+    	return createHeaderFrames(promise, headers);
     }
     
-    public List<Http2Frame> createHeaderFrames(HasHeaderFragment initialFrame, List<Http2Header> headers, long maxFrameSize) {
+    public List<Http2Frame> createHeaderFrames(HasHeaderFragment initialFrame, List<Http2Header> headers) {
         List<Http2Frame> headerFrames = new LinkedList<>();
     	
         DataWrapper serializedHeaders = serializeHeaders(headers);
@@ -40,7 +42,7 @@ public class HeaderEncoding {
         HasHeaderFragment currentFrame = initialFrame;
         DataWrapper dataLeftOver = serializedHeaders;
         while(dataLeftOver.getReadableSize() > 0) {
-            List<? extends DataWrapper> split = dataGen.split(dataLeftOver, (int) maxFrameSize);
+            List<? extends DataWrapper> split = dataGen.split(dataLeftOver, maxFrameSize);
             DataWrapper fragment = split.get(0);
             
             currentFrame.setHeaderFragment(fragment);
@@ -72,4 +74,17 @@ public class HeaderEncoding {
         }
         return dataGen.wrapByteArray(out.toByteArray());
     }
+
+	public void setMaxHeaderTableSize(int value) {
+		try {
+			ByteArrayOutputStream str = new ByteArrayOutputStream();
+			encoder.setMaxHeaderTableSize(str, value);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void setMaxFrameSize(int value) {
+		this.maxFrameSize = value;
+	}
 }

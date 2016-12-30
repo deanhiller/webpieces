@@ -14,7 +14,6 @@ import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
-import com.webpieces.http2engine.api.Http2TrailingHeaders;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
@@ -31,33 +30,32 @@ public class Layer5Outgoing implements ResultListener {
 	}
 
 	@Override
-	public void incomingPayload(Http2Payload frame) {
+	public void incomingPayload(Http2Payload frame, boolean isTrailingHeaders) {
 		if(frame.getStreamId() == 0)
 			throw new IllegalArgumentException("control frames should not come up this far. type="+frame.getClass());
 		else if(frame.getStreamId() % 2 == 0) {
 			throw new UnsupportedOperationException("Server push frames not supported yet");
 		}
 		
-		incomingClientResponse(frame);
+		incomingClientResponse(frame, isTrailingHeaders);
 	}
 
-	private void incomingClientResponse(Http2Payload frame) {
+	private void incomingClientResponse(Http2Payload frame, boolean isTrailingHeaders) {
 		Http2ResponseListener listener = streamIdToListener.get(frame.getStreamId());
 		if(listener == null)
 			throw new IllegalStateException("missing listener for stream id="+frame.getStreamId());
 		else if(frame instanceof Http2FullHeaders) {
 			Http2FullHeaders head = (Http2FullHeaders) frame;
 			Http2Headers headers = new Http2Headers(head.getHeaderList());
-			listener.incomingResponse(headers);
+			if(!isTrailingHeaders)
+				listener.incomingResponse(headers, head.isEndStream());
+			else
+				listener.incomingEndHeaders(headers, head.isEndStream());
 		} else if(frame instanceof Http2Data) {
 			Http2Data data = (Http2Data) frame;
-			listener.incomingData(data.getData());
-		} else if(frame instanceof Http2TrailingHeaders) {
-			Http2TrailingHeaders head = (Http2TrailingHeaders) frame;
-			Http2Headers headers = new Http2Headers(head.getHeaderList());
-			listener.incomingResponse(headers);			
+			listener.incomingData(data.getData(), data.isEndStream());
 		} else if(frame instanceof Http2UnknownFrame) {
-			listener.incomingUnknownFrame((Http2UnknownFrame) frame);
+			listener.incomingUnknownFrame((Http2UnknownFrame) frame, frame.isEndStream());
 		} else
 			throw new IllegalArgumentException("client was not expecting frame type="+frame.getClass());
 	}

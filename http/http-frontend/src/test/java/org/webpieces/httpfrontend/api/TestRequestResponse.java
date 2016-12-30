@@ -37,7 +37,9 @@ import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 
 public class TestRequestResponse {
 
@@ -46,7 +48,7 @@ public class TestRequestResponse {
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private Http2Settings settingsFrame = new Http2Settings();
     private Decoder decoder;
-    private Http2SettingsMap settings = new Http2SettingsMap();
+    private List<Http2Setting> settings = new ArrayList<>();
     private static String blahblah = "blah blah blah";
 
     @Before
@@ -56,7 +58,7 @@ public class TestRequestResponse {
         httpParser = HttpParserFactory.createParser(pool);
         http2Parser = Http2ParserFactory.createParser(pool);
         decoder = new Decoder(4096, 4096);
-        settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, 16384L);
+        settings.add(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 16384L));
         settingsFrame.setSettings(settings);
     }
 

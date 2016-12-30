@@ -1,18 +1,19 @@
 package com.webpieces.http2parser2.impl;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
+import java.util.List;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 
 public class SettingsMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
@@ -33,13 +34,12 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 			// If ack or empty settings
 			dataPayload = dataGen.emptyWrapper();
 		} else {
-			Http2SettingsMap settings = castFrame.getSettings();
+			List<Http2Setting> settings = castFrame.getSettings();
 			ByteBuffer payload = bufferPool.nextBuffer(6 * settings.size());
 
-			for (Map.Entry<Http2Settings.Parameter, Long> setting : settings.entrySet()) {
-				short id = setting.getKey().getId();
-				Long value = setting.getValue();
-				payload.putShort(id).putInt(value.intValue());
+			for (Http2Setting setting : settings) {
+				UnsignedData.putUnsignedShort(payload, setting.getId());
+				UnsignedData.putUnsignedInt(payload, setting.getValue());
 			}
 			payload.flip();
 
@@ -72,12 +72,57 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
 		while (payloadByteBuffer.hasRemaining()) {
-			frame.setSetting(Http2Settings.Parameter.fromId(payloadByteBuffer.getShort()),
-					payloadByteBuffer.getInt() & 0xFFFFFFFFL);
+			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
+			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
+			SettingsParameter key = SettingsParameter.lookup(id);
+			frame.addSetting(new Http2Setting(id, value));
+			validate(key, value);
 		}
 
 		bufferPool.releaseBuffer(payloadByteBuffer);
 
 		return frame;
+	}
+
+	private void validate(SettingsParameter key, long value) {
+		if(key == null)
+			return; //unknown setting
+		
+		switch(key) {
+			case SETTINGS_ENABLE_PUSH:
+				if(value != 0 && value != 1)
+					throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+				break;
+			case SETTINGS_INITIAL_WINDOW_SIZE:
+				validateWindowSize(value);
+				break;
+			case SETTINGS_MAX_FRAME_SIZE:
+				validateMaxFrameSize(value);
+				break;
+			case SETTINGS_HEADER_TABLE_SIZE:
+			case SETTINGS_MAX_CONCURRENT_STREAMS:
+			case SETTINGS_MAX_HEADER_LIST_SIZE:
+				break;
+			default:
+				throw new IllegalArgumentException("case statement missing new setting="+key+" with value="+value);
+		}
+	}
+
+	private void validateWindowSize(long value) {
+        // 2^31 - 1 - max flow control window
+		int min = 0;
+		int max = 2147483647;
+		
+		if(value < min || value > max)
+			throw new ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR);
+	}
+	
+	private void validateMaxFrameSize(long value) {
+        // frame size must be between 16384 and 2^24 - 1
+		int min = 16384;
+		int max = 1677215;
+		
+		if(value < min || value > max)
+			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 	}
 }

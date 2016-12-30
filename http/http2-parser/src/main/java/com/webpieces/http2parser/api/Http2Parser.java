@@ -10,6 +10,7 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
+import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public interface Http2Parser {
@@ -26,7 +27,7 @@ public interface Http2Parser {
     // TODO: add a marshal to bytebuffer so we can use our bufferpool
     int getFrameLength(AbstractHttp2Frame frame);
 
-    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Http2SettingsMap settings);
+    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
 
     DataWrapper serializeHeaders(LinkedList<Http2Header> headers, Encoder encoder, ByteArrayOutputStream out);
     List<AbstractHttp2Frame> createHeaderFrames(LinkedList<Http2Header> headers,

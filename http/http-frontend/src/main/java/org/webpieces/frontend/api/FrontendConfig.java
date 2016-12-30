@@ -7,7 +7,7 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 
 public class FrontendConfig {
 
@@ -63,10 +63,10 @@ public class FrontendConfig {
 
 	public Http2SettingsMap getHttp2Settings() {
 		Http2SettingsMap settings = new Http2SettingsMap();
-		settings.put(Http2Settings.Parameter.SETTINGS_MAX_HEADER_LIST_SIZE, (long) maxHeaderSize);
-		settings.put(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE, (long) maxBodyOrChunkSize);
-		maxConcurrentStreams.ifPresent(v -> settings.put(Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS, v));
-		initialWindowSize.ifPresent(v -> settings.put(Http2Settings.Parameter.SETTINGS_INITIAL_WINDOW_SIZE, v));
+		settings.put(SettingsParameter.SETTINGS_MAX_HEADER_LIST_SIZE, (long) maxHeaderSize);
+		settings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, (long) maxBodyOrChunkSize);
+		maxConcurrentStreams.ifPresent(v -> settings.put(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, v));
+		initialWindowSize.ifPresent(v -> settings.put(SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE, v));
 		return settings;
 	}
 

@@ -32,7 +32,7 @@ public class Layer1Incoming implements DataListener {
 	}
 
 	public CompletableFuture<Void> sendInitialFrames() {
-		return layer2.sendInitialization();
+		return layer2.sendInitializationToSocket();
 	}
 	
 	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener,
@@ -51,7 +51,7 @@ public class Layer1Incoming implements DataListener {
 		fullHeaders.setHeaderList(request.getHeaders());
 		fullHeaders.setStreamId(streamId);
 		fullHeaders.setEndStream(isComplete);
-		return layer2.sendFrameOut(fullHeaders)
+		return layer2.sendFrameToSocket(fullHeaders)
 					.thenApply(c -> writer);
 	}
 	
@@ -85,7 +85,7 @@ public class Layer1Incoming implements DataListener {
 			data.setStreamId(streamId);
 			data.setEndStream(isComplete);
 			data.setData(payload);
-			return layer2.sendFrameOut(data).thenApply(c -> this);
+			return layer2.sendFrameToSocket(data).thenApply(c -> this);
 		}
 
 		@Override
@@ -93,7 +93,7 @@ public class Layer1Incoming implements DataListener {
 			Http2FullHeaders headers = new Http2FullHeaders();
 			headers.setStreamId(streamId);
 			headers.setHeaderList(endHeaders.getHeaders());
-			return layer2.sendFrameOut(headers).thenApply(c -> this);
+			return layer2.sendFrameToSocket(headers).thenApply(c -> this);
 		}
 	}
 	

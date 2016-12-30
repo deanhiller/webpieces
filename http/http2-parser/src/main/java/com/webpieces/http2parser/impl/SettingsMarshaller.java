@@ -1,16 +1,18 @@
 package com.webpieces.http2parser.impl;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
+import com.webpieces.http2parser2.impl.UnsignedData;
 
 public class SettingsMarshaller extends FrameMarshallerImpl {
 
@@ -26,14 +28,13 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
             // If ack or empty settings
             return dataGen.emptyWrapper();
         } else {
-            Http2SettingsMap settings = castFrame.getSettings();
+        	List<Http2Setting> settings = castFrame.getSettings();
             ByteBuffer payload = bufferPool.nextBuffer(6 * settings.size());
 
-            for (Map.Entry<Http2Settings.Parameter, Long> setting : settings.entrySet()) {
-                short id = setting.getKey().getId();
-                Long value = setting.getValue();
-                payload.putShort(id).putInt(value.intValue());
-            }
+			for (Http2Setting setting : settings) {
+				UnsignedData.putUnsignedShort(payload, setting.getId());
+				UnsignedData.putUnsignedInt(payload, setting.getValue());
+			}
             payload.flip();
 
             return dataGen.wrapByteBuffer(payload);
@@ -58,12 +59,13 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         maybePayload.ifPresent(payload -> {
             ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
-            while (payloadByteBuffer.hasRemaining()) {
-                castFrame.setSetting(
-                        Http2Settings.Parameter.fromId(payloadByteBuffer.getShort()),
-                        payloadByteBuffer.getInt() & 0xFFFFFFFFL);
-            }
-
+    		while (payloadByteBuffer.hasRemaining()) {
+    			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
+    			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
+    			SettingsParameter key = SettingsParameter.lookup(id);
+    			castFrame.addSetting(new Http2Setting(id, value));
+    		}
+    		
             bufferPool.releaseBuffer(payloadByteBuffer);
         });
     }

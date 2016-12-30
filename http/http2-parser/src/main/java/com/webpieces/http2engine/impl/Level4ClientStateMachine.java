@@ -8,17 +8,19 @@ import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 
+import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.Http2PushPromise;
 
-public class Level2ClientStateMachine {
+public class Level4ClientStateMachine {
 
 	private StateMachine stateMachine;
 	private State idleState;
-	private Level3FlowControl flowControl;
+	private Level5FlowControl flowControl;
 	
-	public Level2ClientStateMachine(String id, Level3FlowControl flowControl) {
+	public Level4ClientStateMachine(String id, Level5FlowControl flowControl) {
 		this.flowControl = flowControl;
 		StateMachineFactory factory = StateMachineFactory.createFactory();
 		stateMachine = factory.createStateMachine(id);
@@ -64,7 +66,7 @@ public class Level2ClientStateMachine {
 		}
 	}
 	
-	public CompletableFuture<Void> fireSendingFrame(Memento currentState, Http2Payload payload) {
+	public CompletableFuture<Void> fireToSocket(Memento currentState, Http2Payload payload) {
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.SEND, payloadType);
 
@@ -75,25 +77,29 @@ public class Level2ClientStateMachine {
 			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));
 		
 		//if no exceptions occurred, send it on to flow control layer
-		return flowControl.sendFrame(payload);
+		return flowControl.sendPayloadToSocket(payload);
 	}
 	
-	private Http2PayloadType translate(Http2Payload payload) {
-		return null;
-	}
-
-
-
-
 	public Memento createStateMachine(String streamId) {
 		return stateMachine.createMementoFromState("stream"+streamId, idleState);
 	}
-
-	public void fireReceivedFrame(Http2Payload frame) {
+	
+	private Http2PayloadType translate(Http2Payload payload) {
+		if(payload instanceof Http2FullHeaders) {
+			return Http2PayloadType.HEADERS;
+		} else if(payload instanceof Http2Data) {
+			return Http2PayloadType.DATA;
+		} else if(payload instanceof Http2PushPromise) {
+			return Http2PayloadType.PUSH_PROMISE;
+		} else
+			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}
 
-	public void fireControlFrame(Http2Frame lowLevelFrame) {
-		flowControl.fireControlFrame(lowLevelFrame);
+	public void fireToClient(Http2Payload payload) {
+		
 	}
+
+
+
 
 }

@@ -2,10 +2,10 @@ package org.webpieces.httpcommon.impl;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_ENABLE_PUSH;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_HEADER_TABLE_SIZE;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_INITIAL_WINDOW_SIZE;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE;
+import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_ENABLE_PUSH;
+import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_HEADER_TABLE_SIZE;
+import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE;
+import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_MAX_FRAME_SIZE;
 import static java.lang.Math.min;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
@@ -76,6 +76,7 @@ import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public abstract class Http2EngineImpl implements Http2Engine {
@@ -190,38 +191,40 @@ public abstract class Http2EngineImpl implements Http2Engine {
     public void sendLocalRequestedSettings() {
         Http2Settings settingsFrame = new Http2Settings();
 
-        settingsFrame.setSettings(localRequestedSettings);
+        localRequestedSettings.fillFrame(settingsFrame);
         log.info("sending settings: " + settingsFrame);
         channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
     }
 
     void setRemoteSettings(Http2Settings frame, boolean sendAck) {
+    	
+    	Http2SettingsMap setMap = new Http2SettingsMap(frame.getSettings());
         // We've received a settings. Check for legit-ness.
-        if(frame.getSettings().get(SETTINGS_ENABLE_PUSH) != null && (
-                frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 0 && frame.getSettings().get(SETTINGS_ENABLE_PUSH) != 1))
+        if(setMap.get(SETTINGS_ENABLE_PUSH) != null && (
+                setMap.get(SETTINGS_ENABLE_PUSH) != 0 && setMap.get(SETTINGS_ENABLE_PUSH) != 1))
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
 
         // 2^31 - 1 - max flow control window
-        if(frame.getSettings().get(SETTINGS_INITIAL_WINDOW_SIZE) != null &&
-                frame.getSettings().get(SETTINGS_INITIAL_WINDOW_SIZE) > 2147483647)
+        if(setMap.get(SETTINGS_INITIAL_WINDOW_SIZE) != null &&
+                setMap.get(SETTINGS_INITIAL_WINDOW_SIZE) > 2147483647)
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.FLOW_CONTROL_ERROR, wrapperGen.emptyWrapper());
 
         // frame size must be between 16384 and 2^24 - 1
-        if(frame.getSettings().get(SETTINGS_MAX_FRAME_SIZE) != null && (
-                frame.getSettings().get(SETTINGS_MAX_FRAME_SIZE) < 16384 || frame.getSettings().get(SETTINGS_MAX_FRAME_SIZE) > 1677215))
+        if(setMap.get(SETTINGS_MAX_FRAME_SIZE) != null && (
+                setMap.get(SETTINGS_MAX_FRAME_SIZE) < 16384 || setMap.get(SETTINGS_MAX_FRAME_SIZE) > 1677215))
             throw new GoAwayError(lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, wrapperGen.emptyWrapper());
 
         // Update remoteSettings
-        log.info("Setting remote settings to: " + frame.getSettings());
+        log.info("Setting remote settings to: " + setMap);
         gotSettings.set(true);
         settingsLatch.countDown();
 
-        for(Map.Entry<Http2Settings.Parameter, Long> entry: frame.getSettings().entrySet()) {
+        for(Map.Entry<SettingsParameter, Long> entry: setMap.entrySet()) {
             remoteSettings.put(entry.getKey(), entry.getValue());
         }
 
         // What do we do when certain settings are updated
-        if(frame.getSettings().containsKey(SETTINGS_HEADER_TABLE_SIZE)) {
+        if(setMap.containsKey(SETTINGS_HEADER_TABLE_SIZE)) {
             maxHeaderTableSizeNeedsUpdate.set(true);
             class UpdateMinimum implements IntUnaryOperator {
                 int newTableSize;
@@ -236,7 +239,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
                 }
             }
             minimumMaxHeaderTableSizeUpdate.updateAndGet(
-                    new UpdateMinimum(frame.getSettings().get(SETTINGS_HEADER_TABLE_SIZE).intValue()));
+                    new UpdateMinimum(setMap.get(SETTINGS_HEADER_TABLE_SIZE).intValue()));
         }
         if(sendAck) {
             Http2Settings responseFrame = new Http2Settings();
@@ -261,7 +264,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     Http2Settings getLocalRequestedSettingsFrame() {
         Http2Settings settingsFrame = new Http2Settings();
-        settingsFrame.setSettings(localRequestedSettings);
+        localRequestedSettings.fillFrame(settingsFrame);
         return settingsFrame;
     }
 

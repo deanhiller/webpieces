@@ -6,9 +6,9 @@ import org.webpieces.data.api.DataWrapper;
 
 public interface Http2ClientEngine {
 
-	CompletableFuture<Void> sendInitialization();
+	CompletableFuture<Void> sendInitializationToSocket();
 
-	CompletableFuture<Void> sendFrameOut(Http2Payload frame);
+	CompletableFuture<Void> sendFrameToSocket(Http2Payload frame);
 
 	void cancel(int streamId);
 

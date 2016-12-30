@@ -13,7 +13,7 @@ public class Http2FullHeaders implements Http2Payload {
     private List<Http2Header> headerList = new ArrayList<>(); // only created by the parser when deserializing a bunch of header frames
 	private boolean endStream;
     
-    public void setStreamId(int streamId) {
+	public void setStreamId(int streamId) {
         // Clear the MSB because streamId can only be 31 bits
         this.streamId = streamId & 0x7FFFFFFF;
         if(this.streamId != streamId) 

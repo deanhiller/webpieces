@@ -20,23 +20,31 @@ public class SingleResponseListener implements Http2ResponseListener {
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public void incomingResponse(Http2Headers headers) {
+	public void incomingResponse(Http2Headers headers, boolean isComplete) {
 		this.headers = headers;
+		if(isComplete)
+			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
 	@Override
-	public void incomingData(DataWrapper data) {
+	public void incomingData(DataWrapper data, boolean isComplete) {
 		fullData =  dataGen.chainDataWrappers(fullData, data);
+		if(isComplete)
+			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
 	@Override
-	public void incomingEndHeaders(Http2Headers trailingHeaders) {
+	public void incomingEndHeaders(Http2Headers trailingHeaders, boolean isComplete) {
+		if(!isComplete) {
+			responseFuture.completeExceptionally(new IllegalArgumentException("An assumption we made was wrong.  isComplete should be true here"));
+			throw new IllegalArgumentException("An assumption we made was wrong.  isComplete should be true here");
+		}
 		Http2Response response = new Http2Response(headers, fullData, trailingHeaders);
 		responseFuture.complete(response);
 	}
 
 	@Override
-	public void incomingUnknownFrame(Http2UnknownFrame frame) {
+	public void incomingUnknownFrame(Http2UnknownFrame frame, boolean isComplete) {
 		//drop it for single request/response.  If they want this, don't use single request/response
 	}
 	

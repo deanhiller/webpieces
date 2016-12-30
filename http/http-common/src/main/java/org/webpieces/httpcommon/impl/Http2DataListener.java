@@ -1,7 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
-import static com.webpieces.http2parser.api.dto.Http2Settings.Parameter.SETTINGS_MAX_CONCURRENT_STREAMS;
+import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
@@ -39,6 +39,7 @@ import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class Http2DataListener implements DataListener {
@@ -231,7 +232,7 @@ class Http2DataListener implements DataListener {
     private void handleSettings(Http2Settings frame) {
         if(frame.isAck()) {
             // we received an ack, so the settings we sent have been accepted.
-            for(Map.Entry<Http2Settings.Parameter, Long> entry: this.http2EngineImpl.localRequestedSettings.entrySet()) {
+            for(Map.Entry<SettingsParameter, Long> entry: this.http2EngineImpl.localRequestedSettings.entrySet()) {
                 this.http2EngineImpl.localSettings.put(entry.getKey(), entry.getValue());
             }
         } else {
@@ -372,7 +373,7 @@ class Http2DataListener implements DataListener {
                 }
             } else { // Either we got the preface or we don't need it
                 try {
-                    ParserResult parserResult = this.http2EngineImpl.http2Parser.parse(oldData, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings);
+                    ParserResult parserResult = this.http2EngineImpl.http2Parser.parse(oldData, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings.toNewer());
 
                     for (AbstractHttp2Frame frame : parserResult.getParsedFrames()) {
                         Http2EngineImpl.log.info("got frame=" + frame);

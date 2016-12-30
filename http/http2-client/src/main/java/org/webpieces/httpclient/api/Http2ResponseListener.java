@@ -15,13 +15,13 @@ public interface Http2ResponseListener {
 	 * @param resp
 	 * @param isComplete
 	 */
-	void incomingResponse(Http2Headers resp);
+	void incomingResponse(Http2Headers resp, boolean isComplete);
 
-	void incomingData(DataWrapper data);
+	void incomingData(DataWrapper data, boolean isComplete);
 	
-	void incomingEndHeaders(Http2Headers headers);
+	void incomingEndHeaders(Http2Headers headers, boolean isComplete);
 	
-	void incomingUnknownFrame(Http2UnknownFrame frame);
+	void incomingUnknownFrame(Http2UnknownFrame frame, boolean isComplete);
 	
 	void serverCancelledRequest();
 	

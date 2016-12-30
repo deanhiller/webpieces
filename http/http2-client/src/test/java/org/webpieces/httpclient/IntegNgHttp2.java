@@ -105,17 +105,17 @@ public class IntegNgHttp2 {
 	private static class ChunkedResponseListener implements Http2ResponseListener {
 
 		@Override
-		public void incomingResponse(Http2Headers resp) {
+		public void incomingResponse(Http2Headers resp, boolean isComplete) {
 			log.info("incoming response="+resp);
 		}
 
 		@Override
-		public void incomingData(DataWrapper data) {
+		public void incomingData(DataWrapper data, boolean isComplete) {
 			log.info("incoming data for response="+data);
 		}
 
 		@Override
-		public void incomingEndHeaders(Http2Headers headers) {
+		public void incomingEndHeaders(Http2Headers headers, boolean isComplete) {
 			log.info("incoming end headers="+headers);
 		}
 
@@ -125,7 +125,7 @@ public class IntegNgHttp2 {
 		}
 		
 		@Override
-		public void incomingUnknownFrame(Http2UnknownFrame frame) {
+		public void incomingUnknownFrame(Http2UnknownFrame frame, boolean isComplete) {
 			log.info("unknown frame="+frame);
 		}
 	}
