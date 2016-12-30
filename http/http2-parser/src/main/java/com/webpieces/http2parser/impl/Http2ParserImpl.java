@@ -38,28 +38,29 @@ import com.webpieces.http2parser.api.dto.HasHeaderList;
 import com.webpieces.http2parser.api.dto.Http2Continuation;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     private final BufferPool bufferPool;
-    private final Map<Class<? extends Http2Frame>, FrameMarshaller> dtoToMarshaller = new HashMap<>();
+    private final Map<Class<? extends AbstractHttp2Frame>, FrameMarshaller> dtoToMarshaller = new HashMap<>();
 
     public Http2ParserImpl(BufferPool bufferPool) {
         this.bufferPool = bufferPool;
 
         dtoToMarshaller.put(Http2Data.class, new DataMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Headers.class, new HeadersMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(Http2HeadersFrame.class, new HeadersMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2Priority.class, new PriorityMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2RstStream.class, new RstStreamMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2Settings.class, new SettingsMarshaller(bufferPool, dataGen));
@@ -71,7 +72,7 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     @Override
-    public FrameMarshaller getMarshaller(Class<? extends Http2Frame> frameClass) {
+    public FrameMarshaller getMarshaller(Class<? extends AbstractHttp2Frame> frameClass) {
         return dtoToMarshaller.get(frameClass);
     }
 
@@ -80,12 +81,12 @@ public class Http2ParserImpl implements Http2Parser {
         return dataGen.emptyWrapper();
     }
 
-    private Class<? extends Http2Frame> getFrameClassForType(Http2FrameType type) {
+    private Class<? extends AbstractHttp2Frame> getFrameClassForType(Http2FrameType type) {
         switch (type) {
             case DATA:
                 return Http2Data.class;
             case HEADERS:
-                return Http2Headers.class;
+                return Http2HeadersFrame.class;
             case PRIORITY:
                 return Http2Priority.class;
             case RST_STREAM:
@@ -135,7 +136,7 @@ public class Http2ParserImpl implements Http2Parser {
 
     // ignores what's left over at the end of the datawrapper
     @Override
-    public Http2Frame unmarshal(DataWrapper data) {
+    public AbstractHttp2Frame unmarshal(DataWrapper data) {
         int length = getLength(data);
         byte frameTypeId = getFrameTypeId(data);
         byte flagsByte = getFlagsByte(data);
@@ -146,9 +147,9 @@ public class Http2ParserImpl implements Http2Parser {
         // invalid frame types return Optional.empty()
         Http2FrameType frameType = Http2FrameType.fromId(frameTypeId).get();
 
-        Class<? extends Http2Frame> frameClass = getFrameClassForType(frameType);
+        Class<? extends AbstractHttp2Frame> frameClass = getFrameClassForType(frameType);
         try {
-            Http2Frame frame = frameClass.newInstance();
+            AbstractHttp2Frame frame = frameClass.newInstance();
             FrameMarshaller marshaller = dtoToMarshaller.get(frameClass);
 
             frame.setStreamId(streamId);
@@ -174,19 +175,19 @@ public class Http2ParserImpl implements Http2Parser {
 
     }
 
-    private byte getFrameTypeByte(Http2Frame frame) {
+    private byte getFrameTypeByte(AbstractHttp2Frame frame) {
         return frame.getFrameType().getId();
     }
 
     @Override
-    public int getFrameLength(Http2Frame frame) {
+    public int getFrameLength(AbstractHttp2Frame frame) {
         FrameMarshaller marshaller = dtoToMarshaller.get(frame.getClass());
         DataWrapper payload = marshaller.marshalPayload(frame);
         return payload.getReadableSize();
     }
 
     @Override
-    public DataWrapper marshal(Http2Frame frame) {
+    public DataWrapper marshal(AbstractHttp2Frame frame) {
         FrameMarshaller marshaller = dtoToMarshaller.get(frame.getClass());
 
         if(marshaller == null)
@@ -210,9 +211,9 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     @Override
-    public DataWrapper marshal(List<Http2Frame> frames) {
+    public DataWrapper marshal(List<AbstractHttp2Frame> frames) {
         DataWrapper data = dataGen.emptyWrapper();
-        for(Http2Frame frame: frames) {
+        for(AbstractHttp2Frame frame: frames) {
             data = dataGen.chainDataWrappers(data, marshal(frame));
         }
         return data;
@@ -239,8 +240,8 @@ public class Http2ParserImpl implements Http2Parser {
     @Override
     public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, Http2SettingsMap settings) {
         DataWrapper wrapperToParse;
-        List<Http2Frame> frames = new LinkedList<>();
-        List<Http2Frame> hasHeaderFragmentList = new LinkedList<>();
+        List<AbstractHttp2Frame> frames = new LinkedList<>();
+        List<AbstractHttp2Frame> hasHeaderFragmentList = new LinkedList<>();
 
         if (oldData.getReadableSize() > 0) {
             wrapperToParse = dataGen.chainDataWrappers(oldData, newData);
@@ -286,7 +287,7 @@ public class Http2ParserImpl implements Http2Parser {
                     List<? extends DataWrapper> split = dataGen.split(wrapperToParse, totalLength);
                     if(maybeFrameType.isPresent()) {
                         Http2FrameType frameType = maybeFrameType.get();
-                        Http2Frame frame = unmarshal(split.get(0));
+                        AbstractHttp2Frame frame = unmarshal(split.get(0));
 
                         // If our headerFragmenList is non-empty, we must get a continuation frame that has the same streamid
                         // as the initial frame. This if block is just checking for error conditions. Actual
@@ -329,11 +330,11 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
-	private void doSomething(Decoder decoder, List<Http2Frame> frames, List<Http2Frame> hasHeaderFragmentList) {
+	private void doSomething(Decoder decoder, List<AbstractHttp2Frame> frames, List<AbstractHttp2Frame> hasHeaderFragmentList) {
 		// Now we set the full header list on the first frame and just return that
-		Http2Frame firstFrame = hasHeaderFragmentList.get(0);
+		AbstractHttp2Frame firstFrame = hasHeaderFragmentList.get(0);
 		DataWrapper allSerializedHeaders = dataGen.emptyWrapper();
-		for (Http2Frame iterFrame : hasHeaderFragmentList) {
+		for (AbstractHttp2Frame iterFrame : hasHeaderFragmentList) {
 		    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, ((HasHeaderFragment) iterFrame).getHeaderFragment());
 		}
 		((HasHeaderList) firstFrame).setHeaderList(deserializeHeaders(allSerializedHeaders, decoder));
@@ -343,7 +344,7 @@ public class Http2ParserImpl implements Http2Parser {
 		hasHeaderFragmentList.clear();
 	}
 
-	private void checkForBadFrames(List<Http2Frame> hasHeaderFragmentList, Http2FrameType frameType, Http2Frame frame) {
+	private void checkForBadFrames(List<AbstractHttp2Frame> hasHeaderFragmentList, Http2FrameType frameType, AbstractHttp2Frame frame) {
 		if (frameType != CONTINUATION) {
 		    throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 		}
@@ -364,13 +365,13 @@ public class Http2ParserImpl implements Http2Parser {
 	}
 
     @Override
-    public DataWrapper serializeHeaders(LinkedList<HasHeaderFragment.Header> headers, Encoder encoder, ByteArrayOutputStream out) {
-        for (HasHeaderFragment.Header header : headers) {
+    public DataWrapper serializeHeaders(LinkedList<Http2Header> headers, Encoder encoder, ByteArrayOutputStream out) {
+        for (Http2Header header : headers) {
             try {
                 encoder.encodeHeader(
                         out,
-                        header.header.toLowerCase().getBytes(),
-                        header.value.getBytes(),
+                        header.getName().toLowerCase().getBytes(),
+                        header.getValue().getBytes(),
                         false);
             } catch (IOException e) {
                 // TODO: reraise appropriately
@@ -380,14 +381,14 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     @Override
-    public List<Http2Frame> createHeaderFrames(
-            LinkedList<HasHeaderFragment.Header> headers,
+    public List<AbstractHttp2Frame> createHeaderFrames(
+            LinkedList<Http2Header> headers,
             Http2FrameType startingFrameType,
             int streamId,
             Http2SettingsMap remoteSettings,
             Encoder encoder,
             ByteArrayOutputStream out) {
-        List<Http2Frame> headerFrames = new LinkedList<>();
+        List<AbstractHttp2Frame> headerFrames = new LinkedList<>();
 
         DataWrapper serializedHeaders = serializeHeaders(headers, encoder, out);
         long maxFrameSize = remoteSettings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
@@ -405,7 +406,7 @@ public class Http2ParserImpl implements Http2Parser {
                     serializedHeaders = split.get(1);
                 }
 
-                Http2Frame frame;
+                AbstractHttp2Frame frame;
                 if (firstFrame) {
                     frame = getFrameClassForType(startingFrameType).newInstance();
                     if (frame.getFrameType() == PUSH_PROMISE) {
@@ -436,8 +437,8 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     @Override
-    public LinkedList<HasHeaderFragment.Header> deserializeHeaders(DataWrapper data, Decoder decoder) {
-        LinkedList<HasHeaderFragment.Header> headers = new LinkedList<>();
+    public LinkedList<Http2Header> deserializeHeaders(DataWrapper data, Decoder decoder) {
+        LinkedList<Http2Header> headers = new LinkedList<>();
 
         byte[] bytes = data.createByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
@@ -448,7 +449,7 @@ public class Http2ParserImpl implements Http2Parser {
                         if(!h.equals(h.toLowerCase())) {
                             throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
                         }
-                        headers.add(new HasHeaderFragment.Header(h, v));
+                        headers.add(new Http2Header(h, v));
                     }
             );
         } catch (IOException e) {

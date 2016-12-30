@@ -1,6 +1,6 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2Ping extends Http2Frame {
+public class Http2Ping extends AbstractHttp2Frame {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PING;

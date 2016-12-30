@@ -2,7 +2,7 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-public class Http2Continuation extends Http2Frame implements HasHeaderFragment {
+public class Http2Continuation extends AbstractHttp2Frame implements HasHeaderFragment {
 
     @Override
     public Http2FrameType getFrameType() {

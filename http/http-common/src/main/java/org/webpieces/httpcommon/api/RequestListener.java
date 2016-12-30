@@ -7,7 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public interface RequestListener {
 
@@ -51,7 +51,7 @@ public interface RequestListener {
 	 * @param isComplete
 	 * @param sender
 	 */
-	void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender);
+	void incomingTrailer(List<Http2Header> headers, RequestId id, boolean isComplete, ResponseSender sender);
 
 	/**
 	 * In the event the client sends a bad unparseable request, OR your RequestListener

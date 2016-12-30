@@ -1,7 +1,6 @@
 package org.webpieces.httpclient.api;
 
-import org.webpieces.httpclient.api.dto.Http2Request;
-import org.webpieces.httpclient.api.dto.Http2Response;
+import org.webpieces.httpclient.api.dto.Http2Headers;
 
 public interface Http2ServerListener {
 
@@ -16,7 +15,7 @@ public interface Http2ServerListener {
 	 * @param resp
 	 * @param isComplete
 	 */
-	Http2SocketDataReader newIncomingPush(Http2Request req, Http2Response resp);
+	Http2SocketDataReader newIncomingPush(Http2Headers req, Http2Headers resp);
 
 	void failure(Exception e);
 	

@@ -10,15 +10,17 @@ import org.webpieces.httpclient.api.Http2ResponseListener;
 import org.webpieces.httpclient.api.Http2ServerListener;
 import org.webpieces.httpclient.api.Http2Socket;
 import org.webpieces.httpclient.api.Http2SocketDataReader;
-import org.webpieces.httpclient.api.dto.Http2EndHeaders;
-import org.webpieces.httpclient.api.dto.Http2Request;
-import org.webpieces.httpclient.api.dto.Http2Response;
+import org.webpieces.httpclient.api.dto.Http2Headers;
+
+import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
 
-    static private CompletableFuture<Http2Request> sendManyTimes(Http2Socket socket, int n, Http2Request req, Http2ResponseListener l) {
+    static private CompletableFuture<Http2Headers> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
         if(n > 0) {
             return socket.sendRequest(req, l, true)
                     .thenCompose(dataWriter -> sendManyTimes(socket, n-1, req, l));
@@ -35,7 +37,7 @@ public class IntegNgHttp2 {
         if(isHttp)
             port = 80;
 
-        Http2Request req = createRequest(host);
+        Http2Headers req = createRequest(host, isHttp);
 
         log.info("starting socket");
         ChunkedResponseListener listener = new ChunkedResponseListener();
@@ -45,15 +47,15 @@ public class IntegNgHttp2 {
 
         socket
                 .connect(addr, new ServerListenerImpl())
-                .thenCompose(requestListener -> sendManyTimes(requestListener, 10, req, listener))
+                .thenCompose(theSocket -> sendManyTimes(theSocket, 1, req, listener))
                 .exceptionally(e -> {
                     reportException(socket, e);
                     return req;
                 });
 
-        Thread.sleep(10000);
+        Thread.sleep(100000);
 
-        sendManyTimes(socket, 10, req, listener).exceptionally(e -> {
+        sendManyTimes(socket, 1, req, listener).exceptionally(e -> {
             reportException(socket, e);
             return req;
         });
@@ -74,7 +76,7 @@ public class IntegNgHttp2 {
 		}
 
 		@Override
-		public Http2SocketDataReader newIncomingPush(Http2Request req, Http2Response resp) {
+		public Http2SocketDataReader newIncomingPush(Http2Headers req, Http2Headers resp) {
 			return this;
 		}
 
@@ -89,7 +91,7 @@ public class IntegNgHttp2 {
 		}
 
 		@Override
-		public void incomingTrailingHeaders(Http2EndHeaders endHeaders) {
+		public void incomingTrailingHeaders(Http2Headers endHeaders) {
 			log.info("done with data");
 		}
 
@@ -103,7 +105,7 @@ public class IntegNgHttp2 {
 	private static class ChunkedResponseListener implements Http2ResponseListener {
 
 		@Override
-		public void incomingResponse(Http2Response resp) {
+		public void incomingResponse(Http2Headers resp) {
 			log.info("incoming response="+resp);
 		}
 
@@ -113,7 +115,7 @@ public class IntegNgHttp2 {
 		}
 
 		@Override
-		public void incomingEndHeaders(Http2EndHeaders headers) {
+		public void incomingEndHeaders(Http2Headers headers) {
 			log.info("incoming end headers="+headers);
 		}
 
@@ -121,19 +123,28 @@ public class IntegNgHttp2 {
 		public void serverCancelledRequest() {
 			log.info("server cancelled request");
 		}
+		
+		@Override
+		public void incomingUnknownFrame(Http2UnknownFrame frame) {
+			log.info("unknown frame="+frame);
+		}
 	}
 
-    private static Http2Request createRequest(String host) {
-//        HttpRequestLine requestLine = new HttpRequestLine();
-//        requestLine.setMethod(KnownHttpMethod.GET);
-//        requestLine.setUri(new HttpUri("/"));
-//
-//        HttpRequest req = new HttpRequest();
-//        req.setRequestLine(requestLine);
-//        req.addHeader(new Header(KnownHeaderName.HOST, host));
-//        req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
-//        req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
-//        req.addHeader(new Header(KnownHeaderName.USER_AGENT, "nghttp2/1.15.0"));
-        return null;
+    private static Http2Headers createRequest(String host, boolean isHttps) {
+    	String scheme;
+    	if(isHttps)
+    		scheme = "https";
+    	else
+    		scheme = "http";
+    	
+    	Http2Headers req = new Http2Headers();
+        req.addHeader(new Http2Header(Http2HeaderName.METHOD, "GET"));
+        req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, host));
+        req.addHeader(new Http2Header(Http2HeaderName.PATH, "/"));
+        req.addHeader(new Http2Header(Http2HeaderName.SCHEME, scheme));
+        req.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
+        req.addHeader(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
+        req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/xx"));
+        return req;
     }
 }

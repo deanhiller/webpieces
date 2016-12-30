@@ -1,32 +1,25 @@
 package com.webpieces.http2parser2.impl.stateful;
 
-import org.webpieces.javasm.api.Event;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.NoTransitionListener;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 
-import com.webpieces.http2parser.api.highlevel.Http2FullHeaders;
-import com.webpieces.http2parser.api.highlevel.Http2FullPushPromise;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.highlevel.Http2Payload;
 import com.webpieces.http2parser2.impl.stateful.Http2Event.Http2SendRecieve;
 
-public class ClientStateMachine {
-	private static final Http2Event sentHeaders = new Http2Event(Http2SendRecieve.SEND, Http2FullHeaders.class);
-	private static final Http2Event recvPushPromise = new Http2Event(Http2SendRecieve.SEND, Http2FullPushPromise.class);
-	
-	private static final Event recvPushPromise = StateMachineFactory.createEvent("Received Push Promise");
-	private static final Event sentEndStreamFlag = StateMachineFactory.createEvent("Send End Stream Flag");
-	private static final Event sentResetStream = StateMachineFactory.createEvent("Sent Reset Stream");
-	private static final Event recvHeaders = StateMachineFactory.createEvent("Recv Headers");
-	private static final Event receivedResetStream = StateMachineFactory.createEvent("Recv Reset Stream");
-	private static final Event recvEndStreamFlag = StateMachineFactory.createEvent("Recv End Stream Flag");
-	private static final Event dateSend = StateMachineFactory.createEvent("Data Send Flag");
+public class Level2ClientStateMachine {
 
 	private StateMachine stateMachine;
 	private State idleState;
+	private Level3FlowControl flowControl;
 	
-	public ClientStateMachine(String id) {
+	public Level2ClientStateMachine(String id, Level3FlowControl flowControl) {
+		this.flowControl = flowControl;
 		StateMachineFactory factory = StateMachineFactory.createFactory();
 		stateMachine = factory.createStateMachine(id);
 
@@ -43,6 +36,15 @@ public class ClientStateMachine {
 		halfClosedLocal.addNoTransitionListener(failIfNoTransition);
 		closed.addNoTransitionListener(failIfNoTransition);
 		
+		Http2Event sentHeaders = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS);
+		Http2Event recvPushPromise = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.PUSH_PROMISE);
+		Http2Event sentEndStreamFlag = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG);
+		Http2Event sentResetStream = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.RESET_STREAM);
+		Http2Event recvHeaders = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS);
+		Http2Event receivedResetStream = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.RESET_STREAM);
+		Http2Event recvEndStreamFlag = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG);
+		Http2Event dateSend = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA);
+		
 		stateMachine.createTransition(idleState, openState, sentHeaders);
 		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
 		stateMachine.createTransition(openState, halfClosedLocal, sentEndStreamFlag);
@@ -57,21 +59,41 @@ public class ClientStateMachine {
 
 	private static class NoTransitionImpl implements NoTransitionListener {
 		@Override
-		public void noTransitionFromEvent(State state, Event event) {
+		public void noTransitionFromEvent(State state, Object event) {
 			throw new RuntimeException("No transition defined on statemachine for event="+event+" when in state="+state);
 		}
 	}
 	
-	public void fireSendEvent(Memento currentState, Class payloadType) {
+	public CompletableFuture<Void> fireSendingFrame(Memento currentState, Http2Payload payload) {
+		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.SEND, payloadType);
-		
+
 		stateMachine.fireEvent(currentState, event);
+		
+		//sometimes a single frame has two events :( per http2 spec
+		if(payload.isEndStream())
+			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));
+		
+		//if no exceptions occurred, send it on to flow control layer
+		return flowControl.sendFrame(payload);
 	}
 	
-	
+	private Http2PayloadType translate(Http2Payload payload) {
+		return null;
+	}
+
+
 
 
 	public Memento createStateMachine(String streamId) {
 		return stateMachine.createMementoFromState("stream"+streamId, idleState);
 	}
+
+	public void fireReceivedFrame(Http2Payload frame) {
+	}
+
+	public void fireControlFrame(Http2Frame lowLevelFrame) {
+		flowControl.fireControlFrame(lowLevelFrame);
+	}
+
 }

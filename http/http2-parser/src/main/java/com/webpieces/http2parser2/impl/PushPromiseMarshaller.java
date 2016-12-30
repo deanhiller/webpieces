@@ -7,6 +7,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 
@@ -37,7 +38,7 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
 	}
 
 	@Override
-	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2PushPromise frame = new Http2PushPromise();
 		super.unmarshalFrame(state, frame);
 

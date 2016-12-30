@@ -7,7 +7,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
 
 public class WindowUpdateMarshaller extends FrameMarshallerImpl {
@@ -17,12 +17,12 @@ public class WindowUpdateMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public byte marshalFlags(Http2Frame frame) {
+    public byte marshalFlags(AbstractHttp2Frame frame) {
         return 0x0;
     }
 
     @Override
-    public DataWrapper marshalPayload(Http2Frame frame) {
+    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
         Http2WindowUpdate castFrame = (Http2WindowUpdate) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(4).putInt(castFrame.getWindowSizeIncrement());
@@ -32,7 +32,7 @@ public class WindowUpdateMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2WindowUpdate castFrame = (Http2WindowUpdate) frame;
         maybePayload.ifPresent(payload -> {
             ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);

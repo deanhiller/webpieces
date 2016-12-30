@@ -14,7 +14,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class Http2ResponseSender implements ResponseSender {
     // TODO: maybe we should just make the Http2ServerEngine implement ResponseSender?
@@ -46,7 +46,7 @@ class Http2ResponseSender implements ResponseSender {
     }
 
     @Override
-    public void sendTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete) {
+    public void sendTrailer(List<Http2Header> headerList, ResponseId id, boolean isComplete) {
         // TODO: implement this to support chunked encoding last chunk headers in http2
         throw new UnsupportedOperationException();
     }

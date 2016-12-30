@@ -4,11 +4,11 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.*;
+import org.webpieces.httpclient.api.HttpClient;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseListener;
@@ -19,6 +19,8 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class IntegNgHttp2 {
 
@@ -85,7 +87,7 @@ public class IntegNgHttp2 {
         }
 
         @Override
-        public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
+        public void incomingTrailer(List<Http2Header> headers, ResponseId id, boolean isComplete) {
             log.info("received trailer" + headers +" id=" + id + " last="+ isComplete);
         }
 

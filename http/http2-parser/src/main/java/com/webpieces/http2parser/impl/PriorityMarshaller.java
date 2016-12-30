@@ -10,7 +10,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 
 public class PriorityMarshaller implements FrameMarshaller {
@@ -23,12 +23,12 @@ public class PriorityMarshaller implements FrameMarshaller {
     }
 
     @Override
-    public byte marshalFlags(Http2Frame frame) {
+    public byte marshalFlags(AbstractHttp2Frame frame) {
         return 0x0;
     }
 
     @Override
-    public DataWrapper marshalPayload(Http2Frame frame) {
+    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
         Http2Priority castFrame = (Http2Priority) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(5);
@@ -41,7 +41,7 @@ public class PriorityMarshaller implements FrameMarshaller {
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
         Http2Priority castFrame = (Http2Priority) frame;
 
         maybePayload.ifPresent(payload -> {

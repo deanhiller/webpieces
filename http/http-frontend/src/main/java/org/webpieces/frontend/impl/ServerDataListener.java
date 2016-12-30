@@ -1,6 +1,8 @@
 package org.webpieces.frontend.impl;
 
-import com.webpieces.http2parser.api.Http2Parser;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpparser.api.HttpParser;
@@ -9,8 +11,7 @@ import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
 
-import java.nio.ByteBuffer;
-import java.util.Optional;
+import com.webpieces.http2parser.api.Http2Parser;
 
 class ServerDataListener implements AsyncDataListener {
     private TimedRequestListener timedRequestListener;

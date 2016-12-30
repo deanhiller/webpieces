@@ -1,6 +1,6 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2Priority extends Http2Frame implements HasPriorityDetails {
+public class Http2Priority extends AbstractHttp2Frame implements HasPriorityDetails {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PRIORITY;

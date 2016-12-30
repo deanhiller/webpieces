@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 
 public class TestHttp2RstStream {
@@ -25,7 +25,7 @@ public class TestHttp2RstStream {
     }
 
     @Test public void testParseRstStream() {
-        Http2Frame frame = UtilsForTest.frameFromHex(connectError);
+        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(connectError);
         Assert.assertTrue(Http2RstStream.class.isInstance(frame));
         Http2RstStream castFrame = (Http2RstStream) frame;
 

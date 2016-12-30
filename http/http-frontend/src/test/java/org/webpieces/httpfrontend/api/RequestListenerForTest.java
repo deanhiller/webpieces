@@ -1,16 +1,17 @@
 package org.webpieces.httpfrontend.api;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.HttpSocket;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpcommon.api.RequestListener;
-import org.webpieces.httpcommon.api.exceptions.HttpException;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.RequestId;
+import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.exceptions.HttpException;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class RequestListenerForTest implements RequestListener {
 
@@ -26,7 +27,7 @@ class RequestListenerForTest implements RequestListener {
 	}
 
 	@Override
-	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+	public void incomingTrailer(List<Http2Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
 	}
 
 	@Override

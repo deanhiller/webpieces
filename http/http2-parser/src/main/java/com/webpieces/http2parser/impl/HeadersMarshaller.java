@@ -11,8 +11,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 
 public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
 
@@ -21,8 +21,8 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     }
 
     @Override
-    public DataWrapper marshalPayload(Http2Frame frame) {
-        Http2Headers castFrame = (Http2Headers) frame;
+    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
+        Http2HeadersFrame castFrame = (Http2HeadersFrame) frame;
         DataWrapper preludeDW;
         if(castFrame.isPriority()) {
             ByteBuffer prelude = bufferPool.nextBuffer(5);
@@ -43,8 +43,8 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     }
 
     @Override
-    public byte marshalFlags(Http2Frame frame) {
-        Http2Headers castFrame = (Http2Headers) frame;
+    public byte marshalFlags(AbstractHttp2Frame frame) {
+        Http2HeadersFrame castFrame = (Http2HeadersFrame) frame;
 
         byte value = 0x0;
         if (castFrame.isEndStream()) value |= 0x1;
@@ -55,8 +55,8 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
-        Http2Headers castFrame = (Http2Headers) frame;
+    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
+        Http2HeadersFrame castFrame = (Http2HeadersFrame) frame;
 
         castFrame.setEndStream((flagsByte & 0x1) == 0x1);
         castFrame.setEndHeaders((flagsByte & 0x4) == 0x4);

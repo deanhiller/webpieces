@@ -11,7 +11,7 @@ import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Layer1Response implements ResponseListener {
 
@@ -42,7 +42,7 @@ public class Layer1Response implements ResponseListener {
     }
 
     @Override
-    public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
+    public void incomingTrailer(List<Http2Header> headers, ResponseId id, boolean isComplete) {
         // TODO: Handle trailers
         throw new UnsupportedOperationException();
     }

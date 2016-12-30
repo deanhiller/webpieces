@@ -7,7 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public interface ResponseListener {
 
@@ -69,7 +69,7 @@ public interface ResponseListener {
 	 * @param isComplete
 	 * @return
 	 */
-	void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete);
+	void incomingTrailer(List<Http2Header> headers, ResponseId id, boolean isComplete);
 
 	void failure(Throwable e);
 	

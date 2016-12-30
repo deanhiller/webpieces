@@ -4,11 +4,11 @@ import java.util.Optional;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public interface FrameMarshaller {
-    DataWrapper marshalPayload(Http2Frame frame);
-    byte marshalFlags(Http2Frame frame);
+    DataWrapper marshalPayload(AbstractHttp2Frame frame);
+    byte marshalFlags(AbstractHttp2Frame frame);
 
-    void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload);
+    void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload);
 }

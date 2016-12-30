@@ -9,8 +9,8 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
-import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;

@@ -28,18 +28,18 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class Http2DataListener implements DataListener {
     /**
@@ -82,7 +82,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleHeaders(Http2Headers frame, Stream stream) {
+    private void handleHeaders(Http2HeadersFrame frame, Stream stream) {
         boolean isTrailer = false;
         switch (stream.getStatus()) {
             case IDLE:
@@ -123,8 +123,8 @@ class Http2DataListener implements DataListener {
             if(isTrailer) {
                 // Make sure that the headers match what we are expecting.
                 List<String> allowedTrailerHeaders = stream.getTrailerHeaders();
-                for(HasHeaderFragment.Header header: frame.getHeaderList()) {
-                    if(!allowedTrailerHeaders.contains(header.header))
+                for(Http2Header header: frame.getHeaderList()) {
+                    if(!allowedTrailerHeaders.contains(header.getName()))
                         throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
                 }
             }
@@ -262,7 +262,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleFrame(Http2Frame frame) {
+    private void handleFrame(AbstractHttp2Frame frame) {
         if(frame.getFrameType() != SETTINGS && !this.http2EngineImpl.gotSettings.get()) {
             preconditions();
         }
@@ -293,7 +293,7 @@ class Http2DataListener implements DataListener {
                     handleData((Http2Data) frame, stream);
                     break;
                 case HEADERS:
-                    handleHeaders((Http2Headers) frame, stream);
+                    handleHeaders((Http2HeadersFrame) frame, stream);
                     break;
                 case PRIORITY:
                     handlePriority((Http2Priority) frame, stream);
@@ -374,7 +374,7 @@ class Http2DataListener implements DataListener {
                 try {
                     ParserResult parserResult = this.http2EngineImpl.http2Parser.parse(oldData, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings);
 
-                    for (Http2Frame frame : parserResult.getParsedFrames()) {
+                    for (AbstractHttp2Frame frame : parserResult.getParsedFrames()) {
                         Http2EngineImpl.log.info("got frame=" + frame);
                         handleFrame(frame);
                     }

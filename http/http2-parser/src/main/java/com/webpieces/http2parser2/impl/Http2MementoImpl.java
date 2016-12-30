@@ -7,6 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParsedStatus;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public class Http2MementoImpl implements Http2Memento {
@@ -64,7 +65,7 @@ public class Http2MementoImpl implements Http2Memento {
 		return frameHeaderData;
 	}
 
-	public void addParsedFrame(Http2Frame parsedPayload) {
+	public void addParsedFrame(AbstractHttp2Frame parsedPayload) {
 		parsedFrames.add(parsedPayload);
 	}
 	

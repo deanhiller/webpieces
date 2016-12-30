@@ -5,19 +5,19 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public class ParserResultImpl implements ParserResult {
-    final private List<Http2Frame> frames;
+    final private List<AbstractHttp2Frame> frames;
     final private DataWrapper leftOverData;
 
-    public ParserResultImpl(List<Http2Frame> frames, DataWrapper leftOverData) {
+    public ParserResultImpl(List<AbstractHttp2Frame> frames, DataWrapper leftOverData) {
         this.frames = frames;
         this.leftOverData = leftOverData;
     }
 
     @Override
-    public List<Http2Frame> getParsedFrames() {
+    public List<AbstractHttp2Frame> getParsedFrames() {
         return frames;
     }
 

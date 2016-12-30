@@ -6,17 +6,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import org.webpieces.httpclient.api.*;
-import org.webpieces.httpcommon.api.*;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpclient.api.HttpClient;
+import org.webpieces.httpclient.api.HttpClientFactory;
+import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.HttpSocket;
+import org.webpieces.httpcommon.api.RequestSender;
+import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.ResponseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -28,7 +28,14 @@ import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
+
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class IntegGoogleHttps {
 
@@ -110,7 +117,7 @@ public class IntegGoogleHttps {
 		}
 
 		@Override
-		public void incomingTrailer(List<HasHeaderFragment.Header> headers, ResponseId id, boolean isComplete) {
+		public void incomingTrailer(List<Http2Header> headers, ResponseId id, boolean isComplete) {
 			log.info("received trailer" + headers +" id=" + id + " last="+ isComplete);
 		}
 

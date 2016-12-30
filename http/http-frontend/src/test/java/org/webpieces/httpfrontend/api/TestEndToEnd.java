@@ -8,11 +8,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +30,11 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
+
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.Http2SettingsMap;
+import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class TestEndToEnd {
   private int serverPort;

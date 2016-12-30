@@ -7,11 +7,11 @@ import org.webpieces.httpclient.api.Http2ResponseListener;
 import org.webpieces.httpclient.api.Http2ServerListener;
 import org.webpieces.httpclient.api.Http2Socket;
 import org.webpieces.httpclient.api.Http2SocketDataReader;
-import org.webpieces.httpclient.api.dto.Http2EndHeaders;
-import org.webpieces.httpclient.api.dto.Http2Request;
-import org.webpieces.httpclient.api.dto.Http2Response;
+import org.webpieces.httpclient.api.dto.Http2Headers;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+
+import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 
 public class IntegColoradoEdu {
 
@@ -25,7 +25,7 @@ public class IntegColoradoEdu {
 		if(isHttp)
 			port = 80;
 		
-		Http2Request req = createRequest(host);
+		Http2Headers req = createRequest(host);
 
 		log.info("starting socket");
 		ChunkedResponseListener listener = new ChunkedResponseListener();
@@ -54,7 +54,7 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public Http2SocketDataReader newIncomingPush(Http2Request req, Http2Response resp) {
+		public Http2SocketDataReader newIncomingPush(Http2Headers req, Http2Headers resp) {
 			return this;
 		}
 
@@ -69,7 +69,7 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public void incomingTrailingHeaders(Http2EndHeaders endHeaders) {
+		public void incomingTrailingHeaders(Http2Headers endHeaders) {
 			log.info("done with data");
 		}
 
@@ -83,7 +83,7 @@ public class IntegColoradoEdu {
 	private static class ChunkedResponseListener implements Http2ResponseListener {
 
 		@Override
-		public void incomingResponse(Http2Response resp) {
+		public void incomingResponse(Http2Headers resp) {
 			log.info("incoming response="+resp);
 		}
 
@@ -93,7 +93,7 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public void incomingEndHeaders(Http2EndHeaders headers) {
+		public void incomingEndHeaders(Http2Headers headers) {
 			log.info("incoming end headers="+headers);
 		}
 
@@ -101,9 +101,14 @@ public class IntegColoradoEdu {
 		public void serverCancelledRequest() {
 			log.info("server cancelled request");
 		}
+
+		@Override
+		public void incomingUnknownFrame(Http2UnknownFrame frame) {
+			log.info("unknown frame="+frame);
+		}
 	}
 	
-	private static Http2Request createRequest(String host) {
+	private static Http2Headers createRequest(String host) {
 //		GET / HTTP/1.1
 //		Host: www.colorado.edu
 //		User-Agent: curl/7.43.0

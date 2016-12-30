@@ -15,7 +15,7 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class ParseFramesFromFile {
@@ -35,7 +35,7 @@ public class ParseFramesFromFile {
             buf.flip();
             buf.getInt();
             ParserResult result = parser.parse(dataGen.wrapByteBuffer(buf.slice()), dataGen.emptyWrapper(), decoder, settings);
-            List<Http2Frame> frames = result.getParsedFrames();
+            List<AbstractHttp2Frame> frames = result.getParsedFrames();
             System.out.print(frames.toString());
             buf.clear();
         }

@@ -49,7 +49,7 @@ import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.parsing.BodyParser;
 import org.webpieces.webserver.impl.parsing.BodyParsers;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class RequestReceiver implements RequestListener {
 	
@@ -136,7 +136,7 @@ public class RequestReceiver implements RequestListener {
 
 	// We don't actually support any trailer headers, so we ignore them.
 	@Override
-	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+	public void incomingTrailer(List<Http2Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
 		if(isComplete) {
 			completeRequest(id, sender);
 		}

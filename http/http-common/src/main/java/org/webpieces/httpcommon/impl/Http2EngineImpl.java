@@ -68,15 +68,15 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public abstract class Http2EngineImpl implements Http2Engine {
     static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);
@@ -265,26 +265,26 @@ public abstract class Http2EngineImpl implements Http2Engine {
         return settingsFrame;
     }
 
-    LinkedList<HasHeaderFragment.Header> requestToHeaders(HttpRequest request) {
+    LinkedList<Http2Header> requestToHeaders(HttpRequest request) {
         HttpRequestLine requestLine = request.getRequestLine();
         List<Header> requestHeaders = request.getHeaders();
 
-        LinkedList<HasHeaderFragment.Header> headerList = new LinkedList<>();
+        LinkedList<Http2Header> headerList = new LinkedList<>();
 
         // add special headers
-        headerList.add(new HasHeaderFragment.Header(":method", requestLine.getMethod().getMethodAsString()));
+        headerList.add(new Http2Header(":method", requestLine.getMethod().getMethodAsString()));
 
         UrlInfo urlInfo = requestLine.getUri().getUriBreakdown();
-        headerList.add(new HasHeaderFragment.Header(":path", urlInfo.getFullPath()));
+        headerList.add(new Http2Header(":path", urlInfo.getFullPath()));
 
         // Figure out scheme
         if(urlInfo.getPrefix() != null) {
-            headerList.add(new HasHeaderFragment.Header(":scheme", urlInfo.getPrefix()));
+            headerList.add(new Http2Header(":scheme", urlInfo.getPrefix()));
         } else {
             if(channel.isSslChannel()) {
-                headerList.add(new HasHeaderFragment.Header(":scheme", "https"));
+                headerList.add(new Http2Header(":scheme", "https"));
             } else {
-                headerList.add(new HasHeaderFragment.Header(":scheme", "http"));
+                headerList.add(new Http2Header(":scheme", "http"));
             }
         }
 
@@ -297,21 +297,21 @@ public abstract class Http2EngineImpl implements Http2Engine {
             }
         }
         if(h != null) {
-            headerList.add(new HasHeaderFragment.Header(":authority", h));
+            headerList.add(new Http2Header(":authority", h));
         } else {
             if (urlInfo.getHost() != null) {
                 if (urlInfo.getPort() == null)
-                    headerList.add(new HasHeaderFragment.Header(":authority", urlInfo.getHost()));
+                    headerList.add(new Http2Header(":authority", urlInfo.getHost()));
                 else
-                    headerList.add(new HasHeaderFragment.Header(":authority", String.format("%s:%d", urlInfo.getHost(), urlInfo.getPort())));
+                    headerList.add(new Http2Header(":authority", String.format("%s:%d", urlInfo.getHost(), urlInfo.getPort())));
             } else {
-                headerList.add(new HasHeaderFragment.Header(":authority", remoteAddress.getHostName() + ":" + remoteAddress.getPort()));
+                headerList.add(new Http2Header(":authority", remoteAddress.getHostName() + ":" + remoteAddress.getPort()));
             }
         }
 
         // Add regular headers
         for(Header header: requestHeaders) {
-            headerList.add(new HasHeaderFragment.Header(header.getName().toLowerCase(), header.getValue()));
+            headerList.add(new Http2Header(header.getName().toLowerCase(), header.getValue()));
         }
 
         return headerList;
@@ -445,12 +445,12 @@ public abstract class Http2EngineImpl implements Http2Engine {
             throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.wrapByteArray(e.toString().getBytes()));
         }
     }
-    CompletableFuture<Void> sendPushPromiseFrames(LinkedList<HasHeaderFragment.Header> headerList, Stream stream, Stream newStream) {
+    CompletableFuture<Void> sendPushPromiseFrames(LinkedList<Http2Header> headerList, Stream stream, Stream newStream) {
         int streamId = stream.getStreamId();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, PUSH_PROMISE, newStream.getStreamId(), remoteSettings, encoder, out);
+        List<AbstractHttp2Frame> frameList = http2Parser.createHeaderFrames(headerList, PUSH_PROMISE, newStream.getStreamId(), remoteSettings, encoder, out);
         // Set the streamid in the first frame to this streamid
         frameList.get(0).setStreamId(streamId);
 
@@ -463,14 +463,14 @@ public abstract class Http2EngineImpl implements Http2Engine {
     }
     // we never send endstream on the header frame to make our life easier. we always just send
     // endstream on a data frame.
-    CompletableFuture<Void> sendHeaderFrames(LinkedList<HasHeaderFragment.Header> headerList, Stream stream) {
+    CompletableFuture<Void> sendHeaderFrames(LinkedList<Http2Header> headerList, Stream stream) {
         // TODO: check the status of the stream to ensure we can send HEADER frames
 
         int streamId = stream.getStreamId();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
+        List<AbstractHttp2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
 
         // Send all the frames at once
         log.info("sending header frames: " + frameList);
@@ -607,18 +607,18 @@ public abstract class Http2EngineImpl implements Http2Engine {
         outgoingFlowControl.put(streamId, new AtomicLong(remoteSettings.get(SETTINGS_INITIAL_WINDOW_SIZE)));
     }
 
-    LinkedList<HasHeaderFragment.Header> responseToHeaders(HttpResponse response) {
-        LinkedList<HasHeaderFragment.Header> headers = new LinkedList<>();
-        headers.add(new HasHeaderFragment.Header(":status", response.getStatusLine().getStatus().getCode().toString()));
+    LinkedList<Http2Header> responseToHeaders(HttpResponse response) {
+        LinkedList<Http2Header> headers = new LinkedList<>();
+        headers.add(new Http2Header(":status", response.getStatusLine().getStatus().getCode().toString()));
         for(Header header: response.getHeaders()) {
-            headers.add(new HasHeaderFragment.Header(header.getName(), header.getValue()));
+            headers.add(new Http2Header(header.getName(), header.getValue()));
         }
         return headers;
     }
 
     abstract void sideSpecificHandleData(Http2Data frame, int payloadLength, Stream stream);
 
-    abstract void sideSpecificHandleHeaders(Http2Headers frame, boolean isTrailer, Stream stream);
+    abstract void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream);
 
     abstract void sideSpecificHandleRstStream(Http2RstStream frame, Stream stream);
 
@@ -636,32 +636,32 @@ public abstract class Http2EngineImpl implements Http2Engine {
         }
     }
 
-    private Map<String, String> processSpecialHeaders(Queue<HasHeaderFragment.Header> headers,
+    private Map<String, String> processSpecialHeaders(Queue<Http2Header> headers,
                                                       List<String> specialHeaders,
                                                       HttpMessage msg,
                                                       int streamId) {
         Map<String, String> specialHeaderMap = new HashMap<>();
 
         boolean processingSpecialHeaders = true;
-        for(HasHeaderFragment.Header header: headers) {
+        for(Http2Header header: headers) {
             if(processingSpecialHeaders) {
-                if(!header.header.startsWith((":")))
+                if(!header.getName().startsWith((":")))
                 {
                     processingSpecialHeaders = false;
                 } else {
                     // If we got a special header twice, or a special header we are not expecting
-                    if (specialHeaderMap.get(header.header) != null || !specialHeaders.contains(header.header)) {
+                    if (specialHeaderMap.get(header.getName()) != null || !specialHeaders.contains(header.getName())) {
                         throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
                     }
-                    specialHeaderMap.put(header.header, header.value);
+                    specialHeaderMap.put(header.getName(), header.getValue());
                 }
             }
             if(!processingSpecialHeaders) {
                 // if we got a special header mixed in with the regular headers
-                if(header.header.startsWith(":")) {
+                if(header.getName().startsWith(":")) {
                     throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, streamId);
                 }
-                msg.addHeader(new Header(header.header, header.value));
+                msg.addHeader(new Header(header.getName(), header.getValue()));
             }
         }
 
@@ -675,7 +675,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     }
 
-    HttpResponse responseFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
+    HttpResponse responseFromHeaders(Queue<Http2Header> headers, Stream stream) {
         HttpResponse response = new HttpResponse();
 
         Map<String, String> specialHeaderMap = processSpecialHeaders(
@@ -698,7 +698,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         return response;
     }
 
-    HttpRequest requestFromHeaders(Queue<HasHeaderFragment.Header> headers, Stream stream) {
+    HttpRequest requestFromHeaders(Queue<Http2Header> headers, Stream stream) {
         HttpRequest request = new HttpRequest();
         Map<String, String> specialHeaderMap = processSpecialHeaders(
                 headers,

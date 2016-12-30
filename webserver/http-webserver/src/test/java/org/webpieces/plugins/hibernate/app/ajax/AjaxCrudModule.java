@@ -1,6 +1,11 @@
 package org.webpieces.plugins.hibernate.app.ajax;
 
-import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.*;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_ADD_USER_FORM;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_CONFIRM_DELETE_USER;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_EDIT_USER_FORM;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_LIST_USERS;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_DELETE_USER;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_USER_FORM;
 
 import org.webpieces.router.api.routing.CrudRouteIds;
 import org.webpieces.router.api.routing.ScopedRouteModule;

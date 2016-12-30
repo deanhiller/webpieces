@@ -8,17 +8,17 @@ import java.util.LinkedList;
 import org.junit.Test;
 
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class TestHttp2PushPromise {
-    private static LinkedList<HasHeaderFragment.Header> basicRequestHeaders = new LinkedList<>();
+    private static LinkedList<Http2Header> basicRequestHeaders = new LinkedList<>();
 
     static {
-        basicRequestHeaders.add(new HasHeaderFragment.Header(":method", "GET"));
-        basicRequestHeaders.add(new HasHeaderFragment.Header(":scheme", "https"));
-        basicRequestHeaders.add(new HasHeaderFragment.Header(":authority", "www.cloudflare.com"));
-        basicRequestHeaders.add(new HasHeaderFragment.Header(":path", "/"));
+        basicRequestHeaders.add(new Http2Header(":method", "GET"));
+        basicRequestHeaders.add(new Http2Header(":scheme", "https"));
+        basicRequestHeaders.add(new Http2Header(":authority", "www.cloudflare.com"));
+        basicRequestHeaders.add(new Http2Header(":path", "/"));
     }
     private Encoder encoder = new Encoder(4096);
 

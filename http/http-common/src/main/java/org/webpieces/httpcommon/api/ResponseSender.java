@@ -9,7 +9,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public interface ResponseSender {
 
@@ -22,7 +22,7 @@ public interface ResponseSender {
 
 	CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isComplete);
 
-	void sendTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete);
+	void sendTrailer(List<Http2Header> headerList, ResponseId id, boolean isComplete);
 
 	CompletableFuture<Void> sendException(HttpException e);
 

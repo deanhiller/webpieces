@@ -1,6 +1,7 @@
 package org.webpieces.plugins.hibernate.app.ajax;
 
-import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.*;
+import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_LIST_USERS;
+
 import java.util.List;
 
 import javax.inject.Singleton;

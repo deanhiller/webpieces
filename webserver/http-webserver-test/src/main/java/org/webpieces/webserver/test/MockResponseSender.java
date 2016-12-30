@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
+
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class MockResponseSender implements ResponseSender {
 
@@ -55,7 +56,7 @@ public class MockResponseSender implements ResponseSender {
 	}
 
 	@Override
-	public void sendTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete) {
+	public void sendTrailer(List<Http2Header> headerList, ResponseId id, boolean isComplete) {
 		throw new UnsupportedOperationException();
 	}
 

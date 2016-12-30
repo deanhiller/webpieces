@@ -11,6 +11,7 @@ import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class SettingsMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
@@ -48,7 +49,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 	}
 
 	@Override
-	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper payload) {
+	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper payload) {
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int payloadLength = frameHeaderData.getPayloadLength();
 		int streamId = frameHeaderData.getStreamId();

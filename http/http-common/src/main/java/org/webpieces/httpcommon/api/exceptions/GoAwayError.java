@@ -6,7 +6,7 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 
@@ -30,8 +30,8 @@ public class GoAwayError extends Http2Error {
     }
 
     @Override
-    public List<Http2Frame> toFrames() {
-        List<Http2Frame> frames = new ArrayList<>();
+    public List<AbstractHttp2Frame> toFrames() {
+        List<AbstractHttp2Frame> frames = new ArrayList<>();
 
         Http2GoAway http2GoAway = new Http2GoAway();
         http2GoAway.setErrorCode(errorCode);

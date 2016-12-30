@@ -14,6 +14,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParsedStatus;
 import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
@@ -75,7 +76,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
     	List<? extends DataWrapper> split = dataGen.split(allData, payloadLen);
     	DataWrapper framePayloadData = split.get(0);
 
-    	Http2Frame frame;
+    	AbstractHttp2Frame frame;
 		Optional<Http2FrameType> optFrameType = Http2FrameType.fromId(headerData.getFrameTypeId());
 		if(optFrameType.isPresent()) {
 			Http2FrameType frameType = optFrameType.get();

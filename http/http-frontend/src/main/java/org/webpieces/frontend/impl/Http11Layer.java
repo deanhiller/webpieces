@@ -1,10 +1,14 @@
 package org.webpieces.frontend.impl;
 
+import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -22,15 +26,17 @@ import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.UnparsedState;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.*;
+import org.webpieces.httpparser.api.dto.HttpMessageType;
+import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpResponseStatus;
+import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-
-import javax.xml.bind.DatatypeConverter;
-
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 public class Http11Layer {
 

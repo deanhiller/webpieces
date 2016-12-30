@@ -2,7 +2,7 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-public class Http2UnknownFrame extends Http2Frame {
+public class Http2UnknownFrame extends AbstractHttp2Frame {
 
 	private byte flagsByte;
 	private byte frameTypeId;

@@ -6,8 +6,9 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2PushPromise extends Http2Frame implements HasHeaderFragment, HasHeaderList {
+public class Http2PushPromise extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PUSH_PROMISE;
@@ -32,7 +33,7 @@ public class Http2PushPromise extends Http2Frame implements HasHeaderFragment, H
     private int promisedStreamId = 0x0; //31bits
     private DataWrapper headerFragment;
     private Padding padding = PaddingFactory.createPadding();
-    private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
+    private LinkedList<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
 
     @Override
     public DataWrapper getHeaderFragment() {
@@ -40,12 +41,12 @@ public class Http2PushPromise extends Http2Frame implements HasHeaderFragment, H
     }
 
     @Override
-    public LinkedList<Header> getHeaderList() {
+    public LinkedList<Http2Header> getHeaderList() {
         return headerList;
     }
 
     @Override
-    public void setHeaderList(LinkedList<Header> headerList) {
+    public void setHeaderList(LinkedList<Http2Header> headerList) {
         this.headerList = headerList;
     }
 

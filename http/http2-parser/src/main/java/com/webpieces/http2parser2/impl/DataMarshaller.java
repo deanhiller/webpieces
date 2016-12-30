@@ -6,6 +6,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public class DataMarshaller extends AbstractFrameMarshaller implements FrameMarshaller  {
 
@@ -26,7 +27,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
 	}
 
 	@Override
-	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2Data frame = new Http2Data();
         super.unmarshalFrame(state, frame);
         

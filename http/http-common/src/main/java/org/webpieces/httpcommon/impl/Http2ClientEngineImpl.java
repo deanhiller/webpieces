@@ -23,11 +23,11 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Data;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2ClientEngine {
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
@@ -56,7 +56,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     }
 
     @Override
-    void sideSpecificHandleHeaders(Http2Headers frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream) {
 
         if(isTrailer) {
             stream.getResponseListener().incomingTrailer(frame.getHeaderList(), stream.getResponseId(), frame.isEndStream());
@@ -137,7 +137,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
         newStream.setRequest(request);
         initializeFlowControl(thisStreamId);
         activeStreams.put(thisStreamId, newStream);
-        LinkedList<HasHeaderFragment.Header> headers = requestToHeaders(request);
+        LinkedList<Http2Header> headers = requestToHeaders(request);
         return sendHeaderFrames(headers, newStream)
                 .thenCompose(
                         channel -> sendDataFrames(request.getBodyNonNull(), isComplete, newStream, false))

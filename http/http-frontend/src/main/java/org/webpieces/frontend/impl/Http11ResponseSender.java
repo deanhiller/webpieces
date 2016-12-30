@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.Responses;
 import org.webpieces.httpcommon.api.Protocol;
@@ -15,8 +14,15 @@ import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.*;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpResponseStatus;
+import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.nio.api.channels.Channel;
+
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class Http11ResponseSender implements ResponseSender {
 
@@ -83,13 +89,13 @@ class Http11ResponseSender implements ResponseSender {
 	}
 
 	@Override
-	public void sendTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete) {
+	public void sendTrailer(List<Http2Header> headerList, ResponseId id, boolean isComplete) {
 		if(!isComplete) {
 			throw new RuntimeException("can't sendTrailer that isnot completeing the response");
 		}
 		HttpLastChunk lastChunk = new HttpLastChunk();
-		for(HasHeaderFragment.Header header: headerList) {
-			lastChunk.addHeader(new Header(header.header, header.value));
+		for(Http2Header header: headerList) {
+			lastChunk.addHeader(new Header(header.getName(), header.getValue()));
 		}
 		channel.write(parser.marshalToByteBuffer(lastChunk));
 	}

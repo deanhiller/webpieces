@@ -1,6 +1,6 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2WindowUpdate extends Http2Frame {
+public class Http2WindowUpdate extends AbstractHttp2Frame {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.WINDOW_UPDATE;

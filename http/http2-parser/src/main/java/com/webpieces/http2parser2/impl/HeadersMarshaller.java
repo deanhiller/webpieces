@@ -10,7 +10,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 
 public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
@@ -20,7 +21,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-        Http2Headers castFrame = (Http2Headers) frame;
+        Http2HeadersFrame castFrame = (Http2HeadersFrame) frame;
 
         byte value = 0x0;
         if (castFrame.isEndStream()) value |= 0x1;
@@ -49,8 +50,8 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
 	}
 
 	@Override
-	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
-        Http2Headers frame = new Http2Headers();
+	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+        Http2HeadersFrame frame = new Http2HeadersFrame();
         super.unmarshalFrame(state, frame);
 
         byte flagsByte = state.getFrameHeaderData().getFlagsByte();

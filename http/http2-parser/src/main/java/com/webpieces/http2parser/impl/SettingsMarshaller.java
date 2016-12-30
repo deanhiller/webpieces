@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 
 public class SettingsMarshaller extends FrameMarshallerImpl {
@@ -19,7 +19,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public DataWrapper marshalPayload(Http2Frame frame) {
+    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
         if (castFrame.isAck() || castFrame.getSettings().size() == 0) {
@@ -41,7 +41,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public byte marshalFlags(Http2Frame frame) {
+    public byte marshalFlags(AbstractHttp2Frame frame) {
         Http2Settings castFrame = (Http2Settings) frame;
 
         byte value = 0x0;
@@ -50,7 +50,7 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2Settings castFrame = (Http2Settings) frame;
 
         castFrame.setAck((flags & 0x1) == 0x1);

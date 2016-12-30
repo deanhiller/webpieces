@@ -1,9 +1,12 @@
 package org.webpieces.httpfrontend.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.ResponseId;
@@ -11,12 +14,7 @@ import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class MockResponseListener implements ResponseListener {
 
@@ -59,7 +57,7 @@ class MockResponseListener implements ResponseListener {
   }
 
   @Override
-  public void incomingTrailer(List<HasHeaderFragment.Header> headerList, ResponseId id, boolean isComplete) {
+  public void incomingTrailer(List<Http2Header> headerList, ResponseId id, boolean isComplete) {
     throw new UnsupportedOperationException();
   }
 

@@ -12,15 +12,14 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseSender;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpproxy.api.ProxyConfig;
@@ -33,7 +32,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Layer4Processor implements RequestListener {
 
@@ -97,7 +96,7 @@ public class Layer4Processor implements RequestListener {
     }
 
 	@Override
-	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+	public void incomingTrailer(List<Http2Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
 		// TODO: deal with trailers
 		throw new UnsupportedOperationException();
 	}

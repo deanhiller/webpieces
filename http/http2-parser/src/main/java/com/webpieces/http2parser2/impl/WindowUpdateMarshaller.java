@@ -9,6 +9,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
 
 public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
@@ -28,7 +29,7 @@ public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements F
 	}
 
 	@Override
-	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper payload) {
+	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper payload) {
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 4)

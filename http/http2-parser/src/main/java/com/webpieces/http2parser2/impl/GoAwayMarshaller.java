@@ -10,6 +10,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
 
 public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
@@ -35,7 +36,7 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
 	}
 
 	@Override
-	public Http2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
+	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
         Http2GoAway frame = new Http2GoAway();
         super.unmarshalFrame(state, frame);
         int streamId = state.getFrameHeaderData().getStreamId();

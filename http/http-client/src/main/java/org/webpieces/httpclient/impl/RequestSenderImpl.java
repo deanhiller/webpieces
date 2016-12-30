@@ -16,7 +16,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.Http2ClientEngine;
 import org.webpieces.httpcommon.api.Http2EngineFactory;
 import org.webpieces.httpcommon.api.Protocol;
@@ -24,6 +23,7 @@ import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseListener;
+import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.SwitchableDataListener;
 import org.webpieces.httpcommon.api.SwitchableDataListenerFactory;
 import org.webpieces.httpparser.api.HttpParser;
@@ -43,8 +43,8 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class RequestSenderImpl implements RequestSender {
     private static final Logger log = LoggerFactory.getLogger(RequestSenderImpl.class);
@@ -234,7 +234,7 @@ public class RequestSenderImpl implements RequestSender {
     }
 
     @Override
-    public void sendTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete) {
+    public void sendTrailer(List<Http2Header> headers, RequestId id, boolean isComplete) {
         if(protocol == HTTP11) {
             if(isComplete)
                 acceptingRequest.set(false);

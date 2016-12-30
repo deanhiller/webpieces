@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public interface ParserResult {
     boolean hasParsedFrames();
 
-    List<Http2Frame> getParsedFrames();
+    List<AbstractHttp2Frame> getParsedFrames();
 
     boolean hasMoreData();
 

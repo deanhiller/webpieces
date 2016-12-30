@@ -9,22 +9,24 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
-import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.highlevel.Http2HighLevelFactory;
 
 public abstract class Http2ClientFactory {
 
 	public static Http2Client createHttpClient(int numThreads) {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
 		BufferCreationPool pool = new BufferCreationPool();
-		Http2Parser http2Parser = Http2ParserFactory.createParser(pool);
+		Http2Parser2 http2Parser = Http2ParserFactory.createParser2(pool);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 		
-		return createHttpClient(mgr, http2Parser);
+		Http2HighLevelFactory parseFactory = new Http2HighLevelFactory();
+		return createHttpClient(mgr, http2Parser, parseFactory);
 	}
 	
-	public static Http2Client createHttpClient(ChannelManager mgr, Http2Parser http2Parser) {
-		return new Http2ClientImpl(mgr, http2Parser);
+	public static Http2Client createHttpClient(ChannelManager mgr, Http2Parser2 http2Parser, Http2HighLevelFactory factory) {
+		return new Http2ClientImpl(mgr, http2Parser, factory);
 	}
 }

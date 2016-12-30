@@ -21,7 +21,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.Http2Data;
-import com.webpieces.http2parser.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 
@@ -135,7 +135,7 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     }
 
     @Override
-    void sideSpecificHandleHeaders(Http2Headers frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream) {
         if(isTrailer) {
             requestListener.incomingTrailer(frame.getHeaderList(), stream.getRequestId(), frame.isEndStream(), responseSender);
         } else {

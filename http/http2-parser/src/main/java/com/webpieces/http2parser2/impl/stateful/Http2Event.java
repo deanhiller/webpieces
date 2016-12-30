@@ -2,11 +2,11 @@ package com.webpieces.http2parser2.impl.stateful;
 
 public class Http2Event {
 
-	private Http2SendRecieve type;
-	private Class<?> payloadType;
+	private Http2SendRecieve sendReceive;
+	private Http2PayloadType payloadType;
 
-	public Http2Event(Http2SendRecieve type, Class<?> payloadType) {
-		this.type = type;
+	public Http2Event(Http2SendRecieve sendReceive, Http2PayloadType payloadType) {
+		this.sendReceive = sendReceive;
 		this.payloadType = payloadType;
 	}
 
@@ -15,7 +15,7 @@ public class Http2Event {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((payloadType == null) ? 0 : payloadType.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((sendReceive == null) ? 0 : sendReceive.hashCode());
 		return result;
 	}
 
@@ -28,15 +28,19 @@ public class Http2Event {
 		if (getClass() != obj.getClass())
 			return false;
 		Http2Event other = (Http2Event) obj;
-		if (payloadType == null) {
-			if (other.payloadType != null)
-				return false;
-		} else if (!payloadType.equals(other.payloadType))
+		if (payloadType != other.payloadType)
 			return false;
-		if (type != other.type)
+		if (sendReceive != other.sendReceive)
 			return false;
 		return true;
 	}
+
+
+	@Override
+	public String toString() {
+		return "Http2Event [sendReceive=" + sendReceive + ", payloadType=" + payloadType + "]";
+	}
+
 
 	public static enum Http2SendRecieve {
 		SEND, RECEIVE

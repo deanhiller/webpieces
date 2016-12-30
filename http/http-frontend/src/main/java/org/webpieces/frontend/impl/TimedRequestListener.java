@@ -8,23 +8,24 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServerSocket;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.ChannelSession;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpcommon.api.exceptions.HttpClientException;
 import org.webpieces.httpcommon.api.exceptions.HttpException;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.ChannelSession;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.SafeRunnable;
+
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 class TimedRequestListener implements RequestListener {
 
@@ -65,7 +66,7 @@ class TimedRequestListener implements RequestListener {
     }
 
 	@Override
-	public void incomingTrailer(List<HasHeaderFragment.Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
+	public void incomingTrailer(List<Http2Header> headers, RequestId id, boolean isComplete, ResponseSender sender) {
 		listener.incomingTrailer(headers, id, isComplete, sender);
 	}
 

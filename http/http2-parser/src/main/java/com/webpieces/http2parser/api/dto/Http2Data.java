@@ -4,8 +4,9 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
+import com.webpieces.http2parser.api.highlevel.Http2Payload;
 
-public class Http2Data extends Http2Frame {
+public class Http2Data extends AbstractHttp2Frame implements Http2Payload {
 
     @Override
     public Http2FrameType getFrameType() {

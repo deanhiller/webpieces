@@ -6,8 +6,9 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
+public class Http2HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
@@ -58,16 +59,16 @@ public class Http2Headers extends Http2Frame implements HasHeaderFragment, HasHe
     /* payload */
     private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
     private DataWrapper headerFragment;
-    private LinkedList<Header> headerList; // only created by the parser when deserializing a bunch of header frames
+    private LinkedList<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();
 
     @Override
-    public LinkedList<Header> getHeaderList() {
+    public LinkedList<Http2Header> getHeaderList() {
         return headerList;
     }
 
     @Override
-    public void setHeaderList(LinkedList<Header> headerList) {
+    public void setHeaderList(LinkedList<Http2Header> headerList) {
         this.headerList = headerList;
     }
 

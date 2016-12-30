@@ -8,7 +8,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.dto.Http2Data;
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshaller  {
 
@@ -17,14 +17,14 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
     }
 
     @Override
-    public DataWrapper marshalPayload(Http2Frame frame) {
+    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
 
         Http2Data castFrame = (Http2Data) frame;
         return castFrame.getPadding().padDataIfNeeded(castFrame.getData());
     }
 
     @Override
-    public byte marshalFlags(Http2Frame frame) {
+    public byte marshalFlags(AbstractHttp2Frame frame) {
         Http2Data castFrame = (Http2Data) frame;
 
         byte value = (byte) 0x0;
@@ -34,7 +34,7 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         Http2Data castFrame = (Http2Data) frame;
 
         castFrame.setEndStream((flags & 0x1) == 0x1);

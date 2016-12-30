@@ -3,6 +3,7 @@ package org.webpieces.httpclient.api;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.httpclient.api.dto.Http2Headers;
 import org.webpieces.httpclient.api.dto.Http2Request;
 import org.webpieces.httpclient.api.dto.Http2Response;
 
@@ -36,7 +37,7 @@ public interface Http2Socket {
      *  
      *  @param isComplete true if you are only sending request headers with content-length = 0
      */
-    CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Request request, Http2ResponseListener listener, boolean isComplete);
+    CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener, boolean isComplete);
     
     CompletableFuture<Void> close();
     
