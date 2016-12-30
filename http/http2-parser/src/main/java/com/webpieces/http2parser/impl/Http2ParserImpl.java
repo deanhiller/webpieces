@@ -47,11 +47,11 @@ import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2Priority;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class Http2ParserImpl implements Http2Parser {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();

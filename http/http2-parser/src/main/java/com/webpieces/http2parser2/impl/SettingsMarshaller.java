@@ -11,9 +11,9 @@ import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class SettingsMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 

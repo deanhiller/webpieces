@@ -1,7 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
-import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
@@ -39,8 +39,8 @@ import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 class Http2DataListener implements DataListener {
     /**

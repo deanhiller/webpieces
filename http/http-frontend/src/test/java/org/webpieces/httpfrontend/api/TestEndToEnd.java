@@ -34,7 +34,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class TestEndToEnd {
   private int serverPort;

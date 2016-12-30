@@ -9,9 +9,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 import com.webpieces.http2parser2.impl.UnsignedData;
 
 public class SettingsMarshaller extends FrameMarshallerImpl {

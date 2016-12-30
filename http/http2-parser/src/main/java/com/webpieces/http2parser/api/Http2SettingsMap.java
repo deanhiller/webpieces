@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class Http2SettingsMap extends HashMap<SettingsParameter, Long> {
 

@@ -2,10 +2,10 @@ package org.webpieces.httpcommon.impl;
 
 import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
 import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
-import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_ENABLE_PUSH;
-import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_HEADER_TABLE_SIZE;
-import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE;
-import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_MAX_FRAME_SIZE;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_ENABLE_PUSH;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_HEADER_TABLE_SIZE;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_FRAME_SIZE;
 import static java.lang.Math.min;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.CLIENT;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
@@ -76,8 +76,8 @@ import com.webpieces.http2parser.api.dto.Http2Ping;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public abstract class Http2EngineImpl implements Http2Engine {
     static final Logger log = LoggerFactory.getLogger(Http2EngineImpl.class);

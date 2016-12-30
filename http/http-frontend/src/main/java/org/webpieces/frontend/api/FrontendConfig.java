@@ -7,7 +7,7 @@ import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class FrontendConfig {
 

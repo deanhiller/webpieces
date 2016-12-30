@@ -1,6 +1,6 @@
 package org.webpieces.httpcommon.impl;
 
-import static com.webpieces.http2parser.api.dto.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

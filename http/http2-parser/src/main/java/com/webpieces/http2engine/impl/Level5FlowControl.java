@@ -15,10 +15,10 @@ import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class Level5FlowControl {
 

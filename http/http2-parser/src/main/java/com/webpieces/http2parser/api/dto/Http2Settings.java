@@ -3,6 +3,8 @@ package com.webpieces.http2parser.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+
 public class Http2Settings extends AbstractHttp2Frame {
     /* flags */
     private boolean ack = false; /* 0x1 */

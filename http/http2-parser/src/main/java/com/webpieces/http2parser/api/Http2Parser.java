@@ -10,8 +10,8 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
-import com.webpieces.http2parser.api.dto.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public interface Http2Parser {
 	

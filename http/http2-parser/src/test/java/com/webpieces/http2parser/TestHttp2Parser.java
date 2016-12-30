@@ -27,9 +27,9 @@ import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
-import com.webpieces.http2parser.api.dto.Http2Setting;
-import com.webpieces.http2parser.api.dto.SettingsParameter;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class TestHttp2Parser {
     private static String aBunchOfDataFrames =
