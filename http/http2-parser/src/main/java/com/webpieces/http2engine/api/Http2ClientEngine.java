@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
-public interface Http2StatefulParser {
+public interface Http2ClientEngine {
 
 	CompletableFuture<Void> sendInitialization();
 

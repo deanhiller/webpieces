@@ -12,8 +12,8 @@ import org.webpieces.httpclient.api.dto.Http2Request;
 import org.webpieces.httpclient.api.dto.Http2Response;
 import org.webpieces.nio.api.channels.TCPChannel;
 
-import com.webpieces.http2engine.api.Http2HighLevelFactory;
-import com.webpieces.http2engine.api.Http2StatefulParser;
+import com.webpieces.http2engine.api.Http2EngineFactory;
+import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2parser.api.Http2Parser2;
 
 public class Http2SocketImpl implements Http2Socket {
@@ -21,9 +21,9 @@ public class Http2SocketImpl implements Http2Socket {
 	private Layer1Incoming incoming;
 	private Layer5Outgoing outgoing;
 
-	public Http2SocketImpl(TCPChannel channel, Http2Parser2 http2Parser, Http2HighLevelFactory factory) {
+	public Http2SocketImpl(TCPChannel channel, Http2Parser2 http2Parser, Http2EngineFactory factory) {
 		outgoing = new Layer5Outgoing(channel);
-		Http2StatefulParser parseLayer = factory.createClientParser(channel+"", http2Parser, outgoing);
+		Http2ClientEngine parseLayer = factory.createClientParser(channel+"", http2Parser, outgoing);
 		incoming = new Layer1Incoming(parseLayer, outgoing);
 	}
 

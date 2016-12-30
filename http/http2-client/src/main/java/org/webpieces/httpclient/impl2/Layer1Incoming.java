@@ -15,18 +15,18 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
-import com.webpieces.http2engine.api.Http2StatefulParser;
+import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2parser.api.dto.Http2Data;
 
 public class Layer1Incoming implements DataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer1Incoming.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private Http2StatefulParser layer2;
+	private Http2ClientEngine layer2;
 	private int nextAvailableStreamId = 1;
 	private Layer5Outgoing outgoing;
 
-	public Layer1Incoming(Http2StatefulParser layer2, Layer5Outgoing outgoing) {
+	public Layer1Incoming(Http2ClientEngine layer2, Layer5Outgoing outgoing) {
 		this.layer2 = layer2;
 		this.outgoing = outgoing;
 	}

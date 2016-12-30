@@ -13,7 +13,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
-import com.webpieces.http2engine.api.Http2StatefulParser;
+import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser2;
@@ -24,7 +24,7 @@ import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 
-public class Level0ConnectionParser implements Http2StatefulParser {
+public class Level0ClientEngine implements Http2ClientEngine {
 	
 	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
 	
@@ -37,7 +37,7 @@ public class Level0ConnectionParser implements Http2StatefulParser {
 
 	private List<HasHeaderFragment> accumulatingHeaders = new ArrayList<>();
 
-	public Level0ConnectionParser(String id, Http2Parser2 lowLevelParser, ResultListener socketListener) {
+	public Level0ClientEngine(String id, Http2Parser2 lowLevelParser, ResultListener socketListener) {
 		HeaderSettings remoteSettings = new HeaderSettings();
 		flowControl = new Level3FlowControl(lowLevelParser, socketListener, remoteSettings);
 		Level2ClientStateMachine clientSm = new Level2ClientStateMachine(id, flowControl);
