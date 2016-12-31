@@ -2,7 +2,11 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-public class Http2GoAway extends AbstractHttp2Frame {
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+
+public class GoAwayFrame extends AbstractHttp2Frame {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.GOAWAY;
@@ -50,8 +54,8 @@ public class Http2GoAway extends AbstractHttp2Frame {
 
     @Override
     public String toString() {
-        return "Http2GoAway{" +
-        		super.toString() +
+        return "GoAwayFrame{" +
+        		"streamId=" + super.toString() +
                 ", lastStreamId=" + lastStreamId +
                 ", errorCode=" + errorCode +
                 ", debugData.len=" + debugData.getReadableSize() +

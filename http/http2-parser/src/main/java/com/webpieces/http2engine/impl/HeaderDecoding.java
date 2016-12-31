@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class HeaderDecoding {

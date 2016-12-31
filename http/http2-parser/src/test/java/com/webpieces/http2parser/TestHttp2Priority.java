@@ -3,8 +3,8 @@ package com.webpieces.http2parser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Priority;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class TestHttp2Priority {
     static private String priorityFrame =
@@ -25,7 +25,7 @@ public class TestHttp2Priority {
 
     @Test
     public void testCreatePriorityFrame() {
-        Http2Priority frame = new Http2Priority();
+        PriorityFrame frame = new PriorityFrame();
         frame.setStreamDependency(4);
         frame.setStreamDependencyIsExclusive(true);
         frame.setWeight((short) 0x5);
@@ -39,9 +39,9 @@ public class TestHttp2Priority {
     @Test
     public void testParsePriorityFrame() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(priorityFrame);
-        Assert.assertTrue(Http2Priority.class.isInstance(frame));
+        Assert.assertTrue(PriorityFrame.class.isInstance(frame));
 
-        Http2Priority castFrame = (Http2Priority) frame;
+        PriorityFrame castFrame = (PriorityFrame) frame;
 
         Assert.assertEquals(castFrame.getStreamDependency(), 4);
         Assert.assertTrue(castFrame.isStreamDependencyIsExclusive());
@@ -49,7 +49,7 @@ public class TestHttp2Priority {
 
     @Test
     public void testCreatePriorityFrameMSB() {
-        Http2Priority frame = new Http2Priority();
+        PriorityFrame frame = new PriorityFrame();
         frame.setStreamDependency(4);
         frame.setStreamDependencyIsExclusive(true);
         frame.setWeight((short) 0xFF);
@@ -63,9 +63,9 @@ public class TestHttp2Priority {
     @Test
     public void testParsePriorityFrameMSB() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(priorityFrameMSB);
-        Assert.assertTrue(Http2Priority.class.isInstance(frame));
+        Assert.assertTrue(PriorityFrame.class.isInstance(frame));
 
-        Http2Priority castFrame = (Http2Priority) frame;
+        PriorityFrame castFrame = (PriorityFrame) frame;
         Assert.assertEquals(castFrame.getWeight(), 255);
     }
 }

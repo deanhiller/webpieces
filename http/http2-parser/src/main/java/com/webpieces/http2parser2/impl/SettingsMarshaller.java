@@ -8,10 +8,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -23,7 +23,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-		Http2Settings castFrame = (Http2Settings) frame;
+		SettingsFrame castFrame = (SettingsFrame) frame;
 
 		byte flags = 0x0;
 		if (castFrame.isAck())
@@ -54,7 +54,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		int payloadLength = frameHeaderData.getPayloadLength();
 		int streamId = frameHeaderData.getStreamId();
         
-		Http2Settings frame = new Http2Settings();
+		SettingsFrame frame = new SettingsFrame();
 		super.unmarshalFrame(state, frame);
 
 		byte flags = state.getFrameHeaderData().getFlagsByte();

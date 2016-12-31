@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public interface ParserResult {
     boolean hasParsedFrames();

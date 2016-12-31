@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2WindowUpdate extends AbstractHttp2Frame {
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+
+public class WindowUpdateFrame extends AbstractHttp2Frame {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.WINDOW_UPDATE;
@@ -22,8 +25,9 @@ public class Http2WindowUpdate extends AbstractHttp2Frame {
 
     @Override
     public String toString() {
-        return "Http2WindowUpdate{" +
-                "windowSizeIncrement=" + windowSizeIncrement +
-                "} " + super.toString();
+        return "WindowUpdateFrame{" +
+        		"streamId=" + super.toString() +
+                ", windowSizeIncrement=" + windowSizeIncrement +
+                "} ";
     }
 }

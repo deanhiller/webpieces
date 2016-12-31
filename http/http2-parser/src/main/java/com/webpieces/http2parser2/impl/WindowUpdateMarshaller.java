@@ -7,10 +7,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
@@ -20,7 +20,7 @@ public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements F
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-		Http2WindowUpdate castFrame = (Http2WindowUpdate) frame;
+		WindowUpdateFrame castFrame = (WindowUpdateFrame) frame;
 		ByteBuffer payload = bufferPool.nextBuffer(4).putInt(castFrame.getWindowSizeIncrement());
 		payload.flip();
 
@@ -36,7 +36,7 @@ public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements F
 			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, "payload of window update must be exactly 4 and wasn't per http/2 spec");
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
-		Http2WindowUpdate frame = new Http2WindowUpdate();
+		WindowUpdateFrame frame = new WindowUpdateFrame();
 		super.unmarshalFrame(state, frame);
 
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);

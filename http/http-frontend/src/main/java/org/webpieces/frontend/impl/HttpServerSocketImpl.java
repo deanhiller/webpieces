@@ -20,7 +20,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.impl.SettingsMarshaller;
 
 
@@ -57,8 +57,8 @@ class HttpServerSocketImpl implements HttpServerSocket {
         maybeSettingsPayload.ifPresent(settingsPayload ->
         {
             try {
-                Http2Settings settingsFrame = new Http2Settings();
-                SettingsMarshaller settingsMarshaller = (SettingsMarshaller) http2Parser.getMarshaller(Http2Settings.class);
+                SettingsFrame settingsFrame = new SettingsFrame();
+                SettingsMarshaller settingsMarshaller = (SettingsMarshaller) http2Parser.getMarshaller(SettingsFrame.class);
                 Optional<DataWrapper> maybePayload;
                 if(settingsPayload.hasRemaining())
                     maybePayload = Optional.of(dataGen.wrapByteBuffer(settingsPayload));

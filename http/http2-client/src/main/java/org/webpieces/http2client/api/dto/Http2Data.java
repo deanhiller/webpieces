@@ -32,4 +32,9 @@ public class Http2Data implements PartialResponse {
 		this.payload = payload;
 	}
 
+	@Override
+	public String toString() {
+		return "Http2Data [streamId=" + streamId + ", lastPartOfResponse=" + lastPartOfResponse + ", payload=" + payload.getReadableSize()
+				+ "]";
+	}
 }

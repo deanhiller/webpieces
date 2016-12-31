@@ -22,7 +22,8 @@ public class StateMachineState implements Memento
         this.id = rawMapId+","+stateMachineId;
         this.stateName = state.getName();
         this.stateMachine = sm;
-        log = LoggerFactory.getLogger("net.sf.impl.javasm."+rawMapId+"."+stateMachineId);
+        String name = Memento.class.getPackage().getName();
+        log = LoggerFactory.getLogger(name+"."+rawMapId+"."+stateMachineId);
     }
 
     @Override

@@ -9,9 +9,9 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Priority;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class PriorityMarshaller implements FrameMarshaller {
     private BufferPool bufferPool;
@@ -29,7 +29,7 @@ public class PriorityMarshaller implements FrameMarshaller {
 
     @Override
     public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
-        Http2Priority castFrame = (Http2Priority) frame;
+        PriorityFrame castFrame = (PriorityFrame) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(5);
         payload.putInt(castFrame.getStreamDependency());
@@ -42,7 +42,7 @@ public class PriorityMarshaller implements FrameMarshaller {
 
     @Override
     public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
-        Http2Priority castFrame = (Http2Priority) frame;
+        PriorityFrame castFrame = (PriorityFrame) frame;
 
         maybePayload.ifPresent(payload -> {
             ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);

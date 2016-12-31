@@ -34,10 +34,10 @@ import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -46,7 +46,7 @@ public class TestRequestResponse {
     private HttpParser httpParser;
     private Http2Parser http2Parser;
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-    private Http2Settings settingsFrame = new Http2Settings();
+    private SettingsFrame settingsFrame = new SettingsFrame();
     private Decoder decoder;
     private List<Http2Setting> settings = new ArrayList<>();
     private static String blahblah = "blah blah blah";
@@ -112,8 +112,8 @@ public class TestRequestResponse {
         List<AbstractHttp2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
-        Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(1)));
+        Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
+        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
     }
 
@@ -146,8 +146,8 @@ public class TestRequestResponse {
         List<AbstractHttp2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
-        Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(1)));
+        Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
+        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
 
         Assert.assertArrayEquals(((DataFrame) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
@@ -185,11 +185,11 @@ public class TestRequestResponse {
         List<AbstractHttp2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(6, frames.size());
-        Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(1)));
+        Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
+        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
-        Assert.assertTrue(Http2PushPromise.class.isInstance(frames.get(3)));
-        Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(4)));
+        Assert.assertTrue(PushPromiseFrame.class.isInstance(frames.get(3)));
+        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(4)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(5)));
     }
 

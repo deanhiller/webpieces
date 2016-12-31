@@ -8,8 +8,8 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class PushPromiseMarshaller extends FrameMarshallerImpl {
     PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -18,7 +18,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
 
     @Override
     public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
-        Http2PushPromise castFrame = (Http2PushPromise) frame;
+        PushPromiseFrame castFrame = (PushPromiseFrame) frame;
 
         ByteBuffer prelude = bufferPool.nextBuffer(4);
         prelude.putInt(castFrame.getPromisedStreamId());
@@ -33,7 +33,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
 
     @Override
     public byte marshalFlags(AbstractHttp2Frame frame) {
-        Http2PushPromise castFrame = (Http2PushPromise) frame;
+        PushPromiseFrame castFrame = (PushPromiseFrame) frame;
 
         byte value = 0x0;
         if (castFrame.isEndHeaders()) value |= 0x4;
@@ -43,7 +43,7 @@ public class PushPromiseMarshaller extends FrameMarshallerImpl {
 
     @Override
     public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
-        Http2PushPromise castFrame = (Http2PushPromise) frame;
+        PushPromiseFrame castFrame = (PushPromiseFrame) frame;
 
         castFrame.setEndHeaders((flags & 0x4) == 0x4);
         castFrame.getPadding().setIsPadded((flags & 0x8) == 0x8);

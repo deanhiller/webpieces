@@ -8,9 +8,10 @@ import org.webpieces.javasm.api.Memento;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.Http2FullPushPromise;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class Level3StreamInitialization {
 
@@ -46,14 +47,26 @@ public class Level3StreamInitialization {
 		int streamId = frame.getStreamId();
 
 		Stream stream = streamIdToStream.get(streamId);
-		if (stream == null) {
-			//server can only initiate even stream ids for creating a new stream(push_promise type stuff)
-			if (streamId % 2 == 1)
-				throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId,
-						"Server sent us bad frame id per http/2 spec as in it was an odd id=" + streamId);
-			createStream(streamId);
+		if (stream == null)
+			throw new IllegalArgumentException("bug, Stream not found for frame="+frame);
+
+		Memento currentState = stream.getCurrentState();
+		clientSm.fireToClient(currentState, frame);
+	}
+
+	public void sendPushPromiseToClient(Http2FullPushPromise fullPromise) {		
+		int newStreamId = fullPromise.getStreamId();
+		if(newStreamId % 2 == 1)
+			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 
+					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect");
+
+		Stream stream = streamIdToStream.get(newStreamId);
+		if (stream != null) {
+			throw new IllegalArgumentException("bug, how does the stream exist already");
 		}
 
-		clientSm.fireToClient(frame);
+		stream = createStream(newStreamId);
+		Memento currentState = stream.getCurrentState();
+		clientSm.fireToClient(currentState, fullPromise);
 	}
 }

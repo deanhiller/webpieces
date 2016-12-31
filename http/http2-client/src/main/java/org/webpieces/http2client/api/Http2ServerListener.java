@@ -1,6 +1,6 @@
 package org.webpieces.http2client.api;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public interface Http2ServerListener {
 

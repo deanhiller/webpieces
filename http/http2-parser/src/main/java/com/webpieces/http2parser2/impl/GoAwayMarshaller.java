@@ -8,10 +8,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
 
 public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
     GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -20,7 +20,7 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-        Http2GoAway castFrame = (Http2GoAway) frame;
+        GoAwayFrame castFrame = (GoAwayFrame) frame;
 
         ByteBuffer prelude = bufferPool.nextBuffer(8);
         prelude
@@ -37,7 +37,7 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
 
 	@Override
 	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
-        Http2GoAway frame = new Http2GoAway();
+        GoAwayFrame frame = new GoAwayFrame();
         super.unmarshalFrame(state, frame);
         int streamId = state.getFrameHeaderData().getStreamId();
         if(streamId != 0)

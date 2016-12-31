@@ -10,10 +10,10 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.Http2Continuation;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.ContinuationFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class HeaderEncoding {
@@ -27,7 +27,7 @@ public class HeaderEncoding {
     }
     
     public List<Http2Frame> createPushPromises(List<Http2Header> headers, int streamId, int promisedStreamId) {
-    	Http2PushPromise promise = new Http2PushPromise();
+    	PushPromiseFrame promise = new PushPromiseFrame();
     	promise.setStreamId(streamId);
     	promise.setPromisedStreamId(promisedStreamId);
     	
@@ -51,7 +51,7 @@ public class HeaderEncoding {
             currentFrame.setHeaderFragment(fragment);
             headerFrames.add(currentFrame);
             
-            currentFrame = new Http2Continuation();
+            currentFrame = new ContinuationFrame();
             currentFrame.setStreamId(initialFrame.getStreamId());
             dataLeftOver = split.get(1);
         }

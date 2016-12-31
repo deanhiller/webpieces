@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -28,7 +28,7 @@ public class TestHttp2Settings {
 
     @Test
     public void testCreateSettings() {
-        Http2Settings frame = new Http2Settings();
+        SettingsFrame frame = new SettingsFrame();
         frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, 1L));
         frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L));
         String hexFrame = UtilsForTest.frameToHex(frame);
@@ -38,8 +38,8 @@ public class TestHttp2Settings {
         // we'll just parse it and make sure that the settings we set are set.
 
         AbstractHttp2Frame parsedFrame = UtilsForTest.frameFromHex(hexFrame);
-        Assert.assertTrue(Http2Settings.class.isInstance(frame));
-        Http2Settings castFrame = (Http2Settings) parsedFrame;
+        Assert.assertTrue(SettingsFrame.class.isInstance(frame));
+        SettingsFrame castFrame = (SettingsFrame) parsedFrame;
         
         List<Http2Setting> settings = castFrame.getSettings();
         Assert.assertEquals(2, settings.size());
@@ -56,9 +56,9 @@ public class TestHttp2Settings {
     @Test
     public void testParseSettings() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(basicSettings);
-        Assert.assertTrue(Http2Settings.class.isInstance(frame));
+        Assert.assertTrue(SettingsFrame.class.isInstance(frame));
 
-        Http2Settings castFrame = (Http2Settings) frame;
+        SettingsFrame castFrame = (SettingsFrame) frame;
         List<Http2Setting> settings = castFrame.getSettings();
         Assert.assertEquals(2, settings.size());
         
@@ -74,15 +74,15 @@ public class TestHttp2Settings {
     @Test
     public void testParseAck() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(ackFrame);
-        Assert.assertTrue(Http2Settings.class.isInstance(frame));
+        Assert.assertTrue(SettingsFrame.class.isInstance(frame));
 
-        Http2Settings castFrame = (Http2Settings) frame;
+        SettingsFrame castFrame = (SettingsFrame) frame;
         Assert.assertTrue(castFrame.isAck());
         Assert.assertEquals(castFrame.getSettings().size(), 0);
     }
     @Test
     public void testCreateAck() {
-        Http2Settings frame = new Http2Settings();
+        SettingsFrame frame = new SettingsFrame();
         frame.setAck(true);
         frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, 1L));
         frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L));

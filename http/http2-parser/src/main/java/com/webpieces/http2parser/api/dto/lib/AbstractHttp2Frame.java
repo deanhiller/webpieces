@@ -1,10 +1,10 @@
-package com.webpieces.http2parser.api.dto;
+package com.webpieces.http2parser.api.dto.lib;
 
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public abstract class AbstractHttp2Frame implements Http2Frame {
-    final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+    protected final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     //24 bits unsigned length
     public abstract Http2FrameType getFrameType(); //8bits

@@ -1,4 +1,4 @@
-package com.webpieces.http2parser.api.dto;
+package com.webpieces.http2parser.api.dto.lib;
 
 import org.webpieces.data.api.DataWrapper;
 

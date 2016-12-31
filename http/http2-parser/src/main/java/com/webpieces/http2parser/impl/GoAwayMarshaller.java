@@ -8,9 +8,9 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class GoAwayMarshaller extends FrameMarshallerImpl {
     GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -24,7 +24,7 @@ public class GoAwayMarshaller extends FrameMarshallerImpl {
 
     @Override
     public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
-        Http2GoAway castFrame = (Http2GoAway) frame;
+        GoAwayFrame castFrame = (GoAwayFrame) frame;
 
         ByteBuffer prelude = bufferPool.nextBuffer(8);
         prelude.putInt(castFrame.getLastStreamId()).putInt(castFrame.getErrorCode().getCode());
@@ -38,7 +38,7 @@ public class GoAwayMarshaller extends FrameMarshallerImpl {
 
     @Override
     public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
-        Http2GoAway castFrame = (Http2GoAway) frame;
+        GoAwayFrame castFrame = (GoAwayFrame) frame;
 
         maybePayload.ifPresent(payload ->
                 {

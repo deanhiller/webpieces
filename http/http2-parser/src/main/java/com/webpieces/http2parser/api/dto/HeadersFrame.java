@@ -6,9 +6,14 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
+import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
+public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
@@ -116,8 +121,8 @@ public class Http2HeadersFrame extends AbstractHttp2Frame implements HasHeaderFr
 
     @Override
     public String toString() {
-        return "Http2Headers{" +
-        		super.toString() +
+        return "HeadersFrame{" +
+        		"streamId=" + super.toString() +
                 ", endStream=" + endStream +
                 ", endHeaders=" + endHeaders +
                 ", priority=" + priority +

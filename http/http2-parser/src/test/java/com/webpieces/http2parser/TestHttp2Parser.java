@@ -1,6 +1,6 @@
 package com.webpieces.http2parser;
 
-import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -22,11 +22,11 @@ import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2FrameType;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
@@ -268,7 +268,7 @@ public class TestHttp2Parser {
         Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
         Assert.assertTrue(((HasHeaderFragment) headerFrames.get(1)).isEndHeaders());
         Assert.assertFalse(((HasHeaderFragment) headerFrames.get(0)).isEndHeaders());
-        Assert.assertEquals(((Http2PushPromise) headerFrames.get(0)).getPromisedStreamId(), 0x1);
+        Assert.assertEquals(((PushPromiseFrame) headerFrames.get(0)).getPromisedStreamId(), 0x1);
         Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
     }
 
@@ -297,7 +297,7 @@ public class TestHttp2Parser {
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
         AbstractHttp2Frame headerFrame = result.getParsedFrames().get(4);
         Assert.assertEquals(headerFrame.getFrameType(), HEADERS);
-        Assert.assertEquals(((Http2HeadersFrame) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
+        Assert.assertEquals(((HeadersFrame) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
     }
 
     @Test

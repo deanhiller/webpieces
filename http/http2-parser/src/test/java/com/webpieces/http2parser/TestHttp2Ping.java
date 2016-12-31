@@ -3,8 +3,8 @@ package com.webpieces.http2parser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Ping;
+import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class TestHttp2Ping {
     private static String pingFrame =
@@ -24,7 +24,7 @@ public class TestHttp2Ping {
 
     @Test
     public void testCreatePingFrame() {
-        Http2Ping frame = new Http2Ping();
+        PingFrame frame = new PingFrame();
         frame.setOpaqueData(0x10);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
@@ -33,7 +33,7 @@ public class TestHttp2Ping {
 
     @Test
     public void testCreatePongFrame() {
-        Http2Ping frame = new Http2Ping();
+        PingFrame frame = new PingFrame();
         frame.setOpaqueData(0x10);
         frame.setIsPingResponse(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
@@ -44,9 +44,9 @@ public class TestHttp2Ping {
     @Test
     public void testParsePingFrame() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(pingFrame);
-        Assert.assertTrue(Http2Ping.class.isInstance(frame));
+        Assert.assertTrue(PingFrame.class.isInstance(frame));
 
-        Http2Ping castFrame = (Http2Ping) frame;
+        PingFrame castFrame = (PingFrame) frame;
         Assert.assertFalse(castFrame.isPingResponse());
         Assert.assertEquals(castFrame.getOpaqueData(), 0x10);
     }
@@ -54,9 +54,9 @@ public class TestHttp2Ping {
     @Test
     public void testParsePongFrame() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(pongFrame);
-        Assert.assertTrue(Http2Ping.class.isInstance(frame));
+        Assert.assertTrue(PingFrame.class.isInstance(frame));
 
-        Http2Ping castFrame = (Http2Ping) frame;
+        PingFrame castFrame = (PingFrame) frame;
         Assert.assertTrue(castFrame.isPingResponse());
         Assert.assertEquals(castFrame.getOpaqueData(), 0x10);
     }

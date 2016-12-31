@@ -7,10 +7,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Ping;
+import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class PingMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
@@ -20,7 +20,7 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-		Http2Ping ping = (Http2Ping) frame;
+		PingFrame ping = (PingFrame) frame;
         ByteBuffer payload = bufferPool.nextBuffer(8);
         payload.putLong(ping.getOpaqueData());
         payload.flip();		
@@ -44,7 +44,7 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
-        Http2Ping frame = new Http2Ping();
+        PingFrame frame = new PingFrame();
 		super.unmarshalFrame(state, frame);
 		
 		byte flags = state.getFrameHeaderData().getFlagsByte();

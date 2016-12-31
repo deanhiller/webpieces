@@ -1,6 +1,6 @@
 package org.webpieces.httpcommon.impl;
 
-import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
@@ -29,16 +29,16 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2Ping;
-import com.webpieces.http2parser.api.dto.Http2Priority;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -83,7 +83,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleHeaders(Http2HeadersFrame frame, Stream stream) {
+    private void handleHeaders(HeadersFrame frame, Stream stream) {
         boolean isTrailer = false;
         switch (stream.getStatus()) {
             case IDLE:
@@ -146,12 +146,12 @@ class Http2DataListener implements DataListener {
     }
 
 
-    private void handlePriority(Http2Priority frame, Stream stream) {
+    private void handlePriority(PriorityFrame frame, Stream stream) {
         // Can be received in any state. We aren't doing anything with this right now.
         stream.setPriorityDetails(frame.getPriorityDetails());
     }
 
-    private void handleRstStream(Http2RstStream frame, Stream stream) {
+    private void handleRstStream(RstStreamFrame frame, Stream stream) {
         switch(stream.getStatus()) {
             case OPEN:
             case HALF_CLOSED_REMOTE:
@@ -167,7 +167,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handlePushPromise(Http2PushPromise frame, Stream stream) {
+    private void handlePushPromise(PushPromiseFrame frame, Stream stream) {
         if(this.http2EngineImpl.side == SERVER) {
             // Can't get pushpromise in the server
             throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
@@ -205,7 +205,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleWindowUpdate(Http2WindowUpdate frame, Stream stream) {
+    private void handleWindowUpdate(WindowUpdateFrame frame, Stream stream) {
         if(frame.getWindowSizeIncrement() == 0) {
             throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
         }
@@ -229,7 +229,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleSettings(Http2Settings frame) {
+    private void handleSettings(SettingsFrame frame) {
         if(frame.isAck()) {
             // we received an ack, so the settings we sent have been accepted.
             for(Map.Entry<SettingsParameter, Long> entry: this.http2EngineImpl.localRequestedSettings.entrySet()) {
@@ -241,7 +241,7 @@ class Http2DataListener implements DataListener {
     }
 
     // TODO: actually deal with this goaway stuff where necessary
-    private void handleGoAway(Http2GoAway frame) {
+    private void handleGoAway(GoAwayFrame frame) {
         this.http2EngineImpl.remoteGoneAway = true;
         this.http2EngineImpl.goneAwayLastStreamId = frame.getLastStreamId();
         this.http2EngineImpl.goneAwayErrorCode = frame.getErrorCode();
@@ -249,7 +249,7 @@ class Http2DataListener implements DataListener {
         farEndClosed(this.http2EngineImpl.channel);
     }
 
-    private void handlePing(Http2Ping frame) {
+    private void handlePing(PingFrame frame) {
         if(!frame.isPingResponse()) {
             // Send the same frame back, setting ping response
             frame.setIsPingResponse(true);
@@ -294,19 +294,19 @@ class Http2DataListener implements DataListener {
                     handleData((DataFrame) frame, stream);
                     break;
                 case HEADERS:
-                    handleHeaders((Http2HeadersFrame) frame, stream);
+                    handleHeaders((HeadersFrame) frame, stream);
                     break;
                 case PRIORITY:
-                    handlePriority((Http2Priority) frame, stream);
+                    handlePriority((PriorityFrame) frame, stream);
                     break;
                 case RST_STREAM:
-                    handleRstStream((Http2RstStream) frame, stream);
+                    handleRstStream((RstStreamFrame) frame, stream);
                     break;
                 case PUSH_PROMISE:
-                    handlePushPromise((Http2PushPromise) frame, stream);
+                    handlePushPromise((PushPromiseFrame) frame, stream);
                     break;
                 case WINDOW_UPDATE:
-                    handleWindowUpdate((Http2WindowUpdate) frame, stream);
+                    handleWindowUpdate((WindowUpdateFrame) frame, stream);
                     break;
                 case CONTINUATION:
                     throw new InternalError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2EngineImpl.wrapperGen.emptyWrapper());
@@ -317,16 +317,16 @@ class Http2DataListener implements DataListener {
         } else {
             switch (frame.getFrameType()) {
                 case WINDOW_UPDATE:
-                    handleWindowUpdate((Http2WindowUpdate) frame, null);
+                    handleWindowUpdate((WindowUpdateFrame) frame, null);
                     break;
                 case SETTINGS:
-                    handleSettings((Http2Settings) frame);
+                    handleSettings((SettingsFrame) frame);
                     break;
                 case GOAWAY:
-                    handleGoAway((Http2GoAway) frame);
+                    handleGoAway((GoAwayFrame) frame);
                     break;
                 case PING:
-                    handlePing((Http2Ping) frame);
+                    handlePing((PingFrame) frame);
                     break;
                 default:
                     throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR,

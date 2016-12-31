@@ -10,15 +10,16 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
+import com.webpieces.http2engine.api.Http2FullPushPromise;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Level2AggregateDecodeHeaders {
@@ -58,28 +59,29 @@ public class Level2AggregateDecodeHeaders {
 			throw new IllegalArgumentException("HasHeaderFragments are required to be consecutive per spec but somehow are not.  accumulatedFrames="+accumulatingHeaders);
 		} else if(lowLevelFrame instanceof DataFrame) {
 			incomingData((DataFrame) lowLevelFrame);
+			return;
 		}
 		
 		int streamId = lowLevelFrame.getStreamId();
 		if(streamId != 0)
 			throw new IllegalArgumentException("Incoming control frame did not have stream id==0.  frame="+lowLevelFrame);
 		
-		if(lowLevelFrame instanceof Http2Settings) {
-			Http2Settings settings = (Http2Settings) lowLevelFrame;
+		if(lowLevelFrame instanceof SettingsFrame) {
+			SettingsFrame settings = (SettingsFrame) lowLevelFrame;
 			processHttp2SettingsFrame(settings);
 		} else {
 			flowControlLevel5.sendControlFrameToClient(lowLevelFrame);
 		}
 	}
 
-	private void processHttp2SettingsFrame(Http2Settings settings) {
+	private void processHttp2SettingsFrame(SettingsFrame settings) {
 		if(settings.isAck()) {
 			log.info("server acked our settings frame");
 		} else {
 			log.info("applying remote settings frame");
 			flowControlLevel5.applyRemoteSettings(settings);
 			//now that settings is applied, ack the settings
-			Http2Settings settingsAck = new Http2Settings(true);
+			SettingsFrame settingsAck = new SettingsFrame(true);
 			
 			log.info("sending remote settings ack frame");
 			flowControlLevel5.sendControlDataToSocket(settingsAck);
@@ -101,23 +103,28 @@ public class Level2AggregateDecodeHeaders {
 		
 		HasHeaderFragment first = accumulatingHeaders.get(0);
 		accumulatingHeaders.clear(); //clear the headers
-		
-		if(first instanceof Http2HeadersFrame) {
-			Http2HeadersFrame f = (Http2HeadersFrame) first;
-			
-			List<Http2Header> headers = decoder.decode(allData);
 
+		List<Http2Header> headers = decoder.decode(allData);
+
+		if(first instanceof HeadersFrame) {
+
+			HeadersFrame f = (HeadersFrame) first;
 			Http2FullHeaders fullHeaderPayload = new Http2FullHeaders();
 			fullHeaderPayload.setStreamId(first.getStreamId());
 			fullHeaderPayload.setPriorityDetails(f.getPriorityDetails());
 			fullHeaderPayload.setHeaderList(headers);
 			
-			log.info("sending to client full header="+fullHeaderPayload);
 			nextLayer.sendPayloadToClient(fullHeaderPayload);
-		} else if(first instanceof Http2PushPromise) {
-			throw new UnsupportedOperationException("not supported yet="+first);
+		} else if(first instanceof PushPromiseFrame) {
+			PushPromiseFrame promise = (PushPromiseFrame) first;
+			
+			Http2FullPushPromise fullPromise = new Http2FullPushPromise();
+			fullPromise.setStreamId(promise.getPromisedStreamId());
+			fullPromise.setOriginalStreamId(promise.getStreamId());
+			fullPromise.setHeaderList(headers);
+			
+			nextLayer.sendPushPromiseToClient(fullPromise);
 		}
-		
 	}
 	
 	public void incomingData(Http2Payload f) {

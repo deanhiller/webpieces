@@ -6,7 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 
 public interface Http2ClientEngine extends Http2Engine {
     // These are both needed to give the RequestSender the ability to deal with negotiating http1.1 vs http2.
@@ -36,7 +36,7 @@ public interface Http2ClientEngine extends Http2Engine {
      *
      * @return
      */
-    Http2Settings getLocalRequestedSettingsFrame();
+    SettingsFrame getLocalRequestedSettingsFrame();
 
 
     /**

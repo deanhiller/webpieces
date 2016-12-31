@@ -8,7 +8,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshaller  {
 

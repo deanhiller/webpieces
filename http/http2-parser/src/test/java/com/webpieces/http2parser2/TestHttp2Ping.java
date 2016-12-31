@@ -7,7 +7,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import com.webpieces.http2parser.UtilsForTest;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.Http2Ping;
+import com.webpieces.http2parser.api.dto.PingFrame;
 
 public class TestHttp2Ping {
 	
@@ -36,7 +36,7 @@ public class TestHttp2Ping {
 
     @Test
     public void testCreatePingFrame() {
-        Http2Ping frame = new Http2Ping();
+        PingFrame frame = new PingFrame();
         frame.setOpaqueData(0x10);
         
         byte[] data = parser.marshal(frame).createByteArray();
@@ -47,7 +47,7 @@ public class TestHttp2Ping {
     
     @Test
     public void testCreatePongFrame() {
-        Http2Ping frame = new Http2Ping();
+        PingFrame frame = new PingFrame();
         frame.setOpaqueData(0x10);
         frame.setIsPingResponse(true);
 

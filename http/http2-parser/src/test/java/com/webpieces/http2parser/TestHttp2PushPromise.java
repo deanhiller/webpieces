@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import org.junit.Test;
 
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class TestHttp2PushPromise {
@@ -24,7 +24,7 @@ public class TestHttp2PushPromise {
 
     @Test
     public void testCreatePushPromiseFrame() {
-        Http2PushPromise frame = new Http2PushPromise();
+        PushPromiseFrame frame = new PushPromiseFrame();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         frame.setHeaderFragment(parser.serializeHeaders(basicRequestHeaders, encoder, out));
         frame.setPromisedStreamId(5);

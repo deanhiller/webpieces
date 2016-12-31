@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2Headers implements PartialResponse {
+public class Http2Push implements PartialResponse {
 
 	private int streamId;
 	private boolean lastPartOfResponse = false;
@@ -15,8 +15,8 @@ public class Http2Headers implements PartialResponse {
 	//be looked up by key.
 	private transient Http2HeaderStruct headersStruct = new Http2HeaderStruct();
 
-	public Http2Headers() {}
-	public Http2Headers(List<Http2Header> headerList) {
+	public Http2Push() {}
+	public Http2Push(List<Http2Header> headerList) {
 		for(Http2Header header : headerList) {
 			addHeader(header);
 		}
@@ -58,7 +58,7 @@ public class Http2Headers implements PartialResponse {
 	
 	@Override
 	public String toString() {
-		return "Http2Headers [streamId=" + streamId + ", lastPartOfResponse=" + lastPartOfResponse + ", headers="
-				+ headers + "]";
+		return "Http2Push [streamId=" + streamId + ", lastPartOfResponse=" + lastPartOfResponse + ", headers=" + headers
+				+ "]";
 	}
 }

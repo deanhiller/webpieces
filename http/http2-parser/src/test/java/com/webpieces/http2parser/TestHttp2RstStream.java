@@ -3,9 +3,9 @@ package com.webpieces.http2parser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class TestHttp2RstStream {
     private static String connectError =
@@ -16,7 +16,7 @@ public class TestHttp2RstStream {
             "00 00 00 0A"; // payload
     @Test
     public void testCreateRstStream() {
-        Http2RstStream frame = new Http2RstStream();
+        RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(0x4);
         frame.setErrorCode(Http2ErrorCode.CONNECT_ERROR);
         String hexFrame = UtilsForTest.frameToHex(frame);
@@ -26,8 +26,8 @@ public class TestHttp2RstStream {
 
     @Test public void testParseRstStream() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(connectError);
-        Assert.assertTrue(Http2RstStream.class.isInstance(frame));
-        Http2RstStream castFrame = (Http2RstStream) frame;
+        Assert.assertTrue(RstStreamFrame.class.isInstance(frame));
+        RstStreamFrame castFrame = (RstStreamFrame) frame;
 
         Assert.assertEquals(castFrame.getStreamId(), 4);
         Assert.assertEquals(castFrame.getErrorCode(), Http2ErrorCode.CONNECT_ERROR);

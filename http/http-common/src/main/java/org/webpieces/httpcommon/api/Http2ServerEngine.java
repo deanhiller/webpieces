@@ -6,7 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 
 public interface Http2ServerEngine extends Http2Engine {
     // TODO: Figure out if the sendResponse/sendData/sendTrailer should just be in ResponseSender and Http2ServerEngineImpl
@@ -59,5 +59,5 @@ public interface Http2ServerEngine extends Http2Engine {
      *                we don't want to send an ack. The response to the Upgrade request is
      *                the implied ack.
      */
-    void setRemoteSettings(Http2Settings frame, boolean sendAck);
+    void setRemoteSettings(SettingsFrame frame, boolean sendAck);
 }

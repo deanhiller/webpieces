@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -22,7 +22,7 @@ public class Http2SettingsMap extends HashMap<SettingsParameter, Long> {
 	public Http2SettingsMap() {
 	}
 
-	public void fillFrame(Http2Settings settingsFrame) {
+	public void fillFrame(SettingsFrame settingsFrame) {
 		for(Entry<SettingsParameter, Long> entry : this.entrySet()) {
 			settingsFrame.addSetting(new Http2Setting(entry.getKey(), entry.getValue()));
 		}

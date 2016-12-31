@@ -14,10 +14,10 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParsedStatus;
 import com.webpieces.http2parser.api.Http2Parser2;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2FrameType;
-import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
+import com.webpieces.http2parser.api.dto.UnknownFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 
 public class Http2Parser2Impl implements Http2Parser2 {
 
@@ -87,7 +87,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
 				throw new IllegalArgumentException("bug, our developer forgot to add marshaller and only added the enum="+frameType);
 			frame = marshaller.unmarshal(state, framePayloadData);
     	} else {
-    		frame = new Http2UnknownFrame(
+    		frame = new UnknownFrame(
     				headerData.getFlagsByte(),
     				headerData.getFrameTypeId(),
     				headerData.getStreamId(),

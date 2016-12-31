@@ -12,7 +12,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class UtilsForTest {
     private static Base64.Encoder encoder = Base64.getEncoder();

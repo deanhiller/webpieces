@@ -7,7 +7,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import com.webpieces.http2parser.UtilsForTest;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.Http2Priority;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
 
 public class TestHttp2Priority {
     private static Http2Parser2 parser = Http2ParserFactory.createParser2(new BufferCreationPool());
@@ -36,7 +36,7 @@ public class TestHttp2Priority {
 
     @Test
     public void testCreatePriorityFrame() {
-        Http2Priority frame = new Http2Priority();
+        PriorityFrame frame = new PriorityFrame();
         frame.setStreamDependency(4);
         frame.setStreamDependencyIsExclusive(true);
         frame.setWeight((short) 0x5);
@@ -59,7 +59,7 @@ public class TestHttp2Priority {
 //
     @Test
     public void testCreatePriorityFrameMSB() {
-        Http2Priority frame = new Http2Priority();
+        PriorityFrame frame = new PriorityFrame();
         frame.setStreamDependency(4);
         frame.setStreamDependencyIsExclusive(true);
         frame.setWeight((short) 0xFF);

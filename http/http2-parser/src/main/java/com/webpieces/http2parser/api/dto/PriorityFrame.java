@@ -1,6 +1,10 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2Priority extends AbstractHttp2Frame implements HasPriorityDetails {
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+
+public class PriorityFrame extends AbstractHttp2Frame implements HasPriorityDetails {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PRIORITY;
@@ -48,9 +52,10 @@ public class Http2Priority extends AbstractHttp2Frame implements HasPriorityDeta
 
     @Override
     public String toString() {
-        return "Http2Priority{" +
+        return "PriorityFrame{" +
+        		"streamId=" + super.toString() +
                 "priorityDetails=" + priorityDetails +
-                "} " + super.toString();
+                "} ";
     }
 
     @Override

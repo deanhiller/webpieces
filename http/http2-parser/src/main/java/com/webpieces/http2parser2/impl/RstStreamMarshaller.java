@@ -7,10 +7,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class RstStreamMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 	RstStreamMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -19,7 +19,7 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-		Http2RstStream castFrame = (Http2RstStream) frame;
+		RstStreamFrame castFrame = (RstStreamFrame) frame;
 
 		ByteBuffer payload = bufferPool.nextBuffer(4);
 		payload.putInt(castFrame.getErrorCode().getCode());
@@ -37,7 +37,7 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
-		Http2RstStream frame = new Http2RstStream();
+		RstStreamFrame frame = new RstStreamFrame();
 		super.unmarshalFrame(state, frame);
 
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);

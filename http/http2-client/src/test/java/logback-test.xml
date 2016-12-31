@@ -53,9 +53,8 @@
     <logger name="jdbc.resultset" level="WARN"/>
     <logger name="jdbc.connection" level="WARN"/>
     
-    <!-- this will crush performance if uncommented, but it's useful to see interactions with cassandra.  Leave it commented out unless you know what you are doing. -->
-    <!-- logger name="com.alvazan.orm.layer9z.spi.db.cassandra.CassandraSession" level="TRACE"/ -->
-  
+    <logger name="org.webpieces.javasm.api" level="DEBUG"/>    
+    
 	<root>
 		<level value="INFO" />
 		<appender-ref ref="STDOUT"/>

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class TestHttp2Headers {
@@ -38,7 +38,7 @@ public class TestHttp2Headers {
     private Encoder encoder = new Encoder(4096);
     @Test
     public void testCreateRequestHeadersFrame() {
-        Http2HeadersFrame frame = new Http2HeadersFrame();
+        HeadersFrame frame = new HeadersFrame();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         frame.setHeaderFragment(parser.serializeHeaders(basicRequestHeaders, encoder, out));
         frame.setEndHeaders(true);
@@ -49,7 +49,7 @@ public class TestHttp2Headers {
 
     @Test
     public void testCreateResponseHeadersFrame() {
-        Http2HeadersFrame frame = new Http2HeadersFrame();
+        HeadersFrame frame = new HeadersFrame();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         frame.setHeaderFragment(parser.serializeHeaders(basicResponseHeaders, encoder, out));
         frame.setEndHeaders(true);

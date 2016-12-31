@@ -12,13 +12,12 @@ import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.http2client.api.dto.Http2Headers;
-import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
@@ -27,10 +26,10 @@ public class IntegNgHttp2 {
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
     private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    static private CompletableFuture<Void> sendManyTimes(Http2Socket socket, int n, Http2Request req, Http2ResponseListener l) {
+    static private CompletableFuture<Void> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
         if(n > 0) {
         	log.info("send request");
-            return socket.send(req)
+            return socket.sendRequest(req, l, true)
                     .thenCompose(response -> sendManyTimes(socket, n-1, req, l));
         } else {
             return CompletableFuture.completedFuture(null);
@@ -45,7 +44,7 @@ public class IntegNgHttp2 {
         if(isHttp)
             port = 80;
 
-        Http2Request req = createRequest(host, isHttp);
+        Http2Headers req = createRequest(host, isHttp);
 
         log.info("starting socket");
         ChunkedResponseListener listener = new ChunkedResponseListener();
@@ -93,8 +92,8 @@ public class IntegNgHttp2 {
 
 		@Override
 		public void incomingControlFrame(Http2Frame lowLevelFrame) {
-			if(lowLevelFrame instanceof Http2GoAway) {
-				Http2GoAway goAway = (Http2GoAway) lowLevelFrame;
+			if(lowLevelFrame instanceof GoAwayFrame) {
+				GoAwayFrame goAway = (GoAwayFrame) lowLevelFrame;
 				DataWrapper debugData = goAway.getDebugData();
 				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
 				log.info("go away received.  debug="+debug);
@@ -122,12 +121,12 @@ public class IntegNgHttp2 {
 
 		@Override
 		public void incomingPushPromise(PartialResponse response) {
-			log.info("incoming push promise");
+			log.info("incoming push promise="+response);
 		}
 		
 	}
 
-    private static Http2Request createRequest(String host, boolean isHttp) {
+    private static Http2Headers createRequest(String host, boolean isHttp) {
     	String scheme;
     	if(isHttp)
     		scheme = "http";
@@ -144,8 +143,6 @@ public class IntegNgHttp2 {
         req.addHeader(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
         req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "nghttp2/1.15.0"));
         
-        Http2Request request = new Http2Request();
-        request.setHeaders(req);
-        return request;
+        return req;
     }
 }

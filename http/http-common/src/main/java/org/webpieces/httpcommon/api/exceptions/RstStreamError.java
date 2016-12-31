@@ -3,9 +3,9 @@ package org.webpieces.httpcommon.api.exceptions;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class RstStreamError extends Http2Error {
     private Http2ErrorCode errorCode;
@@ -22,7 +22,7 @@ public class RstStreamError extends Http2Error {
 
     @Override
     public List<AbstractHttp2Frame> toFrames() {
-        Http2RstStream frame = new Http2RstStream();
+        RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(streamId);
         frame.setErrorCode(errorCode);
         List<AbstractHttp2Frame> frames = new ArrayList<>();

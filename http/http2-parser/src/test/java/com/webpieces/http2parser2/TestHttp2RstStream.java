@@ -7,8 +7,8 @@ import org.webpieces.data.api.BufferCreationPool;
 import com.webpieces.http2parser.UtilsForTest;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class TestHttp2RstStream {
 	
@@ -25,7 +25,7 @@ public class TestHttp2RstStream {
     }
     @Test
     public void testCreateRstStream() {
-        Http2RstStream frame = new Http2RstStream();
+        RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(0x4);
         frame.setErrorCode(Http2ErrorCode.CONNECT_ERROR);
 

@@ -43,7 +43,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class RequestSenderImpl implements RequestSender {
@@ -143,7 +143,7 @@ public class RequestSenderImpl implements RequestSender {
             log.info("attempting http11 upgrade");
             req.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
             req.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
-            Http2Settings settingsFrame = this.http2ClientEngine.getLocalRequestedSettingsFrame();
+            SettingsFrame settingsFrame = this.http2ClientEngine.getLocalRequestedSettingsFrame();
 
             // For some reason we need to add a " " after the base64urlencoded settings to get this to work
             // against nghttp2.org ?

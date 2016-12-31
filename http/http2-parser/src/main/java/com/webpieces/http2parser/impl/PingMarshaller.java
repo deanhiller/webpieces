@@ -8,8 +8,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.impl.ByteBufferDataWrapper;
 
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2Ping;
+import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class PingMarshaller extends FrameMarshallerImpl {
     public PingMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -18,7 +18,7 @@ public class PingMarshaller extends FrameMarshallerImpl {
 
     @Override
     public byte marshalFlags(AbstractHttp2Frame frame) {
-        Http2Ping castFrame = (Http2Ping) frame;
+        PingFrame castFrame = (PingFrame) frame;
 
         byte value = 0x0;
         if (castFrame.isPingResponse()) value |= 0x1;
@@ -27,7 +27,7 @@ public class PingMarshaller extends FrameMarshallerImpl {
 
     @Override
     public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
-        Http2Ping castFrame = (Http2Ping) frame;
+        PingFrame castFrame = (PingFrame) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(8);
         payload.putLong(castFrame.getOpaqueData());
@@ -38,7 +38,7 @@ public class PingMarshaller extends FrameMarshallerImpl {
 
     @Override
     public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
-        Http2Ping castFrame = (Http2Ping) frame;
+        PingFrame castFrame = (PingFrame) frame;
         castFrame.setIsPingResponse((flags & 0x1) == 0x1);
         maybePayload.ifPresent(payload -> {
             ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);

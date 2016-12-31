@@ -13,9 +13,9 @@ import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.UnknownFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class IntegColoradoEdu {
 
@@ -64,8 +64,8 @@ public class IntegColoradoEdu {
 
 		@Override
 		public void incomingControlFrame(Http2Frame lowLevelFrame) {
-			if(lowLevelFrame instanceof Http2GoAway) {
-				Http2GoAway goAway = (Http2GoAway) lowLevelFrame;
+			if(lowLevelFrame instanceof GoAwayFrame) {
+				GoAwayFrame goAway = (GoAwayFrame) lowLevelFrame;
 				DataWrapper debugData = goAway.getDebugData();
 				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
 				log.info("go away received.  debug="+debug);

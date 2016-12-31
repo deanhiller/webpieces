@@ -9,10 +9,11 @@ import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
+import com.webpieces.http2engine.api.Http2FullPushPromise;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 
 public class Level4ClientStateMachine {
 
@@ -45,7 +46,8 @@ public class Level4ClientStateMachine {
 		Http2Event recvHeaders = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS);
 		Http2Event receivedResetStream = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.RESET_STREAM);
 		Http2Event recvEndStreamFlag = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG);
-		Http2Event dateSend = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA);
+		Http2Event dataSend = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA);
+		Http2Event dataRecv = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA);
 		
 		stateMachine.createTransition(idleState, openState, sentHeaders);
 		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
@@ -56,7 +58,11 @@ public class Level4ClientStateMachine {
 		stateMachine.createTransition(halfClosedLocal, closed, recvEndStreamFlag, receivedResetStream, sentResetStream);
 		
 		//extra transitions defined such that we can catch unknown transitions
-		stateMachine.createTransition(openState, openState, dateSend);
+		stateMachine.createTransition(openState, openState, dataSend, sentHeaders);
+
+		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeaders, dataRecv);
+		
+		
 	}
 
 	private static class NoTransitionImpl implements NoTransitionListener {
@@ -89,17 +95,27 @@ public class Level4ClientStateMachine {
 			return Http2PayloadType.HEADERS;
 		} else if(payload instanceof DataFrame) {
 			return Http2PayloadType.DATA;
-		} else if(payload instanceof Http2PushPromise) {
+		} else if(payload instanceof Http2FullPushPromise) {
 			return Http2PayloadType.PUSH_PROMISE;
 		} else
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}
 
-	public void fireToClient(Http2Payload payload) {
-		throw new UnsupportedOperationException("not done here yet to client="+payload);
+	public void fireToClient(Memento currentState, Http2Payload payload) {
+		testStateTransition(currentState, payload); //validates state transition is ok
+
+		//if no exceptions occurred, send it on to flow control layer
+		flowControl.sendPayloadToClient(payload);
 	}
 
-
-
+	public void testStateTransition(Memento currentState, Http2Payload payload) {
+		Http2PayloadType payloadType = translate(payload);
+		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
+		
+		stateMachine.fireEvent(currentState, event);
+		
+		if(payload.isEndStream())
+			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG));
+	}
 
 }

@@ -6,9 +6,13 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2PushPromise extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList {
+public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PUSH_PROMISE;
@@ -73,10 +77,10 @@ public class Http2PushPromise extends AbstractHttp2Frame implements HasHeaderFra
 
     @Override
     public String toString() {
-        return "Http2PushPromise{" +
+        return "PushPromiseFrame{" +
                 "endHeaders=" + endHeaders +
                 ", promisedStreamId=" + promisedStreamId +
-                ", serializeHeaders=" + headerFragment +
+                ", serializeHeaders=" + headerFragment.getReadableSize() +
                 ", padding=" + padding +
                 "} " + super.toString();
     }

@@ -7,10 +7,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.Http2Priority;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class PriorityMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
@@ -20,7 +20,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-		Http2Priority castFrame = (Http2Priority) frame;
+		PriorityFrame castFrame = (PriorityFrame) frame;
         ByteBuffer payload = bufferPool.nextBuffer(5);
         payload.putInt(castFrame.getStreamDependency());
         if (castFrame.isStreamDependencyIsExclusive()) 
@@ -42,7 +42,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
-        Http2Priority frame = new Http2Priority();
+        PriorityFrame frame = new PriorityFrame();
 		super.unmarshalFrame(state, frame);
 
         ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);

@@ -21,9 +21,9 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 
 public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2ServerEngine {
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
@@ -135,7 +135,7 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     }
 
     @Override
-    void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(HeadersFrame frame, boolean isTrailer, Stream stream) {
         if(isTrailer) {
             requestListener.incomingTrailer(frame.getHeaderList(), stream.getRequestId(), frame.isEndStream(), responseSender);
         } else {
@@ -147,13 +147,13 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     }
 
     @Override
-    void sideSpecificHandleRstStream(Http2RstStream frame, Stream stream) {
+    void sideSpecificHandleRstStream(RstStreamFrame frame, Stream stream) {
         // TODO: change incomingError to failure and fix the exception types
         responseSender.sendException(null);
     }
 
     @Override
-    public void setRemoteSettings(Http2Settings frame, boolean sendAck) {
+    public void setRemoteSettings(SettingsFrame frame, boolean sendAck) {
         super.setRemoteSettings(frame, sendAck);
     }
 }

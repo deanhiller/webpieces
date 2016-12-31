@@ -1,10 +1,10 @@
-package com.webpieces.http2parser.api.dto;
+package com.webpieces.http2parser.api.dto.lib;
 
 public interface HasPriorityDetails {
     class PriorityDetails {
-        boolean streamDependencyIsExclusive = false; //1 bit
-        int streamDependency = 0x0; //31 bits
-        short weight = 0x0; //8
+        public boolean streamDependencyIsExclusive = false; //1 bit
+        public int streamDependency = 0x0; //31 bits
+        public short weight = 0x0; //8
 
         public boolean isStreamDependencyIsExclusive() {
             return streamDependencyIsExclusive;

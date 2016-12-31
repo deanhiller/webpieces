@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public interface FrameMarshaller {
     DataWrapper marshalPayload(AbstractHttp2Frame frame);

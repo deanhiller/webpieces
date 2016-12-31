@@ -1,7 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
-import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.PUSH_PROMISE;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_ENABLE_PUSH;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_HEADER_TABLE_SIZE;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE;
@@ -69,13 +69,13 @@ import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2Ping;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -189,14 +189,14 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     @Override
     public void sendLocalRequestedSettings() {
-        Http2Settings settingsFrame = new Http2Settings();
+        SettingsFrame settingsFrame = new SettingsFrame();
 
         localRequestedSettings.fillFrame(settingsFrame);
         log.info("sending settings: " + settingsFrame);
         channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
     }
 
-    void setRemoteSettings(Http2Settings frame, boolean sendAck) {
+    void setRemoteSettings(SettingsFrame frame, boolean sendAck) {
     	
     	Http2SettingsMap setMap = new Http2SettingsMap(frame.getSettings());
         // We've received a settings. Check for legit-ness.
@@ -242,7 +242,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
                     new UpdateMinimum(setMap.get(SETTINGS_HEADER_TABLE_SIZE).intValue()));
         }
         if(sendAck) {
-            Http2Settings responseFrame = new Http2Settings();
+            SettingsFrame responseFrame = new SettingsFrame();
             responseFrame.setAck(true);
             log.info("sending settings ack: " + responseFrame);
             channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
@@ -262,8 +262,8 @@ public abstract class Http2EngineImpl implements Http2Engine {
         return dataListener;
     }
 
-    Http2Settings getLocalRequestedSettingsFrame() {
-        Http2Settings settingsFrame = new Http2Settings();
+    SettingsFrame getLocalRequestedSettingsFrame() {
+        SettingsFrame settingsFrame = new SettingsFrame();
         localRequestedSettings.fillFrame(settingsFrame);
         return settingsFrame;
     }
@@ -544,7 +544,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     private class SendPing extends TimerTask {
         @Override
         public void run() {
-            Http2Ping pingFrame = new Http2Ping();
+            PingFrame pingFrame = new PingFrame();
             pingFrame.setOpaqueData(System.nanoTime());
             channel.write(ByteBuffer.wrap(http2Parser.marshal(pingFrame).createByteArray()));
         }
@@ -593,7 +593,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         incomingFlowControl.get(0x0).addAndGet(length);
         incomingFlowControl.get(streamId).addAndGet(length);
 
-        Http2WindowUpdate frame = new Http2WindowUpdate();
+        WindowUpdateFrame frame = new WindowUpdateFrame();
         frame.setWindowSizeIncrement(length);
         frame.setStreamId(0x0);
         channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
@@ -621,9 +621,9 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     abstract void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream);
 
-    abstract void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream);
+    abstract void sideSpecificHandleHeaders(HeadersFrame frame, boolean isTrailer, Stream stream);
 
-    abstract void sideSpecificHandleRstStream(Http2RstStream frame, Stream stream);
+    abstract void sideSpecificHandleRstStream(RstStreamFrame frame, Stream stream);
 
     void receivedEndStream(Stream stream) {
         // Make sure status can accept ES

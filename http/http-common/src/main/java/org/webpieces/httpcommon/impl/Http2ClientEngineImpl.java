@@ -24,9 +24,9 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2ClientEngine {
@@ -45,7 +45,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     }
 
     @Override
-    public Http2Settings getLocalRequestedSettingsFrame() {
+    public SettingsFrame getLocalRequestedSettingsFrame() {
         return super.getLocalRequestedSettingsFrame();
     }
 
@@ -56,7 +56,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     }
 
     @Override
-    void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(HeadersFrame frame, boolean isTrailer, Stream stream) {
 
         if(isTrailer) {
             stream.getResponseListener().incomingTrailer(frame.getHeaderList(), stream.getResponseId(), frame.isEndStream());
@@ -69,7 +69,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     }
 
     @Override
-    void sideSpecificHandleRstStream(Http2RstStream frame, Stream stream) {
+    void sideSpecificHandleRstStream(RstStreamFrame frame, Stream stream) {
         stream.getResponseListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
     }
 

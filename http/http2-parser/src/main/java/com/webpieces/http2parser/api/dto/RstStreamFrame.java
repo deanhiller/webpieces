@@ -1,6 +1,10 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2RstStream extends AbstractHttp2Frame {
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+
+public class RstStreamFrame extends AbstractHttp2Frame {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.RST_STREAM;
@@ -21,8 +25,9 @@ public class Http2RstStream extends AbstractHttp2Frame {
 
     @Override
     public String toString() {
-        return "Http2RstStream{" +
+        return "RstStreamFrame{" +
+        		"streamId=" + super.toString() +
                 "errorCode=" + errorCode +
-                "} " + super.toString();
+                "} ";
     }
 }

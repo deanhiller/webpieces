@@ -11,7 +11,7 @@ import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.Http2Parser2;
-import com.webpieces.http2parser.api.dto.Http2Settings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 
 public class Level0ClientEngine implements Http2ClientEngine {
 	
@@ -59,7 +59,7 @@ public class Level0ClientEngine implements Http2ClientEngine {
 	@Override
 	public CompletableFuture<Void> sendInitializationToSocket() {
 		ByteBuffer buf = ByteBuffer.wrap(preface);
-		Http2Settings settings = new Http2Settings();
+		SettingsFrame settings = new SettingsFrame();
 		return flowControlLevel5.sendInitDataToSocket(buf, settings);
 	}
 

@@ -1,13 +1,13 @@
 package com.webpieces.http2parser.impl;
 
-import static com.webpieces.http2parser.api.dto.Http2FrameType.CONTINUATION;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.HEADERS;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.PING;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.PRIORITY;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.PUSH_PROMISE;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.RST_STREAM;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.SETTINGS;
-import static com.webpieces.http2parser.api.dto.Http2FrameType.WINDOW_UPDATE;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.CONTINUATION;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.PING;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.PRIORITY;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.PUSH_PROMISE;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.RST_STREAM;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.SETTINGS;
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.WINDOW_UPDATE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,21 +34,21 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.HasHeaderList;
-import com.webpieces.http2parser.api.dto.Http2Continuation;
+import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2FrameType;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
-import com.webpieces.http2parser.api.dto.Http2Ping;
-import com.webpieces.http2parser.api.dto.Http2Priority;
-import com.webpieces.http2parser.api.dto.Http2PushPromise;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
-import com.webpieces.http2parser.api.dto.Http2Settings;
-import com.webpieces.http2parser.api.dto.Http2WindowUpdate;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
@@ -63,15 +63,15 @@ public class Http2ParserImpl implements Http2Parser {
         this.bufferPool = bufferPool;
 
         dtoToMarshaller.put(DataFrame.class, new DataMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2HeadersFrame.class, new HeadersMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Priority.class, new PriorityMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2RstStream.class, new RstStreamMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Settings.class, new SettingsMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2PushPromise.class, new PushPromiseMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Ping.class, new PingMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2GoAway.class, new GoAwayMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2WindowUpdate.class, new WindowUpdateMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2Continuation.class, new ContinuationMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(HeadersFrame.class, new HeadersMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(PriorityFrame.class, new PriorityMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(RstStreamFrame.class, new RstStreamMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(SettingsFrame.class, new SettingsMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(PushPromiseFrame.class, new PushPromiseMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(PingFrame.class, new PingMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(GoAwayFrame.class, new GoAwayMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(WindowUpdateFrame.class, new WindowUpdateMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(ContinuationFrame.class, new ContinuationMarshaller(bufferPool, dataGen));
     }
 
     @Override
@@ -89,23 +89,23 @@ public class Http2ParserImpl implements Http2Parser {
             case DATA:
                 return DataFrame.class;
             case HEADERS:
-                return Http2HeadersFrame.class;
+                return HeadersFrame.class;
             case PRIORITY:
-                return Http2Priority.class;
+                return PriorityFrame.class;
             case RST_STREAM:
-                return Http2RstStream.class;
+                return RstStreamFrame.class;
             case SETTINGS:
-                return Http2Settings.class;
+                return SettingsFrame.class;
             case PUSH_PROMISE:
-                return Http2PushPromise.class;
+                return PushPromiseFrame.class;
             case PING:
-                return Http2Ping.class;
+                return PingFrame.class;
             case GOAWAY:
-                return Http2GoAway.class;
+                return GoAwayFrame.class;
             case WINDOW_UPDATE:
-                return Http2WindowUpdate.class;
+                return WindowUpdateFrame.class;
             case CONTINUATION:
-                return Http2Continuation.class;
+                return ContinuationFrame.class;
             default:
                 return DataFrame.class; // TODO: change to Optional/None
         }
@@ -365,7 +365,7 @@ public class Http2ParserImpl implements Http2Parser {
 		}
 		switch (hasHeaderFragmentList.get(0).getFrameType()) {
 		    case PUSH_PROMISE:
-		        if (frame.getStreamId() != ((Http2PushPromise) hasHeaderFragmentList.get(0)).getPromisedStreamId()) {
+		        if (frame.getStreamId() != ((PushPromiseFrame) hasHeaderFragmentList.get(0)).getPromisedStreamId()) {
 		            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 		        }
 		        break;
@@ -426,12 +426,12 @@ public class Http2ParserImpl implements Http2Parser {
                     frame = getFrameClassForType(startingFrameType).newInstance();
                     if (frame.getFrameType() == PUSH_PROMISE) {
                         // If push promise the caller will have to set the streamid of the first frame
-                        ((Http2PushPromise) frame).setPromisedStreamId(streamId);
+                        ((PushPromiseFrame) frame).setPromisedStreamId(streamId);
                     } else {
                         frame.setStreamId(streamId); // for push promise the first
                     }
                 } else {
-                    frame = new Http2Continuation();
+                    frame = new ContinuationFrame();
                     frame.setStreamId(streamId);
                 }
                 ((HasHeaderFragment) frame).setHeaderFragment(fragment);

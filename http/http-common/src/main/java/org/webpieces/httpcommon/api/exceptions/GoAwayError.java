@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2RstStream;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class GoAwayError extends Http2Error {
     private int lastStreamId;
@@ -33,13 +33,13 @@ public class GoAwayError extends Http2Error {
     public List<AbstractHttp2Frame> toFrames() {
         List<AbstractHttp2Frame> frames = new ArrayList<>();
 
-        Http2GoAway http2GoAway = new Http2GoAway();
+        GoAwayFrame http2GoAway = new GoAwayFrame();
         http2GoAway.setErrorCode(errorCode);
         http2GoAway.setLastStreamId(lastStreamId);
         http2GoAway.setDebugData(debugData);
         frames.add(http2GoAway);
         if(streamId != 0x0) {
-            Http2RstStream http2RstStream = new Http2RstStream();
+            RstStreamFrame http2RstStream = new RstStreamFrame();
             http2RstStream.setErrorCode(errorCode);
             http2RstStream.setStreamId(streamId);
             frames.add(http2RstStream);

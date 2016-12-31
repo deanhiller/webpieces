@@ -1,6 +1,9 @@
 package com.webpieces.http2parser.api.dto;
 
-public class Http2Ping extends AbstractHttp2Frame {
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+
+public class PingFrame extends AbstractHttp2Frame {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PING;
@@ -41,9 +44,10 @@ public class Http2Ping extends AbstractHttp2Frame {
 
     @Override
     public String toString() {
-        return "Http2Ping{" +
+        return "PingFrame{" +
+        		"streamId=" + super.toString() +
                 "isPingResponse=" + isPingResponse +
                 ", opaqueData=" + opaqueData +
-                "} " + super.toString();
+                "} ";
     }
 }

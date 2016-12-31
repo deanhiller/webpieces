@@ -2,17 +2,19 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-public class Http2UnknownFrame extends AbstractHttp2Frame {
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+
+public class UnknownFrame extends AbstractHttp2Frame {
 
 	private byte flagsByte;
 	private byte frameTypeId;
-	private int streamId;
 	private DataWrapper framePayloadData;
 
-	public Http2UnknownFrame(byte flagsByte, byte frameTypeId, int streamId, DataWrapper framePayloadData) {
+	public UnknownFrame(byte flagsByte, byte frameTypeId, int streamId, DataWrapper framePayloadData) {
 		this.flagsByte = flagsByte;
 		this.frameTypeId = frameTypeId;
-		this.streamId = streamId;
+		setStreamId(streamId);
 		this.framePayloadData = framePayloadData;
 	}
 
@@ -29,17 +31,13 @@ public class Http2UnknownFrame extends AbstractHttp2Frame {
 		return frameTypeId;
 	}
 
-	public int getStreamId() {
-		return streamId;
-	}
-
 	public DataWrapper getFramePayloadData() {
 		return framePayloadData;
 	}
 
 	@Override
 	public String toString() {
-		return "Http2UnknownFrame [flagsByte=" + flagsByte + ", frameTypeId=" + frameTypeId + ", streamId=" + streamId
+		return "UnknownFrame [streamId=" + getStreamId() + ", flagsByte=" + flagsByte + ", frameTypeId=" + frameTypeId
 				+ ", framePayloadData=" + framePayloadData + "]";
 	}
 	

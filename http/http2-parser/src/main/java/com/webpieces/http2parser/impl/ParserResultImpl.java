@@ -5,7 +5,7 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class ParserResultImpl implements ParserResult {
     final private List<AbstractHttp2Frame> frames;

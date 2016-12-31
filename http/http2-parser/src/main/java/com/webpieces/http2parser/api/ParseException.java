@@ -1,6 +1,6 @@
 package com.webpieces.http2parser.api;
 
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class ParseException extends RuntimeException {
 

@@ -88,7 +88,7 @@ public class StateImpl implements State
     }
 
     private void fireNoTransition(StateMachineState smState, Object event) {
-    	NoTransitionListener[] list = exitListeners.getListeners(NoTransitionListener.class);
+    	NoTransitionListener[] list = noTransitionListeners.getListeners(NoTransitionListener.class);
         for(int ii = list.length-1; ii >= 0; ii--) {
         	int index = ii;
             smState.getLogger().debug(()->smState+"Exit Action: "+list[index].getClass().getName()+", state="+getName());

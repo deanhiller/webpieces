@@ -4,9 +4,9 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.Http2Continuation;
-import com.webpieces.http2parser.api.dto.Http2Frame;
-import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.ContinuationFrame;
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class ContinuationMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
     ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -15,7 +15,7 @@ public class ContinuationMarshaller extends AbstractFrameMarshaller implements F
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-        Http2Continuation castFrame = (Http2Continuation) frame;
+        ContinuationFrame castFrame = (ContinuationFrame) frame;
 
         byte value = 0x0;
         if (castFrame.isEndHeaders()) value |= 0x4;
@@ -26,7 +26,7 @@ public class ContinuationMarshaller extends AbstractFrameMarshaller implements F
 
 	@Override
 	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
-        Http2Continuation frame = new Http2Continuation();
+        ContinuationFrame frame = new ContinuationFrame();
         super.unmarshalFrame(state, frame);
 
         byte flags = state.getFrameHeaderData().getFlagsByte();

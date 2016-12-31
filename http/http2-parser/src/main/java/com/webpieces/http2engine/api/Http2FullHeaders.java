@@ -3,14 +3,14 @@ package com.webpieces.http2engine.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.webpieces.http2parser.api.dto.HasPriorityDetails.PriorityDetails;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails.PriorityDetails;
 
 public class Http2FullHeaders implements Http2Payload {
 
 	private int streamId;
+    private List<Http2Header> headerList = new ArrayList<>(); 
     private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
-    private List<Http2Header> headerList = new ArrayList<>(); // only created by the parser when deserializing a bunch of header frames
 	private boolean endStream;
     
 	public void setStreamId(int streamId) {

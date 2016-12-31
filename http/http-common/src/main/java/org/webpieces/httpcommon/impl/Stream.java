@@ -14,8 +14,8 @@ import org.webpieces.httpcommon.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.http2parser.api.dto.HasPriorityDetails;
-import com.webpieces.http2parser.api.dto.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 class Stream {
     private static final Logger log = LoggerFactory.getLogger(Stream.class);

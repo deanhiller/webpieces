@@ -3,9 +3,11 @@ package com.webpieces.http2parser.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
-public class Http2Settings extends AbstractHttp2Frame {
+public class SettingsFrame extends AbstractHttp2Frame {
     /* flags */
     private boolean ack = false; /* 0x1 */
 
@@ -16,9 +18,9 @@ public class Http2Settings extends AbstractHttp2Frame {
     //above this layer we apply them all at one time but others could apply them in-order
     private List<Http2Setting> settings = new ArrayList<Http2Setting>();
     
-    public Http2Settings() {
+    public SettingsFrame() {
     }
-    public Http2Settings(boolean b) {
+    public SettingsFrame(boolean b) {
     	ack = true;
 	}
 
@@ -61,10 +63,10 @@ public class Http2Settings extends AbstractHttp2Frame {
 	
 	@Override
     public String toString() {
-        return "Http2Settings{" +
-                "ack=" + ack +
-                ", settings=" + settings +
-                ", streamId=" + getStreamId()+"} ";
+        return "SettingsFrame{" +
+        		"streamId=" + super.toString() +
+                ", ack=" + ack +
+                ", settings=" + settings +"} ";
     }
 
 }
