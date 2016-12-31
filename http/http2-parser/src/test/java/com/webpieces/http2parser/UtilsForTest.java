@@ -1,7 +1,5 @@
 package com.webpieces.http2parser;
 
-import java.util.Base64;
-
 import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
@@ -15,18 +13,18 @@ import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 
 public class UtilsForTest {
-    private static Base64.Encoder encoder = Base64.getEncoder();
-    private static Base64.Decoder decoder = Base64.getDecoder();
+    //private static Base64.Encoder encoder = Base64.getEncoder();
+    //private static Base64.Decoder decoder = Base64.getDecoder();
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
-    private static String dataWrapperToBase64(DataWrapper data) {
-        return encoder.encodeToString(data.createByteArray());
-    }
-
-    private static DataWrapper base64ToDataWrapper(String base64) {
-        return dataGen.wrapByteArray(decoder.decode(base64));
-    }
+//    private static String dataWrapperToBase64(DataWrapper data) {
+//        return encoder.encodeToString(data.createByteArray());
+//    }
+//
+//    private static DataWrapper base64ToDataWrapper(String base64) {
+//        return dataGen.wrapByteArray(decoder.decode(base64));
+//    }
 
     public static String toHexString(byte[] array) {
         return DatatypeConverter.printHexBinary(array);
@@ -63,7 +61,7 @@ public class UtilsForTest {
 
     public static void testBidiFromBytes(String hexFrame) {
         AbstractHttp2Frame frame = frameFromHex(hexFrame);
-        String hex = frameToHex(frame);
+        //String hex = frameToHex(frame);
         byte[] bytes = frameToBytes(frame);
         Assert.assertArrayEquals(bytes, toByteArray(hexFrame));
     }

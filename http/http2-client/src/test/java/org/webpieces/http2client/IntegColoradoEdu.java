@@ -14,7 +14,6 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class IntegColoradoEdu {

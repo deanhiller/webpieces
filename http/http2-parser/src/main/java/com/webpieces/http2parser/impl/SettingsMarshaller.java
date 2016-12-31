@@ -11,7 +11,6 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
-import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 import com.webpieces.http2parser2.impl.UnsignedData;
 
 public class SettingsMarshaller extends FrameMarshallerImpl {
@@ -62,7 +61,6 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
     		while (payloadByteBuffer.hasRemaining()) {
     			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
     			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
-    			SettingsParameter key = SettingsParameter.lookup(id);
     			castFrame.addSetting(new Http2Setting(id, value));
     		}
     		

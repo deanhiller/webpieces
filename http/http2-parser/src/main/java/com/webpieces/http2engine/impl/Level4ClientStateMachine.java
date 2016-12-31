@@ -13,7 +13,6 @@ import com.webpieces.http2engine.api.Http2FullPushPromise;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 
 public class Level4ClientStateMachine {
 

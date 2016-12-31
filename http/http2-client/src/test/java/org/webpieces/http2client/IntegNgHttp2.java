@@ -5,8 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
@@ -24,7 +22,6 @@ import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
-    private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     static private CompletableFuture<Void> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
         if(n > 0) {

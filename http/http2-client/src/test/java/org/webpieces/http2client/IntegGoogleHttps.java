@@ -1,7 +1,6 @@
 package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -9,11 +8,9 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2ResponseListener;
-import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.http2client.api.dto.Http2Headers;
@@ -27,9 +24,6 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.http2engine.api.Http2EngineFactory;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.UnknownFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class IntegGoogleHttps {
 
@@ -103,29 +97,29 @@ public class IntegGoogleHttps {
 		return null;
 	}
 
-	private static class ServerListenerImpl implements Http2ServerListener {
-
-		@Override
-		public void farEndClosed(Http2Socket socket) {
-			log.info("far end closed");
-		}
-
-		@Override
-		public void failure(Exception e) {
-			log.warn("exception", e);
-		}
-
-		@Override
-		public void incomingControlFrame(Http2Frame lowLevelFrame) {
-			if(lowLevelFrame instanceof GoAwayFrame) {
-				GoAwayFrame goAway = (GoAwayFrame) lowLevelFrame;
-				DataWrapper debugData = goAway.getDebugData();
-				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
-				log.info("go away received.  debug="+debug);
-			} else 
-				throw new UnsupportedOperationException("not done yet.  frame="+lowLevelFrame);
-		}
-	}
+//	private static class ServerListenerImpl implements Http2ServerListener {
+//
+//		@Override
+//		public void farEndClosed(Http2Socket socket) {
+//			log.info("far end closed");
+//		}
+//
+//		@Override
+//		public void failure(Exception e) {
+//			log.warn("exception", e);
+//		}
+//
+//		@Override
+//		public void incomingControlFrame(Http2Frame lowLevelFrame) {
+//			if(lowLevelFrame instanceof GoAwayFrame) {
+//				GoAwayFrame goAway = (GoAwayFrame) lowLevelFrame;
+//				DataWrapper debugData = goAway.getDebugData();
+//				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
+//				log.info("go away received.  debug="+debug);
+//			} else 
+//				throw new UnsupportedOperationException("not done yet.  frame="+lowLevelFrame);
+//		}
+//	}
 	
 	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 		@Override

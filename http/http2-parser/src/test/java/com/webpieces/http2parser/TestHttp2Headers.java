@@ -7,7 +7,6 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -34,7 +33,6 @@ public class TestHttp2Headers {
         basicResponseHeaders.add(new Http2Header("cf-ray", "2e916f776c724fd5-DEN"));
     }
 
-    private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
     @Test
     public void testCreateRequestHeadersFrame() {

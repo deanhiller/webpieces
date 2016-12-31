@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullPushPromise;
 import com.webpieces.http2engine.api.Http2Payload;
@@ -15,7 +13,6 @@ import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class Level3StreamInitialization {
 
-	private static final Logger log = LoggerFactory.getLogger(Level3StreamInitialization.class);
 	private Level4ClientStateMachine clientSm;
 
 	private Map<Integer, Stream> streamIdToStream = new HashMap<>();
