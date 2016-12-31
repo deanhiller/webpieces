@@ -13,7 +13,7 @@ import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
@@ -56,8 +56,8 @@ public class Level2AggregateDecodeHeaders {
 			return;
 		} else if(accumulatingHeaders.size() > 0) {
 			throw new IllegalArgumentException("HasHeaderFragments are required to be consecutive per spec but somehow are not.  accumulatedFrames="+accumulatingHeaders);
-		} else if(lowLevelFrame instanceof Http2Data) {
-			incomingData((Http2Data) lowLevelFrame);
+		} else if(lowLevelFrame instanceof DataFrame) {
+			incomingData((DataFrame) lowLevelFrame);
 		}
 		
 		int streamId = lowLevelFrame.getStreamId();

@@ -26,12 +26,17 @@ public interface Http2Socket {
     CompletableFuture<Http2Response> send(Http2Request request);
 
     /**
-     * Http1.1 and Http\2 are both a bit complex resulting in a more complex api BUT this api does support every
-     * scenario including
+     * You should have a pretty good understanding the http/2 spec to use this method.  This method supports EVERY use-case
+     * that http/2 has to offer (pretty much).
      * 
-     *  1. send request headers(in HttpRequest), then stream request chunks forever (this is sometimes a use-case)
-     *  2. send request headers only, then receive response headers and data chunks forever (twitter api does this)
-     *  3. send request headers only, then receive response headers and data chunks until end chunk is received
+     * Http1.1 and Http\2 are both a bit complex resulting in a more complex api IF you want to support all use-cases
+     * other than just the request/response use-case without blowing up your RAM including
+     *
+     *  1. send request headers only, then receive response headers and data chunks forever (twitter api does this)
+     *  2. send request headers only, then receive response headers and data chunks until end chunk is received
+     *     -With this, you can stream chunks through your system so it works for very very large file use-cases without
+     *      storing the whole file in RAM as you can stream it through the system
+     *  3. send request headers, then stream request chunks forever (this is sometimes a use-case)
      *  4. send request headers and send data chunks, then receive response headers
      *  5. send request headers and send data chunks, then receive response headers and data chunks
      *  

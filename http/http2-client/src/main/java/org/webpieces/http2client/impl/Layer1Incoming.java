@@ -16,7 +16,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class Layer1Incoming implements DataListener {
 
@@ -81,7 +81,7 @@ public class Layer1Incoming implements DataListener {
 
 		@Override
 		public CompletableFuture<Http2SocketDataWriter> sendData(DataWrapper payload, boolean isComplete) {
-			Http2Data data = new Http2Data();
+			DataFrame data = new DataFrame();
 			data.setStreamId(streamId);
 			data.setEndStream(isComplete);
 			data.setData(payload);

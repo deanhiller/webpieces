@@ -7,7 +7,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import com.webpieces.http2parser.UtilsForTest;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class TestHttp2Data{
 	
@@ -87,7 +87,7 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFrameUnpadded() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         
@@ -97,7 +97,7 @@ public class TestHttp2Data{
     }
 
     @Test public void testCreateDataFramePadded() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setPadding(UtilsForTest.toByteArray("00 00"));
@@ -109,7 +109,7 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFrameEndStream() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setEndStream(true);
@@ -121,7 +121,7 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFramePaddedEndStream() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setEndStream(true);

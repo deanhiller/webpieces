@@ -7,8 +7,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.Http2SocketDataReader;
+import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.http2client.api.dto.Http2Headers;
+import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class IntegColoradoEdu {
 		return null;
 	}
 
-	private static class ServerListenerImpl implements Http2ServerListener, Http2SocketDataReader {
+	private static class ServerListenerImpl implements Http2ServerListener {
 
 		@Override
 		public void farEndClosed(Http2Socket socket) {
@@ -57,28 +58,8 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public Http2SocketDataReader newIncomingPush(Http2Headers req, Http2Headers resp) {
-			return this;
-		}
-
-		@Override
 		public void failure(Exception e) {
 			log.warn("exception", e);
-		}
-
-		@Override
-		public void incomingData(DataWrapper data) {
-			log.info("data");
-		}
-
-		@Override
-		public void incomingTrailingHeaders(Http2Headers endHeaders) {
-			log.info("done with data");
-		}
-
-		@Override
-		public void serverCancelledRequest() {
-			log.info("this request was cancelled by remote end");
 		}
 
 		@Override
@@ -94,32 +75,28 @@ public class IntegColoradoEdu {
 		
 	}
 	
-	private static class ChunkedResponseListener implements Http2ResponseListener {
+	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 
 		@Override
-		public void incomingResponse(Http2Headers resp, boolean isComplete) {
-			log.info("incoming response="+resp);
+		public void incomingPartialResponse(PartialResponse response) {
+			log.info("incoming part of response="+response);
 		}
 
 		@Override
-		public void incomingData(DataWrapper data, boolean isComplete) {
-			log.info("incoming data for response="+data);
+		public PushPromiseListener newIncomingPush(int streamId) {
+			return this;
 		}
-
-		@Override
-		public void incomingEndHeaders(Http2Headers headers, boolean isComplete) {
-			log.info("incoming end headers="+headers);
-		}
-
+		
 		@Override
 		public void serverCancelledRequest() {
 			log.info("server cancelled request");
 		}
 
 		@Override
-		public void incomingUnknownFrame(Http2UnknownFrame frame, boolean isComplete) {
-			log.info("unknown frame="+frame);
+		public void incomingPushPromise(PartialResponse response) {
+			log.info("incoming push promise");
 		}
+
 	}
 	
 	private static Http2Headers createRequest(String host) {

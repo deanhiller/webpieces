@@ -11,7 +11,7 @@ import org.webpieces.javasm.api.StateMachineFactory;
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
 
 public class Level4ClientStateMachine {
@@ -87,7 +87,7 @@ public class Level4ClientStateMachine {
 	private Http2PayloadType translate(Http2Payload payload) {
 		if(payload instanceof Http2FullHeaders) {
 			return Http2PayloadType.HEADERS;
-		} else if(payload instanceof Http2Data) {
+		} else if(payload instanceof DataFrame) {
 			return Http2PayloadType.DATA;
 		} else if(payload instanceof Http2PushPromise) {
 			return Http2PayloadType.PUSH_PROMISE;

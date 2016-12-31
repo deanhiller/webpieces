@@ -5,31 +5,35 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.Http2SocketDataReader;
+import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.http2client.api.dto.Http2Headers;
+import org.webpieces.http2client.api.dto.Http2Request;
+import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
-import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
+    private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-    static private CompletableFuture<Http2Headers> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
+    static private CompletableFuture<Void> sendManyTimes(Http2Socket socket, int n, Http2Request req, Http2ResponseListener l) {
         if(n > 0) {
         	log.info("send request");
-            return socket.sendRequest(req, l, true)
-                    .thenCompose(dataWriter -> sendManyTimes(socket, n-1, req, l));
+            return socket.send(req)
+                    .thenCompose(response -> sendManyTimes(socket, n-1, req, l));
         } else {
-            return CompletableFuture.completedFuture(req);
+            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -41,7 +45,7 @@ public class IntegNgHttp2 {
         if(isHttp)
             port = 80;
 
-        Http2Headers req = createRequest(host, isHttp);
+        Http2Request req = createRequest(host, isHttp);
 
         log.info("starting socket");
         ChunkedResponseListener listener = new ChunkedResponseListener();
@@ -57,14 +61,14 @@ public class IntegNgHttp2 {
                 	})
                 .exceptionally(e -> {
                     reportException(socket, e);
-                    return req;
+                    return null;
                 });
 
         Thread.sleep(100000);
 
         sendManyTimes(socket, 1, req, listener).exceptionally(e -> {
             reportException(socket, e);
-            return req;
+            return null;
         });
         Thread.sleep(10000);
     }
@@ -75,7 +79,7 @@ public class IntegNgHttp2 {
     }
 
 
-	private static class ServerListenerImpl implements Http2ServerListener, Http2SocketDataReader {
+	private static class ServerListenerImpl implements Http2ServerListener {
 
 		@Override
 		public void farEndClosed(Http2Socket socket) {
@@ -83,30 +87,10 @@ public class IntegNgHttp2 {
 		}
 
 		@Override
-		public Http2SocketDataReader newIncomingPush(Http2Headers req, Http2Headers resp) {
-			return this;
-		}
-
-		@Override
 		public void failure(Exception e) {
 			log.warn("exception", e);
 		}
 
-		@Override
-		public void incomingData(DataWrapper data) {
-			log.info("data");
-		}
-
-		@Override
-		public void incomingTrailingHeaders(Http2Headers endHeaders) {
-			log.info("done with data");
-		}
-
-		@Override
-		public void serverCancelledRequest() {
-			log.info("this request was cancelled by remote end");
-		}
-		
 		@Override
 		public void incomingControlFrame(Http2Frame lowLevelFrame) {
 			if(lowLevelFrame instanceof Http2GoAway) {
@@ -119,35 +103,31 @@ public class IntegNgHttp2 {
 		}
 	}
 	
-	private static class ChunkedResponseListener implements Http2ResponseListener {
+	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 
 		@Override
-		public void incomingResponse(Http2Headers resp, boolean isComplete) {
-			log.info("incoming response="+resp);
+		public void incomingPartialResponse(PartialResponse response) {
+			log.info("incoming part of response="+response);
 		}
 
 		@Override
-		public void incomingData(DataWrapper data, boolean isComplete) {
-			log.info("incoming data for response="+data);
+		public PushPromiseListener newIncomingPush(int streamId) {
+			return this;
 		}
-
-		@Override
-		public void incomingEndHeaders(Http2Headers headers, boolean isComplete) {
-			log.info("incoming end headers="+headers);
-		}
-
+		
 		@Override
 		public void serverCancelledRequest() {
 			log.info("server cancelled request");
 		}
-		
+
 		@Override
-		public void incomingUnknownFrame(Http2UnknownFrame frame, boolean isComplete) {
-			log.info("unknown frame="+frame);
+		public void incomingPushPromise(PartialResponse response) {
+			log.info("incoming push promise");
 		}
+		
 	}
 
-    private static Http2Headers createRequest(String host, boolean isHttp) {
+    private static Http2Request createRequest(String host, boolean isHttp) {
     	String scheme;
     	if(isHttp)
     		scheme = "http";
@@ -159,8 +139,13 @@ public class IntegNgHttp2 {
         req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, host));
         req.addHeader(new Http2Header(Http2HeaderName.PATH, "/"));
         req.addHeader(new Http2Header(Http2HeaderName.SCHEME, scheme));
+        req.addHeader(new Http2Header("host", host));
         req.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
-        req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/xx"));
-        return req;
+        req.addHeader(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
+        req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "nghttp2/1.15.0"));
+        
+        Http2Request request = new Http2Request();
+        request.setHeaders(req);
+        return request;
     }
 }

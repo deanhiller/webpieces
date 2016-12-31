@@ -23,7 +23,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2RstStream;
 import com.webpieces.http2parser.api.dto.Http2Settings;
@@ -50,7 +50,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     }
 
     @Override
-    void sideSpecificHandleData(Http2Data frame, int payloadLength, Stream stream) {
+    void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream) {
         stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), frame.isEndStream()).thenAccept(
                 length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
     }

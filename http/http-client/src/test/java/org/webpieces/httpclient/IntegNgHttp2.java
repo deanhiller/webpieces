@@ -53,13 +53,13 @@ public class IntegNgHttp2 {
         HttpClientSocket socket = client.openHttpSocket("oneTimer");
         socket
                 .connect(new InetSocketAddress(host, port))
-                .thenCompose(requestListener -> sendManyTimes(requestListener, 10, req, listener))
+                .thenCompose(requestListener -> sendManyTimes(requestListener, 1, req, listener))
                 .exceptionally(e -> {
                     reportException(socket, e);
                     return req;
                 });
 
-        Thread.sleep(10000);
+        Thread.sleep(1000000);
 
         sendManyTimes(socket.getRequestSender(), 10, req, listener).exceptionally(e -> {
             reportException(socket, e);

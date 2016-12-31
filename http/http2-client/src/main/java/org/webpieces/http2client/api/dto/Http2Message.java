@@ -4,11 +4,11 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2Message {
+public abstract class Http2Message {
 
 	protected Http2Headers headers = new Http2Headers();
 	protected DataWrapper payload;
-	protected Http2Headers trailingHeaders = new Http2Headers();
+	protected Http2Headers trailingHeaders;
 	
 	public Http2Message() {}
 

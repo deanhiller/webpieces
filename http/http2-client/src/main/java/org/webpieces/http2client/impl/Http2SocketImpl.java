@@ -52,10 +52,10 @@ public class Http2SocketImpl implements Http2Socket {
 	public CompletableFuture<Http2Response> send(Http2Request request) {
 		SingleResponseListener responseListener = new SingleResponseListener();
 		
-		if(request.getPayload() == null || request.getPayload().getReadableSize() == 0) {
+		if(request.getPayload() == null) {
 			sendRequest(request.getHeaders(), responseListener, true);
 			return responseListener.fetchResponseFuture();
-		} else if(request.getTrailingHeaders().getHeaders().size() == 0) {
+		} else if(request.getTrailingHeaders() == null) {
 			return sendRequest(request.getHeaders(), responseListener, false)
 						.thenCompose(writer -> writer.sendData(request.getPayload(), true))
 						.thenCompose(writer -> responseListener.fetchResponseFuture());

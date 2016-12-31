@@ -68,7 +68,7 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
@@ -331,7 +331,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         }
     }
 
-    private CompletableFuture<Void> writeDataFrame(Http2Data frame) {
+    private CompletableFuture<Void> writeDataFrame(DataFrame frame) {
         int streamId = frame.getStreamId();
         log.info("actually writing data frame: " + frame);
         decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
@@ -380,7 +380,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
                                 outgoingFlowControl.get(0x0).get()));
 
 
-                Http2Data newFrame = new Http2Data();
+                DataFrame newFrame = new DataFrame();
                 newFrame.setStreamId(stream.getStreamId());
 
                 if(dataLength <= maxLength) {
@@ -619,7 +619,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         return headers;
     }
 
-    abstract void sideSpecificHandleData(Http2Data frame, int payloadLength, Stream stream);
+    abstract void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream);
 
     abstract void sideSpecificHandleHeaders(Http2HeadersFrame frame, boolean isTrailer, Stream stream);
 

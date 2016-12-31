@@ -6,8 +6,10 @@ import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2Headers {
+public class Http2Headers implements PartialResponse {
 
+	private int streamId;
+	private boolean lastPartOfResponse = false;
 	protected List<Http2Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can
 	//be looked up by key.
@@ -20,6 +22,14 @@ public class Http2Headers {
 		}
 	}
 
+	public int getStreamId() {
+		return streamId;
+	}
+
+	public void setStreamId(int streamId) {
+		this.streamId = streamId;
+	}
+	
 	/**
 	 * Order of HTTP Headers matters for Headers with the same key
 	 */
@@ -39,4 +49,11 @@ public class Http2Headers {
 	public Http2HeaderStruct getHeaderLookupStruct() {
 		return headersStruct;
 	}
+	public boolean isLastPartOfResponse() {
+		return lastPartOfResponse;
+	}
+	public void setLastPartOfResponse(boolean lastPartOfResponse) {
+		this.lastPartOfResponse = lastPartOfResponse;
+	}
+	
 }

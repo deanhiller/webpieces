@@ -28,7 +28,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
@@ -58,7 +58,7 @@ class Http2DataListener implements DataListener {
 		oldData = this.http2EngineImpl.http2Parser.prepareToParse();
 	}
 
-    private void handleData(Http2Data frame, Stream stream) {
+    private void handleData(DataFrame frame, Stream stream) {
         // Only allowable if stream is open or half closed local
         switch(stream.getStatus()) {
             case OPEN:
@@ -291,7 +291,7 @@ class Http2DataListener implements DataListener {
 
             switch (frame.getFrameType()) {
                 case DATA:
-                    handleData((Http2Data) frame, stream);
+                    handleData((DataFrame) frame, stream);
                     break;
                 case HEADERS:
                     handleHeaders((Http2HeadersFrame) frame, stream);

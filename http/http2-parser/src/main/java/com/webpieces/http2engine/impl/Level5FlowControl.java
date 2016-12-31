@@ -14,7 +14,7 @@ import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
@@ -64,8 +64,8 @@ public class Level5FlowControl {
 
 	public CompletableFuture<Void> sendPayloadToSocket(Http2Payload payload) {
 		log.info("sending payload to socket="+payload);
-		if(payload instanceof Http2Data) {
-			Http2Data frame = (Http2Data) payload;
+		if(payload instanceof DataFrame) {
+			DataFrame frame = (DataFrame) payload;
 			DataWrapper data = lowLevelParser.marshal(frame);
 			ByteBuffer frameBytes = translate(data);
 			return socketListener.sendToSocket(frameBytes);

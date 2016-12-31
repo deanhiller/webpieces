@@ -37,7 +37,7 @@ import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.HasHeaderList;
 import com.webpieces.http2parser.api.dto.Http2Continuation;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2FrameType;
@@ -62,7 +62,7 @@ public class Http2ParserImpl implements Http2Parser {
     public Http2ParserImpl(BufferPool bufferPool) {
         this.bufferPool = bufferPool;
 
-        dtoToMarshaller.put(Http2Data.class, new DataMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(DataFrame.class, new DataMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2HeadersFrame.class, new HeadersMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2Priority.class, new PriorityMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2RstStream.class, new RstStreamMarshaller(bufferPool, dataGen));
@@ -87,7 +87,7 @@ public class Http2ParserImpl implements Http2Parser {
     private Class<? extends AbstractHttp2Frame> getFrameClassForType(Http2FrameType type) {
         switch (type) {
             case DATA:
-                return Http2Data.class;
+                return DataFrame.class;
             case HEADERS:
                 return Http2HeadersFrame.class;
             case PRIORITY:
@@ -107,7 +107,7 @@ public class Http2ParserImpl implements Http2Parser {
             case CONTINUATION:
                 return Http2Continuation.class;
             default:
-                return Http2Data.class; // TODO: change to Optional/None
+                return DataFrame.class; // TODO: change to Optional/None
         }
     }
 

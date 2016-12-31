@@ -4,7 +4,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
@@ -16,7 +16,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-        Http2Data castFrame = (Http2Data) frame;
+        DataFrame castFrame = (DataFrame) frame;
 
         byte value = (byte) 0x0;
         if (castFrame.isEndStream()) value |= 0x1;
@@ -28,7 +28,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
 
 	@Override
 	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         super.unmarshalFrame(state, frame);
         
         byte flags = state.getFrameHeaderData().getFlagsByte();

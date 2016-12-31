@@ -7,7 +7,7 @@ import com.webpieces.http2parser.api.dto.Http2Frame;
 
 public interface ResultListener {
 
-	void incomingPayload(Http2Payload frame, boolean isTrailingHeaders);
+	void incomingPayload(Http2Payload frame);
 
 	CompletableFuture<Void> sendToSocket(ByteBuffer newData);
 

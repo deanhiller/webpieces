@@ -44,12 +44,13 @@ public class Level3StreamInitialization {
 	
 	public void sendPayloadToClient(Http2Payload frame) {
 		int streamId = frame.getStreamId();
-		if (streamId % 2 == 1)
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId,
-					"Server sent us bad frame id per http/2 spec as in it was an odd id=" + streamId);
 
 		Stream stream = streamIdToStream.get(streamId);
 		if (stream == null) {
+			//server can only initiate even stream ids for creating a new stream(push_promise type stuff)
+			if (streamId % 2 == 1)
+				throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId,
+						"Server sent us bad frame id per http/2 spec as in it was an odd id=" + streamId);
 			createStream(streamId);
 		}
 

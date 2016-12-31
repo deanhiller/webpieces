@@ -3,7 +3,7 @@ package com.webpieces.http2parser;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public class TestHttp2Data{
@@ -42,9 +42,9 @@ public class TestHttp2Data{
     @Test
     public void testParseUnpaddedData() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(unpaddedDataFrame);
-        Assert.assertTrue(Http2Data.class.isInstance(frame));
+        Assert.assertTrue(DataFrame.class.isInstance(frame));
 
-        Http2Data castFrame = (Http2Data) frame;
+        DataFrame castFrame = (DataFrame) frame;
 
         byte[] data = castFrame.getData().createByteArray();
         Assert.assertArrayEquals(data, UtilsForTest.toByteArray("FF FF FF FF FF FF FF FF"));
@@ -57,8 +57,8 @@ public class TestHttp2Data{
     public void testParsePaddedData() {
         AbstractHttp2Frame frame = UtilsForTest.frameFromHex(paddedDataFrame);
 
-        Assert.assertTrue(Http2Data.class.isInstance(frame));
-        Http2Data castFrame = (Http2Data) frame;
+        Assert.assertTrue(DataFrame.class.isInstance(frame));
+        DataFrame castFrame = (DataFrame) frame;
 
         // Even though there is padding the data should be the same
         byte[] data = castFrame.getData().createByteArray();
@@ -69,7 +69,7 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFrameUnpadded() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(unpaddedDataFrame));
@@ -78,7 +78,7 @@ public class TestHttp2Data{
     }
 
     @Test public void testCreateDataFramePadded() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setPadding(UtilsForTest.toByteArray("00 00"));
@@ -89,7 +89,7 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFrameEndStream() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setEndStream(true);
@@ -100,7 +100,7 @@ public class TestHttp2Data{
 
     @Test
     public void testCreateDataFramePaddedEndStream() {
-        Http2Data frame = new Http2Data();
+        DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
         frame.setEndStream(true);

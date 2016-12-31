@@ -33,7 +33,7 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2PushPromise;
@@ -114,7 +114,7 @@ public class TestRequestResponse {
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
         Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(1)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
+        Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
     }
 
     private void http2ResponseWithData(RequestListenerForTest listener) throws InterruptedException, ExecutionException {
@@ -148,9 +148,9 @@ public class TestRequestResponse {
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
         Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(1)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
+        Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
 
-        Assert.assertArrayEquals(((Http2Data) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
+        Assert.assertArrayEquals(((DataFrame) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
     }
 
     private void http2WithPushPromise(RequestListenerForTest listener) throws InterruptedException, ExecutionException {
@@ -187,10 +187,10 @@ public class TestRequestResponse {
         Assert.assertEquals(6, frames.size());
         Assert.assertTrue(Http2Settings.class.isInstance(frames.get(0)));
         Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(1)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(2)));
+        Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
         Assert.assertTrue(Http2PushPromise.class.isInstance(frames.get(3)));
         Assert.assertTrue(Http2HeadersFrame.class.isInstance(frames.get(4)));
-        Assert.assertTrue(Http2Data.class.isInstance(frames.get(5)));
+        Assert.assertTrue(DataFrame.class.isInstance(frames.get(5)));
     }
 
     @Test

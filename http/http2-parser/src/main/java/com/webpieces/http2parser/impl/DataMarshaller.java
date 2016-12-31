@@ -7,7 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
-import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.AbstractHttp2Frame;
 
 public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshaller  {
@@ -19,13 +19,13 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
     @Override
     public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
 
-        Http2Data castFrame = (Http2Data) frame;
+        DataFrame castFrame = (DataFrame) frame;
         return castFrame.getPadding().padDataIfNeeded(castFrame.getData());
     }
 
     @Override
     public byte marshalFlags(AbstractHttp2Frame frame) {
-        Http2Data castFrame = (Http2Data) frame;
+        DataFrame castFrame = (DataFrame) frame;
 
         byte value = (byte) 0x0;
         if (castFrame.isEndStream()) value |= 0x1;
@@ -35,7 +35,7 @@ public class DataMarshaller extends FrameMarshallerImpl implements FrameMarshall
 
     @Override
     public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
-        Http2Data castFrame = (Http2Data) frame;
+        DataFrame castFrame = (DataFrame) frame;
 
         castFrame.setEndStream((flags & 0x1) == 0x1);
         castFrame.getPadding().setIsPadded((flags & 0x8) == 0x8);

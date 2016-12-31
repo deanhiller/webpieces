@@ -6,11 +6,12 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.Http2ResponseListener;
+import org.webpieces.http2client.api.PushPromiseListener;
+import org.webpieces.http2client.api.dto.Http2Data;
 import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.http2client.api.dto.Http2Response;
+import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.http2client.api.exceptions.ResetStreamException;
-
-import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 
 public class SingleResponseListener implements Http2ResponseListener {
 
@@ -20,22 +21,29 @@ public class SingleResponseListener implements Http2ResponseListener {
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public void incomingResponse(Http2Headers headers, boolean isComplete) {
+	public void incomingPartialResponse(PartialResponse response) {
+		if(headers == null) {
+			incomingResponse((Http2Headers) response);
+		} else if(response instanceof Http2Data) {
+			incomingData((Http2Data) response);
+		} else
+			incomingEndHeaders((Http2Headers) response);
+	}
+	
+	public void incomingResponse(Http2Headers headers) {
 		this.headers = headers;
-		if(isComplete)
+		if(headers.isLastPartOfResponse())
 			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
-	@Override
-	public void incomingData(DataWrapper data, boolean isComplete) {
-		fullData =  dataGen.chainDataWrappers(fullData, data);
-		if(isComplete)
+	public void incomingData(Http2Data data) {
+		fullData =  dataGen.chainDataWrappers(fullData, data.getPayload());
+		if(data.isLastPartOfResponse())
 			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
-	@Override
-	public void incomingEndHeaders(Http2Headers trailingHeaders, boolean isComplete) {
-		if(!isComplete) {
+	public void incomingEndHeaders(Http2Headers trailingHeaders) {
+		if(!trailingHeaders.isLastPartOfResponse()) {
 			responseFuture.completeExceptionally(new IllegalArgumentException("An assumption we made was wrong.  isComplete should be true here"));
 			throw new IllegalArgumentException("An assumption we made was wrong.  isComplete should be true here");
 		}
@@ -44,17 +52,18 @@ public class SingleResponseListener implements Http2ResponseListener {
 	}
 
 	@Override
-	public void incomingUnknownFrame(Http2UnknownFrame frame, boolean isComplete) {
-		//drop it for single request/response.  If they want this, don't use single request/response
-	}
-	
-	@Override
 	public void serverCancelledRequest() {
 		responseFuture.completeExceptionally(new ResetStreamException("Server cancelled this request"));
 	}
 
 	public CompletableFuture<Http2Response> fetchResponseFuture() {
 		return responseFuture;
+	}
+
+
+	@Override
+	public PushPromiseListener newIncomingPush(int streamId) {
+		throw new UnsupportedOperationException("you should either turn push promise setting off or not use single request/response since the server is sending a push_promise");
 	}
 
 }
