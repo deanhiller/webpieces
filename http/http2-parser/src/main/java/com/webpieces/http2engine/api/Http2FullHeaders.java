@@ -48,5 +48,10 @@ public class Http2FullHeaders implements Http2Payload {
 	public void setEndStream(boolean endOfStream) {
 		this.endStream = endOfStream;
 	}
-    
+
+	@Override
+	public String toString() {
+		return "Http2FullHeaders [streamId=" + streamId + ", priorityDetails=" + priorityDetails + ", headerList="
+				+ headerList + ", endStream=" + endStream + "]";
+	}
 }

@@ -14,6 +14,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 
@@ -225,17 +226,29 @@ public final class Helper {
             //throw an IOException: "An existing connection was forcibly closed by the remote host"
             //we also close UDPChannels as well on IOException.  Not sure if this is good or not.
 			
-			String msg = e.getMessage();
-			if(msg != null && 
-				(msg.startsWith("An existing connection was forcibly closed")
-					|| msg.startsWith("Connection reset by peer")
-					|| msg.startsWith("An established connection was aborted by the software in your host machine"))) {
-		            log.trace(() -> "Exception 2", e);
-		            processBytes(key, chunk, -1, mgr);
-			} else {
-				log.error("IO Exception unexpected", e);
-				in.failure(channel, null, e);
-			}
+			process(key, mgr, in, channel, chunk, e);
+		} catch(NioException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof IOException) {
+				IOException ioExc = (IOException) cause;
+				process(key, mgr, in, channel, chunk, ioExc);
+			} else
+				throw e;
+		}
+	}
+
+	private static void process(SelectionKey key, SelectorManager2 mgr, DataListener in, BasChannelImpl channel,
+			ByteBuffer chunk, IOException e) throws IOException {
+		String msg = e.getMessage();
+		if(msg != null && 
+			(msg.contains("An existing connection was forcibly closed")
+				|| msg.contains("Connection reset by peer")
+				|| msg.contains("An established connection was aborted by the software in your host machine"))) {
+		        log.trace(() -> "Exception 2", e);
+		        processBytes(key, chunk, -1, mgr);
+		} else {
+			log.error("IO Exception unexpected", e);
+			in.failure(channel, null, e);
 		}
 	}
 

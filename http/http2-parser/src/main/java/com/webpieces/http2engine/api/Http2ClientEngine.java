@@ -14,5 +14,9 @@ public interface Http2ClientEngine {
 
 	void parse(DataWrapper newData);
 
+	/**
+	 * completely tear down engine
+	 */
+	void closeEngine();
 
 }

@@ -1,4 +1,4 @@
-package org.webpieces.httpclient;
+package org.webpieces.http2client;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

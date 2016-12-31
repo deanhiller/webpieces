@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api.dto;
+package org.webpieces.http2client.api.dto;
 
 import java.util.ArrayList;
 import java.util.HashMap;

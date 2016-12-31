@@ -102,18 +102,17 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 			tuple.add(EMPTY_WRAPPER);
 			tuple.add(EMPTY_WRAPPER);
 			return tuple;
+		} else if(dataToRead.getReadableSize() == splitAtPosition) {
+			tuple.add(dataToRead);
+			tuple.add(EMPTY_WRAPPER);
+			return tuple;
 		}
 		
 		SplitProxyWrapper wrapper1 = new SplitProxyWrapper(dataToRead, 0, splitAtPosition);
+		dataToRead.increaseRefCount();
 		
-		SliceableDataWrapper wrapper2;
-		if(dataToRead.getReadableSize() == splitAtPosition) {
-			wrapper2 = EMPTY_WRAPPER;
-		} else {
-			dataToRead.increaseRefCount();
-			wrapper2 = 
+		SliceableDataWrapper wrapper2 = 
 				new SplitProxyWrapper(dataToRead, splitAtPosition, dataToRead.getReadableSize() - splitAtPosition);
-		}
 		
 		tuple.add(wrapper1);
 		tuple.add(wrapper2);

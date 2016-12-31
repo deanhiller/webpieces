@@ -1,10 +1,10 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.http2client.api;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.httpclient.impl2.Http2ClientImpl;
+import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;

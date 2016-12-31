@@ -45,6 +45,13 @@ public class Http2Setting {
 	
 	@Override
 	public String toString() {
-		return name + ": " + value + "\r\n";
+		String idAsStr;
+		SettingsParameter knownName = getKnownName();
+		if(knownName == null) {
+			idAsStr = name+"";
+		} else
+			idAsStr = knownName+"";
+		
+		return "{"+idAsStr + ": " + value+"}";
 	}
 }

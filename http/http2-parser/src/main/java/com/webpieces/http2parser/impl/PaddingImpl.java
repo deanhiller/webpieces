@@ -10,7 +10,8 @@ import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.Http2ErrorCode;
 
 public class PaddingImpl implements Padding {
-    private byte[] padding = null;
+
+	private byte[] padding = null;
     private boolean padded = false;
 
     final private DataWrapperGenerator dataGen;
@@ -66,4 +67,12 @@ public class PaddingImpl implements Padding {
         } else
             return data;
     }
+    
+    @Override
+	public String toString() {
+    	int len = 0;
+    	if(padding != null)
+    		len = padding.length;
+		return "[padding.length=" + len + ", padded=" + padded + "]";
+	}
 }

@@ -43,19 +43,6 @@ public class Http2HeadersFrame extends AbstractHttp2Frame implements HasHeaderFr
     }
     public void setPriority(boolean priority) { this.priority = priority; }
 
-    @Override
-    public String toString() {
-        return "Http2Headers{" +
-                "endStream=" + endStream +
-                ", endHeaders=" + endHeaders +
-                ", priority=" + priority +
-                ", priorityDetails=" + priorityDetails +
-                ", headerFragment=" + headerFragment +
-                ", headerList=" + headerList +
-                ", padding=" + padding +
-                "} " + super.toString();
-    }
-
     /* payload */
     private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
     private DataWrapper headerFragment;
@@ -126,4 +113,17 @@ public class Http2HeadersFrame extends AbstractHttp2Frame implements HasHeaderFr
         return this.padding;
     }
 
+
+    @Override
+    public String toString() {
+        return "Http2Headers{" +
+        		super.toString() +
+                ", endStream=" + endStream +
+                ", endHeaders=" + endHeaders +
+                ", priority=" + priority +
+                ", priorityDetails=" + priorityDetails +
+                ", headerFragment=" + headerFragment.getReadableSize() +
+                ", padding=" + padding +
+                "} ";
+    }
 }

@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.http2client.api;
 
 import javax.net.ssl.SSLEngine;
 

@@ -1,7 +1,7 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.http2client.api;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.dto.Http2Headers;
+import org.webpieces.http2client.api.dto.Http2Headers;
 
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 

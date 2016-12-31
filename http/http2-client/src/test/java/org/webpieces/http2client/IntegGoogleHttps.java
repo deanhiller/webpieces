@@ -1,6 +1,7 @@
-package org.webpieces.httpclient;
+package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -9,13 +10,13 @@ import javax.net.ssl.SSLEngine;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.Http2Client;
-import org.webpieces.httpclient.api.Http2ClientFactory;
-import org.webpieces.httpclient.api.Http2ResponseListener;
-import org.webpieces.httpclient.api.Http2ServerListener;
-import org.webpieces.httpclient.api.Http2Socket;
-import org.webpieces.httpclient.api.Http2SocketDataReader;
-import org.webpieces.httpclient.api.dto.Http2Headers;
+import org.webpieces.http2client.api.Http2Client;
+import org.webpieces.http2client.api.Http2ClientFactory;
+import org.webpieces.http2client.api.Http2ResponseListener;
+import org.webpieces.http2client.api.Http2ServerListener;
+import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketDataReader;
+import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.logging.Logger;
@@ -25,6 +26,8 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.http2engine.api.Http2EngineFactory;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 
 public class IntegGoogleHttps {
@@ -131,6 +134,16 @@ public class IntegGoogleHttps {
 			log.info("this request was cancelled by remote end");
 		}
 		
+		@Override
+		public void incomingControlFrame(Http2Frame lowLevelFrame) {
+			if(lowLevelFrame instanceof Http2GoAway) {
+				Http2GoAway goAway = (Http2GoAway) lowLevelFrame;
+				DataWrapper debugData = goAway.getDebugData();
+				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
+				log.info("go away received.  debug="+debug);
+			} else 
+				throw new UnsupportedOperationException("not done yet.  frame="+lowLevelFrame);
+		}
 	}
 	
 	private static class ChunkedResponseListener implements Http2ResponseListener {

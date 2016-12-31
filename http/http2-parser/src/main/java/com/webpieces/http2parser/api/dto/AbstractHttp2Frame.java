@@ -25,8 +25,6 @@ public abstract class AbstractHttp2Frame implements Http2Frame {
 
     @Override
     public String toString() {
-        return "Http2Frame{" +
-                "streamId=" + streamId +
-                '}';
+        return "streamId=" + streamId;
     }
 }

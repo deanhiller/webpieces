@@ -6,6 +6,8 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
@@ -21,6 +23,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class Level2AggregateDecodeHeaders {
 
+	private static final Logger log = LoggerFactory.getLogger(Level2AggregateDecodeHeaders.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private Level3StreamInitialization nextLayer;
@@ -41,6 +44,7 @@ public class Level2AggregateDecodeHeaders {
 	 *************************************************************************/
 
 	public void sendFrameUpToClient(Http2Frame lowLevelFrame) {
+		log.info("frame from socket="+lowLevelFrame);
 		//headers on two streams must all come in series for stream 1 then stream 2 per spec.  only
 		//data frames can be multiplexed per spec
 		if(lowLevelFrame instanceof HasHeaderFragment) {
@@ -62,13 +66,23 @@ public class Level2AggregateDecodeHeaders {
 		
 		if(lowLevelFrame instanceof Http2Settings) {
 			Http2Settings settings = (Http2Settings) lowLevelFrame;
+			processHttp2SettingsFrame(settings);
+		} else {
+			flowControlLevel5.sendControlFrameToClient(lowLevelFrame);
+		}
+	}
+
+	private void processHttp2SettingsFrame(Http2Settings settings) {
+		if(settings.isAck()) {
+			log.info("server acked our settings frame");
+		} else {
+			log.info("applying remote settings frame");
 			flowControlLevel5.applyRemoteSettings(settings);
 			//now that settings is applied, ack the settings
 			Http2Settings settingsAck = new Http2Settings(true);
 			
+			log.info("sending remote settings ack frame");
 			flowControlLevel5.sendControlDataToSocket(settingsAck);
-		} else {
-			flowControlLevel5.sendControlFrameToClient(lowLevelFrame);
 		}
 	}
 
@@ -98,9 +112,10 @@ public class Level2AggregateDecodeHeaders {
 			fullHeaderPayload.setPriorityDetails(f.getPriorityDetails());
 			fullHeaderPayload.setHeaderList(headers);
 			
+			log.info("sending to client full header="+fullHeaderPayload);
 			nextLayer.sendPayloadToClient(fullHeaderPayload);
 		} else if(first instanceof Http2PushPromise) {
-			throw new UnsupportedOperationException("not supported yet");
+			throw new UnsupportedOperationException("not supported yet="+first);
 		}
 		
 	}
@@ -109,9 +124,10 @@ public class Level2AggregateDecodeHeaders {
 		if (f.getStreamId() <= 0) {
 			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, f.getStreamId(),
 					"frame streamId cannot be <= 0");
-		} else {
-			nextLayer.sendPayloadToClient(f);
 		}
+
+		log.info("incoming payload="+f);
+		nextLayer.sendPayloadToClient(f);
 	}
 
 }

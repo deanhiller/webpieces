@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.impl2;
+package org.webpieces.http2client.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -6,27 +6,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpclient.api.Http2ResponseListener;
-import org.webpieces.httpclient.api.Http2ServerListener;
-import org.webpieces.httpclient.api.dto.Http2Headers;
+import org.webpieces.http2client.api.Http2ResponseListener;
+import org.webpieces.http2client.api.Http2ServerListener;
+import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.dto.Http2Data;
+import com.webpieces.http2parser.api.dto.Http2Frame;
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 
 public class Layer5Outgoing implements ResultListener {
 	
+	private static final Logger log = LoggerFactory.getLogger(Layer5Outgoing.class);
 	private TCPChannel channel;
 	
 	private Map<Integer, Http2ResponseListener> streamIdToListener = new HashMap<>();
 	private Http2ServerListener clientListener;
+	private Http2Socket socket;
 
-	public Layer5Outgoing(TCPChannel channel) {
+	public Layer5Outgoing(TCPChannel channel, Http2Socket socket) {
 		this.channel = channel;
+		this.socket = socket;
 	}
 
 	@Override
@@ -62,6 +69,7 @@ public class Layer5Outgoing implements ResultListener {
 
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer data) {
+		log.info("writing out data to socket size="+data.remaining());
 		return channel.write(data)
 						.thenApply(c -> null);
 	}
@@ -88,6 +96,16 @@ public class Layer5Outgoing implements ResultListener {
 
 	public void addResponseListener(int streamId, Http2ResponseListener listener) {
 		streamIdToListener.put(streamId, listener);
+	}
+
+	@Override
+	public void incomingControlFrame(Http2Frame lowLevelFrame) {
+		clientListener.incomingControlFrame(lowLevelFrame);
+	}
+
+	@Override
+	public void engineClosed() {
+		clientListener.farEndClosed(socket);
 	}
 
 }

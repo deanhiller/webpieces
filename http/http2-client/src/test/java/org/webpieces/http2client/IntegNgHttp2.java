@@ -1,17 +1,20 @@
-package org.webpieces.httpclient;
+package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.Http2ResponseListener;
-import org.webpieces.httpclient.api.Http2ServerListener;
-import org.webpieces.httpclient.api.Http2Socket;
-import org.webpieces.httpclient.api.Http2SocketDataReader;
-import org.webpieces.httpclient.api.dto.Http2Headers;
+import org.webpieces.http2client.api.Http2ResponseListener;
+import org.webpieces.http2client.api.Http2ServerListener;
+import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.http2client.api.Http2SocketDataReader;
+import org.webpieces.http2client.api.dto.Http2Headers;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -22,6 +25,7 @@ public class IntegNgHttp2 {
 
     static private CompletableFuture<Http2Headers> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
         if(n > 0) {
+        	log.info("send request");
             return socket.sendRequest(req, l, true)
                     .thenCompose(dataWriter -> sendManyTimes(socket, n-1, req, l));
         } else {
@@ -47,7 +51,10 @@ public class IntegNgHttp2 {
 
         socket
                 .connect(addr, new ServerListenerImpl())
-                .thenCompose(theSocket -> sendManyTimes(theSocket, 1, req, listener))
+                .thenCompose(theSocket -> {
+                	log.info("sending REQUEST");
+                	return sendManyTimes(theSocket, 1, req, listener);
+                	})
                 .exceptionally(e -> {
                     reportException(socket, e);
                     return req;
@@ -100,6 +107,16 @@ public class IntegNgHttp2 {
 			log.info("this request was cancelled by remote end");
 		}
 		
+		@Override
+		public void incomingControlFrame(Http2Frame lowLevelFrame) {
+			if(lowLevelFrame instanceof Http2GoAway) {
+				Http2GoAway goAway = (Http2GoAway) lowLevelFrame;
+				DataWrapper debugData = goAway.getDebugData();
+				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
+				log.info("go away received.  debug="+debug);
+			} else 
+				throw new UnsupportedOperationException("not done yet.  frame="+lowLevelFrame);
+		}
 	}
 	
 	private static class ChunkedResponseListener implements Http2ResponseListener {
@@ -130,12 +147,12 @@ public class IntegNgHttp2 {
 		}
 	}
 
-    private static Http2Headers createRequest(String host, boolean isHttps) {
+    private static Http2Headers createRequest(String host, boolean isHttp) {
     	String scheme;
-    	if(isHttps)
-    		scheme = "https";
-    	else
+    	if(isHttp)
     		scheme = "http";
+    	else
+    		scheme = "https";
     	
     	Http2Headers req = new Http2Headers();
         req.addHeader(new Http2Header(Http2HeaderName.METHOD, "GET"));
@@ -143,7 +160,6 @@ public class IntegNgHttp2 {
         req.addHeader(new Http2Header(Http2HeaderName.PATH, "/"));
         req.addHeader(new Http2Header(Http2HeaderName.SCHEME, scheme));
         req.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
-        req.addHeader(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
         req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/xx"));
         return req;
     }

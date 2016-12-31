@@ -48,9 +48,10 @@ public class Http2Data extends AbstractHttp2Frame implements Http2Payload {
     @Override
     public String toString() {
         return "Http2Data{" +
-                "endStream=" + endStream +
-                ", data=" + data +
+        		super.toString() +
+                ", endStream=" + endStream +
+                ", data.len=" + data.getReadableSize() +
                 ", padding=" + padding +
-                "} " + super.toString();
+                "} ";
     }
 }

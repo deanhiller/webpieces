@@ -1,9 +1,9 @@
-package org.webpieces.httpclient.impl2;
+package org.webpieces.http2client.impl;
 
 import javax.net.ssl.SSLEngine;
 
-import org.webpieces.httpclient.api.Http2Client;
-import org.webpieces.httpclient.api.Http2Socket;
+import org.webpieces.http2client.api.Http2Client;
+import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPChannel;
 

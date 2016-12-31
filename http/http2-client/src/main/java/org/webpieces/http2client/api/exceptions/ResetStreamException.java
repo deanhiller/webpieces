@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.api.exceptions;
+package org.webpieces.http2client.api.exceptions;
 
 public class ResetStreamException extends RuntimeException {
 

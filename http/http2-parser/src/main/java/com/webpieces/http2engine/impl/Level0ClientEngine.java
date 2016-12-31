@@ -68,4 +68,9 @@ public class Level0ClientEngine implements Http2ClientEngine {
 		parsingLayer.parse(newData);
 	}
 
+	@Override
+	public void closeEngine() {
+		flowControlLevel5.closeEngine();
+	}
+
 }

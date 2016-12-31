@@ -1,11 +1,11 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.http2client.api;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpclient.api.dto.Http2Headers;
-import org.webpieces.httpclient.api.dto.Http2Request;
-import org.webpieces.httpclient.api.dto.Http2Response;
+import org.webpieces.http2client.api.dto.Http2Headers;
+import org.webpieces.http2client.api.dto.Http2Request;
+import org.webpieces.http2client.api.dto.Http2Response;
 
 public interface Http2Socket {
 	

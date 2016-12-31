@@ -42,7 +42,8 @@ public class HeaderEncoding {
         HasHeaderFragment currentFrame = initialFrame;
         DataWrapper dataLeftOver = serializedHeaders;
         while(dataLeftOver.getReadableSize() > 0) {
-            List<? extends DataWrapper> split = dataGen.split(dataLeftOver, maxFrameSize);
+        	int splitSize = Math.min(dataLeftOver.getReadableSize(), maxFrameSize);
+            List<? extends DataWrapper> split = dataGen.split(dataLeftOver, splitSize);
             DataWrapper fragment = split.get(0);
             
             currentFrame.setHeaderFragment(fragment);
@@ -55,7 +56,6 @@ public class HeaderEncoding {
 
         //last frame is currentFrame so set end header
         currentFrame.setEndHeaders(true);
-        
 		return headerFrames;
 	}
     

@@ -1,14 +1,14 @@
-package org.webpieces.httpclient.impl2;
+package org.webpieces.http2client.impl;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.Http2ResponseListener;
-import org.webpieces.httpclient.api.dto.Http2Headers;
-import org.webpieces.httpclient.api.dto.Http2Response;
-import org.webpieces.httpclient.api.exceptions.ResetStreamException;
+import org.webpieces.http2client.api.Http2ResponseListener;
+import org.webpieces.http2client.api.dto.Http2Headers;
+import org.webpieces.http2client.api.dto.Http2Response;
+import org.webpieces.http2client.api.exceptions.ResetStreamException;
 
 import com.webpieces.http2parser.api.dto.Http2UnknownFrame;
 

@@ -51,9 +51,10 @@ public class Http2GoAway extends AbstractHttp2Frame {
     @Override
     public String toString() {
         return "Http2GoAway{" +
-                "lastStreamId=" + lastStreamId +
+        		super.toString() +
+                ", lastStreamId=" + lastStreamId +
                 ", errorCode=" + errorCode +
-                ", debugData=" + debugData +
-                "} " + super.toString();
+                ", debugData.len=" + debugData.getReadableSize() +
+                "}";
     }
 }

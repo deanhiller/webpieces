@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.impl2;
+package org.webpieces.http2client.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
@@ -6,9 +6,9 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.Http2ResponseListener;
-import org.webpieces.httpclient.api.Http2SocketDataWriter;
-import org.webpieces.httpclient.api.dto.Http2Headers;
+import org.webpieces.http2client.api.Http2ResponseListener;
+import org.webpieces.http2client.api.Http2SocketDataWriter;
+import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
@@ -105,14 +105,14 @@ public class Layer1Incoming implements DataListener {
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
-		log.info("incoming data");
+		log.info("incoming data. size="+b.remaining());
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		layer2.parse(data);
 	}
 
 	@Override
 	public void farEndClosed(Channel channel) {
-		log.info("far end closed");
+		layer2.closeEngine();
 	}
 
 	@Override

@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2Payload;
@@ -14,6 +16,7 @@ import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.Http2Data;
 import com.webpieces.http2parser.api.dto.Http2Frame;
+import com.webpieces.http2parser.api.dto.Http2GoAway;
 import com.webpieces.http2parser.api.dto.Http2HeadersFrame;
 import com.webpieces.http2parser.api.dto.Http2Settings;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -22,6 +25,8 @@ import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class Level5FlowControl {
 
+	private static final Logger log = LoggerFactory.getLogger(Level5FlowControl.class);
+	
 	private Http2Parser2 lowLevelParser;
 	private ResultListener socketListener;
 	private HeaderEncoding encoding;
@@ -58,6 +63,7 @@ public class Level5FlowControl {
 //	}
 
 	public CompletableFuture<Void> sendPayloadToSocket(Http2Payload payload) {
+		log.info("sending payload to socket="+payload);
 		if(payload instanceof Http2Data) {
 			Http2Data frame = (Http2Data) payload;
 			DataWrapper data = lowLevelParser.marshal(frame);
@@ -68,16 +74,17 @@ public class Level5FlowControl {
 			
 	    	Http2HeadersFrame frame = new Http2HeadersFrame();
 	    	frame.setStreamId(headers.getStreamId());
-	    	return encodeAndSend(frame, headers.getHeaderList());
-		}
-		
-		return null;
+	    	frame.setEndStream(headers.isEndStream());
+	    	return encodeAndSend(frame, headers.getHeaderList(), payload.isEndStream());
+		} else
+			throw new UnsupportedOperationException("not done yet.  frame="+payload);
 	}
 
-	private CompletableFuture<Void> encodeAndSend(HasHeaderFragment initialFrame, List<Http2Header> headers) {
+	private CompletableFuture<Void> encodeAndSend(HasHeaderFragment initialFrame, List<Http2Header> headers, boolean isEndStream) {
 		List<Http2Frame> framesToSend = encoding.createHeaderFrames(initialFrame, headers);
 		CompletableFuture<Void> lastFuture = null;
 		for(Http2Frame frame : framesToSend) {
+			log.info("sending frame down to socket(from client)="+frame);
 			DataWrapper data = lowLevelParser.marshal(frame);
 			ByteBuffer frameBug = translate(data);
 			lastFuture = socketListener.sendToSocket(frameBug);
@@ -89,8 +96,13 @@ public class Level5FlowControl {
 		DataWrapper data = lowLevelParser.marshal(settings);
 		ByteBuffer settingsBytes = translate(data);
 		
+		log.info("send preface AND settings to socket="+settings);
 		return socketListener.sendToSocket(preface)
-				.thenCompose(c -> socketListener.sendToSocket(settingsBytes));
+				.thenCompose(c -> {
+					CompletableFuture<Void> socketSend = socketListener.sendToSocket(settingsBytes);
+					log.info("sent local settings to remote");
+					return socketSend;
+				});
 	}
 
 	private ByteBuffer translate(DataWrapper data) {
@@ -98,7 +110,10 @@ public class Level5FlowControl {
 	}
 
 	public void sendControlFrameToClient(Http2Frame lowLevelFrame) {
-		throw new UnsupportedOperationException("not done yet");
+		if(lowLevelFrame instanceof Http2GoAway) {
+			socketListener.incomingControlFrame(lowLevelFrame);
+		} else
+			throw new UnsupportedOperationException("not done yet. frame="+lowLevelFrame);
 	}
 
 	/**
@@ -171,6 +186,10 @@ public class Level5FlowControl {
 		windowSizeLeft.addAndGet(difference);
 
 		remoteSettings.setInitialWindowSize(initialWindow);
+	}
+
+	public void closeEngine() {
+		this.socketListener.engineClosed();
 	}
 
 }
