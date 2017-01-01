@@ -9,6 +9,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.Http2DataPayload;
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2FullPushPromise;
 import com.webpieces.http2engine.api.Http2Payload;
@@ -58,7 +59,9 @@ public class Level2AggregateDecodeHeaders {
 		} else if(accumulatingHeaders.size() > 0) {
 			throw new IllegalArgumentException("HasHeaderFragments are required to be consecutive per spec but somehow are not.  accumulatedFrames="+accumulatingHeaders);
 		} else if(lowLevelFrame instanceof DataFrame) {
-			incomingData((DataFrame) lowLevelFrame);
+			DataFrame f = (DataFrame) lowLevelFrame;
+			Http2DataPayload data = new Http2DataPayload(f);
+			incomingData(data);
 			return;
 		}
 		

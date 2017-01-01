@@ -28,7 +28,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2engine.impl.HeaderSettings;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
@@ -341,8 +340,10 @@ public class Http2ParserImpl implements Http2Parser {
 				return s.getValue();
 		}
 		
+		int defaultMaxFrameSize = 16_384; 
+
 		//otherwise return default
-		return HeaderSettings.DEFAULT.getMaxFrameSize();
+		return defaultMaxFrameSize;
 	}
 
 	private void doSomething(Decoder decoder, List<AbstractHttp2Frame> frames, List<AbstractHttp2Frame> hasHeaderFragmentList) {

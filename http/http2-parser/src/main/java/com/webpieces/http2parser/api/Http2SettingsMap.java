@@ -8,6 +8,7 @@ import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
+@Deprecated
 public class Http2SettingsMap extends HashMap<SettingsParameter, Long> {
 
 	private static final long serialVersionUID = 1L;

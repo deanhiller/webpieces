@@ -1,7 +1,6 @@
 dependencies {
     compile project(':core:core-channelmanager2') 
-    compile project(':http:http2-parser')
-    compile project(':core:core-statemachine')
+    compile project(':http:http2-engine')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

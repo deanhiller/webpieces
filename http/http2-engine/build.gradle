@@ -1,0 +1,9 @@
+dependencies {
+    compile deps['twitter-hpack']
+    compile project(':http:http2-parser')
+    compile project(':core:core-statemachine')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='A re-usable asynchronous http2 parser'
+}

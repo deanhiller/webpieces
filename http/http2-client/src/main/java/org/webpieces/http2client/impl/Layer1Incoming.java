@@ -16,6 +16,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2ClientEngine;
+import com.webpieces.http2engine.api.Http2DataPayload;
 import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class Layer1Incoming implements DataListener {
@@ -85,7 +86,8 @@ public class Layer1Incoming implements DataListener {
 			data.setStreamId(streamId);
 			data.setEndStream(isComplete);
 			data.setData(payload);
-			return layer2.sendFrameToSocket(data).thenApply(c -> this);
+			Http2DataPayload d = new Http2DataPayload(data);
+			return layer2.sendFrameToSocket(d).thenApply(c -> this);
 		}
 
 		@Override

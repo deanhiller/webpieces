@@ -2,13 +2,12 @@ package com.webpieces.http2parser.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2engine.api.Http2Payload;
 import com.webpieces.http2parser.api.Padding;
 import com.webpieces.http2parser.api.PaddingFactory;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 
-public class DataFrame extends AbstractHttp2Frame implements Http2Payload {
+public class DataFrame extends AbstractHttp2Frame {
 
     @Override
     public Http2FrameType getFrameType() {

@@ -8,5 +8,4 @@ public class Http2EngineFactory {
 	public Http2ClientEngine createClientParser(String id, Http2Parser2 lowLevelParser, ResultListener resultListener) {
 		return new Level0ClientEngine(id, lowLevelParser, resultListener);
 	}
-	
 }
