@@ -17,8 +17,8 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 @RunWith(Parameterized.class)
-public class TestH2Spec2 {
-	private static final Logger log = LoggerFactory.getLogger(TestH2Spec2.class);
+public class TestH2Spec {
+	private static final Logger log = LoggerFactory.getLogger(TestH2Spec.class);
 
     String h2SpecPath;
     int port;
@@ -31,14 +31,14 @@ public class TestH2Spec2 {
         String[] tests = {
                 "3.5",
                 "4.2",
-                // "4.3",
+                //"4.3",
                 "5.1",
                 "5.1.1",
                 "5.1.2",
                 "5.3",
                 "5.3.1",
                 "5.4",
-                // "5.4.1",
+                //"5.4.1",
                 "5.5",
                 "6.1",
                 "6.2",
@@ -69,7 +69,7 @@ public class TestH2Spec2 {
 		return Arrays.asList(arrayOfArgs);
 	}
 	
-	public TestH2Spec2(int index, String testName) {
+	public TestH2Spec(int index, String testName) {
 		this.testName = testName;
 		log.info("constructing test suite for server prod="+testName+" index="+index);
 	}
