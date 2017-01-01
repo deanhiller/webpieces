@@ -20,6 +20,9 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
+		if(frame.getStreamId() != 0)
+	    	throw new IllegalArgumentException("GoAwayFrame can never be any other stream id except 0 which is already set");
+
         GoAwayFrame castFrame = (GoAwayFrame) frame;
 
         ByteBuffer prelude = bufferPool.nextBuffer(8);
@@ -52,6 +55,9 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         frame.setDebugData(split.get(1));
 
         bufferPool.releaseBuffer(preludeBytes);
+
+		if(frame.getStreamId() != 0)
+	    	throw new IllegalArgumentException("GoAwayFrame can never be any other stream id except 0 which is already set");
 
         return frame;
 	}

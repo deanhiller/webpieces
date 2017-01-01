@@ -20,6 +20,9 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
+    	if(frame.getStreamId() != 0)
+    		throw new IllegalArgumentException("PingFrame can never be any other stream id except 0 which is already set");
+    	
 		PingFrame ping = (PingFrame) frame;
         ByteBuffer payload = bufferPool.nextBuffer(8);
         payload.putLong(ping.getOpaqueData());
@@ -53,6 +56,10 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
         ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);
         frame.setOpaqueData(payloadByteBuffer.getLong());
         bufferPool.releaseBuffer(payloadByteBuffer);
+        
+    	if(frame.getStreamId() != 0)
+    		throw new IllegalArgumentException("PingFrame can never be any other stream id except 0 which is already set");
+    	
         return frame;
 	}
 

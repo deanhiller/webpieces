@@ -23,6 +23,9 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
+    	if(frame.getStreamId() != 0)
+    		throw new IllegalArgumentException("SettingsFrame can never be any other stream id except 0 which is already set");
+    	
 		SettingsFrame castFrame = (SettingsFrame) frame;
 
 		byte flags = 0x0;
@@ -81,6 +84,9 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 		bufferPool.releaseBuffer(payloadByteBuffer);
 
+    	if(frame.getStreamId() != 0)
+    		throw new IllegalArgumentException("SettingsFrame can never be any other stream id except 0 which is already set");
+    	
 		return frame;
 	}
 

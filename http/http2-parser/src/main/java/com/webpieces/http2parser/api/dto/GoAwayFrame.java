@@ -20,17 +20,6 @@ public class GoAwayFrame extends AbstractHttp2Frame {
     private Http2ErrorCode errorCode; //32bits
     private DataWrapper debugData;
 
-    @Override
-	public void setStreamId(int streamId) {
-    	if(streamId == 0)
-    		return; //nothing to do as we are fixed at 0
-    	throw new UnsupportedOperationException("Http2Settings can never be any other stream id except 0 which is already set");
-	}
-	@Override
-	public int getStreamId() {
-		return 0;
-	}
-	
     public void setLastStreamId(int lastStreamId) {
         this.lastStreamId = lastStreamId & 0x7FFFFFFF; // clear the MSB for reserved
     }

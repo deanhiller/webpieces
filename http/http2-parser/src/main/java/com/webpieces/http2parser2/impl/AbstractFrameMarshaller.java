@@ -20,6 +20,12 @@ public class AbstractFrameMarshaller {
 	}
 
 	protected DataWrapper marshalFrame(Http2Frame frame, byte value, DataWrapper payload) {
+		int originalStreamId = frame.getStreamId();
+        // Clear the MSB because streamId can only be 31 bits
+        int streamId = originalStreamId & 0x7FFFFFFF;
+        if(streamId != originalStreamId) 
+        	throw new RuntimeException("your stream id is too large per spec");
+		
         ByteBuffer header = ByteBuffer.allocate(9);
         
         int length = payload.getReadableSize();
@@ -30,7 +36,7 @@ public class AbstractFrameMarshaller {
         header.put(value);
 
         // 1 bit reserved, streamId MSB is always 0, see setStreamId()
-        header.putInt(frame.getStreamId());
+        header.putInt(streamId);
         header.flip();
 
         DataWrapper frameHeader = dataGen.wrapByteBuffer(header);
