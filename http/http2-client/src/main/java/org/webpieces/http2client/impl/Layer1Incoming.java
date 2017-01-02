@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -14,8 +13,10 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2engine.api.dto.Http2Data;
+import com.webpieces.http2engine.api.Http2ResponseListener;
+import com.webpieces.http2engine.api.RequestWriter;
 import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.PartialStream;
 
 public class Layer1Incoming implements DataListener {
 
@@ -23,69 +24,51 @@ public class Layer1Incoming implements DataListener {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ClientEngine layer2;
 	private int nextAvailableStreamId = 1;
-	private Layer5Outgoing outgoing;
 
-	public Layer1Incoming(Http2ClientEngine layer2, Layer5Outgoing outgoing) {
+	public Layer1Incoming(Http2ClientEngine layer2) {
 		this.layer2 = layer2;
-		this.outgoing = outgoing;
 	}
 
 	public CompletableFuture<Void> sendInitialFrames() {
 		return layer2.sendInitializationToSocket();
 	}
 	
-	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener,
-			boolean isComplete) {
+	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
 		int streamId = getNextAvailableStreamId();
-		
-		outgoing.addResponseListener(streamId, listener);
-		
-		Http2SocketDataWriter writer;
-		if(isComplete)
-			writer = new NullWriter(streamId);
-		else
-			writer = new Writer(streamId);
+		request.setStreamId(streamId);
 
-		return layer2.sendFrameToSocket(request)
-					.thenApply(c -> writer);
+		return layer2.sendFrameToSocket(request, listener)
+						.thenApply(c -> createWriter(request, c));
+	}
+
+	private Http2SocketDataWriter createWriter(Http2Headers request, RequestWriter requestWriter) {
+		Http2SocketDataWriter writer = new Writer(request.getStreamId(), request.isEndOfStream(), requestWriter);
+		return writer;
 	}
 	
-	private class NullWriter implements Http2SocketDataWriter {
-		protected int streamId;
-		public NullWriter(int streamId) {
+	private class Writer implements Http2SocketDataWriter {
+		private RequestWriter requestWriter;
+		private int streamId;
+		private boolean isEndOfStream;
+
+		public Writer(int streamId, boolean isEndOfStream, RequestWriter requestWriter) {
 			this.streamId = streamId;
-		}
-		@Override
-		public CompletableFuture<Http2SocketDataWriter> sendData(DataWrapper data, boolean isComplete) {
-			throw new IllegalStateException("Client called sendRequest(..., ..., true) meaning that was supposed to be the complete request");
-		}
-		@Override
-		public CompletableFuture<Http2SocketDataWriter> sendTrailingHeaders(Http2Headers endHeaders) {
-			throw new IllegalStateException("Client called sendRequest(..., ..., true) meaning that was supposed to be the complete request");
-		}
-		@Override
-		public final void cancel() {
-			layer2.cancel(streamId);
-		}
-	}
-	
-	private class Writer extends NullWriter {
-		public Writer(int streamId) {
-			super(streamId);
+			this.isEndOfStream = isEndOfStream;
+			this.requestWriter = requestWriter;
 		}
 
 		@Override
-		public CompletableFuture<Http2SocketDataWriter> sendData(DataWrapper payload, boolean isComplete) {
-			Http2Data data = new Http2Data();
+		public CompletableFuture<Http2SocketDataWriter> sendData(PartialStream data) {
+			if(isEndOfStream)
+				throw new IllegalStateException("Client has already sent a PartialStream"
+						+ " object with endOfStream=true so no more data can be sent");
+			
+			if(data.isEndOfStream())
+				isEndOfStream = true;
+			
 			data.setStreamId(streamId);
-			data.setEndOfStream(isComplete);
-			data.setPayload(payload);
-			return layer2.sendFrameToSocket(data).thenApply(c -> this);
-		}
 
-		@Override
-		public CompletableFuture<Http2SocketDataWriter> sendTrailingHeaders(Http2Headers endHeaders) {
-			return layer2.sendFrameToSocket(endHeaders).thenApply(c -> this);
+			return requestWriter.sendMore(data).thenApply(c -> this);
 		}
 	}
 	

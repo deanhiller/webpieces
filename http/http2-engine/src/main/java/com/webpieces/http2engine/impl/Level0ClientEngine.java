@@ -8,8 +8,10 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2engine.api.ResultListener;
-import com.webpieces.http2engine.api.dto.PartialStream;
+import com.webpieces.http2engine.api.Http2ResponseListener;
+import com.webpieces.http2engine.api.RequestWriter;
+import com.webpieces.http2engine.api.EngineListener;
+import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 
@@ -22,7 +24,7 @@ public class Level0ClientEngine implements Http2ClientEngine {
 	private Level1IncomingParsing parsingLayer;
 	private Level3StreamInitialization streamInitializationLevel3;
 
-	public Level0ClientEngine(String id, Http2Parser2 lowLevelParser, ResultListener socketListener) {
+	public Level0ClientEngine(String id, Http2Parser2 lowLevelParser, EngineListener socketListener) {
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = new HeaderSettings();
 
@@ -34,21 +36,16 @@ public class Level0ClientEngine implements Http2ClientEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendFrameToSocket(PartialStream frame) {
-		int streamId = frame.getStreamId();
+	public CompletableFuture<RequestWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
+		int streamId = headers.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException("frames for requests must have a streamId > 0");
 		else if(streamId % 2 == 0)
 			throw new IllegalArgumentException("Client cannot send frames with even stream ids to server per http/2 spec");
-
-		return streamInitializationLevel3.outgoingFrame(frame);
+		
+		return streamInitializationLevel3.createStreamAndSend(headers, responseListener);
 	}
 
-	@Override
-	public void cancel(int streamId) {
-		throw new UnsupportedOperationException("not supported yet");
-	}
-	
 	/**
 	 * NOT thread-safe.  This is meant to be called from a 'virtual' single thread or a single thread.
 	 * channelmanager2 uses 'virtual' single threads ensuring order and never running at the same time

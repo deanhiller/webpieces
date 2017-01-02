@@ -5,4 +5,6 @@ public interface PartialStream {
 	boolean isEndOfStream();
 	
 	int getStreamId();
+
+	void setStreamId(int streamId);
 }

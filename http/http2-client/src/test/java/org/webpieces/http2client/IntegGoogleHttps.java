@@ -10,9 +10,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
-import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.logging.Logger;
@@ -20,6 +18,8 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.http2engine.api.Http2EngineFactory;
+import com.webpieces.http2engine.api.Http2ResponseListener;
+import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.Http2Parser2;
@@ -60,7 +60,7 @@ public class IntegGoogleHttps {
 		
 		socket
 			.connect(addr, null)
-			.thenAccept(s -> s.sendRequest(req, new ChunkedResponseListener(), true))
+			.thenAccept(s -> s.sendRequest(req, new ChunkedResponseListener()))
 			.exceptionally(e -> reportException(socket, e));
 		
 		Thread.sleep(100000);

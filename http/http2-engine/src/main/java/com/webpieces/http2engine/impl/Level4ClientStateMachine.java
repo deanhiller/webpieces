@@ -100,21 +100,16 @@ public class Level4ClientStateMachine {
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}
 
-	public void fireToClient(Memento currentState, PartialStream payload) {
-		testStateTransition(currentState, payload); //validates state transition is ok
-
-		//if no exceptions occurred, send it on to flow control layer
-		flowControl.sendPayloadToClient(payload);
-	}
-
-	public void testStateTransition(Memento currentState, PartialStream payload) {
+	public void testStateMachineTransition(Memento currentState, PartialStream payload) {
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
 		
 		stateMachine.fireEvent(currentState, event);
 		
 		if(payload.isEndOfStream())
-			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG));
+			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG)); //validates state transition is ok
+		
+		//if no exceptions occurred, return and data is sent on to client
 	}
 
 }

@@ -138,7 +138,8 @@ public class Level2AggregateDecodeHeaders {
 			fullPromise.setCausalStreamId(promise.getStreamId());
 			
 			nextLayer.sendPushPromiseToClient(fullPromise);
-		}
+		} else
+			throw new IllegalStateException("bug, should not be able to end up here");
 	}
 	
 	public void incomingData(PartialStream f) {

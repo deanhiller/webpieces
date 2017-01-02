@@ -4,15 +4,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2engine.api.dto.PartialStream;
+import com.webpieces.http2engine.api.dto.Http2Headers;
 
 public interface Http2ClientEngine {
 
 	CompletableFuture<Void> sendInitializationToSocket();
-
-	CompletableFuture<Void> sendFrameToSocket(PartialStream frame);
-
-	void cancel(int streamId);
+	CompletableFuture<RequestWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener);
+	//CompletableFuture<Void> sendFrameToSocket(PartialStream frame);
+	//void cancel(int streamId);
 
 	void parse(DataWrapper newData);
 

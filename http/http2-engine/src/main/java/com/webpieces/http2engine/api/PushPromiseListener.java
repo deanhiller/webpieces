@@ -1,4 +1,4 @@
-package org.webpieces.http2client.api;
+package com.webpieces.http2engine.api;
 
 import com.webpieces.http2engine.api.dto.PartialStream;
 
@@ -12,11 +12,5 @@ public interface PushPromiseListener {
 	 * @param resp
 	 */
 	void incomingPushPromise(PartialStream response);
-	
-	/**
-	 * In http/2, sends a stream reset to cancel the request.  In http1.1, throws an exception
-	 * since requests can't be cancelled
-	 */
-	void serverCancelledRequest();
 	
 }

@@ -5,11 +5,11 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.http2client.api.Http2ResponseListener;
-import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.http2client.api.exceptions.ResetStreamException;
 
+import com.webpieces.http2engine.api.Http2ResponseListener;
+import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.dto.Http2Data;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;

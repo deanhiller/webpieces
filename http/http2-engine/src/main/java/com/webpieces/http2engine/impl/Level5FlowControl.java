@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.ResultListener;
+import com.webpieces.http2engine.api.EngineListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.Http2Parser2;
@@ -28,13 +28,17 @@ public class Level5FlowControl {
 	private static final Logger log = LoggerFactory.getLogger(Level5FlowControl.class);
 	
 	private Http2Parser2 lowLevelParser;
-	private ResultListener resultListener;
+	private EngineListener resultListener;
 	private HeaderEncoding encoding;
 	private HeaderSettings remoteSettings;
 	
 	private AtomicLong windowSizeLeft;
 
-	public Level5FlowControl(Http2Parser2 lowLevelParser, ResultListener socketListener, HeaderSettings remoteSettings) {
+	public Level5FlowControl(
+			Http2Parser2 lowLevelParser, 
+			EngineListener socketListener,
+			HeaderSettings remoteSettings
+	) {
 		this.lowLevelParser = lowLevelParser;
 		this.resultListener = socketListener;
 		this.remoteSettings = remoteSettings;
@@ -52,16 +56,6 @@ public class Level5FlowControl {
 		return resultListener.sendToSocket(frameBytes);
 	}
 	
-//	public CompletableFuture<Void> marshalControlFrame(Http2Payload payload) {
-//		if(payload instanceof Http2Settings) {
-//			AbstractHttp2Frame frame = (AbstractHttp2Frame) payload;
-//			DataWrapper data = lowLevelParser.marshal(frame);
-//			ByteBuffer frameBytes = translate(data);
-//			return socketListener.sendToSocket(frameBytes);
-//		} else
-//			throw new IllegalArgumentException("control frame not supported"+payload.getClass());
-//	}
-
 	public CompletableFuture<Void> sendPayloadToSocket(PartialStream payload) {
 		log.info("sending payload to socket="+payload);
 		if(payload instanceof DataFrame) {
@@ -111,7 +105,7 @@ public class Level5FlowControl {
 
 	public void sendControlFrameToClient(Http2Frame lowLevelFrame) {
 		if(lowLevelFrame instanceof GoAwayFrame) {
-			resultListener.incomingControlFrame(lowLevelFrame);
+			resultListener.sendControlFrameToClient(lowLevelFrame);
 		} else
 			throw new UnsupportedOperationException("not done yet. frame="+lowLevelFrame);
 	}
@@ -189,11 +183,7 @@ public class Level5FlowControl {
 	}
 
 	public void closeEngine() {
-		this.resultListener.engineClosed();
-	}
-
-	public void sendPayloadToClient(PartialStream payload) {
-		resultListener.incomingPayload(payload);
+		this.resultListener.engineClosedByFarEnd();
 	}
 
 }

@@ -1,4 +1,4 @@
-package org.webpieces.http2client.api;
+package com.webpieces.http2engine.api;
 
 import com.webpieces.http2engine.api.dto.PartialStream;
 

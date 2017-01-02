@@ -5,13 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.Http2ResponseListener;
+import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -26,8 +26,8 @@ public class IntegNgHttp2 {
     static private CompletableFuture<Void> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
         if(n > 0) {
         	log.info("send request");
-            return socket.sendRequest(req, l, true)
-                    .thenCompose(response -> sendManyTimes(socket, n-1, req, l));
+            return socket.sendRequest(req, l)
+                    .thenCompose(writer -> sendManyTimes(socket, n-1, req, l));
         } else {
             return CompletableFuture.completedFuture(null);
         }
@@ -140,6 +140,7 @@ public class IntegNgHttp2 {
         req.addHeader(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
         req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "nghttp2/1.15.0"));
         
+        req.setEndOfStream(true);
         return req;
     }
 }
