@@ -12,6 +12,7 @@ import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class PriorityMarshaller implements FrameMarshaller {
     private BufferPool bufferPool;
@@ -31,10 +32,12 @@ public class PriorityMarshaller implements FrameMarshaller {
     public DataWrapper marshalPayload(Http2Frame frame) {
         PriorityFrame castFrame = (PriorityFrame) frame;
 
+        PriorityDetails priorityDetails = castFrame.getPriorityDetails();
+        
         ByteBuffer payload = bufferPool.nextBuffer(5);
-        payload.putInt(castFrame.getStreamDependency());
-        if (castFrame.isStreamDependencyIsExclusive()) payload.put(0, (byte) (payload.get(0) | 0x80));
-        payload.put((byte) (castFrame.getWeight() & 0xFF));
+        payload.putInt(priorityDetails.getStreamDependency());
+        if (priorityDetails.isStreamDependencyIsExclusive()) payload.put(0, (byte) (payload.get(0) | 0x80));
+        payload.put((byte) (priorityDetails.getWeight() & 0xFF));
         payload.flip();
 
         return dataGen.wrapByteBuffer(payload);
@@ -47,15 +50,17 @@ public class PriorityMarshaller implements FrameMarshaller {
         maybePayload.ifPresent(payload -> {
             ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
+            PriorityDetails priorityDetails = castFrame.getPriorityDetails();
+
             int firstInt = payloadByteBuffer.getInt();
-            castFrame.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
+            priorityDetails.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
             int streamDependency = firstInt & 0x7FFFFFFF;
             if(streamDependency == frame.getStreamId()) {
                 // Can't depend on self
                 throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
             }
-            castFrame.setStreamDependency(streamDependency);
-            castFrame.setWeight((short) (payloadByteBuffer.get() & 0xFF));
+            priorityDetails.setStreamDependency(streamDependency);
+            priorityDetails.setWeight((short) (payloadByteBuffer.get() & 0xFF));
 
             bufferPool.releaseBuffer(payloadByteBuffer);
         });

@@ -12,6 +12,7 @@ import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
 import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
     @Override
@@ -23,8 +24,14 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     private boolean endStream = false; /* 0x1 */
     private boolean endHeaders = false; /* 0x4 */
     //private boolean padded = false; /* 0x8 */
-    private boolean priority = false; /* 0x20 */
-
+    //if PriorityDetails is null, this is false
+    //private boolean priority = false; /* 0x20 */
+    /* payload */
+    private PriorityDetails priorityDetails; /* optional */
+    private DataWrapper headerFragment;
+    private List<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
+    private Padding padding = PaddingFactory.createPadding();
+    
     public boolean isEndStream() {
         return endStream;
     }
@@ -44,15 +51,8 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     }
 
     public boolean isPriority() {
-        return priority;
+        return priorityDetails != null;
     }
-    public void setPriority(boolean priority) { this.priority = priority; }
-
-    /* payload */
-    private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
-    private DataWrapper headerFragment;
-    private List<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
-    private Padding padding = PaddingFactory.createPadding();
 
     @Override
     public List<Http2Header> getHeaderList() {
@@ -72,36 +72,6 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     @Override
     public void setHeaderFragment(DataWrapper serializedHeaders) {
         this.headerFragment = serializedHeaders;
-    }
-
-    @Override
-    public boolean isStreamDependencyIsExclusive() {
-        return priorityDetails.streamDependencyIsExclusive;
-    }
-
-    @Override
-    public void setStreamDependencyIsExclusive(boolean streamDependencyIsExclusive) {
-        this.priorityDetails.streamDependencyIsExclusive = streamDependencyIsExclusive;
-    }
-
-    @Override
-    public int getStreamDependency() {
-        return priorityDetails.streamDependency;
-    }
-
-    @Override
-    public void setStreamDependency(int streamDependency) {
-        this.priorityDetails.streamDependency = streamDependency & 0x7FFFFFFF;
-    }
-
-    @Override
-    public short getWeight() {
-        return priorityDetails.weight;
-    }
-
-    @Override
-    public void setWeight(short weight) {
-        this.priorityDetails.weight = weight;
     }
 
     @Override
@@ -125,7 +95,6 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
         		"streamId=" + super.toString() +
                 ", endStream=" + endStream +
                 ", endHeaders=" + endHeaders +
-                ", priority=" + priority +
                 ", priorityDetails=" + priorityDetails +
                 ", headerFragment=" + headerFragment.getReadableSize() +
                 ", padding=" + padding +

@@ -8,6 +8,7 @@ import com.webpieces.http2parser.UtilsForTest;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class TestHttp2Priority {
     private static Http2Parser2 parser = Http2ParserFactory.createParser2(new BufferCreationPool());
@@ -37,9 +38,10 @@ public class TestHttp2Priority {
     @Test
     public void testCreatePriorityFrame() {
         PriorityFrame frame = new PriorityFrame();
-        frame.setStreamDependency(4);
-        frame.setStreamDependencyIsExclusive(true);
-        frame.setWeight((short) 0x5);
+        PriorityDetails details = frame.getPriorityDetails();
+        details.setStreamDependency(4);
+        details.setStreamDependencyIsExclusive(true);
+        details.setWeight((short) 0x5);
 
         byte[] data = parser.marshal(frame).createByteArray();
         String hexFrame = UtilsForTest.toHexString(data);
@@ -60,10 +62,11 @@ public class TestHttp2Priority {
     @Test
     public void testCreatePriorityFrameMSB() {
         PriorityFrame frame = new PriorityFrame();
-        frame.setStreamDependency(4);
-        frame.setStreamDependencyIsExclusive(true);
-        frame.setWeight((short) 0xFF);
-        Assert.assertEquals(frame.getWeight(), 255);
+        PriorityDetails details = frame.getPriorityDetails();
+        details.setStreamDependency(4);
+        details.setStreamDependencyIsExclusive(true);
+        details.setWeight((short) 0xFF);
+        Assert.assertEquals(details.getWeight(), 255);
         
         byte[] data = parser.marshal(frame).createByteArray();
         String hexFrame = UtilsForTest.toHexString(data);

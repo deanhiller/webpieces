@@ -9,7 +9,6 @@ import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.RST_STREAM;
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.WINDOW_UPDATE;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,12 +24,9 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
-import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;

@@ -13,6 +13,7 @@ import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
 
@@ -24,11 +25,12 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     public DataWrapper marshalPayload(Http2Frame frame) {
         HeadersFrame castFrame = (HeadersFrame) frame;
         DataWrapper preludeDW;
-        if(castFrame.isPriority()) {
+        PriorityDetails priorityDetails = castFrame.getPriorityDetails();
+        if(priorityDetails != null) {
             ByteBuffer prelude = bufferPool.nextBuffer(5);
-            prelude.putInt(castFrame.getStreamDependency());
-            if (castFrame.isStreamDependencyIsExclusive()) prelude.put(0, (byte) (prelude.get(0) | 0x80));
-            prelude.put((byte) (castFrame.getWeight() & 0xFF));
+            prelude.putInt(priorityDetails.getStreamDependency());
+            if (priorityDetails.isStreamDependencyIsExclusive()) prelude.put(0, (byte) (prelude.get(0) | 0x80));
+            prelude.put((byte) (priorityDetails.getWeight() & 0xFF));
             prelude.flip();
             preludeDW = dataGen.wrapByteBuffer(prelude);
         }
@@ -61,8 +63,14 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
         castFrame.setEndStream((flagsByte & 0x1) == 0x1);
         castFrame.setEndHeaders((flagsByte & 0x4) == 0x4);
         castFrame.getPadding().setIsPadded((flagsByte & 0x8) == 0x8);
-        castFrame.setPriority((flagsByte & 0x20) == 0x20);
+        
+        PriorityDetails priority = null;
+        if((flagsByte & 0x20) == 0x20) {
+        	priority = new PriorityDetails();
+        	castFrame.setPriorityDetails(priority);
+        }
 
+        PriorityDetails finalPriority = priority;
         maybePayload.ifPresent(payload -> {
             DataWrapper paddingStripped = castFrame.getPadding().extractPayloadAndSetPaddingIfNeeded(payload, frame.getStreamId());
 
@@ -71,14 +79,17 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
                 ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
 
                 int firstInt = preludeBytes.getInt();
-                castFrame.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
-                int streamDependency = firstInt & 0x7FFFFFFF;
-                if(streamDependency == frame.getStreamId()) {
-                    // Can't depend on self
-                    throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+                
+                if(finalPriority != null) {
+                	finalPriority.setStreamDependencyIsExclusive((firstInt >>> 31) == 0x1);
+	                int streamDependency = firstInt & 0x7FFFFFFF;
+	                if(streamDependency == frame.getStreamId()) {
+	                    // Can't depend on self
+	                    throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+	                }
+	                finalPriority.setStreamDependency(streamDependency);
+	                finalPriority.setWeight((short) (preludeBytes.get() & 0xFF));
                 }
-                castFrame.setStreamDependency(streamDependency);
-                castFrame.setWeight((short) (preludeBytes.get() & 0xFF));
                 castFrame.setHeaderFragment(split.get(1));
                 bufferPool.releaseBuffer(preludeBytes);
             } else {

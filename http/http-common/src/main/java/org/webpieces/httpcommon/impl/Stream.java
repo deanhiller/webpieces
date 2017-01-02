@@ -14,8 +14,8 @@ import org.webpieces.httpcommon.api.exceptions.RstStreamError;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 class Stream {
     private static final Logger log = LoggerFactory.getLogger(Stream.class);
@@ -70,13 +70,13 @@ class Stream {
     }
 
     private StreamStatus status = IDLE;
-    private HasPriorityDetails.PriorityDetails priorityDetails;
+    private PriorityDetails priorityDetails;
 
-    public HasPriorityDetails.PriorityDetails getPriorityDetails() {
+    public PriorityDetails getPriorityDetails() {
         return priorityDetails;
     }
 
-    void setPriorityDetails(HasPriorityDetails.PriorityDetails priorityDetails) {
+    void setPriorityDetails(PriorityDetails priorityDetails) {
         this.priorityDetails = priorityDetails;
     }
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class TestHttp2Priority {
     static private String priorityFrame =
@@ -26,9 +27,10 @@ public class TestHttp2Priority {
     @Test
     public void testCreatePriorityFrame() {
         PriorityFrame frame = new PriorityFrame();
-        frame.setStreamDependency(4);
-        frame.setStreamDependencyIsExclusive(true);
-        frame.setWeight((short) 0x5);
+        PriorityDetails details = frame.getPriorityDetails();
+        details.setStreamDependency(4);
+        details.setStreamDependencyIsExclusive(true);
+        details.setWeight((short) 0x5);
 
         String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(priorityFrame));
@@ -43,17 +45,21 @@ public class TestHttp2Priority {
 
         PriorityFrame castFrame = (PriorityFrame) frame;
 
-        Assert.assertEquals(castFrame.getStreamDependency(), 4);
-        Assert.assertTrue(castFrame.isStreamDependencyIsExclusive());
+        PriorityDetails details = castFrame.getPriorityDetails();
+
+        Assert.assertEquals(details.getStreamDependency(), 4);
+        Assert.assertTrue(details.isStreamDependencyIsExclusive());
     }
 
     @Test
     public void testCreatePriorityFrameMSB() {
         PriorityFrame frame = new PriorityFrame();
-        frame.setStreamDependency(4);
-        frame.setStreamDependencyIsExclusive(true);
-        frame.setWeight((short) 0xFF);
-        Assert.assertEquals(frame.getWeight(), 255);
+        PriorityDetails details = frame.getPriorityDetails();
+
+        details.setStreamDependency(4);
+        details.setStreamDependencyIsExclusive(true);
+        details.setWeight((short) 0xFF);
+        Assert.assertEquals(details.getWeight(), 255);
         String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(priorityFrameMSB));
 
@@ -66,6 +72,7 @@ public class TestHttp2Priority {
         Assert.assertTrue(PriorityFrame.class.isInstance(frame));
 
         PriorityFrame castFrame = (PriorityFrame) frame;
-        Assert.assertEquals(castFrame.getWeight(), 255);
+        PriorityDetails details = castFrame.getPriorityDetails();
+        Assert.assertEquals(details.getWeight(), 255);
     }
 }

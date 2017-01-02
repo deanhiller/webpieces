@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails.PriorityDetails;
+import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class Http2Headers implements PartialStream {
 
