@@ -9,6 +9,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.twitter.hpack.Decoder;
 import com.webpieces.http2engine.api.dto.Http2Data;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.Http2Push;
@@ -41,7 +42,8 @@ public class Level2AggregateDecodeHeaders {
 	public Level2AggregateDecodeHeaders(Level3StreamInitialization nextLayer, Level5FlowControl flowControlLevel5, HeaderSettings localSettings) {
 		this.nextLayer = nextLayer;
 		this.flowControlLevel5 = flowControlLevel5;
-		this.decoder = new HeaderDecoding(localSettings);
+        Decoder decode = new Decoder(16_384, localSettings.getMaxHeaderTableSize());
+		this.decoder = new HeaderDecoding(decode);
 	}
 
 	/************************************************************************

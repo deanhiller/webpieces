@@ -16,6 +16,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2engine.impl.HeaderDecoding;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2Parser2;
@@ -324,10 +325,12 @@ public class TestHttp2Parser {
 
     @Test
     public void testDeserializeHeaders() {
-        List<Http2Header> headers = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(ngHttp2ExampleHeaderFragment), decoder);
+    	HeaderDecoding decoding = new HeaderDecoding(decoder);
+    	
+        List<Http2Header> headers = decoding.decode(UtilsForTest.dataWrapperFromHex(ngHttp2ExampleHeaderFragment));
         Assert.assertEquals(headers, ngHttp2ExampleHeaders);
 
-        List<Http2Header> headers2 = parser.deserializeHeaders(UtilsForTest.dataWrapperFromHex(basicRequestSerializationNghttp2), decoder);
+        List<Http2Header> headers2 = decoding.decode(UtilsForTest.dataWrapperFromHex(basicRequestSerializationNghttp2));
         Assert.assertEquals(headers2, basicRequestHeaders);
 
 

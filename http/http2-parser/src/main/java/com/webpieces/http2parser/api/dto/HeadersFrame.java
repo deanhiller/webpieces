@@ -1,6 +1,6 @@
 package com.webpieces.http2parser.api.dto;
 
-import java.util.LinkedList;
+import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
@@ -51,16 +51,16 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     /* payload */
     private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
     private DataWrapper headerFragment;
-    private LinkedList<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
+    private List<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private Padding padding = PaddingFactory.createPadding();
 
     @Override
-    public LinkedList<Http2Header> getHeaderList() {
+    public List<Http2Header> getHeaderList() {
         return headerList;
     }
 
     @Override
-    public void setHeaderList(LinkedList<Http2Header> headerList) {
+    public void setHeaderList(List<Http2Header> headerList) {
         this.headerList = headerList;
     }
 

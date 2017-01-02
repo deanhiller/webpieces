@@ -4,6 +4,7 @@ import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_E
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
@@ -139,7 +140,7 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
         if(isTrailer) {
             requestListener.incomingTrailer(frame.getHeaderList(), stream.getRequestId(), frame.isEndStream(), responseSender);
         } else {
-            HttpRequest request = requestFromHeaders(frame.getHeaderList(), stream);
+            HttpRequest request = requestFromHeaders(new LinkedList<>(frame.getHeaderList()), stream);
             checkHeaders(request.getHeaderLookupStruct(), stream);
             stream.setRequest(request);
             requestListener.incomingRequest(request, stream.getRequestId(), frame.isEndStream(), responseSender);

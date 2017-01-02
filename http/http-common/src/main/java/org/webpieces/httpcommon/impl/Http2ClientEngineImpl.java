@@ -61,7 +61,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
         if(isTrailer) {
             stream.getResponseListener().incomingTrailer(frame.getHeaderList(), stream.getResponseId(), frame.isEndStream());
         } else {
-            HttpResponse response = responseFromHeaders(frame.getHeaderList(), stream);
+            HttpResponse response = responseFromHeaders(new LinkedList<>(frame.getHeaderList()), stream);
             checkHeaders(response.getHeaderLookupStruct(), stream);
             stream.setResponse(response);
             stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), frame.isEndStream());

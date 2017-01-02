@@ -28,6 +28,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2engine.impl.HeaderDecoding;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
@@ -354,7 +355,11 @@ public class Http2ParserImpl implements Http2Parser {
 		for (AbstractHttp2Frame iterFrame : hasHeaderFragmentList) {
 		    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, ((HasHeaderFragment) iterFrame).getHeaderFragment());
 		}
-		((HasHeaderList) firstFrame).setHeaderList(deserializeHeaders(allSerializedHeaders, decoder));
+		
+		HeaderDecoding decoding = new HeaderDecoding(decoder);
+		List<Http2Header> headers = decoding.decode(allSerializedHeaders);
+		
+		((HasHeaderList) firstFrame).setHeaderList(headers);
 		((HasHeaderFragment) firstFrame).setEndHeaders(true); // fake setting end headers
 		frames.add(firstFrame);
 
@@ -453,27 +458,4 @@ public class Http2ParserImpl implements Http2Parser {
         }
     }
 
-    @Override
-    public LinkedList<Http2Header> deserializeHeaders(DataWrapper data, Decoder decoder) {
-        LinkedList<Http2Header> headers = new LinkedList<>();
-
-        byte[] bytes = data.createByteArray();
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        try {
-            decoder.decode(in, (name, value, sensitive) -> {
-                        String h = new String(name);
-                        String v = new String(value);
-                        if(!h.equals(h.toLowerCase())) {
-                            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
-                        }
-                        headers.add(new Http2Header(h, v));
-                    }
-            );
-        } catch (IOException e) {
-            // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment
-            throw new ParseException(Http2ErrorCode.COMPRESSION_ERROR);
-        }
-        decoder.endHeaderBlock();
-        return headers;
-    }
 }

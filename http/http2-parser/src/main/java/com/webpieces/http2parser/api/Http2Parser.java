@@ -37,5 +37,4 @@ public interface Http2Parser {
                                         Encoder encoder,
                                         ByteArrayOutputStream out);
 
-    LinkedList<Http2Header> deserializeHeaders(DataWrapper headerPayload, Decoder decoder);
 }

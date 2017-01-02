@@ -16,8 +16,8 @@ public class HeaderDecoding {
 
 	private Decoder decoder;
 
-	public HeaderDecoding(HeaderSettings localSettings) {
-        this.decoder = new Decoder(16_384, localSettings.getMaxHeaderTableSize());
+	public HeaderDecoding(Decoder decoder) {
+		this.decoder = decoder;
 	}
 
 	public List<Http2Header> decode(DataWrapper data) {
