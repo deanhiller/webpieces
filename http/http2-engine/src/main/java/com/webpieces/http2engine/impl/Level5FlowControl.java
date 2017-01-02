@@ -69,6 +69,7 @@ public class Level5FlowControl {
 	    	HeadersFrame frame = new HeadersFrame();
 	    	frame.setStreamId(headers.getStreamId());
 	    	frame.setEndStream(headers.isEndOfStream());
+	    	frame.setPriorityDetails(headers.getPriorityDetails());
 	    	return encodeAndSend(frame, headers.getHeaders(), payload.isEndOfStream());
 		} else
 			throw new UnsupportedOperationException("not done yet.  frame="+payload);

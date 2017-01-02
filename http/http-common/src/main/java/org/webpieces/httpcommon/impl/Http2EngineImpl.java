@@ -66,6 +66,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -135,6 +136,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     int goneAwayLastStreamId;
     Http2ErrorCode goneAwayErrorCode;
     DataWrapper additionalDebugData;
+	private HeaderEncoding headerEncoder;
 
 
     public Http2EngineImpl(
@@ -168,13 +170,15 @@ public abstract class Http2EngineImpl implements Http2Engine {
         remoteSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535L);
         localSettings.put(SETTINGS_INITIAL_WINDOW_SIZE, 65535L);
 
-        remoteSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384L);
+        int initialMaxFrameSize = 16384;
+        remoteSettings.put(SETTINGS_MAX_FRAME_SIZE, new Long(initialMaxFrameSize));
         localSettings.put(SETTINGS_MAX_FRAME_SIZE, 16384L);
 
         // No limit for MAX_HEADER_LIST_SIZE by default, so not in the map
 
         this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
         this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
+        this.headerEncoder = new HeaderEncoding(encoder, initialMaxFrameSize);
 
         this.dataListener = new Http2DataListener(this);
 
@@ -453,9 +457,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, PUSH_PROMISE, newStream.getStreamId(), remoteSettings, encoder, out);
-        // Set the streamid in the first frame to this streamid
-        frameList.get(0).setStreamId(streamId);
+        List<Http2Frame> frameList = headerEncoder.createPushPromises(headerList, streamId, newStream.getStreamId());
 
         // Send all the frames at once
         log.info("sending push promise frames: " + frameList);
@@ -469,11 +471,14 @@ public abstract class Http2EngineImpl implements Http2Engine {
     CompletableFuture<Void> sendHeaderFrames(LinkedList<Http2Header> headerList, Stream stream) {
         // TODO: check the status of the stream to ensure we can send HEADER frames
 
-        int streamId = stream.getStreamId();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
+    	HeadersFrame frame = new HeadersFrame();
+    	frame.setStreamId(stream.getStreamId());
+    	frame.setEndStream(false);
+    	
+        List<Http2Frame> frameList = headerEncoder.createHeaderFrames(frame, headerList);
 
         // Send all the frames at once
         log.info("sending header frames: " + frameList);

@@ -29,11 +29,11 @@ public interface Http2Parser {
 
     ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
 
-    List<Http2Frame> createHeaderFrames(LinkedList<Http2Header> headers,
-                                        Http2FrameType frameType,
-                                        int streamId,
-                                        Http2SettingsMap remoteSettings,
-                                        Encoder encoder,
-                                        ByteArrayOutputStream out);
+//    List<Http2Frame> createHeaderFrames(LinkedList<Http2Header> headers,
+//                                        Http2FrameType frameType,
+//                                        int streamId,
+//                                        Http2SettingsMap remoteSettings,
+//                                        Encoder encoder,
+//                                        ByteArrayOutputStream out);
 
 }

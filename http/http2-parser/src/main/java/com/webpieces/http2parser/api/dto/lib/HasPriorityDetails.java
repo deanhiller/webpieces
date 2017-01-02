@@ -1,5 +1,6 @@
 package com.webpieces.http2parser.api.dto.lib;
 
+@Deprecated
 public interface HasPriorityDetails {
     class PriorityDetails {
         public boolean streamDependencyIsExclusive = false; //1 bit
@@ -28,17 +29,21 @@ public interface HasPriorityDetails {
         }
     }
 
+    @Deprecated
     boolean isStreamDependencyIsExclusive();
 
+    @Deprecated
     void setStreamDependencyIsExclusive(boolean streamDependencyIsExclusive);
+    @Deprecated
     int getStreamDependency();
-
+    @Deprecated
     void setStreamDependency(int streamDependency);
-
+    @Deprecated
     short getWeight();
-
+    @Deprecated
     void setWeight(short weight);
-
+    @Deprecated
     PriorityDetails getPriorityDetails();
+    @Deprecated
     void setPriorityDetails(PriorityDetails priorityDetails);
 }

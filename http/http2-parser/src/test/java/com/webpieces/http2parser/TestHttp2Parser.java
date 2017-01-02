@@ -2,12 +2,12 @@ package com.webpieces.http2parser;
 
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
@@ -22,7 +22,6 @@ import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
@@ -118,6 +117,11 @@ public class TestHttp2Parser {
         settings.add(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 16384L));
     }
 
+    @Before
+    public void setUp() {
+    	encoding.setMaxFrameSize(Integer.MAX_VALUE);
+    }
+    
     @Test
     public void testBasicParse() {
         ParserResult result = parser.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper(), decoder, settings);
@@ -243,11 +247,13 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Http2SettingsMap remoteSettings = new Http2SettingsMap();
         // set a small max frame size for testing
-        remoteSettings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 256L);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, HEADERS, 0x1, remoteSettings, encoder, out);
+        encoding.setMaxFrameSize(256);
+
+        HeadersFrame initialFrame = new HeadersFrame();
+        initialFrame.setStreamId(1);
+        List<Http2Frame> headerFrames = encoding.createHeaderFrames(initialFrame, bigHeaderList);
+        
         Assert.assertEquals(headerFrames.size(), 2);
         Assert.assertEquals(headerFrames.get(0).getFrameType(), HEADERS);
         Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
@@ -263,17 +269,17 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Http2SettingsMap remoteSettings = new Http2SettingsMap();
         // set a small max frame size for testing
-        remoteSettings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 256L);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings, encoder, out);
+        encoding.setMaxFrameSize(256);
+
+        List<Http2Frame> headerFrames = encoding.createPushPromises(bigHeaderList, 1, 2);
+        
         Assert.assertEquals(headerFrames.size(), 2);
         Assert.assertEquals(headerFrames.get(0).getFrameType(), Http2FrameType.PUSH_PROMISE);
         Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
         Assert.assertTrue(((HasHeaderFragment) headerFrames.get(1)).isEndHeaders());
         Assert.assertFalse(((HasHeaderFragment) headerFrames.get(0)).isEndHeaders());
-        Assert.assertEquals(((PushPromiseFrame) headerFrames.get(0)).getPromisedStreamId(), 0x1);
+        Assert.assertEquals(((PushPromiseFrame) headerFrames.get(0)).getPromisedStreamId(), 2);
         Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
     }
 
@@ -283,12 +289,12 @@ public class TestHttp2Parser {
         for(int i = 0; i < 5; i++) {
             bigHeaderList.addAll(basicResponseHeaders);
         }
-        Http2SettingsMap remoteSettings = new Http2SettingsMap();
         // set a small max frame size for testing
-        remoteSettings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 256L);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        encoding.setMaxFrameSize(256);
 
-        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings, encoder, out);
+        HeadersFrame initialFrame = new HeadersFrame();
+        initialFrame.setStreamId(1);
+        List<Http2Frame> headerFrames = encoding.createHeaderFrames(initialFrame, bigHeaderList);
 
         Assert.assertEquals(headerFrames.size(), 2);
         DataWrapper serializedHeaderFrames = parser.marshal(headerFrames);
