@@ -14,7 +14,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2EngineFactory;
-import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2parser.api.Http2Parser2;
 

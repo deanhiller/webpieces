@@ -1,6 +1,6 @@
 package org.webpieces.http2client.api;
 
-import com.webpieces.http2engine.api.PartialStream;
+import com.webpieces.http2engine.api.dto.PartialStream;
 
 public interface PushPromiseListener {
 

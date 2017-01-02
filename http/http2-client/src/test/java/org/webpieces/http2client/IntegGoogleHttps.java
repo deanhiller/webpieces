@@ -20,8 +20,8 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.http2engine.api.Http2EngineFactory;
-import com.webpieces.http2engine.api.Http2Headers;
-import com.webpieces.http2engine.api.PartialStream;
+import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 

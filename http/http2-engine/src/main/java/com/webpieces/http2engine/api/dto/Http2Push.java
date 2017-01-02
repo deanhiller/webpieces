@@ -1,24 +1,24 @@
-package com.webpieces.http2engine.api;
+package com.webpieces.http2engine.api.dto;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails.PriorityDetails;
 
-public class Http2Headers implements PartialStream {
+public class Http2Push implements PartialStream {
 
-	private int streamId;
-	private boolean endOfStream = false;
-    private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
+	//the new stream id being created
+	private int streamId; 
 	protected List<Http2Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can
 	//be looked up by key.
 	private transient Http2HeaderStruct headersStruct = new Http2HeaderStruct();
+	//the stream id that caused this push promise to start
+    private int causalStreamId; 
 
-	public Http2Headers() {}
-	public Http2Headers(List<Http2Header> headerList) {
+	public Http2Push() {}
+	public Http2Push(List<Http2Header> headerList) {
 		for(Http2Header header : headerList) {
 			addHeader(header);
 		}
@@ -51,22 +51,19 @@ public class Http2Headers implements PartialStream {
 	public Http2HeaderStruct getHeaderLookupStruct() {
 		return headersStruct;
 	}
+	@Override
 	public boolean isEndOfStream() {
-		return endOfStream;
+		return false;
 	}
-	public void setEndOfStream(boolean lastPartOfResponse) {
-		this.endOfStream = lastPartOfResponse;
-	}
-	
 	@Override
 	public String toString() {
-		return "Http2Headers [streamId=" + streamId + ", endStream=" + endOfStream + ", headerList="
-				+ headers + ", priorityDetails=" + getPriorityDetails() + "]";
+		return "Http2Push [streamId=" + streamId + ", causalStreamId=" + getCausalStreamId() +  ", headers=" + headers + "]";
 	}
-	public PriorityDetails getPriorityDetails() {
-		return priorityDetails;
+	public int getCausalStreamId() {
+		return causalStreamId;
 	}
-	public void setPriorityDetails(PriorityDetails priorityDetails) {
-		this.priorityDetails = priorityDetails;
+	public void setCausalStreamId(int causalStreamId) {
+		this.causalStreamId = causalStreamId;
 	}
+	
 }

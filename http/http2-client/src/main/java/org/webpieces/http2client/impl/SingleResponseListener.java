@@ -10,9 +10,9 @@ import org.webpieces.http2client.api.PushPromiseListener;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.http2client.api.exceptions.ResetStreamException;
 
-import com.webpieces.http2engine.api.Http2Data;
-import com.webpieces.http2engine.api.Http2Headers;
-import com.webpieces.http2engine.api.PartialStream;
+import com.webpieces.http2engine.api.dto.Http2Data;
+import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.PartialStream;
 
 public class SingleResponseListener implements Http2ResponseListener {
 

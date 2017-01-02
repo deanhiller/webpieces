@@ -9,9 +9,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2Headers;
-import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.api.ResultListener;
+import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;

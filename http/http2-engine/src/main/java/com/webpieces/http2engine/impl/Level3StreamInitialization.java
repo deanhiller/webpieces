@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
 
-import com.webpieces.http2engine.api.Http2Push;
-import com.webpieces.http2engine.api.PartialStream;
+import com.webpieces.http2engine.api.dto.Http2Push;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 

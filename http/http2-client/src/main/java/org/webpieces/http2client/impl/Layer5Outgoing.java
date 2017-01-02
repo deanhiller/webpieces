@@ -15,12 +15,12 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2Data;
-import com.webpieces.http2engine.api.Http2Headers;
-import com.webpieces.http2engine.api.Http2Push;
-import com.webpieces.http2engine.api.Http2UnknownFrame;
-import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.api.ResultListener;
+import com.webpieces.http2engine.api.dto.Http2Data;
+import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.Http2Push;
+import com.webpieces.http2engine.api.dto.Http2UnknownFrame;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 

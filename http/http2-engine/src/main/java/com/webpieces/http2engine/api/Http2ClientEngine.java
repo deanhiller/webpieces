@@ -4,6 +4,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
+import com.webpieces.http2engine.api.dto.PartialStream;
+
 public interface Http2ClientEngine {
 
 	CompletableFuture<Void> sendInitializationToSocket();

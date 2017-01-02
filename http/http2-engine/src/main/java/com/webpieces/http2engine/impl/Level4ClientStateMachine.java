@@ -8,9 +8,9 @@ import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 
-import com.webpieces.http2engine.api.Http2Headers;
-import com.webpieces.http2engine.api.Http2Push;
-import com.webpieces.http2engine.api.PartialStream;
+import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.Http2Push;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
 

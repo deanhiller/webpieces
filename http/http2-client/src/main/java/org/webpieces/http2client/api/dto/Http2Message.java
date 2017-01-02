@@ -2,7 +2,7 @@ package org.webpieces.http2client.api.dto;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public abstract class Http2Message {

@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.dto.Http2Headers;
 
 public interface Http2SocketDataWriter {
 

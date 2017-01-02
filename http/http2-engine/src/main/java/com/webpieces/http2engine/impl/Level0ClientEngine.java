@@ -8,8 +8,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.api.ResultListener;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 

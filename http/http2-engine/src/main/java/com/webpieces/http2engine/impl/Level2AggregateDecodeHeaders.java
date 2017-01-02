@@ -9,11 +9,11 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2Data;
-import com.webpieces.http2engine.api.Http2Headers;
-import com.webpieces.http2engine.api.Http2Push;
-import com.webpieces.http2engine.api.Http2UnknownFrame;
-import com.webpieces.http2engine.api.PartialStream;
+import com.webpieces.http2engine.api.dto.Http2Data;
+import com.webpieces.http2engine.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.dto.Http2Push;
+import com.webpieces.http2engine.api.dto.Http2UnknownFrame;
+import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
