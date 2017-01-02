@@ -8,7 +8,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
@@ -17,20 +17,20 @@ public interface Http2Parser {
 	
     DataWrapper prepareToParse();
 
-    AbstractHttp2Frame unmarshal(DataWrapper data);
+    Http2Frame unmarshal(DataWrapper data);
 
-    DataWrapper marshal(AbstractHttp2Frame frame);
-    DataWrapper marshal(List<AbstractHttp2Frame> frames);
+    DataWrapper marshal(Http2Frame frame);
+    DataWrapper marshal(List<Http2Frame> frames);
 
-    FrameMarshaller getMarshaller(Class<? extends AbstractHttp2Frame> frameClass);
+    FrameMarshaller getMarshaller(Class<? extends Http2Frame> frameClass);
 
     // TODO: add a marshal to bytebuffer so we can use our bufferpool
-    int getFrameLength(AbstractHttp2Frame frame);
+    int getFrameLength(Http2Frame frame);
 
     ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
 
     DataWrapper serializeHeaders(LinkedList<Http2Header> headers, Encoder encoder, ByteArrayOutputStream out);
-    List<AbstractHttp2Frame> createHeaderFrames(LinkedList<Http2Header> headers,
+    List<Http2Frame> createHeaderFrames(LinkedList<Http2Header> headers,
                                         Http2FrameType frameType,
                                         int streamId,
                                         Http2SettingsMap remoteSettings,

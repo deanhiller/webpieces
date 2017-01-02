@@ -26,6 +26,7 @@ import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
@@ -242,7 +243,7 @@ public class TestHttp2Parser {
         // set a small max frame size for testing
         remoteSettings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        List<AbstractHttp2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, HEADERS, 0x1, remoteSettings, encoder, out);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, HEADERS, 0x1, remoteSettings, encoder, out);
         Assert.assertEquals(headerFrames.size(), 2);
         Assert.assertEquals(headerFrames.get(0).getFrameType(), HEADERS);
         Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
@@ -262,7 +263,7 @@ public class TestHttp2Parser {
         // set a small max frame size for testing
         remoteSettings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        List<AbstractHttp2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings, encoder, out);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.PUSH_PROMISE, 0x1, remoteSettings, encoder, out);
         Assert.assertEquals(headerFrames.size(), 2);
         Assert.assertEquals(headerFrames.get(0).getFrameType(), Http2FrameType.PUSH_PROMISE);
         Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
@@ -283,7 +284,7 @@ public class TestHttp2Parser {
         remoteSettings.put(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 256L);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        List<AbstractHttp2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings, encoder, out);
+        List<Http2Frame> headerFrames = parser.createHeaderFrames(bigHeaderList, Http2FrameType.HEADERS, 0x1, remoteSettings, encoder, out);
 
         Assert.assertEquals(headerFrames.size(), 2);
         DataWrapper serializedHeaderFrames = parser.marshal(headerFrames);
@@ -295,7 +296,7 @@ public class TestHttp2Parser {
 
         ParserResult result = parser.parse(combined, dataGen.emptyWrapper(), decoder, settings);
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
-        AbstractHttp2Frame headerFrame = result.getParsedFrames().get(4);
+        Http2Frame headerFrame = result.getParsedFrames().get(4);
         Assert.assertEquals(headerFrame.getFrameType(), HEADERS);
         Assert.assertEquals(((HeadersFrame) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
     }

@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.dto.PriorityFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class TestHttp2Priority {
     static private String priorityFrame =
@@ -38,7 +38,7 @@ public class TestHttp2Priority {
 
     @Test
     public void testParsePriorityFrame() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(priorityFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(priorityFrame);
         Assert.assertTrue(PriorityFrame.class.isInstance(frame));
 
         PriorityFrame castFrame = (PriorityFrame) frame;
@@ -62,7 +62,7 @@ public class TestHttp2Priority {
 
     @Test
     public void testParsePriorityFrameMSB() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(priorityFrameMSB);
+        Http2Frame frame = UtilsForTest.frameFromHex(priorityFrameMSB);
         Assert.assertTrue(PriorityFrame.class.isInstance(frame));
 
         PriorityFrame castFrame = (PriorityFrame) frame;

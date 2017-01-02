@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.dto.PingFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class TestHttp2Ping {
     private static String pingFrame =
@@ -43,7 +43,7 @@ public class TestHttp2Ping {
 
     @Test
     public void testParsePingFrame() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(pingFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(pingFrame);
         Assert.assertTrue(PingFrame.class.isInstance(frame));
 
         PingFrame castFrame = (PingFrame) frame;
@@ -53,7 +53,7 @@ public class TestHttp2Ping {
 
     @Test
     public void testParsePongFrame() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(pongFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(pongFrame);
         Assert.assertTrue(PingFrame.class.isInstance(frame));
 
         PingFrame castFrame = (PingFrame) frame;

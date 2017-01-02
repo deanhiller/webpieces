@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -36,7 +36,7 @@ public class TestHttp2Settings {
         // settings show up is non-deterministic.
         // we'll just parse it and make sure that the settings we set are set.
 
-        AbstractHttp2Frame parsedFrame = UtilsForTest.frameFromHex(hexFrame);
+        Http2Frame parsedFrame = UtilsForTest.frameFromHex(hexFrame);
         Assert.assertTrue(SettingsFrame.class.isInstance(frame));
         SettingsFrame castFrame = (SettingsFrame) parsedFrame;
         
@@ -54,7 +54,7 @@ public class TestHttp2Settings {
 
     @Test
     public void testParseSettings() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(basicSettings);
+        Http2Frame frame = UtilsForTest.frameFromHex(basicSettings);
         Assert.assertTrue(SettingsFrame.class.isInstance(frame));
 
         SettingsFrame castFrame = (SettingsFrame) frame;
@@ -72,7 +72,7 @@ public class TestHttp2Settings {
 
     @Test
     public void testParseAck() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(ackFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(ackFrame);
         Assert.assertTrue(SettingsFrame.class.isInstance(frame));
 
         SettingsFrame castFrame = (SettingsFrame) frame;

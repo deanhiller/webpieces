@@ -74,8 +74,8 @@ import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -453,7 +453,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<AbstractHttp2Frame> frameList = http2Parser.createHeaderFrames(headerList, PUSH_PROMISE, newStream.getStreamId(), remoteSettings, encoder, out);
+        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, PUSH_PROMISE, newStream.getStreamId(), remoteSettings, encoder, out);
         // Set the streamid in the first frame to this streamid
         frameList.get(0).setStreamId(streamId);
 
@@ -473,7 +473,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<AbstractHttp2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
+        List<Http2Frame> frameList = http2Parser.createHeaderFrames(headerList, HEADERS, streamId, remoteSettings, encoder, out);
 
         // Send all the frames at once
         log.info("sending header frames: " + frameList);

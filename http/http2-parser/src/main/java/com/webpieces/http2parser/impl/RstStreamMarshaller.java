@@ -9,8 +9,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class RstStreamMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
     RstStreamMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -18,12 +18,12 @@ public class RstStreamMarshaller extends FrameMarshallerImpl implements FrameMar
     }
 
     @Override
-    public byte marshalFlags(AbstractHttp2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         return 0x0;
     }
 
     @Override
-    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         RstStreamFrame castFrame = (RstStreamFrame) frame;
 
         ByteBuffer payload = bufferPool.nextBuffer(4);
@@ -34,7 +34,7 @@ public class RstStreamMarshaller extends FrameMarshallerImpl implements FrameMar
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flags, Optional<DataWrapper> maybePayload) {
         RstStreamFrame castFrame = (RstStreamFrame) frame;
 
         maybePayload.ifPresent(payload -> {

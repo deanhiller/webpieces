@@ -11,8 +11,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarshaller {
 
@@ -21,7 +21,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     }
 
     @Override
-    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         HeadersFrame castFrame = (HeadersFrame) frame;
         DataWrapper preludeDW;
         if(castFrame.isPriority()) {
@@ -43,7 +43,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     }
 
     @Override
-    public byte marshalFlags(AbstractHttp2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         HeadersFrame castFrame = (HeadersFrame) frame;
 
         byte value = 0x0;
@@ -55,7 +55,7 @@ public class HeadersMarshaller extends FrameMarshallerImpl implements FrameMarsh
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
         HeadersFrame castFrame = (HeadersFrame) frame;
 
         castFrame.setEndStream((flagsByte & 0x1) == 0x1);

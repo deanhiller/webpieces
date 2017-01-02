@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class TestHttp2Data{
     private static String unpaddedDataFrame =
@@ -41,7 +41,7 @@ public class TestHttp2Data{
 
     @Test
     public void testParseUnpaddedData() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(unpaddedDataFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(unpaddedDataFrame);
         Assert.assertTrue(DataFrame.class.isInstance(frame));
 
         DataFrame castFrame = (DataFrame) frame;
@@ -55,7 +55,7 @@ public class TestHttp2Data{
 
     @Test
     public void testParsePaddedData() {
-        AbstractHttp2Frame frame = UtilsForTest.frameFromHex(paddedDataFrame);
+        Http2Frame frame = UtilsForTest.frameFromHex(paddedDataFrame);
 
         Assert.assertTrue(DataFrame.class.isInstance(frame));
         DataFrame castFrame = (DataFrame) frame;

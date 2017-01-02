@@ -10,7 +10,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class UtilsForTest {
     //private static Base64.Encoder encoder = Base64.getEncoder();
@@ -38,19 +38,19 @@ public class UtilsForTest {
         return dataGen.wrapByteArray(toByteArray(hex));
     }
 
-    public static AbstractHttp2Frame frameFromHex(String frameHex) {
+    public static Http2Frame frameFromHex(String frameHex) {
         return parser.unmarshal(dataWrapperFromHex(frameHex));
     }
 
-    public static DataWrapper frameToDataWrapper(AbstractHttp2Frame frame) {
+    public static DataWrapper frameToDataWrapper(Http2Frame frame) {
         return parser.marshal(frame);
     }
 
-    public static byte[] frameToBytes(AbstractHttp2Frame frame) {
+    public static byte[] frameToBytes(Http2Frame frame) {
         return frameToDataWrapper(frame).createByteArray();
     }
 
-    public static String frameToHex(AbstractHttp2Frame frame) {
+    public static String frameToHex(Http2Frame frame) {
         return toHexString(frameToBytes(frame));
     }
 
@@ -60,7 +60,7 @@ public class UtilsForTest {
     }
 
     public static void testBidiFromBytes(String hexFrame) {
-        AbstractHttp2Frame frame = frameFromHex(hexFrame);
+        Http2Frame frame = frameFromHex(hexFrame);
         //String hex = frameToHex(frame);
         byte[] bytes = frameToBytes(frame);
         Assert.assertArrayEquals(bytes, toByteArray(hexFrame));

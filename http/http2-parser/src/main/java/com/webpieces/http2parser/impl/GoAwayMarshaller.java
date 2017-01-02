@@ -9,8 +9,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class GoAwayMarshaller extends FrameMarshallerImpl {
     GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -18,12 +18,12 @@ public class GoAwayMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public byte marshalFlags(AbstractHttp2Frame frame) {
+    public byte marshalFlags(Http2Frame frame) {
         return 0x0;
     }
 
     @Override
-    public DataWrapper marshalPayload(AbstractHttp2Frame frame) {
+    public DataWrapper marshalPayload(Http2Frame frame) {
         GoAwayFrame castFrame = (GoAwayFrame) frame;
 
         ByteBuffer prelude = bufferPool.nextBuffer(8);
@@ -37,7 +37,7 @@ public class GoAwayMarshaller extends FrameMarshallerImpl {
     }
 
     @Override
-    public void unmarshalFlagsAndPayload(AbstractHttp2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
+    public void unmarshalFlagsAndPayload(Http2Frame frame, byte flagsByte, Optional<DataWrapper> maybePayload) {
         GoAwayFrame castFrame = (GoAwayFrame) frame;
 
         maybePayload.ifPresent(payload ->

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class RstStreamError extends Http2Error {
     private Http2ErrorCode errorCode;
@@ -21,11 +21,11 @@ public class RstStreamError extends Http2Error {
     }
 
     @Override
-    public List<AbstractHttp2Frame> toFrames() {
+    public List<Http2Frame> toFrames() {
         RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(streamId);
         frame.setErrorCode(errorCode);
-        List<AbstractHttp2Frame> frames = new ArrayList<>();
+        List<Http2Frame> frames = new ArrayList<>();
         frames.add(frame);
 
         return frames;
