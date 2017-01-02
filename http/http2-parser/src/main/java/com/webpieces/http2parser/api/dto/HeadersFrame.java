@@ -9,12 +9,11 @@ import com.webpieces.http2parser.api.PaddingFactory;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
-import com.webpieces.http2parser.api.dto.lib.HasPriorityDetails;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
-public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList, HasPriorityDetails {
+public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.HEADERS;
@@ -74,12 +73,10 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
         this.headerFragment = serializedHeaders;
     }
 
-    @Override
     public PriorityDetails getPriorityDetails() {
         return priorityDetails;
     }
 
-    @Override
     public void setPriorityDetails(PriorityDetails priorityDetails) {
         this.priorityDetails = priorityDetails;
     }
