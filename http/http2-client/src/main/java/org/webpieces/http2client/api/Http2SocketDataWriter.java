@@ -3,7 +3,8 @@ package org.webpieces.http2client.api;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2client.api.dto.Http2Headers;
+
+import com.webpieces.http2engine.api.Http2Headers;
 
 public interface Http2SocketDataWriter {
 

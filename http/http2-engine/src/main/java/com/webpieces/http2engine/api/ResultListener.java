@@ -7,7 +7,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public interface ResultListener {
 
-	void incomingPayload(Http2Payload frame);
+	void incomingPayload(PartialStream frame);
 	
 	void incomingControlFrame(Http2Frame lowLevelFrame);
 

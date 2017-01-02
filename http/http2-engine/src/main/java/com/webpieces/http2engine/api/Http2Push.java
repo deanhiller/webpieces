@@ -1,4 +1,4 @@
-package org.webpieces.http2client.api.dto;
+package com.webpieces.http2engine.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,14 +6,16 @@ import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class Http2Push implements PartialResponse {
+public class Http2Push implements PartialStream {
 
-	private int streamId;
-	private boolean lastPartOfResponse = false;
+	//the new stream id being created
+	private int streamId; 
 	protected List<Http2Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can
 	//be looked up by key.
 	private transient Http2HeaderStruct headersStruct = new Http2HeaderStruct();
+	//the stream id that caused this push promise to start
+    private int causalStreamId; 
 
 	public Http2Push() {}
 	public Http2Push(List<Http2Header> headerList) {
@@ -49,16 +51,19 @@ public class Http2Push implements PartialResponse {
 	public Http2HeaderStruct getHeaderLookupStruct() {
 		return headersStruct;
 	}
-	public boolean isLastPartOfResponse() {
-		return lastPartOfResponse;
+	@Override
+	public boolean isEndOfStream() {
+		return false;
 	}
-	public void setLastPartOfResponse(boolean lastPartOfResponse) {
-		this.lastPartOfResponse = lastPartOfResponse;
-	}
-	
 	@Override
 	public String toString() {
-		return "Http2Push [streamId=" + streamId + ", lastPartOfResponse=" + lastPartOfResponse + ", headers=" + headers
-				+ "]";
+		return "Http2Push [streamId=" + streamId + ", causalStreamId=" + getCausalStreamId() +  ", headers=" + headers + "]";
 	}
+	public int getCausalStreamId() {
+		return causalStreamId;
+	}
+	public void setCausalStreamId(int causalStreamId) {
+		this.causalStreamId = causalStreamId;
+	}
+	
 }

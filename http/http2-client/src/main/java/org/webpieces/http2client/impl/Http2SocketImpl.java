@@ -7,7 +7,6 @@ import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketDataWriter;
-import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -15,6 +14,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.Http2EngineFactory;
+import com.webpieces.http2engine.api.Http2Headers;
 import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2parser.api.Http2Parser2;
 

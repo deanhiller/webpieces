@@ -9,11 +9,11 @@ import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.PushPromiseListener;
-import org.webpieces.http2client.api.dto.Http2Headers;
-import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -102,7 +102,7 @@ public class IntegNgHttp2 {
 	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 
 		@Override
-		public void incomingPartialResponse(PartialResponse response) {
+		public void incomingPartialResponse(PartialStream response) {
 			log.info("incoming part of response="+response);
 		}
 
@@ -117,7 +117,7 @@ public class IntegNgHttp2 {
 		}
 
 		@Override
-		public void incomingPushPromise(PartialResponse response) {
+		public void incomingPushPromise(PartialStream response) {
 			log.info("incoming push promise="+response);
 		}
 		

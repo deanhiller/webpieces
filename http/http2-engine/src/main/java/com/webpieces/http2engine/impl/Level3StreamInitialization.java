@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
 
-import com.webpieces.http2engine.api.Http2FullPushPromise;
-import com.webpieces.http2engine.api.Http2Payload;
+import com.webpieces.http2engine.api.Http2Push;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
@@ -21,7 +21,7 @@ public class Level3StreamInitialization {
 		this.clientSm = clientSm;
 	}
 
-	public synchronized CompletableFuture<Void> outgoingFrame(Http2Payload frame) {
+	public synchronized CompletableFuture<Void> outgoingFrame(PartialStream frame) {
 		int streamId = frame.getStreamId();
 
 		Stream stream = streamIdToStream.get(streamId);
@@ -40,7 +40,7 @@ public class Level3StreamInitialization {
 		return stream;
 	}
 	
-	public void sendPayloadToClient(Http2Payload frame) {
+	public void sendPayloadToClient(PartialStream frame) {
 		int streamId = frame.getStreamId();
 
 		Stream stream = streamIdToStream.get(streamId);
@@ -51,7 +51,7 @@ public class Level3StreamInitialization {
 		clientSm.fireToClient(currentState, frame);
 	}
 
-	public void sendPushPromiseToClient(Http2FullPushPromise fullPromise) {		
+	public void sendPushPromiseToClient(Http2Push fullPromise) {		
 		int newStreamId = fullPromise.getStreamId();
 		if(newStreamId % 2 == 1)
 			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 

@@ -1,6 +1,6 @@
 package org.webpieces.http2client.api;
 
-import org.webpieces.http2client.api.dto.PartialResponse;
+import com.webpieces.http2engine.api.PartialStream;
 
 public interface PushPromiseListener {
 
@@ -11,7 +11,7 @@ public interface PushPromiseListener {
 	 * 
 	 * @param resp
 	 */
-	void incomingPushPromise(PartialResponse response);
+	void incomingPushPromise(PartialStream response);
 	
 	/**
 	 * In http/2, sends a stream reset to cancel the request.  In http1.1, throws an exception

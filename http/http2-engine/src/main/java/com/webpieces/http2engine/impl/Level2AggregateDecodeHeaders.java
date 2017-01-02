@@ -9,15 +9,17 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2DataPayload;
-import com.webpieces.http2engine.api.Http2FullHeaders;
-import com.webpieces.http2engine.api.Http2FullPushPromise;
-import com.webpieces.http2engine.api.Http2Payload;
+import com.webpieces.http2engine.api.Http2Data;
+import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.Http2Push;
+import com.webpieces.http2engine.api.Http2UnknownFrame;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -60,9 +62,17 @@ public class Level2AggregateDecodeHeaders {
 			throw new IllegalArgumentException("HasHeaderFragments are required to be consecutive per spec but somehow are not.  accumulatedFrames="+accumulatingHeaders);
 		} else if(lowLevelFrame instanceof DataFrame) {
 			DataFrame f = (DataFrame) lowLevelFrame;
-			Http2DataPayload data = new Http2DataPayload(f);
+			Http2Data data = new Http2Data(f.getStreamId(), f.isEndStream(), f.getData());
 			incomingData(data);
 			return;
+		} else if(lowLevelFrame instanceof UnknownFrame) {
+			UnknownFrame f = (UnknownFrame) lowLevelFrame;
+			Http2UnknownFrame unknown = new Http2UnknownFrame();
+			unknown.setFlagsByte(f.getFlagsByte());
+			unknown.setFramePayloadData(f.getFramePayloadData());
+			unknown.setFrameTypeId(f.getFrameTypeId());
+			unknown.setStreamId(f.getStreamId());
+			incomingData(unknown);
 		}
 		
 		int streamId = lowLevelFrame.getStreamId();
@@ -112,25 +122,26 @@ public class Level2AggregateDecodeHeaders {
 		if(first instanceof HeadersFrame) {
 
 			HeadersFrame f = (HeadersFrame) first;
-			Http2FullHeaders fullHeaderPayload = new Http2FullHeaders();
+			Http2Headers fullHeaderPayload = new Http2Headers(headers);
 			fullHeaderPayload.setStreamId(first.getStreamId());
 			fullHeaderPayload.setPriorityDetails(f.getPriorityDetails());
-			fullHeaderPayload.setHeaderList(headers);
+			fullHeaderPayload.setEndOfStream(f.isEndStream());
 			
 			nextLayer.sendPayloadToClient(fullHeaderPayload);
 		} else if(first instanceof PushPromiseFrame) {
 			PushPromiseFrame promise = (PushPromiseFrame) first;
 			
-			Http2FullPushPromise fullPromise = new Http2FullPushPromise();
+			Http2Push fullPromise = new Http2Push(promise.getHeaderList());
+			//These are reveresed on purpose and we name it 'causal' meaning
+			//the stream that causes this new stream to open
 			fullPromise.setStreamId(promise.getPromisedStreamId());
-			fullPromise.setOriginalStreamId(promise.getStreamId());
-			fullPromise.setHeaderList(headers);
+			fullPromise.setCausalStreamId(promise.getStreamId());
 			
 			nextLayer.sendPushPromiseToClient(fullPromise);
 		}
 	}
 	
-	public void incomingData(Http2Payload f) {
+	public void incomingData(PartialStream f) {
 		if (f.getStreamId() <= 0) {
 			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, f.getStreamId(),
 					"frame streamId cannot be <= 0");

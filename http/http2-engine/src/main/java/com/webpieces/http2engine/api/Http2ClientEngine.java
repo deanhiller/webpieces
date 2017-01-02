@@ -8,7 +8,7 @@ public interface Http2ClientEngine {
 
 	CompletableFuture<Void> sendInitializationToSocket();
 
-	CompletableFuture<Void> sendFrameToSocket(Http2Payload frame);
+	CompletableFuture<Void> sendFrameToSocket(PartialStream frame);
 
 	void cancel(int streamId);
 

@@ -8,16 +8,14 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2SocketDataWriter;
-import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2FullHeaders;
 import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2engine.api.Http2DataPayload;
-import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2engine.api.Http2Data;
+import com.webpieces.http2engine.api.Http2Headers;
 
 public class Layer1Incoming implements DataListener {
 
@@ -48,11 +46,7 @@ public class Layer1Incoming implements DataListener {
 		else
 			writer = new Writer(streamId);
 
-		Http2FullHeaders fullHeaders = new Http2FullHeaders();
-		fullHeaders.setHeaderList(request.getHeaders());
-		fullHeaders.setStreamId(streamId);
-		fullHeaders.setEndStream(isComplete);
-		return layer2.sendFrameToSocket(fullHeaders)
+		return layer2.sendFrameToSocket(request)
 					.thenApply(c -> writer);
 	}
 	
@@ -82,20 +76,16 @@ public class Layer1Incoming implements DataListener {
 
 		@Override
 		public CompletableFuture<Http2SocketDataWriter> sendData(DataWrapper payload, boolean isComplete) {
-			DataFrame data = new DataFrame();
+			Http2Data data = new Http2Data();
 			data.setStreamId(streamId);
-			data.setEndStream(isComplete);
-			data.setData(payload);
-			Http2DataPayload d = new Http2DataPayload(data);
-			return layer2.sendFrameToSocket(d).thenApply(c -> this);
+			data.setEndOfStream(isComplete);
+			data.setPayload(payload);
+			return layer2.sendFrameToSocket(data).thenApply(c -> this);
 		}
 
 		@Override
 		public CompletableFuture<Http2SocketDataWriter> sendTrailingHeaders(Http2Headers endHeaders) {
-			Http2FullHeaders headers = new Http2FullHeaders();
-			headers.setStreamId(streamId);
-			headers.setHeaderList(endHeaders.getHeaders());
-			return layer2.sendFrameToSocket(headers).thenApply(c -> this);
+			return layer2.sendFrameToSocket(endHeaders).thenApply(c -> this);
 		}
 	}
 	

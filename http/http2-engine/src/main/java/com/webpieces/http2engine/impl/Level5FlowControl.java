@@ -9,8 +9,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2FullHeaders;
-import com.webpieces.http2engine.api.Http2Payload;
+import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -62,20 +62,20 @@ public class Level5FlowControl {
 //			throw new IllegalArgumentException("control frame not supported"+payload.getClass());
 //	}
 
-	public CompletableFuture<Void> sendPayloadToSocket(Http2Payload payload) {
+	public CompletableFuture<Void> sendPayloadToSocket(PartialStream payload) {
 		log.info("sending payload to socket="+payload);
 		if(payload instanceof DataFrame) {
 			DataFrame frame = (DataFrame) payload;
 			DataWrapper data = lowLevelParser.marshal(frame);
 			ByteBuffer frameBytes = translate(data);
 			return resultListener.sendToSocket(frameBytes);
-		} else if(payload instanceof Http2FullHeaders) {
-			Http2FullHeaders headers = (Http2FullHeaders) payload;
+		} else if(payload instanceof Http2Headers) {
+			Http2Headers headers = (Http2Headers) payload;
 			
 	    	HeadersFrame frame = new HeadersFrame();
 	    	frame.setStreamId(headers.getStreamId());
-	    	frame.setEndStream(headers.isEndStream());
-	    	return encodeAndSend(frame, headers.getHeaderList(), payload.isEndStream());
+	    	frame.setEndStream(headers.isEndOfStream());
+	    	return encodeAndSend(frame, headers.getHeaders(), payload.isEndOfStream());
 		} else
 			throw new UnsupportedOperationException("not done yet.  frame="+payload);
 	}
@@ -192,7 +192,7 @@ public class Level5FlowControl {
 		this.resultListener.engineClosed();
 	}
 
-	public void sendPayloadToClient(Http2Payload payload) {
+	public void sendPayloadToClient(PartialStream payload) {
 		resultListener.incomingPayload(payload);
 	}
 

@@ -1,6 +1,6 @@
 package org.webpieces.http2client.api;
 
-import org.webpieces.http2client.api.dto.PartialResponse;
+import com.webpieces.http2engine.api.PartialStream;
 
 public interface Http2ResponseListener {
 
@@ -11,7 +11,7 @@ public interface Http2ResponseListener {
 	 * 
 	 * @param resp
 	 */
-	void incomingPartialResponse(PartialResponse response);
+	void incomingPartialResponse(PartialStream response);
 
 	/**
 	 * For http/2 only in that servers can pre-emptively send a response to requests

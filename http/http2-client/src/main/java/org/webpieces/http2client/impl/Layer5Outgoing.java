@@ -10,19 +10,17 @@ import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.PushPromiseListener;
-import org.webpieces.http2client.api.dto.Http2Data;
-import org.webpieces.http2client.api.dto.Http2Headers;
-import org.webpieces.http2client.api.dto.Http2Push;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.Http2FullHeaders;
-import com.webpieces.http2engine.api.Http2FullPushPromise;
-import com.webpieces.http2engine.api.Http2Payload;
+import com.webpieces.http2engine.api.Http2Data;
+import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.Http2Push;
+import com.webpieces.http2engine.api.Http2UnknownFrame;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.api.ResultListener;
-import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
@@ -42,7 +40,7 @@ public class Layer5Outgoing implements ResultListener {
 	}
 
 	@Override
-	public void incomingPayload(Http2Payload frame) {
+	public void incomingPayload(PartialStream frame) {
 		if(frame.getStreamId() == 0)
 			throw new IllegalArgumentException("control frames should not come up this far. type="+frame.getClass());
 		else if(frame.getStreamId() % 2 == 1) {
@@ -52,73 +50,51 @@ public class Layer5Outgoing implements ResultListener {
 		}
 	}
 
-	private void incomingPush(Http2Payload frame) {
-		if(frame instanceof Http2FullPushPromise) {
-			Http2FullPushPromise promise = (Http2FullPushPromise) frame;
+	private void incomingPush(PartialStream frame) {
+		if(frame instanceof Http2Push) {
+			Http2Push promise = (Http2Push) frame;
 			int newStreamId = promise.getStreamId();
-			Http2ResponseListener listener = streamIdToListener.get(promise.getOriginalStreamId());
+			Http2ResponseListener listener = streamIdToListener.get(promise.getCausalStreamId());
 			PushPromiseListener pushListener = listener.newIncomingPush(newStreamId);
-			
-			Http2Push push = new Http2Push(promise.getHeaderList());
-			push.setStreamId(newStreamId);
-			
 			streamIdToPushListener.put(newStreamId, pushListener);
-			pushListener.incomingPushPromise(push);
+			pushListener.incomingPushPromise(promise);
 			return;
 		}
 		
 		int streamId = frame.getStreamId();
 		PushPromiseListener listener = streamIdToPushListener.get(streamId);
 		
-		if(frame.isEndStream()) { //clean up memory if last data for push_promise
+		if(frame.isEndOfStream()) { //clean up memory if last data for push_promise
 			streamIdToPushListener.remove(streamId);
 		}
 		
 		if(listener == null)
 			throw new IllegalStateException("missing listener for stream id="+frame.getStreamId());
-		else if(frame instanceof Http2FullHeaders) {
-			Http2FullHeaders head = (Http2FullHeaders) frame;
-			Http2Headers headers = new Http2Headers(head.getHeaderList());
-			headers.setStreamId(head.getStreamId());
-			headers.setLastPartOfResponse(head.isEndStream());
-			listener.incomingPushPromise(headers);
-		} else if(frame instanceof DataFrame) {
-			DataFrame data = (DataFrame) frame;
-			Http2Data http2Data = new Http2Data();
-			http2Data.setStreamId(data.getStreamId());
-			http2Data.setLastPartOfResponse(data.isEndStream());
-			http2Data.setPayload(data.getData());
-			listener.incomingPushPromise(http2Data);
+		else if(frame instanceof Http2Headers) {
+			listener.incomingPushPromise(frame);
+		} else if(frame instanceof Http2Data) {
+			listener.incomingPushPromise(frame);
 		} else if(frame instanceof UnknownFrame) {
 			//drop it, though we could feed to client if they are testing out some SIP protocol or something
 		} else
 			throw new IllegalArgumentException("client was not expecting frame type="+frame.getClass());
 	}
 
-	private void incomingClientResponse(Http2Payload frame) {
+	private void incomingClientResponse(PartialStream frame) {
 		int streamId = frame.getStreamId();
 		Http2ResponseListener listener = streamIdToListener.get(streamId);
 		
-		if(frame.isEndStream()) { //clean up memory if last response
+		if(frame.isEndOfStream()) { //clean up memory if last response
 			streamIdToListener.remove(streamId);
 		}
 		
 		if(listener == null)
 			throw new IllegalStateException("missing listener for stream id="+streamId);
-		else if(frame instanceof Http2FullHeaders) {
-			Http2FullHeaders head = (Http2FullHeaders) frame;
-			Http2Headers headers = new Http2Headers(head.getHeaderList());
-			headers.setStreamId(head.getStreamId());
-			headers.setLastPartOfResponse(head.isEndStream());
-			listener.incomingPartialResponse(headers);
-		} else if(frame instanceof DataFrame) {
-			DataFrame data = (DataFrame) frame;
-			Http2Data http2Data = new Http2Data();
-			http2Data.setStreamId(data.getStreamId());
-			http2Data.setLastPartOfResponse(data.isEndStream());
-			http2Data.setPayload(data.getData());
-			listener.incomingPartialResponse(http2Data);
-		} else if(frame instanceof UnknownFrame) {
+		else if(frame instanceof Http2Headers) {
+			listener.incomingPartialResponse(frame);
+		} else if(frame instanceof Http2Data) {
+			listener.incomingPartialResponse(frame);
+		} else if(frame instanceof Http2UnknownFrame) {
 			//drop it, though we could feed to client if they are testing out some SIP protocol or something
 		} else
 			throw new IllegalArgumentException("client was not expecting frame type="+frame.getClass());

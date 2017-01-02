@@ -8,9 +8,9 @@ import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 
-import com.webpieces.http2engine.api.Http2FullHeaders;
-import com.webpieces.http2engine.api.Http2FullPushPromise;
-import com.webpieces.http2engine.api.Http2Payload;
+import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.Http2Push;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
 
@@ -71,14 +71,14 @@ public class Level4ClientStateMachine {
 		}
 	}
 	
-	public CompletableFuture<Void> fireToSocket(Memento currentState, Http2Payload payload) {
+	public CompletableFuture<Void> fireToSocket(Memento currentState, PartialStream payload) {
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.SEND, payloadType);
 
 		stateMachine.fireEvent(currentState, event);
 		
 		//sometimes a single frame has two events :( per http2 spec
-		if(payload.isEndStream())
+		if(payload.isEndOfStream())
 			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));
 		
 		//if no exceptions occurred, send it on to flow control layer
@@ -89,31 +89,31 @@ public class Level4ClientStateMachine {
 		return stateMachine.createMementoFromState("stream"+streamId, idleState);
 	}
 	
-	private Http2PayloadType translate(Http2Payload payload) {
-		if(payload instanceof Http2FullHeaders) {
+	private Http2PayloadType translate(PartialStream payload) {
+		if(payload instanceof Http2Headers) {
 			return Http2PayloadType.HEADERS;
 		} else if(payload instanceof DataFrame) {
 			return Http2PayloadType.DATA;
-		} else if(payload instanceof Http2FullPushPromise) {
+		} else if(payload instanceof Http2Push) {
 			return Http2PayloadType.PUSH_PROMISE;
 		} else
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}
 
-	public void fireToClient(Memento currentState, Http2Payload payload) {
+	public void fireToClient(Memento currentState, PartialStream payload) {
 		testStateTransition(currentState, payload); //validates state transition is ok
 
 		//if no exceptions occurred, send it on to flow control layer
 		flowControl.sendPayloadToClient(payload);
 	}
 
-	public void testStateTransition(Memento currentState, Http2Payload payload) {
+	public void testStateTransition(Memento currentState, PartialStream payload) {
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
 		
 		stateMachine.fireEvent(currentState, event);
 		
-		if(payload.isEndStream())
+		if(payload.isEndOfStream())
 			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG));
 	}
 

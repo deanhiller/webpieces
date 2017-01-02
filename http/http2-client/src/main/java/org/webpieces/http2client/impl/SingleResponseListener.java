@@ -7,11 +7,12 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.Http2ResponseListener;
 import org.webpieces.http2client.api.PushPromiseListener;
-import org.webpieces.http2client.api.dto.Http2Data;
-import org.webpieces.http2client.api.dto.Http2Headers;
 import org.webpieces.http2client.api.dto.Http2Response;
-import org.webpieces.http2client.api.dto.PartialResponse;
 import org.webpieces.http2client.api.exceptions.ResetStreamException;
+
+import com.webpieces.http2engine.api.Http2Data;
+import com.webpieces.http2engine.api.Http2Headers;
+import com.webpieces.http2engine.api.PartialStream;
 
 public class SingleResponseListener implements Http2ResponseListener {
 
@@ -21,7 +22,7 @@ public class SingleResponseListener implements Http2ResponseListener {
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public void incomingPartialResponse(PartialResponse response) {
+	public void incomingPartialResponse(PartialStream response) {
 		if(headers == null) {
 			incomingResponse((Http2Headers) response);
 		} else if(response instanceof Http2Data) {
@@ -32,18 +33,18 @@ public class SingleResponseListener implements Http2ResponseListener {
 	
 	public void incomingResponse(Http2Headers headers) {
 		this.headers = headers;
-		if(headers.isLastPartOfResponse())
+		if(headers.isEndOfStream())
 			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
 	public void incomingData(Http2Data data) {
 		fullData =  dataGen.chainDataWrappers(fullData, data.getPayload());
-		if(data.isLastPartOfResponse())
+		if(data.isEndOfStream())
 			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
 	public void incomingEndHeaders(Http2Headers trailingHeaders) {
-		if(!trailingHeaders.isLastPartOfResponse()) {
+		if(!trailingHeaders.isEndOfStream()) {
 			responseFuture.completeExceptionally(new IllegalArgumentException("An assumption we made was wrong.  isComplete should be true here"));
 			throw new IllegalArgumentException("An assumption we made was wrong.  isComplete should be true here");
 		}

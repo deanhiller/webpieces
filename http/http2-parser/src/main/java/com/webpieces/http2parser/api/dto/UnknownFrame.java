@@ -38,7 +38,7 @@ public class UnknownFrame extends AbstractHttp2Frame {
 	@Override
 	public String toString() {
 		return "UnknownFrame [streamId=" + getStreamId() + ", flagsByte=" + flagsByte + ", frameTypeId=" + frameTypeId
-				+ ", framePayloadData=" + framePayloadData + "]";
+				+ ", framePayloadData=" + framePayloadData.getReadableSize() + "]";
 	}
 	
 }

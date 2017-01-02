@@ -8,7 +8,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2engine.api.Http2Payload;
+import com.webpieces.http2engine.api.PartialStream;
 import com.webpieces.http2engine.api.ResultListener;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -34,7 +34,7 @@ public class Level0ClientEngine implements Http2ClientEngine {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendFrameToSocket(Http2Payload frame) {
+	public CompletableFuture<Void> sendFrameToSocket(PartialStream frame) {
 		int streamId = frame.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException("frames for requests must have a streamId > 0");
