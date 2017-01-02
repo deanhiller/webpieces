@@ -16,6 +16,7 @@ import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -34,6 +35,8 @@ public class Level5FlowControl {
 	
 	private AtomicLong windowSizeLeft;
 
+	private CompletableFuture<Void> pingFuture;
+
 	public Level5FlowControl(
 			Http2Parser2 lowLevelParser, 
 			EngineListener socketListener,
@@ -51,18 +54,13 @@ public class Level5FlowControl {
 		if(streamId != 0)
 			throw new IllegalArgumentException("control frame is not stream 0.  streamId="+streamId+" frame type="+frame.getClass());
 
-		DataWrapper data = lowLevelParser.marshal(frame);
-		ByteBuffer frameBytes = translate(data);
-		return resultListener.sendToSocket(frameBytes);
+		return sendFrameToSocket(frame);
 	}
 	
 	public CompletableFuture<Void> sendPayloadToSocket(PartialStream payload) {
 		log.info("sending payload to socket="+payload);
 		if(payload instanceof DataFrame) {
-			DataFrame frame = (DataFrame) payload;
-			DataWrapper data = lowLevelParser.marshal(frame);
-			ByteBuffer frameBytes = translate(data);
-			return resultListener.sendToSocket(frameBytes);
+			return sendFrameToSocket((DataFrame)payload);
 		} else if(payload instanceof Http2Headers) {
 			Http2Headers headers = (Http2Headers) payload;
 			
@@ -79,21 +77,16 @@ public class Level5FlowControl {
 		CompletableFuture<Void> lastFuture = null;
 		for(Http2Frame frame : framesToSend) {
 			log.info("sending frame down to socket(from client)="+frame);
-			DataWrapper data = lowLevelParser.marshal(frame);
-			ByteBuffer frameBug = translate(data);
-			lastFuture = resultListener.sendToSocket(frameBug);
+			lastFuture = sendFrameToSocket(frame);
 		}
 		return lastFuture;
 	}
 
 	public CompletableFuture<Void> sendInitDataToSocket(ByteBuffer preface, SettingsFrame settings) {
-		DataWrapper data = lowLevelParser.marshal(settings);
-		ByteBuffer settingsBytes = translate(data);
-		
 		log.info("send preface AND settings to socket="+settings);
 		return resultListener.sendToSocket(preface)
 				.thenCompose(c -> {
-					CompletableFuture<Void> socketSend = resultListener.sendToSocket(settingsBytes);
+					CompletableFuture<Void> socketSend = sendFrameToSocket(settings);
 					log.info("sent local settings to remote");
 					return socketSend;
 				});
@@ -186,4 +179,33 @@ public class Level5FlowControl {
 		this.resultListener.engineClosedByFarEnd();
 	}
 
+	public CompletableFuture<Void> sendPing(PingFrame ping) {
+		if(pingFuture != null)
+			throw new IllegalStateException("You must wait until the first ping you sent is complete");
+		pingFuture = new CompletableFuture<>();
+		
+		sendFrameToSocket(ping);
+		return pingFuture;
+	}
+
+	public void processPing(PingFrame ping) {
+		if(!ping.isPingResponse()) {
+			PingFrame pingAck = new PingFrame();
+			pingAck.setIsPingResponse(true);
+			sendFrameToSocket(pingAck);
+			return;
+		}
+		
+		if(pingFuture == null)
+			throw new IllegalStateException("bug, this should not be possible");
+		CompletableFuture<Void> tempFuture = pingFuture;
+		pingFuture = null; //set to null before firing (in case client throws exception)
+		tempFuture.complete(null);
+	}
+
+	private CompletableFuture<Void> sendFrameToSocket(Http2Frame frame) {
+		DataWrapper data = lowLevelParser.marshal(frame);
+		ByteBuffer buffer = translate(data);
+		return resultListener.sendToSocket(buffer);
+	}
 }

@@ -17,6 +17,7 @@ import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
@@ -73,15 +74,11 @@ public class Level2AggregateDecodeHeaders {
 			unknown.setFrameTypeId(f.getFrameTypeId());
 			unknown.setStreamId(f.getStreamId());
 			incomingData(unknown);
-		}
-		
-		int streamId = lowLevelFrame.getStreamId();
-		if(streamId != 0)
-			throw new IllegalArgumentException("Incoming control frame did not have stream id==0.  frame="+lowLevelFrame);
-		
-		if(lowLevelFrame instanceof SettingsFrame) {
+		} else if(lowLevelFrame instanceof SettingsFrame) {
 			SettingsFrame settings = (SettingsFrame) lowLevelFrame;
 			processHttp2SettingsFrame(settings);
+		} else if(lowLevelFrame instanceof PingFrame) {
+			flowControlLevel5.processPing((PingFrame)lowLevelFrame);
 		} else {
 			flowControlLevel5.sendControlFrameToClient(lowLevelFrame);
 		}

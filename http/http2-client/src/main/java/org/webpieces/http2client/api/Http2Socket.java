@@ -47,5 +47,10 @@ public interface Http2Socket {
     CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener);
     
     CompletableFuture<Void> close();
+
+    /**
+     * Future is complete when ping response is returned such that you can measure latency
+     */
+    CompletableFuture<Void> sendPing();
     
 }

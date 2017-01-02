@@ -92,4 +92,9 @@ public class Http2SocketImpl implements Http2Socket {
 		return incoming.sendRequest(request, listener);
 	}
 
+	@Override
+	public CompletableFuture<Void> sendPing() {
+		return incoming.sendPing();
+	}
+
 }

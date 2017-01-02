@@ -13,6 +13,7 @@ import com.webpieces.http2engine.api.RequestWriter;
 import com.webpieces.http2engine.api.EngineListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 
 public class Level0ClientEngine implements Http2ClientEngine {
@@ -35,6 +36,12 @@ public class Level0ClientEngine implements Http2ClientEngine {
 		parsingLayer = new Level1IncomingParsing(headers, lowLevelParser);
 	}
 
+	@Override
+	public CompletableFuture<Void> sendPing() {
+		PingFrame ping = new PingFrame();
+		return flowControlLevel5.sendPing(ping);
+	}
+	
 	@Override
 	public CompletableFuture<RequestWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
 		int streamId = headers.getStreamId();

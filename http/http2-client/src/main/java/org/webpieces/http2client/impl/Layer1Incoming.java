@@ -33,6 +33,10 @@ public class Layer1Incoming implements DataListener {
 		return layer2.sendInitializationToSocket();
 	}
 	
+	public CompletableFuture<Void> sendPing() {
+		return layer2.sendPing();
+	}
+	
 	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
 		int streamId = getNextAvailableStreamId();
 		request.setStreamId(streamId);

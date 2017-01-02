@@ -10,14 +10,14 @@ public interface Http2ClientEngine {
 
 	CompletableFuture<Void> sendInitializationToSocket();
 	CompletableFuture<RequestWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener);
-	//CompletableFuture<Void> sendFrameToSocket(PartialStream frame);
-	//void cancel(int streamId);
 
+	CompletableFuture<Void> sendPing();
+	
+	
 	void parse(DataWrapper newData);
 
 	/**
 	 * completely tear down engine
 	 */
 	void closeEngine();
-
 }
