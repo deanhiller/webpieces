@@ -9,9 +9,7 @@ import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.RST_STREAM;
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.WINDOW_UPDATE;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +27,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
+import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.FrameMarshaller;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
@@ -387,22 +386,6 @@ public class Http2ParserImpl implements Http2Parser {
 	}
 
     @Override
-    public DataWrapper serializeHeaders(LinkedList<Http2Header> headers, Encoder encoder, ByteArrayOutputStream out) {
-        for (Http2Header header : headers) {
-            try {
-                encoder.encodeHeader(
-                        out,
-                        header.getName().toLowerCase().getBytes(),
-                        header.getValue().getBytes(),
-                        false);
-            } catch (IOException e) {
-                // TODO: reraise appropriately
-            }
-        }
-        return dataGen.wrapByteArray(out.toByteArray());
-    }
-
-    @Override
     public List<Http2Frame> createHeaderFrames(
             LinkedList<Http2Header> headers,
             Http2FrameType startingFrameType,
@@ -412,7 +395,9 @@ public class Http2ParserImpl implements Http2Parser {
             ByteArrayOutputStream out) {
         List<Http2Frame> headerFrames = new LinkedList<>();
 
-        DataWrapper serializedHeaders = serializeHeaders(headers, encoder, out);
+        HeaderEncoding encoding = new HeaderEncoding(encoder, Integer.MAX_VALUE);
+
+        DataWrapper serializedHeaders = encoding.serializeHeaders(headers);
         long maxFrameSize = remoteSettings.get(SettingsParameter.SETTINGS_MAX_FRAME_SIZE) - 16; // subtract a little to deal with the extra bits on some of the header frame types)
         boolean firstFrame = true;
         boolean lastFrame = false;

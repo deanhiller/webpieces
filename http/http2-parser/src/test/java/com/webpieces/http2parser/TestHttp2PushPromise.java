@@ -1,13 +1,11 @@
 package com.webpieces.http2parser;
 
-import static com.webpieces.http2parser.UtilsForTest.parser;
-
-import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 
 import org.junit.Test;
 
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
@@ -20,13 +18,12 @@ public class TestHttp2PushPromise {
         basicRequestHeaders.add(new Http2Header(":authority", "www.cloudflare.com"));
         basicRequestHeaders.add(new Http2Header(":path", "/"));
     }
-    private Encoder encoder = new Encoder(4096);
+    private HeaderEncoding encoding = new HeaderEncoding(new Encoder(4096), Integer.MAX_VALUE);
 
     @Test
     public void testCreatePushPromiseFrame() {
         PushPromiseFrame frame = new PushPromiseFrame();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        frame.setHeaderFragment(parser.serializeHeaders(basicRequestHeaders, encoder, out));
+        frame.setHeaderFragment(encoding.serializeHeaders(basicRequestHeaders));
         frame.setPromisedStreamId(5);
 
         String hexFrame = UtilsForTest.frameToHex(frame);

@@ -1,13 +1,12 @@
 package com.webpieces.http2parser;
 
-import static com.webpieces.http2parser.UtilsForTest.parser;
-
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 
 import org.junit.Test;
 
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
@@ -33,12 +32,12 @@ public class TestHttp2Headers {
         basicResponseHeaders.add(new Http2Header("cf-ray", "2e916f776c724fd5-DEN"));
     }
 
-    private Encoder encoder = new Encoder(4096);
+    private HeaderEncoding encoding = new HeaderEncoding(new Encoder(4096), Integer.MAX_VALUE);
+    		
     @Test
     public void testCreateRequestHeadersFrame() {
         HeadersFrame frame = new HeadersFrame();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        frame.setHeaderFragment(parser.serializeHeaders(basicRequestHeaders, encoder, out));
+        frame.setHeaderFragment(encoding.serializeHeaders(basicRequestHeaders));
         frame.setEndHeaders(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
@@ -49,7 +48,7 @@ public class TestHttp2Headers {
     public void testCreateResponseHeadersFrame() {
         HeadersFrame frame = new HeadersFrame();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        frame.setHeaderFragment(parser.serializeHeaders(basicResponseHeaders, encoder, out));
+        frame.setHeaderFragment(encoding.serializeHeaders(basicResponseHeaders));
         frame.setEndHeaders(true);
         String hexFrame = UtilsForTest.frameToHex(frame);
 

@@ -9,6 +9,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.api.EngineListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;
@@ -45,7 +46,8 @@ public class Level5FlowControl {
 		this.lowLevelParser = lowLevelParser;
 		this.resultListener = socketListener;
 		this.remoteSettings = remoteSettings;
-        encoding = new HeaderEncoding(remoteSettings.getMaxHeaderTableSize(), remoteSettings.getMaxFrameSize());
+		Encoder encoder = new Encoder(remoteSettings.getMaxHeaderTableSize());
+        encoding = new HeaderEncoding(encoder, remoteSettings.getMaxFrameSize());
         windowSizeLeft = new AtomicLong(remoteSettings.getInitialWindowSize());
 	}
 

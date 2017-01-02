@@ -17,6 +17,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
+import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2Parser2;
@@ -77,6 +78,8 @@ public class TestHttp2Parser {
 
     private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
+    private HeaderEncoding encoding = new HeaderEncoding(encoder, Integer.MAX_VALUE);
+
     private static List<Http2Setting> settings = new ArrayList<>();
 
     // https://github.com/http2jp/hpack-test-case/blob/master/nghttp2/story_00.json
@@ -305,16 +308,13 @@ public class TestHttp2Parser {
     @Test
     public void testSerializeHeaders() {
 
-        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-        DataWrapper serializedExample = parser.serializeHeaders(ngHttp2ExampleHeaders, encoder, out2);
+        DataWrapper serializedExample = encoding.serializeHeaders(ngHttp2ExampleHeaders);
         String serializedExampleHex = UtilsForTest.toHexString(serializedExample.createByteArray());
         Assert.assertArrayEquals(
                 UtilsForTest.toByteArray(serializedExampleHex),
                 UtilsForTest.toByteArray(ngHttp2ExampleHeaderFragment));
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        DataWrapper serialized = parser.serializeHeaders(basicRequestHeaders, encoder, out);
+        DataWrapper serialized = encoding.serializeHeaders(basicRequestHeaders);
         String serializedHex = UtilsForTest.toHexString(serialized.createByteArray());
         Assert.assertArrayEquals(
                 UtilsForTest.toByteArray(serializedHex),

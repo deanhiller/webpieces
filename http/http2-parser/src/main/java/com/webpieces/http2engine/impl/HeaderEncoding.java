@@ -21,8 +21,8 @@ public class HeaderEncoding {
 	private Encoder encoder;
 	private int maxFrameSize;
 
-    public HeaderEncoding(int maxHeaderTableSize, int maxFrameSize) {
-		encoder = new Encoder(maxHeaderTableSize);
+    public HeaderEncoding(Encoder encoder, int maxFrameSize) {
+		this.encoder = encoder;
 		this.maxFrameSize = maxFrameSize;
     }
     
