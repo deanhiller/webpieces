@@ -40,7 +40,6 @@ import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -269,7 +268,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleFrame(AbstractHttp2Frame frame) {
+    private void handleFrame(Http2Frame frame) {
         if(frame.getFrameType() != SETTINGS && !this.http2EngineImpl.gotSettings.get()) {
             preconditions();
         }
@@ -381,7 +380,7 @@ class Http2DataListener implements DataListener {
                 try {
                     ParserResult parserResult = this.http2EngineImpl.http2Parser.parse(oldData, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings.toNewer());
 
-                    for (AbstractHttp2Frame frame : parserResult.getParsedFrames()) {
+                    for (Http2Frame frame : parserResult.getParsedFrames()) {
                         Http2EngineImpl.log.info("got frame=" + frame);
                         handleFrame(frame);
                     }

@@ -13,21 +13,20 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 public interface Http2Parser {
 	
     DataWrapper prepareToParse();
-
-    Http2Frame unmarshal(DataWrapper data);
+    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
 
     DataWrapper marshal(Http2Frame frame);
 
-    // TODO: add a marshal to bytebuffer so we can use our bufferpool
-    int getFrameLength(Http2Frame frame);
-
-    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
-
     /**
      * Unfortunately, in the http1.1 request to a server, the base64 http/2 upgrade settings header ONLY
-     * contains the payload of a SettingFrame, so we must have a method to just parse the payload of a
+     * contains the 'payload' of a SettingFrame, so we must have a method to just parse the payload of a
      * settings frame so this is a one-off function that I don't like exposing but need to. 
      */
 	SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload);
 
+    @Deprecated
+    Http2Frame unmarshal(DataWrapper data);
+    // TODO: add a marshal to bytebuffer so we can use our bufferpool
+    @Deprecated
+    int getFrameLength(Http2Frame frame);
 }

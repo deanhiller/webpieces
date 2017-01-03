@@ -228,7 +228,7 @@ public class Http2ParserImpl implements Http2Parser {
     @Override
     public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings) {
         DataWrapper wrapperToParse;
-        List<AbstractHttp2Frame> frames = new LinkedList<>();
+        List<Http2Frame> frames = new LinkedList<>();
         List<AbstractHttp2Frame> hasHeaderFragmentList = new LinkedList<>();
 
         if (oldData.getReadableSize() > 0) {
@@ -332,7 +332,7 @@ public class Http2ParserImpl implements Http2Parser {
 		return defaultMaxFrameSize;
 	}
 
-	private void doSomething(Decoder decoder, List<AbstractHttp2Frame> frames, List<AbstractHttp2Frame> hasHeaderFragmentList) {
+	private void doSomething(Decoder decoder, List<Http2Frame> frames, List<AbstractHttp2Frame> hasHeaderFragmentList) {
 		// Now we set the full header list on the first frame and just return that
 		AbstractHttp2Frame firstFrame = hasHeaderFragmentList.get(0);
 		DataWrapper allSerializedHeaders = dataGen.emptyWrapper();

@@ -31,13 +31,12 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
@@ -109,7 +108,7 @@ public class TestRequestResponse {
 
         // Check that we got a settings frame, a headers frame, and a data frame
         ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
-        List<AbstractHttp2Frame> frames = result.getParsedFrames();
+        List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
@@ -143,7 +142,7 @@ public class TestRequestResponse {
 
         // Check that we got a settings frame, a headers frame, and a data frame
         ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
-        List<AbstractHttp2Frame> frames = result.getParsedFrames();
+        List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
@@ -182,7 +181,7 @@ public class TestRequestResponse {
         // Check that we got a settings frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
         ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
-        List<AbstractHttp2Frame> frames = result.getParsedFrames();
+        List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(6, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
