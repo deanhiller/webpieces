@@ -52,7 +52,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
 		Http2MementoImpl state = (Http2MementoImpl) memento;
 		state.getParsedMessages().clear();
 		
-		DataWrapper allData = dataGen.chainDataWrappers(memento.getLeftOverData(), newData);
+		DataWrapper allData = dataGen.chainDataWrappers(state.getLeftOverData(), newData);
 		state.setLeftOverData(allData);
 		
 		while(true) {

@@ -74,8 +74,8 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     @Override
-    public DataWrapper prepareToParse() {
-        return dataGen.emptyWrapper();
+    public ParserResult prepareToParse() {
+    	return new ParserResultImpl();
     }
 
     private Class<? extends AbstractHttp2Frame> getFrameClassForType(Http2FrameType type) {
@@ -226,17 +226,14 @@ public class Http2ParserImpl implements Http2Parser {
 
 
     @Override
-    public ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings) {
-        DataWrapper wrapperToParse;
+    public ParserResult parse(ParserResult memento, DataWrapper newData, Decoder decoder, List<Http2Setting> settings) {
+    	ParserResultImpl state = (ParserResultImpl) memento;
+    	state.getParsedFrames().clear(); //clear any previous parsed frames
+    	
         List<Http2Frame> frames = new LinkedList<>();
         List<AbstractHttp2Frame> hasHeaderFragmentList = new LinkedList<>();
 
-        if (oldData.getReadableSize() > 0) {
-            wrapperToParse = dataGen.chainDataWrappers(oldData, newData);
-        }
-        else {
-            wrapperToParse = newData;
-        }
+        DataWrapper wrapperToParse = dataGen.chainDataWrappers(state.getMoreData(), newData);
 
         DataWrapper wrapperToReturn = wrapperToParse; // we might return moredata if there are header framesn
 
@@ -245,7 +242,9 @@ public class Http2ParserImpl implements Http2Parser {
             int lengthOfData = wrapperToParse.getReadableSize();
             if (lengthOfData < 9) {
                 // Not even a frame header
-                return new ParserResultImpl(frames, wrapperToReturn);
+            	state.setParsedFrames(frames);
+            	state.setLeftOverData(wrapperToReturn);
+            	return state;
             } else {
                 // peek for length, add 9 bytes for the header
                 int payloadLength =  getLength(wrapperToParse);
@@ -271,7 +270,9 @@ public class Http2ParserImpl implements Http2Parser {
                 int totalLength = payloadLength + 9;
                 if (lengthOfData < totalLength) {
                     // not a whole frame
-                    return new ParserResultImpl(frames, wrapperToReturn);
+                	state.setParsedFrames(frames);
+                	state.setLeftOverData(wrapperToReturn);
+                	return state;
                 } else {
                     // parse a single frame, look for more
                     List<? extends DataWrapper> split = dataGen.split(wrapperToParse, totalLength);

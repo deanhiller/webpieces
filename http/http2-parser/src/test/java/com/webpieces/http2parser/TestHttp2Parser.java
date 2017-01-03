@@ -123,7 +123,8 @@ public class TestHttp2Parser {
     
     @Test
     public void testBasicParse() {
-        ParserResult result = parser.parse(UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), dataGen.emptyWrapper(), decoder, settings);
+    	ParserResult state = parser.prepareToParse();
+        ParserResult result = parser.parse(state, UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames), decoder, settings);
         Assert.assertEquals(0, result.getMoreData().getReadableSize());
         List<Http2Frame> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 4);
@@ -133,9 +134,13 @@ public class TestHttp2Parser {
     public void testParseWithSplitFrame() {
         DataWrapper fullFrames = UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames);
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 6);
-        ParserResult result = parser.parse(split.get(0), split.get(1), decoder, settings);
-        Assert.assertEquals(0, result.getMoreData().getReadableSize());
-        List<Http2Frame> frames = result.getParsedFrames();
+        
+    	ParserResult state = parser.prepareToParse();
+        state = parser.parse(state, split.get(0), decoder, settings);
+        state = parser.parse(state, split.get(1), decoder, settings);
+
+        Assert.assertEquals(0, state.getMoreData().getReadableSize());
+        List<Http2Frame> frames = state.getParsedFrames();
         Assert.assertTrue(frames.size() == 4);
     }
 
@@ -164,17 +169,22 @@ public class TestHttp2Parser {
         Http2Memento state = parser2.prepareToParse();
         parser2.parse(state, split.get(0));
         Assert.assertEquals(0, state.getParsedMessages().size());
-        Assert.assertTrue(state.getLeftOverData().getReadableSize() > 0);
+        Assert.assertTrue(state.getLeftOverDataSize() > 0);
         
         parser2.parse(state, split.get(1));
         Assert.assertEquals(4, state.getParsedMessages().size());
-        Assert.assertFalse(state.getLeftOverData().getReadableSize() > 0);
+        Assert.assertFalse(state.getLeftOverDataSize() > 0);
     }
     
     @Test
     public void testBasicParseWithPriorData() {
-        ParserResult result = parser.parse(
+    	ParserResult result = parser.prepareToParse();
+
+        result = parser.parse(result, 
                 UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames.subSequence(0, 8).toString()), // oldData
+                decoder, settings
+            );
+        result = parser.parse(result, 
                 UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames.substring(8)), // newData
                 decoder, settings
             );
@@ -186,9 +196,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithSomeData() {
-        ParserResult result = parser.parse(
+    	ParserResult result = parser.prepareToParse();
+        result = parser.parse(result, 
                 UtilsForTest.dataWrapperFromHex(dataFramesWithSomeLeftOverData),
-                dataGen.emptyWrapper(),
                 decoder, settings);
         Assert.assertTrue(result.getMoreData().getReadableSize() > 0);
 
@@ -199,9 +209,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithMoreData() {
-        ParserResult result = parser.parse(
+    	ParserResult result = parser.prepareToParse();
+        result = parser.parse(result, 
                 UtilsForTest.dataWrapperFromHex(dataFramesWithABunchOfLeftOverData),
-                dataGen.emptyWrapper(),
                 decoder, settings);
         Assert.assertTrue(result.getMoreData().getReadableSize() > 0);
         List<Http2Frame> frames = result.getParsedFrames();
@@ -211,9 +221,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithLittleData() {
-        ParserResult result = parser.parse(
+    	ParserResult result = parser.prepareToParse();
+        result = parser.parse(result, 
                 UtilsForTest.dataWrapperFromHex("00 00"),
-                dataGen.emptyWrapper(),
                 decoder, settings);
         Assert.assertTrue(result.getMoreData().getReadableSize() > 0);
         List<Http2Frame> frames = result.getParsedFrames();
@@ -223,8 +233,8 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithNoData() {
-        ParserResult result = parser.parse(
-                dataGen.emptyWrapper(),
+    	ParserResult result = parser.prepareToParse();
+        result = parser.parse(result,
                 dataGen.emptyWrapper(),
                 decoder, settings);
         Assert.assertEquals(0, result.getMoreData().getReadableSize());
@@ -297,7 +307,8 @@ public class TestHttp2Parser {
                         serializedHeaderFrames,
                         UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames)));
 
-        ParserResult result = parser.parse(combined, dataGen.emptyWrapper(), decoder, settings);
+    	ParserResult result = parser.prepareToParse();
+        result = parser.parse(result, combined, decoder, settings);
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
         Http2Frame headerFrame = result.getParsedFrames().get(4);
         Assert.assertEquals(headerFrame.getFrameType(), HEADERS);

@@ -51,15 +51,16 @@ class Http2DataListener implements DataListener {
 	 * 
 	 */
 	private final Http2EngineImpl http2EngineImpl;
-	private DataWrapper oldData;
+	private ParserResult parseState;
     private AtomicBoolean gotPreface = new AtomicBoolean(false);
+	private DataWrapper firstIncomingData = DataWrapperGeneratorFactory.EMPTY;
     
 	/**
 	 * @param http2EngineImpl
 	 */
 	Http2DataListener(Http2EngineImpl http2EngineImpl) {
 		this.http2EngineImpl = http2EngineImpl;
-		oldData = this.http2EngineImpl.http2Parser.prepareToParse();
+		parseState = this.http2EngineImpl.http2Parser.prepareToParse();
 	}
 
     private void handleData(DataFrame frame, Stream stream) {
@@ -361,43 +362,25 @@ class Http2DataListener implements DataListener {
             // First check to make sure we got our preface
             if(this.http2EngineImpl.side == SERVER && !gotPreface.get()) {
                 // check to make sure we got the preface.
-                DataWrapper combined = Http2EngineImpl.wrapperGen.chainDataWrappers(oldData, newData);
+                DataWrapper combined = Http2EngineImpl.wrapperGen.chainDataWrappers(firstIncomingData, newData);
                 int prefaceLength = Http2EngineImpl.prefaceHexString.length()/2;
                 if(combined.getReadableSize() >= prefaceLength) {
                     List<? extends DataWrapper> split = Http2EngineImpl.wrapperGen.split(combined, prefaceLength);
                     if(Arrays.equals(split.get(0).createByteArray(), (DatatypeConverter.parseHexBinary(Http2EngineImpl.prefaceHexString)))) {
                         gotPreface.set(true);
-                        oldData = split.get(1);
+                        DataWrapper afterPrefaceData = split.get(1);
                         Http2EngineImpl.log.info("got http2 preface");
                         this.http2EngineImpl.sendLocalRequestedSettings();
+                        firstIncomingData = null; //release as no longer needed
+                        parseStuff(afterPrefaceData);
                     } else {
                         throw new GoAwayError(0, Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
                     }
                 } else {
-                    oldData = combined;
+                    firstIncomingData = combined;
                 }
             } else { // Either we got the preface or we don't need it
-                try {
-                    ParserResult parserResult = this.http2EngineImpl.http2Parser.parse(oldData, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings.toNewer());
-
-                    for (Http2Frame frame : parserResult.getParsedFrames()) {
-                        Http2EngineImpl.log.info("got frame=" + frame);
-                        handleFrame(frame);
-                    }
-                    oldData = parserResult.getMoreData();
-                }
-                catch (ParseException e) {
-                    if(e.isConnectionLevel()) {
-                        if(e.hasStream()) {
-                            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
-                        }
-                        else {
-                            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
-                        }
-                    } else {
-                        throw new RstStreamError(e.getErrorCode(), e.getStreamId());
-                    }
-                }
+                parseStuff(newData);
             }
         } catch (Http2Error e) {
             Http2EngineImpl.log.error("sending error frames " + e.toFrames(), e);
@@ -415,6 +398,29 @@ class Http2DataListener implements DataListener {
             }
         }
     }
+
+	private void parseStuff(DataWrapper newData) {
+		try {
+		    parseState = this.http2EngineImpl.http2Parser.parse(parseState, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings.toNewer());
+
+		    for (Http2Frame frame : parseState.getParsedFrames()) {
+		        Http2EngineImpl.log.info("got frame=" + frame);
+		        handleFrame(frame);
+		    }
+		}
+		catch (ParseException e) {
+		    if(e.isConnectionLevel()) {
+		        if(e.hasStream()) {
+		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
+		        }
+		        else {
+		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
+		        }
+		    } else {
+		        throw new RstStreamError(e.getErrorCode(), e.getStreamId());
+		    }
+		}
+	}
 
     private ByteBuffer translate(List<Http2Frame> frames) {
     	DataWrapper allData = dataGen.emptyWrapper();

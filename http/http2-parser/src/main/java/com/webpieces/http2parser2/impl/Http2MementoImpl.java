@@ -29,7 +29,6 @@ public class Http2MementoImpl implements Http2Memento {
 		return parsedFrames;
 	}
 
-	@Override
 	public DataWrapper getLeftOverData() {
 		return leftOverData;
 	}
@@ -56,6 +55,11 @@ public class Http2MementoImpl implements Http2Memento {
 
 	public void addParsedFrame(AbstractHttp2Frame parsedPayload) {
 		parsedFrames.add(parsedPayload);
+	}
+
+	@Override
+	public int getLeftOverDataSize() {
+		return leftOverData.getReadableSize();
 	}
 	
 }

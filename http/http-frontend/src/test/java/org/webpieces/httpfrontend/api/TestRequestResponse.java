@@ -106,8 +106,9 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
+        ParserResult parse2State = http2Parser.prepareToParse();
         // Check that we got a settings frame, a headers frame, and a data frame
-        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
+        ParserResult result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
@@ -140,8 +141,9 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
+        ParserResult parse2State = http2Parser.prepareToParse();
         // Check that we got a settings frame, a headers frame, and a data frame
-        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
+        ParserResult result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
@@ -178,9 +180,10 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
+        ParserResult parse2State = http2Parser.prepareToParse();
         // Check that we got a settings frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
-        ParserResult result = http2Parser.parse(leftOverData, dataGen.emptyWrapper(), decoder, settings);
+        ParserResult result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(6, frames.size());

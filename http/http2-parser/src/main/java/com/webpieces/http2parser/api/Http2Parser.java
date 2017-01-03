@@ -12,8 +12,8 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public interface Http2Parser {
 	
-    DataWrapper prepareToParse();
-    ParserResult parse(DataWrapper oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
+    ParserResult prepareToParse();
+    ParserResult parse(ParserResult oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
 
     DataWrapper marshal(Http2Frame frame);
 

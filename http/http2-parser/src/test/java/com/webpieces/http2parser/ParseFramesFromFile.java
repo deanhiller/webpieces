@@ -35,7 +35,8 @@ public class ParseFramesFromFile {
         while (inChannel.read(buf) != -1) {
             buf.flip();
             buf.getInt();
-            ParserResult result = parser.parse(dataGen.wrapByteBuffer(buf.slice()), dataGen.emptyWrapper(), decoder, settings);
+        	ParserResult result = parser.prepareToParse();
+            result = parser.parse(result, dataGen.wrapByteBuffer(buf.slice()), decoder, settings);
             List<Http2Frame> frames = result.getParsedFrames();
             System.out.print(frames.toString());
             buf.clear();
