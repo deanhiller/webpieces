@@ -26,13 +26,4 @@ public class ParserResultImpl implements ParserResult {
         return leftOverData;
     }
 
-    @Override
-    public boolean hasMoreData() {
-        return leftOverData.getReadableSize() > 0;
-    }
-
-    @Override
-    public boolean hasParsedFrames() {
-        return frames.size() > 0;
-    }
 }

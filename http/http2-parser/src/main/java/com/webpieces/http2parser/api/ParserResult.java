@@ -7,11 +7,8 @@ import org.webpieces.data.api.DataWrapper;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public interface ParserResult {
-    boolean hasParsedFrames();
 
     List<Http2Frame> getParsedFrames();
-
-    boolean hasMoreData();
 
     DataWrapper getMoreData();
 }
