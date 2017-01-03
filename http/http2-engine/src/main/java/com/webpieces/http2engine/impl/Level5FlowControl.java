@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -28,6 +30,7 @@ import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 public class Level5FlowControl {
 
 	private static final Logger log = LoggerFactory.getLogger(Level5FlowControl.class);
+	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private Http2Parser2 lowLevelParser;
 	private EngineListener resultListener;
@@ -77,12 +80,7 @@ public class Level5FlowControl {
 
 	private CompletableFuture<Void> encodeAndSend(HasHeaderFragment initialFrame, List<Http2Header> headers, boolean isEndStream) {
 		List<Http2Frame> framesToSend = encoding.createHeaderFrames(initialFrame, headers);
-		CompletableFuture<Void> lastFuture = null;
-		for(Http2Frame frame : framesToSend) {
-			log.info("sending frame down to socket(from client)="+frame);
-			lastFuture = sendFrameToSocket(frame);
-		}
-		return lastFuture;
+		return sendFrameToSocket(framesToSend.toArray(new Http2Frame[0]));
 	}
 
 	public CompletableFuture<Void> sendInitDataToSocket(ByteBuffer preface, SettingsFrame settings) {
@@ -206,9 +204,14 @@ public class Level5FlowControl {
 		tempFuture.complete(null);
 	}
 
-	private CompletableFuture<Void> sendFrameToSocket(Http2Frame frame) {
-		DataWrapper data = lowLevelParser.marshal(frame);
-		ByteBuffer buffer = translate(data);
+	private CompletableFuture<Void> sendFrameToSocket(Http2Frame ... frames) {
+		DataWrapper allFrames = dataGen.emptyWrapper();
+		for(Http2Frame frame : frames) {
+			log.info("sending frame down to socket(from client)="+frame);
+			DataWrapper data = lowLevelParser.marshal(frame);
+			allFrames = dataGen.chainDataWrappers(allFrames, data);
+		}
+		ByteBuffer buffer = translate(allFrames);
 		return resultListener.sendToSocket(buffer);
 	}
 }

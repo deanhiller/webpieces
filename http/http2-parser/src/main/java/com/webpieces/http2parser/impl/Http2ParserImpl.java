@@ -207,15 +207,6 @@ public class Http2ParserImpl implements Http2Parser {
         return dataGen.chainDataWrappers(dataGen.wrapByteBuffer(header), payload);
     }
 
-    @Override
-    public DataWrapper marshal(List<Http2Frame> frames) {
-        DataWrapper data = dataGen.emptyWrapper();
-        for(Http2Frame frame: frames) {
-            data = dataGen.chainDataWrappers(data, marshal(frame));
-        }
-        return data;
-    }
-
     private static Map<Http2FrameType, Integer> fixedFrameLengthByType = new HashMap<>();
     private static List<Http2FrameType> connectionLevelFrames = new ArrayList<>();
 

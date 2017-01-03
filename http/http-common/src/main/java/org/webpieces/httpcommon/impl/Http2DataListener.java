@@ -18,6 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.Http2Error;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
@@ -40,10 +42,12 @@ import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 class Http2DataListener implements DataListener {
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     /**
 	 * 
 	 */
@@ -398,7 +402,8 @@ class Http2DataListener implements DataListener {
             }
         } catch (Http2Error e) {
             Http2EngineImpl.log.error("sending error frames " + e.toFrames(), e);
-            channel.write(ByteBuffer.wrap(this.http2EngineImpl.http2Parser.marshal(e.toFrames()).createByteArray()));
+            ByteBuffer dataPayload = translate(e.toFrames());
+            channel.write(dataPayload);
             if(RstStreamError.class.isInstance(e)) {
                 // Mark the stream closed
                 Stream stream = this.http2EngineImpl.activeStreams.get(((RstStreamError) e).getStreamId());
@@ -412,7 +417,17 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    @Override
+    private ByteBuffer translate(List<Http2Frame> frames) {
+    	DataWrapper allData = dataGen.emptyWrapper();
+    	for(Http2Frame f : frames) {
+    		DataWrapper data = this.http2EngineImpl.http2Parser.marshal(f);
+    		allData = dataGen.chainDataWrappers(allData, data);
+    	}
+    	byte[] byteArray = allData.createByteArray();
+		return ByteBuffer.wrap(byteArray);
+	}
+
+	@Override
     public void farEndClosed(Channel channel) {
         // TODO: deal with this
     }

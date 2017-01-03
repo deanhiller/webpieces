@@ -2,6 +2,7 @@ package com.webpieces.http2parser;
 
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -297,7 +298,7 @@ public class TestHttp2Parser {
         List<Http2Frame> headerFrames = encoding.createHeaderFrames(initialFrame, bigHeaderList);
 
         Assert.assertEquals(headerFrames.size(), 2);
-        DataWrapper serializedHeaderFrames = parser.marshal(headerFrames);
+        DataWrapper serializedHeaderFrames = translate(headerFrames);
         DataWrapper combined = dataGen.chainDataWrappers(
                 UtilsForTest.dataWrapperFromHex(aBunchOfDataFrames),
                 dataGen.chainDataWrappers(
@@ -311,6 +312,15 @@ public class TestHttp2Parser {
         Assert.assertEquals(((HeadersFrame) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
     }
 
+    private DataWrapper translate(List<Http2Frame> frames) {
+    	DataWrapper allData = dataGen.emptyWrapper();
+    	for(Http2Frame f : frames) {
+    		DataWrapper data = parser.marshal(f);
+    		allData = dataGen.chainDataWrappers(allData, data);
+    	}
+		return allData;
+	}
+    
     @Test
     public void testSerializeHeaders() {
 

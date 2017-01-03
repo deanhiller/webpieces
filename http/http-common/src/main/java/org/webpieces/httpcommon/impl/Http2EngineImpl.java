@@ -1,7 +1,5 @@
 package org.webpieces.httpcommon.impl;
 
-import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
-import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.PUSH_PROMISE;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_ENABLE_PUSH;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_HEADER_TABLE_SIZE;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE;
@@ -461,11 +459,23 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         // Send all the frames at once
         log.info("sending push promise frames: " + frameList);
-        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenAccept(
+        ByteBuffer buf = translate(frameList);
+        return channel.write(buf).thenAccept(
                 channel -> newStream.setStatus(Stream.StreamStatus.RESERVED_LOCAL)
         );
 
     }
+    
+    private ByteBuffer translate(List<Http2Frame> frames) {
+    	DataWrapper allData = wrapperGen.emptyWrapper();
+    	for(Http2Frame f : frames) {
+    		DataWrapper data = http2Parser.marshal(f);
+    		allData = wrapperGen.chainDataWrappers(allData, data);
+    	}
+    	byte[] byteArray = allData.createByteArray();
+		return ByteBuffer.wrap(byteArray);
+	}
+    
     // we never send endstream on the header frame to make our life easier. we always just send
     // endstream on a data frame.
     CompletableFuture<Void> sendHeaderFrames(LinkedList<Http2Header> headerList, Stream stream) {
@@ -482,7 +492,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         // Send all the frames at once
         log.info("sending header frames: " + frameList);
-        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frameList).createByteArray())).thenAccept(
+        return channel.write(translate(frameList)).thenAccept(
                 channel -> {
                     switch (stream.getStatus()) {
                         case IDLE:
