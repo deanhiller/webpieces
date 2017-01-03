@@ -74,13 +74,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
         
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
-		while (payloadByteBuffer.hasRemaining()) {
-			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
-			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
-			SettingsParameter key = SettingsParameter.lookup(id);
-			frame.addSetting(new Http2Setting(id, value));
-			validate(key, value);
-		}
+		unmarshal(frame, payloadByteBuffer);
 
 		bufferPool.releaseBuffer(payloadByteBuffer);
 
@@ -88,6 +82,16 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
     		throw new IllegalArgumentException("SettingsFrame can never be any other stream id except 0 which is already set");
     	
 		return frame;
+	}
+
+	private void unmarshal(SettingsFrame frame, ByteBuffer payloadByteBuffer) {
+		while (payloadByteBuffer.hasRemaining()) {
+			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
+			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
+			SettingsParameter key = SettingsParameter.lookup(id);
+			frame.addSetting(new Http2Setting(id, value));
+			validate(key, value);
+		}
 	}
 
 	private void validate(SettingsParameter key, long value) {
@@ -130,5 +134,11 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		
 		if(value < min || value > max)
 			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+	}
+
+	public SettingsFrame unmarshalPayload(ByteBuffer settingsPayload) {
+		SettingsFrame frame = new SettingsFrame();
+		unmarshal(frame, settingsPayload);
+		return frame;
 	}
 }

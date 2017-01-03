@@ -55,24 +55,22 @@ public class Http2ParserImpl implements Http2Parser {
     private final BufferPool bufferPool;
     private final Map<Class<? extends Http2Frame>, FrameMarshaller> dtoToMarshaller = new HashMap<>();
 
+	private SettingsMarshaller settingsMarshaller;
+
     public Http2ParserImpl(BufferPool bufferPool) {
         this.bufferPool = bufferPool;
 
+        settingsMarshaller = new SettingsMarshaller(bufferPool, dataGen);
         dtoToMarshaller.put(DataFrame.class, new DataMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(HeadersFrame.class, new HeadersMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(PriorityFrame.class, new PriorityMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(RstStreamFrame.class, new RstStreamMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(SettingsFrame.class, new SettingsMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(SettingsFrame.class, settingsMarshaller);
         dtoToMarshaller.put(PushPromiseFrame.class, new PushPromiseMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(PingFrame.class, new PingMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(GoAwayFrame.class, new GoAwayMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(WindowUpdateFrame.class, new WindowUpdateMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(ContinuationFrame.class, new ContinuationMarshaller(bufferPool, dataGen));
-    }
-
-    @Override
-    public FrameMarshaller getMarshaller(Class<? extends Http2Frame> frameClass) {
-        return dtoToMarshaller.get(frameClass);
     }
 
     @Override
@@ -379,6 +377,11 @@ public class Http2ParserImpl implements Http2Parser {
 		    default:
 		        throw new ParseException(Http2ErrorCode.INTERNAL_ERROR); // This should not happen
 		}
+	}
+
+	@Override
+	public SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload) {
+		return settingsMarshaller.unmarshalPayload(settingsPayload);
 	}
 
 }

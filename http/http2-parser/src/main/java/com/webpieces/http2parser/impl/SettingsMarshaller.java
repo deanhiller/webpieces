@@ -58,13 +58,23 @@ public class SettingsMarshaller extends FrameMarshallerImpl {
         maybePayload.ifPresent(payload -> {
             ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
-    		while (payloadByteBuffer.hasRemaining()) {
-    			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
-    			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
-    			castFrame.addSetting(new Http2Setting(id, value));
-    		}
+    		unmarshalSettings(castFrame, payloadByteBuffer);
     		
             bufferPool.releaseBuffer(payloadByteBuffer);
         });
     }
+
+	private void unmarshalSettings(SettingsFrame castFrame, ByteBuffer payloadByteBuffer) {
+		while (payloadByteBuffer.hasRemaining()) {
+			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
+			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
+			castFrame.addSetting(new Http2Setting(id, value));
+		}
+	}
+
+	public SettingsFrame unmarshalPayload(ByteBuffer settingsPayload) {
+		SettingsFrame castFrame = new SettingsFrame();
+		unmarshalSettings(castFrame, settingsPayload);
+		return castFrame;
+	}
 }

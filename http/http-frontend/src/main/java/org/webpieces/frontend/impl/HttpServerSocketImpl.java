@@ -57,14 +57,7 @@ class HttpServerSocketImpl implements HttpServerSocket {
         maybeSettingsPayload.ifPresent(settingsPayload ->
         {
             try {
-                SettingsFrame settingsFrame = new SettingsFrame();
-                SettingsMarshaller settingsMarshaller = (SettingsMarshaller) http2Parser.getMarshaller(SettingsFrame.class);
-                Optional<DataWrapper> maybePayload;
-                if(settingsPayload.hasRemaining())
-                    maybePayload = Optional.of(dataGen.wrapByteBuffer(settingsPayload));
-                else
-                    maybePayload = Optional.empty();
-                settingsMarshaller.unmarshalFlagsAndPayload(settingsFrame, (byte) 0x0, maybePayload);
+                SettingsFrame settingsFrame = http2Parser.unmarshalSettingsPayload(settingsPayload);
 
                 http2ServerEngine.setRemoteSettings(settingsFrame, false);
             } catch (Exception e) {

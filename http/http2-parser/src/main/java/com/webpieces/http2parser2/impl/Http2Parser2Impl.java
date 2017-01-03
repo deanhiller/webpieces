@@ -14,6 +14,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParsedStatus;
 import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -24,9 +25,12 @@ public class Http2Parser2Impl implements Http2Parser2 {
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private final Map<Http2FrameType, FrameMarshaller> dtoToMarshaller = new HashMap<>();
 	private BufferPool bufferPool;
+	private SettingsMarshaller settingsMarshaller;
 
 	public Http2Parser2Impl(BufferPool bufferPool) {
         this.bufferPool = bufferPool;
+        
+        settingsMarshaller = new SettingsMarshaller(bufferPool, dataGen);
 		dtoToMarshaller.put(Http2FrameType.CONTINUATION, new ContinuationMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2FrameType.DATA, new DataMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2FrameType.GOAWAY, new GoAwayMarshaller(bufferPool, dataGen));
@@ -35,7 +39,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
         dtoToMarshaller.put(Http2FrameType.PRIORITY, new PriorityMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2FrameType.PUSH_PROMISE, new PushPromiseMarshaller(bufferPool, dataGen));
         dtoToMarshaller.put(Http2FrameType.RST_STREAM, new RstStreamMarshaller(bufferPool, dataGen));
-        dtoToMarshaller.put(Http2FrameType.SETTINGS, new SettingsMarshaller(bufferPool, dataGen));
+        dtoToMarshaller.put(Http2FrameType.SETTINGS, settingsMarshaller);
         dtoToMarshaller.put(Http2FrameType.WINDOW_UPDATE, new WindowUpdateMarshaller(bufferPool, dataGen));
 	}
 
@@ -154,6 +158,11 @@ public class Http2Parser2Impl implements Http2Parser2 {
 		if(marshaller == null)
 			throw new IllegalArgumentException("unknown frame bean="+frame);
 		return marshaller.marshal(frame);
+	}
+
+	@Override
+	public SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload) {
+		return settingsMarshaller.unmarshalPayload(settingsPayload);
 	}
 
 }
