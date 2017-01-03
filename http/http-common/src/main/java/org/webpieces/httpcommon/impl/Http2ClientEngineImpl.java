@@ -15,13 +15,13 @@ import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -33,7 +33,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
 
     public Http2ClientEngineImpl(
-        Http2Parser http2Parser,
+        TempHttp2Parser http2Parser,
         Channel channel,
         InetSocketAddress remoteAddress, Http2SettingsMap http2SettingsMap) {
         super(http2Parser, channel, remoteAddress, http2SettingsMap, HttpSide.CLIENT);

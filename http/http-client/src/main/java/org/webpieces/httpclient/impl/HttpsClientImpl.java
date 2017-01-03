@@ -9,6 +9,7 @@ import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.ServerListener;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -16,7 +17,6 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 
 public class HttpsClientImpl implements HttpClient {
@@ -24,11 +24,11 @@ public class HttpsClientImpl implements HttpClient {
 	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 	private ChannelManager mgr;
 	private HttpParser httpParser;
-	private Http2Parser http2Parser;
+	private TempHttp2Parser http2Parser;
 	private HttpsSslEngineFactory factory;
 	private Http2SettingsMap http2SettingsMap;
 
-	public HttpsClientImpl(ChannelManager mgr, HttpParser httpParser, Http2Parser http2Parser, HttpsSslEngineFactory factory, Http2SettingsMap http2SettingsMap) {
+	public HttpsClientImpl(ChannelManager mgr, HttpParser httpParser, TempHttp2Parser http2Parser, HttpsSslEngineFactory factory, Http2SettingsMap http2SettingsMap) {
 		this.mgr = mgr;
 		this.httpParser = httpParser;
 		this.http2Parser = http2Parser;

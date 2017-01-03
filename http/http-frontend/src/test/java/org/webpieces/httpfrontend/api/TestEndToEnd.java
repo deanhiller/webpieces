@@ -22,6 +22,8 @@ import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
+import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -48,7 +50,7 @@ public class TestEndToEnd {
     ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 
     HttpParser httpParser = HttpParserFactory.createParser(pool2);
-    Http2Parser http2Parser = Http2ParserFactory.createParser(pool2);
+    TempHttp2Parser http2Parser = TempHttp2ParserFactory.createParser(pool2);
 
     return HttpClientFactory.createHttpClient(mgr, httpParser, http2Parser, http2SettingsMap);
   }

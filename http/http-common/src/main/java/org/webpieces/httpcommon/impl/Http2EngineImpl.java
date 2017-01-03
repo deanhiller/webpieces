@@ -43,6 +43,7 @@ import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.Headers;
@@ -65,7 +66,6 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.impl.HeaderEncoding;
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -85,7 +85,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     Channel channel;
     DataListener dataListener;
-    Http2Parser http2Parser;
+    TempHttp2Parser http2Parser;
     private InetSocketAddress remoteAddress;
 
     HttpSide side;
@@ -138,7 +138,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
 
     public Http2EngineImpl(
-        Http2Parser http2Parser,
+        TempHttp2Parser http2Parser,
         Channel channel,
         InetSocketAddress remoteAddress,
         Http2SettingsMap http2SettingsMap,

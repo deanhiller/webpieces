@@ -26,6 +26,7 @@ import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.SwitchableDataListener;
 import org.webpieces.httpcommon.api.SwitchableDataListenerFactory;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -41,7 +42,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -60,7 +60,7 @@ public class RequestSenderImpl implements RequestSender {
     private AtomicBoolean negotiationStarted = new AtomicBoolean(false);
     private CompletableFuture<Channel> negotiationDoneNotifier = new CompletableFuture<>();
     private Http2ClientEngine http2ClientEngine;
-    private Http2Parser http2Parser;
+    private TempHttp2Parser http2Parser;
 
     // HTTP 1.1
     private HttpParser httpParser;
@@ -80,7 +80,7 @@ public class RequestSenderImpl implements RequestSender {
     public RequestSenderImpl(
         HttpClientSocket socket,
         HttpParser httpParser,
-        Http2Parser http2Parser,
+        TempHttp2Parser http2Parser,
         ServerListener closeListener,
         InetSocketAddress addr,
         TCPChannel channel,

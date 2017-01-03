@@ -152,7 +152,8 @@ public class Http2Parser2Impl implements Http2Parser2 {
     
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
-		FrameMarshaller marshaller = dtoToMarshaller.get(frame.getFrameType());
+		Http2FrameType frameType = frame.getFrameType();
+		FrameMarshaller marshaller = dtoToMarshaller.get(frameType);
 		if(marshaller == null)
 			throw new IllegalArgumentException("unknown frame bean="+frame);
 		return marshaller.marshal(frame);

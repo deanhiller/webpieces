@@ -10,10 +10,10 @@ import java.util.List;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
+import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
@@ -25,7 +25,7 @@ public class ParseFramesFromFile {
         FileInputStream inFile = new FileInputStream(aFile);
         FileChannel inChannel = inFile.getChannel();
         ByteBuffer buf = ByteBuffer.allocate((int) aFile.length());
-        Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
+        TempHttp2Parser parser = TempHttp2ParserFactory.createParser(new BufferCreationPool());
         DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
         Decoder decoder = new Decoder(4096, 4096);
         List<Http2Setting> settings = new ArrayList<>();

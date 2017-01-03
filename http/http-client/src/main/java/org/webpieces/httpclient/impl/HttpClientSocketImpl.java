@@ -11,6 +11,7 @@ import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ServerListener;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
@@ -20,7 +21,6 @@ import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2SettingsMap;
 
 
@@ -30,7 +30,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
 
     private TCPChannel channel;
     private HttpParser httpParser;
-    private Http2Parser http2Parser;
+    private TempHttp2Parser http2Parser;
     private Http2SettingsMap http2SettingsMap;
 
     private CompletableFuture<RequestSender> connectFuture;
@@ -48,7 +48,7 @@ public class HttpClientSocketImpl implements HttpClientSocket, Closeable {
         String idForLogging,
         HttpsSslEngineFactory factory,
         HttpParser httpParser,
-        Http2Parser http2Parser,
+        TempHttp2Parser http2Parser,
         ServerListener closeListener,
         Http2SettingsMap http2SettingsMap)
     {
