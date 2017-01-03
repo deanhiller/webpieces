@@ -5,8 +5,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -15,7 +13,6 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
-import org.webpieces.httpparser.api.ParsedStatus;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
@@ -32,6 +29,8 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.HttpVersion;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HttpParserImpl implements HttpParser {
 
@@ -206,7 +205,6 @@ public class HttpParserImpl implements HttpParser {
 
 		MementoImpl memento = (MementoImpl) state;
 		//initialize state to need more data
-		memento.setStatus(ParsedStatus.NEED_MORE_DATA);
 		memento.getParsedMessages().clear();
 		
 		DataWrapper leftOverData = memento.getLeftOverData();
@@ -252,13 +250,6 @@ public class HttpParserImpl implements HttpParser {
 			}
 		}
 		memento.setReadingHttpMessagePointer(i);
-		
-		DataWrapper leftOverData = memento.getLeftOverData();
-		if(leftOverData.getReadableSize() == 0) {
-			memento.setStatus(ParsedStatus.ALL_DATA_PARSED);
-		} else if(memento.getParsedMessages().size() > 0) {
-			memento.setStatus(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA);
-		}
 	}
 
 	/**

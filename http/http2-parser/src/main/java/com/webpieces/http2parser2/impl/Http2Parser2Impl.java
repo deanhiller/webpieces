@@ -12,7 +12,6 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.Http2Memento;
-import com.webpieces.http2parser.api.Http2ParsedStatus;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
@@ -115,7 +114,6 @@ public class Http2Parser2Impl implements Http2Parser2 {
         if (lengthOfData < 9) {
             // Not even a frame header
         	state.setLeftOverData(allData);
-        	state.setParsedStatus(Http2ParsedStatus.NEED_MORE_DATA);
         	return false;
         }
         

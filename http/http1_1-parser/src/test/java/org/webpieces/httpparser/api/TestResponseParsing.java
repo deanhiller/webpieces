@@ -8,10 +8,6 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.ParsedStatus;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -98,12 +94,10 @@ public class TestResponseParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, data1);
 		
-		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
 		Assert.assertEquals(0, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data2);
 		
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 		
 		HttpPayload httpMessage = memento.getParsedMessages().get(0);
@@ -129,12 +123,10 @@ public class TestResponseParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, data1);
 		
-		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
 		Assert.assertEquals(2, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data2);
 		
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 	}
 	
@@ -164,17 +156,14 @@ public class TestResponseParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, data1);
 		
-		Assert.assertEquals(ParsedStatus.NEED_MORE_DATA, memento.getStatus());
 		Assert.assertEquals(0, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data2);
 		
-		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 		
 		memento = parser.parse(memento, data3);
 		
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		Assert.assertEquals(1, memento.getParsedMessages().size());
 	}
 	

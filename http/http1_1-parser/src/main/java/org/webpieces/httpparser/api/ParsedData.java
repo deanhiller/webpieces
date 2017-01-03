@@ -5,16 +5,9 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public class ParsedData {
 
-	private ParsedStatus status;
 	private HttpPayload msg;
 	private DataWrapper leftOverData;
 	
-	public ParsedStatus getStatus() {
-		return status;
-	}
-	public void setStatus(ParsedStatus status) {
-		this.status = status;
-	}
 	public HttpPayload getMsg() {
 		return msg;
 	}

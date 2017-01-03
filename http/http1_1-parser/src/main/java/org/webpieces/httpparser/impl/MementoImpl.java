@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.ParsedStatus;
 import org.webpieces.httpparser.api.ParsingState;
 import org.webpieces.httpparser.api.UnparsedState;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -23,18 +22,8 @@ public class MementoImpl implements Memento {
 	private boolean inChunkParsingMode;
 	
 	//Return state for client to access
-	private ParsedStatus status = ParsedStatus.NEED_MORE_DATA;
 	private List<HttpPayload> parsedMessages = new ArrayList<>();
 	private int indexBytePointer;
-
-	public void setStatus(ParsedStatus status) {
-		this.status = status;
-	}
-
-	@Override
-	public ParsedStatus getStatus() {
-		return status;
-	}
 
 	@Override
 	public List<HttpPayload> getParsedMessages() {

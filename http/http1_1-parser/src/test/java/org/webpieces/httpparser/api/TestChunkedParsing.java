@@ -13,7 +13,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.ParsedStatus;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
@@ -63,8 +62,6 @@ public class TestChunkedParsing {
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, wrapper);
 		
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
-		
 		List<HttpPayload> msgs = memento.getParsedMessages();
 		Assert.assertEquals(5, msgs.size());
 		
@@ -100,8 +97,6 @@ public class TestChunkedParsing {
 		DataWrapper wrapper = dataGen.wrapByteArray(all);
 		Memento memento = parser.prepareToParse();
 		memento = parser.parse(memento, wrapper);
-		
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		
 		List<HttpPayload> msgs = memento.getParsedMessages();
 		Assert.assertEquals(6, msgs.size());
@@ -153,14 +148,11 @@ public class TestChunkedParsing {
 		Assert.assertEquals(ParsingState.CHUNK, memento.getUnParsedState().getCurrentlyParsing());
 		Assert.assertEquals(11, memento.getUnParsedState().getCurrentUnparsedSize());
 		
-		Assert.assertEquals(ParsedStatus.MSG_PARSED_AND_LEFTOVER_DATA, memento.getStatus());
-		
 		List<HttpPayload> msgs = memento.getParsedMessages();
 		Assert.assertEquals(1, msgs.size());
 		Assert.assertEquals(resp, msgs.get(0));
 		
 		memento = parser.parse(memento, second);
-		Assert.assertEquals(ParsedStatus.ALL_DATA_PARSED, memento.getStatus());
 		List<HttpPayload> parsedMessages = memento.getParsedMessages();
 		Assert.assertEquals(4, parsedMessages.size());
 
