@@ -12,6 +12,8 @@ import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
+import com.webpieces.http2parser.impl.DataSplit;
+import com.webpieces.http2parser.impl.PaddingUtil;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 
 public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
@@ -23,11 +25,12 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
         HeadersFrame castFrame = (HeadersFrame) frame;
+        int paddingSize = castFrame.getPadding().getReadableSize();
 
         byte value = 0x0;
         if (castFrame.isEndStream()) value |= 0x1;
         if (castFrame.isEndHeaders()) value |= 0x4;
-        if (castFrame.getPadding().isPadded()) value |= 0x8;
+        if (paddingSize > 0) value |= 0x8;
         if (castFrame.isPriority()) value |= 0x20;
         
         DataWrapper preludeDW;
@@ -47,7 +50,8 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         DataWrapper unpadded = dataGen.chainDataWrappers(
                 preludeDW,
                 castFrame.getHeaderFragment());
-        DataWrapper payload = castFrame.getPadding().padDataIfNeeded(unpadded);        
+        
+        DataWrapper payload = PaddingUtil.padDataIfNeeded(unpadded, castFrame.getPadding());
         return super.marshalFrame(frame, value, payload);
 	}
 
@@ -59,7 +63,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         byte flagsByte = state.getFrameHeaderData().getFlagsByte();
         frame.setEndStream((flagsByte & 0x1) == 0x1);
         frame.setEndHeaders((flagsByte & 0x4) == 0x4);
-        frame.getPadding().setIsPadded((flagsByte & 0x8) == 0x8);
+        boolean isPadded = (flagsByte & 0x8) == 0x8;
         
         PriorityDetails priorityDetails = null;
         if((flagsByte & 0x20) == 0x20) {
@@ -67,7 +71,9 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         	frame.setPriorityDetails(priorityDetails);
         }
 
-        DataWrapper paddingStripped = frame.getPadding().extractPayloadAndSetPaddingIfNeeded(framePayloadData, frame.getStreamId());
+        DataSplit padSplit = PaddingUtil.extractPayloadAndPadding(isPadded, framePayloadData, frame.getStreamId());
+        frame.setPadding(padSplit.getPadding());
+        DataWrapper paddingStripped = padSplit.getPayload();
 
         if(priorityDetails != null) {
         	//1 bit Exclusive flag, 31 bits stream dependency, and 8 bits weight = 5 bytes....

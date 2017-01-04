@@ -65,12 +65,12 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 		if(frame.isAck()) {
 	        if(payloadLength != 0) {
-	            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+	            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
 	        }
 		} else if(payloadLength % 6 != 0) {
-            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
         } else if(streamId != 0)
-            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, false);
+            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
         
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 

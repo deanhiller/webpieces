@@ -3,9 +3,8 @@ package com.webpieces.http2parser.api.dto;
 import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.Padding;
-import com.webpieces.http2parser.api.PaddingFactory;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
@@ -29,7 +28,7 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     private PriorityDetails priorityDetails; /* optional */
     private DataWrapper headerFragment;
     private List<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
-    private Padding padding = PaddingFactory.createPadding();
+    private DataWrapper padding = DataWrapperGeneratorFactory.EMPTY;
     
     public boolean isEndStream() {
         return endStream;
@@ -81,12 +80,15 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
         this.priorityDetails = priorityDetails;
     }
 
-    public Padding getPadding() {
-        return this.padding;
-    }
+    public DataWrapper getPadding() {
+		return padding;
+	}
 
+	public void setPadding(DataWrapper padding) {
+		this.padding = padding;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return "HeadersFrame{" +
         		"streamId=" + super.toString() +

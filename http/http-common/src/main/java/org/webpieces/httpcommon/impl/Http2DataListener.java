@@ -68,7 +68,13 @@ class Http2DataListener implements DataListener {
         switch(stream.getStatus()) {
             case OPEN:
             case HALF_CLOSED_LOCAL:
-                int payloadLength = this.http2EngineImpl.http2Parser.getFrameLength(frame);
+            	int dataSize = frame.getData().getReadableSize();
+            	int paddingSize = frame.getPadding().getReadableSize();
+            	if(paddingSize > 0) {
+            		paddingSize += 1; //add the length byte in since there is padding
+            	}
+            	
+                int payloadLength = dataSize + paddingSize;
                 this.http2EngineImpl.decrementIncomingWindow(frame.getStreamId(), payloadLength);
                 stream.checkAgainstContentLength(frame.getData().getReadableSize(), frame.isEndStream());
 

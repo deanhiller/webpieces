@@ -11,7 +11,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -45,14 +45,14 @@ public class Http2Parser2Impl implements Http2Parser2 {
 	}
 
 	@Override
-	public Http2Memento prepareToParse() {
+	public ParserResult prepareToParse() {
 		return new Http2MementoImpl(dataGen.emptyWrapper());
 	}
 
 	@Override
-	public Http2Memento parse(Http2Memento memento, DataWrapper newData, long maxFrameSize) {
+	public ParserResult parse(ParserResult memento, DataWrapper newData, long maxFrameSize) {
 		Http2MementoImpl state = (Http2MementoImpl) memento;
-		state.getParsedMessages().clear();
+		state.getParsedFrames().clear();
 		
 		DataWrapper allData = dataGen.chainDataWrappers(state.getLeftOverData(), newData);
 		state.setLeftOverData(allData);

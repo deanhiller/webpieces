@@ -8,7 +8,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -41,9 +41,9 @@ public class UtilsForTest2 {
 
     public static Http2Frame frameFromHex(String frameHex) {
     	DataWrapper data = dataWrapperFromHex(frameHex);
-    	Http2Memento state = parser.prepareToParse();
+    	ParserResult state = parser.prepareToParse();
     	state = parser.parse(state, data, Integer.MAX_VALUE);
-    	return state.getParsedMessages().get(0);
+    	return state.getParsedFrames().get(0);
     }
 
     public static DataWrapper frameToDataWrapper(Http2Frame frame) {

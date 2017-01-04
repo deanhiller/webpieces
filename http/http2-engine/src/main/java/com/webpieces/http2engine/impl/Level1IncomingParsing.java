@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
@@ -12,7 +12,7 @@ public class Level1IncomingParsing {
 
 	private Level2AggregateDecodeHeaders headers;
 	private Http2Parser2 lowLevelParser;
-	private Http2Memento parsingState;
+	private ParserResult parsingState;
 	private HeaderSettings remoteSettings;
 
 	public Level1IncomingParsing(Level2AggregateDecodeHeaders headers, Http2Parser2 lowLevelParser, HeaderSettings remoteSettings) {
@@ -24,7 +24,7 @@ public class Level1IncomingParsing {
 
 	public void parse(DataWrapper newData) {
 		parsingState = lowLevelParser.parse(parsingState, newData, remoteSettings.getMaxFrameSize());
-		List<Http2Frame> parsedMessages = parsingState.getParsedMessages();
+		List<Http2Frame> parsedMessages = parsingState.getParsedFrames();
 		
 		for(Http2Frame lowLevelFrame : parsedMessages) {
 			headers.sendFrameUpToClient(lowLevelFrame);

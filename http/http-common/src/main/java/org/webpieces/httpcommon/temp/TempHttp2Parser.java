@@ -25,8 +25,4 @@ public interface TempHttp2Parser {
      */
 	SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload);
 
-    // TODO: add a marshal to bytebuffer so we can use our bufferpool
-    @Deprecated
-    int getFrameLength(Http2Frame frame);
-    
 }

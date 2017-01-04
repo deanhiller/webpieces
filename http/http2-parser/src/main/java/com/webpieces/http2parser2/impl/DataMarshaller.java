@@ -7,6 +7,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.impl.DataSplit;
+import com.webpieces.http2parser.impl.PaddingUtil;
 
 public class DataMarshaller extends AbstractFrameMarshaller implements FrameMarshaller  {
 
@@ -17,12 +19,13 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
         DataFrame castFrame = (DataFrame) frame;
+        int paddingSize = castFrame.getPadding().getReadableSize();
 
         byte value = (byte) 0x0;
         if (castFrame.isEndStream()) value |= 0x1;
-        if (castFrame.getPadding().isPadded()) value |= 0x8;
+        if (paddingSize > 0) value |= 0x8;
         
-        DataWrapper dataPayload = castFrame.getPadding().padDataIfNeeded(castFrame.getData());
+        DataWrapper dataPayload = PaddingUtil.padDataIfNeeded(castFrame.getData(), castFrame.getPadding());
 		return super.marshalFrame(frame, value, dataPayload);
 	}
 
@@ -33,10 +36,11 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
         
         byte flags = state.getFrameHeaderData().getFlagsByte();
         frame.setEndStream((flags & 0x1) == 0x1);
-        frame.getPadding().setIsPadded((flags & 0x8) == 0x8);
+        boolean isPadded = (flags & 0x8) == 0x8;
 
-        DataWrapper data = frame.getPadding().extractPayloadAndSetPaddingIfNeeded(framePayloadData, frame.getStreamId());
-        frame.setData(data);
+        DataSplit split = PaddingUtil.extractPayloadAndPadding(isPadded, framePayloadData, frame.getStreamId());
+        frame.setData(split.getPayload());
+        frame.setPadding(split.getPadding());
         
 		return frame;
 	}

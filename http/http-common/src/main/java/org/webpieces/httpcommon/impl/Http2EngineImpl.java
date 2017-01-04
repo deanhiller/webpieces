@@ -336,7 +336,15 @@ public abstract class Http2EngineImpl implements Http2Engine {
     private CompletableFuture<Void> writeDataFrame(DataFrame frame) {
         int streamId = frame.getStreamId();
         log.info("actually writing data frame: " + frame);
-        decrementOutgoingWindow(streamId, http2Parser.getFrameLength(frame));
+        
+        int dataSize = frame.getData().getReadableSize();
+        int paddingSize = frame.getPadding().getReadableSize();
+        if(paddingSize > 0)
+        	paddingSize += 1;
+        
+        int totalSize = dataSize + paddingSize;
+        
+        decrementOutgoingWindow(streamId, totalSize);
         return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenAccept(c -> {});
     }
 

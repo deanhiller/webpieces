@@ -40,10 +40,10 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
-		if(state.getFrameHeaderData().getPayloadLength() > 8)
-			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+		if(state.getFrameHeaderData().getPayloadLength() != 8)
+			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
 		else if(streamId != 0)
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, false);
+			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
 
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		

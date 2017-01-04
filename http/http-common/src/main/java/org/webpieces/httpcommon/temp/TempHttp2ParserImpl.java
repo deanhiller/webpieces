@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
-import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
@@ -27,7 +27,7 @@ import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 public class TempHttp2ParserImpl implements TempHttp2Parser {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private Http2Parser parser;
+	private Http2Parser2 parser;
 
 	public ParserResult prepareToParse() {
 		ParserResult result = parser.prepareToParse();
@@ -140,11 +140,7 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		return parser.unmarshalSettingsPayload(settingsPayload);
 	}
 
-	public int getFrameLength(Http2Frame frame) {
-		return parser.getFrameLength(frame);
-	}
-
-	public TempHttp2ParserImpl(Http2Parser parser) {
+	public TempHttp2ParserImpl(Http2Parser2 parser) {
 		this.parser = parser;
 	}
 

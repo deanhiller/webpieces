@@ -20,7 +20,7 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
 import com.webpieces.http2engine.impl.HeaderEncoding;
-import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.ParserResult;
@@ -167,14 +167,14 @@ public class TestHttp2Parser {
         DataWrapper fullFrames = UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames);
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 12);
         
-        Http2Memento state = parser2.prepareToParse();
+        ParserResult state = parser2.prepareToParse();
         parser2.parse(state, split.get(0), Integer.MAX_VALUE);
-        Assert.assertEquals(0, state.getParsedMessages().size());
-        Assert.assertTrue(state.getLeftOverDataSize() > 0);
+        Assert.assertEquals(0, state.getParsedFrames().size());
+        Assert.assertTrue(state.getMoreData().getReadableSize() > 0);
         
         parser2.parse(state, split.get(1), Integer.MAX_VALUE);
-        Assert.assertEquals(4, state.getParsedMessages().size());
-        Assert.assertFalse(state.getLeftOverDataSize() > 0);
+        Assert.assertEquals(4, state.getParsedFrames().size());
+        Assert.assertFalse(state.getMoreData().getReadableSize() > 0);
     }
     
     @Test

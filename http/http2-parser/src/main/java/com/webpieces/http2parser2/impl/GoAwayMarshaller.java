@@ -44,7 +44,7 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         super.unmarshalFrame(state, frame);
         int streamId = state.getFrameHeaderData().getStreamId();
         if(streamId != 0)
-            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, false);
+            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
         
         List<? extends DataWrapper> split = dataGen.split(framePayloadData, 8);
         ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));

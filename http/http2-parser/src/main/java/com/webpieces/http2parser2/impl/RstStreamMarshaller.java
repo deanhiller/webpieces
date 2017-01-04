@@ -34,7 +34,7 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 4)
-			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
 		RstStreamFrame frame = new RstStreamFrame();
