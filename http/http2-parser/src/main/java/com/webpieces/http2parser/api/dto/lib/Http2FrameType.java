@@ -12,7 +12,14 @@ public enum Http2FrameType {
     PING(0x6),
     GOAWAY(0x7),
     WINDOW_UPDATE(0x8),
-    CONTINUATION(0x9);
+    CONTINUATION(0x9),
+    
+    //This is only so the old http2-common and old engine keep working to validate with tests we didn't break anything
+    //we should remove these once complete
+    @Deprecated
+    FULL_HEADERS(0x999),
+    @Deprecated
+    FULL_PROMISE(0x998);
 
     private final int id;
 

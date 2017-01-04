@@ -1,14 +1,11 @@
 package com.webpieces.http2parser.api.dto;
 
-import java.util.List;
-
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFragment {
     @Override
@@ -35,19 +32,10 @@ public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFra
     private int promisedStreamId = 0x0; //31bits
     private DataWrapper headerFragment;
     private DataWrapper padding = DataWrapperGeneratorFactory.EMPTY;
-    private List<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
 
     @Override
     public DataWrapper getHeaderFragment() {
         return headerFragment;
-    }
-
-    public List<Http2Header> getHeaderList() {
-        return headerList;
-    }
-
-    public void setHeaderList(List<Http2Header> headerList) {
-        this.headerList = headerList;
     }
 
     @Override
@@ -68,6 +56,7 @@ public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFra
     }
 
     public void setPromisedStreamId(int promisedStreamId) {
+    	//TODO: This should be tested in marshaller and throw if promisedStreamId not equal to modified one
         this.promisedStreamId = promisedStreamId & 0x7FFFFFFF;
     }
 

@@ -16,6 +16,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
+import org.webpieces.httpcommon.api.Http2FullHeaders;
+import org.webpieces.httpcommon.api.Http2FullPushPromise;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
@@ -113,7 +115,7 @@ public class TestRequestResponse {
 
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
-        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
     }
 
@@ -148,7 +150,7 @@ public class TestRequestResponse {
 
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
-        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
 
         Assert.assertArrayEquals(((DataFrame) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
@@ -188,10 +190,10 @@ public class TestRequestResponse {
 
         Assert.assertEquals(6, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
-        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
-        Assert.assertTrue(PushPromiseFrame.class.isInstance(frames.get(3)));
-        Assert.assertTrue(HeadersFrame.class.isInstance(frames.get(4)));
+        Assert.assertTrue(Http2FullPushPromise.class.isInstance(frames.get(3)));
+        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(4)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(5)));
     }
 

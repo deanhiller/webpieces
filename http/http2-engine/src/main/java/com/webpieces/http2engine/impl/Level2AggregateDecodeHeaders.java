@@ -130,7 +130,7 @@ public class Level2AggregateDecodeHeaders {
 		} else if(first instanceof PushPromiseFrame) {
 			PushPromiseFrame promise = (PushPromiseFrame) first;
 			
-			Http2Push fullPromise = new Http2Push(promise.getHeaderList());
+			Http2Push fullPromise = new Http2Push(headers);
 			//These are reveresed on purpose and we name it 'causal' meaning
 			//the stream that causes this new stream to open
 			fullPromise.setStreamId(promise.getPromisedStreamId());

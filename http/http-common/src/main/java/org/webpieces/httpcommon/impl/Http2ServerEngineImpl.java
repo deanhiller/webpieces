@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.api.Http2ServerEngine;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
@@ -22,7 +23,6 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 
@@ -136,7 +136,7 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     }
 
     @Override
-    void sideSpecificHandleHeaders(HeadersFrame frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(Http2FullHeaders frame, boolean isTrailer, Stream stream) {
         if(isTrailer) {
             requestListener.incomingTrailer(frame.getHeaderList(), stream.getRequestId(), frame.isEndStream(), responseSender);
         } else {

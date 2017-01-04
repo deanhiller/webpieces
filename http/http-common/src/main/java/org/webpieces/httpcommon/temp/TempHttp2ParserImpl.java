@@ -6,6 +6,8 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpcommon.api.Http2FullHeaders;
+import org.webpieces.httpcommon.api.Http2FullPushPromise;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
@@ -119,15 +121,14 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		//TODO: fix this to remove HeadersFrame and PushPromieFrame from having a List<Header> field
 		if(firstFrame instanceof HeadersFrame) {
 			HeadersFrame f = (HeadersFrame) firstFrame;
-			f.setHeaderList(headers);
-			f.setEndHeaders(true);
+			Http2FullHeaders full = new Http2FullHeaders(f.getStreamId(), headers, f.getPriorityDetails(), f.isEndStream());
+			state.getParsedFrames().add(full);
 		} else if(firstFrame instanceof PushPromiseFrame) {
 			PushPromiseFrame f = (PushPromiseFrame) firstFrame;
-			f.setHeaderList(headers);
-			f.setEndHeaders(true);
+			Http2FullPushPromise promise = new Http2FullPushPromise(
+					headers, f.getPromisedStreamId(), f.getStreamId());
+			state.getParsedFrames().add(promise);
 		}
-
-		state.getParsedFrames().add(firstFrame);
 
 		hasHeaderFragmentList.clear();
 	}

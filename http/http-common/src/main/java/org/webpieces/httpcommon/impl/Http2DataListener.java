@@ -20,6 +20,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpcommon.api.Http2FullHeaders;
+import org.webpieces.httpcommon.api.Http2FullPushPromise;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.Http2Error;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
@@ -94,7 +96,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleHeaders(HeadersFrame frame, Stream stream) {
+    private void handleHeaders(Http2FullHeaders frame, Stream stream) {
         boolean isTrailer = false;
         switch (stream.getStatus()) {
             case IDLE:
@@ -178,7 +180,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handlePushPromise(PushPromiseFrame frame, Stream stream) {
+    private void handlePushPromise(Http2FullPushPromise frame, Stream stream) {
         if(this.http2EngineImpl.side == SERVER) {
             // Can't get pushpromise in the server
             throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
@@ -305,8 +307,8 @@ class Http2DataListener implements DataListener {
                 case DATA:
                     handleData((DataFrame) frame, stream);
                     break;
-                case HEADERS:
-                    handleHeaders((HeadersFrame) frame, stream);
+                case FULL_HEADERS:
+                    handleHeaders((Http2FullHeaders) frame, stream);
                     break;
                 case PRIORITY:
                     handlePriority((PriorityFrame) frame, stream);
@@ -314,8 +316,8 @@ class Http2DataListener implements DataListener {
                 case RST_STREAM:
                     handleRstStream((RstStreamFrame) frame, stream);
                     break;
-                case PUSH_PROMISE:
-                    handlePushPromise((PushPromiseFrame) frame, stream);
+                case FULL_PROMISE:
+                    handlePushPromise((Http2FullPushPromise) frame, stream);
                     break;
                 case WINDOW_UPDATE:
                     handleWindowUpdate((WindowUpdateFrame) frame, stream);

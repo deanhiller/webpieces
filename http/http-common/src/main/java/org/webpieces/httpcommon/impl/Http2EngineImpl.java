@@ -39,6 +39,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.Http2Engine;
+import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
@@ -644,7 +645,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     abstract void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream);
 
-    abstract void sideSpecificHandleHeaders(HeadersFrame frame, boolean isTrailer, Stream stream);
+    abstract void sideSpecificHandleHeaders(Http2FullHeaders frame, boolean isTrailer, Stream stream);
 
     abstract void sideSpecificHandleRstStream(RstStreamFrame frame, Stream stream);
 

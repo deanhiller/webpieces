@@ -1,5 +1,6 @@
 package com.webpieces.http2parser;
 
+import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.FULL_HEADERS;
 import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 
@@ -20,7 +22,6 @@ import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
 import com.webpieces.http2engine.impl.HeaderEncoding;
-import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.Http2Parser2;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.ParserResult;
@@ -312,8 +313,8 @@ public class TestHttp2Parser {
         result = parser.parse(result, combined, decoder, settings);
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
         Http2Frame headerFrame = result.getParsedFrames().get(4);
-        Assert.assertEquals(headerFrame.getFrameType(), HEADERS);
-        Assert.assertEquals(((HeadersFrame) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
+        Assert.assertEquals(headerFrame.getFrameType(), FULL_HEADERS);
+        Assert.assertEquals(((Http2FullHeaders) headerFrame).getHeaderList().size(), basicResponseHeaders.size() * 5);
     }
 
     private DataWrapper translate(List<Http2Frame> frames) {

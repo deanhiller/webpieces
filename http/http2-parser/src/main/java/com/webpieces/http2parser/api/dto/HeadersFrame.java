@@ -1,14 +1,11 @@
 package com.webpieces.http2parser.api.dto;
 
-import java.util.List;
-
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragment {
@@ -26,7 +23,6 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     /* payload */
     private PriorityDetails priorityDetails; /* optional */
     private DataWrapper headerFragment;
-    private List<Http2Header> headerList; // only created by the parser when deserializing a bunch of header frames
     private DataWrapper padding = DataWrapperGeneratorFactory.EMPTY;
     
     public boolean isEndStream() {
@@ -49,14 +45,6 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
 
     public boolean isPriority() {
         return priorityDetails != null;
-    }
-
-    public List<Http2Header> getHeaderList() {
-        return headerList;
-    }
-
-    public void setHeaderList(List<Http2Header> headerList) {
-        this.headerList = headerList;
     }
 
     @Override
