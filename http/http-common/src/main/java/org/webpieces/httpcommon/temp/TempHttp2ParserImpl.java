@@ -140,10 +140,6 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		return parser.unmarshalSettingsPayload(settingsPayload);
 	}
 
-	public Http2Frame unmarshal(DataWrapper data) {
-		return parser.unmarshal(data);
-	}
-
 	public int getFrameLength(Http2Frame frame) {
 		return parser.getFrameLength(frame);
 	}

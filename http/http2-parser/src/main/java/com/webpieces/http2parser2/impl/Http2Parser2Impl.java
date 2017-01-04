@@ -13,9 +13,11 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 
@@ -48,7 +50,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
 	}
 
 	@Override
-	public Http2Memento parse(Http2Memento memento, DataWrapper newData) {
+	public Http2Memento parse(Http2Memento memento, DataWrapper newData, long maxFrameSize) {
 		Http2MementoImpl state = (Http2MementoImpl) memento;
 		state.getParsedMessages().clear();
 		
@@ -58,7 +60,7 @@ public class Http2Parser2Impl implements Http2Parser2 {
 		while(true) {
 			switch(state.getParsingState()) {
 			case NEED_PARSE_FRAME_HEADER:
-				if(!parseFrameHeader(state))
+				if(!parseFrameHeader(state, maxFrameSize))
 					return state;
 				else
 					state.setParsingState(ParsingState.NEED_PARSE_BODY);
@@ -112,8 +114,9 @@ public class Http2Parser2Impl implements Http2Parser2 {
 
 	/**
 	 * Return true if header was parsed
+	 * @param maxFrameSize 
 	 */
-    private boolean parseFrameHeader(Http2MementoImpl state) {
+    private boolean parseFrameHeader(Http2MementoImpl state, long maxFrameSize) {
     	DataWrapper allData = state.getLeftOverData();
         int lengthOfData = allData.getReadableSize();
         if (lengthOfData < 9) {
@@ -129,6 +132,9 @@ public class Http2Parser2Impl implements Http2Parser2 {
         int streamId = getStreamId(frameHeader);
         byte frameTypeId = frameHeader.readByteAt(3);
         byte flagsByte = frameHeader.readByteAt(4);
+        
+        if(payloadLength > maxFrameSize) 
+        	throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, "Frame size="+payloadLength+" was greater than max="+maxFrameSize, true);
         
         state.setFrameHeaderData(new FrameHeaderData(payloadLength, streamId, frameTypeId, flagsByte));
 		state.setLeftOverData(left);

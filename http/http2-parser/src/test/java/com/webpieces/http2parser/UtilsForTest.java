@@ -32,7 +32,7 @@ public class UtilsForTest {
     public static Http2Frame frameFromHex(String frameHex) {
     	DataWrapper data = dataWrapperFromHex(frameHex);
     	Http2Memento state = parser.prepareToParse();
-    	state = parser.parse(state, data);
+    	state = parser.parse(state, data, Integer.MAX_VALUE);
     	return state.getParsedMessages().get(0);
     }
 

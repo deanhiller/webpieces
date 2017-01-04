@@ -168,11 +168,11 @@ public class TestHttp2Parser {
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 12);
         
         Http2Memento state = parser2.prepareToParse();
-        parser2.parse(state, split.get(0));
+        parser2.parse(state, split.get(0), Integer.MAX_VALUE);
         Assert.assertEquals(0, state.getParsedMessages().size());
         Assert.assertTrue(state.getLeftOverDataSize() > 0);
         
-        parser2.parse(state, split.get(1));
+        parser2.parse(state, split.get(1), Integer.MAX_VALUE);
         Assert.assertEquals(4, state.getParsedMessages().size());
         Assert.assertFalse(state.getLeftOverDataSize() > 0);
     }

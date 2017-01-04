@@ -33,7 +33,7 @@ public class Level0ClientEngine implements Http2ClientEngine {
 		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(id, flowControlLevel5);
 		streamInitializationLevel3 = new Level3StreamInitialization(clientSm);
 		headers = new Level2AggregateDecodeHeaders(streamInitializationLevel3, flowControlLevel5, localSettings);
-		parsingLayer = new Level1IncomingParsing(headers, lowLevelParser);
+		parsingLayer = new Level1IncomingParsing(headers, lowLevelParser, remoteSettings);
 	}
 
 	@Override

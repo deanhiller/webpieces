@@ -125,7 +125,6 @@ public class Http2ParserImpl implements Http2Parser {
     }
 
     // ignores what's left over at the end of the datawrapper
-    @Override
     public AbstractHttp2Frame unmarshal(DataWrapper data) {
         int length = getLength(data);
         byte frameTypeId = getFrameTypeId(data);

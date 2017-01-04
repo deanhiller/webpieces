@@ -13,15 +13,17 @@ public class Level1IncomingParsing {
 	private Level2AggregateDecodeHeaders headers;
 	private Http2Parser2 lowLevelParser;
 	private Http2Memento parsingState;
+	private HeaderSettings remoteSettings;
 
-	public Level1IncomingParsing(Level2AggregateDecodeHeaders headers, Http2Parser2 lowLevelParser) {
+	public Level1IncomingParsing(Level2AggregateDecodeHeaders headers, Http2Parser2 lowLevelParser, HeaderSettings remoteSettings) {
 		this.headers = headers;
 		this.lowLevelParser = lowLevelParser;
+		this.remoteSettings = remoteSettings;
 		parsingState = lowLevelParser.prepareToParse();
 	}
 
 	public void parse(DataWrapper newData) {
-		parsingState = lowLevelParser.parse(parsingState, newData);
+		parsingState = lowLevelParser.parse(parsingState, newData, remoteSettings.getMaxFrameSize());
 		List<Http2Frame> parsedMessages = parsingState.getParsedMessages();
 		
 		for(Http2Frame lowLevelFrame : parsedMessages) {

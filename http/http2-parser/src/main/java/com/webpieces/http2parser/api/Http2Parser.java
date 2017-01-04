@@ -21,8 +21,6 @@ public interface Http2Parser {
      */
 	SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload);
 
-    @Deprecated
-    Http2Frame unmarshal(DataWrapper data);
     // TODO: add a marshal to bytebuffer so we can use our bufferpool
     @Deprecated
     int getFrameLength(Http2Frame frame);
