@@ -7,11 +7,10 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.lib.HasHeaderList;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
-public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFragment, HasHeaderList {
+public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFragment {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.PUSH_PROMISE;
@@ -43,12 +42,10 @@ public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFra
         return headerFragment;
     }
 
-    @Override
     public List<Http2Header> getHeaderList() {
         return headerList;
     }
 
-    @Override
     public void setHeaderList(List<Http2Header> headerList) {
         this.headerList = headerList;
     }
