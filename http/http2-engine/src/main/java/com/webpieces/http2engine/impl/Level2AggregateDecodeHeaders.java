@@ -144,7 +144,7 @@ public class Level2AggregateDecodeHeaders {
 	public void incomingData(PartialStream f) {
 		if (f.getStreamId() <= 0) {
 			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, f.getStreamId(),
-					"frame streamId cannot be <= 0");
+					"frame streamId cannot be <= 0", true);
 		}
 
 		log.info("incoming payload="+f);

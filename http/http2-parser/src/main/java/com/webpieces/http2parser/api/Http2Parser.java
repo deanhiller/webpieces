@@ -1,19 +1,16 @@
 package com.webpieces.http2parser.api;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public interface Http2Parser {
 	
     ParserResult prepareToParse();
-    ParserResult parse(ParserResult oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings);
+    ParserResult parse(ParserResult oldData, DataWrapper newData, long maxFrameSize);
 
     DataWrapper marshal(Http2Frame frame);
 

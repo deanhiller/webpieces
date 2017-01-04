@@ -60,9 +60,15 @@ public class Http2Parser2Impl implements Http2Parser2 {
 			case NEED_PARSE_FRAME_HEADER:
 				if(!parseFrameHeader(state))
 					return state;
+				else
+					state.setParsingState(ParsingState.NEED_PARSE_BODY);
+				break;
 			case NEED_PARSE_BODY:
 				if(!parseBody(state))
 					return state;
+				else
+					state.setParsingState(ParsingState.NEED_PARSE_FRAME_HEADER);
+		    	break;
 			}
 		}
 		
@@ -100,7 +106,6 @@ public class Http2Parser2Impl implements Http2Parser2 {
     	state.setFrameHeaderData(null); //reset header data
     	state.setLeftOverData(split.get(1)); //set leftover data
     	state.addParsedFrame(frame);
-    	state.setParsingState(ParsingState.NEED_PARSE_FRAME_HEADER);
 
 		return true;
 	}
@@ -126,7 +131,6 @@ public class Http2Parser2Impl implements Http2Parser2 {
         byte flagsByte = frameHeader.readByteAt(4);
         
         state.setFrameHeaderData(new FrameHeaderData(payloadLength, streamId, frameTypeId, flagsByte));
-		state.setParsingState(ParsingState.NEED_PARSE_BODY);
 		state.setLeftOverData(left);
 
         return true;

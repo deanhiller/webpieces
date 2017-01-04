@@ -16,6 +16,8 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
+import org.webpieces.httpcommon.temp.TempHttp2Parser;
+import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
@@ -29,8 +31,6 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.ParserResult;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -43,7 +43,7 @@ import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 public class TestRequestResponse {
 
     private HttpParser httpParser;
-    private Http2Parser http2Parser;
+    private TempHttp2Parser http2Parser;
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private SettingsFrame settingsFrame = new SettingsFrame();
     private Decoder decoder;
@@ -55,7 +55,7 @@ public class TestRequestResponse {
         BufferCreationPool pool = new BufferCreationPool();
 
         httpParser = HttpParserFactory.createParser(pool);
-        http2Parser = Http2ParserFactory.createParser(pool);
+        http2Parser = TempHttp2ParserFactory.createParser(pool);
         decoder = new Decoder(4096, 4096);
         settings.add(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 16384L));
         settingsFrame.setSettings(settings);

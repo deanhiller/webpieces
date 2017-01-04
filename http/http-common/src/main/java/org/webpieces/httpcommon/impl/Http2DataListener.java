@@ -417,7 +417,7 @@ class Http2DataListener implements DataListener {
 		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
 		        }
 		    } else {
-		        throw new RstStreamError(e.getErrorCode(), e.getStreamId());
+		        throw new RstStreamError(e.getErrorCode(), e.getStreamId(), e);
 		    }
 		}
 	}

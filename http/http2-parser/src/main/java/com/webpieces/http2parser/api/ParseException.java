@@ -13,11 +13,18 @@ public class ParseException extends RuntimeException {
         super();
     }
 
-    public ParseException(Http2ErrorCode errorCode, int streamId, String msg) {
+    public ParseException(Http2ErrorCode errorCode, int streamId, String msg, boolean connectionLevel) {
         super(msg);
         this.errorCode = errorCode;
         this.streamId = streamId;
+        this.connectionLevel = connectionLevel;
     }
+    
+//    public ParseException(Http2ErrorCode errorCode, int streamId, String msg) {
+//        super(msg);
+//        this.errorCode = errorCode;
+//        this.streamId = streamId;
+//    }
     
     public ParseException(Http2ErrorCode errorCode, int streamId, boolean connectionLevel) {
         this.errorCode = errorCode;

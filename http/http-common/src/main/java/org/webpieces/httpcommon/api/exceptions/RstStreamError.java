@@ -17,6 +17,12 @@ public class RstStreamError extends Http2Error {
 
     public RstStreamError(Http2ErrorCode errorCode, int streamId) {
         this.errorCode = errorCode;
+        this.streamId = streamId;    	
+    }
+    
+    public RstStreamError(Http2ErrorCode errorCode, int streamId, Throwable e) {
+    	super(e);
+        this.errorCode = errorCode;
         this.streamId = streamId;
     }
 

@@ -5,6 +5,12 @@ import java.util.List;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public abstract class Http2Error extends RuntimeException {
-    public abstract List<Http2Frame> toFrames();
+	public Http2Error() {}
+	
+    public Http2Error(Throwable e) {
+    	super(e);
+	}
+
+	public abstract List<Http2Frame> toFrames();
 }
 

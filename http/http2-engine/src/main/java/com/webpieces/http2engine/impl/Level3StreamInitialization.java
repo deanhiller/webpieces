@@ -68,7 +68,7 @@ public class Level3StreamInitialization {
 		int newStreamId = fullPromise.getStreamId();
 		if(newStreamId % 2 == 1)
 			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 
-					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect");
+					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number", true);
 
 		Stream stream = streamState.get(newStreamId);
 		if (stream != null) {

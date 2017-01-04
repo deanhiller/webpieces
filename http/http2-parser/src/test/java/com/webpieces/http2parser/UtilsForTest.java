@@ -14,18 +14,8 @@ import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class UtilsForTest {
-    //private static Base64.Encoder encoder = Base64.getEncoder();
-    //private static Base64.Decoder decoder = Base64.getDecoder();
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     static Http2Parser2 parser = Http2ParserFactory.createParser2(new BufferCreationPool());
-
-//    private static String dataWrapperToBase64(DataWrapper data) {
-//        return encoder.encodeToString(data.createByteArray());
-//    }
-//
-//    private static DataWrapper base64ToDataWrapper(String base64) {
-//        return dataGen.wrapByteArray(decoder.decode(base64));
-//    }
 
     public static String toHexString(byte[] array) {
         return DatatypeConverter.printHexBinary(array);
