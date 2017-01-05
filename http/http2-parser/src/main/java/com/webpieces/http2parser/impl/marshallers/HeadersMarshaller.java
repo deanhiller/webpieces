@@ -7,7 +7,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -80,7 +80,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
             int streamDependency = firstInt & 0x7FFFFFFF;
             if(streamDependency == frame.getStreamId()) {
                 // Can't depend on self
-                throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+                throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
             }
             priorityDetails.setStreamDependency(streamDependency);
             priorityDetails.setWeight((short) (preludeBytes.get() & 0xFF));

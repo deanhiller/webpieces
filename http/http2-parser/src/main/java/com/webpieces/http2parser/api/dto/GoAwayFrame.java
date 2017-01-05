@@ -44,7 +44,7 @@ public class GoAwayFrame extends AbstractHttp2Frame {
     @Override
     public String toString() {
         return "GoAwayFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 ", lastStreamId=" + lastStreamId +
                 ", errorCode=" + errorCode +
                 ", debugData.len=" + debugData.getReadableSize() +

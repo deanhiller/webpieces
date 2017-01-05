@@ -13,7 +13,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
@@ -32,14 +32,14 @@ import com.webpieces.http2parser.impl.marshallers.RstStreamMarshaller;
 import com.webpieces.http2parser.impl.marshallers.SettingsMarshaller;
 import com.webpieces.http2parser.impl.marshallers.WindowUpdateMarshaller;
 
-public class Http2Parser2Impl implements Http2Parser {
+public class Http2ParserImpl implements Http2Parser {
 
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private final Map<Http2FrameType, FrameMarshaller> dtoToMarshaller = new HashMap<>();
 	private BufferPool bufferPool;
 	private SettingsMarshaller settingsMarshaller;
 
-	public Http2Parser2Impl(BufferPool bufferPool) {
+	public Http2ParserImpl(BufferPool bufferPool) {
         this.bufferPool = bufferPool;
         
         settingsMarshaller = new SettingsMarshaller(bufferPool, dataGen);
@@ -145,7 +145,7 @@ public class Http2Parser2Impl implements Http2Parser {
         byte flagsByte = frameHeader.readByteAt(4);
         
         if(payloadLength > maxFrameSize) 
-        	throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, "Frame size="+payloadLength+" was greater than max="+maxFrameSize, true);
+        	throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, "Frame size="+payloadLength+" was greater than max="+maxFrameSize, true);
         
         state.setFrameHeaderData(new FrameHeaderData(payloadLength, streamId, frameTypeId, flagsByte));
 		state.setLeftOverData(left);

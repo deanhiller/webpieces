@@ -27,7 +27,7 @@ public class PriorityFrame extends AbstractHttp2Frame {
     @Override
     public String toString() {
         return "PriorityFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 "priorityDetails=" + priorityDetails +
                 "} ";
     }

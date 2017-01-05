@@ -12,7 +12,7 @@ import org.webpieces.httpcommon.api.Http2FullPushPromise;
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -61,7 +61,7 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 				combineAndSendHeadersToClient(state, decoder);
 			return;
 		} else if(headerFragList.size() > 0) {
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, frame.getStreamId(), 
+			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, frame.getStreamId(), 
 					"Parser in the middle of accepting headers(spec "
 					+ "doesn't allow frames between header fragments).  frame="+frame+" list="+headerFragList, true);
 		}
@@ -82,14 +82,14 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		
 		if(list.size() == 1) {
 			if(!(first instanceof HeadersFrame) && !(first instanceof PushPromiseFrame))
-				throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
+				throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
 						"First has header frame must be HeadersFrame or PushPromiseFrame first frame="+first, true);				
 		} else if(streamId != lowLevelFrame.getStreamId()) {
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
+			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
 					"Headers/continuations from two different streams per spec cannot be"
 					+ " interleaved.  frames="+list, true);
 		} else if(!(lowLevelFrame instanceof ContinuationFrame)) {
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
+			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
 					"Must be continuation frame and wasn't.  frames="+list, true);			
 		}
 	}

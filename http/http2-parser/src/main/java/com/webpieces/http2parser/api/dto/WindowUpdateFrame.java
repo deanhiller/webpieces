@@ -26,7 +26,7 @@ public class WindowUpdateFrame extends AbstractHttp2Frame {
     @Override
     public String toString() {
         return "WindowUpdateFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 ", windowSizeIncrement=" + windowSizeIncrement +
                 "} ";
     }

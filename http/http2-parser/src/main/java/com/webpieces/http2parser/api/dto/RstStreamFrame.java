@@ -26,7 +26,7 @@ public class RstStreamFrame extends AbstractHttp2Frame {
     @Override
     public String toString() {
         return "RstStreamFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 "errorCode=" + errorCode +
                 "} ";
     }

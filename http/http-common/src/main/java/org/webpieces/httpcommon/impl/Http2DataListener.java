@@ -31,7 +31,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -416,7 +416,7 @@ class Http2DataListener implements DataListener {
 		        handleFrame(frame);
 		    }
 		}
-		catch (ParseException e) {
+		catch (Http2ParseException e) {
 		    if(e.isConnectionLevel()) {
 		        if(e.hasStream()) {
 		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());

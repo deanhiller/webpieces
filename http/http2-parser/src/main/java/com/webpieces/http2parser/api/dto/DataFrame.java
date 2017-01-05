@@ -46,7 +46,7 @@ public class DataFrame extends AbstractHttp2Frame {
 	@Override
     public String toString() {
         return "DataFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 ", endStream=" + endStream +
                 ", data.len=" + data.getReadableSize() +
                 ", padding=" + padding.getReadableSize() +

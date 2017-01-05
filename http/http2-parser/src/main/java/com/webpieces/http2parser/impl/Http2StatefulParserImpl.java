@@ -9,12 +9,12 @@ import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2StatefulParser;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
-public class HttpStatefulParserImpl implements Http2StatefulParser {
+public class Http2StatefulParserImpl implements Http2StatefulParser {
 
 	private Http2Parser statelessParser;
 	private Http2Memento state;
 
-	public HttpStatefulParserImpl(Http2Parser statelessParser) {
+	public Http2StatefulParserImpl(Http2Parser statelessParser) {
 		this.statelessParser = statelessParser;
 		state = statelessParser.prepareToParse();
 	}

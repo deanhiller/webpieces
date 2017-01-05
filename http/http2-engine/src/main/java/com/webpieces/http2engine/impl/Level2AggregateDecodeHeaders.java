@@ -15,7 +15,7 @@ import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.Http2Push;
 import com.webpieces.http2engine.api.dto.Http2UnknownFrame;
 import com.webpieces.http2engine.api.dto.PartialStream;
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
@@ -143,7 +143,7 @@ public class Level2AggregateDecodeHeaders {
 	
 	public void incomingData(PartialStream f) {
 		if (f.getStreamId() <= 0) {
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, f.getStreamId(),
+			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, f.getStreamId(),
 					"frame streamId cannot be <= 0", true);
 		}
 

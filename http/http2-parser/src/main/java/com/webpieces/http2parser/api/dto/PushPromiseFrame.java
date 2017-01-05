@@ -63,10 +63,11 @@ public class PushPromiseFrame extends AbstractHttp2Frame implements HasHeaderFra
     @Override
     public String toString() {
         return "PushPromiseFrame{" +
-                "endHeaders=" + endHeaders +
+        		super.toString() +
+                ", endHeaders=" + endHeaders +
                 ", promisedStreamId=" + promisedStreamId +
                 ", serializeHeaders=" + headerFragment.getReadableSize() +
                 ", padding=" + padding +
-                "} " + super.toString();
+                "} ";
     }
 }

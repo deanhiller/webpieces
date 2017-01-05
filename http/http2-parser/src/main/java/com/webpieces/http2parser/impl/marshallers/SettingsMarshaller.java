@@ -7,7 +7,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -68,12 +68,12 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 		if(frame.isAck()) {
 	        if(payloadLength != 0) {
-	            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
+	            throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
 	        }
 		} else if(payloadLength % 6 != 0) {
-            throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
+            throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
         } else if(streamId != 0)
-            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
+            throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
         
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
@@ -104,7 +104,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		switch(key) {
 			case SETTINGS_ENABLE_PUSH:
 				if(value != 0 && value != 1)
-					throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+					throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 				break;
 			case SETTINGS_INITIAL_WINDOW_SIZE:
 				validateWindowSize(value);
@@ -127,7 +127,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		int max = 2147483647;
 		
 		if(value < min || value > max)
-			throw new ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR);
+			throw new Http2ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR);
 	}
 	
 	private void validateMaxFrameSize(long value) {
@@ -136,7 +136,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		int max = 1677215;
 		
 		if(value < min || value > max)
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 	}
 
 	public SettingsFrame unmarshalPayload(ByteBuffer settingsPayload) {

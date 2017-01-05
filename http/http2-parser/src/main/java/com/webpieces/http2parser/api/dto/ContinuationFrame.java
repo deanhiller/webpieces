@@ -42,7 +42,7 @@ public class ContinuationFrame extends AbstractHttp2Frame implements HasHeaderFr
     @Override
     public String toString() {
         return "ContinuationFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 "endHeaders=" + endHeaders +
                 ", serializeHeaders=" + headerFragment +
                 "} ";

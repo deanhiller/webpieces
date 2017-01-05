@@ -6,7 +6,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -57,7 +57,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() > 5)
-			throw new ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
+			throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
 		
         PriorityFrame frame = new PriorityFrame();
@@ -71,7 +71,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
         int streamDependency = firstInt & 0x7FFFFFFF;
         if(streamDependency == frame.getStreamId()) {
             // Can't depend on self
-            throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+            throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
         }
         priorityDetails.setStreamDependency(streamDependency);
         priorityDetails.setWeight((short) (payloadByteBuffer.get() & 0xFF));

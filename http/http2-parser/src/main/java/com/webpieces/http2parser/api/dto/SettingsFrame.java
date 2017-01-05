@@ -52,7 +52,7 @@ public class SettingsFrame extends AbstractHttp2Frame {
 	@Override
     public String toString() {
         return "SettingsFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 ", ack=" + ack +
                 ", settings=" + settings +"} ";
     }

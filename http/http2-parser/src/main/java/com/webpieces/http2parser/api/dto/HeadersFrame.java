@@ -76,7 +76,7 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
 	@Override
     public String toString() {
         return "HeadersFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 ", endStream=" + endStream +
                 ", endHeaders=" + endHeaders +
                 ", priorityDetails=" + priorityDetails +

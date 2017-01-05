@@ -10,7 +10,7 @@ import com.webpieces.http2engine.api.RequestWriter;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.Http2Push;
 import com.webpieces.http2engine.api.dto.PartialStream;
-import com.webpieces.http2parser.api.ParseException;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class Level3StreamInitialization {
@@ -67,7 +67,7 @@ public class Level3StreamInitialization {
 	public void sendPushPromiseToClient(Http2Push fullPromise) {		
 		int newStreamId = fullPromise.getStreamId();
 		if(newStreamId % 2 == 1)
-			throw new ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 
+			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 
 					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number", true);
 
 		Stream stream = streamState.get(newStreamId);

@@ -33,7 +33,7 @@ public class PingFrame extends AbstractHttp2Frame {
     @Override
     public String toString() {
         return "PingFrame{" +
-        		"streamId=" + super.toString() +
+        		super.toString() +
                 "isPingResponse=" + isPingResponse +
                 ", opaqueData=" + opaqueData +
                 "} ";
