@@ -100,6 +100,9 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* rename ParserResult to Http2Memento and move Http2SettingsMap out of parser as well.  rename Http2Parser2 to Http2Parser
+* create stateful Http2Parser possibly
+* delete FrameMarshaller
 * run ./gradlew test, run example prod server, run ./gradlew test, to see if that works
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
 * more fully integrate the http2 stack
@@ -110,6 +113,7 @@ This project is essentially pieces that can be used to build any http related so
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
 * Tab state (rather than just global session, but per tab state to put data)
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
+* A/B split testing and experiments - hooks to wire into existing system and hooks to make it easier to create A/B pages
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
 * codecov.io - still reports incorrect coverage results (different from jacoco)

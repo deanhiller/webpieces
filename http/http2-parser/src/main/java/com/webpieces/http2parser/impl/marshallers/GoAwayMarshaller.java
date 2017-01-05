@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -11,11 +11,12 @@ import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 
 public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
-    GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-        super(bufferPool, dataGen);
+    public GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+        super(bufferPool);
     }
 
 	@Override

@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
@@ -7,10 +7,11 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public class ContinuationMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
-    ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-        super(bufferPool, dataGen);
+    public ContinuationMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+        super(bufferPool);
     }
 
 	@Override

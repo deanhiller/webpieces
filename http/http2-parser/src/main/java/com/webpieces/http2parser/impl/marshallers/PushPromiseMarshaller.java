@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -11,11 +11,12 @@ import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.DataSplit;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 import com.webpieces.http2parser.impl.PaddingUtil;
 
 public class PushPromiseMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
-    PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-        super(bufferPool, dataGen);
+    public PushPromiseMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+        super(bufferPool);
     }
 
 	@Override

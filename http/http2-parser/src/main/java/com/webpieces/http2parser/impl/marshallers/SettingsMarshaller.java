@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -14,11 +14,14 @@ import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
+import com.webpieces.http2parser.impl.FrameHeaderData;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
+import com.webpieces.http2parser.impl.UnsignedData;
 
 public class SettingsMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
-	SettingsMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-		super(bufferPool, dataGen);
+	public SettingsMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+		super(bufferPool);
 	}
 
 	@Override

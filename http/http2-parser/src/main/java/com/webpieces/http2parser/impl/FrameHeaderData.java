@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl;
 
 public class FrameHeaderData {
 

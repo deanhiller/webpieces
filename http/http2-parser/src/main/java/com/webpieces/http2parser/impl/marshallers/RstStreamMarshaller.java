@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 
@@ -11,10 +11,12 @@ import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.impl.FrameHeaderData;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public class RstStreamMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
-	RstStreamMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-		super(bufferPool, dataGen);
+	public RstStreamMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+		super(bufferPool);
 	}
 
 	@Override

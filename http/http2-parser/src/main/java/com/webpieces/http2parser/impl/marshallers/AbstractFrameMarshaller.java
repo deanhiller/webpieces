@@ -1,22 +1,23 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.impl.FrameHeaderData;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public class AbstractFrameMarshaller {
+	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
     protected BufferPool bufferPool;
-	protected DataWrapperGenerator dataGen;
 
-	public AbstractFrameMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+	public AbstractFrameMarshaller(BufferPool bufferPool) {
 		this.bufferPool = bufferPool;
-		this.dataGen = dataGen;
-    	
 	}
 
 	protected DataWrapper marshalFrame(Http2Frame frame, byte value, DataWrapper payload) {
@@ -24,7 +25,7 @@ public class AbstractFrameMarshaller {
         // Clear the MSB because streamId can only be 31 bits
         int streamId = originalStreamId & 0x7FFFFFFF;
         if(streamId != originalStreamId) 
-        	throw new RuntimeException("your stream id is too large per spec");
+        	throw new RuntimeException("your stream id is too large per spec. frame="+frame);
 		
         ByteBuffer header = ByteBuffer.allocate(9);
         

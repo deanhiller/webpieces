@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 
@@ -12,29 +12,44 @@ import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
+import com.webpieces.http2parser.impl.FrameHeaderData;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 
 public class PriorityMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
-    PriorityMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-    	super(bufferPool, dataGen);
+    public PriorityMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+    	super(bufferPool);
     }
 
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
 		PriorityFrame castFrame = (PriorityFrame) frame;
+		
 		PriorityDetails priorityDetails = castFrame.getPriorityDetails();
 		
-        ByteBuffer payload = bufferPool.nextBuffer(5);
+        DataWrapper payload = marshalPriorityDetails(bufferPool, priorityDetails, frame);
+        
+		return super.marshalFrame(frame, (byte)0, payload);
+	}
+
+	public static DataWrapper marshalPriorityDetails(BufferPool bufferPool, PriorityDetails priorityDetails, Http2Frame frame) {
+		
+		int streamDependency = priorityDetails.getStreamDependency();
+		int newVal = streamDependency & 0x7FFFFFFF;
+		if(newVal != streamDependency)
+			throw new IllegalArgumentException("frame.priorityDetails.streamDependency "
+					+ "is too large an id value per http/2 spec.  frame="+frame);
+		
+		ByteBuffer payload = bufferPool.nextBuffer(5);
         payload.putInt(priorityDetails.getStreamDependency());
         if (priorityDetails.isStreamDependencyIsExclusive()) 
         	payload.put(0, (byte) (payload.get(0) | 0x80));
         
         payload.put((byte) (priorityDetails.getWeight() & 0xFF));
         payload.flip();
-
         DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
-        
-		return super.marshalFrame(frame, (byte)0, dataPayload);
+
+		return dataPayload;
 	}
 
 	@Override

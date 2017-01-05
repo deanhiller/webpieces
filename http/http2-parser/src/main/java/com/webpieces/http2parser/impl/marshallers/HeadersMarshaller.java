@@ -1,4 +1,4 @@
-package com.webpieces.http2parser2.impl;
+package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -13,13 +13,14 @@ import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 import com.webpieces.http2parser.impl.DataSplit;
+import com.webpieces.http2parser.impl.Http2MementoImpl;
 import com.webpieces.http2parser.impl.PaddingUtil;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 
 public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
-    HeadersMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
-        super(bufferPool, dataGen);
+    public HeadersMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+        super(bufferPool);
     }
 
 	@Override
@@ -36,14 +37,8 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         DataWrapper preludeDW;
         PriorityDetails priorityDetails = castFrame.getPriorityDetails();
         if(priorityDetails != null) {
-            ByteBuffer prelude = bufferPool.nextBuffer(5);
-            prelude.putInt(priorityDetails.getStreamDependency());
-            if (priorityDetails.isStreamDependencyIsExclusive()) prelude.put(0, (byte) (prelude.get(0) | 0x80));
-            prelude.put((byte) (priorityDetails.getWeight() & 0xFF));
-            prelude.flip();
-            preludeDW = dataGen.wrapByteBuffer(prelude);
-        }
-        else {
+        	preludeDW = PriorityMarshaller.marshalPriorityDetails(bufferPool, priorityDetails, frame);
+        } else {
             preludeDW = dataGen.emptyWrapper();
         }
 
