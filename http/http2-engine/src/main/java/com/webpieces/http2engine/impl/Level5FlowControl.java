@@ -131,8 +131,9 @@ public class Level5FlowControl {
 				break;
 			case SETTINGS_INITIAL_WINDOW_SIZE:
 				modifyWindowSize(value);
+				break;
 			case SETTINGS_MAX_FRAME_SIZE:
-			applyMaxFrameSize(value);
+				applyMaxFrameSize(value);
 				break;
 			case SETTINGS_MAX_HEADER_LIST_SIZE:
 				remoteSettings.setMaxHeaderListSize(value);
