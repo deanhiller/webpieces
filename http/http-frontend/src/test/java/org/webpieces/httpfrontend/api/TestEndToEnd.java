@@ -20,6 +20,7 @@ import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.Requests;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
@@ -34,7 +35,6 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class TestEndToEnd {

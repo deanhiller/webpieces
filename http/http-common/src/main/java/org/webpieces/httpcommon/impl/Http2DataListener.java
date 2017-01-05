@@ -32,7 +32,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -53,7 +53,7 @@ class Http2DataListener implements DataListener {
 	 * 
 	 */
 	private final Http2EngineImpl http2EngineImpl;
-	private ParserResult parseState;
+	private Http2Memento parseState;
     private AtomicBoolean gotPreface = new AtomicBoolean(false);
 	private DataWrapper firstIncomingData = DataWrapperGeneratorFactory.EMPTY;
     

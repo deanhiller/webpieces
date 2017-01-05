@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.ServerListener;
@@ -15,8 +16,6 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-
-import com.webpieces.http2parser.api.Http2SettingsMap;
 
 public class HttpClientImpl implements HttpClient {
 

@@ -12,7 +12,7 @@ import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.RequestWriter;
 import com.webpieces.http2engine.api.EngineListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 
@@ -25,7 +25,7 @@ public class Level0ClientEngine implements Http2ClientEngine {
 	private Level1IncomingParsing parsingLayer;
 	private Level3StreamInitialization streamInitializationLevel3;
 
-	public Level0ClientEngine(String id, Http2Parser2 lowLevelParser, EngineListener socketListener) {
+	public Level0ClientEngine(String id, Http2Parser lowLevelParser, EngineListener socketListener) {
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = new HeaderSettings();
 

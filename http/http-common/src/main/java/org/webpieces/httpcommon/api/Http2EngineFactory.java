@@ -7,8 +7,6 @@ import org.webpieces.httpcommon.impl.Http2ServerEngineImpl;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.nio.api.channels.Channel;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
-
 public class Http2EngineFactory {
     static public Http2ServerEngine createHttp2ServerEngine(
         TempHttp2Parser http2Parser,

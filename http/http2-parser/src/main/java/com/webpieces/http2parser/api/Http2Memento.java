@@ -6,7 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
-public interface ParserResult {
+public interface Http2Memento {
 
 	/**
 	 * In the case where you pass in bytes 2 or more messages, we
@@ -15,6 +15,6 @@ public interface ParserResult {
 	 */
 	List<Http2Frame> getParsedFrames();
 	
-	DataWrapper getMoreData();
+	DataWrapper getLeftOverData();
 
 }

@@ -15,7 +15,7 @@ import com.twitter.hpack.Encoder;
 import com.webpieces.http2engine.api.EngineListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -32,7 +32,7 @@ public class Level5FlowControl {
 	private static final Logger log = LoggerFactory.getLogger(Level5FlowControl.class);
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	private Http2Parser2 lowLevelParser;
+	private Http2Parser lowLevelParser;
 	private EngineListener resultListener;
 	private HeaderEncoding encoding;
 	private HeaderSettings remoteSettings;
@@ -42,7 +42,7 @@ public class Level5FlowControl {
 	private CompletableFuture<Void> pingFuture;
 
 	public Level5FlowControl(
-			Http2Parser2 lowLevelParser, 
+			Http2Parser lowLevelParser, 
 			EngineListener socketListener,
 			HeaderSettings remoteSettings
 	) {

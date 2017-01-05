@@ -33,7 +33,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
@@ -108,9 +108,9 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        ParserResult parse2State = http2Parser.prepareToParse();
+        Http2Memento parse2State = http2Parser.prepareToParse();
         // Check that we got a settings frame, a headers frame, and a data frame
-        ParserResult result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
+        Http2Memento result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
@@ -143,9 +143,9 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        ParserResult parse2State = http2Parser.prepareToParse();
+        Http2Memento parse2State = http2Parser.prepareToParse();
         // Check that we got a settings frame, a headers frame, and a data frame
-        ParserResult result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
+        Http2Memento result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
@@ -182,10 +182,10 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        ParserResult parse2State = http2Parser.prepareToParse();
+        Http2Memento parse2State = http2Parser.prepareToParse();
         // Check that we got a settings frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
-        ParserResult result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
+        Http2Memento result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
         List<Http2Frame> frames = result.getParsedFrames();
 
         Assert.assertEquals(6, frames.size());

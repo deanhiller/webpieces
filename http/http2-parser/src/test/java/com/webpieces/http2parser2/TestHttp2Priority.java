@@ -5,13 +5,13 @@ import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 
 import com.webpieces.http2parser.UtilsForTest;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class TestHttp2Priority {
-    private static Http2Parser2 parser = Http2ParserFactory.createParser2(new BufferCreationPool());
+    private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
     static private String priorityFrame() {
            String priorityFrame = 

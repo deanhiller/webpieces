@@ -5,13 +5,13 @@ import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 
 import com.webpieces.http2parser.UtilsForTest;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.PingFrame;
 
 public class TestHttp2Ping {
 	
-    private static Http2Parser2 parser = Http2ParserFactory.createParser2(new BufferCreationPool());
+    private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
     private static String getPingFrame() {
             String ping = 

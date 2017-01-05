@@ -14,7 +14,7 @@ import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
@@ -35,7 +35,7 @@ public class ParseFramesFromFile {
         while (inChannel.read(buf) != -1) {
             buf.flip();
             buf.getInt();
-        	ParserResult result = parser.prepareToParse();
+        	Http2Memento result = parser.prepareToParse();
             result = parser.parse(result, dataGen.wrapByteBuffer(buf.slice()), decoder, settings);
             List<Http2Frame> frames = result.getParsedFrames();
             System.out.print(frames.toString());

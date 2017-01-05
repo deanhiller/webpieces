@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
-public class Http2MementoImpl implements ParserResult {
+public class Http2MementoImpl implements Http2Memento {
 
 	private ParsingState parsingState = ParsingState.NEED_PARSE_FRAME_HEADER;
 	private DataWrapper leftOverData;
@@ -27,10 +27,6 @@ public class Http2MementoImpl implements ParserResult {
 	@Override
 	public List<Http2Frame> getParsedFrames() {
 		return parsedFrames;
-	}
-
-	public DataWrapper getLeftOverData() {
-		return leftOverData;
 	}
 
 	public void setLeftOverData(DataWrapper allData) {
@@ -58,7 +54,7 @@ public class Http2MementoImpl implements ParserResult {
 	}
 
 	@Override
-	public DataWrapper getMoreData() {
+	public DataWrapper getLeftOverData() {
 		return leftOverData;
 	}
 	

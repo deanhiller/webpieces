@@ -22,7 +22,7 @@ import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.dto.PartialStream;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 
 public class IntegGoogleHttps {
@@ -72,7 +72,7 @@ public class IntegGoogleHttps {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
-		Http2Parser2 http2Parser = Http2ParserFactory.createParser2(pool2);
+		Http2Parser http2Parser = Http2ParserFactory.createParser(pool2);
 		Http2EngineFactory http2HighLevelFactory = new Http2EngineFactory();
 		
 		String host = addr.getHostName();

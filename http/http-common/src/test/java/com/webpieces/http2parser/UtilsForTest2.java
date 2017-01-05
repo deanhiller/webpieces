@@ -8,8 +8,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
@@ -17,7 +17,7 @@ public class UtilsForTest2 {
     //private static Base64.Encoder encoder = Base64.getEncoder();
     //private static Base64.Decoder decoder = Base64.getDecoder();
     private static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-    static Http2Parser2 parser = Http2ParserFactory.createParser2(new BufferCreationPool());
+    static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
 
 //    private static String dataWrapperToBase64(DataWrapper data) {
 //        return encoder.encodeToString(data.createByteArray());
@@ -41,7 +41,7 @@ public class UtilsForTest2 {
 
     public static Http2Frame frameFromHex(String frameHex) {
     	DataWrapper data = dataWrapperFromHex(frameHex);
-    	ParserResult state = parser.prepareToParse();
+    	Http2Memento state = parser.prepareToParse();
     	state = parser.parse(state, data, Integer.MAX_VALUE);
     	return state.getParsedFrames().get(0);
     }

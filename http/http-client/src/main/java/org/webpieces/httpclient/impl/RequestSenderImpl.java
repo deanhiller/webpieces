@@ -18,6 +18,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpcommon.api.Http2ClientEngine;
 import org.webpieces.httpcommon.api.Http2EngineFactory;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.Protocol;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestSender;
@@ -42,7 +43,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 

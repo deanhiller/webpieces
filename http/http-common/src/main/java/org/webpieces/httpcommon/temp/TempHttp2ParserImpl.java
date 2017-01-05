@@ -11,9 +11,9 @@ import org.webpieces.httpcommon.api.Http2FullPushPromise;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2engine.impl.HeaderDecoding;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.ParseException;
-import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
@@ -29,19 +29,19 @@ import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 public class TempHttp2ParserImpl implements TempHttp2Parser {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private Http2Parser2 parser;
+	private Http2Parser parser;
 
-	public ParserResult prepareToParse() {
-		ParserResult result = parser.prepareToParse();
+	public Http2Memento prepareToParse() {
+		Http2Memento result = parser.prepareToParse();
 		return new ParserResult2Impl(result);
 	}
 
-	public ParserResult parse(ParserResult oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings) {
+	public Http2Memento parse(Http2Memento oldData, DataWrapper newData, Decoder decoder, List<Http2Setting> settings) {
 		ParserResult2Impl state = (ParserResult2Impl) oldData;
 		state.getParsedFrames().clear(); //reset any parsed frames
 		
 		long maxFrameSize = fetchMaxFrameSize(settings);
-		ParserResult result = parser.parse(state.getResult(), newData, maxFrameSize);
+		Http2Memento result = parser.parse(state.getResult(), newData, maxFrameSize);
 		
 		List<Http2Frame> parsedFrames = result.getParsedFrames();
 		for(Http2Frame frame: parsedFrames) {
@@ -141,7 +141,7 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		return parser.unmarshalSettingsPayload(settingsPayload);
 	}
 
-	public TempHttp2ParserImpl(Http2Parser2 parser) {
+	public TempHttp2ParserImpl(Http2Parser parser) {
 		this.parser = parser;
 	}
 

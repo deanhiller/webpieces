@@ -9,6 +9,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
@@ -20,8 +21,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-
-import com.webpieces.http2parser.api.Http2SettingsMap;
 
 
 public class HttpClientSocketImpl implements HttpClientSocket, Closeable {

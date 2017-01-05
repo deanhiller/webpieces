@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class FrontendConfig {

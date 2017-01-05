@@ -8,17 +8,17 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.http2engine.api.Http2EngineFactory;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Parser;
 
 public class Http2ClientImpl implements Http2Client {
 
 	private ChannelManager mgr;
-	private Http2Parser2 http2Parser;
+	private Http2Parser http2Parser;
 	private Http2EngineFactory factory;
 
 	public Http2ClientImpl(
 			ChannelManager mgr,
-			Http2Parser2 http2Parser,
+			Http2Parser http2Parser,
 			Http2EngineFactory factory
 	) {
 		this.mgr = mgr;

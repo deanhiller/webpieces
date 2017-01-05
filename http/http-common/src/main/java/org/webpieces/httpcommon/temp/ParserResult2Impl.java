@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.http2parser.api.ParserResult;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
-public class ParserResult2Impl implements ParserResult {
+public class ParserResult2Impl implements Http2Memento {
 
     /**
      * Only the proxy layer is using this!!!  ie. this is dead code eventually once I can kill it as it
@@ -19,14 +19,14 @@ public class ParserResult2Impl implements ParserResult {
      */
     @Deprecated
     private List<HasHeaderFragment> hasHeaderFragmentList = new LinkedList<>();
-	private ParserResult result;
+	private Http2Memento result;
 	private List<Http2Frame> parsedFrames = new ArrayList<>();
 
-	public ParserResult2Impl(ParserResult result) {
+	public ParserResult2Impl(Http2Memento result) {
 		this.result = result;
 	}
 
-	public ParserResult getResult() {
+	public Http2Memento getResult() {
 		return result;
 	}
 
@@ -44,8 +44,8 @@ public class ParserResult2Impl implements ParserResult {
 	}
 
 	@Override
-	public DataWrapper getMoreData() {
-		return result.getMoreData();
+	public DataWrapper getLeftOverData() {
+		return result.getLeftOverData();
 	}
 
 }

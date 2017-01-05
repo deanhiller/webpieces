@@ -12,6 +12,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.Http2ClientEngine;
 import org.webpieces.httpcommon.api.Http2FullHeaders;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.exceptions.ClientError;
@@ -23,7 +24,6 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;

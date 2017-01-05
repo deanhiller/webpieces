@@ -11,8 +11,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.ParserResult;
-import com.webpieces.http2parser.api.Http2Parser2;
+import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.ParseException;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
@@ -32,7 +32,7 @@ import com.webpieces.http2parser.impl.marshallers.RstStreamMarshaller;
 import com.webpieces.http2parser.impl.marshallers.SettingsMarshaller;
 import com.webpieces.http2parser.impl.marshallers.WindowUpdateMarshaller;
 
-public class Http2Parser2Impl implements Http2Parser2 {
+public class Http2Parser2Impl implements Http2Parser {
 
     private final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private final Map<Http2FrameType, FrameMarshaller> dtoToMarshaller = new HashMap<>();
@@ -56,12 +56,12 @@ public class Http2Parser2Impl implements Http2Parser2 {
 	}
 
 	@Override
-	public ParserResult prepareToParse() {
+	public Http2Memento prepareToParse() {
 		return new Http2MementoImpl(dataGen.emptyWrapper());
 	}
 
 	@Override
-	public ParserResult parse(ParserResult memento, DataWrapper newData, long maxFrameSize) {
+	public Http2Memento parse(Http2Memento memento, DataWrapper newData, long maxFrameSize) {
 		Http2MementoImpl state = (Http2MementoImpl) memento;
 		state.getParsedFrames().clear();
 		

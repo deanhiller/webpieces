@@ -12,6 +12,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
 import org.webpieces.httpclient.api.HttpClientSocket;
+import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.HttpSocket;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
@@ -34,7 +35,6 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
-import com.webpieces.http2parser.api.Http2SettingsMap;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class IntegGoogleHttps {

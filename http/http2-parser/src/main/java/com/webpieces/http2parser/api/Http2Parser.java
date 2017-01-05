@@ -7,12 +7,12 @@ import org.webpieces.data.api.DataWrapper;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
-public interface Http2Parser2 {
+public interface Http2Parser {
 	
 	//taking a stab at my guess of what we could do instead
-	ParserResult prepareToParse(); 
+	Http2Memento prepareToParse(); 
 	
-	ParserResult parse(ParserResult memento, DataWrapper newData, long maxFrameSize);
+	Http2Memento parse(Http2Memento memento, DataWrapper newData, long maxFrameSize);
 
 	DataWrapper marshal(Http2Frame frame);
 	
