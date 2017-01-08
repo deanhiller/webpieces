@@ -45,6 +45,7 @@ import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
+import org.webpieces.httpcommon.temp.HeaderEncoding2;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -67,7 +68,6 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
@@ -135,7 +135,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     int goneAwayLastStreamId;
     Http2ErrorCode goneAwayErrorCode;
     DataWrapper additionalDebugData;
-	private HeaderEncoding headerEncoder;
+	private HeaderEncoding2 headerEncoder;
 
 
     public Http2EngineImpl(
@@ -177,7 +177,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
         this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
-        this.headerEncoder = new HeaderEncoding(encoder, initialMaxFrameSize);
+        this.headerEncoder = new HeaderEncoding2(encoder, initialMaxFrameSize);
 
         this.dataListener = new Http2DataListener(this);
 

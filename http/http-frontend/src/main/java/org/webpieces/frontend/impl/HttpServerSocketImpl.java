@@ -1,10 +1,8 @@
 package org.webpieces.frontend.impl;
 
-import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -20,6 +18,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 
 class HttpServerSocketImpl implements HttpServerSocket {
@@ -46,7 +45,7 @@ class HttpServerSocketImpl implements HttpServerSocket {
     }
 
     @Override
-    public void upgradeHttp2(Optional<ByteBuffer> maybeSettingsPayload) {
+    public void upgradeHttp2(Optional<String> maybeSettingsPayload) {
         http2ServerEngine = Http2EngineFactory.createHttp2ServerEngine(http2Parser, channel, channel.getRemoteAddress(), frontendConfig.getHttp2Settings());
         http2ServerEngine.setRequestListener(timedRequestListener);
         dataListener = http2ServerEngine.getDataListener();
@@ -55,11 +54,13 @@ class HttpServerSocketImpl implements HttpServerSocket {
         maybeSettingsPayload.ifPresent(settingsPayload ->
         {
             try {
-                SettingsFrame settingsFrame = http2Parser.unmarshalSettingsPayload(settingsPayload);
+            	SettingsFrame settingsFrame = new SettingsFrame();
+                List<Http2Setting> headers = http2Parser.unmarshalSettingsPayload(settingsPayload);
+                settingsFrame.setSettings(headers);
 
                 http2ServerEngine.setRemoteSettings(settingsFrame, false);
             } catch (Exception e) {
-                log.error("Unable to parse initial settings payload: 0x" + DatatypeConverter.printHexBinary(settingsPayload.array()), e);
+                log.error("Unable to parse initial settings payload: 0x" + settingsPayload, e);
             }
         });
     }

@@ -15,16 +15,16 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.Http2FullHeaders;
+import org.webpieces.httpcommon.temp.HeaderDecoding2;
+import org.webpieces.httpcommon.temp.HeaderEncoding2;
 import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
+import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.hpack.impl.HeaderDecoding;
-import com.webpieces.hpack.impl.HeaderEncoding;
-import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
@@ -78,7 +78,7 @@ public class TestHttp2Parser {
 
     private Decoder decoder = new Decoder(4096, 4096);
     private Encoder encoder = new Encoder(4096);
-    private HeaderEncoding encoding = new HeaderEncoding(encoder, Integer.MAX_VALUE);
+    private HeaderEncoding2 encoding = new HeaderEncoding2(encoder, Integer.MAX_VALUE);
 
     private static List<Http2Setting> settings = new ArrayList<>();
 
@@ -346,7 +346,7 @@ public class TestHttp2Parser {
 
     @Test
     public void testDeserializeHeaders() {
-    	HeaderDecoding decoding = new HeaderDecoding(decoder);
+    	HeaderDecoding2 decoding = new HeaderDecoding2(decoder);
     	
         List<Http2Header> headers = decoding.decode(UtilsForTest2.dataWrapperFromHex(ngHttp2ExampleHeaderFragment));
         Assert.assertEquals(headers, ngHttp2ExampleHeaders);

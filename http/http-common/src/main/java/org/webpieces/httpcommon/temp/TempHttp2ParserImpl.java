@@ -115,7 +115,7 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, iterFrame.getHeaderFragment());
 		}
 		
-		HeaderDecoding decoding = new HeaderDecoding(decoder);
+		HeaderDecoding2 decoding = new HeaderDecoding2(decoder);
 		List<Http2Header> headers = decoding.decode(allSerializedHeaders);
 
 		//TODO: fix this to remove HeadersFrame and PushPromieFrame from having a List<Header> field
@@ -137,8 +137,8 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		return parser.marshal(frame);
 	}
 
-	public SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload) {
-		return parser.unmarshalSettingsPayload(settingsPayload);
+	public List<Http2Setting> unmarshalSettingsPayload(String base64SettingsPayload) {
+		return parser.unmarshalSettingsPayload(base64SettingsPayload);
 	}
 
 	public TempHttp2ParserImpl(Http2Parser parser) {

@@ -61,19 +61,19 @@ public class Http11Layer {
 			if(!channel.isSslChannel()) {
                 List<Header> reqHeaders = req.getHeaders();
                 String upgradeHeader = null;
-                ByteBuffer settingsFrame = null;
+                String settingsFrame = null;
 
                 for (Header header : reqHeaders) {
                     if (header.getKnownName() == KnownHeaderName.UPGRADE) {
                         upgradeHeader = header.getValue();
                     }
                     if (header.getKnownName() == KnownHeaderName.HTTP2_SETTINGS) {
-                        settingsFrame = ByteBuffer.wrap(Base64.getUrlDecoder().decode(header.getValue()));
+                        settingsFrame = header.getValue();
                     }
                 }
                 if (upgradeHeader != null && upgradeHeader.toLowerCase().equals("h2c")) {
-                    final Optional<ByteBuffer> maybeSettingsPayload = Optional.of(settingsFrame);
-                    log.info("got http2 upgrade with settings: " + DatatypeConverter.printHexBinary(settingsFrame.array()));
+                    final Optional<String> maybeSettingsPayload = Optional.of(settingsFrame);
+                    log.info("got http2 upgrade with settings: " + settingsFrame);
                     // Create the upgrade response
                     HttpResponse response = new HttpResponse();
                     HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
