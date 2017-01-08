@@ -56,12 +56,12 @@ public class Http2ParserImpl implements Http2Parser {
 	}
 
 	@Override
-	public Http2Memento prepareToParse() {
-		return new Http2MementoImpl(dataGen.emptyWrapper());
+	public Http2Memento prepareToParse(long maxFrameSize) {
+		return new Http2MementoImpl(dataGen.emptyWrapper(), maxFrameSize);
 	}
 
 	@Override
-	public Http2Memento parse(Http2Memento memento, DataWrapper newData, long maxFrameSize) {
+	public Http2Memento parse(Http2Memento memento, DataWrapper newData) {
 		Http2MementoImpl state = (Http2MementoImpl) memento;
 		state.getParsedFrames().clear();
 		
@@ -71,7 +71,7 @@ public class Http2ParserImpl implements Http2Parser {
 		while(true) {
 			switch(state.getParsingState()) {
 			case NEED_PARSE_FRAME_HEADER:
-				if(!parseFrameHeader(state, maxFrameSize))
+				if(!parseFrameHeader(state))
 					return state;
 				else
 					state.setParsingState(ParsingState.NEED_PARSE_BODY);
@@ -127,7 +127,7 @@ public class Http2ParserImpl implements Http2Parser {
 	 * Return true if header was parsed
 	 * @param maxFrameSize 
 	 */
-    private boolean parseFrameHeader(Http2MementoImpl state, long maxFrameSize) {
+    private boolean parseFrameHeader(Http2MementoImpl state) {
     	DataWrapper allData = state.getLeftOverData();
         int lengthOfData = allData.getReadableSize();
         if (lengthOfData < 9) {
@@ -144,6 +144,7 @@ public class Http2ParserImpl implements Http2Parser {
         byte frameTypeId = frameHeader.readByteAt(3);
         byte flagsByte = frameHeader.readByteAt(4);
         
+        long maxFrameSize = state.getIncomingMaxFrameSize();
         if(payloadLength > maxFrameSize) 
         	throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, "Frame size="+payloadLength+" was greater than max="+maxFrameSize, true);
         

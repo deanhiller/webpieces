@@ -14,9 +14,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class HeaderDecoding {
 
-	public void setMaxHeaderTableSize(HpackMementoImpl state, int newSize) {
-		Decoder decoder = state.getDecoder();
-		
+	public void setMaxHeaderTableSize(Decoder decoder, int newSize) {
 		synchronized(decoder) {
 			decoder.setMaxHeaderTableSize(newSize);
 		}

@@ -41,8 +41,8 @@ public class UtilsForTest2 {
 
     public static Http2Frame frameFromHex(String frameHex) {
     	DataWrapper data = dataWrapperFromHex(frameHex);
-    	Http2Memento state = parser.prepareToParse();
-    	state = parser.parse(state, data, Integer.MAX_VALUE);
+    	Http2Memento state = parser.prepareToParse(Integer.MAX_VALUE);
+    	state = parser.parse(state, data);
     	return state.getParsedFrames().get(0);
     }
 

@@ -1,13 +1,10 @@
 package com.webpieces.hpack.impl;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
@@ -32,7 +29,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public class HpackParserImpl implements HpackParser {
 
-	private static final Logger log = LoggerFactory.getLogger(HpackParserImpl.class);
+	//private static final Logger log = LoggerFactory.getLogger(HpackParserImpl.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HeaderEncoding encoding = new HeaderEncoding();
 	private HeaderDecoding decoding = new HeaderDecoding();
@@ -45,24 +42,18 @@ public class HpackParserImpl implements HpackParser {
 	}
 
 	@Override
-	public void setDecoderMaxTableSize(UnmarshalState memento, int newSize) {
-		HpackMementoImpl state = (HpackMementoImpl) memento;
-		decoding.setMaxHeaderTableSize(state, newSize);
-	}
-	
-	@Override
-	public UnmarshalState prepareToUnmarshal(int maxHeaderSize, int maxHeaderTableSize) {
+	public UnmarshalState prepareToUnmarshal(int maxHeaderSize, int maxHeaderTableSize, long localMaxFrameSize) {
 		Decoder decoder = new Decoder(maxHeaderSize, maxHeaderTableSize);
-		Http2Memento result = parser.prepareToParse();
-		return new HpackMementoImpl(result, decoder);
+		Http2Memento result = parser.prepareToParse(localMaxFrameSize);
+		return new UnmarshalStateImpl(result, decoding, decoder);
 	}
 
 	@Override
-	public UnmarshalState unmarshal(UnmarshalState memento, DataWrapper newData, long maxFrameSize) {
-		HpackMementoImpl state = (HpackMementoImpl) memento;
+	public UnmarshalState unmarshal(UnmarshalState memento, DataWrapper newData) {
+		UnmarshalStateImpl state = (UnmarshalStateImpl) memento;
 		state.getParsedFrames().clear(); //reset any parsed frames
 		
-		Http2Memento result = parser.parse(state.getLowLevelState(), newData, maxFrameSize);
+		Http2Memento result = parser.parse(state.getLowLevelState(), newData);
 		
 		List<Http2Frame> parsedFrames = result.getParsedFrames();
 		for(Http2Frame frame: parsedFrames) {
@@ -72,7 +63,7 @@ public class HpackParserImpl implements HpackParser {
 		return state;
 	}
 
-	private void processFrame(HpackMementoImpl state, Http2Frame frame) {
+	private void processFrame(UnmarshalStateImpl state, Http2Frame frame) {
 		List<HasHeaderFragment> headerFragList = state.getHeadersToCombine();
 		if(frame instanceof HasHeaderFragment) {
 			HasHeaderFragment headerFrame = (HasHeaderFragment) frame;
@@ -96,7 +87,7 @@ public class HpackParserImpl implements HpackParser {
 		}
 	}
 
-	private void validateHeader(HpackMementoImpl state, HasHeaderFragment lowLevelFrame) {
+	private void validateHeader(UnmarshalStateImpl state, HasHeaderFragment lowLevelFrame) {
 		List<HasHeaderFragment> list = state.getHeadersToCombine();
 		HasHeaderFragment first = list.get(0);
 		int streamId = first.getStreamId();
@@ -120,7 +111,7 @@ public class HpackParserImpl implements HpackParser {
 		}
 	}
 	
-	private void combineAndSendHeadersToClient(HpackMementoImpl state) {
+	private void combineAndSendHeadersToClient(UnmarshalStateImpl state) {
 		List<HasHeaderFragment> hasHeaderFragmentList = state.getHeadersToCombine();
 		// Now we set the full header list on the first frame and just return that
 		HasHeaderFragment firstFrame = hasHeaderFragmentList.get(0);
@@ -150,47 +141,50 @@ public class HpackParserImpl implements HpackParser {
 	}
 
 	@Override
-    public MarshalState prepareToMarshal(int maxHeaderTableSize) {
+    public MarshalState prepareToMarshal(int maxHeaderTableSize, long remoteMaxFrameSize) {
 		Encoder encoder = new Encoder(maxHeaderTableSize);
-		return new MarshalStateImpl(encoder);
+		return new MarshalStateImpl(encoding, encoder, remoteMaxFrameSize);
 	}
 
 	@Override
-	public DataWrapper marshal(MarshalState memento, Http2Msg msg, long maxFrameSize) {
+	public DataWrapper marshal(MarshalState memento, Http2Msg msg) {
 		MarshalStateImpl state = (MarshalStateImpl) memento;
 		if(msg instanceof Http2Headers) {
 			Http2Headers h = (Http2Headers) msg;
-			return createHeadersData(state, h, maxFrameSize);
+			return createHeadersData(state, h);
 		} else if(msg instanceof Http2Push) {
 			Http2Push p = (Http2Push) msg;
-			return createPushPromiseData(state, p, maxFrameSize);
+			return createPushPromiseData(state, p);
 		} else if(msg instanceof Http2Frame) {
 			return parser.marshal((Http2Frame) msg);
 		} else
 			throw new IllegalStateException("bug, missing case for msg="+msg);
 	}
 
-	private DataWrapper createPushPromiseData(MarshalStateImpl state, Http2Push p, long maxFrameSize) {
+	private DataWrapper createPushPromiseData(MarshalStateImpl state, Http2Push p) {
     	PushPromiseFrame promise = new PushPromiseFrame();
     	promise.setStreamId(p.getStreamId());
     	promise.setPromisedStreamId(p.getPromisedStreamId());
 		List<Http2Header> headers = p.getHeaders();
     	
-		return marshal(state, maxFrameSize, promise, headers);
+		return marshal(state, promise, headers);
 	}
 
-	private DataWrapper createHeadersData(MarshalStateImpl state, Http2Headers headers, long maxFrameSize) {
+	private DataWrapper createHeadersData(MarshalStateImpl state, Http2Headers headers) {
     	HeadersFrame frame = new HeadersFrame();
     	frame.setStreamId(headers.getStreamId());
     	frame.setEndOfStream(headers.isEndOfStream());
     	frame.setPriorityDetails(headers.getPriorityDetails());
     	List<Http2Header> headerList = headers.getHeaders();
 		
-		return marshal(state, maxFrameSize, frame, headerList);
+		return marshal(state, frame, headerList);
 	}
 	
-	private DataWrapper marshal(MarshalStateImpl state, long maxFrameSize, HasHeaderFragment promise,
+	private DataWrapper marshal(MarshalStateImpl state, HasHeaderFragment promise,
 			List<Http2Header> headers) {
+		
+		long maxFrameSize = state.getMaxRemoteFrameSize();
+		
 		List<Http2Frame> headerFrames = encoding.createHeaderFrames(promise, headers, state.getEncoder(), maxFrameSize);
 		
 		DataWrapper allData = DataWrapperGeneratorFactory.EMPTY;
@@ -201,16 +195,6 @@ public class HpackParserImpl implements HpackParser {
 		
 		return allData;
 	}
-
-	@Override
-    public void setEncoderMaxTableSize(MarshalState memento, int newSize) {
-		MarshalStateImpl state = (MarshalStateImpl) memento;
-		try {
-			encoding.setMaxHeaderTableSize(state, newSize);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-    }
 
 	@Override
 	public List<Http2Setting> unmarshalSettingsPayload(String base64SettingsPayload) {

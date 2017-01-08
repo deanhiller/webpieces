@@ -27,8 +27,8 @@ public class ParseFramesFromFile {
         while (inChannel.read(buf) != -1) {
             buf.flip();
             buf.getInt();
-        	UnmarshalState result = parser.prepareToUnmarshal(4096, 4096);
-            result = parser.unmarshal(result, dataGen.wrapByteBuffer(buf.slice()), 16384L);
+        	UnmarshalState result = parser.prepareToUnmarshal(4096, 4096, 16384L);
+            result = parser.unmarshal(result, dataGen.wrapByteBuffer(buf.slice()));
             List<Http2Msg> frames = result.getParsedFrames();
             System.out.print(frames.toString());
             buf.clear();

@@ -10,16 +10,18 @@ import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class HpackMementoImpl implements UnmarshalState {
+public class UnmarshalStateImpl implements UnmarshalState {
 
+	private HeaderDecoding decoding;
 	private Decoder decoder;
 	private Http2Memento lowLevelState;
 	
     private List<HasHeaderFragment> headersToCombine = new LinkedList<>();
 	private List<Http2Msg> parsedFrames = new ArrayList<>();
 	
-	public HpackMementoImpl(Http2Memento lowLevelState, Decoder decoder) {
+	public UnmarshalStateImpl(Http2Memento lowLevelState, HeaderDecoding decoding, Decoder decoder) {
 		this.lowLevelState = lowLevelState;
+		this.decoding = decoding;
 		this.decoder = decoder;
 	}
 
@@ -44,5 +46,16 @@ public class HpackMementoImpl implements UnmarshalState {
 	public Decoder getDecoder() {
 		return decoder;
 	}
+
+	@Override
+	public void setDecoderMaxTableSize(int newSize) {
+		decoding.setMaxHeaderTableSize(decoder, newSize);
+	}
+
+	@Override
+	public void setIncomingMaxFrameSize(long maxFrameSize) {
+		lowLevelState.setIncomingMaxFrameSize(maxFrameSize);
+	}
+
 
 }

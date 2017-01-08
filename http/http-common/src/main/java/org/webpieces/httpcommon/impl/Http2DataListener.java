@@ -62,7 +62,8 @@ class Http2DataListener implements DataListener {
 	 */
 	Http2DataListener(Http2EngineImpl http2EngineImpl) {
 		this.http2EngineImpl = http2EngineImpl;
-		unmarshalState = this.http2EngineImpl.http2Parser.prepareToUnmarshal(4096, 4096);
+		Long localMaxFrameSize = http2EngineImpl.localSettings.get(SETTINGS_MAX_FRAME_SIZE);
+		unmarshalState = this.http2EngineImpl.http2Parser.prepareToUnmarshal(4096, 4096, localMaxFrameSize);
 		
 	}
 
@@ -395,8 +396,7 @@ class Http2DataListener implements DataListener {
 
 	private void parseStuff(DataWrapper newData) {
 		try {
-	    	Long localMaxFrameSize = this.http2EngineImpl.localSettings.get(SETTINGS_MAX_FRAME_SIZE);
-			unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData, localMaxFrameSize);
+			unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData);
 			
 		    for (Http2Msg frame : unmarshalState.getParsedFrames()) {
 		        Http2EngineImpl.log.info("got frame=" + frame);

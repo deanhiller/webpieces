@@ -10,9 +10,9 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 public interface Http2Parser {
 	
 	//taking a stab at my guess of what we could do instead
-	Http2Memento prepareToParse(); 
+	Http2Memento prepareToParse(long maxFrameSize); 
 	
-	Http2Memento parse(Http2Memento memento, DataWrapper newData, long maxFrameSize);
+	Http2Memento parse(Http2Memento memento, DataWrapper newData);
 
 	DataWrapper marshal(Http2Frame frame);
 	

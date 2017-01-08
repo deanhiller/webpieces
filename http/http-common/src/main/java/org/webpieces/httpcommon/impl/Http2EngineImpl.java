@@ -170,7 +170,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         // No limit for MAX_HEADER_LIST_SIZE by default, so not in the map
 
-        marshalState = http2Parser.prepareToMarshal(4096);
+        marshalState = http2Parser.prepareToMarshal(4096, initialMaxFrameSize);
         
         this.dataListener = new Http2DataListener(this);
 
@@ -195,8 +195,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     }
 
     DataWrapper marshal(Http2Msg msg) {
-    	Long maxFrameSize = remoteSettings.get(SETTINGS_MAX_FRAME_SIZE);
-        return http2Parser.marshal(marshalState, msg, maxFrameSize);
+        return http2Parser.marshal(marshalState, msg);
     }
     
     void setRemoteSettings(SettingsFrame frame, boolean sendAck) {
@@ -448,9 +447,9 @@ public abstract class Http2EngineImpl implements Http2Engine {
             // If we need to update the max header table size
             int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue();
             if (minimumMaxHeaderTableSizeUpdate.get() < newMaxHeaderTableSize) {
-            	http2Parser.setEncoderMaxTableSize(marshalState, minimumMaxHeaderTableSizeUpdate.get());
+            	marshalState.setOutgoingMaxTableSize(minimumMaxHeaderTableSizeUpdate.get());
             }
-            http2Parser.setEncoderMaxTableSize(marshalState, newMaxHeaderTableSize);
+            marshalState.setOutgoingMaxTableSize(newMaxHeaderTableSize);
             minimumMaxHeaderTableSizeUpdate.set(Integer.MAX_VALUE);
             maxHeaderTableSizeNeedsUpdate.set(false);
         }

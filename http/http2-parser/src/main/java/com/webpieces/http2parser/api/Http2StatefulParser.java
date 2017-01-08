@@ -10,6 +10,6 @@ public interface Http2StatefulParser {
 
 	DataWrapper marshalToByteBuffer(Http2Frame request);
 	
-	List<Http2Frame> parse(DataWrapper moreData, long maxFrameSize);
+	List<Http2Frame> parse(DataWrapper moreData);
 	
 }

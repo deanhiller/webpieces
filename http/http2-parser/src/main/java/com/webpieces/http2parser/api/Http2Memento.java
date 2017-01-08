@@ -17,4 +17,6 @@ public interface Http2Memento {
 	
 	DataWrapper getLeftOverData();
 
+	void setIncomingMaxFrameSize(long maxFrameSize);
+
 }

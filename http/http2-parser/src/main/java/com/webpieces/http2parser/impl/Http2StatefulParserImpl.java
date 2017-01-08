@@ -14,9 +14,9 @@ public class Http2StatefulParserImpl implements Http2StatefulParser {
 	private Http2Parser statelessParser;
 	private Http2Memento state;
 
-	public Http2StatefulParserImpl(Http2Parser statelessParser) {
+	public Http2StatefulParserImpl(Http2Parser statelessParser, long maxFrameSize) {
 		this.statelessParser = statelessParser;
-		state = statelessParser.prepareToParse();
+		state = statelessParser.prepareToParse(maxFrameSize);
 	}
 
 	@Override
@@ -25,8 +25,8 @@ public class Http2StatefulParserImpl implements Http2StatefulParser {
 	}
 
 	@Override
-	public List<Http2Frame> parse(DataWrapper moreData, long maxFrameSize) {
-		state = statelessParser.parse(state, moreData, maxFrameSize);
+	public List<Http2Frame> parse(DataWrapper moreData) {
+		state = statelessParser.parse(state, moreData);
 		return state.getParsedFrames();
 	}
 

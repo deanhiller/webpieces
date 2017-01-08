@@ -12,7 +12,7 @@ public class Http2ParserFactory {
 		return new Http2ParserImpl(bufferCreationPool);
 	}
 	
-	public static Http2StatefulParser createStatefulParser(Http2Parser statelessParser) {
-		return new Http2StatefulParserImpl(statelessParser);
+	public static Http2StatefulParser createStatefulParser(Http2Parser statelessParser, long maxFrameSize) {
+		return new Http2StatefulParserImpl(statelessParser, maxFrameSize);
 	}
 }

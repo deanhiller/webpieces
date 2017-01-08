@@ -22,7 +22,6 @@ public class Level2ParsingAndRemoteSettings {
 	private static final Logger log = LoggerFactory.getLogger(Level2ParsingAndRemoteSettings.class);
 	private HpackParser lowLevelParser;
 	private UnmarshalState parsingState;
-	private HeaderSettings localSettings;
 	private Level6NotifyListeners level6NotifyListener;
 	private String id;
 	private Level5RemoteFlowControl remoteFlowControl;
@@ -43,15 +42,14 @@ public class Level2ParsingAndRemoteSettings {
 		this.remoteFlowControl = level5FlowControl;
 		this.level6NotifyListener = level6NotifyListener;
 		this.lowLevelParser = lowLevelParser;
-		this.localSettings = localSettings;
-		parsingState = lowLevelParser.prepareToUnmarshal(4096, localSettings.getHeaderTableSize());
+		parsingState = lowLevelParser.prepareToUnmarshal(4096, localSettings.getHeaderTableSize(), localSettings.getMaxFrameSize());
 	}
 
 	/**
 	 * NOT thread safe!!! BUT channelmanager keeps everything virtually thread-safe (ie. it's all going to come in order)
 	 */
 	public void parse(DataWrapper newData) {
-		parsingState = lowLevelParser.unmarshal(parsingState, newData, localSettings.getMaxFrameSize());
+		parsingState = lowLevelParser.unmarshal(parsingState, newData);
 		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
 		
 		for(Http2Msg lowLevelFrame : parsedMessages) {

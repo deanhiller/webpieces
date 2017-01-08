@@ -101,9 +101,9 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096);
+        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096, Integer.MAX_VALUE);
         // Check that we got a settings frame, a headers frame, and a data frame
-        result = http2Parser.unmarshal(result, leftOverData, Integer.MAX_VALUE);
+        result = http2Parser.unmarshal(result, leftOverData);
         List<Http2Msg> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
@@ -133,9 +133,9 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096);
+        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096, Integer.MAX_VALUE);
         // Check that we got a settings frame, a headers frame, and a data frame
-        result = http2Parser.unmarshal(result, leftOverData, Integer.MAX_VALUE);
+        result = http2Parser.unmarshal(result, leftOverData);
         List<Http2Msg> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
@@ -169,10 +169,10 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096);
+        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096, Integer.MAX_VALUE);
         // Check that we got a settings frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
-        result = http2Parser.unmarshal(result, leftOverData, Integer.MAX_VALUE);
+        result = http2Parser.unmarshal(result, leftOverData);
         List<Http2Msg> frames = result.getParsedFrames();
 
         Assert.assertEquals(6, frames.size());

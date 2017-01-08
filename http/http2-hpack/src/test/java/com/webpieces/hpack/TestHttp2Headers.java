@@ -78,16 +78,16 @@ public class TestHttp2Headers {
     }
     
 	private Http2Msg parse(DataWrapper data) {
-		UnmarshalState parseState = parser.prepareToUnmarshal(4096, Integer.MAX_VALUE);
-    	parseState = parser.unmarshal(parseState, data, 4096L);
+		UnmarshalState parseState = parser.prepareToUnmarshal(4096, Integer.MAX_VALUE, 4096L);
+    	parseState = parser.unmarshal(parseState, data);
     	List<Http2Msg> parsedFrames = parseState.getParsedFrames();
     	Http2Msg frame = parsedFrames.get(0);
 		return frame;
 	}
 
 	private DataWrapper marshal(PartialStream headers) {
-		MarshalState state = parser.prepareToMarshal(Integer.MAX_VALUE);
-    	DataWrapper data = parser.marshal(state, headers, 4096);
+		MarshalState state = parser.prepareToMarshal(Integer.MAX_VALUE, 4096);
+    	DataWrapper data = parser.marshal(state, headers);
 		return data;
 	}
 

@@ -129,8 +129,8 @@ public class TestHttp2Parser {
     @Test
     public void testBasicParse() {
     	DataWrapper data = UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames);
-    	UnmarshalState state = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
-    	UnmarshalState result = parser.unmarshal(state, data, maxFrameSize);
+    	UnmarshalState state = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
+    	UnmarshalState result = parser.unmarshal(state, data);
         Assert.assertEquals(0, result.getLeftOverDataSize());
         List<Http2Msg> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 4);
@@ -141,9 +141,9 @@ public class TestHttp2Parser {
         DataWrapper fullFrames = UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames);
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 6);
         
-    	UnmarshalState state = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
-        state = parser.unmarshal(state, split.get(0), maxFrameSize);
-        state = parser.unmarshal(state, split.get(1), maxFrameSize);
+    	UnmarshalState state = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
+        state = parser.unmarshal(state, split.get(0));
+        state = parser.unmarshal(state, split.get(1));
 
         Assert.assertEquals(0, state.getLeftOverDataSize());
         List<Http2Msg> frames = state.getParsedFrames();
@@ -172,27 +172,25 @@ public class TestHttp2Parser {
         DataWrapper fullFrames = UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames);
         List<? extends DataWrapper> split = dataGen.split(fullFrames, 12);
         
-        Http2Memento state = parser2.prepareToParse();
-        parser2.parse(state, split.get(0), Integer.MAX_VALUE);
+        Http2Memento state = parser2.prepareToParse(Integer.MAX_VALUE);
+        parser2.parse(state, split.get(0));
         Assert.assertEquals(0, state.getParsedFrames().size());
         Assert.assertTrue(state.getLeftOverData().getReadableSize() > 0);
         
-        parser2.parse(state, split.get(1), Integer.MAX_VALUE);
+        parser2.parse(state, split.get(1));
         Assert.assertEquals(4, state.getParsedFrames().size());
         Assert.assertFalse(state.getLeftOverData().getReadableSize() > 0);
     }
     
     @Test
     public void testBasicParseWithPriorData() {
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
+    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
 
         result = parser.unmarshal(result, 
-                UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames.subSequence(0, 8).toString()), // oldData
-                maxFrameSize
+                UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames.subSequence(0, 8).toString()) // oldData
             );
         result = parser.unmarshal(result, 
-                UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames.substring(8)), // newData
-                maxFrameSize
+                UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames.substring(8)) // newData
             );
 
         Assert.assertEquals(0, result.getLeftOverDataSize());
@@ -202,10 +200,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithSomeData() {
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
+    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
         result = parser.unmarshal(result, 
-                UtilsForTest2.dataWrapperFromHex(dataFramesWithSomeLeftOverData),
-                maxFrameSize);
+                UtilsForTest2.dataWrapperFromHex(dataFramesWithSomeLeftOverData));
         Assert.assertTrue(result.getLeftOverDataSize() > 0);
 
         List<Http2Msg> frames = result.getParsedFrames();
@@ -215,10 +212,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithMoreData() {
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
+    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
         result = parser.unmarshal(result, 
-                UtilsForTest2.dataWrapperFromHex(dataFramesWithABunchOfLeftOverData),
-                maxFrameSize);
+                UtilsForTest2.dataWrapperFromHex(dataFramesWithABunchOfLeftOverData));
         Assert.assertTrue(result.getLeftOverDataSize() > 0);
         List<Http2Msg> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 4);
@@ -227,10 +223,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithLittleData() {
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
+    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
         result = parser.unmarshal(result, 
-                UtilsForTest2.dataWrapperFromHex("00 00"),
-                maxFrameSize);
+                UtilsForTest2.dataWrapperFromHex("00 00"));
         Assert.assertTrue(result.getLeftOverDataSize() > 0);
         List<Http2Msg> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 0);
@@ -239,10 +234,9 @@ public class TestHttp2Parser {
 
     @Test
     public void testBasicParseWithNoData() {
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
+    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
         result = parser.unmarshal(result,
-                dataGen.emptyWrapper(),
-                maxFrameSize);
+                dataGen.emptyWrapper());
         Assert.assertEquals(0, result.getLeftOverDataSize());
         List<Http2Msg> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 0);
@@ -312,8 +306,8 @@ public class TestHttp2Parser {
                         serializedHeaderFrames,
                         UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames)));
 
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize);
-        result = parser.unmarshal(result, combined, maxFrameSize);
+    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
+        result = parser.unmarshal(result, combined);
         Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
         Http2Msg headerFrame = result.getParsedFrames().get(4);
         Assert.assertEquals(headerFrame.getClass(), Http2Headers.class);

@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public interface EngineListener {
 

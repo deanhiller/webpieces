@@ -34,7 +34,7 @@ public class Level6NotifyListeners {
 		this.parser = parser;
 		this.resultListener = socketListener;
 		this.remoteSettings = remoteSettings;
-        marshalState = parser.prepareToMarshal(remoteSettings.getHeaderTableSize());
+        marshalState = parser.prepareToMarshal(remoteSettings.getHeaderTableSize(), remoteSettings.getMaxFrameSize());
 	}
 
 	public CompletableFuture<Void> sendClearTextUpgrade(byte[] bytes) {
@@ -45,7 +45,7 @@ public class Level6NotifyListeners {
 	
 	public CompletableFuture<Void> sendInitDataToSocket(DataWrapper preface, SettingsFrame settings) {
 		log.info("send preface AND settings to socket="+settings);
-		DataWrapper settingsData = parser.marshal(marshalState, settings, remoteSettings.getMaxFrameSize());
+		DataWrapper settingsData = parser.marshal(marshalState, settings);
 		DataWrapper allData = dataGen.chainDataWrappers(preface, settingsData);
 		ByteBuffer buffer = translate(allData);
 		return resultListener.sendToSocket(buffer).thenApply(c -> null);
@@ -95,7 +95,7 @@ public class Level6NotifyListeners {
 	
 	public CompletableFuture<Void> sendFrameToSocket(Http2Msg msg) {
 		log.info("sending frame down to socket(from client)="+msg);
-		DataWrapper data = parser.marshal(marshalState, msg, remoteSettings.getMaxFrameSize());
+		DataWrapper data = parser.marshal(marshalState, msg);
 		ByteBuffer buffer = translate(data);
 		return resultListener.sendToSocket(buffer);
 	}
@@ -110,6 +110,6 @@ public class Level6NotifyListeners {
 
 	public void setEncoderMaxTableSize(int value) {
 		remoteSettings.setHeaderTableSize(value);
-		parser.setEncoderMaxTableSize(marshalState, value);
+		marshalState.setOutgoingMaxTableSize(value);
 	}
 }

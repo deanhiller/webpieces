@@ -15,9 +15,11 @@ public class Http2MementoImpl implements Http2Memento {
 	private DataWrapper leftOverData;
 	private List<Http2Frame> parsedFrames = new ArrayList<>();
 	private FrameHeaderData frameHeaderData;
+	private volatile long maxFrameSize;
 
-	public Http2MementoImpl(DataWrapper emptyWrapper) {
+	public Http2MementoImpl(DataWrapper emptyWrapper, long maxFrameSize) {
 		this.leftOverData = emptyWrapper;
+		this.maxFrameSize = maxFrameSize;
 	}
 
 	public void setParsedFrames(List<Http2Frame> parsedMessages) {
@@ -56,6 +58,15 @@ public class Http2MementoImpl implements Http2Memento {
 	@Override
 	public DataWrapper getLeftOverData() {
 		return leftOverData;
+	}
+
+	public long getIncomingMaxFrameSize() {
+		return maxFrameSize;
+	}
+
+	@Override
+	public void setIncomingMaxFrameSize(long maxFrameSize) {
+		this.maxFrameSize = maxFrameSize;
 	}
 	
 }

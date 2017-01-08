@@ -75,8 +75,7 @@ public class HeaderEncoding {
         return dataGen.wrapByteArray(out.toByteArray());
     }
 
-	public void setMaxHeaderTableSize(MarshalStateImpl state, int newSize) throws IOException {
-		Encoder encoder = state.getEncoder();
+	public void setMaxHeaderTableSize(Encoder encoder, int newSize) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		synchronized(encoder) {
 			encoder.setMaxHeaderTableSize(out, newSize);

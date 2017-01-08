@@ -9,13 +9,11 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public interface HpackParser {
 
-	UnmarshalState prepareToUnmarshal(int maxHeaderSize, int maxHeaderTableSize);
-    UnmarshalState unmarshal(UnmarshalState state, DataWrapper newData, long maxFrameSize);
-    void setDecoderMaxTableSize(UnmarshalState memento, int newSize);
+	UnmarshalState prepareToUnmarshal(int maxHeaderSize, int maxHeaderTableSize, long localMaxFrameSize);
+    UnmarshalState unmarshal(UnmarshalState state, DataWrapper newData);
 
-	MarshalState prepareToMarshal(int maxHeaderTableSize);
-    DataWrapper marshal(MarshalState state, Http2Msg frame, long maxFrameSize);
-    void setEncoderMaxTableSize(MarshalState memento, int newSize);
+	MarshalState prepareToMarshal(int maxHeaderTableSize, long remoteMaxFrameSize);
+    DataWrapper marshal(MarshalState state, Http2Msg frame);
     
     /**
      * Unfortunately, in the http1.1 request to a server, the base64 http/2 upgrade settings header ONLY
