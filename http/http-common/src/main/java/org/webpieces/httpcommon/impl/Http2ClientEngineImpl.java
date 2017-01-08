@@ -11,19 +11,19 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpcommon.api.Http2ClientEngine;
-import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -33,7 +33,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
 
     public Http2ClientEngineImpl(
-        TempHttp2Parser http2Parser,
+        HpackParser http2Parser,
         Channel channel,
         InetSocketAddress remoteAddress, Http2SettingsMap http2SettingsMap) {
         super(http2Parser, channel, remoteAddress, http2SettingsMap, HttpSide.CLIENT);
@@ -56,15 +56,15 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
     }
 
     @Override
-    void sideSpecificHandleHeaders(Http2FullHeaders frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(Http2Headers frame, boolean isTrailer, Stream stream) {
 
         if(isTrailer) {
-            stream.getResponseListener().incomingTrailer(frame.getHeaderList(), stream.getResponseId(), frame.isEndStream());
+            stream.getResponseListener().incomingTrailer(frame.getHeaders(), stream.getResponseId(), frame.isEndOfStream());
         } else {
-            HttpResponse response = responseFromHeaders(new LinkedList<>(frame.getHeaderList()), stream);
+            HttpResponse response = responseFromHeaders(new LinkedList<>(frame.getHeaders()), stream);
             checkHeaders(response.getHeaderLookupStruct(), stream);
             stream.setResponse(response);
-            stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), frame.isEndStream());
+            stream.getResponseListener().incomingResponse(response, stream.getRequest(), stream.getResponseId(), frame.isEndOfStream());
         }
     }
 

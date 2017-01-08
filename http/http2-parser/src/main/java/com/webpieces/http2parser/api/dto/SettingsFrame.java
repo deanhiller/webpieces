@@ -6,6 +6,7 @@ import java.util.List;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public class SettingsFrame extends AbstractHttp2Frame implements Http2Msg {
@@ -25,11 +26,6 @@ public class SettingsFrame extends AbstractHttp2Frame implements Http2Msg {
     	ack = true;
 	}
 
-	@Override
-    public Http2FrameType getFrameType() {
-        return Http2FrameType.SETTINGS;
-    }
-
     public boolean isAck() {
         return ack;
     }
@@ -48,6 +44,15 @@ public class SettingsFrame extends AbstractHttp2Frame implements Http2Msg {
 
 	public void setSettings(List<Http2Setting> settings2) {
 		this.settings = settings2;
+	}
+	
+	@Override
+    public Http2FrameType getFrameType() {
+        return Http2FrameType.SETTINGS;
+    }
+	@Override
+	public Http2MsgType getMessageType() {
+		return Http2MsgType.SETTINGS;
 	}
 	
 	@Override

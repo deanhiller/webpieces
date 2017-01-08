@@ -9,7 +9,6 @@ import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.ServerListener;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -17,15 +16,17 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.HpackParser;
+
 public class HttpClientImpl implements HttpClient {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 	private ChannelManager mgr;
 	private HttpParser httpParser;
-	private TempHttp2Parser http2Parser;
+	private HpackParser http2Parser;
 	private Http2SettingsMap http2SettingsMap;
 
-	public HttpClientImpl(ChannelManager mgr, HttpParser httpParser, TempHttp2Parser http2Parser, Http2SettingsMap http2SettingsMap) {
+	public HttpClientImpl(ChannelManager mgr, HttpParser httpParser, HpackParser http2Parser, Http2SettingsMap http2SettingsMap) {
 		this.mgr = mgr;
 		this.httpParser = httpParser;
 		this.http2Parser = http2Parser;

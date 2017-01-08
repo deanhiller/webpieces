@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
@@ -31,6 +32,13 @@ public class Http2Headers implements PartialStream {
 
 	public void setStreamId(int streamId) {
 		this.streamId = streamId;
+	}
+	
+	public PriorityDetails getPriorityDetails() {
+		return priorityDetails;
+	}
+	public void setPriorityDetails(PriorityDetails priorityDetails) {
+		this.priorityDetails = priorityDetails;
 	}
 	
 	/**
@@ -96,14 +104,14 @@ public class Http2Headers implements PartialStream {
 	}
 	
 	@Override
+	public Http2MsgType getMessageType() {
+		return Http2MsgType.HEADERS;
+	}
+	
+	@Override
 	public String toString() {
 		return "Http2Headers [streamId=" + streamId + ", endStream=" + endOfStream + ", headerList="
 				+ headers + ", priorityDetails=" + getPriorityDetails() + "]";
 	}
-	public PriorityDetails getPriorityDetails() {
-		return priorityDetails;
-	}
-	public void setPriorityDetails(PriorityDetails priorityDetails) {
-		this.priorityDetails = priorityDetails;
-	}
+
 }

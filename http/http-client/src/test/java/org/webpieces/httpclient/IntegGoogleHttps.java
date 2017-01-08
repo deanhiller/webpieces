@@ -18,8 +18,6 @@ import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.ServerListener;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
-import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -35,6 +33,8 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class IntegGoogleHttps {
@@ -83,7 +83,7 @@ public class IntegGoogleHttps {
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
 		HttpParser httpParser = HttpParserFactory.createParser(pool2);
-		TempHttp2Parser http2Parser = TempHttp2ParserFactory.createParser(pool2);
+		HpackParser http2Parser = HpackParserFactory.createParser(pool2, true);
 		
 		HttpClient client;
 		if(isHttp)

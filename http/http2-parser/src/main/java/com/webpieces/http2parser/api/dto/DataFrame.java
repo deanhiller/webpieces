@@ -4,6 +4,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class DataFrame extends AbstractHttp2Frame implements PartialStream {
@@ -14,11 +15,6 @@ public class DataFrame extends AbstractHttp2Frame implements PartialStream {
     /* payload */
     private DataWrapper data = dataGen.emptyWrapper();
     private DataWrapper padding = dataGen.emptyWrapper();
-    
-    @Override
-    public Http2FrameType getFrameType() {
-        return Http2FrameType.DATA;
-    }
 
     public boolean isEndOfStream() {
         return endOfStream;
@@ -44,6 +40,15 @@ public class DataFrame extends AbstractHttp2Frame implements PartialStream {
 		this.padding = padding;
 	}
 
+    @Override
+    public Http2FrameType getFrameType() {
+        return Http2FrameType.DATA;
+    }
+    @Override
+	public Http2MsgType getMessageType() {
+		return Http2MsgType.DATA;
+	}
+	
 	@Override
     public String toString() {
         return "DataFrame{" +
@@ -61,4 +66,5 @@ public class DataFrame extends AbstractHttp2Frame implements PartialStream {
 			padLen += 1;
 		return len + padLen;
 	}
+
 }

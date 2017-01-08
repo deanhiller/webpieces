@@ -9,6 +9,7 @@ import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class GoAwayError extends Http2Error {
     private int lastStreamId;
@@ -30,8 +31,8 @@ public class GoAwayError extends Http2Error {
     }
 
     @Override
-    public List<Http2Frame> toFrames() {
-        List<Http2Frame> frames = new ArrayList<>();
+    public List<Http2Msg> toFrames() {
+        List<Http2Msg> frames = new ArrayList<>();
 
         GoAwayFrame http2GoAway = new GoAwayFrame();
         http2GoAway.setErrorCode(errorCode);

@@ -2,8 +2,6 @@ package org.webpieces.httpfrontend.api;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -16,10 +14,6 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.Responses;
-import org.webpieces.httpcommon.api.Http2FullHeaders;
-import org.webpieces.httpcommon.api.Http2FullPushPromise;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
-import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
@@ -33,19 +27,21 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.nio.api.handlers.DataListener;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
-import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class TestRequestResponse {
 
     private HttpParser httpParser;
-    private TempHttp2Parser http2Parser;
+    private HpackParser http2Parser;
     private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     private SettingsFrame settingsFrame = new SettingsFrame();
     private Decoder decoder;
@@ -57,7 +53,7 @@ public class TestRequestResponse {
         BufferCreationPool pool = new BufferCreationPool();
 
         httpParser = HttpParserFactory.createParser(pool);
-        http2Parser = TempHttp2ParserFactory.createParser(pool);
+        http2Parser = HpackParserFactory.createParser(pool, true);
         decoder = new Decoder(4096, 4096);
         settings.add(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, 16384L));
         settingsFrame.setSettings(settings);
@@ -88,12 +84,9 @@ public class TestRequestResponse {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
-        byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+        String base64 = http2Parser.marshalSettingsPayload(settingsFrame.getSettings());
 
-        // strip the header
-        byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
-        request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-            Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+        request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS, base64 + " "));
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
 
@@ -108,14 +101,14 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        Http2Memento parse2State = http2Parser.prepareToParse();
+        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096);
         // Check that we got a settings frame, a headers frame, and a data frame
-        Http2Memento result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
-        List<Http2Frame> frames = result.getParsedFrames();
+        result = http2Parser.unmarshal(result, leftOverData, Integer.MAX_VALUE);
+        List<Http2Msg> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
     }
 
@@ -123,12 +116,9 @@ public class TestRequestResponse {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
-        byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+        String base64 = http2Parser.marshalSettingsPayload(settingsFrame.getSettings());
 
-        // strip the header
-        byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
-        request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-            Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+        request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS, base64 + " "));
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
 
@@ -143,14 +133,14 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        Http2Memento parse2State = http2Parser.prepareToParse();
+        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096);
         // Check that we got a settings frame, a headers frame, and a data frame
-        Http2Memento result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
-        List<Http2Frame> frames = result.getParsedFrames();
+        result = http2Parser.unmarshal(result, leftOverData, Integer.MAX_VALUE);
+        List<Http2Msg> frames = result.getParsedFrames();
 
         Assert.assertEquals(3, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
 
         Assert.assertArrayEquals(((DataFrame) frames.get(2)).getData().createByteArray(), blahblah.getBytes());
@@ -162,12 +152,9 @@ public class TestRequestResponse {
         HttpRequest request = Requests.createRequest(KnownHttpMethod.GET, "/");
         request.addHeader(new Header(KnownHeaderName.UPGRADE, "h2c"));
         request.addHeader(new Header(KnownHeaderName.CONNECTION, "Upgrade, HTTP2-Settings"));
-        byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
+        String base64 = http2Parser.marshalSettingsPayload(settingsFrame.getSettings());
 
-        // strip the header
-        byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
-        request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-            Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+        request.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS, base64 + " "));
 
         ByteBuffer bytesWritten = processRequestWithRequestListener(request, listener);
 
@@ -182,18 +169,18 @@ public class TestRequestResponse {
         HttpResponse responseGot = (HttpResponse) parsedMessages.get(0);
         Assert.assertEquals(responseGot.getStatusLine().getStatus().getKnownStatus(), KnownStatusCode.HTTP_101_SWITCHING_PROTOCOLS);
 
-        Http2Memento parse2State = http2Parser.prepareToParse();
+        UnmarshalState result = http2Parser.prepareToUnmarshal(4096, 4096);
         // Check that we got a settings frame, a headers frame, and a data frame, then a push promise frame
         // then a headers then a data frame
-        Http2Memento result = http2Parser.parse(parse2State, leftOverData, decoder, settings);
-        List<Http2Frame> frames = result.getParsedFrames();
+        result = http2Parser.unmarshal(result, leftOverData, Integer.MAX_VALUE);
+        List<Http2Msg> frames = result.getParsedFrames();
 
         Assert.assertEquals(6, frames.size());
         Assert.assertTrue(SettingsFrame.class.isInstance(frames.get(0)));
-        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(1)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(1)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(2)));
-        Assert.assertTrue(Http2FullPushPromise.class.isInstance(frames.get(3)));
-        Assert.assertTrue(Http2FullHeaders.class.isInstance(frames.get(4)));
+        Assert.assertTrue(Http2Push.class.isInstance(frames.get(3)));
+        Assert.assertTrue(Http2Headers.class.isInstance(frames.get(4)));
         Assert.assertTrue(DataFrame.class.isInstance(frames.get(5)));
     }
 

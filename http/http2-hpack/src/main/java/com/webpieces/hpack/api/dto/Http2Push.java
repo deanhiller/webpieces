@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Http2Push implements PartialStream {
@@ -90,6 +91,11 @@ public class Http2Push implements PartialStream {
 		if (streamId != other.streamId)
 			return false;
 		return true;
+	}
+	
+	@Override
+	public Http2MsgType getMessageType() {
+		return Http2MsgType.PUSH_PROMISE;
 	}
 	
 	@Override

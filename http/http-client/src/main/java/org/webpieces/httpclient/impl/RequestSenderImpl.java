@@ -27,7 +27,6 @@ import org.webpieces.httpcommon.api.ResponseListener;
 import org.webpieces.httpcommon.api.ServerListener;
 import org.webpieces.httpcommon.api.SwitchableDataListener;
 import org.webpieces.httpcommon.api.SwitchableDataListenerFactory;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.common.Header;
@@ -43,6 +42,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
@@ -60,7 +60,7 @@ public class RequestSenderImpl implements RequestSender {
     private AtomicBoolean negotiationStarted = new AtomicBoolean(false);
     private CompletableFuture<Channel> negotiationDoneNotifier = new CompletableFuture<>();
     private Http2ClientEngine http2ClientEngine;
-    private TempHttp2Parser http2Parser;
+    private HpackParser http2Parser;
 
     // HTTP 1.1
     private HttpParser httpParser;
@@ -80,7 +80,7 @@ public class RequestSenderImpl implements RequestSender {
     public RequestSenderImpl(
         HttpClientSocket socket,
         HttpParser httpParser,
-        TempHttp2Parser http2Parser,
+        HpackParser http2Parser,
         ServerListener closeListener,
         InetSocketAddress addr,
         TCPChannel channel,
@@ -149,12 +149,9 @@ public class RequestSenderImpl implements RequestSender {
             // against nghttp2.org ?
             // TODO: check if we still need this " " now that we are only shipping the payload and not the
             // whole frame
-            byte[] settingsFrameBytes = http2Parser.marshal(settingsFrame).createByteArray();
-
-            // strip the header
-            byte[] settingsFramePayload = Arrays.copyOfRange(settingsFrameBytes, 9, settingsFrameBytes.length);
-            req.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS,
-                    Base64.getUrlEncoder().encodeToString(settingsFramePayload) + " "));
+            String base64SettingsPayload = http2Parser.marshalSettingsPayload(settingsFrame.getSettings());
+            
+            req.addHeader(new Header(KnownHeaderName.HTTP2_SETTINGS, base64SettingsPayload + " "));
 
             CompletableFuture<HttpResponse> response = sendHttp11AndWaitForHeaders(req);
 

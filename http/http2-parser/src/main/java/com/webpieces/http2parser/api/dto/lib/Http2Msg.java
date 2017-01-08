@@ -4,4 +4,6 @@ public interface Http2Msg {
 
 	int getStreamId();
 
+	Http2MsgType getMessageType();
+	
 }

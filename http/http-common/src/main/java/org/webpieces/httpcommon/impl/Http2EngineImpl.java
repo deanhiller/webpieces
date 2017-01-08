@@ -13,7 +13,6 @@ import static org.webpieces.httpparser.api.common.KnownHeaderName.TRAILER;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -39,14 +38,11 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.Http2Engine;
-import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.exceptions.ClientError;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
-import org.webpieces.httpcommon.temp.HeaderEncoding2;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.Headers;
@@ -66,17 +62,18 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.MarshalState;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public abstract class Http2EngineImpl implements Http2Engine {
@@ -86,7 +83,9 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     Channel channel;
     DataListener dataListener;
-    TempHttp2Parser http2Parser;
+    HpackParser http2Parser;
+	MarshalState marshalState;
+
     private InetSocketAddress remoteAddress;
 
     HttpSide side;
@@ -123,8 +122,6 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     ConcurrentHashMap<Integer, ConcurrentLinkedDeque<PendingData>> outgoingDataQueue = new ConcurrentHashMap<>();
 
-    private Encoder encoder;
-    Decoder decoder;
     private AtomicBoolean maxHeaderTableSizeNeedsUpdate = new AtomicBoolean(false);
     private AtomicInteger minimumMaxHeaderTableSizeUpdate = new AtomicInteger(Integer.MAX_VALUE);
 
@@ -135,11 +132,9 @@ public abstract class Http2EngineImpl implements Http2Engine {
     int goneAwayLastStreamId;
     Http2ErrorCode goneAwayErrorCode;
     DataWrapper additionalDebugData;
-	private HeaderEncoding2 headerEncoder;
-
 
     public Http2EngineImpl(
-        TempHttp2Parser http2Parser,
+    	HpackParser http2Parser,
         Channel channel,
         InetSocketAddress remoteAddress,
         Http2SettingsMap http2SettingsMap,
@@ -175,10 +170,8 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         // No limit for MAX_HEADER_LIST_SIZE by default, so not in the map
 
-        this.decoder = new Decoder(4096, localSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
-        this.encoder = new Encoder(remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue());
-        this.headerEncoder = new HeaderEncoding2(encoder, initialMaxFrameSize);
-
+        marshalState = http2Parser.prepareToMarshal(4096);
+        
         this.dataListener = new Http2DataListener(this);
 
         initializeFlowControl(0x0);
@@ -196,9 +189,16 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
         localRequestedSettings.fillFrame(settingsFrame);
         log.info("sending settings: " + settingsFrame);
-        channel.write(ByteBuffer.wrap(http2Parser.marshal(settingsFrame).createByteArray()));
+        
+        
+        channel.write(ByteBuffer.wrap(marshal(settingsFrame).createByteArray()));
     }
 
+    DataWrapper marshal(Http2Msg msg) {
+    	Long maxFrameSize = remoteSettings.get(SETTINGS_MAX_FRAME_SIZE);
+        return http2Parser.marshal(marshalState, msg, maxFrameSize);
+    }
+    
     void setRemoteSettings(SettingsFrame frame, boolean sendAck) {
     	
     	Http2SettingsMap setMap = new Http2SettingsMap(frame.getSettings());
@@ -248,7 +248,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
             SettingsFrame responseFrame = new SettingsFrame();
             responseFrame.setAck(true);
             log.info("sending settings ack: " + responseFrame);
-            channel.write(ByteBuffer.wrap(http2Parser.marshal(responseFrame).createByteArray()));
+            channel.write(ByteBuffer.wrap(marshal(responseFrame).createByteArray()));
         }
     }
 
@@ -346,7 +346,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         int totalSize = dataSize + paddingSize;
         
         decrementOutgoingWindow(streamId, totalSize);
-        return channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray())).thenAccept(c -> {});
+        return channel.write(ByteBuffer.wrap(marshal(frame).createByteArray())).thenAccept(c -> {});
     }
 
     private boolean isQueueEmpty(Stream stream) {
@@ -441,22 +441,18 @@ public abstract class Http2EngineImpl implements Http2Engine {
     }
 
     private void updateMaxHeaderTableSize(ByteArrayOutputStream out) {
+    	
         // If the header table size needs update, we pre-fill the buffer with the update notification
 
-        try {
-            if (maxHeaderTableSizeNeedsUpdate.get()) {
-                // If we need to update the max header table size
-                int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue();
-                if (minimumMaxHeaderTableSizeUpdate.get() < newMaxHeaderTableSize) {
-                    encoder.setMaxHeaderTableSize(out, minimumMaxHeaderTableSizeUpdate.get());
-                }
-                encoder.setMaxHeaderTableSize(out, newMaxHeaderTableSize);
-                minimumMaxHeaderTableSizeUpdate.set(Integer.MAX_VALUE);
-                maxHeaderTableSizeNeedsUpdate.set(false);
+        if (maxHeaderTableSizeNeedsUpdate.get()) {
+            // If we need to update the max header table size
+            int newMaxHeaderTableSize = remoteSettings.get(SETTINGS_HEADER_TABLE_SIZE).intValue();
+            if (minimumMaxHeaderTableSizeUpdate.get() < newMaxHeaderTableSize) {
+            	http2Parser.setEncoderMaxTableSize(marshalState, minimumMaxHeaderTableSizeUpdate.get());
             }
-        } catch (IOException e) {
-            // TODO: Remove debugdata when not in developer mode
-            throw new InternalError(lastClosedRemoteOriginatedStream().orElse(0), wrapperGen.wrapByteArray(e.toString().getBytes()));
+            http2Parser.setEncoderMaxTableSize(marshalState, newMaxHeaderTableSize);
+            minimumMaxHeaderTableSizeUpdate.set(Integer.MAX_VALUE);
+            maxHeaderTableSizeNeedsUpdate.set(false);
         }
     }
     CompletableFuture<Void> sendPushPromiseFrames(LinkedList<Http2Header> headerList, Stream stream, Stream newStream) {
@@ -464,26 +460,20 @@ public abstract class Http2EngineImpl implements Http2Engine {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-        List<Http2Frame> frameList = headerEncoder.createPushPromises(headerList, streamId, newStream.getStreamId());
-
+        Http2Push push = new Http2Push(headerList);
+        push.setStreamId(streamId);
+        push.setPromisedStreamId(newStream.getStreamId());
+        
+        DataWrapper data = marshal(push);
+        
         // Send all the frames at once
-        log.info("sending push promise frames: " + frameList);
-        ByteBuffer buf = translate(frameList);
+        log.info("sending push promise frames: " + push);
+        ByteBuffer buf = ByteBuffer.wrap(data.createByteArray());
         return channel.write(buf).thenAccept(
                 channel -> newStream.setStatus(Stream.StreamStatus.RESERVED_LOCAL)
         );
 
     }
-    
-    private ByteBuffer translate(List<Http2Frame> frames) {
-    	DataWrapper allData = wrapperGen.emptyWrapper();
-    	for(Http2Frame f : frames) {
-    		DataWrapper data = http2Parser.marshal(f);
-    		allData = wrapperGen.chainDataWrappers(allData, data);
-    	}
-    	byte[] byteArray = allData.createByteArray();
-		return ByteBuffer.wrap(byteArray);
-	}
     
     // we never send endstream on the header frame to make our life easier. we always just send
     // endstream on a data frame.
@@ -493,15 +483,16 @@ public abstract class Http2EngineImpl implements Http2Engine {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         updateMaxHeaderTableSize(out);
 
-    	HeadersFrame frame = new HeadersFrame();
-    	frame.setStreamId(stream.getStreamId());
-    	frame.setEndOfStream(false);
-    	
-        List<Http2Frame> frameList = headerEncoder.createHeaderFrames(frame, headerList);
+    	Http2Headers headers = new Http2Headers(headerList);
+    	headers.setStreamId(stream.getStreamId());
+    	headers.setEndOfStream(false);
+
+    	DataWrapper data = marshal(headers);
+    	ByteBuffer buf = ByteBuffer.wrap(data.createByteArray());
 
         // Send all the frames at once
-        log.info("sending header frames: " + frameList);
-        return channel.write(translate(frameList)).thenAccept(
+        log.info("sending header frames: " + headers);
+        return channel.write(buf).thenAccept(
                 channel -> {
                     switch (stream.getStatus()) {
                         case IDLE:
@@ -570,7 +561,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
         public void run() {
             PingFrame pingFrame = new PingFrame();
             pingFrame.setOpaqueData(System.nanoTime());
-            channel.write(ByteBuffer.wrap(http2Parser.marshal(pingFrame).createByteArray()));
+            channel.write(ByteBuffer.wrap(marshal(pingFrame).createByteArray()));
         }
     }
 
@@ -620,11 +611,11 @@ public abstract class Http2EngineImpl implements Http2Engine {
         WindowUpdateFrame frame = new WindowUpdateFrame();
         frame.setWindowSizeIncrement(length);
         frame.setStreamId(0x0);
-        channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+        channel.write(ByteBuffer.wrap(marshal(frame).createByteArray()));
 
         // reusing the frame! ack.
         frame.setStreamId(streamId);
-        channel.write(ByteBuffer.wrap(http2Parser.marshal(frame).createByteArray()));
+        channel.write(ByteBuffer.wrap(marshal(frame).createByteArray()));
         log.info("stream {} incoming window is {} and connection window is {}", streamId, incomingFlowControl.get(streamId), incomingFlowControl.get(0));
     }
 
@@ -645,7 +636,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     abstract void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream);
 
-    abstract void sideSpecificHandleHeaders(Http2FullHeaders frame, boolean isTrailer, Stream stream);
+    abstract void sideSpecificHandleHeaders(Http2Headers frame, boolean isTrailer, Stream stream);
 
     abstract void sideSpecificHandleRstStream(RstStreamFrame frame, Stream stream);
 

@@ -1,7 +1,7 @@
 package org.webpieces.httpcommon.impl;
 
-import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.SETTINGS;
 import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS;
+import static com.webpieces.http2parser.api.dto.lib.SettingsParameter.SETTINGS_MAX_FRAME_SIZE;
 import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.IDLE;
@@ -20,31 +20,30 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpcommon.api.Http2FullHeaders;
-import org.webpieces.httpcommon.api.Http2FullPushPromise;
 import org.webpieces.httpcommon.api.exceptions.GoAwayError;
 import org.webpieces.httpcommon.api.exceptions.Http2Error;
-import org.webpieces.httpcommon.api.exceptions.InternalError;
 import org.webpieces.httpcommon.api.exceptions.RstStreamError;
 import org.webpieces.httpcommon.impl.Http2EngineImpl.PendingData;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
-import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 class Http2DataListener implements DataListener {
@@ -53,7 +52,8 @@ class Http2DataListener implements DataListener {
 	 * 
 	 */
 	private final Http2EngineImpl http2EngineImpl;
-	private Http2Memento parseState;
+	private UnmarshalState unmarshalState;
+	
     private AtomicBoolean gotPreface = new AtomicBoolean(false);
 	private DataWrapper firstIncomingData = DataWrapperGeneratorFactory.EMPTY;
     
@@ -62,7 +62,8 @@ class Http2DataListener implements DataListener {
 	 */
 	Http2DataListener(Http2EngineImpl http2EngineImpl) {
 		this.http2EngineImpl = http2EngineImpl;
-		parseState = this.http2EngineImpl.http2Parser.prepareToParse();
+		unmarshalState = this.http2EngineImpl.http2Parser.prepareToUnmarshal(4096, 4096);
+		
 	}
 
     private void handleData(DataFrame frame, Stream stream) {
@@ -96,7 +97,7 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleHeaders(Http2FullHeaders frame, Stream stream) {
+    private void handleHeaders(Http2Headers frame, Stream stream) {
         boolean isTrailer = false;
         switch (stream.getStatus()) {
             case IDLE:
@@ -125,37 +126,28 @@ class Http2DataListener implements DataListener {
                 throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), stream.getStreamId(), Http2ErrorCode.STREAM_CLOSED, Http2EngineImpl.wrapperGen.emptyWrapper());
         }
 
-        if(frame.isPriority()) {
-            stream.setPriorityDetails(frame.getPriorityDetails());
-        }
+        stream.setPriorityDetails(frame.getPriorityDetails());
 
-        if(frame.isEndHeaders()) {
-            // the parser has already accumulated the headers in the frame for us.
+        boolean isComplete = frame.isEndOfStream();
 
-            boolean isComplete = frame.isEndStream();
-
-            if(isTrailer) {
-                // Make sure that the headers match what we are expecting.
-                List<String> allowedTrailerHeaders = stream.getTrailerHeaders();
-                for(Http2Header header: frame.getHeaderList()) {
-                    if(!allowedTrailerHeaders.contains(header.getName()))
-                        throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
-                }
+        if(isTrailer) {
+            // Make sure that the headers match what we are expecting.
+            List<String> allowedTrailerHeaders = stream.getTrailerHeaders();
+            for(Http2Header header: frame.getHeaders()) {
+                if(!allowedTrailerHeaders.contains(header.getName()))
+                    throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());
             }
-
-            // if we have no headers must be a compression error?
-            if(frame.getHeaderList().isEmpty()) {
-                throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.COMPRESSION_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
-            }
-            this.http2EngineImpl.sideSpecificHandleHeaders(frame, isTrailer, stream);
-
-            if (isComplete)
-                this.http2EngineImpl.receivedEndStream(stream);
-
         }
-        else {
-            throw new InternalError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2EngineImpl.wrapperGen.emptyWrapper());
+
+        // if we have no headers must be a compression error?
+        if(frame.getHeaders().isEmpty()) {
+            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.COMPRESSION_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
         }
+        this.http2EngineImpl.sideSpecificHandleHeaders(frame, isTrailer, stream);
+
+        if (isComplete)
+            this.http2EngineImpl.receivedEndStream(stream);
+
     }
 
 
@@ -180,43 +172,38 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handlePushPromise(Http2FullPushPromise frame, Stream stream) {
+    private void handlePushPromise(Http2Push frame, Stream stream) {
         if(this.http2EngineImpl.side == SERVER) {
             // Can't get pushpromise in the server
             throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
         }
 
-        // Can get this on any stream id, creates a new stream
-        if(frame.isEndHeaders()) {
-            long currentlyOpenStreams = this.http2EngineImpl.countOpenRemoteOriginatedStreams();
-            Http2EngineImpl.log.info("got push promise with currently open streams: " + currentlyOpenStreams);
-            if(this.http2EngineImpl.localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
-                    currentlyOpenStreams >= this.http2EngineImpl.localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
-                throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, frame.getPromisedStreamId());
-            }
-            int newStreamId = frame.getPromisedStreamId();
-            if(newStreamId <= this.http2EngineImpl.lastIncomingStreamId.get()) {
-                throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
-            }
-            this.http2EngineImpl.lastIncomingStreamId.set(newStreamId);
-
-            Stream promisedStream = new Stream();
-            this.http2EngineImpl.initializeFlowControl(newStreamId);
-            promisedStream.setStreamId(newStreamId);
-
-            // TODO: make sure streamid is valid
-            // TODO: close all lower numbered even IDLE streams
-            this.http2EngineImpl.activeStreams.put(newStreamId, promisedStream);
-
-            // Uses the same listener as the stream it came in on
-            promisedStream.setResponseListener(stream.getResponseListener());
-            
-            HttpRequest request = this.http2EngineImpl.requestFromHeaders(new LinkedList<>(frame.getHeaderList()), promisedStream);
-            promisedStream.setRequest(request);
-            promisedStream.setStatus(Stream.StreamStatus.RESERVED_REMOTE);
-        } else {
-            throw new InternalError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2EngineImpl.wrapperGen.emptyWrapper());
+        long currentlyOpenStreams = this.http2EngineImpl.countOpenRemoteOriginatedStreams();
+        Http2EngineImpl.log.info("got push promise with currently open streams: " + currentlyOpenStreams);
+        if(this.http2EngineImpl.localSettings.containsKey(SETTINGS_MAX_CONCURRENT_STREAMS) &&
+                currentlyOpenStreams >= this.http2EngineImpl.localSettings.get(SETTINGS_MAX_CONCURRENT_STREAMS)) {
+            throw new RstStreamError(Http2ErrorCode.REFUSED_STREAM, frame.getPromisedStreamId());
         }
+        int newStreamId = frame.getPromisedStreamId();
+        if(newStreamId <= this.http2EngineImpl.lastIncomingStreamId.get()) {
+            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2ErrorCode.PROTOCOL_ERROR, Http2EngineImpl.wrapperGen.emptyWrapper());
+        }
+        this.http2EngineImpl.lastIncomingStreamId.set(newStreamId);
+
+        Stream promisedStream = new Stream();
+        this.http2EngineImpl.initializeFlowControl(newStreamId);
+        promisedStream.setStreamId(newStreamId);
+
+        // TODO: make sure streamid is valid
+        // TODO: close all lower numbered even IDLE streams
+        this.http2EngineImpl.activeStreams.put(newStreamId, promisedStream);
+
+        // Uses the same listener as the stream it came in on
+        promisedStream.setResponseListener(stream.getResponseListener());
+        
+        HttpRequest request = this.http2EngineImpl.requestFromHeaders(new LinkedList<>(frame.getHeaders()), promisedStream);
+        promisedStream.setRequest(request);
+        promisedStream.setStatus(Stream.StreamStatus.RESERVED_REMOTE);
     }
 
     private void handleWindowUpdate(WindowUpdateFrame frame, Stream stream) {
@@ -268,7 +255,8 @@ class Http2DataListener implements DataListener {
             // Send the same frame back, setting ping response
             frame.setIsPingResponse(true);
             Http2EngineImpl.log.info("sending ping response: " + frame);
-            this.http2EngineImpl.channel.write(ByteBuffer.wrap(this.http2EngineImpl.http2Parser.marshal(frame).createByteArray()));
+            DataWrapper data = this.http2EngineImpl.marshal(frame);
+            this.http2EngineImpl.channel.write(ByteBuffer.wrap(data.createByteArray()));
         } else {
             // measure latency from the ping that was sent. The opaqueData we sent is
             // System.nanoTime() so we just measure the difference
@@ -277,8 +265,8 @@ class Http2DataListener implements DataListener {
         }
     }
 
-    private void handleFrame(Http2Frame frame) {
-        if(frame.getFrameType() != SETTINGS && !this.http2EngineImpl.gotSettings.get()) {
+    private void handleFrame(Http2Msg frame) {
+        if(frame.getMessageType() != Http2MsgType.SETTINGS && !this.http2EngineImpl.gotSettings.get()) {
             preconditions();
         }
 
@@ -303,12 +291,12 @@ class Http2DataListener implements DataListener {
                 }
             }
 
-            switch (frame.getFrameType()) {
+            switch (frame.getMessageType()) {
                 case DATA:
                     handleData((DataFrame) frame, stream);
                     break;
-                case FULL_HEADERS:
-                    handleHeaders((Http2FullHeaders) frame, stream);
+                case HEADERS:
+                    handleHeaders((Http2Headers) frame, stream);
                     break;
                 case PRIORITY:
                     handlePriority((PriorityFrame) frame, stream);
@@ -316,20 +304,18 @@ class Http2DataListener implements DataListener {
                 case RST_STREAM:
                     handleRstStream((RstStreamFrame) frame, stream);
                     break;
-                case FULL_PROMISE:
-                    handlePushPromise((Http2FullPushPromise) frame, stream);
+                case PUSH_PROMISE:
+                    handlePushPromise((Http2Push) frame, stream);
                     break;
                 case WINDOW_UPDATE:
                     handleWindowUpdate((WindowUpdateFrame) frame, stream);
                     break;
-                case CONTINUATION:
-                    throw new InternalError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), Http2EngineImpl.wrapperGen.emptyWrapper());
                 default:
                     throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), frame.getStreamId(), Http2ErrorCode.PROTOCOL_ERROR,
                             Http2EngineImpl.wrapperGen.emptyWrapper());
             }
         } else {
-            switch (frame.getFrameType()) {
+            switch (frame.getMessageType()) {
                 case WINDOW_UPDATE:
                     handleWindowUpdate((WindowUpdateFrame) frame, null);
                     break;
@@ -409,9 +395,10 @@ class Http2DataListener implements DataListener {
 
 	private void parseStuff(DataWrapper newData) {
 		try {
-		    parseState = this.http2EngineImpl.http2Parser.parse(parseState, newData, this.http2EngineImpl.decoder, this.http2EngineImpl.localSettings.toNewer());
-
-		    for (Http2Frame frame : parseState.getParsedFrames()) {
+	    	Long localMaxFrameSize = this.http2EngineImpl.localSettings.get(SETTINGS_MAX_FRAME_SIZE);
+			unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData, localMaxFrameSize);
+			
+		    for (Http2Msg frame : unmarshalState.getParsedFrames()) {
 		        Http2EngineImpl.log.info("got frame=" + frame);
 		        handleFrame(frame);
 		    }
@@ -430,10 +417,10 @@ class Http2DataListener implements DataListener {
 		}
 	}
 
-    private ByteBuffer translate(List<Http2Frame> frames) {
+    private ByteBuffer translate(List<Http2Msg> frames) {
     	DataWrapper allData = dataGen.emptyWrapper();
-    	for(Http2Frame f : frames) {
-    		DataWrapper data = this.http2EngineImpl.http2Parser.marshal(f);
+    	for(Http2Msg f : frames) {
+    		DataWrapper data = this.http2EngineImpl.marshal(f);
     		allData = dataGen.chainDataWrappers(allData, data);
     	}
     	byte[] byteArray = allData.createByteArray();

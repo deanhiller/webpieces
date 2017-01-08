@@ -23,8 +23,6 @@ import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestSender;
 import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
-import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -34,7 +32,8 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
-import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class TestEndToEnd {
@@ -49,7 +48,7 @@ public class TestEndToEnd {
     ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 
     HttpParser httpParser = HttpParserFactory.createParser(pool2);
-    TempHttp2Parser http2Parser = TempHttp2ParserFactory.createParser(pool2);
+    HpackParser http2Parser = HpackParserFactory.createParser(pool2, true);
 
     return HttpClientFactory.createHttpClient(mgr, httpParser, http2Parser, http2SettingsMap);
   }

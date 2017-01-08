@@ -5,18 +5,19 @@ import java.util.Optional;
 
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpServerSocket;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
 
+import com.webpieces.hpack.api.HpackParser;
+
 class ServerDataListener implements AsyncDataListener {
     private TimedRequestListener timedRequestListener;
     private Http11DataListener http11DataListener;
     private HttpParser httpParser;
-    private TempHttp2Parser http2Parser;
+    private HpackParser http2Parser;
     private FrontendConfig frontendConfig;
 
     private HttpServerSocket getHttpServerSocketForChannel(Channel channel) {
@@ -39,7 +40,7 @@ class ServerDataListener implements AsyncDataListener {
     }
 
     ServerDataListener(TimedRequestListener timedRequestListener, Http11DataListener http11DataListener, HttpParser httpParser,
-                       TempHttp2Parser http2Parser, FrontendConfig frontendConfig) {
+    		HpackParser http2Parser, FrontendConfig frontendConfig) {
         this.timedRequestListener = timedRequestListener;
         this.http11DataListener = http11DataListener;
         this.httpParser = httpParser;

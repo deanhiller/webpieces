@@ -8,20 +8,20 @@ import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.api.Http2ServerEngine;
 import org.webpieces.httpcommon.api.Http2SettingsMap;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -30,7 +30,7 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     private static final Logger log = LoggerFactory.getLogger(Http2ServerEngineImpl.class);
 
     public Http2ServerEngineImpl(
-        TempHttp2Parser http2Parser,
+        HpackParser http2Parser,
         Channel channel,
         InetSocketAddress remoteAddress,
         Http2SettingsMap http2SettingsMap) {
@@ -136,14 +136,14 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
     }
 
     @Override
-    void sideSpecificHandleHeaders(Http2FullHeaders frame, boolean isTrailer, Stream stream) {
+    void sideSpecificHandleHeaders(Http2Headers frame, boolean isTrailer, Stream stream) {
         if(isTrailer) {
-            requestListener.incomingTrailer(frame.getHeaderList(), stream.getRequestId(), frame.isEndStream(), responseSender);
+            requestListener.incomingTrailer(frame.getHeaders(), stream.getRequestId(), frame.isEndOfStream(), responseSender);
         } else {
-            HttpRequest request = requestFromHeaders(new LinkedList<>(frame.getHeaderList()), stream);
+            HttpRequest request = requestFromHeaders(new LinkedList<>(frame.getHeaders()), stream);
             checkHeaders(request.getHeaderLookupStruct(), stream);
             stream.setRequest(request);
-            requestListener.incomingRequest(request, stream.getRequestId(), frame.isEndStream(), responseSender);
+            requestListener.incomingRequest(request, stream.getRequestId(), frame.isEndOfStream(), responseSender);
         }
     }
 

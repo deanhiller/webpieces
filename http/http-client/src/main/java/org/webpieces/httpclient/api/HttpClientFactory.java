@@ -7,13 +7,14 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.httpclient.impl.HttpClientImpl;
 import org.webpieces.httpclient.impl.HttpsClientImpl;
 import org.webpieces.httpcommon.api.Http2SettingsMap;
-import org.webpieces.httpcommon.temp.TempHttp2Parser;
-import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
+
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
 
 public abstract class HttpClientFactory {
 
@@ -21,7 +22,7 @@ public abstract class HttpClientFactory {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
 		BufferCreationPool pool = new BufferCreationPool();
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
-		TempHttp2Parser http2Parser = TempHttp2ParserFactory.createParser(pool);
+		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 		
@@ -32,17 +33,17 @@ public abstract class HttpClientFactory {
 		return createHttpsClient(numThreads, null);
 	}
 	
-	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser httpParser, TempHttp2Parser http2Parser) {
+	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser httpParser, HpackParser http2Parser) {
 		return createHttpsClient(mgr, httpParser, http2Parser, null, new Http2SettingsMap());
 	}
 
-	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser httpParser, TempHttp2Parser http2Parser, Http2SettingsMap http2SettingsMap) {
+	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser httpParser, HpackParser http2Parser, Http2SettingsMap http2SettingsMap) {
 		return createHttpsClient(mgr, httpParser, http2Parser, null, http2SettingsMap);
 	}
 
 	public static HttpClient createHttpsClient(ChannelManager mgr,
 																							HttpParser httpParser,
-																							TempHttp2Parser http2Parser,
+																							HpackParser http2Parser,
 																							HttpsSslEngineFactory factory,
 																							Http2SettingsMap http2SettingsMap) {
 		if(factory != null)
