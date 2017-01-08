@@ -23,7 +23,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
         int paddingSize = castFrame.getPadding().getReadableSize();
 
         byte value = (byte) 0x0;
-        if (castFrame.isEndStream()) value |= 0x1;
+        if (castFrame.isEndOfStream()) value |= 0x1;
         if (paddingSize > 0) value |= 0x8;
         
         DataWrapper dataPayload = PaddingUtil.padDataIfNeeded(castFrame.getData(), castFrame.getPadding());
@@ -36,7 +36,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
         super.unmarshalFrame(state, frame);
         
         byte flags = state.getFrameHeaderData().getFlagsByte();
-        frame.setEndStream((flags & 0x1) == 0x1);
+        frame.setEndOfStream((flags & 0x1) == 0x1);
         boolean isPadded = (flags & 0x8) == 0x8;
 
         DataSplit split = PaddingUtil.extractPayloadAndPadding(isPadded, framePayloadData, frame.getStreamId());

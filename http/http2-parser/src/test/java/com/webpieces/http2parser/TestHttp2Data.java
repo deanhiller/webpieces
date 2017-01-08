@@ -48,7 +48,7 @@ public class TestHttp2Data{
 
         byte[] data = castFrame.getData().createByteArray();
         Assert.assertArrayEquals(data, UtilsForTest.toByteArray("FF FF FF FF FF FF FF FF"));
-        Assert.assertFalse(castFrame.isEndStream());
+        Assert.assertFalse(castFrame.isEndOfStream());
 
         UtilsForTest.testBidiFromBytes(unpaddedDataFrame);
     }
@@ -63,7 +63,7 @@ public class TestHttp2Data{
         // Even though there is padding the data should be the same
         byte[] data = castFrame.getData().createByteArray();
         Assert.assertArrayEquals(data, UtilsForTest.toByteArray("FF FF FF FF FF FF FF FF"));
-        Assert.assertFalse(castFrame.isEndStream());
+        Assert.assertFalse(castFrame.isEndOfStream());
         UtilsForTest.testBidiFromBytes(paddedDataFrame);
     }
 
@@ -92,7 +92,7 @@ public class TestHttp2Data{
         DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
-        frame.setEndStream(true);
+        frame.setEndOfStream(true);
         Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(endStreamDataFrame));
         Assert.assertTrue(UtilsForTest.isReservedBitZero(UtilsForTest.frameToDataWrapper(frame)));
         UtilsForTest.testBidiFromBytes(UtilsForTest.frameToHex(frame));
@@ -103,7 +103,7 @@ public class TestHttp2Data{
         DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
-        frame.setEndStream(true);
+        frame.setEndOfStream(true);
         frame.setPadding(UtilsForTest.toDataWrapper("00 00"));
         Assert.assertArrayEquals(UtilsForTest.frameToBytes(frame), UtilsForTest.toByteArray(paddedEndStreamDataFrame));
         Assert.assertTrue(UtilsForTest.isReservedBitZero(UtilsForTest.frameToDataWrapper(frame)));

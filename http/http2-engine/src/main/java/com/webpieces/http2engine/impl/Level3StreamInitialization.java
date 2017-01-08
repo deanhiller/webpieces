@@ -1,89 +1,175 @@
 package com.webpieces.http2engine.impl;
 
+import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.javasm.api.Memento;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.RequestWriter;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.Http2Push;
-import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level3StreamInitialization {
 
+	private static final Logger log = LoggerFactory.getLogger(Level3StreamInitialization.class);
 	private Level4ClientStateMachine clientSm;
-	//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
-	//we have to release items in the map inside this or release the engine
-	private StreamState streamState = new StreamState();
+	private StreamState streamState;
+	private Level5RemoteFlowControl level5FlowControl;
+	private HeaderSettings localSettings;
+	private HeaderSettings remoteSettings;
+	private int startingMaxConcurrent = 50;
+	private Semaphore newStreamPermits = new Semaphore(startingMaxConcurrent); //start with 100 until we get word from remote endpoint
+	private LinkedList<CachedRequest> queue = new LinkedList<>();
+	private AtomicInteger acquiredCnt = new AtomicInteger(0);
+	private AtomicInteger releasedCnt = new AtomicInteger(0);
 
-	public Level3StreamInitialization(Level4ClientStateMachine clientSm) {
+	public Level3StreamInitialization(
+			StreamState state,
+			Level4ClientStateMachine clientSm, 
+			Level5RemoteFlowControl level5FlowControl,
+			HeaderSettings localSettings,
+			HeaderSettings remoteSettings
+	) {
+		this.streamState = state;
 		this.clientSm = clientSm;
+		this.level5FlowControl = level5FlowControl;
+		this.localSettings = localSettings;
+		this.remoteSettings = remoteSettings;
 	}
 
 	public synchronized CompletableFuture<RequestWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
-		int streamId = frame.getStreamId();
-		if (streamState.get(streamId) != null) { // idle state
-			throw new IllegalStateException("Stream with id="+streamId+" already exists and can't be created again");
+		//always queue the request first...(this creates fairness in first in first out sending to server)
+		CompletableFuture<RequestWriter> future = queueRequest(frame, responseListener);
+		
+		processItemFromQueue();
+
+		log.info("queue size="+queue.size()+" currently running="+(startingMaxConcurrent-newStreamPermits.availablePermits()));
+		return future;
+	}
+
+	private void processItemFromQueue() {
+		CachedRequest req;
+		synchronized(this) {
+			CachedRequest peek = queue.peek();
+			if(peek == null)
+				return;
+		
+			boolean acquired = newStreamPermits.tryAcquire();
+			if(!acquired) 
+				return;
+			
+			req = queue.poll();
 		}
+		
+		Http2Headers frame = req.getFrame();
 
-		Stream stream = createStream(streamId, responseListener, null);
-		streamState.put(streamId, stream);
+		int val = acquiredCnt.incrementAndGet();
+		log.info("got permit(cause="+frame+").  size="+newStreamPermits.availablePermits()+" acquired="+val);
+		
+		Http2ResponseListener responseListener = req.getResponseListener();
+		CompletableFuture<RequestWriter> future = req.getFuture();
+		
+		Stream stream = createStream(frame.getStreamId(), responseListener, null);
+		clientSm.fireToSocket(stream, frame).handle((v, e) -> handleCompletion(v, e, future, stream));
+	}
 
-		Memento currentState = stream.getCurrentState();
-		return clientSm.fireToSocket(currentState, frame)
-				.thenApply(c -> new RequestWriterImpl(stream, clientSm));
+	private Void handleCompletion(Void v, Throwable t, CompletableFuture<RequestWriter> future, Stream stream) {
+		if(t != null) {
+			future.completeExceptionally(new RuntimeException(t));
+			return null;
+		}
+		
+		future.complete(new RequestWriterImpl(stream, this));
+		return null;
+	}
+	
+	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
+		CompletableFuture<Void> future = clientSm.fireToSocket(stream, data);
+		checkForClosedState(stream, data);
+		return future;
+	}
+	
+	private void checkForClosedState(Stream stream, PartialStream cause) {
+		//If a stream ends up in closed state, for request type streams, we must release a permit on
+		//max concurrent streams
+		boolean isClosed = clientSm.isInClosedState(stream);
+		if(!isClosed)
+			return; //do nothing
+		
+		Stream removedStream = streamState.remove(stream);
+		if(removedStream == null)
+			return; //someone else beat us to it so just return
+		
+		if(stream.getStreamId() % 2 == 1) {
+			//request stream, so increase permits
+			this.newStreamPermits.release();
+			int val = releasedCnt.decrementAndGet();
+			log.info("release permit(cause="+cause+").  size="+newStreamPermits.availablePermits()+" releasedCnt="+val);
+			processItemFromQueue(); //process any items from queue now that there is a new permit
+		}
+	}
+
+	private CompletableFuture<RequestWriter> queueRequest(Http2Headers frame, Http2ResponseListener responseListener) {
+		CompletableFuture<RequestWriter> future = new CompletableFuture<RequestWriter>();
+		queue.add(new CachedRequest(frame, responseListener, future));
+		return future;
 	}
 	
 	private Stream createStream(int streamId, Http2ResponseListener responseListener, PushPromiseListener pushListener) {
 		Memento initialState = clientSm.createStateMachine("stream" + streamId);
-		Stream stream = new Stream(streamId, initialState, responseListener, pushListener);
-		streamState.put(streamId, stream);
-		return stream;
+		long localWindowSize = localSettings.getInitialWindowSize();
+		long remoteWindowSize = remoteSettings.getInitialWindowSize();
+		Stream stream = new Stream(streamId, initialState, responseListener, pushListener, localWindowSize, remoteWindowSize);
+		return streamState.create(stream);
 	}
-	
+
 	public void sendPayloadToClient(PartialStream frame) {
-		int streamId = frame.getStreamId();
-
-		Stream stream = streamState.get(streamId);
-		if (stream == null)
-			throw new IllegalArgumentException("bug, Stream not found for frame="+frame);
-
-		Memento currentState = stream.getCurrentState();
-		clientSm.testStateMachineTransition(currentState, frame);
-		
-		if(frame.getStreamId() % 2 == 1) {
-			Http2ResponseListener listener = stream.getResponseListener();
-			listener.incomingPartialResponse(frame);
-		} else {
-			PushPromiseListener listener = stream.getPushListener();
-			listener.incomingPushPromise(frame);
+		if(frame instanceof Http2Push) {
+			sendPushPromiseToClient((Http2Push) frame);
+			return;
 		}
+		
+		Stream stream = streamState.get(frame);
+		clientSm.fireToClient(stream, frame);
+		checkForClosedState(stream, frame);
 	}
 
 	public void sendPushPromiseToClient(Http2Push fullPromise) {		
-		int newStreamId = fullPromise.getStreamId();
+		int newStreamId = fullPromise.getPromisedStreamId();
 		if(newStreamId % 2 == 1)
 			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 
 					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number", true);
 
-		Stream stream = streamState.get(newStreamId);
-		if (stream != null) {
-			throw new IllegalArgumentException("bug, how does the stream exist already. promise="+fullPromise);
-		}
-		Stream causalStream = streamState.get(fullPromise.getCausalStreamId());
-		if(causalStream == null)
-			throw new IllegalArgumentException("bug, the stream causing the push_promise does not exist. promise="+fullPromise);
+		Stream causalStream = streamState.get(fullPromise);
 		
 		Http2ResponseListener listener = causalStream.getResponseListener();
 		PushPromiseListener pushListener = listener.newIncomingPush(newStreamId);
 
-		stream = createStream(newStreamId, null, pushListener);
-		Memento currentState = stream.getCurrentState();
-		clientSm.testStateMachineTransition(currentState, fullPromise);
-		pushListener.incomingPushPromise(fullPromise);
+		Stream stream = createStream(newStreamId, null, pushListener);
+		clientSm.fireToClient(stream, fullPromise);
+	}
+
+	public void updateWindowSize(WindowUpdateFrame msg) {
+		if(msg.getStreamId() == 0) {
+			level5FlowControl.updateConnectionWindowSize(msg);
+		} else {
+			Stream stream = streamState.get(msg);
+			level5FlowControl.updateStreamWindowSize(stream, msg);
+		}
+	}
+
+	public void setMaxConcurrentStreams(long value) {
+		remoteSettings.setMaxConcurrentStreams(value);
+		
 	}
 }

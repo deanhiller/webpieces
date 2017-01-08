@@ -2,73 +2,125 @@ package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.threading.NamedThreadFactory;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class IntegNgHttp2 {
 
     private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
+    
+    private static Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("deanClientThread"));
+    private static SortedSet<Integer> sent = new TreeSet<>();
+    private static SortedSet<Integer> completed = new TreeSet<>();
+    private static SortedSet<Integer> completedPush = new TreeSet<>();
 
-    static private CompletableFuture<Void> sendManyTimes(Http2Socket socket, int n, Http2Headers req, Http2ResponseListener l) {
-        if(n > 0) {
-        	log.info("send request");
-            return socket.sendRequest(req, l)
-                    .thenCompose(writer -> sendManyTimes(socket, n-1, req, l));
-        } else {
-            return CompletableFuture.completedFuture(null);
-        }
-    }
+    private static class WorkItem implements Runnable {
+    	private ChunkedResponseListener listener;
+		private Http2Socket socket;
+		private List<Http2Header> req;
+		private int id;
+		private int originalId;
 
+		public WorkItem(Http2Socket socket, List<Http2Header> req2, int id, int originalId) {
+    		this.socket = socket;
+			this.req = req2;
+			this.id = id;
+			this.originalId = originalId;
+			listener = new ChunkedResponseListener(id);
+    	}
+    	
+    	public void run() {
+    		try {
+    			runImpl();
+    		} catch(Throwable e) {
+    			log.warn("Exception", e);
+    		}
+    	}
+    	public void runImpl() {
+            synchronized(sent) {
+            	sent.add(id);
+            }
+    		
+        	Http2Headers request = new Http2Headers(req);
+            request.setEndOfStream(true);
+            
+    		socket.sendRequest(request, listener)
+    				.exceptionally(e -> {
+    					reportException(socket, e);
+    					return null;
+    				});
+
+    		log.info("sent request.  ID="+id+" streamId="+request.getStreamId());
+
+    		int numRun = id - originalId;
+    		if(numRun >= 9) {
+    			log.info("exiting running more.  numRun="+numRun+" id="+id+" orig="+originalId);
+    			return;
+    		}
+    		
+    		int newId = id+1;
+    		WorkItem work = new WorkItem(socket, req, newId, originalId);
+    		executor.execute(work);
+    	}
+    };
+    
     public static void main(String[] args) throws InterruptedException {
         boolean isHttp = true;
 
-        String host = "nghttp2.org";
+        String host = "localhost";
         int port = 443;
         if(isHttp)
-            port = 80;
+            port = 8080;
 
-        Http2Headers req = createRequest(host, isHttp);
+        List<Http2Header> req = createRequest(host, isHttp);
 
         log.info("starting socket");
-        ChunkedResponseListener listener = new ChunkedResponseListener();
 
         InetSocketAddress addr = new InetSocketAddress(host, port);
         Http2Socket socket = IntegGoogleHttps.createHttpClient("clientSocket", isHttp, addr);
 
+
+        
         socket
                 .connect(addr, new ServerListenerImpl())
-                .thenCompose(theSocket -> {
-                	log.info("sending REQUEST");
-                	return sendManyTimes(theSocket, 1, req, listener);
-                	})
+                .thenApply(s -> {
+                    for(int i = 0; i < 1000; i+=100) {
+                    	executor.execute(new WorkItem(socket, req, i, i));
+                    }
+                	return s;
+                })
                 .exceptionally(e -> {
                     reportException(socket, e);
                     return null;
                 });
 
-        Thread.sleep(100000);
-
-        sendManyTimes(socket, 1, req, listener).exceptionally(e -> {
-            reportException(socket, e);
-            return null;
-        });
-        Thread.sleep(10000);
+        Thread.sleep(100000000);
     }
 
+    
+    
+    
     private static Void reportException(Http2Socket socket, Throwable e) {
         log.error("exception on socket="+socket, e);
         return null;
@@ -101,9 +153,24 @@ public class IntegNgHttp2 {
 	
 	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 
+		private int id;
+
+		public ChunkedResponseListener(int id) {
+			this.id = id;
+		}
+
 		@Override
-		public void incomingPartialResponse(PartialStream response) {
+		public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
 			log.info("incoming part of response="+response);
+			
+			if(response.isEndOfStream()) {
+				synchronized (completed) {
+					completed.add(id);
+				}
+				log.info("completed="+completed.size()+" sent="+sent.size()+" list="+completed);
+			}
+			
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
@@ -117,30 +184,37 @@ public class IntegNgHttp2 {
 		}
 
 		@Override
-		public void incomingPushPromise(PartialStream response) {
+		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
 			log.info("incoming push promise="+response);
+			if(response.isEndOfStream()) {
+				synchronized(this) {
+					completedPush.add(id);
+					log.info("completedPush="+completedPush+" sent="+sent.size());
+				}
+			}
+			return CompletableFuture.completedFuture(null);
 		}
 		
 	}
 
-    private static Http2Headers createRequest(String host, boolean isHttp) {
+    private static List<Http2Header> createRequest(String host, boolean isHttp) {
     	String scheme;
     	if(isHttp)
     		scheme = "http";
     	else
     		scheme = "https";
     	
-    	Http2Headers req = new Http2Headers();
-        req.addHeader(new Http2Header(Http2HeaderName.METHOD, "GET"));
-        req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, host));
-        req.addHeader(new Http2Header(Http2HeaderName.PATH, "/"));
-        req.addHeader(new Http2Header(Http2HeaderName.SCHEME, scheme));
-        req.addHeader(new Http2Header("host", host));
-        req.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
-        req.addHeader(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
-        req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "nghttp2/1.15.0"));
-        
-        req.setEndOfStream(true);
-        return req;
+    	List<Http2Header> headers = new ArrayList<>();
+    	
+        headers.add(new Http2Header(Http2HeaderName.METHOD, "GET"));
+        headers.add(new Http2Header(Http2HeaderName.AUTHORITY, host));
+        headers.add(new Http2Header(Http2HeaderName.PATH, "/"));
+        headers.add(new Http2Header(Http2HeaderName.SCHEME, scheme));
+        headers.add(new Http2Header("host", host));
+        headers.add(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
+        headers.add(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
+        headers.add(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/1.15.0"));
+
+        return headers;
     }
 }

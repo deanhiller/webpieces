@@ -1,6 +1,7 @@
 package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -17,13 +18,13 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2EngineFactory;
 import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.PartialStream;
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class IntegGoogleHttps {
 
@@ -72,7 +73,7 @@ public class IntegGoogleHttps {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
-		Http2Parser http2Parser = Http2ParserFactory.createParser(pool2);
+		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
 		Http2EngineFactory http2HighLevelFactory = new Http2EngineFactory();
 		
 		String host = addr.getHostName();
@@ -80,7 +81,7 @@ public class IntegGoogleHttps {
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		
-		Http2Client client = Http2ClientFactory.createHttpClient(mgr, http2Parser, http2HighLevelFactory);
+		Http2Client client = Http2ClientFactory.createHttpClient(mgr, hpackParser, http2HighLevelFactory);
 		
 		Http2Socket socket;
 		if(isHttp) {
@@ -123,8 +124,9 @@ public class IntegGoogleHttps {
 	
 	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 		@Override
-		public void incomingPartialResponse(PartialStream response) {
+		public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
 			log.info("incoming part of response="+response);
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
@@ -136,8 +138,9 @@ public class IntegGoogleHttps {
 			log.info("server cancelled request");
 		}
 		@Override
-		public void incomingPushPromise(PartialStream response) {
+		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
 			log.info("incoming push promise");
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 }

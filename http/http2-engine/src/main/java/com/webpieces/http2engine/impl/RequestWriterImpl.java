@@ -3,15 +3,15 @@ package com.webpieces.http2engine.impl;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2engine.api.RequestWriter;
-import com.webpieces.http2engine.api.dto.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class RequestWriterImpl implements RequestWriter {
 
 	private Stream stream;
-	private Level4ClientStateMachine clientSm;
+	private Level3StreamInitialization clientSm;
 	private boolean streamEnded;
 
-	public RequestWriterImpl(Stream stream, Level4ClientStateMachine clientSm) {
+	public RequestWriterImpl(Stream stream, Level3StreamInitialization clientSm) {
 		this.stream = stream;
 		this.clientSm = clientSm;
 	}
@@ -28,7 +28,7 @@ public class RequestWriterImpl implements RequestWriter {
 		if(data.isEndOfStream())
 			streamEnded = true;
 		
-		return clientSm.fireToSocket(stream.getCurrentState(), data).thenApply(c -> this);
+		return clientSm.sendMoreStreamData(stream, data).thenApply(c -> this);
 	}
 
 }

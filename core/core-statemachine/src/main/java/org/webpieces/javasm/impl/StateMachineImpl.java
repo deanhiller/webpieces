@@ -118,13 +118,13 @@ public class StateMachineImpl implements StateMachine
 
         try {
             //get the current state
-            StateImpl state = nameToState.get(smState.getCurrentStateName());
+            StateImpl state = nameToState.get(smState.getCurrentState().getName());
 
             state.fireEvent(smState, evt);
         } catch(RuntimeException e) {
             //NOTE: Stack trace is not logged here.  That is the responsibility of the javasm client
             //so exceptions don't get logged multiple times.
-            smState.getLogger().warn(this+"Exception occurred going out of state="+smState.getCurrentStateName()+", event="+evt);
+            smState.getLogger().warn(this+"Exception occurred going out of state="+smState.getCurrentState()+", event="+evt);
             throw e;
         } finally {
             smState.setInProcess(false);

@@ -112,7 +112,7 @@ public class TestHttp2Data{
         DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
-        frame.setEndStream(true);
+        frame.setEndOfStream(true);
         
         byte[] data = parser.marshal(frame).createByteArray();
         String hexFrame = UtilsForTest.toHexString(data);
@@ -124,7 +124,7 @@ public class TestHttp2Data{
         DataFrame frame = new DataFrame();
         frame.setData(UtilsForTest.dataWrapperFromHex("FF FF FF FF FF FF FF FF"));
         frame.setStreamId(1);
-        frame.setEndStream(true);
+        frame.setEndOfStream(true);
         frame.setPadding(UtilsForTest.toDataWrapper("00 00"));
 
         byte[] data = parser.marshal(frame).createByteArray();

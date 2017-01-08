@@ -1,6 +1,10 @@
 package com.webpieces.http2parser.impl.marshallers;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 import java.util.List;
 
 import org.webpieces.data.api.BufferPool;
@@ -41,15 +45,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 			dataPayload = dataGen.emptyWrapper();
 		} else {
 			List<Http2Setting> settings = castFrame.getSettings();
-			ByteBuffer payload = bufferPool.nextBuffer(6 * settings.size());
-
-			for (Http2Setting setting : settings) {
-				UnsignedData.putUnsignedShort(payload, setting.getId());
-				UnsignedData.putUnsignedInt(payload, setting.getValue());
-			}
-			payload.flip();
-
-			dataPayload = dataGen.wrapByteBuffer(payload);
+			dataPayload = marshalOut(settings);
 		}
 		return super.marshalFrame(frame, flags, dataPayload);
 	}
@@ -77,7 +73,8 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
         
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
 
-		unmarshal(frame, payloadByteBuffer);
+		List<Http2Setting> settingsList = unmarshal(payloadByteBuffer);
+		frame.setSettings(settingsList);
 
 		bufferPool.releaseBuffer(payloadByteBuffer);
 
@@ -87,14 +84,16 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		return frame;
 	}
 
-	private void unmarshal(SettingsFrame frame, ByteBuffer payloadByteBuffer) {
+	private List<Http2Setting> unmarshal(ByteBuffer payloadByteBuffer) {
+		List<Http2Setting> settings = new ArrayList<>();
 		while (payloadByteBuffer.hasRemaining()) {
 			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
 			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
 			SettingsParameter key = SettingsParameter.lookup(id);
-			frame.addSetting(new Http2Setting(id, value));
+			settings.add(new Http2Setting(id, value));
 			validate(key, value);
 		}
+		return settings;
 	}
 
 	private void validate(SettingsParameter key, long value) {
@@ -139,9 +138,31 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR);
 	}
 
-	public SettingsFrame unmarshalPayload(ByteBuffer settingsPayload) {
-		SettingsFrame frame = new SettingsFrame();
-		unmarshal(frame, settingsPayload);
-		return frame;
+	public List<Http2Setting> unmarshalPayload(String base64SettingsPayload) {
+		Decoder decoder = Base64.getDecoder();
+		byte[] decoded = decoder.decode(base64SettingsPayload);
+		ByteBuffer buf = ByteBuffer.wrap(decoded);
+		return unmarshal(buf);
+	}
+
+	public String marshalPayload(List<Http2Setting> settingsPayload) {
+		DataWrapper data = marshalOut(settingsPayload);
+		byte[] byteBuf = data.createByteArray();
+		Encoder encoder = Base64.getEncoder();
+		return encoder.encodeToString(byteBuf);
+	}
+	
+	private DataWrapper marshalOut(List<Http2Setting> settings) {
+		DataWrapper dataPayload;
+		ByteBuffer payload = bufferPool.nextBuffer(6 * settings.size());
+
+		for (Http2Setting setting : settings) {
+			UnsignedData.putUnsignedShort(payload, setting.getId());
+			UnsignedData.putUnsignedInt(payload, setting.getValue());
+		}
+		payload.flip();
+
+		dataPayload = dataGen.wrapByteBuffer(payload);
+		return dataPayload;
 	}
 }

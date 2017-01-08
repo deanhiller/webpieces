@@ -72,7 +72,7 @@ public class StateImpl implements State
         }
 
         StateImpl endState = transition.getEndState();
-        String nextState = transition.getEndState().getName();
+        State nextState = transition.getEndState();
         smState.getLogger().debug(() -> smState+"Transition: "+getName()+" -> "+nextState+", event="+evt);
 
         try {

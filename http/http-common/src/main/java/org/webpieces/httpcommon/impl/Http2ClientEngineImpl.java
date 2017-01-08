@@ -51,7 +51,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
 
     @Override
     void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream) {
-        stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), frame.isEndStream()).thenAccept(
+        stream.getResponseListener().incomingData(frame.getData(), stream.getResponseId(), frame.isEndOfStream()).thenAccept(
                 length -> incrementIncomingWindow(frame.getStreamId(), payloadLength));
     }
 

@@ -3,8 +3,9 @@ package com.webpieces.http2parser.api.dto;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class RstStreamFrame extends AbstractHttp2Frame {
+public class RstStreamFrame extends AbstractHttp2Frame implements PartialStream {
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.RST_STREAM;
@@ -23,6 +24,11 @@ public class RstStreamFrame extends AbstractHttp2Frame {
         this.errorCode = errorCode;
     }
 
+	@Override
+	public boolean isEndOfStream() {
+		return true;
+	}
+	
     @Override
     public String toString() {
         return "RstStreamFrame{" +

@@ -2,6 +2,7 @@ package org.webpieces.http2client;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2ServerListener;
@@ -9,12 +10,12 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.PartialStream;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class IntegColoradoEdu {
 
@@ -77,8 +78,9 @@ public class IntegColoradoEdu {
 	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
 
 		@Override
-		public void incomingPartialResponse(PartialStream response) {
+		public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
 			log.info("incoming part of response="+response);
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
@@ -92,8 +94,9 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public void incomingPushPromise(PartialStream response) {
+		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
 			log.info("incoming push promise");
+			return CompletableFuture.completedFuture(null);
 		}
 
 	}

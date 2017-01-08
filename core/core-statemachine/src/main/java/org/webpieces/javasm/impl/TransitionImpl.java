@@ -52,7 +52,7 @@ public class TransitionImpl implements Transition
         for(int ii = list.length-1; ii >= 0; ii--) {
             try {
                 int index = ii;
-                smState.getLogger().trace(()->smState+"Action: "+list[index].getClass().getName()+", state="+smState.getCurrentStateName());
+                smState.getLogger().trace(()->smState+"Action: "+list[index].getClass().getName()+", state="+smState.getCurrentState());
                 list[ii].actionPerformed(evt);
             } catch(RuntimeException e) {
                 smState.getLogger().warn(smState+"Exception occurred in client ActionListener="+list[ii]);

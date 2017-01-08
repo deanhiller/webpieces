@@ -8,11 +8,11 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.http2client.api.exceptions.ResetStreamException;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.dto.Http2Data;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.PartialStream;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class SingleResponseListener implements Http2ResponseListener {
 
@@ -22,13 +22,17 @@ public class SingleResponseListener implements Http2ResponseListener {
 	private DataWrapper fullData = dataGen.emptyWrapper();
 	
 	@Override
-	public void incomingPartialResponse(PartialStream response) {
+	public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
 		if(headers == null) {
 			incomingResponse((Http2Headers) response);
-		} else if(response instanceof Http2Data) {
-			incomingData((Http2Data) response);
+		} else if(response instanceof DataFrame) {
+			incomingData((DataFrame) response);
 		} else
 			incomingEndHeaders((Http2Headers) response);
+		
+		//complete immediately because client is in control of single request/response
+		//and can just send less requests if he wants to back off
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	public void incomingResponse(Http2Headers headers) {
@@ -37,8 +41,8 @@ public class SingleResponseListener implements Http2ResponseListener {
 			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}
 
-	public void incomingData(Http2Data data) {
-		fullData =  dataGen.chainDataWrappers(fullData, data.getPayload());
+	public void incomingData(DataFrame data) {
+		fullData =  dataGen.chainDataWrappers(fullData, data.getData());
 		if(data.isEndOfStream())
 			responseFuture.complete(new Http2Response(headers, fullData, null));
 	}

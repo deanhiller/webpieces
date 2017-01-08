@@ -4,8 +4,9 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class UnknownFrame extends AbstractHttp2Frame {
+public class UnknownFrame extends AbstractHttp2Frame implements PartialStream {
 
 	private byte flagsByte;
 	private byte frameTypeId;
@@ -35,6 +36,11 @@ public class UnknownFrame extends AbstractHttp2Frame {
 		return framePayloadData;
 	}
 
+	@Override
+	public boolean isEndOfStream() {
+		return false;
+	}
+	
 	@Override
 	public String toString() {
 		return "UnknownFrame ["

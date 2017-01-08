@@ -13,12 +13,12 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2engine.api.Http2EngineFactory;
 import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.dto.Http2Data;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class Http2SocketImpl implements Http2Socket {
 
@@ -26,7 +26,7 @@ public class Http2SocketImpl implements Http2Socket {
 	private Layer1Incoming incoming;
 	private Layer3Outgoing outgoing;
 
-	public Http2SocketImpl(TCPChannel channel, Http2Parser http2Parser, Http2EngineFactory factory) {
+	public Http2SocketImpl(TCPChannel channel, HpackParser http2Parser, Http2EngineFactory factory) {
 		outgoing = new Layer3Outgoing(channel, this);
 		Http2ClientEngine parseLayer = factory.createClientParser(channel+"", http2Parser, outgoing);
 		incoming = new Layer1Incoming(parseLayer);
@@ -62,7 +62,7 @@ public class Http2SocketImpl implements Http2Socket {
 			sendRequest(request.getHeaders(), responseListener);
 			return responseListener.fetchResponseFuture();
 		} else if(request.getTrailingHeaders() == null) {
-			Http2Data data = createData(request, true);
+			DataFrame data = createData(request, true);
 			
 			return sendRequest(request.getHeaders(), responseListener)
 						.thenCompose(writer -> writer.sendData(data))
@@ -70,7 +70,7 @@ public class Http2SocketImpl implements Http2Socket {
 		}
 		
 		request.getHeaders().setEndOfStream(false);
-		Http2Data data = createData(request, false);
+		DataFrame data = createData(request, false);
 		request.getTrailingHeaders().setEndOfStream(true);
 		
 		return sendRequest(request.getHeaders(), responseListener)
@@ -79,11 +79,11 @@ public class Http2SocketImpl implements Http2Socket {
 			.thenCompose(writer -> responseListener.fetchResponseFuture());
 	}
 
-	private Http2Data createData(Http2Request request, boolean isEndOfStream) {
+	private DataFrame createData(Http2Request request, boolean isEndOfStream) {
 		DataWrapper payload = request.getPayload();
-		Http2Data data = new Http2Data();
+		DataFrame data = new DataFrame();
 		data.setEndOfStream(isEndOfStream);
-		data.setPayload(payload);
+		data.setData(payload);
 		return data;
 	}
 

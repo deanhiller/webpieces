@@ -29,7 +29,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         int paddingSize = castFrame.getPadding().getReadableSize();
 
         byte value = 0x0;
-        if (castFrame.isEndStream()) value |= 0x1;
+        if (castFrame.isEndOfStream()) value |= 0x1;
         if (castFrame.isEndHeaders()) value |= 0x4;
         if (paddingSize > 0) value |= 0x8;
         if (castFrame.isPriority()) value |= 0x20;
@@ -56,7 +56,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         super.unmarshalFrame(state, frame);
 
         byte flagsByte = state.getFrameHeaderData().getFlagsByte();
-        frame.setEndStream((flagsByte & 0x1) == 0x1);
+        frame.setEndOfStream((flagsByte & 0x1) == 0x1);
         frame.setEndHeaders((flagsByte & 0x4) == 0x4);
         boolean isPadded = (flagsByte & 0x8) == 0x8;
         

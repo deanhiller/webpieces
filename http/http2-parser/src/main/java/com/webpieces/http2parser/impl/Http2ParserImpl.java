@@ -12,14 +12,14 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.http2parser.api.Http2Memento;
-import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParseException;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.impl.marshallers.ContinuationMarshaller;
 import com.webpieces.http2parser.impl.marshallers.DataMarshaller;
 import com.webpieces.http2parser.impl.marshallers.FrameMarshaller;
@@ -181,8 +181,12 @@ public class Http2ParserImpl implements Http2Parser {
 	}
 
 	@Override
-	public SettingsFrame unmarshalSettingsPayload(ByteBuffer settingsPayload) {
-		return settingsMarshaller.unmarshalPayload(settingsPayload);
+	public List<Http2Setting> unmarshalSettingsPayload(String base64SettingsPayload) {
+		return settingsMarshaller.unmarshalPayload(base64SettingsPayload);
 	}
 
+	@Override
+	public String marshalSettingsPayload(List<Http2Setting> settingsPayload) {
+		return settingsMarshaller.marshalPayload(settingsPayload);
+	}
 }

@@ -1,17 +1,18 @@
-package com.webpieces.http2engine.api.dto;
+package com.webpieces.hpack.api.dto;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class Http2Headers implements PartialStream {
 
 	private int streamId;
 	private boolean endOfStream = false;
-    private PriorityDetails priorityDetails = new PriorityDetails(); /* optional */
+    private PriorityDetails priorityDetails; /* optional */
 	protected List<Http2Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can
 	//be looked up by key.
@@ -56,6 +57,42 @@ public class Http2Headers implements PartialStream {
 	}
 	public void setEndOfStream(boolean lastPartOfResponse) {
 		this.endOfStream = lastPartOfResponse;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (endOfStream ? 1231 : 1237);
+		result = prime * result + ((headers == null) ? 0 : headers.hashCode());
+		result = prime * result + ((priorityDetails == null) ? 0 : priorityDetails.hashCode());
+		result = prime * result + streamId;
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Http2Headers other = (Http2Headers) obj;
+		if (endOfStream != other.endOfStream)
+			return false;
+		if (headers == null) {
+			if (other.headers != null)
+				return false;
+		} else if (!headers.equals(other.headers))
+			return false;
+		if (priorityDetails == null) {
+			if (other.priorityDetails != null)
+				return false;
+		} else if (!priorityDetails.equals(other.priorityDetails))
+			return false;
+		if (streamId != other.streamId)
+			return false;
+		return true;
 	}
 	
 	@Override

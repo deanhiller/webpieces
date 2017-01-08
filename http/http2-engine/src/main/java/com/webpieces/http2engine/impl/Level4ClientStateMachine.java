@@ -8,20 +8,23 @@ import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
 
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.Http2Push;
-import com.webpieces.http2engine.api.dto.PartialStream;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level4ClientStateMachine {
 
 	private StateMachine stateMachine;
 	private State idleState;
-	private Level5FlowControl flowControl;
+	private Level5RemoteFlowControl remoteFlowControl;
+	private Level5LocalFlowControl localFlowControl;
+	private State closed;
 	
-	public Level4ClientStateMachine(String id, Level5FlowControl flowControl) {
-		this.flowControl = flowControl;
+	public Level4ClientStateMachine(String id, Level5RemoteFlowControl remoteFlowControl, Level5LocalFlowControl localFlowControl) {
+		this.remoteFlowControl = remoteFlowControl;
+		this.localFlowControl = localFlowControl;
 		StateMachineFactory factory = StateMachineFactory.createFactory();
 		stateMachine = factory.createStateMachine(id);
 
@@ -29,7 +32,7 @@ public class Level4ClientStateMachine {
 		State openState = stateMachine.createState("Open");
 		State reservedState = stateMachine.createState("Reserved(remote)");
 		State halfClosedLocal = stateMachine.createState("Half Closed(local)");
-		State closed = stateMachine.createState("closed");
+		closed = stateMachine.createState("closed");
 	
 		NoTransitionImpl failIfNoTransition = new NoTransitionImpl();
 		idleState.addNoTransitionListener(failIfNoTransition);
@@ -60,8 +63,6 @@ public class Level4ClientStateMachine {
 		stateMachine.createTransition(openState, openState, dataSend, sentHeaders);
 
 		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeaders, dataRecv);
-		
-		
 	}
 
 	private static class NoTransitionImpl implements NoTransitionListener {
@@ -71,18 +72,19 @@ public class Level4ClientStateMachine {
 		}
 	}
 	
-	public CompletableFuture<Void> fireToSocket(Memento currentState, PartialStream payload) {
+	public CompletableFuture<Void> fireToSocket(Stream stream, PartialStream payload) {
+		Memento state = stream.getCurrentState();
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.SEND, payloadType);
 
-		stateMachine.fireEvent(currentState, event);
+		stateMachine.fireEvent(state, event);
 		
 		//sometimes a single frame has two events :( per http2 spec
 		if(payload.isEndOfStream())
-			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));
+			stateMachine.fireEvent(state, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));
 		
 		//if no exceptions occurred, send it on to flow control layer
-		return flowControl.sendPayloadToSocket(payload);
+		return remoteFlowControl.sendPayloadToSocket(stream, payload);
 	}
 	
 	public Memento createStateMachine(String streamId) {
@@ -100,7 +102,8 @@ public class Level4ClientStateMachine {
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}
 
-	public void testStateMachineTransition(Memento currentState, PartialStream payload) {
+	public void fireToClient(Stream stream, PartialStream payload) {
+		Memento currentState = stream.getCurrentState();
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
 		
@@ -108,8 +111,15 @@ public class Level4ClientStateMachine {
 		
 		if(payload.isEndOfStream())
 			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG)); //validates state transition is ok
-		
-		//if no exceptions occurred, return and data is sent on to client
+
+		localFlowControl.fireToClient(stream, payload);
+	}
+
+	public boolean isInClosedState(Stream stream) {
+		State currentState = stream.getCurrentState().getCurrentState();
+		if(currentState == closed)
+			return true;
+		return false;
 	}
 
 }

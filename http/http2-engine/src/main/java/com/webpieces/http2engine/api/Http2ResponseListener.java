@@ -1,6 +1,8 @@
 package com.webpieces.http2engine.api;
 
-import com.webpieces.http2engine.api.dto.PartialStream;
+import java.util.concurrent.CompletableFuture;
+
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public interface Http2ResponseListener {
 
@@ -10,8 +12,9 @@ public interface Http2ResponseListener {
 	 * to see if it is the final end of the response
 	 * 
 	 * @param resp
+	 * @return Future that will complete when we should free up more space to read more incoming data for this HttpEngine
 	 */
-	void incomingPartialResponse(PartialStream response);
+	CompletableFuture<Void> incomingPartialResponse(PartialStream response);
 
 	/**
 	 * For http/2 only in that servers can pre-emptively send a response to requests

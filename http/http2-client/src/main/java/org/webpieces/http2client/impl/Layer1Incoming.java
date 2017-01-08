@@ -1,7 +1,9 @@
 package org.webpieces.http2client.impl;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -12,18 +14,18 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2ClientEngine;
 import com.webpieces.http2engine.api.Http2ResponseListener;
 import com.webpieces.http2engine.api.RequestWriter;
-import com.webpieces.http2engine.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.dto.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Layer1Incoming implements DataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer1Incoming.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ClientEngine layer2;
-	private int nextAvailableStreamId = 1;
+	private AtomicInteger nextAvailableStreamId = new AtomicInteger(1);
 
 	public Layer1Incoming(Http2ClientEngine layer2) {
 		this.layer2 = layer2;
@@ -76,22 +78,21 @@ public class Layer1Incoming implements DataListener {
 		}
 	}
 	
-	private synchronized int getNextAvailableStreamId() {
-		int temp = nextAvailableStreamId;
-		nextAvailableStreamId += 2;
-		return temp;
+	private int getNextAvailableStreamId() {
+		return nextAvailableStreamId.getAndAdd(2);
 	}
 
 	@Override
 	public void incomingData(Channel channel, ByteBuffer b) {
-		log.info("incoming data. size="+b.remaining());
+		log.info(channel+"incoming data. size="+b.remaining());
 		DataWrapper data = dataGen.wrapByteBuffer(b);
+		log.info("data="+data.createStringFrom(0, data.getReadableSize(), StandardCharsets.UTF_8));
 		layer2.parse(data);
 	}
 
 	@Override
 	public void farEndClosed(Channel channel) {
-		layer2.closeEngine();
+		layer2.farEndClosed();
 	}
 
 	@Override

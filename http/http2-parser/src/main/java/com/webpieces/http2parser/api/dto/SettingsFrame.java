@@ -5,9 +5,10 @@ import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
-public class SettingsFrame extends AbstractHttp2Frame {
+public class SettingsFrame extends AbstractHttp2Frame implements Http2Msg {
     /* flags */
     private boolean ack = false; /* 0x1 */
 

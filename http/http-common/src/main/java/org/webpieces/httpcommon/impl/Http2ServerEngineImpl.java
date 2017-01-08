@@ -132,7 +132,7 @@ public class Http2ServerEngineImpl extends Http2EngineImpl implements Http2Serve
 
     @Override
     void sideSpecificHandleData(DataFrame frame, int payloadLength, Stream stream) {
-        requestListener.incomingData(frame.getData(), stream.getRequestId(), frame.isEndStream(), responseSender);
+        requestListener.incomingData(frame.getData(), stream.getRequestId(), frame.isEndOfStream(), responseSender);
     }
 
     @Override

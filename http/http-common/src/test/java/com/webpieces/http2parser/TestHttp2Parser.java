@@ -20,10 +20,10 @@ import org.webpieces.httpcommon.temp.TempHttp2ParserFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2engine.impl.HeaderDecoding;
-import com.webpieces.http2engine.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.hpack.impl.HeaderDecoding;
+import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;

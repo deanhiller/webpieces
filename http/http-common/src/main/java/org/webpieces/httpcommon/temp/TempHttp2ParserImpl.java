@@ -10,9 +10,9 @@ import org.webpieces.httpcommon.api.Http2FullHeaders;
 import org.webpieces.httpcommon.api.Http2FullPushPromise;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2engine.impl.HeaderDecoding;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.hpack.impl.HeaderDecoding;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
@@ -121,7 +121,7 @@ public class TempHttp2ParserImpl implements TempHttp2Parser {
 		//TODO: fix this to remove HeadersFrame and PushPromieFrame from having a List<Header> field
 		if(firstFrame instanceof HeadersFrame) {
 			HeadersFrame f = (HeadersFrame) firstFrame;
-			Http2FullHeaders full = new Http2FullHeaders(f.getStreamId(), headers, f.getPriorityDetails(), f.isEndStream());
+			Http2FullHeaders full = new Http2FullHeaders(f.getStreamId(), headers, f.getPriorityDetails(), f.isEndOfStream());
 			state.getParsedFrames().add(full);
 		} else if(firstFrame instanceof PushPromiseFrame) {
 			PushPromiseFrame f = (PushPromiseFrame) firstFrame;

@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.Http2Response;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.dto.Http2Headers;
 
 public interface Http2Socket {
 	

@@ -15,7 +15,7 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     }
 
     /* flags */
-    private boolean endStream = false; /* 0x1 */
+    private boolean endOfStream = false; /* 0x1 */
     private boolean endHeaders = false; /* 0x4 */
     //private boolean padded = false; /* 0x8 */
     //if PriorityDetails is null, this is false
@@ -25,12 +25,12 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     private DataWrapper headerFragment;
     private DataWrapper padding = DataWrapperGeneratorFactory.EMPTY;
     
-    public boolean isEndStream() {
-        return endStream;
+    public boolean isEndOfStream() {
+        return endOfStream;
     }
 
-    public void setEndStream(boolean endStream) {
-        this.endStream = endStream;
+    public void setEndOfStream(boolean endStream) {
+        this.endOfStream = endStream;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
     public String toString() {
         return "HeadersFrame{" +
         		super.toString() +
-                ", endStream=" + endStream +
+                ", endStream=" + endOfStream +
                 ", endHeaders=" + endHeaders +
                 ", priorityDetails=" + priorityDetails +
                 ", headerFragment=" + headerFragment.getReadableSize() +

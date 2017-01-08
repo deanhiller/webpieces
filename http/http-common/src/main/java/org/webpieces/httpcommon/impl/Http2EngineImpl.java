@@ -67,7 +67,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
-import com.webpieces.http2engine.impl.HeaderEncoding;
+import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
@@ -399,7 +399,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
                     // the body fits within one frame and is within the flow control window
                     newFrame.setData(body);
                     if(isComplete)
-                        newFrame.setEndStream(true);
+                        newFrame.setEndOfStream(true);
 
                     log.info("writing final data frame: (but might not complete the request)" + newFrame);
                     return writeDataFrame(newFrame).thenAccept(
@@ -495,7 +495,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
 
     	HeadersFrame frame = new HeadersFrame();
     	frame.setStreamId(stream.getStreamId());
-    	frame.setEndStream(false);
+    	frame.setEndOfStream(false);
     	
         List<Http2Frame> frameList = headerEncoder.createHeaderFrames(frame, headerList);
 

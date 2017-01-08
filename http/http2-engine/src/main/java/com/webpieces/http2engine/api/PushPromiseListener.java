@@ -1,6 +1,8 @@
 package com.webpieces.http2engine.api;
 
-import com.webpieces.http2engine.api.dto.PartialStream;
+import java.util.concurrent.CompletableFuture;
+
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public interface PushPromiseListener {
 
@@ -10,7 +12,8 @@ public interface PushPromiseListener {
 	 * to see if it is the final end of the response
 	 * 
 	 * @param resp
+	 * @return Future that completes when we should free up more space to read in more data
 	 */
-	void incomingPushPromise(PartialStream response);
+	CompletableFuture<Void> incomingPushPromise(PartialStream response);
 	
 }

@@ -1,0 +1,15 @@
+package com.webpieces.hpack.api;
+
+import org.webpieces.data.api.BufferPool;
+
+import com.webpieces.hpack.impl.HpackParserImpl;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
+
+public class HpackParserFactory {
+
+    public static HpackParser createParser(BufferPool bufferPool, boolean ignoreUnknownFrames) {
+    	Http2Parser parser = Http2ParserFactory.createParser(bufferPool);
+        return new HpackParserImpl(parser, ignoreUnknownFrames);
+    }
+}

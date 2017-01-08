@@ -13,14 +13,14 @@ public class StateMachineState implements Memento
 
     private Logger log;
     private String id;
-    private String stateName;
+    private State state;
     private transient boolean inProcess = false;
     private StateMachineImpl stateMachine;
 
     public StateMachineState(String rawMapId, String stateMachineId, State state, StateMachineImpl sm)
     {
         this.id = rawMapId+","+stateMachineId;
-        this.stateName = state.getName();
+        this.state = state;
         this.stateMachine = sm;
         String name = Memento.class.getPackage().getName();
         log = LoggerFactory.getLogger(name+"."+rawMapId+"."+stateMachineId);
@@ -31,16 +31,16 @@ public class StateMachineState implements Memento
         return "["+id+"] ";
     }
 
-    public String getCurrentStateName()
+    public State getCurrentState()
     {
-        return stateName;
+        return state;
     }
 
-    public void setCurrentStateName(String name)
+    public void setCurrentStateName(State name)
     {
         if(name == null)
             throw new IllegalArgumentException("name cannot be null");
-        this.stateName = name;
+        this.state = name;
     }
 
     public boolean isInProcess()
