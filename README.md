@@ -102,6 +102,7 @@ This project is essentially pieces that can be used to build any http related so
 #### TODO:
 * remove TempParser and use Hpack Parser
 * remove HeaderEncoding2 HeaderDecoding2
+* max conccurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
 * more fully integrate the http2 stack
