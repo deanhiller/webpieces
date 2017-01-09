@@ -46,7 +46,7 @@ public class IntegColoradoEdu {
 			.thenAccept(requestListener -> requestListener.sendRequest(req, true, listener))
 			.exceptionally(e -> reportException(socket, e));
 
-		Thread.sleep(100000);
+		Thread.sleep(10000000);
 	}
 
 	private static Void reportException(HttpClientSocket socket, Throwable e) {

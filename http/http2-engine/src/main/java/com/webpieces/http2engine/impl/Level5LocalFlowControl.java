@@ -74,15 +74,19 @@ public class Level5LocalFlowControl {
 		w1.setStreamId(0);
 		w1.setWindowSizeIncrement(len);
 		
-		WindowUpdateFrame w2 = new WindowUpdateFrame();
-		w2.setStreamId(stream.getStreamId());
-		w2.setWindowSizeIncrement(len);
-		
 		log.info("sending WUF increments.  framelen="+frameLength+" recovered="+totalRecovered);
 		
 
 		level6NotifyListener.sendFrameToSocket(w1);
-		level6NotifyListener.sendFrameToSocket(w2);
+		
+		if(!stream.isClosed()) {
+			//IF the stream is not closed, update flow control
+			WindowUpdateFrame w2 = new WindowUpdateFrame();
+			w2.setStreamId(stream.getStreamId());
+			w2.setWindowSizeIncrement(len);
+			
+			level6NotifyListener.sendFrameToSocket(w2);
+		}
 
 		return null;
 	}

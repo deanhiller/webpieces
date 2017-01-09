@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 
@@ -31,8 +32,9 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 	public DataWrapper wrapByteBuffer(ByteBuffer buffer) {
 		if(buffer.position() != 0)
 			throw new IllegalArgumentException("You probably forgot to call buffer.flip() so the buffer is made readable after writing to it.  position must be 0");
-		else if(!buffer.hasRemaining())
-			throw new IllegalArgumentException("There is no data in this buffer.");
+		else if(!buffer.hasRemaining()) {
+			return DataWrapperGeneratorFactory.EMPTY;
+		}
 		
 		return new ByteBufferDataWrapper(buffer);
 	}

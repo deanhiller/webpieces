@@ -16,6 +16,7 @@ public class Stream {
 	private long remoteWindowSize;
 	private long localWindowSize;
 	private long remoteInitialWindowSize;
+	private volatile boolean isClosed = false;
 
 	public Stream(
 			int streamId, 
@@ -83,4 +84,13 @@ public class Stream {
 		}
 	}
 
+	public void setIsClosed(boolean b) {
+		isClosed = b;
+	}
+
+	public boolean isClosed() {
+		return isClosed;
+	}
+
+	
 }

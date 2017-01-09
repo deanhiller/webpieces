@@ -88,19 +88,21 @@ public class IntegNgHttp2 {
     public static void main(String[] args) throws InterruptedException {
         boolean isHttp = true;
 
+        String path = "/";
         String host = "localhost";
         int port = 443;
         if(isHttp)
             port = 8080;
 
-        List<Http2Header> req = createRequest(host, isHttp);
+        if(host.equals("localhost"))
+        	path = "/test/data.txt"; //IF jetty, use a path with a bigger download
+        
+        List<Http2Header> req = createRequest(host, isHttp, path);
 
         log.info("starting socket");
 
         InetSocketAddress addr = new InetSocketAddress(host, port);
         Http2Socket socket = IntegGoogleHttps.createHttpClient("clientSocket", isHttp, addr);
-
-
         
         socket
                 .connect(addr, new ServerListenerImpl())
@@ -118,14 +120,10 @@ public class IntegNgHttp2 {
         Thread.sleep(100000000);
     }
 
-    
-    
-    
     private static Void reportException(Http2Socket socket, Throwable e) {
         log.error("exception on socket="+socket, e);
         return null;
     }
-
 
 	private static class ServerListenerImpl implements Http2ServerListener {
 
@@ -167,7 +165,7 @@ public class IntegNgHttp2 {
 				synchronized (completed) {
 					completed.add(id);
 				}
-				log.info("completed="+completed.size()+" sent="+sent.size()+" list="+completed);
+				log.info("completed="+completed.size()+" completedPus="+completedPush.size()+" sent="+sent.size()+" list="+completed);
 			}
 			
 			return CompletableFuture.completedFuture(null);
@@ -194,10 +192,9 @@ public class IntegNgHttp2 {
 			}
 			return CompletableFuture.completedFuture(null);
 		}
-		
 	}
 
-    private static List<Http2Header> createRequest(String host, boolean isHttp) {
+    private static List<Http2Header> createRequest(String host, boolean isHttp, String path) {
     	String scheme;
     	if(isHttp)
     		scheme = "http";
@@ -208,7 +205,7 @@ public class IntegNgHttp2 {
     	
         headers.add(new Http2Header(Http2HeaderName.METHOD, "GET"));
         headers.add(new Http2Header(Http2HeaderName.AUTHORITY, host));
-        headers.add(new Http2Header(Http2HeaderName.PATH, "/"));
+        headers.add(new Http2Header(Http2HeaderName.PATH, path));
         headers.add(new Http2Header(Http2HeaderName.SCHEME, scheme));
         headers.add(new Http2Header("host", host));
         headers.add(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));

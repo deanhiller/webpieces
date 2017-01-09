@@ -29,6 +29,7 @@ public class StreamState {
 	}
 
 	public Stream remove(Stream stream) {
+		stream.setIsClosed(true);
 		return streamIdToStream.remove(stream.getStreamId());
 	}
 
