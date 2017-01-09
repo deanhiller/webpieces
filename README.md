@@ -100,10 +100,7 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* add 404 nullpointer test and fix it !!
-* find out if log4jdbc is there
 * create api / REST method so webserver can be used as api
-* remove TempParser and use Hpack Parser
 * remove HeaderEncoding2 HeaderDecoding2
 * max conccurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
