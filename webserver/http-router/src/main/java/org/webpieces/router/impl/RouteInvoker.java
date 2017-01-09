@@ -124,14 +124,16 @@ public class RouteInvoker {
 			//throwing an exception and filling in stack trace...
 			//We could convert the exc. to FastException and override method so stack is not filled in but that
 			//can get very annoying
-			RouteType routeType = result.getMeta().getRoute().getRouteType();
+			RouteMeta meta = result.getMeta();
+			Route route = meta.getRoute();
+			RouteType routeType = route.getRouteType();
 			if(routeType == RouteType.NOT_FOUND) {
 				processException(responseCb, reqCtx, null, notFoundRoute, null);
 				//This is a special case....check the NotFound tests
 				return CompletableFuture.completedFuture(null);
 			}
 
-			return invokeImpl(result, result.getMeta().getService222(), reqCtx, responseCb);
+			return invokeImpl(result, meta.getService222(), reqCtx, responseCb);
 		} catch (Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...
@@ -181,7 +183,7 @@ public class RouteInvoker {
 		if(meta.getRoute().getRouteType() == RouteType.STATIC) {
 			StaticRoute route = (StaticRoute) meta.getRoute();
 			boolean isOnClassPath = route.getIsOnClassPath();
-			
+
 			RenderStaticResponse resp = new RenderStaticResponse(route.getStaticRouteId(), isOnClassPath);
 			if(route.isFile()) {
 				resp.setFilePath(route.getFileSystemPath());

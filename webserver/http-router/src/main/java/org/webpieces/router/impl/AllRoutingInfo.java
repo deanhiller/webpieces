@@ -40,6 +40,13 @@ public class AllRoutingInfo {
 	}
 
 	public MatchResult fetchRoute(RouterRequest request, String subPath) {
+		MatchResult result = fetchRouteImpl(request, subPath);
+		if(result.isNotFound())
+			return new MatchResult(pageNotFoundRoute);
+		return result;
+	}
+	
+	private MatchResult fetchRouteImpl(RouterRequest request, String subPath) {
 		if(!subPath.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 
@@ -54,7 +61,7 @@ public class AllRoutingInfo {
 		AllRoutingInfo routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
 			String newRelativePath = subPath.substring(index, subPath.length());
-			MatchResult route = routeInfo.fetchRoute(request, newRelativePath);
+			MatchResult route = routeInfo.fetchRouteImpl(request, newRelativePath);
 			if(route != null)
 				return route;
 		}
@@ -65,7 +72,7 @@ public class AllRoutingInfo {
 				return result;
 		}
 
-		return new MatchResult(pageNotFoundRoute);
+		return new MatchResult(true);
 	}
 
 	public boolean isPageNotFoundRouteSet() {

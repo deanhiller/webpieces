@@ -18,6 +18,7 @@ import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
@@ -44,6 +45,21 @@ public class TestAjaxHibernate {
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
 		server = webserver.start();
+	}
+	
+	@Test
+	public void testNotFoundInSubRoute() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/ajax/notfound");
+
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+
+		response.assertContains("Your page was not found");
 	}
 	
 	@Test
