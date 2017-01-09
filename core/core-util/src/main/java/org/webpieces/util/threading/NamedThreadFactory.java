@@ -1,18 +1,19 @@
 package org.webpieces.util.threading;
 
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NamedThreadFactory implements ThreadFactory {
 
-	private int count = 0;
+	private AtomicInteger count = 0;
 	private String threadNamePrefix;
 	
 	public NamedThreadFactory(String threadNamePrefix) {
 		this.threadNamePrefix = threadNamePrefix;
 	}
 
-	private synchronized int getNextCount() {
-		return count++;
+	private int getNextCount() {
+		return count.getAndIncrement();
 	}
 	
 	@Override

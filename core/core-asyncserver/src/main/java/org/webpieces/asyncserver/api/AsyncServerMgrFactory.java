@@ -2,6 +2,7 @@ package org.webpieces.asyncserver.api;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.asyncserver.impl.AsyncServerManagerImpl;
 import org.webpieces.data.api.BufferPool;
@@ -10,10 +11,10 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 
 public class AsyncServerMgrFactory {
 
-	private static int counter = 0;
+	private static AtomicInteger counter = new AtomicInteger(0);
 	
-	public static synchronized int getCount() {
-		return counter++;
+	public static int getCount() {
+		return counter.getAndIncrement();
 	}
 	
 	public static AsyncServerManager createAsyncServer(String id, BufferPool pool) {
