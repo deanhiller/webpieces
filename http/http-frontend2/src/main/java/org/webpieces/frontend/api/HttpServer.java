@@ -7,6 +7,8 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface HttpServer {
 
+	void start();
+	
 	CompletableFuture<Void> close();
 
 	void enableOverloadMode(ByteBuffer overloadResponse);

@@ -11,16 +11,21 @@ import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 
 public class HttpServerImpl implements HttpServer {
 
+	private static final Logger log = LoggerFactory.getLogger(HttpServerImpl.class);
 	private AsyncServer server;
 	private AsyncDataListener dataListener;
+	private FrontendConfig config;
 
 	public HttpServerImpl(TimedRequestListener requestListener, BufferPool bufferPool, FrontendConfig config) {
+		this.config = config;
 		HttpParser httpParser = HttpParserFactory.createParser(bufferPool);
 		HpackParser http2Parser = HpackParserFactory.createParser(bufferPool, true);
 
@@ -36,11 +41,6 @@ public class HttpServerImpl implements HttpServer {
 	
 	void init(AsyncServer asyncServer) {
 		this.server = asyncServer;
-	}
-	
-	@Override
-	public CompletableFuture<Void> close() {
-		return server.closeServerChannel();
 	}
 	
 	AsyncDataListener getDataListener() {
@@ -60,6 +60,18 @@ public class HttpServerImpl implements HttpServer {
 	@Override
 	public TCPServerChannel getUnderlyingChannel() {
 		return server.getUnderlyingChannel();
+	}
+
+	@Override
+	public void start() {
+		log.info("starting to listen to port="+config.bindAddress);
+		server.start(config.bindAddress);
+		log.info("now listening for incoming requests");
+	}
+	
+	@Override
+	public CompletableFuture<Void> close() {
+		return server.closeServerChannel();
 	}
 
 }

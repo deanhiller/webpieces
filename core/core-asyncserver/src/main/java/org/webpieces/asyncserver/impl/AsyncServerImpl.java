@@ -1,5 +1,6 @@
 package org.webpieces.asyncserver.impl;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
@@ -18,6 +19,18 @@ public class AsyncServerImpl implements AsyncServer {
 	}
 
 	@Override
+	public void start(SocketAddress bindAddr) {
+		serverChannel.bind(bindAddr);
+	}
+	
+	@Override
+	public CompletableFuture<Void> closeServerChannel() {
+		serverChannel.closeServerChannel();
+		
+		return connectionListener.closeChannels();
+	}
+	
+	@Override
 	public void enableOverloadMode(ByteBuffer overloadResponse) {
 		connectionListener.enableOverloadMode(overloadResponse);
 	}
@@ -25,13 +38,6 @@ public class AsyncServerImpl implements AsyncServer {
 	@Override
 	public void disableOverloadMode() {
 		connectionListener.disableOverloadMode();
-	}
-
-	@Override
-	public CompletableFuture<Void> closeServerChannel() {
-		serverChannel.closeServerChannel();
-		
-		return connectionListener.closeChannels();
 	}
 
 	@Override

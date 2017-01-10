@@ -21,14 +21,14 @@ public class MockAsyncServerManager implements AsyncServerManager {
 	@Override
 	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener) {
 		serverListeners.add(listener);
-		return null;
+		return new MockAsyncServer();
 	}
 
 	@Override
 	public AsyncServer createTcpServer(AsyncConfig config, AsyncDataListener listener,
 			SSLEngineFactory sslFactory) {
 		serverListeners.add(listener);
-		return null;
+		return new MockAsyncServer();
 	}
 
 }

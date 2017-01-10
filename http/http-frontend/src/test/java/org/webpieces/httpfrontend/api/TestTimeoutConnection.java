@@ -15,6 +15,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -54,7 +55,8 @@ public class TestTimeoutConnection {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
 		config.maxConnectToRequestTimeoutMs = (int) timeout;
 
-		mgr.createHttpServer(config , requestListenerForTest);
+		HttpServer server = mgr.createHttpServer(config , requestListenerForTest);
+		server.start();
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
 		Assert.assertEquals(1, listeners.length);
@@ -88,7 +90,8 @@ public class TestTimeoutConnection {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
 		config.maxConnectToRequestTimeoutMs = (int) timeout;
 
-		mgr.createHttpServer(config , requestListenerForTest);
+		HttpServer server = mgr.createHttpServer(config , requestListenerForTest);
+		server.start();
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
 		Assert.assertEquals(1, listeners.length);

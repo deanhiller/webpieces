@@ -1,5 +1,6 @@
 package org.webpieces.frontend.api;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
@@ -10,6 +11,8 @@ import com.webpieces.http2engine.impl.HeaderSettings;
 public class FrontendConfig {
 
 	public AsyncConfig asyncServerConfig = new AsyncConfig();
+	
+	public InetSocketAddress address;
 	
 	/**
 	 * When a client connects, they must send a request in this amount of time.  null means disabled.
@@ -44,12 +47,10 @@ public class FrontendConfig {
 
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;
-		asyncServerConfig.bindAddr = bindAddr;
 	}
 	
 	public FrontendConfig(String id, SocketAddress bindAddr, Integer connectToRequestTimeout) {
 		asyncServerConfig.id = id;
-		asyncServerConfig.bindAddr = bindAddr;
 		maxConnectToRequestTimeoutMs = connectToRequestTimeout;
 	}
 

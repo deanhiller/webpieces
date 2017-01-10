@@ -9,6 +9,10 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 public class MockHttpServer implements HttpServer {
 
 	@Override
+	public void start() {
+	}
+	
+	@Override
 	public CompletableFuture<Void> close() {
 		return CompletableFuture.completedFuture(null);
 	}

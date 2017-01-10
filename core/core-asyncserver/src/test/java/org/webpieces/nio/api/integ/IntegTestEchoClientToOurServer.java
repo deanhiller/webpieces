@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
@@ -37,9 +38,10 @@ public class IntegTestEchoClientToOurServer {
 		BufferPool pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, executor);
-		AsyncServerManager server = AsyncServerMgrFactory.createAsyncServer(mgr);
-		server.createTcpServer(new AsyncConfig("tcpServer", new InetSocketAddress(8080)), new IntegTestLocalhostServerListener());
-		
+		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
+		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new IntegTestLocalhostServerListener());
+		server.start(new InetSocketAddress(8080));
+
 		client.start(8080);
 		
 		synchronized(this) {

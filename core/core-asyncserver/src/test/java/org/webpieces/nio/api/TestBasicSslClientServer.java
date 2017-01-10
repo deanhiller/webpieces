@@ -35,8 +35,9 @@ public class TestBasicSslClientServer {
 		
 		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();
 		InetSocketAddress addr = new InetSocketAddress("localhost", 0);
-		AsyncServer svr = svrFactory.createTcpServer(new AsyncConfig("sslTcpSvr", addr), new SvrDataListener(), f);
-		
+		AsyncServer svr = svrFactory.createTcpServer(new AsyncConfig("sslTcpSvr"), new SvrDataListener(), f);
+		svr.start(addr);
+
 		InetSocketAddress bound = svr.getUnderlyingChannel().getLocalAddress();
 		System.out.println("port="+bound.getPort());
 		

@@ -13,6 +13,8 @@ public class FrontendConfig {
 
 	public AsyncConfig asyncServerConfig = new AsyncConfig();
 	
+	public SocketAddress bindAddress;
+	
 	/**
 	 * When a client connects, they must send a request in this amount of time.  null means disabled.
 	 * telnet google.com 443 yeilds an 11 second timeout while telnet google.com 80 yeilds a 
@@ -52,12 +54,12 @@ public class FrontendConfig {
 
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;
-		asyncServerConfig.bindAddr = bindAddr;
+		this.bindAddress = bindAddr;
 	}
 	
 	public FrontendConfig(String id, SocketAddress bindAddr, Integer connectToRequestTimeout) {
 		asyncServerConfig.id = id;
-		asyncServerConfig.bindAddr = bindAddr;
+		this.bindAddress = bindAddr;
 		maxConnectToRequestTimeoutMs = connectToRequestTimeout;
 	}
 

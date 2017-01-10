@@ -41,7 +41,6 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 		serverChannel.setReuseAddress(true);
 		
 		serverChannel.configure(config.functionToConfigureBeforeBind);
-		serverChannel.bind(config.bindAddr);
 		
 		return new AsyncServerImpl(serverChannel, connectionListener, proxyListener);
 	}

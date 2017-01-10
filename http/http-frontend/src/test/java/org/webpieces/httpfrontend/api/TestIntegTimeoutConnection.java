@@ -38,6 +38,7 @@ public class TestIntegTimeoutConnection {
 		config.maxConnectToRequestTimeoutMs = 1000;
 		RequestListenerForTest requestListenerForTest = new RequestListenerForTest();
 		HttpServer server = mgr.createHttpServer(config, requestListenerForTest);
+		server.start();
 		
 		int port = server.getUnderlyingChannel().getLocalAddress().getPort();
 		
@@ -71,6 +72,7 @@ public class TestIntegTimeoutConnection {
 		config.maxConnectToRequestTimeoutMs = 1000;
 		RequestListenerForTest requestListenerForTest = new RequestListenerForTest();
 		HttpServer server = mgr.createHttpsServer(config, requestListenerForTest, new SSLEngineFactoryForTest());
+		server.start();
 		
 		int port = server.getUnderlyingChannel().getLocalAddress().getPort();
 		

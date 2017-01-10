@@ -185,6 +185,8 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	 * @see api.biz.xsoftware.nio.SocketSuperclass#getLocalAddress()
 	 */
 	public InetSocketAddress getLocalAddress() {
+		if(!channel.socket().isBound())
+			throw new IllegalStateException("Socket not bound yet.  please bind before calling getLocalAddress");
 		InetAddress addr = channel.socket().getInetAddress();
 		int port = channel.socket().getLocalPort();
 		return new InetSocketAddress(addr, port);

@@ -46,6 +46,7 @@ class ServerFactory {
         config.alwaysHttp2 = alwaysHttp2;
         config.maxConcurrentStreams = Optional.of(maxConcurrentStreams);
         HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
+        server.start();
         return server.getUnderlyingChannel().getLocalAddress().getPort();
     }
 

@@ -11,6 +11,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 
@@ -37,7 +38,8 @@ public class MockServer {
         config.maxConnectToRequestTimeoutMs = 5000;
         config.alwaysHttp2 = alwaysHttp2;
 
-        mgr.createHttpServer(config, requestListenerForTest);
+        HttpServer server = mgr.createHttpServer(config, requestListenerForTest);
+        server.start();
 
         ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
         Assert.assertEquals(1, listeners.length);

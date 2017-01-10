@@ -32,14 +32,14 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		
 		TimedRequestListener timed = new TimedRequestListener(timer, listener, config);
 		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
-		log.info("starting to listen to http port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener());
 		frontend.init(tcpServer);
-		log.info("now listening for incoming http requests");
 		return frontend;
 	}
 
 	private void preconditionCheck(FrontendConfig config) {
+		if(config.bindAddress == null)
+			throw new IllegalArgumentException("config.bindAddress cannot be null");
 		if(config.keepAliveTimeoutMs != null && timer == null)
 			throw new IllegalArgumentException("keepAliveTimeoutMs must be null since no timer was given when HttpFrontendFactory.createFrontEnd was called");
 		else if(config.maxConnectToRequestTimeoutMs != null && timer == null)
@@ -52,10 +52,9 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		preconditionCheck(config);
 		TimedRequestListener timed = new TimedRequestListener(timer, listener, config);
 		HttpServerImpl frontend = new HttpServerImpl(timed, bufferPool, config);
-		log.info("starting to listen to https port="+config.asyncServerConfig.bindAddr);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, frontend.getDataListener(), factory);
 		frontend.init(tcpServer);
-		log.info("now listening for incoming https requests");
+
 		return frontend;
 	}
 

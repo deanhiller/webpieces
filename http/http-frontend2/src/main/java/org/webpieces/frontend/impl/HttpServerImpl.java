@@ -4,32 +4,29 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncServer;
-import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.HttpServer;
-import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.nio.api.handlers.AsyncDataListener;
-
-import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.hpack.api.HpackParserFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HttpServerImpl implements HttpServer {
 
+	private static final Logger log = LoggerFactory.getLogger(HttpServerImpl.class);
 	private AsyncServer server;
-	private AsyncDataListener dataListener;
+	private FrontendConfig config;
 
-	public HttpServerImpl(HttpRequestListener requestListener, BufferPool bufferPool, FrontendConfig config) {
-		HttpParser httpParser = HttpParserFactory.createParser(bufferPool);
-		HpackParser http2Parser = HpackParserFactory.createParser(bufferPool, true);
-
-		dataListener = new ServerDataListener(requestListener, httpParser, http2Parser, config);
+	public HttpServerImpl(AsyncServer server, FrontendConfig config) {
+		this.server = server;
+		this.config = config;
 	}
 	
-	void init(AsyncServer asyncServer) {
-		this.server = asyncServer;
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		log.info("starting to listen to port="+config.address);
+		server.start(config.address);
+		log.info("now listening for incoming http requests");
 	}
 	
 	@Override
@@ -37,10 +34,6 @@ public class HttpServerImpl implements HttpServer {
 		return server.closeServerChannel();
 	}
 	
-	AsyncDataListener getDataListener() {
-		return dataListener;
-	}
-
 	@Override
 	public void enableOverloadMode(ByteBuffer overloadResponse) {
 		server.enableOverloadMode(overloadResponse);

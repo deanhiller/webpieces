@@ -8,9 +8,15 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend.impl.FrontEndServerManagerImpl;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
+
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
 public abstract class HttpFrontendFactory {
 	
@@ -33,8 +39,17 @@ public abstract class HttpFrontendFactory {
 		return createFrontEnd(svrMgr, timer, pool);
 	}
 	
-	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool) {
-		return new FrontEndServerManagerImpl(svrManager, svc, bufferPool);
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, ScheduledExecutorService timer, BufferPool pool) {
+		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
+		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory();
+		ParsingLogic parsing = new ParsingLogic(httpParser, http2Parser, svrEngineFactory);
+		
+		return createFrontEnd(svrMgr, timer, pool, parsing);		
+	}
+	
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool, ParsingLogic parsing) {
+		return new FrontEndServerManagerImpl(svrManager, svc, bufferPool, parsing);
 	}
 	
 }

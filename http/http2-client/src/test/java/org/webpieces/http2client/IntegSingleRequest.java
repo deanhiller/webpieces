@@ -46,11 +46,13 @@ public class IntegSingleRequest {
 	public void start() throws InterruptedException {
 		log.info("starting test to download / page from google");
 
-		boolean isHttp = false;
+		boolean isHttp = true;
 		
 		//String host = "www.google.com"; 
 		//String host = "localhost"; //jetty
-		String host = "nghttp2.org";
+		//String host = "api.push.apple.com";
+		String host = "gcm-http.googleapis.com";
+		//String host = "nghttp2.org";
 		int port = 443;
 		if(isHttp)
 			port = 80;

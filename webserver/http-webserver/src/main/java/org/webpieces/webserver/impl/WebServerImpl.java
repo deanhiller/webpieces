@@ -54,11 +54,13 @@ public class WebServerImpl implements WebServer {
 		FrontendConfig svrChanConfig = new FrontendConfig("http", config.getHttpListenAddress());
 		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
+		httpServer.start();
 
 		if(factory != null) {
 			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
+			httpsServer.start();
 		} else {
 			log.info("https port is disabled since configuration had no sslEngineFactory");
 		}

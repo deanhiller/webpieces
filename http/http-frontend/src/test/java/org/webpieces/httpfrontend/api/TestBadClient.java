@@ -14,6 +14,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.frontend.api.FrontendConfig;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -40,7 +41,8 @@ public class TestBadClient {
 	public void testTimeoutTimerCancelled() throws InterruptedException, ExecutionException {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
 		config.maxConnectToRequestTimeoutMs = 5000;
-		mgr.createHttpServer(config , requestListenerForTest);
+		HttpServer server = mgr.createHttpServer(config , requestListenerForTest);
+		server.start();
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
 		Assert.assertEquals(1, listeners.length);
@@ -68,7 +70,8 @@ public class TestBadClient {
 	public void testMaxSizeExceeded() throws InterruptedException, ExecutionException {
 		FrontendConfig config = new FrontendConfig("httpFrontend", new InetSocketAddress(80));
 		config.maxConnectToRequestTimeoutMs = 5000;
-		mgr.createHttpServer(config , requestListenerForTest);
+		HttpServer server = mgr.createHttpServer(config , requestListenerForTest);
+		server.start();
 		
 		ConnectionListener[] listeners = mockChanMgr.fetchTcpConnectionListeners();
 		Assert.assertEquals(1, listeners.length);
