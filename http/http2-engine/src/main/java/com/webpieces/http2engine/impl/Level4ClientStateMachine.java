@@ -102,7 +102,7 @@ public class Level4ClientStateMachine {
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}
 
-	public void fireToClient(Stream stream, PartialStream payload) {
+	public void fireToClient(Stream stream, PartialStream payload, Runnable possiblyModifyState) {
 		Memento currentState = stream.getCurrentState();
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
@@ -112,6 +112,11 @@ public class Level4ClientStateMachine {
 		if(payload.isEndOfStream())
 			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG)); //validates state transition is ok
 
+		//modifying the stream state should be done BEFORE firing to client as if the stream is closed
+		//then this will prevent windowUpdateFrame with increment being sent to a closed stream
+		if(possiblyModifyState != null)
+			possiblyModifyState.run();
+		
 		localFlowControl.fireToClient(stream, payload);
 	}
 

@@ -35,7 +35,7 @@ public class IntegColoradoEdu {
 		ChunkedResponseListener listener = new ChunkedResponseListener();
 		
 		InetSocketAddress addr = new InetSocketAddress(host, port);
-		Http2Socket socket = IntegGoogleHttps.createHttpClient("oneTimerHttp2Socket", isHttp, addr);
+		Http2Socket socket = IntegSingleRequest.createHttpClient("oneTimerHttp2Socket", isHttp, addr);
 		
 		socket
 			.connect(addr, new ServerListenerImpl())

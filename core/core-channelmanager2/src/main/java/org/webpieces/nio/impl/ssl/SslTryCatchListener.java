@@ -13,6 +13,8 @@ public class SslTryCatchListener implements DataListener {
 	
 	private DataListener listener;
 
+	private boolean closedAlready;
+
 	public SslTryCatchListener(DataListener listener) {
 		this.listener = listener;
 	}
@@ -27,6 +29,11 @@ public class SslTryCatchListener implements DataListener {
 
 	public void farEndClosed(Channel channel) {
 		try {
+			synchronized(this) {
+				if(closedAlready)
+					return;
+				closedAlready = true;
+			}
 			listener.farEndClosed(channel);
 		} catch (Throwable e) {
 			log.error("Exception", e);

@@ -106,6 +106,7 @@ public class Level3StreamInitialization {
 		if(!isClosed)
 			return; //do nothing
 		
+		log.info("stream closed="+stream.getStreamId());
 		Stream removedStream = streamState.remove(stream);
 		if(removedStream == null)
 			return; //someone else beat us to it so just return
@@ -140,8 +141,8 @@ public class Level3StreamInitialization {
 		}
 		
 		Stream stream = streamState.get(frame);
-		clientSm.fireToClient(stream, frame);
-		checkForClosedState(stream, frame);
+		
+		clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame));
 	}
 
 	public void sendPushPromiseToClient(Http2Push fullPromise) {		
@@ -156,7 +157,7 @@ public class Level3StreamInitialization {
 		PushPromiseListener pushListener = listener.newIncomingPush(newStreamId);
 
 		Stream stream = createStream(newStreamId, null, pushListener);
-		clientSm.fireToClient(stream, fullPromise);
+		clientSm.fireToClient(stream, fullPromise, null);
 	}
 
 	public void updateWindowSize(WindowUpdateFrame msg) {

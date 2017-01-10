@@ -26,9 +26,9 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class IntegNgHttp2 {
+public class IntegMultiThreaded {
 
-    private static final Logger log = LoggerFactory.getLogger(IntegNgHttp2.class);
+    private static final Logger log = LoggerFactory.getLogger(IntegMultiThreaded.class);
     
     private static Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("deanClientThread"));
     private static SortedSet<Integer> sent = new TreeSet<>();
@@ -74,7 +74,7 @@ public class IntegNgHttp2 {
     		log.info("sent request.  ID="+id+" streamId="+request.getStreamId());
 
     		int numRun = id - originalId;
-    		if(numRun >= 9) {
+    		if(numRun >= -1) {
     			log.info("exiting running more.  numRun="+numRun+" id="+id+" orig="+originalId);
     			return;
     		}
@@ -89,25 +89,31 @@ public class IntegNgHttp2 {
         boolean isHttp = true;
 
         String path = "/";
-        String host = "localhost";
+		//String host = www.google.com; 
+		//String host = "localhost"; //jetty
+        String host = "nghttp2.org";
         int port = 443;
         if(isHttp)
-            port = 8080;
+            port = 80;
 
-        if(host.equals("localhost"))
+        if(host.equals("localhost")) {
         	path = "/test/data.txt"; //IF jetty, use a path with a bigger download
+			port = 8443;
+			if(isHttp)
+				port = 8080;
+		}
         
         List<Http2Header> req = createRequest(host, isHttp, path);
 
         log.info("starting socket");
 
         InetSocketAddress addr = new InetSocketAddress(host, port);
-        Http2Socket socket = IntegGoogleHttps.createHttpClient("clientSocket", isHttp, addr);
+        Http2Socket socket = IntegSingleRequest.createHttpClient("clientSocket", isHttp, addr);
         
         socket
                 .connect(addr, new ServerListenerImpl())
                 .thenApply(s -> {
-                    for(int i = 0; i < 1000; i+=100) {
+                    for(int i = 0; i < 99; i+=100) {
                     	executor.execute(new WorkItem(socket, req, i, i));
                     }
                 	return s;

@@ -20,6 +20,7 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.SSLEngineFactoryWithHost;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.ssl.api.AsyncSSLEngine;
@@ -128,7 +129,11 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 
 		@Override
 		public void sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
-			realChannel.write(engineToSocketData);
+			try {
+				realChannel.write(engineToSocketData);
+			} catch(NioClosedChannelException e) {
+				log.info("Remote end closed before handshake was finished.  (nothing we can do about that)");
+			}
 			//we don't care about future as we won't write anything out anyways until we get
 			//data back and we have not fired connected to client so he should also not be writing yet too
 		}

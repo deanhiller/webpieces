@@ -36,6 +36,10 @@ public class Http2SocketImpl implements Http2Socket {
 	public CompletableFuture<Http2Socket> connect(InetSocketAddress addr, Http2ServerListener listener) {
 		if(outgoing.getClientListener() != null)
 			throw new IllegalStateException("Cannot call connect on an HttpSocket twice");
+		else if(listener == null)
+			throw new IllegalArgumentException("listener cannot be null");
+		else if(addr == null)
+			throw new IllegalArgumentException("addr cannot be null");
 			
 		outgoing.setClientListener(listener);
 		
