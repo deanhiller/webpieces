@@ -12,7 +12,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
-import com.webpieces.http2engine.api.EngineListener;
+import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -25,12 +25,12 @@ public class Level6NotifyListeners {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private HpackParser parser;
-	private EngineListener resultListener;
+	private ClientEngineListener resultListener;
 	private HeaderSettings remoteSettings;
 	private MarshalState marshalState;
 	private AtomicReference<CompletableFuture<Void>> pingFutureRef;
 
-	public Level6NotifyListeners(HpackParser parser, EngineListener socketListener, HeaderSettings remoteSettings) {
+	public Level6NotifyListeners(HpackParser parser, ClientEngineListener socketListener, HeaderSettings remoteSettings) {
 		this.parser = parser;
 		this.resultListener = socketListener;
 		this.remoteSettings = remoteSettings;

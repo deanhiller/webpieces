@@ -11,7 +11,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.http2engine.api.Http2EngineFactory;
+import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 
 public abstract class Http2ClientFactory {
 
@@ -23,11 +23,11 @@ public abstract class Http2ClientFactory {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 		
-		Http2EngineFactory parseFactory = new Http2EngineFactory();
+		Http2ClientEngineFactory parseFactory = new Http2ClientEngineFactory();
 		return createHttpClient(mgr, hpackParser, parseFactory);
 	}
 	
-	public static Http2Client createHttpClient(ChannelManager mgr, HpackParser http2Parser, Http2EngineFactory factory) {
+	public static Http2Client createHttpClient(ChannelManager mgr, HpackParser http2Parser, Http2ClientEngineFactory factory) {
 		return new Http2ClientImpl(mgr, http2Parser, factory);
 	}
 }

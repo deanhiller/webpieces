@@ -26,9 +26,9 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.Http2EngineFactory;
-import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
+import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -83,7 +83,7 @@ public class IntegSingleRequest {
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
 		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
-		Http2EngineFactory http2HighLevelFactory = new Http2EngineFactory();
+		Http2ClientEngineFactory http2HighLevelFactory = new Http2ClientEngineFactory();
 		
 		String host = addr.getHostName();
 		int port = addr.getPort();

@@ -2,8 +2,8 @@ package com.webpieces.http2engine.impl;
 
 import org.webpieces.javasm.api.Memento;
 
-import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 

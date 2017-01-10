@@ -6,8 +6,8 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;

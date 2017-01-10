@@ -15,9 +15,9 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.Http2ClientEngine;
-import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.RequestWriter;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.client.Http2ClientEngine;
+import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Layer1Incoming implements DataListener {
@@ -47,17 +47,17 @@ public class Layer1Incoming implements DataListener {
 						.thenApply(c -> createWriter(request, c));
 	}
 
-	private Http2SocketDataWriter createWriter(Http2Headers request, RequestWriter requestWriter) {
+	private Http2SocketDataWriter createWriter(Http2Headers request, StreamWriter requestWriter) {
 		Http2SocketDataWriter writer = new Writer(request.getStreamId(), request.isEndOfStream(), requestWriter);
 		return writer;
 	}
 	
 	private class Writer implements Http2SocketDataWriter {
-		private RequestWriter requestWriter;
+		private StreamWriter requestWriter;
 		private int streamId;
 		private boolean isEndOfStream;
 
-		public Writer(int streamId, boolean isEndOfStream, RequestWriter requestWriter) {
+		public Writer(int streamId, boolean isEndOfStream, StreamWriter requestWriter) {
 			this.streamId = streamId;
 			this.isEndOfStream = isEndOfStream;
 			this.requestWriter = requestWriter;

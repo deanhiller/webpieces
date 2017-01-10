@@ -9,8 +9,8 @@ import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.http2client.api.exceptions.ResetStreamException;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 

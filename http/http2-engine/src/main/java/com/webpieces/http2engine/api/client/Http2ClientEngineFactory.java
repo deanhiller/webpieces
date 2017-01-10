@@ -1,16 +1,16 @@
-package com.webpieces.http2engine.api;
+package com.webpieces.http2engine.api.client;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2engine.impl.HeaderSettings;
 import com.webpieces.http2engine.impl.Level1ClientEngine;
 
-public class Http2EngineFactory {
+public class Http2ClientEngineFactory {
 
-	public Http2ClientEngine createClientParser(HpackParser lowLevelParser, EngineListener resultListener, HeaderSettings localSettings) {
+	public Http2ClientEngine createClientParser(HpackParser lowLevelParser, ClientEngineListener resultListener, HeaderSettings localSettings) {
 		return new Level1ClientEngine(lowLevelParser, resultListener, localSettings);
 	}
 	
-	public Http2ClientEngine createClientParser(String id, HpackParser lowLevelParser, EngineListener resultListener) {
+	public Http2ClientEngine createClientParser(String id, HpackParser lowLevelParser, ClientEngineListener resultListener) {
 		HeaderSettings localSettings = new HeaderSettings();
 		localSettings.setId(id);
 		

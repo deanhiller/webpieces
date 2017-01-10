@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.api;
+package com.webpieces.http2engine.api.client;
 
 import java.util.concurrent.CompletableFuture;
 

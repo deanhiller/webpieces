@@ -11,9 +11,9 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.Http2ResponseListener;
-import com.webpieces.http2engine.api.PushPromiseListener;
-import com.webpieces.http2engine.api.RequestWriter;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -47,9 +47,9 @@ public class Level3StreamInitialization {
 		this.remoteSettings = remoteSettings;
 	}
 
-	public synchronized CompletableFuture<RequestWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
+	public synchronized CompletableFuture<StreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
 		//always queue the request first...(this creates fairness in first in first out sending to server)
-		CompletableFuture<RequestWriter> future = queueRequest(frame, responseListener);
+		CompletableFuture<StreamWriter> future = queueRequest(frame, responseListener);
 		
 		processItemFromQueue();
 
@@ -77,13 +77,13 @@ public class Level3StreamInitialization {
 		log.info("got permit(cause="+frame+").  size="+newStreamPermits.availablePermits()+" acquired="+val);
 		
 		Http2ResponseListener responseListener = req.getResponseListener();
-		CompletableFuture<RequestWriter> future = req.getFuture();
+		CompletableFuture<StreamWriter> future = req.getFuture();
 		
 		Stream stream = createStream(frame.getStreamId(), responseListener, null);
 		clientSm.fireToSocket(stream, frame).handle((v, e) -> handleCompletion(v, e, future, stream));
 	}
 
-	private Void handleCompletion(Void v, Throwable t, CompletableFuture<RequestWriter> future, Stream stream) {
+	private Void handleCompletion(Void v, Throwable t, CompletableFuture<StreamWriter> future, Stream stream) {
 		if(t != null) {
 			future.completeExceptionally(new RuntimeException(t));
 			return null;
@@ -120,8 +120,8 @@ public class Level3StreamInitialization {
 		}
 	}
 
-	private CompletableFuture<RequestWriter> queueRequest(Http2Headers frame, Http2ResponseListener responseListener) {
-		CompletableFuture<RequestWriter> future = new CompletableFuture<RequestWriter>();
+	private CompletableFuture<StreamWriter> queueRequest(Http2Headers frame, Http2ResponseListener responseListener) {
+		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
 		queue.add(new CachedRequest(frame, responseListener, future));
 		return future;
 	}

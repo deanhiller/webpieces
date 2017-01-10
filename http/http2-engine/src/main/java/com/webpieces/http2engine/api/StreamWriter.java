@@ -4,8 +4,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public interface RequestWriter {
+public interface StreamWriter {
 
-	CompletableFuture<RequestWriter> sendMore(PartialStream data);
+	CompletableFuture<StreamWriter> sendMore(PartialStream data);
 
 }

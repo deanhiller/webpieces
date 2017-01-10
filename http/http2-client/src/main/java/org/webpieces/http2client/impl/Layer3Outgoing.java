@@ -11,10 +11,10 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.EngineListener;
+import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
-public class Layer3Outgoing implements EngineListener {
+public class Layer3Outgoing implements ClientEngineListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(Layer3Outgoing.class);
 	private TCPChannel channel;

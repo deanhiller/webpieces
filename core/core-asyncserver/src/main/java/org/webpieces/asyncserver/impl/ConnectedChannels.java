@@ -5,46 +5,43 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.webpieces.nio.api.channels.Channel;
 
 public class ConnectedChannels {
 
-	private Set<Channel> connectedChannels = new HashSet<>();
-	private boolean closed;
+	private ConcurrentHashMap<Channel, Boolean> connectedChannels = new ConcurrentHashMap<>();
+	private volatile boolean closed;
 	
-	public synchronized boolean addChannel(Channel channel) {
+	public boolean addChannel(Channel channel) {
 		if(closed) {
 			channel.close();
 			return false;
 		}
 		
-		this.connectedChannels.add(channel);
+		this.connectedChannels.put(channel, true);
 		return true;
 	}
 	
-	public synchronized void removeChannel(Channel channel) {
+	public void removeChannel(Channel channel) {
+		if(closed) {
+			return; //don't allow any threads to modify as closeChannels will be doing it
+		}
 		this.connectedChannels.remove(channel);
 	}
 
-	public synchronized Set<Channel> getAllChannels() {
-		Set<Channel> copy = new HashSet<>();
-		for(Channel c : connectedChannels) {
-			copy.add(c);
-		}
-		
-		return copy;
-	}
+	public CompletableFuture<Void> closeChannels() {
+		//first prevent other threads from calling above functions ever again
+		closed = true;
 
-	public synchronized CompletableFuture<Void> closeChannels() {
 		List<CompletableFuture<Channel>> futures = new ArrayList<>();
-		for(Channel c : getAllChannels()) {
+		for(Channel c : connectedChannels.keySet()) {
 			futures.add(c.close());
 		}
 		
 		@SuppressWarnings("rawtypes")
 		CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
-		closed = true;
 		return CompletableFuture.allOf(array);
 	}
 	

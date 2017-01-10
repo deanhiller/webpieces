@@ -7,6 +7,14 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface AsyncServer {
 
+	//public void start();
+	
+	/**
+	 * Closes the server channel and then closes all existing channels that are open
+	 * @return
+	 */
+    public CompletableFuture<Void> closeServerChannel();
+    
 	/**
 	 * Puts the server in a mode where all incoming connections are sent the response in the
 	 * ByteBuffer provided and then the connection is closed immediately.  This will not
@@ -22,12 +30,6 @@ public interface AsyncServer {
 	 * is not enabled to start with.
 	 */
 	public void disableOverloadMode();
-	
-	/**
-	 * Closes the server channel and then closes all existing channels that are open
-	 * @return
-	 */
-    public CompletableFuture<Void> closeServerChannel();
 
 	public TCPServerChannel getUnderlyingChannel();
 
