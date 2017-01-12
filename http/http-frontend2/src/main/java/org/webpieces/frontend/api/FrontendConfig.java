@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
 
-import com.webpieces.http2engine.impl.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.HeaderSettings;
 
 public class FrontendConfig {
 

@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.shared;
 
 import java.util.List;
 
@@ -7,6 +7,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.http2engine.impl.client.Level6NotifyListeners;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;

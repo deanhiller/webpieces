@@ -3,6 +3,8 @@ package com.webpieces.http2engine.impl;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.impl.shared.Level3StreamInitialization;
+import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class RequestWriterImpl implements StreamWriter {

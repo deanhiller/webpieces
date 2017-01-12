@@ -1,8 +1,8 @@
 package com.webpieces.http2engine.api.client;
 
 import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.http2engine.impl.HeaderSettings;
-import com.webpieces.http2engine.impl.Level1ClientEngine;
+import com.webpieces.http2engine.impl.client.Level1ClientEngine;
+import com.webpieces.http2engine.impl.shared.HeaderSettings;
 
 public class Http2ClientEngineFactory {
 

@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.shared;
 
 import java.util.HashMap;
 import java.util.Map;

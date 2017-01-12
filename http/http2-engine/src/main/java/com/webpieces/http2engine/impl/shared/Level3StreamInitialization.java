@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.shared;
 
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
@@ -14,6 +14,8 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
+import com.webpieces.http2engine.impl.CachedRequest;
+import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;

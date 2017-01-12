@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.client;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -16,6 +16,13 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
+import com.webpieces.http2engine.impl.shared.Level3StreamInitialization;
+import com.webpieces.http2engine.impl.shared.Level4ClientStateMachine;
+import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
+import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;

@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.client;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
@@ -13,6 +13,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
+import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;

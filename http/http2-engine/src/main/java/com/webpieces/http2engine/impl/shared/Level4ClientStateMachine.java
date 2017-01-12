@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -10,7 +10,7 @@ import org.webpieces.javasm.api.StateMachineFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.impl.Http2Event.Http2SendRecieve;
+import com.webpieces.http2engine.impl.shared.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 

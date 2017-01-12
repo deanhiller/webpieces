@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl;
+package com.webpieces.http2engine.impl.shared;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -11,6 +11,8 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.impl.DataTry;
+import com.webpieces.http2engine.impl.client.Level6NotifyListeners;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;

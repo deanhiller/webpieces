@@ -2,6 +2,7 @@ package com.webpieces.http2engine.impl;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class DataTry {
