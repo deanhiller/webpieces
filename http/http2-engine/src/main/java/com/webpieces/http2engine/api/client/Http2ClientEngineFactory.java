@@ -18,6 +18,6 @@ public class Http2ClientEngineFactory {
 		long initialWindowSize = 100 * localSettings.getMaxFrameSize();
 		//localSettings.setInitialWindowSize(1000);
 		localSettings.setInitialWindowSize(initialWindowSize);
-		return new Level1ClientEngine(lowLevelParser, resultListener, localSettings);
+		return createClientParser(lowLevelParser, resultListener, localSettings);
 	}
 }

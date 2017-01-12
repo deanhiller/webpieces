@@ -15,6 +15,7 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.Http2MarkerMessage;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpChunkExtension;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
@@ -247,7 +248,8 @@ public class HttpParserImpl implements HttpParser {
 			//do not continue if we are reading the body...
 			if(memento.getHalfParsedMessage() != null) {
 				break;
-			}
+			} else if(memento.isHttp2())
+				break;
 		}
 		memento.setReadingHttpMessagePointer(i);
 	}
@@ -304,7 +306,11 @@ public class HttpParserImpl implements HttpParser {
 		List<? extends DataWrapper> tuple = dataGen.split(dataToRead, i+4);
 		DataWrapper toBeParsed = tuple.get(0);
 		memento.setLeftOverData(tuple.get(1));
-		HttpMessage message = parseHttpMessage(toBeParsed, markedPositions);
+		HttpMessage message = parseHttpMessage(memento, toBeParsed, markedPositions);
+		if(memento.isHttp2()) {
+			memento.getParsedMessages().add(message);
+			return;
+		}
 		
 		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		Header transferHeader = message.getHeaderLookupStruct().getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
@@ -443,7 +449,7 @@ public class HttpParserImpl implements HttpParser {
 		}
 	}
 
-	private HttpMessage parseHttpMessage(DataWrapper toBeParsed, List<Integer> markedPositions) {
+	private HttpMessage parseHttpMessage(MementoImpl memento, DataWrapper toBeParsed, List<Integer> markedPositions) {
 		List<String> lines = new ArrayList<>();
 		
 		//Add the last line..
@@ -464,9 +470,28 @@ public class HttpParserImpl implements HttpParser {
 		
 		if(firstLine.startsWith("HTTP/")) {
 			return parseResponse(lines);
+		} else if(lines.size() == 1 && memento.getParsedMessages().size() == 1) {
+			//special case where there is no headers AND it could be http 2 preface
+			return checkSpecialCase(memento, lines);
 		} else {
 			return parseRequest(lines);
 		}
+	}
+
+	private HttpMessage checkSpecialCase(MementoImpl memento, List<String> lines) {
+		HttpRequest request = memento.getParsedMessages().get(0).getHttpRequest();
+		if(request != null) {
+			String secondLine = lines.get(0);
+			String line = request.getRequestLine().toString();
+			if("PRI * HTTP/2.0\r\n".equals(line) && "SM".equals(secondLine)) {
+				//we are http2 so return an Http2Message and SHORT-CIRCUIT FURTHER PARSING
+				memento.getParsedMessages().clear();
+				memento.setHttp2(true);
+				return new Http2MarkerMessage();
+			}
+		}
+		
+		return parseRequest(lines);
 	}
 
 	private HttpMessage parseRequest(List<String> lines) {

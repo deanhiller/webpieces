@@ -24,9 +24,9 @@ public class HttpServerImpl implements HttpServer {
 	@Override
 	public void start() {
 		// TODO Auto-generated method stub
-		log.info("starting to listen to port="+config.address);
-		server.start(config.address);
-		log.info("now listening for incoming http requests");
+		log.info("starting to listen to port="+config.bindAddress);
+		server.start(config.bindAddress);
+		log.info("now listening for incoming requests");
 	}
 	
 	@Override

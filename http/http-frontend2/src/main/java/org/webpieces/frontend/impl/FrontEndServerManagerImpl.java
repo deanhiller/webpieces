@@ -33,15 +33,22 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
 		preconditionCheck(config);
 
-		SharedListenerImpl listener = new SharedListenerImpl(httpListener);
+		ServerListener listener = buildDatalListener(httpListener);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 
 		return frontend;
 	}
 
+	private ServerListener buildDatalListener(HttpRequestListener httpListener) {
+		Http1_1Handler http1_1 = new Http1_1Handler(parsing.getHttpParser(), httpListener);
+		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener);
+		ServerListener listener = new ServerListener(http1_1, http2);
+		return listener;
+	}
+
 	private void preconditionCheck(FrontendConfig config) {
-		if(config.address == null)
+		if(config.bindAddress == null)
 			throw new IllegalArgumentException("config.bindAddress must be set");
 		if(config.keepAliveTimeoutMs != null && timer == null)
 			throw new IllegalArgumentException("keepAliveTimeoutMs must be null since no timer was given when HttpFrontendFactory.createFrontEnd was called");
@@ -54,7 +61,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		SharedListenerImpl listener = new SharedListenerImpl(httpListener);
+		ServerListener listener = buildDatalListener(httpListener);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 		

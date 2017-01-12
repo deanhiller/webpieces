@@ -1,7 +1,10 @@
 dependencies {
-    compile project(':core:core-asyncserver'), project(':http:http1_1-parser'), project(':http:http2-engine')
+    compile project(':core:core-asyncserver')
+	compile project(':http:http1_1-parser')
+	compile project(':http:http2-engine')
+	
     testCompile project(':core:core-mock')
-    testCompile project(':http:http-client')
+    testCompile project(':http:http2-client')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

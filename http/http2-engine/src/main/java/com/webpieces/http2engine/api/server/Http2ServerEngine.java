@@ -1,16 +1,23 @@
 package com.webpieces.http2engine.api.server;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import java.util.concurrent.CompletableFuture;
+
+import org.webpieces.data.api.DataWrapper;
 
 public interface Http2ServerEngine {
-	/**
-	 * Future completes one the data is SENT! not when there is a response
-	 */
-	StreamWriter incomingRequest(FrontendStream stream, Http2Headers req);
 
+	/**
+	 * Usually not used from server-side but could be
+	 * @return
+	 */
+	CompletableFuture<Void> sendPing();
+	
+	void parse(DataWrapper newData);
+	
 	/**
 	 * completely tear down engine
 	 */
 	void farEndClosed();
+
+	void initiateClose();
 }

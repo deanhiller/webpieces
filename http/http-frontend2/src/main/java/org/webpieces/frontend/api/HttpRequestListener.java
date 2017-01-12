@@ -5,6 +5,6 @@ import com.webpieces.http2engine.api.StreamWriter;
 
 public interface HttpRequestListener {
 
-	StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, RequestType type);
+	StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type);
 
 }

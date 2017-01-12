@@ -24,6 +24,7 @@ public class MementoImpl implements Memento {
 	//Return state for client to access
 	private List<HttpPayload> parsedMessages = new ArrayList<>();
 	private int indexBytePointer;
+	private boolean isHttp2;
 
 	@Override
 	public List<HttpPayload> getParsedMessages() {
@@ -97,6 +98,14 @@ public class MementoImpl implements Memento {
 		}
 		
 		return new UnparsedState(ParsingState.HEADERS, leftOverData.getReadableSize());
+	}
+
+	public boolean isHttp2() {
+		return isHttp2;
+	}
+
+	public void setHttp2(boolean isHttp2) {
+		this.isHttp2 = isHttp2;
 	}
 	
 }

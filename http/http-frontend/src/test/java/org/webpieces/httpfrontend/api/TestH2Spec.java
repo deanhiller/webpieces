@@ -115,7 +115,6 @@ public class TestH2Spec {
         }
     }
 
-    @Ignore
     @Test
     public void testH2Spec() {
     	Assert.assertTrue(passH2SpecTest(testName));

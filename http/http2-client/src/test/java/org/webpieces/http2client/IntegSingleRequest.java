@@ -49,9 +49,9 @@ public class IntegSingleRequest {
 		boolean isHttp = true;
 		
 		//String host = "www.google.com"; 
-		//String host = "localhost"; //jetty
+		String host = "localhost"; //jetty
 		//String host = "api.push.apple.com";
-		String host = "gcm-http.googleapis.com";
+		//String host = "gcm-http.googleapis.com";
 		//String host = "nghttp2.org";
 		int port = 443;
 		if(isHttp)
@@ -60,7 +60,7 @@ public class IntegSingleRequest {
 		if("localhost".equals(host)) {
 			port = 8443;
 			if(isHttp)
-				port = 8080;
+				port = 51518;
 		}
 		
 		List<Http2Header> req = createRequest(host, isHttp);

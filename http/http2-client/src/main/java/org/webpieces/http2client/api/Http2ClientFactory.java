@@ -27,7 +27,15 @@ public abstract class Http2ClientFactory {
 		return createHttpClient(mgr, hpackParser, parseFactory);
 	}
 	
-	public static Http2Client createHttpClient(ChannelManager mgr, HpackParser http2Parser, Http2ClientEngineFactory factory) {
-		return new Http2ClientImpl(mgr, http2Parser, factory);
+	public static Http2Client createHttpClient(ChannelManager mgr) {
+		Http2ClientEngineFactory engineFactory = new Http2ClientEngineFactory();
+		BufferCreationPool pool = new BufferCreationPool();
+		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
+		
+		return createHttpClient(mgr, hpackParser, engineFactory);
+	}
+	
+	public static Http2Client createHttpClient(ChannelManager mgr, HpackParser hpackParser, Http2ClientEngineFactory engineFactory) {
+		return new Http2ClientImpl(mgr, hpackParser, engineFactory);
 	}
 }

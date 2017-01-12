@@ -20,7 +20,6 @@ public interface ConnectionListener {
 	 * and once with isReadyForWrites=true when the encrypted link is established
 	 * 
 	 * @param channel
-	 * @param isReadyForWrites TODO
 	 * @param isReadyForWrites This is true in every case except an SSL Server where connected is called twice, once for
 	 * when socket is connected(so you can start timeout timers if desired) and once when the encrypted link is established
 	 * and you can write to the socket

@@ -4,5 +4,7 @@ public enum HttpMessageType {
 
 	CHUNK,
 	REQUEST,
-	RESPONSE, LAST_CHUNK
+	RESPONSE, 
+	LAST_CHUNK,
+	HTTP2_MARKER_MSG
 }
