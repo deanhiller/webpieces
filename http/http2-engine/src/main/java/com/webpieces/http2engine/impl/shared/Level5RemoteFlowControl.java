@@ -12,7 +12,6 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.impl.DataTry;
-import com.webpieces.http2engine.impl.client.Level6NotifyListeners;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
@@ -25,7 +24,7 @@ public class Level5RemoteFlowControl {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private HeaderSettings remoteSettings;
-	private Level6NotifyListeners layer6NotifyListener;
+	private Level6MarshalAndPing layer6NotifyListener;
 
 	private long remoteWindowSize;
 	
@@ -37,7 +36,7 @@ public class Level5RemoteFlowControl {
 
 	public Level5RemoteFlowControl(
 			StreamState streamState,
-			Level6NotifyListeners layer6NotifyListener, 
+			Level6MarshalAndPing layer6NotifyListener, 
 			HeaderSettings remoteSettings
 	) {
 		this.streamState = streamState;

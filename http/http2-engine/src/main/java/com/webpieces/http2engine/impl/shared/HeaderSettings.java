@@ -9,6 +9,7 @@ public class HeaderSettings {
 	public static final HeaderSettings DEFAULT = new HeaderSettings();
 	
 	//start with default per spec for all of these
+	@Deprecated
 	private String id = "headerSettingsId";
 	private int headerTableSize = 4096;
 	private volatile boolean isPushEnabled = true;
@@ -60,9 +61,11 @@ public class HeaderSettings {
 	public void setUnknownSettings(Map<Short, byte[]> unknownSettings) {
 		this.unknownSettings = unknownSettings;
 	}
+	@Deprecated
 	public String getId() {
 		return id;
 	}
+	@Deprecated
 	public void setId(String id) {
 		this.id = id;
 	}

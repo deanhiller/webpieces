@@ -45,4 +45,8 @@ public class FrontendSocketImpl implements FrontendSocket {
 	public Http2ServerEngine getHttp2Engine() {
 		return http2Engine;
 	}
+
+	public TCPChannel getChannel() {
+		return channel;
+	}
 }

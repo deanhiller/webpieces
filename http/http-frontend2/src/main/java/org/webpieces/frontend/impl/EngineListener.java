@@ -1,5 +1,8 @@
 package org.webpieces.frontend.impl;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.frontend.api.HttpRequestListener;
 import org.webpieces.frontend.api.Protocol;
 
@@ -19,11 +22,19 @@ public class EngineListener implements ServerEngineListener {
 	}
 
 	@Override
-	public StreamWriter receiveRequest(Http2Headers request, ResponseHandler responseHandler) {
+	public StreamWriter sendRequestToClient(Http2Headers request, ResponseHandler responseHandler) {
 		//every request received is a new stream
 		FrontendStreamImpl stream = new FrontendStreamImpl(socket, responseHandler);
-		return httpListener.incomingRequest(stream, request, Protocol.HTTP2);
+		return httpListener.incomingRequest(stream, request, Protocol.HTTP2);		
 	}
 
+	@Override
+	public CompletableFuture<Void> sendToSocket(ByteBuffer newData) {
+		return socket.getChannel().write(newData).thenApply(c -> null);
+	}
+
+	@Override
+	public void engineClosedByFarEnd() {
+	}
 	
 }

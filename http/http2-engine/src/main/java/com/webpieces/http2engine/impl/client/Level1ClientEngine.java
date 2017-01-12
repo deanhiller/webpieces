@@ -22,37 +22,33 @@ import com.webpieces.http2engine.impl.shared.Level3StreamInitialization;
 import com.webpieces.http2engine.impl.shared.Level4ClientStateMachine;
 import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Level6MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.StreamState;
-import com.webpieces.http2parser.api.dto.PingFrame;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Setting;
-import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
 public class Level1ClientEngine implements Http2ClientEngine {
 	
 	private static final Logger log = LoggerFactory.getLogger(Level1ClientEngine.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
-	private static final HeaderSettings DEFAULT = new HeaderSettings();
 
 	private Level2ParsingAndRemoteSettings parsing;
 	private Level3StreamInitialization streamInit;
-	private Level6NotifyListeners notifyListener;
-	private HeaderSettings localSettings;
+	private Level7NotifyListeners finalLayer;
+	private Level6MarshalAndPing notifyListener;
 
 	public Level1ClientEngine(
 			HpackParser parser, 
 			ClientEngineListener socketListener, 
 			HeaderSettings localSettings
 	) {
-		this.localSettings = localSettings;
 		HeaderSettings remoteSettings = new HeaderSettings();
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
 		//we have to release items in the map inside this or release the engine
 		StreamState streamState = new StreamState();
 		
-		notifyListener = new Level6NotifyListeners(parser, socketListener, remoteSettings);
+		finalLayer = new Level7NotifyListeners(socketListener);
+		notifyListener = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, notifyListener, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(notifyListener, localSettings);
 		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(localSettings.getId(), remoteFlowCtrl, localFlowCtrl);
@@ -62,39 +58,16 @@ public class Level1ClientEngine implements Http2ClientEngine {
 
 	@Override
 	public CompletableFuture<Void> sendInitializationToSocket() {
+		log.info("sending preface");
 		DataWrapper prefaceData = dataGen.wrapByteArray(preface);
-		SettingsFrame settings = create();
-		log.info("sending settings frame="+settings);
-		return notifyListener.sendInitDataToSocket(prefaceData, settings);
+		finalLayer.sendPreface(prefaceData);
+
+		return parsing.sendSettings();
 	}
 	
-	private SettingsFrame create() {
-		SettingsFrame f = new SettingsFrame();
-		
-		if(localSettings.getHeaderTableSize() != DEFAULT.getHeaderTableSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_HEADER_TABLE_SIZE, localSettings.getHeaderTableSize()));
-		if(localSettings.isPushEnabled() != DEFAULT.isPushEnabled()) {
-			long enabled = 1;
-			if(!localSettings.isPushEnabled())
-				enabled = 0;
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, enabled));
-		}
-		if(localSettings.getMaxConcurrentStreams() != DEFAULT.getMaxConcurrentStreams())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, localSettings.getMaxConcurrentStreams()));
-		if(localSettings.getInitialWindowSize() != DEFAULT.getInitialWindowSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE, localSettings.getInitialWindowSize()));
-		if(localSettings.getMaxFrameSize() != DEFAULT.getMaxFrameSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, localSettings.getMaxFrameSize()));		
-		if(localSettings.getMaxHeaderListSize() != DEFAULT.getMaxHeaderListSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_HEADER_LIST_SIZE, localSettings.getMaxHeaderListSize()));			
-		
-		return f;
-	}
-
 	@Override
 	public CompletableFuture<Void> sendPing() {
-		PingFrame ping = new PingFrame();
-		return notifyListener.sendPing(ping);
+		return notifyListener.sendPing();
 	}
 	
 	@Override

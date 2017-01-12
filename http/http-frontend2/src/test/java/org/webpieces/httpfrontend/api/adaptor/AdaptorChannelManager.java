@@ -1,8 +1,5 @@
 package org.webpieces.httpfrontend.api.adaptor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.nio.api.ChannelManager;

@@ -8,7 +8,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2engine.impl.client.Level6NotifyListeners;
+import com.webpieces.http2engine.impl.client.Level7NotifyListeners;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
@@ -18,13 +18,13 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
 public class Level5LocalFlowControl {
 
 	private static final Logger log = LoggerFactory.getLogger(Level5LocalFlowControl.class);
-	private Level6NotifyListeners level6NotifyListener;
+	private Level6MarshalAndPing level6NotifyListener;
 	private long connectionLocalWindowSize;
 	private long totalSent = 0;
 	private long totalRecovered = 0;
 
 	public Level5LocalFlowControl(
-			Level6NotifyListeners level6NotifyListener,
+			Level6MarshalAndPing level6NotifyListener,
 			HeaderSettings localSettings
 	) {
 		this.level6NotifyListener = level6NotifyListener;

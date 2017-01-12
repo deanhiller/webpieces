@@ -14,6 +14,8 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.impl.shared.HeaderSettings;
+
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
 	private static final Logger log = LoggerFactory.getLogger(FrontEndServerManagerImpl.class);
@@ -33,16 +35,16 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
 		preconditionCheck(config);
 
-		ServerListener listener = buildDatalListener(httpListener);
+		ServerListener listener = buildDatalListener(httpListener, config.localSettings);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 
 		return frontend;
 	}
 
-	private ServerListener buildDatalListener(HttpRequestListener httpListener) {
+	private ServerListener buildDatalListener(HttpRequestListener httpListener, HeaderSettings localSettings) {
 		Http1_1Handler http1_1 = new Http1_1Handler(parsing.getHttpParser(), httpListener);
-		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener);
+		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, localSettings);
 		ServerListener listener = new ServerListener(http1_1, http2);
 		return listener;
 	}
@@ -61,7 +63,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		ServerListener listener = buildDatalListener(httpListener);
+		ServerListener listener = buildDatalListener(httpListener, config.localSettings);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 		
