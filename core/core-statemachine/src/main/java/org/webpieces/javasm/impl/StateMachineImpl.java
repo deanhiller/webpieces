@@ -3,14 +3,17 @@ package org.webpieces.javasm.impl;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import javax.swing.event.EventListenerList;
 
-import org.webpieces.javasm.api.IllegalFireEventException;
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.Transition;
+
+import com.webpieces.util.locking.PermitQueue;
 
 /**
  */
@@ -20,14 +23,17 @@ public class StateMachineImpl implements StateMachine
     private final EventListenerList globalEntryListeners = new EventListenerList();
     private final EventListenerList globalExitListeners = new EventListenerList();
     private final String rawMapId;
+	private Executor executor;
 
     /**
      * Creates an instance of StateMachineImpl.
+     * @param executor 
      * @param id
      */
-    public StateMachineImpl(String id)
+    public StateMachineImpl(Executor executor, String id)
     {
-        if(id == null)
+        this.executor = executor;
+		if(id == null)
             rawMapId = "unnamed";
         else
             rawMapId = id;
@@ -37,13 +43,13 @@ public class StateMachineImpl implements StateMachine
         State name = nameToState.get(state.getName());
         if(name == null)
             throw new IllegalArgumentException(this + "This state does not exist in this statemachine.  name="+name);
-        return new StateMachineState(rawMapId, stateMachineId, state, this);
+        return new StateMachineState(executor, rawMapId, stateMachineId, state, this);
     }
 
     /**
      * @see org.webpieces.javasm.api.StateMachine#createState(java.lang.String)
      */
-    public synchronized State createState(String name)
+    public State createState(String name)
     {
     	StateImpl state = nameToState.get(name);
     	if(state != null)
@@ -96,7 +102,8 @@ public class StateMachineImpl implements StateMachine
 
     }
 
-    public void fireEvent(Memento memento, Object evt)
+    @Override
+    public CompletableFuture<State> fireEvent(Memento memento, Object evt)
     {
         if(memento == null)
             throw new IllegalArgumentException(this + "memento cannot be null");
@@ -109,32 +116,47 @@ public class StateMachineImpl implements StateMachine
                     "you got your statemachines mixed up with the mementos");
 
         StateMachineState smState = (StateMachineState)memento;
-        synchronized(memento) {
-            if(smState.isInProcess())
-                throw new IllegalFireEventException(smState+"The StateMachine is currently " +
-                        "transitioning and running a client ActionListener which calls back into the StateMachine.  This is illegal");
-            smState.setInProcess(true);
-        }
+        PermitQueue<State> queue = smState.getPermitQueue();
+        
+        CompletableFuture<State> f = new CompletableFuture<State>();
+        queue.runRequest(() -> fire(evt, smState)).handle((s, t) -> release(s, t, f, queue));
+        
+        return f;
+    }
 
-        try {
+	private Void release(State s, Throwable t, CompletableFuture<State> f, PermitQueue<State> queue) {
+		queue.releasePermit(); //release the next event to the statemachine
+		
+		if(t != null)
+			f.completeExceptionally(new RuntimeException(t));
+		else
+			f.complete(s);
+		
+		return null;
+	}
+
+	private CompletableFuture<State> fire(Object evt, StateMachineState smState) {
+		CompletableFuture<State> future = new CompletableFuture<>();
+		try {
             //get the current state
             StateImpl state = nameToState.get(smState.getCurrentState().getName());
 
             state.fireEvent(smState, evt);
+            
+            future.complete(smState.getCurrentState());
         } catch(RuntimeException e) {
             //NOTE: Stack trace is not logged here.  That is the responsibility of the javasm client
             //so exceptions don't get logged multiple times.
             smState.getLogger().warn(this+"Exception occurred going out of state="+smState.getCurrentState()+", event="+evt);
-            throw e;
-        } finally {
-            smState.setInProcess(false);
+            future.completeExceptionally(new RuntimeException(e));
         }
-    }
+		return future;
+	}
 
     /**
      * @see org.webpieces.javasm.api.StateMachine#addGlobalStateEntryAction(java.awt.event.ActionListener)
      */
-    public synchronized StateMachine addGlobalStateEntryAction(ActionListener l)
+    public StateMachine addGlobalStateEntryAction(ActionListener l)
     {
         //first add it to all created states
         for(State state : nameToState.values()) {
@@ -147,7 +169,7 @@ public class StateMachineImpl implements StateMachine
     /**
      * @see org.webpieces.javasm.api.StateMachine#addGlobalStateExitAction(java.awt.event.ActionListener)
      */
-    public synchronized StateMachine addGlobalStateExitAction(ActionListener l)
+    public StateMachine addGlobalStateExitAction(ActionListener l)
     {
         //first add it to all created states
         for(State state : nameToState.values()) {

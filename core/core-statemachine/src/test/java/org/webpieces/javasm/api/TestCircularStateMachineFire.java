@@ -2,29 +2,33 @@ package org.webpieces.javasm.api;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Logger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import junit.framework.TestCase;
 
-/**
- */
-public class TestFailures extends TestCase {
+public class TestCircularStateMachineFire extends TestCase {
 	
-	private static final Logger log = Logger.getLogger(TestFailures.class.getName());
 	private MockActionListener onList = new MockActionListener();
 	private StateMachine sm;
 	private String flipOn;
 	private String flipOff;
 	private State on;
 	private Memento memento;
-	
+	private State off;
+	private CompletableFuture<State> secondFuture;
 
 	/**
 	 * Creates an instance of TestStateMachine.
 	 * 
 	 * @param arg0
 	 */
-	public TestFailures(String arg0) {
+	public TestCircularStateMachineFire(String arg0) {
 		super(arg0);
 	}
 
@@ -35,14 +39,15 @@ public class TestFailures extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
+        Executor executor = Executors.newFixedThreadPool(2);
 		StateMachineFactory factory = StateMachineFactory.createFactory();
-		sm = factory.createStateMachine("TestFailures");
+		sm = factory.createStateMachine(executor, "TestFailures");
 
 		flipOn = "flipOn";
 		flipOff = "flipOff";
 
 		on = sm.createState("on");
-		State off = sm.createState("off");
+		off = sm.createState("off");
 
 		Transition onToOff = sm.createTransition(on, off, flipOff);
 		Transition offToOn = sm.createTransition(off, on, flipOn);
@@ -51,31 +56,26 @@ public class TestFailures extends TestCase {
 		offToOn.addActionListener((ActionListener) onList);
 	}
 
-	/**
-	 * @see junit.framework.TestCase#tearDown()
-	 */
 	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 
-	public void testBasic() {
+	@Test
+	public void testBasic() throws InterruptedException, ExecutionException {
 		memento = sm.createMementoFromState("id", on);
 
-		try {
-			sm.fireEvent(memento, flipOff);
-			fail("Should have thrown exception....circular firing events into sm can't be allowed");
-		} catch (IllegalFireEventException e) {
-			log.info("This exception is expected");
-		}
+		CompletableFuture<State> future = sm.fireEvent(memento, flipOff);
+		State state = future.get();
+		Assert.assertEquals(off, state);
+		
+		//even though there is a circular fire, it just queues it up and works
+		Assert.assertEquals(on, secondFuture.get());
 	}
 
 	private class FireIntoStateMachine implements ActionListener {
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
 		public void actionPerformed(ActionEvent e) {
-			sm.fireEvent(memento, flipOn);
+			secondFuture = sm.fireEvent(memento, flipOn);
 		}
 	}
 }

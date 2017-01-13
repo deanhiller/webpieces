@@ -19,5 +19,5 @@ public interface Http2ServerEngine {
 	 */
 	void farEndClosed();
 
-	void initiateClose();
+	void initiateClose(String reason);
 }

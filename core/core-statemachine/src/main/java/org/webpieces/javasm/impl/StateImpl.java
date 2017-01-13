@@ -80,7 +80,7 @@ public class StateImpl implements State
             transition.fireTransitionActions(smState);
             endState.fireEntryActions(smState);
 
-            smState.setCurrentStateName(nextState);
+            smState.setCurrentState(nextState);
         } catch(RuntimeException e) {
             smState.getLogger().warn(smState+"Transition FAILED: "+getName()+" -> "+nextState+", event="+evt);
             throw e;

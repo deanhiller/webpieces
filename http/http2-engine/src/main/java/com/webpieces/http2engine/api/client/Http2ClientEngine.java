@@ -24,4 +24,6 @@ public interface Http2ClientEngine {
 	 * completely tear down engine
 	 */
 	void farEndClosed();
+
+	void initiateClose(String reason);
 }

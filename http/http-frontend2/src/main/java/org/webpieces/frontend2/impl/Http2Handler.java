@@ -1,6 +1,7 @@
 package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -19,22 +20,25 @@ public class Http2Handler {
 	private HpackParser http2Parser;
 	private HttpRequestListener httpListener;
 	private HeaderSettings localSettings;
+	private Executor backupPool;
 
 	public Http2Handler(
 			Http2ServerEngineFactory svrEngineFactory, 
 			HpackParser http2Parser,
 			HttpRequestListener httpListener,
-			HeaderSettings localSettings
+			HeaderSettings localSettings,
+			Executor backupPool
 	) {
 				this.svrEngineFactory = svrEngineFactory;
 				this.http2Parser = http2Parser;
 				this.httpListener = httpListener;
 				this.localSettings = localSettings;
+				this.backupPool = backupPool;
 	}
 
 	public void initialize(FrontendSocketImpl socket) {
 		EngineListener listener = new EngineListener(socket, httpListener);
-		Http2ServerEngine engine = svrEngineFactory.createEngine(http2Parser, listener, localSettings);
+		Http2ServerEngine engine = svrEngineFactory.createEngine(http2Parser, backupPool, listener, localSettings);
 		socket.setHttp2Engine(engine);
 	}
 	

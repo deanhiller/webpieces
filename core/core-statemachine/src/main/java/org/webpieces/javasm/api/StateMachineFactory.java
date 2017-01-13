@@ -1,5 +1,7 @@
 package org.webpieces.javasm.api;
 
+import java.util.concurrent.Executor;
+
 import org.webpieces.javasm.impl.StateMachineFactoryImpl;
 
 
@@ -13,8 +15,8 @@ public abstract class StateMachineFactory
         return new StateMachineFactoryImpl(); 
     }
 
-    public abstract StateMachine createStateMachine();
+    public abstract StateMachine createStateMachine(Executor backedUpThreadPool);
 
-    public abstract StateMachine createStateMachine(String id);
+    public abstract StateMachine createStateMachine(Executor backedUpThreadPool, String id);
     
 }

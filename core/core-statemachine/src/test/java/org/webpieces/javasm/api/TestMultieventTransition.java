@@ -2,6 +2,9 @@
  */
 package org.webpieces.javasm.api;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import junit.framework.TestCase;
 
 /**
@@ -22,8 +25,9 @@ public class TestMultieventTransition extends TestCase
     {
         super.setUp();
 
+        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine("TestMultieventTransition");
+        sm = factory.createStateMachine(executor, "TestMultieventTransition");
 
         flipOn = "flipOn";
         alsoFlipOn = "alsoFlipOn";

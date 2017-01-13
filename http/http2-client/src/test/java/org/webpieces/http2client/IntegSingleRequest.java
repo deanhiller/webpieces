@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLEngine;
@@ -92,7 +93,8 @@ public class IntegSingleRequest {
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		
-		Http2Client client = Http2ClientFactory.createHttpClient(mgr, hpackParser, http2HighLevelFactory);
+		ExecutorService backupPool = Executors.newCachedThreadPool(new NamedThreadFactory("backingUpThread"));
+		Http2Client client = Http2ClientFactory.createHttpClient(mgr, hpackParser, http2HighLevelFactory, backupPool);
 		
 		Http2Socket socket;
 		if(isHttp) {

@@ -1,6 +1,7 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.NoTransitionListener;
@@ -22,11 +23,15 @@ public class Level4ClientStateMachine {
 	private Level5LocalFlowControl localFlowControl;
 	private State closed;
 	
-	public Level4ClientStateMachine(String id, Level5RemoteFlowControl remoteFlowControl, Level5LocalFlowControl localFlowControl) {
+	public Level4ClientStateMachine(String id,
+			Executor backUpPool,
+			Level5RemoteFlowControl remoteFlowControl, 
+			Level5LocalFlowControl localFlowControl
+	) {
 		this.remoteFlowControl = remoteFlowControl;
 		this.localFlowControl = localFlowControl;
 		StateMachineFactory factory = StateMachineFactory.createFactory();
-		stateMachine = factory.createStateMachine(id);
+		stateMachine = factory.createStateMachine(backUpPool, id);
 
 		idleState = stateMachine.createState("idle");
 		State openState = stateMachine.createState("Open");
@@ -77,14 +82,16 @@ public class Level4ClientStateMachine {
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.SEND, payloadType);
 
-		stateMachine.fireEvent(state, event);
-		
-		//sometimes a single frame has two events :( per http2 spec
-		if(payload.isEndOfStream())
-			stateMachine.fireEvent(state, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));
-		
-		//if no exceptions occurred, send it on to flow control layer
-		return remoteFlowControl.sendPayloadToSocket(stream, payload);
+		CompletableFuture<State> result = stateMachine.fireEvent(state, event);
+		return result.thenCompose( s -> {
+					//sometimes a single frame has two events :( per http2 spec
+					if(payload.isEndOfStream())
+						return stateMachine.fireEvent(state, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));			
+					return CompletableFuture.completedFuture(s);
+				}).thenCompose( s -> 
+					//if no exceptions occurred, send it on to flow control layer
+					remoteFlowControl.sendPayloadToSocket(stream, payload)
+				);
 	}
 	
 	public Memento createStateMachine(String streamId) {
@@ -107,17 +114,22 @@ public class Level4ClientStateMachine {
 		Http2PayloadType payloadType = translate(payload);
 		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
 		
-		stateMachine.fireEvent(currentState, event);
-		
-		if(payload.isEndOfStream())
-			stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG)); //validates state transition is ok
+		CompletableFuture<State> result = stateMachine.fireEvent(currentState, event);
+		result.thenCompose( s -> {
+			if(payload.isEndOfStream())
+				return stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG)); //validates state transition is ok
+			return CompletableFuture.completedFuture(s);
+		}).thenApply( s -> {
+			//modifying the stream state should be done BEFORE firing to client as if the stream is closed
+			//then this will prevent windowUpdateFrame with increment being sent to a closed stream
+			if(possiblyModifyState != null)
+				possiblyModifyState.run();
+			
+			localFlowControl.fireToClient(stream, payload);			
+			
+			return s;
+		});
 
-		//modifying the stream state should be done BEFORE firing to client as if the stream is closed
-		//then this will prevent windowUpdateFrame with increment being sent to a closed stream
-		if(possiblyModifyState != null)
-			possiblyModifyState.run();
-		
-		localFlowControl.fireToClient(stream, payload);
 	}
 
 	public boolean isInClosedState(Stream stream) {

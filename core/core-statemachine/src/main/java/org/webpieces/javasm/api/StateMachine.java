@@ -1,6 +1,7 @@
 package org.webpieces.javasm.api;
 
 import java.awt.event.ActionListener;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -20,8 +21,9 @@ public interface StateMachine
      * @param currentState The current state of the StateMachine(The statemachine is stateless, so you need
      * to tell it the state of the StateMachine)
      * @param event
+     * @return 
      */
-    public void fireEvent(Memento currentState, Object event);
+    public CompletableFuture<State> fireEvent(Memento currentState, Object event);
 
     /**
      * Creates a State with the given name.

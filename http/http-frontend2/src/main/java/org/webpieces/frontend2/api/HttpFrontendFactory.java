@@ -1,6 +1,7 @@
 package org.webpieces.frontend2.api;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -44,12 +45,20 @@ public abstract class HttpFrontendFactory {
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory();
 		ParsingLogic parsing = new ParsingLogic(httpParser, http2Parser, svrEngineFactory);
-		
-		return createFrontEnd(svrMgr, timer, pool, parsing);		
+
+		ExecutorService backupPool = Executors.newCachedThreadPool(new NamedThreadFactory("backingUpThread"));
+
+		return createFrontEnd(svrMgr, timer, pool, parsing, backupPool);		
 	}
 	
-	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool, ParsingLogic parsing) {
-		return new FrontEndServerManagerImpl(svrManager, svc, bufferPool, parsing);
+	public static HttpFrontendManager createFrontEnd(
+			AsyncServerManager svrManager, 
+			ScheduledExecutorService svc, 
+			BufferPool bufferPool, 
+			ParsingLogic parsing, 
+			Executor backupPool
+	) {
+		return new FrontEndServerManagerImpl(svrManager, svc, bufferPool, parsing, backupPool);
 	}
 	
 }

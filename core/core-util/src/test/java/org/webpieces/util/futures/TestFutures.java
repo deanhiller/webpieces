@@ -68,11 +68,8 @@ public class TestFutures {
 		
 		result.cancel(true);
 		
-		Thread.sleep(5000);
-		
 		myFuture.complete(8);
 		
-		Thread.sleep(10000);
 	}
 
 	private String handle(String r, Throwable e) {

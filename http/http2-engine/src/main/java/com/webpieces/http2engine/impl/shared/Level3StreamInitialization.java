@@ -1,8 +1,7 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.javasm.api.Memento;
@@ -14,12 +13,12 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2engine.impl.CachedRequest;
 import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.util.locking.PermitQueue;
 
 public class Level3StreamInitialization {
 
@@ -30,8 +29,7 @@ public class Level3StreamInitialization {
 	private HeaderSettings localSettings;
 	private HeaderSettings remoteSettings;
 	private int startingMaxConcurrent = 50;
-	private Semaphore newStreamPermits = new Semaphore(startingMaxConcurrent); //start with 100 until we get word from remote endpoint
-	private LinkedList<CachedRequest> queue = new LinkedList<>();
+	private PermitQueue<StreamWriter> permitQueue;
 	private AtomicInteger acquiredCnt = new AtomicInteger(0);
 	private AtomicInteger releasedCnt = new AtomicInteger(0);
 
@@ -40,92 +38,55 @@ public class Level3StreamInitialization {
 			Level4ClientStateMachine clientSm, 
 			Level5RemoteFlowControl level5FlowControl,
 			HeaderSettings localSettings,
-			HeaderSettings remoteSettings
+			HeaderSettings remoteSettings,
+			Executor backupExecutor
 	) {
 		this.streamState = state;
 		this.clientSm = clientSm;
 		this.level5FlowControl = level5FlowControl;
 		this.localSettings = localSettings;
 		this.remoteSettings = remoteSettings;
+		permitQueue = new PermitQueue<>(backupExecutor, startingMaxConcurrent);
 	}
 
-	public synchronized CompletableFuture<StreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
-		//always queue the request first...(this creates fairness in first in first out sending to server)
-		CompletableFuture<StreamWriter> future = queueRequest(frame, responseListener);
-		
-		processItemFromQueue();
-
-		log.info("queue size="+queue.size()+" currently running="+(startingMaxConcurrent-newStreamPermits.availablePermits()));
-		return future;
+	public CompletableFuture<StreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
+		return permitQueue.runRequest(() -> createStreamSendImpl(frame, responseListener));
 	}
 
-	private void processItemFromQueue() {
-		CachedRequest req;
-		synchronized(this) {
-			CachedRequest peek = queue.peek();
-			if(peek == null)
-				return;
-		
-			boolean acquired = newStreamPermits.tryAcquire();
-			if(!acquired) 
-				return;
-			
-			req = queue.poll();
-		}
-		
-		Http2Headers frame = req.getFrame();
-
+	private CompletableFuture<StreamWriter> createStreamSendImpl(Http2Headers frame, Http2ResponseListener responseListener) {
 		int val = acquiredCnt.incrementAndGet();
-		log.info("got permit(cause="+frame+").  size="+newStreamPermits.availablePermits()+" acquired="+val);
-		
-		Http2ResponseListener responseListener = req.getResponseListener();
-		CompletableFuture<StreamWriter> future = req.getFuture();
+		log.info("got permit(cause="+frame+").  size="+permitQueue.availablePermits()+" acquired="+val);
 		
 		Stream stream = createStream(frame.getStreamId(), responseListener, null);
-		clientSm.fireToSocket(stream, frame).handle((v, e) -> handleCompletion(v, e, future, stream));
+		return clientSm.fireToSocket(stream, frame)
+				.thenApply(s -> new RequestWriterImpl(stream, this));
 	}
 
-	private Void handleCompletion(Void v, Throwable t, CompletableFuture<StreamWriter> future, Stream stream) {
-		if(t != null) {
-			future.completeExceptionally(new RuntimeException(t));
-			return null;
-		}
-		
-		future.complete(new RequestWriterImpl(stream, this));
-		return null;
-	}
-	
-	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
+	public CompletableFuture<Void> sendMoreStreamData(
+			Stream stream, PartialStream data) {
 		CompletableFuture<Void> future = clientSm.fireToSocket(stream, data);
-		checkForClosedState(stream, data);
+		if(checkForClosedState(stream, data)) {
+			//request stream, so increase permits
+			permitQueue.releasePermit();
+			int val = releasedCnt.decrementAndGet();
+			log.info("release permit(cause="+data+").  size="+permitQueue.availablePermits()+" releasedCnt="+val);
+		}
 		return future;
 	}
 	
-	private void checkForClosedState(Stream stream, PartialStream cause) {
+	private boolean checkForClosedState(Stream stream, PartialStream cause) {
 		//If a stream ends up in closed state, for request type streams, we must release a permit on
 		//max concurrent streams
 		boolean isClosed = clientSm.isInClosedState(stream);
 		if(!isClosed)
-			return; //do nothing
+			return false; //do nothing
 		
 		log.info("stream closed="+stream.getStreamId());
 		Stream removedStream = streamState.remove(stream);
 		if(removedStream == null)
-			return; //someone else beat us to it so just return
+			return false; //someone else closed the stream. they beat us to it so just return
 		
-		if(stream.getStreamId() % 2 == 1) {
-			//request stream, so increase permits
-			this.newStreamPermits.release();
-			int val = releasedCnt.decrementAndGet();
-			log.info("release permit(cause="+cause+").  size="+newStreamPermits.availablePermits()+" releasedCnt="+val);
-			processItemFromQueue(); //process any items from queue now that there is a new permit
-		}
-	}
-
-	private CompletableFuture<StreamWriter> queueRequest(Http2Headers frame, Http2ResponseListener responseListener) {
-		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
-		queue.add(new CachedRequest(frame, responseListener, future));
-		return future;
+		return true; //we closed the stream
 	}
 	
 	private Stream createStream(int streamId, Http2ResponseListener responseListener, PushPromiseListener pushListener) {

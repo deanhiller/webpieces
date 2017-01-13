@@ -1,6 +1,8 @@
 package org.webpieces.javasm.api;
 
 import java.awt.event.ActionListener;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import junit.framework.TestCase;
 
@@ -33,8 +35,9 @@ public class TestEntryExitListeners extends TestCase
     {
         super.setUp();
         
+        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine("TestEntryExitListeners");
+        sm = factory.createStateMachine(executor, "TestEntryExitListeners");
         
         flipOn = "flipOn";
         flipOff = "flipOff";

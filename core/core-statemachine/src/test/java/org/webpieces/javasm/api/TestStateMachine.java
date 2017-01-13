@@ -2,6 +2,10 @@ package org.webpieces.javasm.api;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
@@ -36,8 +40,9 @@ public class TestStateMachine extends TestCase
     {
         super.setUp();
 
+        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine("TestStateMachine");
+        sm = factory.createStateMachine(executor, "TestStateMachine");
 
         flipOn = "flipOn";
         flipOff = "flipOff";
@@ -97,13 +102,16 @@ public class TestStateMachine extends TestCase
 
         mockOffListener.addThrowException(new IllegalMonitorStateException());
 
+        CompletableFuture<State> future = sm.fireEvent(memento, flipOff);
         try {
             //fire turn off
-            sm.fireEvent(memento, flipOff);
+            future.get();
             fail("Should have thrown exception");
-        } catch(IllegalMonitorStateException e) {
+        } catch (InterruptedException e) {
+        	fail("what");
+		} catch (ExecutionException e) {
         	log.info("This exception is expected");
-        }
+		}
 
         mockOffListener.expectOneMethodCall();
 
