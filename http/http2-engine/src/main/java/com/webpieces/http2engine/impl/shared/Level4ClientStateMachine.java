@@ -1,7 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.NoTransitionListener;
@@ -24,14 +23,13 @@ public class Level4ClientStateMachine {
 	private State closed;
 	
 	public Level4ClientStateMachine(String id,
-			Executor backUpPool,
 			Level5RemoteFlowControl remoteFlowControl, 
 			Level5LocalFlowControl localFlowControl
 	) {
 		this.remoteFlowControl = remoteFlowControl;
 		this.localFlowControl = localFlowControl;
 		StateMachineFactory factory = StateMachineFactory.createFactory();
-		stateMachine = factory.createStateMachine(backUpPool, id);
+		stateMachine = factory.createStateMachine(id);
 
 		idleState = stateMachine.createState("idle");
 		State openState = stateMachine.createState("Open");

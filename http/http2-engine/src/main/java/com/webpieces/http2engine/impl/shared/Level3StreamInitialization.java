@@ -1,7 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.javasm.api.Memento;
@@ -38,15 +37,14 @@ public class Level3StreamInitialization {
 			Level4ClientStateMachine clientSm, 
 			Level5RemoteFlowControl level5FlowControl,
 			HeaderSettings localSettings,
-			HeaderSettings remoteSettings,
-			Executor backupExecutor
+			HeaderSettings remoteSettings
 	) {
 		this.streamState = state;
 		this.clientSm = clientSm;
 		this.level5FlowControl = level5FlowControl;
 		this.localSettings = localSettings;
 		this.remoteSettings = remoteSettings;
-		permitQueue = new PermitQueue<>(backupExecutor, startingMaxConcurrent);
+		permitQueue = new PermitQueue<>(startingMaxConcurrent);
 	}
 
 	public CompletableFuture<StreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {

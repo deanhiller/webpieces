@@ -3,8 +3,6 @@
 package org.webpieces.javasm.api;
 
 import java.awt.event.ActionListener;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import junit.framework.TestCase;
 
@@ -25,9 +23,8 @@ public class TestAnyEvent extends TestCase
     {
         super.setUp();
 
-        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine(executor, "TestAnyEvent");
+        sm = factory.createStateMachine("TestAnyEvent");
 
         flipOn = "flipOn";
         flipOff = "flipOff";

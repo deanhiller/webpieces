@@ -1,7 +1,6 @@
 package com.webpieces.http2engine.impl.client;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -40,8 +39,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	public Level1ClientEngine(
 			HpackParser parser, 
 			ClientEngineListener socketListener, 
-			HeaderSettings localSettings, 
-			Executor backedUpThreadPool
+			HeaderSettings localSettings 
 	) {
 		HeaderSettings remoteSettings = new HeaderSettings();
 
@@ -53,8 +51,8 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		notifyListener = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, notifyListener, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(notifyListener, localSettings);
-		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(localSettings.getId(), backedUpThreadPool, remoteFlowCtrl, localFlowCtrl);
-		streamInit = new Level3StreamInitialization(streamState, clientSm, remoteFlowCtrl, localSettings, remoteSettings, backedUpThreadPool);
+		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(localSettings.getId(), remoteFlowCtrl, localFlowCtrl);
+		streamInit = new Level3StreamInitialization(streamState, clientSm, remoteFlowCtrl, localSettings, remoteSettings);
 		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, notifyListener, parser, localSettings, remoteSettings);
 	}
 

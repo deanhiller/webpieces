@@ -1,8 +1,6 @@
 package org.webpieces.javasm.api;
 
 import java.awt.event.ActionListener;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import junit.framework.TestCase;
 
@@ -36,9 +34,8 @@ public class TestGlobalListeners extends TestCase
     {
         super.setUp();
         
-        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine(executor, "TestGlobalListeners");
+        sm = factory.createStateMachine("TestGlobalListeners");
         
         sm.addGlobalStateEntryAction((ActionListener)beforeCreateStateEntryList);
         sm.addGlobalStateExitAction((ActionListener)beforeCreateStateExitList);

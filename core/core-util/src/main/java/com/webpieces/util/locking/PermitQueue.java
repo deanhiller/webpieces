@@ -2,7 +2,6 @@ package com.webpieces.util.locking;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
@@ -15,10 +14,8 @@ public class PermitQueue<RESP> {
 	private static final Logger log = LoggerFactory.getLogger(PermitQueue.class);
 	private final ConcurrentLinkedQueue<QueuedRequest<RESP>> queue = new ConcurrentLinkedQueue<>();
 	private final Semaphore permits;
-	private Executor executor;
 	
-	public PermitQueue(Executor executor, int numPermits) {
-		this.executor = executor;
+	public PermitQueue(int numPermits) {
 		permits = new Semaphore(numPermits);
 	}
 	
@@ -70,7 +67,7 @@ public class PermitQueue<RESP> {
 		//apply the release now that the function is RUN WHEN the client resolves the release future
 		permits.release();
 		
-		executor.execute(() -> processItemFromQueue());
+		processItemFromQueue();
 	}
 	
 }

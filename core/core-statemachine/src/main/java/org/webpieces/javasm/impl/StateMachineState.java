@@ -1,7 +1,5 @@
 package org.webpieces.javasm.impl;
 
-import java.util.concurrent.Executor;
-
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
 import org.webpieces.util.logging.Logger;
@@ -21,14 +19,14 @@ public class StateMachineState implements Memento
     private StateMachineImpl stateMachine;
     private PermitQueue<State> permitQueue;
 
-    public StateMachineState(Executor executor, String rawMapId, String stateMachineId, State state, StateMachineImpl sm)
+    public StateMachineState(String rawMapId, String stateMachineId, State state, StateMachineImpl sm)
     {
         this.id = rawMapId+","+stateMachineId;
         this.state = state;
         this.stateMachine = sm;
         String name = Memento.class.getPackage().getName();
         log = LoggerFactory.getLogger(name+"."+rawMapId+"."+stateMachineId);
-        permitQueue = new PermitQueue<>(executor, 1);
+        permitQueue = new PermitQueue<>(1);
     }
 
     @Override

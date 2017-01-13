@@ -25,9 +25,8 @@ public class TestMultieventTransition extends TestCase
     {
         super.setUp();
 
-        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine(executor, "TestMultieventTransition");
+        sm = factory.createStateMachine("TestMultieventTransition");
 
         flipOn = "flipOn";
         alsoFlipOn = "alsoFlipOn";

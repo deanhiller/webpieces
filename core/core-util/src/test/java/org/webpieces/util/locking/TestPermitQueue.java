@@ -12,7 +12,7 @@ import com.webpieces.util.locking.PermitQueue;
 public class TestPermitQueue {
 
 	private Executor executor = Executors.newFixedThreadPool(5, new NamedThreadFactory("deansThr"));
-	private PermitQueue<Long> queue = new PermitQueue<>(executor, 1);
+	private PermitQueue<Long> queue = new PermitQueue<>(1);
 	
 	@Test
 	public void testPermits() throws InterruptedException {

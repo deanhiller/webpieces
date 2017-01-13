@@ -4,7 +4,6 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import javax.swing.event.EventListenerList;
 
@@ -23,16 +22,14 @@ public class StateMachineImpl implements StateMachine
     private final EventListenerList globalEntryListeners = new EventListenerList();
     private final EventListenerList globalExitListeners = new EventListenerList();
     private final String rawMapId;
-	private Executor executor;
 
     /**
      * Creates an instance of StateMachineImpl.
      * @param executor 
      * @param id
      */
-    public StateMachineImpl(Executor executor, String id)
+    public StateMachineImpl(String id)
     {
-        this.executor = executor;
 		if(id == null)
             rawMapId = "unnamed";
         else
@@ -43,7 +40,7 @@ public class StateMachineImpl implements StateMachine
         State name = nameToState.get(state.getName());
         if(name == null)
             throw new IllegalArgumentException(this + "This state does not exist in this statemachine.  name="+name);
-        return new StateMachineState(executor, rawMapId, stateMachineId, state, this);
+        return new StateMachineState(rawMapId, stateMachineId, state, this);
     }
 
     /**

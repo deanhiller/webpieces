@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
@@ -40,9 +38,8 @@ public class TestStateMachine extends TestCase
     {
         super.setUp();
 
-        Executor executor = Executors.newFixedThreadPool(2);
         StateMachineFactory factory = StateMachineFactory.createFactory();
-        sm = factory.createStateMachine(executor, "TestStateMachine");
+        sm = factory.createStateMachine("TestStateMachine");
 
         flipOn = "flipOn";
         flipOff = "flipOff";

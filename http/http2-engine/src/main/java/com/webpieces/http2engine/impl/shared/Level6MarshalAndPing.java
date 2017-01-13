@@ -11,7 +11,6 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.http2parser.api.dto.PingFrame;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level6MarshalAndPing implements EngineResultListener {

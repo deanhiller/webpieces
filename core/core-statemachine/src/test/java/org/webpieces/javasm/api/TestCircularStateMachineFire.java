@@ -4,8 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,9 +37,8 @@ public class TestCircularStateMachineFire extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-        Executor executor = Executors.newFixedThreadPool(2);
 		StateMachineFactory factory = StateMachineFactory.createFactory();
-		sm = factory.createStateMachine(executor, "TestFailures");
+		sm = factory.createStateMachine("TestFailures");
 
 		flipOn = "flipOn";
 		flipOff = "flipOff";

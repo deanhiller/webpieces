@@ -24,7 +24,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	private Level3StreamInitialization streamInit;
 	private Level2ParsingAndRemoteSettings parsing;
 
-	public Level1ServerEngine(HpackParser parser, ServerEngineListener listener, HeaderSettings localSettings, Executor backupPool) {
+	public Level1ServerEngine(HpackParser parser, ServerEngineListener listener, HeaderSettings localSettings) {
 		HeaderSettings remoteSettings = new HeaderSettings();
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
@@ -35,8 +35,8 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		notifyListener = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, notifyListener, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(notifyListener, localSettings);
-		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(localSettings.getId(), backupPool, remoteFlowCtrl, localFlowCtrl);
-		streamInit = new Level3StreamInitialization(streamState, clientSm, remoteFlowCtrl, localSettings, remoteSettings, backupPool);
+		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(localSettings.getId(), remoteFlowCtrl, localFlowCtrl);
+		streamInit = new Level3StreamInitialization(streamState, clientSm, remoteFlowCtrl, localSettings, remoteSettings);
 		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, notifyListener, parser, localSettings, remoteSettings);
 		
 		//first thing server always has to do is send preface and settings frame

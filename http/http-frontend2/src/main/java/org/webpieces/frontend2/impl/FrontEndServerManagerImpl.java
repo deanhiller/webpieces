@@ -1,6 +1,5 @@
 package org.webpieces.frontend2.impl;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServer;
@@ -24,14 +23,12 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	private BufferPool bufferPool;
 	private ScheduledExecutorService timer;
 	private ParsingLogic parsing;
-	private Executor backupPool;
 
-	public FrontEndServerManagerImpl(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool, ParsingLogic parsing, Executor backupPool) {
+	public FrontEndServerManagerImpl(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool, ParsingLogic parsing) {
 		this.timer = svc;
 		this.svrManager = svrManager;
 		this.bufferPool = bufferPool;
 		this.parsing = parsing;
-		this.backupPool = backupPool;
 	}
 
 	@Override
@@ -47,7 +44,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
 	private ServerListener buildDatalListener(HttpRequestListener httpListener, HeaderSettings localSettings) {
 		Http1_1Handler http1_1 = new Http1_1Handler(parsing.getHttpParser(), httpListener);
-		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, localSettings, backupPool);
+		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, localSettings);
 		ServerListener listener = new ServerListener(http1_1, http2);
 		return listener;
 	}
