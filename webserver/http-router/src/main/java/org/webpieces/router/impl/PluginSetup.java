@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.EntityLookup;
-import org.webpieces.router.api.Startable;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 
 import com.google.inject.Injector;

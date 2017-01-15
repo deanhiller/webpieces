@@ -39,6 +39,8 @@ public class Layer1Incoming implements DataListener {
 	}
 	
 	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
+		if(request.getStreamId() != 0)
+			throw new IllegalStateException("Client MUST NOT set Http2Headers.streamId.  that is filled in by library");
 		int streamId = getNextAvailableStreamId();
 		request.setStreamId(streamId);
 

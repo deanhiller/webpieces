@@ -88,10 +88,6 @@ public class IntegColoradoEdu {
 			return this;
 		}
 		
-		@Override
-		public void serverCancelledRequest() {
-			log.info("server cancelled request");
-		}
 
 		@Override
 		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {

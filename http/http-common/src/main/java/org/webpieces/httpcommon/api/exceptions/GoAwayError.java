@@ -8,7 +8,6 @@ import org.webpieces.data.api.DataWrapper;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class GoAwayError extends Http2Error {

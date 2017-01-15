@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 
 public abstract class MockSuperclass {
 
-	private Map<MethodEnum, List<ValueToReturn>> returnValues = new HashMap<>();
-	private Map<MethodEnum, List<ParametersPassedIn>> calledMethods = new HashMap<>();
+	protected Map<MethodEnum, List<ValueToReturn>> returnValues = new HashMap<>();
+	protected Map<MethodEnum, List<ParametersPassedIn>> calledMethods = new HashMap<>();
 	
 	protected void addValueToReturn(MethodEnum method, Object toReturn) {
 		ValueToReturn valueToReturn = new ValueToReturn(toReturn);

@@ -3,12 +3,12 @@ package org.webpieces.asyncserver.impl;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class DefaultConnectionListener implements ConnectionListener {
 

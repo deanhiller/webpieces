@@ -2,11 +2,14 @@ package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
 
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
 
 public class ServerListener implements AsyncDataListener {
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private static final String FRONTEND_SOCKET = "__frontendSocket";
 	private Http1_1Handler http1_1Handler;

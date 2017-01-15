@@ -183,6 +183,9 @@ public class HpackParserImpl implements HpackParser {
 	private DataWrapper marshal(MarshalStateImpl state, HasHeaderFragment promise,
 			List<Http2Header> headers) {
 		
+		if(headers.size() == 0)
+			throw new IllegalArgumentException("No headers found, at least one required");
+			
 		long maxFrameSize = state.getMaxRemoteFrameSize();
 		
 		List<Http2Frame> headerFrames = encoding.createHeaderFrames(promise, headers, state.getEncoder(), maxFrameSize);

@@ -44,6 +44,30 @@ public class Http2Setting {
 	}
 	
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + name;
+		result = prime * result + (int) (value ^ (value >>> 32));
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Http2Setting other = (Http2Setting) obj;
+		if (name != other.name)
+			return false;
+		if (value != other.value)
+			return false;
+		return true;
+	}
+	
+	@Override
 	public String toString() {
 		String idAsStr;
 		SettingsParameter knownName = getKnownName();

@@ -183,11 +183,6 @@ public class IntegMultiThreaded {
 		}
 		
 		@Override
-		public void serverCancelledRequest() {
-			log.info("server cancelled request");
-		}
-
-		@Override
 		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
 			log.info("incoming push promise="+response);
 			if(response.isEndOfStream()) {

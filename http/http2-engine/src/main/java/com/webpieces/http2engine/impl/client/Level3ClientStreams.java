@@ -1,4 +1,4 @@
-package com.webpieces.http2engine.impl.shared;
+package com.webpieces.http2engine.impl.client;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,41 +10,42 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2engine.impl.RequestWriterImpl;
+import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.Level3AbstractStreamMgr;
+import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Stream;
+import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2parser.api.Http2ParseException;
-import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.util.locking.PermitQueue;
 
-public class Level3StreamInitialization {
+public class Level3ClientStreams extends Level3AbstractStreamMgr {
 
-	private static final Logger log = LoggerFactory.getLogger(Level3StreamInitialization.class);
+	private static final Logger log = LoggerFactory.getLogger(Level3ClientStreams.class);
 	private Level4ClientStateMachine clientSm;
-	private StreamState streamState;
-	private Level5RemoteFlowControl level5FlowControl;
 	private HeaderSettings localSettings;
-	private HeaderSettings remoteSettings;
-	private int startingMaxConcurrent = 50;
 	private PermitQueue<StreamWriter> permitQueue;
 	private AtomicInteger acquiredCnt = new AtomicInteger(0);
 	private AtomicInteger releasedCnt = new AtomicInteger(0);
 
-	public Level3StreamInitialization(
+	public Level3ClientStreams(
 			StreamState state,
 			Level4ClientStateMachine clientSm, 
 			Level5RemoteFlowControl level5FlowControl,
-			HeaderSettings localSettings,
+			Http2Config config,
 			HeaderSettings remoteSettings
 	) {
+		super(level5FlowControl);
 		this.streamState = state;
 		this.clientSm = clientSm;
-		this.level5FlowControl = level5FlowControl;
-		this.localSettings = localSettings;
+		this.localSettings = config.getLocalSettings();
 		this.remoteSettings = remoteSettings;
-		permitQueue = new PermitQueue<>(startingMaxConcurrent);
+		permitQueue = new PermitQueue<>(config.getInitialRemoteMaxConcurrent());
 	}
 
 	public CompletableFuture<StreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
@@ -95,18 +96,19 @@ public class Level3StreamInitialization {
 		return streamState.create(stream);
 	}
 
-	public void sendPayloadToClient(PartialStream frame) {
+	@Override
+	public CompletableFuture<Void> sendPayloadToClient(PartialStream frame) {
 		if(frame instanceof Http2Push) {
-			sendPushPromiseToClient((Http2Push) frame);
-			return;
+			return sendPushPromiseToClient((Http2Push) frame);
 		}
 		
 		Stream stream = streamState.get(frame);
 		
-		clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame));
+		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame))
+					.thenApply(s -> null);
 	}
 
-	public void sendPushPromiseToClient(Http2Push fullPromise) {		
+	public CompletableFuture<Void> sendPushPromiseToClient(Http2Push fullPromise) {		
 		int newStreamId = fullPromise.getPromisedStreamId();
 		if(newStreamId % 2 == 1)
 			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, newStreamId, 
@@ -118,20 +120,8 @@ public class Level3StreamInitialization {
 		PushPromiseListener pushListener = listener.newIncomingPush(newStreamId);
 
 		Stream stream = createStream(newStreamId, null, pushListener);
-		clientSm.fireToClient(stream, fullPromise, null);
+		return clientSm.fireToClient(stream, fullPromise, null).thenApply(s -> null);
 	}
 
-	public void updateWindowSize(WindowUpdateFrame msg) {
-		if(msg.getStreamId() == 0) {
-			level5FlowControl.updateConnectionWindowSize(msg);
-		} else {
-			Stream stream = streamState.get(msg);
-			level5FlowControl.updateStreamWindowSize(stream, msg);
-		}
-	}
 
-	public void setMaxConcurrentStreams(long value) {
-		remoteSettings.setMaxConcurrentStreams(value);
-		
-	}
 }

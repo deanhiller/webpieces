@@ -28,6 +28,4 @@ public interface Http2ResponseListener {
 	 */
 	PushPromiseListener newIncomingPush(int streamId);
 	
-	void serverCancelledRequest();
-	
 }

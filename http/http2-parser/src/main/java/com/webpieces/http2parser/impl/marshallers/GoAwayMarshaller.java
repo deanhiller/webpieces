@@ -26,6 +26,11 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
 
         GoAwayFrame castFrame = (GoAwayFrame) frame;
 
+        int originalStreamId = castFrame.getLastStreamId();
+        int streamId = originalStreamId & 0x7FFFFFFF;
+        if(streamId != originalStreamId) 
+        	throw new RuntimeException("your lastStreamId is too large per spec. frame="+frame);
+        
         ByteBuffer prelude = bufferPool.nextBuffer(8);
         prelude
         	.putInt(castFrame.getLastStreamId())

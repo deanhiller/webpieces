@@ -4,13 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Setting;
+import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
+
 public class HeaderSettings {
 
 	public static final HeaderSettings DEFAULT = new HeaderSettings();
 	
 	//start with default per spec for all of these
-	@Deprecated
-	private String id = "headerSettingsId";
 	private int headerTableSize = 4096;
 	private volatile boolean isPushEnabled = true;
 	private volatile Long maxConcurrentStreams = null; //no limit by default per spec
@@ -61,13 +63,29 @@ public class HeaderSettings {
 	public void setUnknownSettings(Map<Short, byte[]> unknownSettings) {
 		this.unknownSettings = unknownSettings;
 	}
-	@Deprecated
-	public String getId() {
-		return id;
+
+	public static SettingsFrame createSettingsFrame(HeaderSettings localSettings) {
+		SettingsFrame f = new SettingsFrame();
+		
+		if(localSettings.getHeaderTableSize() != DEFAULT.getHeaderTableSize())
+			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_HEADER_TABLE_SIZE, localSettings.getHeaderTableSize()));
+		if(localSettings.isPushEnabled() != DEFAULT.isPushEnabled()) {
+			long enabled = 1;
+			if(!localSettings.isPushEnabled())
+				enabled = 0;
+			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, enabled));
+		}
+		if(localSettings.getMaxConcurrentStreams() != DEFAULT.getMaxConcurrentStreams())
+			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, localSettings.getMaxConcurrentStreams()));
+		if(localSettings.getInitialWindowSize() != DEFAULT.getInitialWindowSize())
+			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE, localSettings.getInitialWindowSize()));
+		if(localSettings.getMaxFrameSize() != DEFAULT.getMaxFrameSize())
+			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, localSettings.getMaxFrameSize()));		
+		if(localSettings.getMaxHeaderListSize() != DEFAULT.getMaxHeaderListSize())
+			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_HEADER_LIST_SIZE, localSettings.getMaxHeaderListSize()));			
+		
+		return f;		
 	}
-	@Deprecated
-	public void setId(String id) {
-		this.id = id;
-	}
+	
 	
 }

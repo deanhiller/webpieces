@@ -6,8 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
@@ -19,6 +17,8 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 public class IntegTestLocalhostThroughput {

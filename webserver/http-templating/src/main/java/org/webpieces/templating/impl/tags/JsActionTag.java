@@ -3,9 +3,7 @@ package org.webpieces.templating.impl.tags;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
-import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
 
 import groovy.lang.Closure;

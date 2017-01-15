@@ -16,7 +16,14 @@ public class DataFrame extends AbstractHttp2Frame implements PartialStream {
     private DataWrapper data = dataGen.emptyWrapper();
     private DataWrapper padding = dataGen.emptyWrapper();
 
-    public boolean isEndOfStream() {
+    public DataFrame() {}
+    
+    public DataFrame(int streamId, boolean endOfStream) {
+    	this.streamId = streamId;
+    	this.endOfStream = endOfStream;
+	}
+
+	public boolean isEndOfStream() {
         return endOfStream;
     }
 

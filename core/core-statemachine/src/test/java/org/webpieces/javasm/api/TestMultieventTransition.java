@@ -2,9 +2,6 @@
  */
 package org.webpieces.javasm.api;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 import junit.framework.TestCase;
 
 /**

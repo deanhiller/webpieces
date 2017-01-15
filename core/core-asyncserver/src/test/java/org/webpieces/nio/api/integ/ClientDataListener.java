@@ -2,11 +2,11 @@ package org.webpieces.nio.api.integ;
 
 import java.nio.ByteBuffer;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 final class ClientDataListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(ClientDataListener.class);

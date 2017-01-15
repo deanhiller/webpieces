@@ -2,6 +2,7 @@ package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -58,9 +59,9 @@ public class Http1_1Handler {
 		return new InitiationResult(state.getLeftOverData(), InitiationStatus.PREFACE);
 	}
 
-	public void incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
+	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
 		Memento state = parse(socket, buf);
-		processHttp1Messages(state);
+		return processHttp1Messages(state);
 	}
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -70,11 +71,12 @@ public class Http1_1Handler {
 		return state;
 	}
 
-	private void processHttp1Messages(Memento state) {
+	private CompletableFuture<Void> processHttp1Messages(Memento state) {
 		List<HttpPayload> parsed = state.getParsedMessages();
 		for(HttpPayload payload : parsed) {
 			log.info("msg received="+payload);
 		}
+		throw new UnsupportedOperationException("must figure out when to complete future");
 	}
 	
 	public void farEndClosed(FrontendSocketImpl socket) {

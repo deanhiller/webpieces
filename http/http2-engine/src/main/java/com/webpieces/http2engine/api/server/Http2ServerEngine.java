@@ -6,6 +6,8 @@ import org.webpieces.data.api.DataWrapper;
 
 public interface Http2ServerEngine {
 
+	void intialize();
+
 	/**
 	 * Usually not used from server-side but could be
 	 * @return
@@ -20,4 +22,5 @@ public interface Http2ServerEngine {
 	void farEndClosed();
 
 	void initiateClose(String reason);
+
 }

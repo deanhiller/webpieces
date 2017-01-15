@@ -1,13 +1,8 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
-import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
@@ -17,22 +12,25 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
 public class Level5LocalFlowControl {
 
 	private static final Logger log = LoggerFactory.getLogger(Level5LocalFlowControl.class);
-	private Level6MarshalAndPing level6NotifyListener;
+	private Level6MarshalAndPing marshalLayer;
 	private long connectionLocalWindowSize;
 	private long totalSent = 0;
 	private long totalRecovered = 0;
+	private EngineResultListener notifyListener;
 
 	public Level5LocalFlowControl(
-			Level6MarshalAndPing level6NotifyListener,
+			Level6MarshalAndPing marshalLayer,
+			EngineResultListener notifyListener,
 			HeaderSettings localSettings
 	) {
-		this.level6NotifyListener = level6NotifyListener;
+		this.marshalLayer = marshalLayer;
+		this.notifyListener = notifyListener;
 		this.connectionLocalWindowSize = localSettings.getInitialWindowSize();
 	}
 
 	public void fireToClient(Stream stream, PartialStream payload) {
 		if(!(payload instanceof DataFrame)) {
-			sendPieceToClient(stream, payload);
+			notifyListener.sendPieceToClient(stream, payload);
 			return;
 		}
 		
@@ -57,7 +55,8 @@ public class Level5LocalFlowControl {
 					+connectionLocalWindowSize+" streamSize="+stream.getLocalWindowSize()+" totalSent="+totalSent);
 		}
 		
-		sendPieceToClient(stream, payload).thenApply(c -> updateFlowControl(frameLength, stream));
+		notifyListener.sendPieceToClient(stream, payload)
+			.thenApply(c -> updateFlowControl(frameLength, stream));
 	}
 
 	private Void updateFlowControl(long frameLength, Stream stream) {
@@ -74,7 +73,7 @@ public class Level5LocalFlowControl {
 		w1.setStreamId(0);
 		w1.setWindowSizeIncrement(len);		
 
-		level6NotifyListener.sendFrameToSocket(w1);
+		marshalLayer.sendFrameToSocket(w1);
 		
 		if(!stream.isClosed()) {
 			
@@ -84,7 +83,7 @@ public class Level5LocalFlowControl {
 			w2.setWindowSizeIncrement(len);
 			
 			log.info("sending BOTH WUF increments. framelen="+frameLength+" recovered="+totalRecovered );
-			level6NotifyListener.sendFrameToSocket(w2);
+			marshalLayer.sendFrameToSocket(w2);
 		} else {
 			log.info("sending WUF increments. framelen="+frameLength+" recovered="+totalRecovered);
 		}
@@ -92,14 +91,4 @@ public class Level5LocalFlowControl {
 		return null;
 	}
 	
-	private CompletableFuture<Void> sendPieceToClient(Stream stream, PartialStream payload) {
-		if(payload.getStreamId() % 2 == 1 && !(payload instanceof Http2Push)) {
-			Http2ResponseListener listener = stream.getResponseListener();
-			return listener.incomingPartialResponse(payload);
-		} else {
-			PushPromiseListener listener = stream.getPushListener();
-			return listener.incomingPushPromise(payload);
-		}
-	}
-
 }

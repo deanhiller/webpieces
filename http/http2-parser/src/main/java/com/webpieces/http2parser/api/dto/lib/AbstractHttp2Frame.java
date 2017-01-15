@@ -10,7 +10,7 @@ public abstract class AbstractHttp2Frame implements Http2Frame {
     public abstract Http2FrameType getFrameType(); //8bits
 
     //1bit reserved
-    private int streamId; //31 bits unsigned
+    protected int streamId; //31 bits unsigned
 
     public void setStreamId(int streamId) {
     	this.streamId = streamId;

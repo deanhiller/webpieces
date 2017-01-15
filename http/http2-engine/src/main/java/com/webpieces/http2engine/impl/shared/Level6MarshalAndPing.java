@@ -13,7 +13,7 @@ import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class Level6MarshalAndPing implements EngineResultListener {
+public class Level6MarshalAndPing {
 
 	private static final Logger log = LoggerFactory.getLogger(Level6MarshalAndPing.class);
 	
@@ -32,9 +32,8 @@ public class Level6MarshalAndPing implements EngineResultListener {
         marshalState = parser.prepareToMarshal(remoteSettings.getHeaderTableSize(), remoteSettings.getMaxFrameSize());
 	}
 	
-	@Override
-	public void sendControlFrameToClient(Http2Msg msg) {
-		finalLayer.sendControlFrameToClient(msg);
+	public CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg) {
+		return finalLayer.sendControlFrameToClient(msg);
 	}
 	
 	public CompletableFuture<Void> sendPing() {
@@ -50,12 +49,11 @@ public class Level6MarshalAndPing implements EngineResultListener {
 				.thenCompose(c -> newFuture);
 	}
 	
-	public void processPing(PingFrame ping) {
+	public CompletableFuture<Void> processPing(PingFrame ping) {
 		if(!ping.isPingResponse()) {
 			PingFrame pingAck = new PingFrame();
 			pingAck.setIsPingResponse(true);
-			sendFrameToSocket(pingAck);
-			return;
+			return sendFrameToSocket(pingAck);
 		}
 
 		CompletableFuture<Void> future = pingFutureRef.get();
@@ -64,6 +62,8 @@ public class Level6MarshalAndPing implements EngineResultListener {
 
 		pingFutureRef.compareAndSet(future, null); //clear the value
 		future.complete(null);
+		
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public void setEncoderMaxTableSize(int value) {
@@ -87,12 +87,10 @@ public class Level6MarshalAndPing implements EngineResultListener {
 		return sendToSocket(buffer);
 	}
 	
-	@Override
 	public void farEndClosed() {
 		finalLayer.farEndClosed();
 	}
 
-	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return finalLayer.sendToSocket(buffer);
 	}

@@ -22,6 +22,12 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
         PushPromiseFrame castFrame = (PushPromiseFrame) frame;
+        
+        int originalStreamId = castFrame.getPromisedStreamId();
+        int streamId = originalStreamId & 0x7FFFFFFF;
+        if(streamId != originalStreamId) 
+        	throw new RuntimeException("your promisedStreamId is too large per spec. frame="+frame);
+        
         int paddingSize = castFrame.getPadding().getReadableSize();
 
         byte value = 0x0;

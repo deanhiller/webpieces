@@ -4,11 +4,8 @@ import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;

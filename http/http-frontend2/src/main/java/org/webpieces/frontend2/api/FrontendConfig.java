@@ -5,7 +5,7 @@ import java.net.SocketAddress;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
 
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.api.client.Http2Config;
 
 public class FrontendConfig {
 
@@ -36,7 +36,7 @@ public class FrontendConfig {
 	
 	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 
-	public HeaderSettings localSettings = new HeaderSettings();
+	public Http2Config http2Config = new Http2Config();
 
 	/**
 	 * This turns on HTTP/2 by default, so HTTP/1.1 won't work. Only needed for testing with

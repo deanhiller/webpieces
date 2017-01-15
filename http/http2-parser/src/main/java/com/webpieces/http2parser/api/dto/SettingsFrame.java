@@ -22,8 +22,8 @@ public class SettingsFrame extends AbstractHttp2Frame implements Http2Msg {
     
     public SettingsFrame() {
     }
-    public SettingsFrame(boolean b) {
-    	ack = true;
+    public SettingsFrame(boolean ack) {
+    	this.ack = ack;
 	}
 
     public boolean isAck() {
@@ -53,6 +53,33 @@ public class SettingsFrame extends AbstractHttp2Frame implements Http2Msg {
 	@Override
 	public Http2MsgType getMessageType() {
 		return Http2MsgType.SETTINGS;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (ack ? 1231 : 1237);
+		result = prime * result + ((settings == null) ? 0 : settings.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SettingsFrame other = (SettingsFrame) obj;
+		if (ack != other.ack)
+			return false;
+		if (settings == null) {
+			if (other.settings != null)
+				return false;
+		} else if (!settings.equals(other.settings))
+			return false;
+		return true;
 	}
 	
 	@Override

@@ -14,7 +14,7 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.api.client.Http2Config;
 
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
@@ -35,16 +35,16 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
 		preconditionCheck(config);
 
-		ServerListener listener = buildDatalListener(httpListener, config.localSettings);
+		ServerListener listener = buildDatalListener(httpListener, config.http2Config);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 
 		return frontend;
 	}
 
-	private ServerListener buildDatalListener(HttpRequestListener httpListener, HeaderSettings localSettings) {
+	private ServerListener buildDatalListener(HttpRequestListener httpListener, Http2Config config) {
 		Http1_1Handler http1_1 = new Http1_1Handler(parsing.getHttpParser(), httpListener);
-		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, localSettings);
+		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, config);
 		ServerListener listener = new ServerListener(http1_1, http2);
 		return listener;
 	}
@@ -63,7 +63,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		ServerListener listener = buildDatalListener(httpListener, config.localSettings);
+		ServerListener listener = buildDatalListener(httpListener, config.http2Config);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 		

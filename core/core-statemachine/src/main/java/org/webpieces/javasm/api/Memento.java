@@ -1,7 +1,6 @@
 package org.webpieces.javasm.api;
 
 import java.io.Serializable;
-import java.util.concurrent.CompletableFuture;
 
 /**
  */

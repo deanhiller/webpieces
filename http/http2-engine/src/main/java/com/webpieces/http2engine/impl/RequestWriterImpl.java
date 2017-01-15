@@ -3,17 +3,17 @@ package com.webpieces.http2engine.impl;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.impl.shared.Level3StreamInitialization;
+import com.webpieces.http2engine.impl.client.Level3ClientStreams;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class RequestWriterImpl implements StreamWriter {
 
 	private Stream stream;
-	private Level3StreamInitialization clientSm;
+	private Level3ClientStreams clientSm;
 	private boolean streamEnded;
 
-	public RequestWriterImpl(Stream stream, Level3StreamInitialization clientSm) {
+	public RequestWriterImpl(Stream stream, Level3ClientStreams clientSm) {
 		this.stream = stream;
 		this.clientSm = clientSm;
 	}

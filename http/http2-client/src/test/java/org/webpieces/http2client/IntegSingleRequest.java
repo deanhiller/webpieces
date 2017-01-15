@@ -27,6 +27,7 @@ import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
+import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -92,7 +93,7 @@ public class IntegSingleRequest {
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		
-		Http2Client client = Http2ClientFactory.createHttpClient(mgr, hpackParser, http2HighLevelFactory);
+		Http2Client client = Http2ClientFactory.createHttpClient(new Http2Config(), mgr, hpackParser, http2HighLevelFactory);
 		
 		Http2Socket socket;
 		if(isHttp) {
@@ -143,10 +144,6 @@ public class IntegSingleRequest {
 		@Override
 		public PushPromiseListener newIncomingPush(int streamId) {
 			return this;
-		}
-		@Override
-		public void serverCancelledRequest() {
-			log.info("server cancelled request");
 		}
 		@Override
 		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {

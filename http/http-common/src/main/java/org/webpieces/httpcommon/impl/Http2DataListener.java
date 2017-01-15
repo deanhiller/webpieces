@@ -31,7 +31,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;

@@ -151,7 +151,7 @@ public class Level5RemoteFlowControl {
 
 	//NOTE: this method virtually single threaded when used with channelmanager
 	//synchronized is to synchronize with other client threads
-	public void updateConnectionWindowSize(WindowUpdateFrame msg) {
+	public CompletableFuture<Void> updateConnectionWindowSize(WindowUpdateFrame msg) {
 		int increment = msg.getWindowSizeIncrement();
 		if(increment == 0) {
 			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, msg.getStreamId(), "Received windowUpdate size increment=0", true);
@@ -176,9 +176,11 @@ public class Level5RemoteFlowControl {
 			dataTry.setWasQueuedBefore(true);
 			trySendPayload(dataTry);
 		}
+		
+		return CompletableFuture.completedFuture(null);
 	}
 
-	public void updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
+	public CompletableFuture<Void> updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
 		if(msg.getWindowSizeIncrement() == 0) {
 			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, msg.getStreamId(), "Received windowUpdate size increment=0", true);
 		}
@@ -200,6 +202,9 @@ public class Level5RemoteFlowControl {
 			dataTry.setWasQueuedBefore(true);
 			trySendPayload(dataTry);		
 		}
+
+		//someday, remove synchronized above and then complete future when it is complete instead maybe
+		return CompletableFuture.completedFuture(null);
 	}
 
 }

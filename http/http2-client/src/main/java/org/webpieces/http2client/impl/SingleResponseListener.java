@@ -12,6 +12,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class SingleResponseListener implements Http2ResponseListener {
@@ -27,8 +28,12 @@ public class SingleResponseListener implements Http2ResponseListener {
 			incomingResponse((Http2Headers) response);
 		} else if(response instanceof DataFrame) {
 			incomingData((DataFrame) response);
-		} else
+		} else if(response instanceof RstStreamFrame) {
+			serverCancelledRequest((RstStreamFrame) response);
+		} else if(response instanceof Http2Headers) {
 			incomingEndHeaders((Http2Headers) response);
+		} else
+			throw new UnsupportedOperationException("missing use case. type="+response.getClass()+" msg="+response);
 		
 		//complete immediately because client is in control of single request/response
 		//and can just send less requests if he wants to back off
@@ -56,9 +61,8 @@ public class SingleResponseListener implements Http2ResponseListener {
 		responseFuture.complete(response);
 	}
 
-	@Override
-	public void serverCancelledRequest() {
-		responseFuture.completeExceptionally(new ResetStreamException("Server cancelled this request"));
+	public void serverCancelledRequest(RstStreamFrame response) {
+		responseFuture.completeExceptionally(new ResetStreamException("Server cancelled this request. code="+response.getErrorCode()));
 	}
 
 	public CompletableFuture<Http2Response> fetchResponseFuture() {

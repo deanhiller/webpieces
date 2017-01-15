@@ -15,11 +15,10 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
+import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
-import com.webpieces.http2engine.impl.shared.Level3StreamInitialization;
-import com.webpieces.http2engine.impl.shared.Level4ClientStateMachine;
 import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Level6MarshalAndPing;
@@ -32,28 +31,25 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
 
 	private Level2ParsingAndRemoteSettings parsing;
-	private Level3StreamInitialization streamInit;
+	private Level3ClientStreams streamInit;
 	private Level7NotifyListeners finalLayer;
-	private Level6MarshalAndPing notifyListener;
+	private Level6MarshalAndPing marshalLayer;
 
-	public Level1ClientEngine(
-			HpackParser parser, 
-			ClientEngineListener socketListener, 
-			HeaderSettings localSettings 
-	) {
+	public Level1ClientEngine(Http2Config config, HpackParser parser, ClientEngineListener clientEngineListener) {
 		HeaderSettings remoteSettings = new HeaderSettings();
+		HeaderSettings localSettings = config.getLocalSettings();
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
 		//we have to release items in the map inside this or release the engine
 		StreamState streamState = new StreamState();
 		
-		finalLayer = new Level7NotifyListeners(socketListener);
-		notifyListener = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
-		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, notifyListener, remoteSettings);
-		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(notifyListener, localSettings);
-		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(localSettings.getId(), remoteFlowCtrl, localFlowCtrl);
-		streamInit = new Level3StreamInitialization(streamState, clientSm, remoteFlowCtrl, localSettings, remoteSettings);
-		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, notifyListener, parser, localSettings, remoteSettings);
+		finalLayer = new Level7NotifyListeners(clientEngineListener);
+		marshalLayer = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
+		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, marshalLayer, remoteSettings);
+		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(marshalLayer, finalLayer, localSettings);
+		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
+		streamInit = new Level3ClientStreams(streamState, clientSm, remoteFlowCtrl, config, remoteSettings);
+		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, marshalLayer, parser, config, remoteSettings);
 	}
 
 	@Override
@@ -67,7 +63,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	
 	@Override
 	public CompletableFuture<Void> sendPing() {
-		return notifyListener.sendPing();
+		return marshalLayer.sendPing();
 	}
 	
 	@Override
@@ -88,7 +84,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 
 	@Override
 	public void farEndClosed() {
-		notifyListener.farEndClosed();
+		marshalLayer.farEndClosed();
 	}
 
 	@Override

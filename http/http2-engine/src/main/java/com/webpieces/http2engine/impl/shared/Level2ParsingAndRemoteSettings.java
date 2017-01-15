@@ -9,6 +9,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -28,21 +29,22 @@ public class Level2ParsingAndRemoteSettings {
 	private Level6MarshalAndPing marshalLayer;
 	private String id;
 	private Level5RemoteFlowControl remoteFlowControl;
-	private Level3StreamInitialization level3StreamInit;
+	private Level3AbstractStreamMgr level3StreamInit;
 	private HeaderSettings remoteSettings;
 	private HeaderSettings localSettings;
 
 	public Level2ParsingAndRemoteSettings(
-			Level3StreamInitialization level3StreamInit,
+			Level3AbstractStreamMgr level3StreamInit,
 			Level5RemoteFlowControl level5FlowControl,
 			Level6MarshalAndPing level6NotifyListener, 
 			HpackParser lowLevelParser, 
-			HeaderSettings localSettings,
+			Http2Config config,
 			HeaderSettings remoteSettings
 	) {
-		this.localSettings = localSettings;
+		this.localSettings = config.getLocalSettings();
 		this.remoteSettings = remoteSettings;
-		this.id = localSettings.getId();
+		this.id = config.getId();
+		
 		this.level3StreamInit = level3StreamInit;
 		this.remoteFlowControl = level5FlowControl;
 		this.marshalLayer = level6NotifyListener;
@@ -52,35 +54,56 @@ public class Level2ParsingAndRemoteSettings {
 
 	/**
 	 * NOT thread safe!!! BUT channelmanager keeps everything virtually thread-safe (ie. it's all going to come in order)
+	 * @return 
 	 */
 	public void parse(DataWrapper newData) {
-		parsingState = lowLevelParser.unmarshal(parsingState, newData);
-		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
-		
-		for(Http2Msg lowLevelFrame : parsedMessages) {
-			process(lowLevelFrame);
+		try {
+			CompletableFuture<Void> future = parseImpl(newData);
+			future.handle((resp, t) -> handleError(resp, t));
+		} catch(Throwable e) {
+			handleError(null, e);
 		}
 	}
 
-	public void process(Http2Msg msg) {
+	private Void handleError(Object object, Throwable e) {
+		if(e != null)
+			log.warn("Exception", e);
+		
+		return null;
+	}
+
+	public CompletableFuture<Void> parseImpl(DataWrapper newData) {
+		parsingState = lowLevelParser.unmarshal(parsingState, newData);
+		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
+		
+		CompletableFuture<Void> future = CompletableFuture.completedFuture((Void)null);
+		for(Http2Msg lowLevelFrame : parsedMessages) {
+			CompletableFuture<Void> f = process(lowLevelFrame);
+			future = future.thenCompose(s -> f);
+		}
+		return future;
+	}
+
+	public CompletableFuture<Void> process(Http2Msg msg) {
 		log.info(id+"frame from socket="+msg);
 		if(msg instanceof PartialStream) {
-			level3StreamInit.sendPayloadToClient((PartialStream) msg);
+			return level3StreamInit.sendPayloadToClient((PartialStream) msg);
 		} else if(msg instanceof GoAwayFrame) {
-			marshalLayer.sendControlFrameToClient(msg);
+			return marshalLayer.sendControlFrameToClient(msg);
 		} else if(msg instanceof PingFrame) {
-			marshalLayer.processPing((PingFrame)msg);
+			return marshalLayer.processPing((PingFrame)msg);
 		} else if(msg instanceof SettingsFrame) {
-			processHttp2SettingsFrame((SettingsFrame) msg);
+			return processHttp2SettingsFrame((SettingsFrame) msg);
 		} else if(msg instanceof WindowUpdateFrame){
-			level3StreamInit.updateWindowSize((WindowUpdateFrame)msg);
+			return level3StreamInit.updateWindowSize((WindowUpdateFrame)msg);
 		} else
 			throw new IllegalArgumentException("Unknown HttpMsg type.  msg="+msg+" type="+msg.getClass());
 	}
 
-	private void processHttp2SettingsFrame(SettingsFrame settings) {
+	private CompletableFuture<Void> processHttp2SettingsFrame(SettingsFrame settings) {
 		if(settings.isAck()) {
 			log.info("server acked our settings frame");
+			return CompletableFuture.completedFuture(null);
 		} else {
 			log.info("applying remote settings frame");
 			
@@ -89,7 +112,7 @@ public class Level2ParsingAndRemoteSettings {
 			SettingsFrame settingsAck = new SettingsFrame(true);
 			
 			log.info("sending remote settings ack frame");
-			marshalLayer.sendControlDataToSocket(settingsAck);
+			return marshalLayer.sendControlDataToSocket(settingsAck);
 		}
 	}
 
@@ -148,31 +171,8 @@ public class Level2ParsingAndRemoteSettings {
 		return (int)value;
 	}
 
-	public SettingsFrame createSettingsFrame(HeaderSettings localSettings) {
-		SettingsFrame f = new SettingsFrame();
-		
-		if(localSettings.getHeaderTableSize() != DEFAULT.getHeaderTableSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_HEADER_TABLE_SIZE, localSettings.getHeaderTableSize()));
-		if(localSettings.isPushEnabled() != DEFAULT.isPushEnabled()) {
-			long enabled = 1;
-			if(!localSettings.isPushEnabled())
-				enabled = 0;
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, enabled));
-		}
-		if(localSettings.getMaxConcurrentStreams() != DEFAULT.getMaxConcurrentStreams())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, localSettings.getMaxConcurrentStreams()));
-		if(localSettings.getInitialWindowSize() != DEFAULT.getInitialWindowSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_INITIAL_WINDOW_SIZE, localSettings.getInitialWindowSize()));
-		if(localSettings.getMaxFrameSize() != DEFAULT.getMaxFrameSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_FRAME_SIZE, localSettings.getMaxFrameSize()));		
-		if(localSettings.getMaxHeaderListSize() != DEFAULT.getMaxHeaderListSize())
-			f.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_HEADER_LIST_SIZE, localSettings.getMaxHeaderListSize()));			
-		
-		return f;		
-	}
-
 	public CompletableFuture<Void> sendSettings() {
-		SettingsFrame settings = createSettingsFrame(localSettings);
+		SettingsFrame settings = HeaderSettings.createSettingsFrame(localSettings);
 		return marshalLayer.sendFrameToSocket(settings);
 	}
 }

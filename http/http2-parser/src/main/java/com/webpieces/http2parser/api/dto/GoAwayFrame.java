@@ -19,7 +19,7 @@ public class GoAwayFrame extends AbstractHttp2Frame implements Http2Msg {
     private DataWrapper debugData;
 
     public void setLastStreamId(int lastStreamId) {
-        this.lastStreamId = lastStreamId & 0x7FFFFFFF; // clear the MSB for reserved
+        this.lastStreamId = lastStreamId;
     }
     public int getLastStreamId() {
         return lastStreamId;

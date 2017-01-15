@@ -7,7 +7,6 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.impl.HeaderEncoding;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
