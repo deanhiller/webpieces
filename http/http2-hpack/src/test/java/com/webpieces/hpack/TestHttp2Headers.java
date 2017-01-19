@@ -52,6 +52,7 @@ public class TestHttp2Headers {
     @Test
     public void testCreateRequestHeadersFrame() {
     	Http2Headers headers = new Http2Headers(basicRequestHeaders);
+    	headers.setStreamId(1);
     	DataWrapper data = marshal(headers);
     	Http2Msg frame = parse(data);
     	Assert.assertEquals(headers, frame);

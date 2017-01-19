@@ -44,6 +44,8 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
+import com.webpieces.http2parser.api.exception.ErrorType;
+import com.webpieces.http2parser.api.exception.ResetStreamException;
 
 class Http2DataListener implements DataListener {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -245,7 +247,7 @@ class Http2DataListener implements DataListener {
     private void handleGoAway(GoAwayFrame frame) {
         this.http2EngineImpl.remoteGoneAway = true;
         this.http2EngineImpl.goneAwayLastStreamId = frame.getLastStreamId();
-        this.http2EngineImpl.goneAwayErrorCode = frame.getErrorCode();
+        this.http2EngineImpl.goneAwayErrorCode = frame.getKnownErrorCode();
         this.http2EngineImpl.additionalDebugData = frame.getDebugData();
         farEndClosed(this.http2EngineImpl.channel);
     }
@@ -395,7 +397,7 @@ class Http2DataListener implements DataListener {
 
 	private void parseStuff(DataWrapper newData) {
 		try {
-			unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData);
+			parseStuffTranslate(newData);
 			
 		    for (Http2Msg frame : unmarshalState.getParsedFrames()) {
 		        Http2EngineImpl.log.info("got frame=" + frame);
@@ -413,6 +415,17 @@ class Http2DataListener implements DataListener {
 		    } else {
 		        throw new RstStreamError(e.getErrorCode(), e.getStreamId(), e);
 		    }
+		}
+	}
+
+	private void parseStuffTranslate(DataWrapper newData) {
+		try {
+			unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData);
+		} catch(ResetStreamException e) {
+			if(e.getType() == ErrorType.CONNECTION)
+				throw new GoAwayError(0, e.getCode(), DataWrapperGeneratorFactory.EMPTY);
+			else if(e.getType() == ErrorType.STREAM)
+				throw new RstStreamError(e.getCode(), 0, e);
 		}
 	}
 

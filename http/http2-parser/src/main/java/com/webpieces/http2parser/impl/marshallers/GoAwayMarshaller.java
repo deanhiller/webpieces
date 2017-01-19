@@ -12,6 +12,7 @@ import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
+import com.webpieces.http2parser.impl.UnsignedData;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 
 public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
@@ -26,15 +27,14 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
 
         GoAwayFrame castFrame = (GoAwayFrame) frame;
 
-        int originalStreamId = castFrame.getLastStreamId();
-        int streamId = originalStreamId & 0x7FFFFFFF;
+        long originalStreamId = castFrame.getLastStreamId();
+        long streamId = originalStreamId & 0x7FFFFFFF;
         if(streamId != originalStreamId) 
         	throw new RuntimeException("your lastStreamId is too large per spec. frame="+frame);
         
         ByteBuffer prelude = bufferPool.nextBuffer(8);
-        prelude
-        	.putInt(castFrame.getLastStreamId())
-        	.putInt(castFrame.getErrorCode().getCode());
+        UnsignedData.putUnsignedInt(prelude, castFrame.getLastStreamId());
+        UnsignedData.putUnsignedInt(prelude, castFrame.getErrorCode());
         prelude.flip();
 
         DataWrapper payload = dataGen.chainDataWrappers(
@@ -55,8 +55,11 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         List<? extends DataWrapper> split = dataGen.split(framePayloadData, 8);
         ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));
 
-        frame.setLastStreamId(preludeBytes.getInt());
-        frame.setErrorCode(Http2ErrorCode.fromInteger(preludeBytes.getInt()));
+        long lastStreamId = UnsignedData.getUnsignedInt(preludeBytes);
+        long errorCode = UnsignedData.getUnsignedInt(preludeBytes);
+        
+        frame.setLastStreamId(lastStreamId);
+        frame.setErrorCode(errorCode);
 
         frame.setDebugData(split.get(1));
 

@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockServerListener;
@@ -22,13 +21,13 @@ import org.webpieces.http2client.mock.SocketWriter;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
-import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class TestBasicHttp2Client {
+public class TestErrors {
 
 	private MockChanMgr mockChanMgr;
 	private MockTCPChannel mockChannel;
@@ -55,45 +54,38 @@ public class TestBasicHttp2Client {
 		Assert.assertEquals(socket, connect.get());
 
 		//verify settings on connect were sent
-		Http2Msg settings = mockChannel.getFrameAndClear();
-		Assert.assertEquals(HeaderSettings.createSettingsFrame(localSettings), settings);
+		Http2Msg settings1 = mockChannel.getFrameAndClear();
+		Assert.assertEquals(HeaderSettings.createSettingsFrame(localSettings), settings1);
 		
 		socketWriter = mockChannel.getSocketWriter();
-	}
-	
-	@Test
-	public void testBasicIntegration() throws InterruptedException, ExecutionException {
-		Http2Headers request1 = createRequest();
-		Http2Headers request2 = createRequest();
-
-		MockResponseListener listener1 = new MockResponseListener();
-		MockResponseListener listener2 = new MockResponseListener();
-		CompletableFuture<Http2SocketDataWriter> future = socket.sendRequest(request1, listener1);
-		CompletableFuture<Http2SocketDataWriter> future2 = socket.sendRequest(request2, listener2);
 		
-		Http2Msg req = mockChannel.getFrameAndClear();
-		Assert.assertEquals(request1, req);
-		
-		Assert.assertTrue(future.isDone());
-		Assert.assertFalse(future2.isDone());
-
 		//server's settings frame is finally coming in as well with maxConcurrent=1
 		HeaderSettings settings = new HeaderSettings();
 		settings.setMaxConcurrentStreams(1L);
 		socketWriter.write(HeaderSettings.createSettingsFrame(settings));
 		socketWriter.write(new SettingsFrame(true)); //ack client frame
 		
-		
-		socketWriter.write(createResponse(request1.getStreamId())); //endOfStream=false
-		
-		Assert.assertFalse(future2.isDone());
-		socketWriter.write(new DataFrame(request1.getStreamId(), false)); //endOfStream=false
-		
-		Assert.assertFalse(future2.isDone());
-		socketWriter.write(new DataFrame(request1.getStreamId(), true));//endOfStream = true
-		//Assert.assertTrue(future2.isDone());
-		
-		
+		Http2Msg svrSettings = mockChannel.getFrameAndClear();
+		SettingsFrame expected = new SettingsFrame(true);
+		Assert.assertEquals(expected, svrSettings);
+	}
+	
+	@Test
+	public void testBadServerSendsInvalidResponseStreamIdWrong() throws InterruptedException, ExecutionException {
+		Http2Headers request1 = createRequest();
+
+		MockResponseListener listener1 = new MockResponseListener();
+		socket.sendRequest(request1, listener1);
+
+		Http2Msg req = mockChannel.getFrameAndClear();
+		Assert.assertEquals(request1, req);
+
+//		socketWriter.write(createResponse(0)); //endOfStream=false
+
+		//TODO: ensure GOAWAY FRAME HERE actually
+//		Http2Msg msgFromClient = mockChannel.getFrameAndClear();
+//		RstStreamFrame str = new RstStreamFrame();
+//		Assert.assertEquals(str, msgFromClient);
 	}
 	
 	private Http2Headers createResponse(int streamId) {

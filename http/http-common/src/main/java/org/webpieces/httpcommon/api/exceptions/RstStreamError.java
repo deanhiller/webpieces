@@ -30,7 +30,7 @@ public class RstStreamError extends Http2Error {
     public List<Http2Msg> toFrames() {
         RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(streamId);
-        frame.setErrorCode(errorCode);
+        frame.setKnownErrorCode(errorCode);
         List<Http2Msg> frames = new ArrayList<>();
         frames.add(frame);
 

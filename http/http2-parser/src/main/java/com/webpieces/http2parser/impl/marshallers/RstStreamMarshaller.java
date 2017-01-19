@@ -13,6 +13,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.FrameHeaderData;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
+import com.webpieces.http2parser.impl.UnsignedData;
 
 public class RstStreamMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 	public RstStreamMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -24,7 +25,7 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		RstStreamFrame castFrame = (RstStreamFrame) frame;
 
 		ByteBuffer payload = bufferPool.nextBuffer(4);
-		payload.putInt(castFrame.getErrorCode().getCode());
+		UnsignedData.putUnsignedInt(payload, castFrame.getErrorCode());
 		payload.flip();
 
 		DataWrapper dataPayload = dataGen.wrapByteBuffer(payload);
@@ -43,7 +44,10 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		super.unmarshalFrame(state, frame);
 
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(framePayloadData);
-		frame.setErrorCode(Http2ErrorCode.fromInteger(payloadByteBuffer.getInt()));
+		
+		long errorCode = UnsignedData.getUnsignedInt(payloadByteBuffer);
+		
+		frame.setErrorCode(errorCode);
 
 		bufferPool.releaseBuffer(payloadByteBuffer);
 

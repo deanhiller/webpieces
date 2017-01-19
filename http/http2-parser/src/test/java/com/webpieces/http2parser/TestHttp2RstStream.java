@@ -18,7 +18,7 @@ public class TestHttp2RstStream {
     public void testCreateRstStream() {
         RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(0x4);
-        frame.setErrorCode(Http2ErrorCode.CONNECT_ERROR);
+        frame.setKnownErrorCode(Http2ErrorCode.CONNECT_ERROR);
         String hexFrame = UtilsForTest.frameToHex(frame);
 
         UtilsForTest.testBidiFromBytes(hexFrame);
@@ -30,6 +30,6 @@ public class TestHttp2RstStream {
         RstStreamFrame castFrame = (RstStreamFrame) frame;
 
         Assert.assertEquals(castFrame.getStreamId(), 4);
-        Assert.assertEquals(castFrame.getErrorCode(), Http2ErrorCode.CONNECT_ERROR);
+        Assert.assertEquals(castFrame.getKnownErrorCode(), Http2ErrorCode.CONNECT_ERROR);
     }
 }

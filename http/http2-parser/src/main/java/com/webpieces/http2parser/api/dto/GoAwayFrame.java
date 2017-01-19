@@ -14,22 +14,31 @@ public class GoAwayFrame extends AbstractHttp2Frame implements Http2Msg {
 
     /* payload */
     // 1 bit reserved
-    private int lastStreamId; // 31bits
-    private Http2ErrorCode errorCode; //32bits
+    private long lastStreamId; // 31bits
+    private long errorCode; //32bits
     private DataWrapper debugData;
 
-    public void setLastStreamId(int lastStreamId) {
+    public void setLastStreamId(long lastStreamId) {
         this.lastStreamId = lastStreamId;
     }
-    public int getLastStreamId() {
+    public long getLastStreamId() {
         return lastStreamId;
     }
 
-    public void setErrorCode(Http2ErrorCode errorCode) {
-        this.errorCode = errorCode;
+    public long getErrorCode() {
+    	return errorCode;
     }
-    public Http2ErrorCode getErrorCode() {
-        return errorCode;
+
+    public void setErrorCode(long code) {
+    	this.errorCode = code;
+    }
+    
+    public void setKnownErrorCode(Http2ErrorCode errorCode) {
+        this.errorCode = errorCode.getCode();
+    }
+    
+    public Http2ErrorCode getKnownErrorCode() {
+    	return Http2ErrorCode.translate(errorCode);
     }
 
     public DataWrapper getDebugData() {

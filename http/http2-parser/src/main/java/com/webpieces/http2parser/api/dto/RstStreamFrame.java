@@ -11,14 +11,21 @@ public class RstStreamFrame extends AbstractHttp2Frame implements PartialStream 
     /* flags */
 
     /* payload */
-    private Http2ErrorCode errorCode; //32 bits
+    private long errorCode; //32 bits
 
-    public Http2ErrorCode getErrorCode() {
-        return errorCode;
+    public long getErrorCode() {
+		return errorCode;
+	}
+	public void setErrorCode(long errorCode) {
+		this.errorCode = errorCode;
+	}
+
+	public Http2ErrorCode getKnownErrorCode() {
+        return Http2ErrorCode.translate(errorCode);
     }
 
-    public void setErrorCode(Http2ErrorCode errorCode) {
-        this.errorCode = errorCode;
+    public void setKnownErrorCode(Http2ErrorCode errorCode) {
+        this.errorCode = errorCode.getCode();
     }
 
 	@Override

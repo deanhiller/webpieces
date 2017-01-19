@@ -34,13 +34,13 @@ public class GoAwayError extends Http2Error {
         List<Http2Msg> frames = new ArrayList<>();
 
         GoAwayFrame http2GoAway = new GoAwayFrame();
-        http2GoAway.setErrorCode(errorCode);
+        http2GoAway.setKnownErrorCode(errorCode);
         http2GoAway.setLastStreamId(lastStreamId);
         http2GoAway.setDebugData(debugData);
         frames.add(http2GoAway);
         if(streamId != 0x0) {
             RstStreamFrame http2RstStream = new RstStreamFrame();
-            http2RstStream.setErrorCode(errorCode);
+            http2RstStream.setKnownErrorCode(errorCode);
             http2RstStream.setStreamId(streamId);
             frames.add(http2RstStream);
         }

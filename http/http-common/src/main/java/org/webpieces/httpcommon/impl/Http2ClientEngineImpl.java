@@ -70,7 +70,7 @@ public class Http2ClientEngineImpl extends Http2EngineImpl implements Http2Clien
 
     @Override
     void sideSpecificHandleRstStream(RstStreamFrame frame, Stream stream) {
-        stream.getResponseListener().failure(new RstStreamError(frame.getErrorCode(), stream.getStreamId()));
+        stream.getResponseListener().failure(new RstStreamError(frame.getKnownErrorCode(), stream.getStreamId()));
     }
 
     @Override

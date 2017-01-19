@@ -12,6 +12,8 @@ import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
+import com.webpieces.http2parser.api.exception.ErrorType;
+import com.webpieces.http2parser.api.exception.ResetStreamException;
 import com.webpieces.http2parser.impl.DataSplit;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 import com.webpieces.http2parser.impl.PaddingUtil;
@@ -26,6 +28,9 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {
         HeadersFrame castFrame = (HeadersFrame) frame;
+        if(frame.getStreamId() == 0)
+        	throw new IllegalArgumentException("Headers frame cannot be streamId 0");
+        
         int paddingSize = castFrame.getPadding().getReadableSize();
 
         byte value = 0x0;
@@ -89,6 +94,9 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         } else {
             frame.setHeaderFragment(paddingStripped);
         }
+        
+        if(frame.getStreamId() == 0)
+        	throw new ResetStreamException("Headers frame has streamId=0 which is not allowed per spec. frame="+frame, Http2ErrorCode.PROTOCOL_ERROR, ErrorType.CONNECTION);
         
         return frame;
 	}

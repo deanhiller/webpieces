@@ -27,7 +27,7 @@ public class TestHttp2RstStream {
     public void testCreateRstStream() {
         RstStreamFrame frame = new RstStreamFrame();
         frame.setStreamId(0x4);
-        frame.setErrorCode(Http2ErrorCode.CONNECT_ERROR);
+        frame.setKnownErrorCode(Http2ErrorCode.CONNECT_ERROR);
 
         byte[] data = parser.marshal(frame).createByteArray();
         String hexFrame = UtilsForTest.toHexString(data);

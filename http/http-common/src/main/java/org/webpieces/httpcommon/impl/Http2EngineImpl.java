@@ -129,7 +129,7 @@ public abstract class Http2EngineImpl implements Http2Engine {
     // going to record what they told us.
     // these don't have to be concurrent-safe because the datalistener is virtually single threaded.
     boolean remoteGoneAway = false;
-    int goneAwayLastStreamId;
+    long goneAwayLastStreamId;
     Http2ErrorCode goneAwayErrorCode;
     DataWrapper additionalDebugData;
 
