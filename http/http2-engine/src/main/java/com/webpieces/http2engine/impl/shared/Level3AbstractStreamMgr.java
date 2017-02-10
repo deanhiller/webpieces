@@ -10,9 +10,10 @@ public abstract class Level3AbstractStreamMgr {
 	protected StreamState streamState;
 	protected HeaderSettings remoteSettings;
 	private Level5RemoteFlowControl remoteFlowControl;
-
-	public Level3AbstractStreamMgr(Level5RemoteFlowControl level5FlowControl2) {
+	
+	public Level3AbstractStreamMgr(Level5RemoteFlowControl level5FlowControl2, HeaderSettings remoteSettings2) {
 		this.remoteFlowControl = level5FlowControl2;
+		this.remoteSettings = remoteSettings2;
 	}
 
 	public abstract CompletableFuture<Void> sendPayloadToClient(PartialStream msg);
@@ -28,5 +29,9 @@ public abstract class Level3AbstractStreamMgr {
 
 	public void setMaxConcurrentStreams(long value) {
 		remoteSettings.setMaxConcurrentStreams(value);
+		
+		modifyMaxConcurrentStreams(value);
 	}
+
+	protected abstract void modifyMaxConcurrentStreams(long value);
 }

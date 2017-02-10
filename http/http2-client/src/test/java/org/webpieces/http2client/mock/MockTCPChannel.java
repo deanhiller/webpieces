@@ -3,8 +3,10 @@ package org.webpieces.http2client.mock;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.webpieces.data.api.BufferCreationPool;
@@ -46,10 +48,6 @@ public class MockTCPChannel extends MockSuperclass implements TCPChannel {
 		unmarshalState = parser.prepareToUnmarshal(4096, 4096, 4096);
 	}
 	
-	public void clear() {
-		super.clear();
-	}
-	
 	@Override
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
 		if(connected)
@@ -76,17 +74,39 @@ public class MockTCPChannel extends MockSuperclass implements TCPChannel {
 		return processData(b);
 	}
 
+	@SuppressWarnings("unchecked")
 	private CompletableFuture<Channel> processData(ByteBuffer b) {
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		parser.unmarshal(unmarshalState, data);
 		List<Http2Msg> parsedFrames = unmarshalState.getParsedFrames();
-		for(Http2Msg msg : parsedFrames) {
-			super.calledMethod(Method.INCOMING_FRAME, msg);
-		}
-		
-		return CompletableFuture.completedFuture(null);
+		return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
 	}
 
+	public Http2Msg getFrameAndClear() {
+		List<Http2Msg> msgs = getFramesAndClear();
+		if(msgs.size() != 1)
+			throw new IllegalStateException("not correct number of responses.  number="+msgs.size()+" but expected 1.  list="+msgs);
+		return msgs.get(0);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Http2Msg> getFramesAndClear() {
+		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.INCOMING_FRAME);
+		Stream<Http2Msg> retVal = calledMethodList.map(p -> (List<Http2Msg>)p.getArgs()[0])
+														.flatMap(Collection::stream);
+
+		//clear out read values
+		this.calledMethods.remove(Method.INCOMING_FRAME);
+		
+		return retVal.collect(Collectors.toList());
+	}
+	
+	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Channel> future) {
+		super.setDefaultReturnValue(Method.INCOMING_FRAME, future);
+	}
+	
+	
+	
 	@Override
 	public CompletableFuture<Channel> close() {
 		return null;
@@ -211,22 +231,17 @@ public class MockTCPChannel extends MockSuperclass implements TCPChannel {
 		// TODO Auto-generated method stub
 		
 	}
-
-	public Http2Msg getFrameAndClear() {
-		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.INCOMING_FRAME);
-		Stream<Http2Msg> retVal = calledMethodList.map(p -> (Http2Msg)p.getArgs()[0]);
-		Http2Msg[] array = retVal.toArray(Http2Msg[]::new);
-		if(array.length != 1)
-			throw new IllegalStateException("not correct number of responses.  number="+array.length+" but expected 1");
-		
-		List<ParametersPassedIn> params = this.calledMethods.get(Method.INCOMING_FRAME);
-		params.clear();
-		
-		return array[0];
-	}
-
+	
 	public SocketWriter getSocketWriter() {
 		return writer;
+	}
+
+	public void assertNoIncomingMessages() {
+		List<ParametersPassedIn> list = this.calledMethods.get(Method.INCOMING_FRAME);
+		if(list == null)
+			return;
+		else if(list.size() != 0)
+			throw new IllegalStateException("expected no method calls but method was called "+list.size()+" times.  list="+list);
 	}
 
 }

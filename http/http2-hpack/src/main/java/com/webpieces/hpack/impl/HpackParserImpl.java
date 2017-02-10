@@ -51,7 +51,7 @@ public class HpackParserImpl implements HpackParser {
 	@Override
 	public UnmarshalState unmarshal(UnmarshalState memento, DataWrapper newData) {
 		UnmarshalStateImpl state = (UnmarshalStateImpl) memento;
-		state.getParsedFrames().clear(); //reset any parsed frames
+		state.clearParsedFrames(); //reset any parsed frames
 		
 		Http2Memento result = parser.parse(state.getLowLevelState(), newData);
 		

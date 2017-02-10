@@ -29,7 +29,10 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	private static final Logger log = LoggerFactory.getLogger(Level3ClientStreams.class);
 	private Level4ClientStateMachine clientSm;
 	private HeaderSettings localSettings;
+	private int permitCount;
 	private PermitQueue<StreamWriter> permitQueue;
+
+	//purely for logging!!!  do not use for something else
 	private AtomicInteger acquiredCnt = new AtomicInteger(0);
 	private AtomicInteger releasedCnt = new AtomicInteger(0);
 
@@ -40,11 +43,12 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 			Http2Config config,
 			HeaderSettings remoteSettings
 	) {
-		super(level5FlowControl);
+		super(level5FlowControl, remoteSettings);
 		this.streamState = state;
 		this.clientSm = clientSm;
 		this.localSettings = config.getLocalSettings();
 		this.remoteSettings = remoteSettings;
+		this.permitCount = config.getInitialRemoteMaxConcurrent();
 		permitQueue = new PermitQueue<>(config.getInitialRemoteMaxConcurrent());
 	}
 
@@ -64,28 +68,27 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	public CompletableFuture<Void> sendMoreStreamData(
 			Stream stream, PartialStream data) {
 		CompletableFuture<Void> future = clientSm.fireToSocket(stream, data);
-		if(checkForClosedState(stream, data)) {
-			//request stream, so increase permits
-			permitQueue.releasePermit();
-			int val = releasedCnt.decrementAndGet();
-			log.info("release permit(cause="+data+").  size="+permitQueue.availablePermits()+" releasedCnt="+val);
-		}
+		checkForClosedState(stream, data);
 		return future;
 	}
 	
-	private boolean checkForClosedState(Stream stream, PartialStream cause) {
+	private void checkForClosedState(Stream stream, PartialStream cause) {
 		//If a stream ends up in closed state, for request type streams, we must release a permit on
 		//max concurrent streams
 		boolean isClosed = clientSm.isInClosedState(stream);
 		if(!isClosed)
-			return false; //do nothing
+			return; //do nothing
 		
 		log.info("stream closed="+stream.getStreamId());
 		Stream removedStream = streamState.remove(stream);
 		if(removedStream == null)
-			return false; //someone else closed the stream. they beat us to it so just return
-		
-		return true; //we closed the stream
+			return; //someone else closed the stream. they beat us to it so just return
+
+		//request stream, so increase permits
+		permitQueue.releasePermit();
+		int val = releasedCnt.decrementAndGet();
+		log.info("release permit(cause="+cause+").  size="+permitQueue.availablePermits()+" releasedCnt="+val);
+		return; //we closed the stream
 	}
 	
 	private Stream createStream(int streamId, Http2ResponseListener responseListener, PushPromiseListener pushListener) {
@@ -121,6 +124,17 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 
 		Stream stream = createStream(newStreamId, null, pushListener);
 		return clientSm.fireToClient(stream, fullPromise, null).thenApply(s -> null);
+	}
+
+	@Override
+	protected void modifyMaxConcurrentStreams(long value) {
+		if(value == permitCount)
+			return;
+		else if (value > Integer.MAX_VALUE)
+			throw new IllegalArgumentException("remote setting too large");
+
+		int modifyPermitsCnt = (int) (value - permitCount);
+		permitQueue.modifyPermitPoolSize(modifyPermitsCnt);
 	}
 
 

@@ -3,6 +3,7 @@ package com.webpieces.util.locking;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.webpieces.util.logging.Logger;
@@ -14,6 +15,7 @@ public class PermitQueue<RESP> {
 	private static final Logger log = LoggerFactory.getLogger(PermitQueue.class);
 	private final ConcurrentLinkedQueue<QueuedRequest<RESP>> queue = new ConcurrentLinkedQueue<>();
 	private final Semaphore permits;
+	private final AtomicInteger toBeRemoved = new AtomicInteger(0);
 	
 	public PermitQueue(int numPermits) {
 		permits = new Semaphore(numPermits);
@@ -35,7 +37,7 @@ public class PermitQueue<RESP> {
 		
 		QueuedRequest<RESP> req = queue.poll();
 		if(req == null) {
-			permits.release(); //release acquired permit
+			releaseSinglePermit(); //release acquired permit
 			return;
 		}
 
@@ -50,6 +52,19 @@ public class PermitQueue<RESP> {
 		}
 	}
 	
+	private void releaseSinglePermit() {
+		int value = toBeRemoved.decrementAndGet();
+		if(value >= 0) {
+			//we need to NOT release permit back into pool and just return here
+			return;
+		}
+		
+		//oops, it's less than 0, add it back now
+		toBeRemoved.incrementAndGet();
+
+		permits.release(); 
+	}
+
 	private Void handle(RESP resp, Throwable t, CompletableFuture<RESP> future) {
 		if(t != null)
 			future.completeExceptionally(new RuntimeException(t));
@@ -65,9 +80,24 @@ public class PermitQueue<RESP> {
 
 	public void releasePermit() {
 		//apply the release now that the function is RUN WHEN the client resolves the release future
-		permits.release();
+		releaseSinglePermit();
 		
 		processItemFromQueue();
 	}
 	
+	public void modifyPermitPoolSize(int permitCnt) {
+		if(permitCnt > 0) {
+			log.info("increasing permits in pool by "+permitCnt);
+			//apply the release now that the function is RUN WHEN the client resolves the release future
+			permits.release(permitCnt);
+			
+			for(int i = 0; i < permitCnt; i++) {
+				processItemFromQueue();
+			}
+		} else {
+			log.info("decreasing permits in pool by "+permitCnt);
+			toBeRemoved.addAndGet(permitCnt);
+		}
+	}
+
 }

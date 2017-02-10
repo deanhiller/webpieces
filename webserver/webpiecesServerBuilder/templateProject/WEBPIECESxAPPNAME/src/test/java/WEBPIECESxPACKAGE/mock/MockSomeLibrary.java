@@ -1,5 +1,7 @@
 package WEBPIECESxPACKAGE.mock;
 
+import java.util.function.Supplier;
+
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 
@@ -16,7 +18,7 @@ public class MockSomeLibrary extends MockSuperclass implements SomeLibrary {
 		super.calledMethod(Method.DO_SOMETHING, something);
 	}
 
-	public void addExceptionToThrow(RuntimeException exc) {
+	public void addExceptionToThrow(Supplier<Void> exc) {
 		super.addExceptionToThrow(Method.DO_SOMETHING, exc);
 	}
 

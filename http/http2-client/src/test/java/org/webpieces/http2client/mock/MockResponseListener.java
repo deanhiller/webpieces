@@ -1,9 +1,13 @@
 package org.webpieces.http2client.mock;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
+import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
@@ -32,6 +36,27 @@ public class MockResponseListener extends MockSuperclass implements Http2Respons
 	}
 	public void addReturnValuePush(PushPromiseListener retVal) {
 		super.addValueToReturn(Method.INCOMING_PUSH, retVal);
+	}
+
+	public PartialStream getSingleReturnValueIncomingResponse() {
+		List<PartialStream> list = getReturnValuesIncomingResponse();
+		if(list.size() != 1)
+			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+list.size());
+		return list.get(0);
+	}
+	
+	public List<PartialStream> getReturnValuesIncomingResponse() {
+		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.INCOMING_RESPONSE);
+		Stream<PartialStream> retVal = calledMethodList.map(p -> (PartialStream)p.getArgs()[0]);
+
+		//clear out read values
+		this.calledMethods.remove(Method.INCOMING_RESPONSE);
+		
+		return retVal.collect(Collectors.toList());
+	}
+
+	public void setIncomingRespDefault(CompletableFuture<Void> retVal) {
+		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
 	}
 
 }

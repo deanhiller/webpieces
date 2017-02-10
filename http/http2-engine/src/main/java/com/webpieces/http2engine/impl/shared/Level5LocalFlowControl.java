@@ -60,6 +60,9 @@ public class Level5LocalFlowControl {
 	}
 
 	private Void updateFlowControl(long frameLength, Stream stream) {
+		if(frameLength == 0)
+			return null; //nothing to do if it is a 0 length frame.  
+		
 		//TODO: we could optimize this to send very large window updates and send less window updates instead of
 		//what we do currently sending many increase window by 13 byte updates and such.
 		synchronized(this) {

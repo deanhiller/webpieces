@@ -57,5 +57,9 @@ public class UnmarshalStateImpl implements UnmarshalState {
 		lowLevelState.setIncomingMaxFrameSize(maxFrameSize);
 	}
 
+	public void clearParsedFrames() {
+		parsedFrames = new ArrayList<>();
+	}
+
 
 }

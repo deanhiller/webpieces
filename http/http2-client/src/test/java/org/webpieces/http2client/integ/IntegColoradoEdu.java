@@ -1,4 +1,4 @@
-package org.webpieces.http2client;
+package org.webpieces.http2client.integ;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;

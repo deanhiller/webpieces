@@ -17,7 +17,7 @@ public class MockExecutor extends MockSuperclass implements Executor {
 	
 	@Override
 	public void execute(Runnable command) {
-		super.calledMethod(Method.EXECUTE, command);
+		super.calledVoidMethod(Method.EXECUTE, command);
 	}
 
 	public List<Runnable> getRunnablesScheduled() {

@@ -97,7 +97,9 @@ public class TestStateMachine extends TestCase
     public void testExceptionHandled() {
         Memento memento = sm.createMementoFromState("id", on);
 
-        mockOffListener.addThrowException(new IllegalMonitorStateException());
+        mockOffListener.addThrowException(() -> {
+        	throw new IllegalMonitorStateException();
+        });
 
         CompletableFuture<State> future = sm.fireEvent(memento, flipOff);
         try {

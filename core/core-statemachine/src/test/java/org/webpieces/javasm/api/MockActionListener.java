@@ -3,6 +3,7 @@ package org.webpieces.javasm.api;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,7 +20,7 @@ public class MockActionListener extends MockSuperclass implements ActionListener
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		super.calledMethod(Method.ACTION_PERFORMED, e);
+		super.calledVoidMethod(Method.ACTION_PERFORMED, e);
 	}
 
 	public List<ActionEvent> getMethodParameters() {
@@ -31,15 +32,15 @@ public class MockActionListener extends MockSuperclass implements ActionListener
 	
     public void expectNoMethodCalls() {
         Assert.assertEquals(0, getMethodParameters().size());
-        clear();
+		calledMethods.clear();
     }
 
 	public void expectOneMethodCall() {
         Assert.assertEquals(1, getMethodParameters().size());
-        clear();
+		calledMethods.clear();
 	}
 
-	public void addThrowException(IllegalMonitorStateException illegalMonitorStateException) {
-		super.addExceptionToThrow(Method.ACTION_PERFORMED, illegalMonitorStateException);
+	public void addThrowException(Supplier<Void> exc) {
+		super.addExceptionToThrow(Method.ACTION_PERFORMED, exc);
 	}
 }

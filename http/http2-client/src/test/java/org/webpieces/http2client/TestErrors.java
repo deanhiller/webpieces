@@ -40,6 +40,8 @@ public class TestErrors {
 		
         mockChanMgr = new MockChanMgr();
         mockChannel = new MockTCPChannel();
+        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
+
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);

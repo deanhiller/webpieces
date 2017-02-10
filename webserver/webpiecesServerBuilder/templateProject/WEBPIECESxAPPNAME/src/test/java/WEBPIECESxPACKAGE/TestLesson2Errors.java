@@ -73,7 +73,9 @@ public class TestLesson2Errors {
 	 */
 	@Test
 	public void testWebAppHasBugRenders500Route() {
-		mockLibrary.addExceptionToThrow(new RuntimeException("test internal bug page"));
+		mockLibrary.addExceptionToThrow(() -> {
+			throw new RuntimeException("test internal bug page");
+		});
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/");
 		
 		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);

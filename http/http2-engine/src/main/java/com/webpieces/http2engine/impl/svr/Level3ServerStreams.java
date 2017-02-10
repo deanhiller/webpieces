@@ -17,16 +17,14 @@ public class Level3ServerStreams extends Level3AbstractStreamMgr {
 	private StreamState streamState;
 	private Level4ServerStateMachine clientSm;
 	private HeaderSettings localSettings;
-	private HeaderSettings remoteSettings;
 	private volatile int streamsInProcess = 0;
 
 	public Level3ServerStreams(StreamState streamState, Level4ServerStateMachine clientSm,
 			Level5RemoteFlowControl remoteFlowCtrl, HeaderSettings localSettings, HeaderSettings remoteSettings) {
-		super(remoteFlowCtrl);
+		super(remoteFlowCtrl, remoteSettings);
 		this.streamState = streamState;
 		this.clientSm = clientSm;
 		this.localSettings = localSettings;
-		this.remoteSettings = remoteSettings;
 	}
 
 	@Override
@@ -48,6 +46,11 @@ public class Level3ServerStreams extends Level3AbstractStreamMgr {
 		long remoteWindowSize = remoteSettings.getInitialWindowSize();
 		Stream stream = new Stream(streamId, initialState, null, null, localWindowSize, remoteWindowSize);
 		return streamState.create(stream);
+	}
+
+	@Override
+	protected void modifyMaxConcurrentStreams(long value) {
+		//this is max promises to send at a time basically...we ignore for now
 	}
 
 }
