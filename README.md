@@ -5,6 +5,40 @@
 Codecov.io has a bug that incorrectly reports code coverage lower than what it is(so we are actually higher than this number)
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
+#### Steps to try the webserver
+
+1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
+2. run ./createProject.sh
+3. cd projectDir
+4. ./gradlew test # runs all the tests and verify everything is working
+5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
+6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
+    NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
+  * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
+       eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
+       go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
+       'Store information about method parameters'
+  * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
+       NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
+6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better).  The first steps are to
+  * From Welcome screen, choose Import Project
+  * Select your folder {yourapp}-all and click ok
+  * Choose 'Import project from external model' and choose gradle and click next
+  * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
+  * Open Preferences, expand "Build, Execution, and Deployment", expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
+8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart
+     the webserver (even in debug mode)
+9. In a browser go to http://localhost:9000
+10. refactor your code like crazy and hit the website again(no restart needed)
+
+#### To try modifying/contributing to the actual webserver
+
+1. clone webpieces
+2. The automated build runs "./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PexcludeSelenium=true -PexcludeH2Spec=true" as it can't run the selenium tests or H2Spec tests at this time
+3. If you have selenium setup and h2spec, you can just run "./gradlew build" in which parallel=true and configureondemand=true so it's a faster build
+4. debugging with eclipse works better than intellij.  intellij IDE support is better than eclipse(so pick your poison but it works in both)
+
 I want to try something new on this project.  If you want something fixed, I will pair with you to fix it ramping up your knowledge while fixing the issue.  We do this with screenhero(remote desktop sharing and control)
 
 A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely 'Feature' Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
@@ -48,40 +82,6 @@ This project is essentially pieces that can be used to build any http related so
 #### Downsides
   Currently documentation is lacking but there is an example for pretty much everything in webpieces/webserver/http-webserver/src/test/java/* as we do something called feature testing(testing as user would use the system) for all paths of code.
 
-#### Steps to try the webserver
-
-1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
-2. run ./createProject.sh
-3. cd projectDir
-4. ./gradlew test # runs all the tests and verify everything is working
-5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
-6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
-    NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
-  * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
-       eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
-       go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
-       'Store information about method parameters'
-  * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
-       NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
-6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better).  The first steps are to
-  * From Welcome screen, choose Import Project
-  * Select your folder {yourapp}-all and click ok
-  * Choose 'Import project from external model' and choose gradle and click next
-  * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
-  * Open Preferences, expand "Build, Execution, and Deployment", expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
-7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
-8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart 
-     the webserver (even in debug mode)
-9. In a browser go to http://localhost:9000
-10. refactor your code like crazy and hit the website again(no restart needed)
-
-#### To try modifying/contributing to the actual webserver
-
-1. clone webpieces
-2. The automated build runs "./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PexcludeSelenium=true -PexcludeH2Spec=true" as it can't run the selenium tests or H2Spec tests at this time
-3. If you have selenium setup and h2spec, you can just run "./gradlew test" in which parallel=true and configureondemand=true so it's a faster build
-4. debugging with eclipse works better than intellij.  intellij IDE support is better than eclipse(so pick your poison but it works in both)
-
 #### Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
  * Server push - sending responses before requests even come based on the first page requests (pre-emptively send what you know they will need)
@@ -92,10 +92,10 @@ This project is essentially pieces that can be used to build any http related so
  * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer including netty!!!)
  * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers together)
  * http/http1_1-parser - An asynchronous http parser that can accept partial payloads (ie. nio payloads don't have full messages).  Can be used with ANY nio library.
+ * http/http1_1-client - http1.1 client
  * http/http2-parser - An asynchronous http2 parser with all the advantages of no "head of line blocking" issues and pre-emptively sending responses, etc. etc.
- * http/httpclient - http client built on above core components
+ * http/http2-client - http 2 client built on above core components because you know if you server supports http2 AND noy doing 1.1 keeps it simple!!!
  * http/http-frontend - An very thin http library.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end)
- * embeddablehttpproxy - built on http-frontend and http client
  * webserver/http-webserver - a webserver with http 2 support and tons of overriddable pieces via guice
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
@@ -130,6 +130,7 @@ This project is essentially pieces that can be used to build any http related so
 * escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
+* eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as they could have done this  
 
 #### Examples.....
 

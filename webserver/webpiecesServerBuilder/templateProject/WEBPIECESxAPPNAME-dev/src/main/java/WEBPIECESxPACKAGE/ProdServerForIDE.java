@@ -3,8 +3,6 @@ package WEBPIECESxPACKAGE;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.webpieces.compiler.api.CompileConfig;
-import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
@@ -14,7 +12,6 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.Module;
-import com.google.inject.util.Modules;
 
 /**
  * Uses the production Router but the dev template compiler so you 'could' step through prod router code
@@ -66,9 +63,6 @@ public class ProdServerForIDE {
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths)
 														.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		
-		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths)
-										.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		Module platformOverrides = new DevTemplateModule(templateConfig);
 		
 		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
