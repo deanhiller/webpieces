@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.Protocol;
@@ -41,5 +42,9 @@ public class MockHttpRequestListener extends MockSuperclass implements HttpReque
 		this.calledMethods.remove(Method.INCOMING_FRAME);
 		
 		return retVal.collect(Collectors.toList());
+	}
+
+	@Override
+	public void socketClosed(FrontendSocket socket) {
 	}
 }

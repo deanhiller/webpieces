@@ -73,10 +73,10 @@ public class TestBasicHttp2Client {
 		Http2Headers request1 = Requests.createRequest();
 		Http2Headers request2 = Requests.createRequest();
 
-		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
+		MockResponseListener clientResponseListener1 = new MockResponseListener();
+		clientResponseListener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
 		MockResponseListener listener2 = new MockResponseListener();
-		CompletableFuture<Http2SocketDataWriter> future = socket.sendRequest(request1, listener1);
+		CompletableFuture<Http2SocketDataWriter> future = socket.sendRequest(request1, clientResponseListener1);
 		CompletableFuture<Http2SocketDataWriter> future2 = socket.sendRequest(request2, listener2);
 		
 		Http2Msg req = mockChannel.getFrameAndClear();
@@ -85,23 +85,26 @@ public class TestBasicHttp2Client {
 		
 		Assert.assertTrue(future.isDone());
 		Assert.assertFalse(future2.isDone());
-
-		socketWriter.write(Requests.createResponse(request1.getStreamId())); //endOfStream=false
-		PartialStream response1 = listener1.getSingleReturnValueIncomingResponse();
+		
+		Http2Headers resp1 = Requests.createResponse(request1.getStreamId());
+		socketWriter.write(resp1); //endOfStream=false
+		PartialStream response1 = clientResponseListener1.getSingleReturnValueIncomingResponse();
+		Assert.assertEquals(resp1, response1);
 		
 		Assert.assertFalse(future2.isDone());
 		socketWriter.write(new DataFrame(request1.getStreamId(), false)); //endOfStream=false
-		PartialStream response2 = listener1.getSingleReturnValueIncomingResponse();
+		clientResponseListener1.getSingleReturnValueIncomingResponse();
 		
 		//at this point, should not have a call outstanding
 		mockChannel.assertNoIncomingMessages();
 		
-		listener1.addReturnValueIncomingResponse(CompletableFuture.completedFuture(null));
+		clientResponseListener1.addReturnValueIncomingResponse(CompletableFuture.completedFuture(null));
+		
 		Assert.assertFalse(future2.isDone());
 		socketWriter.write(new DataFrame(request1.getStreamId(), true));//endOfStream = true
-		//Assert.assertTrue(future2.isDone());
+		Assert.assertTrue(future2.isDone());
 		
-		PartialStream response3 = listener1.getSingleReturnValueIncomingResponse();
+		clientResponseListener1.getSingleReturnValueIncomingResponse();
 		
 		Http2Msg frame = mockChannel.getFrameAndClear();
 		Assert.assertEquals(3, frame.getStreamId());

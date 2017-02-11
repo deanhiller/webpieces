@@ -23,13 +23,13 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class Http1_1Handler {
-	private static final Logger log = LoggerFactory.getLogger(Http1_1Handler.class);
+public class Layer2Http1_1Handler {
+	private static final Logger log = LoggerFactory.getLogger(Layer2Http1_1Handler.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser httpParser;
 	private HttpRequestListener httpListener;
 
-	public Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener) {
+	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
 	}
@@ -84,7 +84,6 @@ public class Http1_1Handler {
 			log.info("msg received="+payload);
 			processCorrectly(socket, payload);
 		}
-		throw new UnsupportedOperationException("must figure out when to complete future");
 	}
 	
 	private void processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
@@ -96,7 +95,7 @@ public class Http1_1Handler {
 //			if(socket.getActiveStream() != null)
 //				throw new IllegalStateException("previous stream not complete");
 
-			Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, true);
+			Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
 			//socket.setActiveHttp11Stream(stream);
 			
 			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
@@ -109,13 +108,10 @@ public class Http1_1Handler {
 		} else {
 			throw new IllegalArgumentException("payload not supported="+payload);
 		}
-		
-
-
 	}
 
 	public void farEndClosed(FrontendSocketImpl socket) {
-		
+		httpListener.socketClosed(socket);
 	}
 
 	public void socketOpened(FrontendSocketImpl socket, boolean isReadyForWrites) {

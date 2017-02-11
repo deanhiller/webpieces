@@ -1,5 +1,6 @@
 package org.webpieces.httpfrontend2.api.mock;
 
+import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.Protocol;
@@ -18,6 +19,10 @@ class RequestListenerForTest implements HttpRequestListener {
 
 	public boolean isClosed() {
 		return false;
+	}
+
+	@Override
+	public void socketClosed(FrontendSocket socket) {
 	}
 
 

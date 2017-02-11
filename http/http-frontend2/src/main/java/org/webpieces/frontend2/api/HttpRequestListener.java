@@ -7,4 +7,6 @@ public interface HttpRequestListener {
 
 	StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type);
 
+	void socketClosed(FrontendSocket socket);
+
 }

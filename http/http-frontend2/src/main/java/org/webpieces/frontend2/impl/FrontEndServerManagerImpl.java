@@ -35,17 +35,17 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
 		preconditionCheck(config);
 
-		ServerListener listener = buildDatalListener(httpListener, config.http2Config);
+		Layer1ServerListener listener = buildDatalListener(httpListener, config.http2Config);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 
 		return frontend;
 	}
 
-	private ServerListener buildDatalListener(HttpRequestListener httpListener, Http2Config config) {
-		Http1_1Handler http1_1 = new Http1_1Handler(parsing.getHttpParser(), httpListener);
-		Http2Handler http2 = new Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, config);
-		ServerListener listener = new ServerListener(http1_1, http2);
+	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener, Http2Config config) {
+		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(parsing.getHttpParser(), httpListener);
+		Layer2Http2Handler http2 = new Layer2Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, config);
+		Layer1ServerListener listener = new Layer1ServerListener(http1_1, http2);
 		return listener;
 	}
 
@@ -63,7 +63,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		ServerListener listener = buildDatalListener(httpListener, config.http2Config);
+		Layer1ServerListener listener = buildDatalListener(httpListener, config.http2Config);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 		

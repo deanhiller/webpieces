@@ -1,5 +1,8 @@
 package org.webpieces.frontend2.impl;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -48,6 +51,10 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	public TCPChannel getChannel() {
 		return channel;
+	}
+
+	public CompletableFuture<FrontendSocket> write(ByteBuffer buf) {
+		return channel.write(buf).thenApply(c -> this);
 	}
 
 }

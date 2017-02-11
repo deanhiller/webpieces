@@ -11,12 +11,12 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.ResponseHandler;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 
-public class EngineListener implements ServerEngineListener {
+public class Layer3Http2EngineListener implements ServerEngineListener {
 
 	private FrontendSocketImpl socket;
 	private HttpRequestListener httpListener;
 
-	public EngineListener(FrontendSocketImpl socket, HttpRequestListener httpListener) {
+	public Layer3Http2EngineListener(FrontendSocketImpl socket, HttpRequestListener httpListener) {
 		this.socket = socket;
 		this.httpListener = httpListener;
 	}

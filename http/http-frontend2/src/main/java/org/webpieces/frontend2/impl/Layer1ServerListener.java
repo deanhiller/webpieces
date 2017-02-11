@@ -8,16 +8,17 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
 
-public class ServerListener implements AsyncDataListener {
+public class Layer1ServerListener implements AsyncDataListener {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private static final String FRONTEND_SOCKET = "__frontendSocket";
-	private Http1_1Handler http1_1Handler;
-	private Http2Handler http2Handler;
+	private Layer2Http1_1Handler http1_1Handler;
+	private Layer2Http2Handler http2Handler;
+
 	
-	public ServerListener(
-			Http1_1Handler http1_1Listener, 
-			Http2Handler http2Listener) {
+	public Layer1ServerListener(
+			Layer2Http1_1Handler http1_1Listener, 
+			Layer2Http2Handler http2Listener) {
 		this.http1_1Handler = http1_1Listener;
 		this.http2Handler = http2Listener;
 	}
@@ -93,7 +94,6 @@ public class ServerListener implements AsyncDataListener {
 		//when a channel is SSL, we can tell right away IF ALPN is installed
 		//boolean isHttp2 = channel.getAlpnDetails().isHttp2();
 
-		
 		FrontendSocketImpl socket = new FrontendSocketImpl(channel, ProtocolType.UNKNOWN);
 		channel.getSession().put(FRONTEND_SOCKET, socket);
 

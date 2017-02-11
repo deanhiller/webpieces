@@ -15,6 +15,7 @@ import org.webpieces.httpparser.api.dto.UrlInfo;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Http2Translations {
 
@@ -72,6 +73,16 @@ public class Http2Translations {
     }
 
 	public static Http2Msg translate(HttpPayload payload) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static HttpResponse translateResponse(Http2Headers headers) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static HttpPayload translate(PartialStream data) {
 		// TODO Auto-generated method stub
 		return null;
 	}

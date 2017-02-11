@@ -12,7 +12,7 @@ import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
-public class Http2Handler {
+public class Layer2Http2Handler {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ServerEngineFactory svrEngineFactory;
@@ -20,7 +20,7 @@ public class Http2Handler {
 	private HttpRequestListener httpListener;
 	private Http2Config config;
 
-	public Http2Handler(
+	public Layer2Http2Handler(
 			Http2ServerEngineFactory svrEngineFactory, 
 			HpackParser http2Parser,
 			HttpRequestListener httpListener,
@@ -33,7 +33,7 @@ public class Http2Handler {
 	}
 
 	public void initialize(FrontendSocketImpl socket) {
-		EngineListener listener = new EngineListener(socket, httpListener);
+		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener);
 		Http2ServerEngine engine = svrEngineFactory.createEngine(config, http2Parser, listener);
 		socket.setHttp2Engine(engine);
 		

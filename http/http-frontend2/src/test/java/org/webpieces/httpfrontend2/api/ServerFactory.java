@@ -19,9 +19,7 @@ import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.Protocol;
 import org.webpieces.httpfrontend2.api.http.Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -66,6 +64,12 @@ class ServerFactory {
 		public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
 			// TODO Auto-generated method stub
 			return null;
+		}
+
+		@Override
+		public void socketClosed(FrontendSocket socket) {
+			// TODO Auto-generated method stub
+			
 		}
 
 
