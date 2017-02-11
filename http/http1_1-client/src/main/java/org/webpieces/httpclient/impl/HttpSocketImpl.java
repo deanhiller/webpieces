@@ -17,7 +17,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpChunkWriter;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
@@ -33,14 +33,14 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
-public class HttpSocketImpl implements HttpSocket, Closeable {
+public class HttpSocketImpl implements HttpClientSocket, Closeable {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
 	private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private TCPChannel channel;
 
-	private CompletableFuture<HttpSocket> connectFuture;
+	private CompletableFuture<HttpClientSocket> connectFuture;
 	private boolean isClosed;
 	private boolean connected;
 	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
@@ -66,7 +66,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 
 	@Override
-	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr) {
+	public CompletableFuture<HttpClientSocket> connect(InetSocketAddress addr) {
 		if(factory == null) {
 			channel = mgr.createTCPChannel(idForLogging);
 		} else {
@@ -90,7 +90,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 		return future;
 	}
 	
-	private synchronized HttpSocket connected() {
+	private synchronized HttpClientSocket connected() {
 		connected = true;
 		
 		while(!pendingRequests.isEmpty()) {
@@ -154,7 +154,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 			return;
 		
 		//best effort and ignore exception except log it
-		CompletableFuture<HttpSocket> future = closeSocket();
+		CompletableFuture<HttpClientSocket> future = closeSocket();
 		future.exceptionally(e -> {
 			log.info("close failed", e);
 			return this;
@@ -162,7 +162,7 @@ public class HttpSocketImpl implements HttpSocket, Closeable {
 	}
 	
 	@Override
-	public CompletableFuture<HttpSocket> closeSocket() {
+	public CompletableFuture<HttpClientSocket> closeSocket() {
 		if(isClosed) {
 			return CompletableFuture.completedFuture(this);
 		}

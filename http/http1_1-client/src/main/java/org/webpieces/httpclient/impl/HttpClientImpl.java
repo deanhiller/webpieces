@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpChunkWriter;
 import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -28,16 +28,16 @@ public class HttpClientImpl implements HttpClient {
 
 	@Override
 	public CompletableFuture<HttpResponse> sendSingleRequest(InetSocketAddress addr, HttpRequest request) {
-		HttpSocket socket = openHttpSocket(addr+"");
-		CompletableFuture<HttpSocket> connect = socket.connect(addr);
+		HttpClientSocket socket = openHttpSocket(addr+"");
+		CompletableFuture<HttpClientSocket> connect = socket.connect(addr);
 		return connect.thenCompose(p -> socket.send(request));
 	}
 	
 	@Override
 	public CompletableFuture<HttpChunkWriter> sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener listener) {
-		HttpSocket socket = openHttpSocket(addr+"");
+		HttpClientSocket socket = openHttpSocket(addr+"");
 
-		CompletableFuture<HttpSocket> connect = socket.connect(addr);
+		CompletableFuture<HttpClientSocket> connect = socket.connect(addr);
 		return connect.thenCompose(p -> socket.send(request, listener));
 	}
 
@@ -54,12 +54,12 @@ public class HttpClientImpl implements HttpClient {
 //	}
 
 	@Override
-	public HttpSocket openHttpSocket(String idForLogging) {
+	public HttpClientSocket openHttpSocket(String idForLogging) {
 		return openHttpSocket(idForLogging, null);
 	}
 	
 	@Override
-	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener) {
+	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
 		return new HttpSocketImpl(mgr, idForLogging, null, parser, listener);
 	}
 

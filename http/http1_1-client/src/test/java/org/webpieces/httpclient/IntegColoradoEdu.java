@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -35,14 +35,14 @@ public class IntegColoradoEdu {
 		
 		HttpClient client = IntegGoogleHttps.createHttpClient(isHttp);
 		
-		HttpSocket socket = client.openHttpSocket("oneTimer");
+		HttpClientSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(p -> socket.send(req, listener))
 			.exceptionally(e -> reportException(socket, e));
 	}
 
-	private static Void reportException(HttpSocket socket, Throwable e) {
+	private static Void reportException(HttpClientSocket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
 	}

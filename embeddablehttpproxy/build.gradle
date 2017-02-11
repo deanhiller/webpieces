@@ -1,5 +1,0 @@
-dependencies {
-    compile deps['guice'], deps['guava']
-    compile project(':http:http-frontend'), project(':http:http1_1-parser'), project(':http:http-client')
-    testCompile project(':core:core-mock')
-}

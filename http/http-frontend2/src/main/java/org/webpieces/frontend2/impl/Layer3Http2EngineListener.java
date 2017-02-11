@@ -35,6 +35,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 
 	@Override
 	public void engineClosedByFarEnd() {
+		httpListener.socketClosed(socket);
 	}
 	
 }

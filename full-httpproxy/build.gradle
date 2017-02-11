@@ -1,4 +1,0 @@
-dependencies {
-    compile project(':embeddablehttpproxy')
-    compile deps['groovy'] //we use groovy in logback.xml
-}

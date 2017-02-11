@@ -12,7 +12,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpClientSocket;
 import org.webpieces.httpclient.api.ResponseListener;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
@@ -58,7 +58,7 @@ public class IntegGoogleHttps {
 		
 		HttpClient client = createHttpClient(isHttp);
 		
-		HttpSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
+		HttpClientSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(p -> sendRequest(socket, req))
@@ -85,11 +85,11 @@ public class IntegGoogleHttps {
 		return client;
 	}
 
-	private void sendRequest(HttpSocket socket, HttpRequest req) {
+	private void sendRequest(HttpClientSocket socket, HttpRequest req) {
 		socket.send(req, new OurListener());
 	}
 
-	private Void reportException(HttpSocket socket, Throwable e) {
+	private Void reportException(HttpClientSocket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
 	}
@@ -115,7 +115,7 @@ public class IntegGoogleHttps {
 	
 	private class OurCloseListener implements CloseListener {
 		@Override
-		public void farEndClosed(HttpSocket socket) {
+		public void farEndClosed(HttpClientSocket socket) {
 			log.info(socket+" far end closed");
 		}
 		

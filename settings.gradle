@@ -32,6 +32,4 @@ include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME'
 include 'webserver-plugins:hibernate-plugin'
 include 'webserver-plugins:h2db-plugin'
 include 'webserver-plugins:plugin-api'
-include 'embeddablehttpproxy'
-include 'full-httpproxy'
 

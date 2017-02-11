@@ -34,7 +34,7 @@ public interface HttpClient {
 	 * 
 	 * @return
 	 */
-	public HttpSocket openHttpSocket(String idForLogging);
+	public HttpClientSocket openHttpSocket(String idForLogging);
 	
 	/**
 	 * Feel free to use openHttpSocket(String idForLogging) unless you want to be notified of the 
@@ -47,6 +47,6 @@ public interface HttpClient {
 	 * 
 	 * @return
 	 */
-	public HttpSocket openHttpSocket(String idForLogging, CloseListener listener);
+	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener);
 	
 }
