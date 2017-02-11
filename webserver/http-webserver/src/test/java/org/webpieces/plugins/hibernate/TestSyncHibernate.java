@@ -214,6 +214,62 @@ public class TestSyncHibernate {
 		Assert.assertEquals("blah2", user2.getFirstName()); //firstname changed
 		Assert.assertEquals(user.getLastName(), user2.getLastName()); //lastname remained the same
 	}
+
+	@Test
+	public void testHibernateNoUserIdWillSaveNewUser() {
+		String email = "test2";
+		HttpRequest req = Requests.createPostRequest("/testmerge",
+				"user.id", "",
+				"user.email", email,
+				"user.name", "blah1",
+				"user.firstName", "blah2");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		UserTestDbo user2 = loadByEmail(email);
+		Assert.assertEquals("blah1", user2.getName()); //name changed
+		Assert.assertEquals("blah2", user2.getFirstName()); //firstname changed
+	}
+	
+	@Test
+	public void testHibernateNoUserIdParamWillSaveNewUser() {
+		String email = "test1";
+		HttpRequest req = Requests.createPostRequest("/testmerge",
+				"user.email", email,
+				"user.name", "blah1",
+				"user.firstName", "blah2");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		UserTestDbo user2 = loadByEmail(email);
+		Assert.assertEquals("blah1", user2.getName()); //name changed
+		Assert.assertEquals("blah2", user2.getFirstName()); //firstname changed
+	}
+	
+	private UserTestDbo loadByEmail(String email) {
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);
+		EntityManager mgr = factory.createEntityManager();
+		EntityTransaction tx = mgr.getTransaction();
+		tx.begin();
+
+		UserTestDbo user = UserTestDbo.findByEmailId(mgr, email);
+		
+		tx.commit();
+		
+		return user;		
+	}
 	
 	private UserTestDbo load(Integer id) {
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);

@@ -48,12 +48,18 @@ public class HibernateLookup implements EntityLookup {
 		SingularAttribute<? super T, ?> idAttribute = entityType.getId(idClazz);
 		String name = idAttribute.getName();
 		ParamNode paramNode = tree.get(name);
-		if(!(paramNode instanceof ValueNode))
-			throw new IllegalStateException("The id field in the hibernate entity should have matched to a "
-					+ "ValueNode on incoming data and did not.  bad multipart form?  (Please "
-					+ "let us know so we can pair with you on this and I can add better error messaging)");
-		ValueNode node = (ValueNode) paramNode;
-		String value = node.getValue();
+		
+		String value = null;
+		if(paramNode != null) {
+		
+			if(!(paramNode instanceof ValueNode))
+				throw new IllegalStateException("The id field in the hibernate entity should have matched to a "
+						+ "ValueNode on incoming data and did not. node="+paramNode+".  bad multipart form?  (Please "
+						+ "let us know so we can pair with you on this and I can add better error messaging)");
+			ValueNode node = (ValueNode) paramNode;
+			value = node.getValue();
+		}
+		
 		if(value == null)
 			return beanCreate.apply(paramTypeToCreate);
 		
