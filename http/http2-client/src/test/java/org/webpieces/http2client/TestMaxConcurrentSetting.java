@@ -15,7 +15,7 @@ import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockServerListener;
-import org.webpieces.http2client.mock.MockTCPChannel;
+import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.SocketWriter;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -28,7 +28,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 public class TestMaxConcurrentSetting {
 
 	private MockChanMgr mockChanMgr;
-	private MockTCPChannel mockChannel;
+	private MockHttp2Channel mockChannel;
 	private Http2Socket socket;
 	private SocketWriter socketWriter;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
@@ -37,7 +37,7 @@ public class TestMaxConcurrentSetting {
 	public void setUp() throws InterruptedException, ExecutionException {
 		
         mockChanMgr = new MockChanMgr();
-        mockChannel = new MockTCPChannel();
+        mockChannel = new MockHttp2Channel();
         mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
         
         Http2Config config = new Http2Config();

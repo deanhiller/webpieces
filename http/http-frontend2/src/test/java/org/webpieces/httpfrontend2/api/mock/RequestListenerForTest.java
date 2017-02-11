@@ -1,4 +1,4 @@
-package org.webpieces.httpfrontend2.api;
+package org.webpieces.httpfrontend2.api.mock;
 
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;

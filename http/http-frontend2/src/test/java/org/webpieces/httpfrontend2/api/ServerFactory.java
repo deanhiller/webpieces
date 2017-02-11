@@ -17,6 +17,7 @@ import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.Protocol;
+import org.webpieces.httpfrontend2.api.http.Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -44,10 +45,6 @@ class ServerFactory {
 
     private static class OurListener implements HttpRequestListener {
         private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-        private HttpResponse responseA = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString(MAIN_RESPONSE));
-        private HttpResponse responseANoBody = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.emptyWrapper());
-
-        private HttpResponse pushedResponse = Responses.createResponse(KnownStatusCode.HTTP_200_OK, dataGen.wrapString(PUSHED_RESPONSE));
         private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
         private Map<Long, HttpRequest> idMap = new HashMap<>();
 

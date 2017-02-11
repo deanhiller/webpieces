@@ -49,4 +49,5 @@ public class FrontendSocketImpl implements FrontendSocket {
 	public TCPChannel getChannel() {
 		return channel;
 	}
+
 }

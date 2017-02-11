@@ -1,4 +1,4 @@
-package org.webpieces.httpfrontend2.api;
+package org.webpieces.httpfrontend2.api.mock;
 
 import java.util.stream.Stream;
 
@@ -65,6 +65,13 @@ public class MockChannelManager extends MockSuperclass implements ChannelManager
 		Stream<ParametersPassedIn> calledMethods = super.getCalledMethods(Method.CREATE_TCP_SERVER_CHANNEL);
 		Stream<ConnectionListener> retVal = calledMethods.map(p -> (ConnectionListener)p.getArgs()[1]);
 		return retVal.toArray(ConnectionListener[]::new);
+	}
+
+	public ConnectionListener getConnListener() {
+		ConnectionListener[] listeners = fetchTcpConnectionListeners();
+		if(listeners.length != 1)
+			throw new IllegalStateException("listeners not exactly 1.  size="+listeners.length);
+		return listeners[0];
 	}
 
 }

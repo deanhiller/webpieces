@@ -4,7 +4,6 @@ dependencies {
 	compile project(':http:http2-engine')
 	
     testCompile project(':core:core-mock')
-    testCompile project(':http:http2-client')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

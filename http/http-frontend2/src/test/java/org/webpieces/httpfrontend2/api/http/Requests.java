@@ -1,7 +1,4 @@
-package org.webpieces.httpfrontend2.api;
-
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
+package org.webpieces.httpfrontend2.api.http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -29,11 +26,6 @@ public class Requests {
 		
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine);
-		if(isHttps)
-			req.setHttpScheme(HTTPS);
-		else
-			req.setHttpScheme(HTTP);
-
 		req.addHeader(new Header(KnownHeaderName.HOST, "myhost.com"));
 
 		return req;

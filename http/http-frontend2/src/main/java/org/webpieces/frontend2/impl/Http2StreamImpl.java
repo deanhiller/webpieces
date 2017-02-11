@@ -8,13 +8,13 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.ResponseHandler;
 
-public class FrontendStreamImpl implements FrontendStream {
+public class Http2StreamImpl implements FrontendStream {
 
 	private FrontendSocketImpl socket;
 	private boolean sentResponseHeaders;
 	private ResponseHandler responseHandler;
 
-	public FrontendStreamImpl(FrontendSocketImpl socket, ResponseHandler responseHandler) {
+	public Http2StreamImpl(FrontendSocketImpl socket, ResponseHandler responseHandler) {
 		this.socket = socket;
 		this.responseHandler = responseHandler;
 	}

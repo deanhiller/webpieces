@@ -24,7 +24,7 @@ public class EngineListener implements ServerEngineListener {
 	@Override
 	public StreamWriter sendRequestToClient(Http2Headers request, ResponseHandler responseHandler) {
 		//every request received is a new stream
-		FrontendStreamImpl stream = new FrontendStreamImpl(socket, responseHandler);
+		Http2StreamImpl stream = new Http2StreamImpl(socket, responseHandler);
 		return httpListener.incomingRequest(stream, request, Protocol.HTTP2);		
 	}
 

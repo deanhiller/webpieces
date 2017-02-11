@@ -12,7 +12,10 @@ public class HttpRequest extends HttpMessage {
 
 	private HttpRequestLine requestLine;
 
+	//not set by parser so should not be here!!!!!
+	@Deprecated
 	public enum HttpScheme { HTTPS, HTTP }
+	@Deprecated
 	public HttpScheme httpScheme = HTTP;
 	
 	public HttpRequestLine getRequestLine() {
@@ -23,10 +26,12 @@ public class HttpRequest extends HttpMessage {
 		this.requestLine = requestLine;
 	}
 
+	@Deprecated
 	public void setHttpScheme(HttpScheme httpScheme) {
 		this.httpScheme = httpScheme;
 	}
 
+	@Deprecated
 	public boolean isHttps() {
 		return httpScheme == HTTPS;
 	}

@@ -28,7 +28,7 @@ import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class MockTCPChannel extends MockSuperclass implements TCPChannel {
+public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private enum Method implements MethodEnum {
@@ -42,7 +42,7 @@ public class MockTCPChannel extends MockSuperclass implements TCPChannel {
 	private boolean connected;
 	private SocketWriter writer;
 
-	public MockTCPChannel() {
+	public MockHttp2Channel() {
 		BufferPool bufferPool = new BufferCreationPool();
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		unmarshalState = parser.prepareToUnmarshal(4096, 4096, 4096);
