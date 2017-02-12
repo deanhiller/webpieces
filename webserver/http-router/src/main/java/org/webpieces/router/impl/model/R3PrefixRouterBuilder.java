@@ -11,19 +11,6 @@ public class R3PrefixRouterBuilder extends AbstractRouteBuilder implements Route
 	}
 
 	@Override
-	public Router getScopedRouter(String path) {
-		if(path == null || path.length() <= 1)
-			throw new IllegalArgumentException("path must be non-null and size greater than 1");
-		else if(!path.startsWith("/"))
-			throw new IllegalArgumentException("path must start with /");
-		else if(path.endsWith("/"))
-			throw new IllegalArgumentException("path must not end with /");
-		
-		L3PrefixedRouting router = routes.getScopedRouter(path);
-		return new R3PrefixRouterBuilder(routerInfo, router, holder);
-	}
-
-	@Override
 	public Router getDomainScopedRouter(String domainRegEx) {
 		//would be nice to make our apis more type-safe(compile error instead of runtime) but that would require major 
 		//changes to api...breaking changes
