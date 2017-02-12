@@ -45,7 +45,8 @@ public class RouterBuilder implements Router {
 
 	private int staticRouteIdCounter;
 
-	public RouterBuilder(String path, AllRoutingInfo info, ReverseRoutes reverseRoutes, ControllerLoader finder, Charset urlEncoding) {
+	public RouterBuilder(String path, AllRoutingInfo info, ReverseRoutes reverseRoutes, 
+			ControllerLoader finder, Charset urlEncoding) {
 		this.routerPath = path;
 		this.info = info;
 		this.reverseRoutes = reverseRoutes;
@@ -67,7 +68,7 @@ public class RouterBuilder implements Router {
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		boolean checkSecureToken = false;
 		if(method == HttpMethod.POST)
-			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
+			checkSecureToken = true;
 		UrlPath p = new UrlPath(routerPath, path);
 		Route route = new RouteImpl(method, p, controllerMethod, routeId, false, checkSecureToken);
 		addRoute(route, routeId);
@@ -168,7 +169,7 @@ public class RouterBuilder implements Router {
 		AllRoutingInfo subInfo = info.addScope(path);
 		return new RouterBuilder(this.routerPath+path, subInfo, reverseRoutes, finder, urlEncoding);
 	}
-
+	
 	/*
 	 * Adds routes like the following all in one method
 	 * 
@@ -281,6 +282,11 @@ public class RouterBuilder implements Router {
 
 	public RouteMeta getInternalErrorMeta() {
 		return info.getInternalErrorRoute();
+	}
+
+	@Override
+	public Router getDomainScopedRouter(String domainRegEx) {
+		throw new UnsupportedOperationException("done in routerbuilder2");
 	}
 
 }

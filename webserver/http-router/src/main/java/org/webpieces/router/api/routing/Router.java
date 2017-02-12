@@ -66,7 +66,19 @@ public interface Router {
 	 * @return
 	 */
 	Router getScopedRouter(String path);
-	
+
+	/**
+	 * Only used if you host multiple domains(like me)!!!!!  All paths refer to all domains EXCEPT the ones defined
+	 * in a DomainScopedRouter.  Only domains matching the pattern of domainRegEx will see these pages and
+	 * the rest are served a not found (or are served the page defined in another module rather than the
+	 * one for the specific domains)
+	 *  
+	 * @param path
+	 * @param isSecure true if only available over https otherwise available over http and https
+	 * @return
+	 */
+	Router getDomainScopedRouter(String domainRegEx);
+
 	void addCrud(String entity, String controller, CrudRouteIds routeIds);
 
 }
