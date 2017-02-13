@@ -39,6 +39,24 @@ public class Requests {
 		return req;
 	}
 
+	public static HttpRequest createGetRequest(String domain, String url, boolean isHttps) {
+		HttpUri httpUri = new HttpUri(url);
+		HttpRequestLine requestLine = new HttpRequestLine();
+		requestLine.setMethod(KnownHttpMethod.GET);
+		requestLine.setUri(httpUri);
+		
+		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine);
+		if(isHttps)
+			req.setHttpScheme(HTTPS);
+		else
+			req.setHttpScheme(HTTP);
+
+		req.addHeader(new Header(KnownHeaderName.HOST, domain));
+
+		return req;
+	}
+	
 	public static HttpRequest createRequest(KnownHttpMethod method, String url) {
 		return createRequest(method, url, false);
 	}

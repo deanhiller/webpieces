@@ -4,6 +4,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.actions.Render;
 
 @Singleton
 public class DomainsController {
@@ -16,4 +17,7 @@ public class DomainsController {
 		return Actions.renderThis();
 	}
 	
+	public Render notFoundDomain1() {
+		return Actions.renderThis();
+	}
 }
