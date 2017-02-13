@@ -1,12 +1,17 @@
 package org.webpieces.router.impl.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.FilterInfo;
+import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.UrlPath;
@@ -34,6 +39,10 @@ public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
 		this.allRouting = allRouting;
 	}
 
+	public L1AllRouting getRouterInfo() {
+		return allRouting;
+	}
+	
 	@Override
 	public Router getDomainScopedRouter(String domain) {
 		if(domain == null || domain.length() == 0)
@@ -92,6 +101,75 @@ public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
 	//only if you happen to create two webservers in two threads is this synchronized(unlikely scenario)
 	private synchronized int getUniqueId() {
 		return staticRouteIdCounter++;
+	}
+
+	public void applyFilters(WebAppMeta rm) {
+		ReverseRoutes reverseRoutes = holder.getReverseRoutes();
+		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
+		for(RouteMeta meta : metas) {
+			String path = meta.getRoute().getFullPath();
+			List<FilterInfo<?>> filters = findMatchingFilters(path, meta.getRoute().isHttpsRoute());
+			meta.setFilters(filters);
+		}
+		
+		List<L2DomainRoutes> allDomains = allRouting.getAllDomains();
+		
+		for(L2DomainRoutes domainRoutes : allDomains) {
+			applyFilters(domainRoutes, rm);
+		}
+	}
+
+	private void applyFilters(L2DomainRoutes domainRoutes, WebAppMeta rm) {
+		String domain = domainRoutes.getDomain();
+		if(domain == null)
+			domain = "ALLOTHER";
+
+		RouteMeta notFoundMeta = domainRoutes.getPageNotFoundRoute();
+
+		RouteMeta internalErrorMeta = domainRoutes.getInternalSvrErrorRoute();
+		
+		if(notFoundMeta == null)
+			throw new IllegalStateException("router.setNotFoundRoute MUST be called for domain="+domain+"  Modules="+rm.getRouteModules());
+		else if(internalErrorMeta == null)
+			throw new IllegalStateException("router.setInternalSvrErrorRoute MUST be called for domain="+domain+".  Modules="+rm.getRouteModules());
+			
+		internalErrorMeta.setFilters(internalErrorFilters);
+		notFoundMeta.setFilters(notFoundFilters);
+	}
+
+	public List<StaticRoute> getStaticRoutes() {
+		return staticRoutes;
+	}
+
+	public List<FilterInfo<?>> findMatchingFilters(String path, boolean isHttps) {
+		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
+		for(FilterInfo<?> info : routeFilters) {
+			if(!info.securityMatch(isHttps))
+				continue; //skip this filter
+			
+			Pattern patternToMatch = info.getPatternToMatch();
+			Matcher matcher = patternToMatch.matcher(path);
+			if(matcher.matches()) {
+				matchingFilters.add(info);
+			}
+		}
+		return matchingFilters;
+	}
+	
+	public void loadNotFoundAndErrorFilters() {
+		List<L2DomainRoutes> allDomains = allRouting.getAllDomains();
+		
+		for(L2DomainRoutes domainRoutes : allDomains) {
+			loadFilters(domainRoutes);
+		}
+		
+	}
+	private void loadFilters(L2DomainRoutes domainRoutes) {
+		RouteMeta notFound = domainRoutes.getPageNotFoundRoute();
+		RouteMeta internalErrorMeta = domainRoutes.getInternalSvrErrorRoute();
+
+		holder.getFinder().loadFiltersIntoMeta(notFound, notFound.getFilters(), true);
+		holder.getFinder().loadFiltersIntoMeta(internalErrorMeta, internalErrorMeta.getFilters(), true);
 	}
 
 }

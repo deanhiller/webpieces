@@ -21,6 +21,11 @@ import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.model.AbstractRouteBuilder;
+import org.webpieces.router.impl.model.L1AllRouting;
+import org.webpieces.router.impl.model.LogicHolder;
+import org.webpieces.router.impl.model.R1RouterBuilder;
+import org.webpieces.router.impl.model.RouterInfo;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -39,7 +44,7 @@ public class RouteLoader {
 	private final ControllerLoader controllerFinder;
 	private CompressionCacheSetup compressionCacheSetup;
 	
-	protected RouterBuilder routerBuilder;
+	protected R1RouterBuilder routerBuilder;
 
 	private PluginSetup pluginSetup;
 	
@@ -140,9 +145,10 @@ public class RouteLoader {
 		log.info("adding routes");
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
-		routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
+		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
+		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, config.getUrlEncoding());
+		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder);
 		invoker.init(reverseRoutes);
-		
 		
 		List<RouteModule> all = new ArrayList<>();
 		all.addAll(rm.getRouteModules()); //the core application routes
@@ -157,34 +163,26 @@ public class RouteLoader {
 		for(RouteModule module : all) {
 			String packageName = getPackage(module.getClass());
 			RouteModuleInfo info = new RouteModuleInfo(packageName, module.getI18nBundleName());
-			RouterBuilder.currentPackage.set(info);
-			RouterBuilder.injector.set(injector);
+			AbstractRouteBuilder.currentPackage.set(info);
+			AbstractRouteBuilder.injector.set(injector);
 			module.configure(routerBuilder);
-			RouterBuilder.currentPackage.set(null);
-			RouterBuilder.injector.set(null);
+			AbstractRouteBuilder.currentPackage.set(null);
+			AbstractRouteBuilder.injector.set(null);
 		}
 		
 		log.info("added all routes to router.  Applying Filters");
 
 		reverseRoutes.finalSetup();
 		
-		routerBuilder.applyFilters();
+		routerBuilder.applyFilters(rm);
 		
 		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
 		for(RouteMeta m : metas) {
 			controllerFinder.loadFiltersIntoMeta(m, m.getFilters(), true);
 		}
-		RouteMeta notFound = routerBuilder.getNotFoundMeta();
-		controllerFinder.loadFiltersIntoMeta(notFound, notFound.getFilters(), true);
-
-		RouteMeta internalErrorMeta = routerBuilder.getInternalErrorMeta();
-		controllerFinder.loadFiltersIntoMeta(internalErrorMeta, internalErrorMeta.getFilters(), true);
 		
-		if(!routerBuilder.getRouterInfo().isPageNotFoundRouteSet())
-			throw new IllegalStateException("None of the RouteModule implementations called top level router.setNotFoundRoute.  Modules="+rm.getRouteModules());
-		else if(!routerBuilder.getRouterInfo().isInternalSvrErrorRouteSet())
-			throw new IllegalStateException("None of the RouteModule implementations called top level router.setInternalSvrErrorRoute.  Modules="+rm.getRouteModules());
-			
+		routerBuilder.loadNotFoundAndErrorFilters();
+	
 		log.info("all filters applied");
 		
 		compressionCacheSetup.setupCache(routerBuilder.getStaticRoutes());
@@ -207,7 +205,7 @@ public class RouteLoader {
 	}
 
 	public MatchResult fetchRoute(RouterRequest req) {
-		AllRoutingInfo allRoutingInfo = routerBuilder.getRouterInfo();
+		L1AllRouting allRoutingInfo = routerBuilder.getRouterInfo();
 		MatchResult meta = allRoutingInfo.fetchRoute(req, req.relativePath);
 		if(meta == null)
 			throw new IllegalStateException("missing exception on creation if we go this far");
@@ -220,15 +218,15 @@ public class RouteLoader {
 		invoker.invoke(result, routerRequest, responseCb, errorRoutes);
 	}
 
-	public RouteMeta fetchNotFoundRoute() {
-		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
-		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute();
+	public RouteMeta fetchNotFoundRoute(String domain) {
+		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
+		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute(domain);
 		return notfoundRoute;
 	}
 
-	public RouteMeta fetchInternalErrorRoute() {
-		AllRoutingInfo routerInfo = routerBuilder.getRouterInfo();
-		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute();
+	public RouteMeta fetchInternalErrorRoute(String domain) {
+		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
+		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute(domain);
 		return internalErrorRoute;
 	}
 

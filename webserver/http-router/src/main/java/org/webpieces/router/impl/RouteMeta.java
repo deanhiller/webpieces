@@ -31,6 +31,8 @@ public class RouteMeta {
 	private List<String> methodParamNames;
 	
 	public RouteMeta(Route r, Injector injector, RouteModuleInfo routerInfo, Charset urlEncoding) {
+		if(routerInfo == null)
+			throw new IllegalArgumentException("routerInfo must be non-null");
 		this.route = r;
 		this.routeModuleInfo = routerInfo;
 		this.injector = injector;

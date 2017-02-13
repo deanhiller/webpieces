@@ -115,7 +115,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	
 	public NotFoundInfo fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
 		//Production app's notFound route TBD and used in iframe later
-		RouteMeta origMeta = routeLoader.fetchNotFoundRoute();
+		RouteMeta origMeta = routeLoader.fetchNotFoundRoute(req.domain);
 
 		if(req.queryParams.containsKey("webpiecesShowPage")) {
 			//This is actually a callback from the below code's iframe!!!
@@ -152,7 +152,7 @@ public class DevRoutingService extends AbstractRouterService implements RoutingS
 	}
 
 	public RouteMeta fetchInternalErrorRoute(RouterRequest req) {
-		RouteMeta meta = routeLoader.fetchInternalErrorRoute();
+		RouteMeta meta = routeLoader.fetchInternalErrorRoute(req.domain);
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);

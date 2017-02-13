@@ -1,5 +1,7 @@
 package org.webpieces.router.impl.model;
 
+import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
 
 public class L2DomainRoutes {
@@ -29,12 +31,24 @@ public class L2DomainRoutes {
 			throw new IllegalStateException("Page Not found for domain="+domain+" was already set.  cannot set again");
 		this.pageNotFoundRoute = meta;
 	}
-
 	public void setInternalSvrErrorRoute(RouteMeta meta) {
 		if(internalSvrErrorRoute != null)
 			throw new IllegalStateException("InternalSvrError Route for domain="+domain+" was already set.  cannot set again");
 		this.internalSvrErrorRoute = meta;
 	}
-	
+	public RouteMeta getPageNotFoundRoute() {
+		return pageNotFoundRoute;
+	}
+	public RouteMeta getInternalSvrErrorRoute() {
+		return internalSvrErrorRoute;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public MatchResult fetchRoute(RouterRequest req, String relativePath) {
+		return domainRoutes.fetchRoute(req, relativePath, pageNotFoundRoute);
+	}
 	
 }

@@ -22,12 +22,12 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
-		super.calledMethod(MockMethod.SEND_REDIRECT, httpResponse);
+		super.calledVoidMethod(MockMethod.SEND_REDIRECT, httpResponse);
 	}
 
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
-		super.calledMethod(MockMethod.SEND_RENDER_HTML, resp);
+		super.calledVoidMethod(MockMethod.SEND_RENDER_HTML, resp);
 	}
 	
 	@Override
