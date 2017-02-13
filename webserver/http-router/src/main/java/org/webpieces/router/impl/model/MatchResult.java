@@ -1,7 +1,9 @@
-package org.webpieces.router.impl;
+package org.webpieces.router.impl.model;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.webpieces.router.impl.RouteMeta;
 
 public class MatchResult {
 

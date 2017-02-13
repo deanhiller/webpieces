@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
 
 public class L3PrefixedRouting {

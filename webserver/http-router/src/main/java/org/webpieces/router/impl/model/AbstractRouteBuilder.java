@@ -12,7 +12,6 @@ import org.webpieces.router.api.routing.Router;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.RouteModuleInfo;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;

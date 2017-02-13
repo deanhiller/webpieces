@@ -1,4 +1,4 @@
-package org.webpieces.router.impl;
+package org.webpieces.router.impl.model;
 
 public class RouteModuleInfo {
 

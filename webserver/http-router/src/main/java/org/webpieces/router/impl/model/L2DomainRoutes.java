@@ -1,7 +1,6 @@
 package org.webpieces.router.impl.model;
 
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.impl.MatchResult;
 import org.webpieces.router.impl.RouteMeta;
 
 public class L2DomainRoutes {
