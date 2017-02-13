@@ -40,8 +40,4 @@ public class MtgRouteModule implements RouteModule {
 		router.setInternalErrorRoute("MeetingController.internalError");
 	}
 
-	@Override
-	public String getI18nBundleName() {
-		return null;
-	}
 }

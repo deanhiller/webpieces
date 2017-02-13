@@ -21,8 +21,4 @@ public class NoMethodRouteModule implements RouteModule {
 		router.setInternalErrorRoute("MeetingController.internalError");
 	}
 
-	@Override
-	public String getI18nBundleName() {
-		return null;
-	}
 }

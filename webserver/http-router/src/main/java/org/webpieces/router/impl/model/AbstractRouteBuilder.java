@@ -16,14 +16,11 @@ import org.webpieces.router.impl.UrlPath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.google.inject.Injector;
-
 public abstract class AbstractRouteBuilder implements Router {
 
 	private static final Logger log = LoggerFactory.getLogger(AbstractRouteBuilder.class);
 
 	public static ThreadLocal<RouteModuleInfo> currentPackage = new ThreadLocal<>();
-	public static ThreadLocal<Injector> injector = new ThreadLocal<>();
 
 	protected L3PrefixedRouting routes;
 	protected RouterInfo routerInfo;
@@ -52,7 +49,7 @@ public abstract class AbstractRouteBuilder implements Router {
 	
 	public void addRoute(Route r, RouteId routeId) {
 		log.info("scope:'"+routerInfo+"' adding route="+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 
 		routes.addRoute(meta);

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.ScopedDomainModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
 
@@ -22,14 +23,11 @@ public class DomainsMeta implements WebAppMeta {
 	
 	@Override
     public List<RouteModule> getRouteModules() {
-//		return Lists.newArrayList(
-//				new DomainModule("mydomain.com", new RoutesModule()),
-//				new DomainsRouteModule()
-//				);
-		return Lists.newArrayList(
-				new DomainsRouteModule()
-				);
+		RouteModule domainModule = new ScopedDomainModule("mydomain.com", new Domain1Module());
+
+		return Lists.newArrayList(domainModule, new Domain2Module());
 	}
+	
 	@Override
 	public List<Plugin> getPlugins() {
 		return null;

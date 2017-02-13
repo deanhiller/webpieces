@@ -148,7 +148,7 @@ public class RouteLoader {
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
-		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, config.getUrlEncoding());
+		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, config.getUrlEncoding(), injector);
 		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder);
 		invoker.init(reverseRoutes);
 		
@@ -163,13 +163,9 @@ public class RouteLoader {
 		}
 		
 		for(RouteModule module : all) {
-			String packageName = getPackage(module.getClass());
-			RouteModuleInfo info = new RouteModuleInfo(packageName, module.getI18nBundleName());
-			AbstractRouteBuilder.currentPackage.set(info);
-			AbstractRouteBuilder.injector.set(injector);
+			AbstractRouteBuilder.currentPackage.set(new RouteModuleInfo(module));
 			module.configure(routerBuilder);
 			AbstractRouteBuilder.currentPackage.set(null);
-			AbstractRouteBuilder.injector.set(null);
 		}
 		
 		log.info("added all routes to router.  Applying Filters");
@@ -189,13 +185,7 @@ public class RouteLoader {
 		
 		compressionCacheSetup.setupCache(routerBuilder.getStaticRoutes());
 	}
-	
-	private String getPackage(Class<?> clazz) {
-		int lastIndexOf = clazz.getName().lastIndexOf(".");
-		String pkgName = clazz.getName().substring(0, lastIndexOf);
-		return pkgName;
-	}
-	
+
 	private Object newInstance(Class<?> clazz) {
 		try {
 			return clazz.newInstance();

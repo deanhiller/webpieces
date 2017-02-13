@@ -94,7 +94,7 @@ public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
 		StaticRoute route = new StaticRoute(getUniqueId(), new UrlPath(routerInfo, urlPath), fileSystemPath, isOnClassPath);
 		staticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
-		RouteMeta meta = new RouteMeta(route, injector.get(), currentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(route, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
 		routes.addRoute(meta);
 	}
 	

@@ -28,7 +28,7 @@ public abstract class AbstractDomainBuilder extends AbstractRouteBuilder{
 		if(!"".equals(this.routerInfo.getPath()))
 			throw new UnsupportedOperationException("setNotFoundRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerInfo+"' adding PAGE_NOT_FOUND route="+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 		domainRoutes.setPageNotFoundRoute(meta);
 	}
@@ -43,7 +43,7 @@ public abstract class AbstractDomainBuilder extends AbstractRouteBuilder{
 		if(!"".equals(this.routerInfo.getPath()))
 			throw new UnsupportedOperationException("setInternalSvrErrorRoute can only be called on the root Router, not a scoped router");
 		log.info("scope:'"+routerInfo+"' adding INTERNAL_SVR_ERROR route="+r.getFullPath()+" method="+r.getControllerMethodString());
-		RouteMeta meta = new RouteMeta(r, injector.get(), currentPackage.get(), holder.getUrlEncoding());
+		RouteMeta meta = new RouteMeta(r, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 		domainRoutes.setInternalSvrErrorRoute(meta);
 	}
