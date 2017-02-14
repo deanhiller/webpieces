@@ -82,7 +82,7 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
-		RedirectResponse httpResponse = new RedirectResponse(req.isHttps, req.domain, req.relativePath);
+		RedirectResponse httpResponse = new RedirectResponse(req.isHttps, req.domain, req.port, req.relativePath);
 		HttpResponse response = createRedirect(httpResponse);
 		
 		responseCreator.addDeleteCookie(response, badCookieName);
@@ -119,7 +119,12 @@ public class ProxyResponse implements ResponseStreamer {
 			String prefix = "http://";
 			if(httpResponse.isHttps)
 				prefix = "https://";
-			url = prefix + httpResponse.domain + httpResponse.redirectToPath;
+			
+			String portPostfix = "";
+			if(httpResponse.port != 443 && httpResponse.port != 80)
+				portPostfix = ":"+httpResponse.port;
+				
+			url = prefix + httpResponse.domain + portPostfix + httpResponse.redirectToPath;
 		} else if(httpResponse.domain != null) {
 			throw new IllegalReturnValueException("Controller is returning a domain without returning isHttps=true or"
 					+ " isHttps=false so we can form the entire redirect.  Either drop the domain or set isHttps");

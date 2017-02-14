@@ -43,6 +43,20 @@ public class TestDomainMatching {
 	}
 
 	@Test
+	public void testDomain1RequestDomain1RouteWithPort() {
+		HttpRequest req = Requests.createGetRequest("mydomain.com:9000", "/domain1", true);
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("This is domain1");
+	}
+	
+	@Test
 	public void testDomain1RequestDomain2Route() {
 		HttpRequest req = Requests.createGetRequest("mydomain.com", "/domain2", true);
 		

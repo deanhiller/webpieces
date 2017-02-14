@@ -152,11 +152,23 @@ public class RequestReceiver implements RequestListener {
 		RouterRequest routerRequest = new RouterRequest();
 		routerRequest.orginalRequest = req;
 		routerRequest.isHttps = req.isHttps();
+		int port = 80;
+		if(routerRequest.isHttps)
+			port = 443;
+		
 		Header header = req.getHeaderLookupStruct().getHeader(KnownHeaderName.HOST);
 		if(header == null) {
 			throw new IllegalArgumentException("Must contain Host header");
 		}
-		String value = header.getValue();
+		String domain = header.getValue();
+
+		int index2 = domain.indexOf(":");
+		//host header may have port in it
+		if(index2 >= 0) {
+			port = Integer.parseInt(domain.substring(index2+1));
+			domain = domain.substring(0, index2);
+		}
+
 		HttpRequestLine requestLine = req.getRequestLine();
 		UrlInfo uriInfo = requestLine.getUri().getUriBreakdown();
 
@@ -175,7 +187,8 @@ public class RequestReceiver implements RequestListener {
 
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
-		routerRequest.domain = value;
+		routerRequest.domain = domain;
+		routerRequest.port = port;
 		String fullPath = uriInfo.getFullPath();
 		int index = fullPath.indexOf("?");
 		if(index > 0) {

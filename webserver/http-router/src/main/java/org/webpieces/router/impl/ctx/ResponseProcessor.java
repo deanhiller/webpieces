@@ -54,7 +54,7 @@ public class ResponseProcessor {
 		}
 
 		RouterRequest request = ctx.getRequest();
-		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, url);
+		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, request.port, url);
 		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
 	}
 	
@@ -91,7 +91,7 @@ public class ResponseProcessor {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, path);
+		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, request.port, path);
 		
 		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
 	}

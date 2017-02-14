@@ -24,6 +24,9 @@ public class RouterRequest {
 	 * Host in https should match
 	 */
 	public String domain;
+	
+	public int port;
+
 	public HttpMethod method;
 
 	public Map<String, RouterCookie> cookies = new HashMap<>();
