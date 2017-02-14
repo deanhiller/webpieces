@@ -5,6 +5,8 @@
 
 ext {
 
+    //Modify here AND gradle webieces plugin version in file 
+    // WEBPIECESxAPPNAME/build.gradle
     webpiecesVersion = 'WEBPIECESxVERSION'
 
     /*
@@ -171,3 +173,4 @@ task build(dependsOn: ':codeCoverage')
 task clean() << {
    delete "${buildDir}"
 }
+
