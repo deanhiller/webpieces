@@ -21,6 +21,9 @@ public class TransactionFilter extends RouteFilter<Void> {
 	private static final Logger log = LoggerFactory.getLogger(TransactionFilter.class);
 	private EntityManagerFactory factory;
 
+	//for test only.  I could not figure out a good way to test ALL the way from the edges without this
+	private static int state = 0; //0 for start, 1 for in progress, 2 for rolled back, 3 for committed
+	
 	@Inject
 	public TransactionFilter(EntityManagerFactory factory) {
 		this.factory = factory;
@@ -28,6 +31,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 	
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		state = 0;
 		if(Em.get() != null)
 			throw new IllegalStateException("Are you stacking two TransactionFilters as this Em should not be set yet.  be aware you do not need to call addFilter for this filter and should just include the HibernateRouteModule");
 		
@@ -63,6 +67,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 	
 	private void commit(EntityTransaction tx, EntityManager em) {
 		try {
+			state = 3;
 			tx.commit();
 			
 			em.close();
@@ -82,6 +87,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 
 	private void rollbackTx(Throwable t, EntityTransaction tx) {
 		try {
+			state = 2;
 			tx.rollback();
 		} catch(Throwable e) {
 			t.addSuppressed(e);
@@ -90,6 +96,12 @@ public class TransactionFilter extends RouteFilter<Void> {
 
 	@Override
 	public void initialize(Void initialConfig) {
+	}
+
+	//FOR TESTING ONLY.  not thread safe.  I HATE doing this, but verifying rollback on exception is critical that
+	//we don't break it.
+	public static int getState() {
+		return state;
 	}
 
 }

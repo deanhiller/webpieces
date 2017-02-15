@@ -20,6 +20,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
+import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.TestConfig;
@@ -32,6 +33,8 @@ public class TestSyncHibernate {
 	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
 	
+	private ServiceToFailMock mock = new ServiceToFailMock();
+
 	@Before
 	public void setUp() {
 		//clear in-memory database
@@ -42,6 +45,7 @@ public class TestSyncHibernate {
 		TestConfig config = new TestConfig();
 		config.setPlatformOverrides(new PlatformOverridesForTest());
 		config.setMetaFile(metaFile);
+		config.setAppOverrides(new TestModule(mock));
 		WebserverForTest webserver = new WebserverForTest(config);
 		server = webserver.start();
 	}
@@ -257,6 +261,22 @@ public class TestSyncHibernate {
 		Assert.assertEquals("blah1", user2.getName()); //name changed
 		Assert.assertEquals("blah2", user2.getFirstName()); //firstname changed
 	}
+	@Test
+	public void testRollback() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/fail");
+
+		mock.addException(() -> {throw new RuntimeException("for test");});
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+
+		Assert.assertEquals(2, TransactionFilter.getState());
+	}
 	
 	private UserTestDbo loadByEmail(String email) {
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory(HibernateAppMeta.PERSISTENCE_TEST_UNIT);
@@ -286,5 +306,4 @@ public class TestSyncHibernate {
 	@Test
 	public void testOptimisticLock() {
 	}
-	
 }

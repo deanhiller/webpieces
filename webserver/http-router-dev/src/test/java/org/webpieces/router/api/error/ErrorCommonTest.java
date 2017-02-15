@@ -67,7 +67,12 @@ public class ErrorCommonTest {
 		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
 		server.incomingCompleteRequest(req, mockResponseStream);
 			
-		Exception e = mockResponseStream.getOnlyException();
+		Throwable e = mockResponseStream.getOnlyException();
+		
+		while(e.getCause() != null) {
+			e = e.getCause();
+		}
+		
 		Assert.assertEquals(IllegalStateException.class, e.getClass());
 	}
 	

@@ -18,6 +18,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.mock.lib.MockExecutor;
+import org.webpieces.plugins.hibernate.app.ServiceToFail;
+import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
@@ -130,6 +132,7 @@ public class TestAsyncHibernate {
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(Executor.class).toInstance(mockExecutor);
+			binder.bind(ServiceToFail.class).toInstance(new ServiceToFailMock());
 		}
 	}
 }

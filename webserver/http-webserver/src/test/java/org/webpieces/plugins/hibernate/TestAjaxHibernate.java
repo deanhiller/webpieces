@@ -42,6 +42,7 @@ public class TestAjaxHibernate {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		TestConfig config = new TestConfig();
 		config.setPlatformOverrides(new PlatformOverridesForTest());
+		config.setAppOverrides(new TestModule());
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
 		server = webserver.start();

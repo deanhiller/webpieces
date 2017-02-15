@@ -25,7 +25,9 @@ public class HibernateTestRouteModule extends AbstractRouteModule {
 		addRoute(POST, "/async/save",        "HibernateAsyncController.save", HibernateRouteId.ASYNC_SAVE_ENTITY);
 		addRoute(GET , "/async/get/{id}",    "HibernateAsyncController.display", HibernateRouteId.ASYNC_DISPLAY_ENTITY);
 		addRoute(GET , "/async/dynamic/{id}","HibernateAsyncController.entityLoad", HibernateRouteId.ASYNC_ENTITY_LOAD);
-		
+
+		addRoute(GET , "/fail",          "HibernateController.saveThenFail", HibernateRouteId.ROLLBACK);
+
 		CrudRouteIds routeIds = new CrudRouteIds(LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
 		addCrud("user", "CrudTestController", routeIds);
 		

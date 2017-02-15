@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.impl.InvokeException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
@@ -24,14 +24,27 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 			return invokeMethod(meta);
 		} catch(InvocationTargetException e) {
 			Throwable cause = e.getCause();
-			if(cause instanceof RuntimeException) {
-				throw (RuntimeException)cause;
-			} else {
-				throw new InvokeException(e);
+			if(cause instanceof NotFoundException) {
+				return createNotFound(cause);
 			}
-		} catch (IllegalAccessException | IllegalArgumentException e) {
-			throw new InvokeException(e);
+			return createRuntimeFuture(new RuntimeException(cause));
+		} catch(NotFoundException e) {
+			return createNotFound(e);
+		} catch(Throwable e) {
+			return createRuntimeFuture(e);
 		}			
+	}
+
+	private CompletableFuture<Action> createRuntimeFuture(Throwable e) {
+		CompletableFuture<Action> future = new CompletableFuture<Action>();
+		future.completeExceptionally(new RuntimeException(e));
+		return future;
+	}
+
+	private CompletableFuture<Action> createNotFound(Throwable e) {
+		CompletableFuture<Action> future = new CompletableFuture<Action>();
+		future.completeExceptionally(new NotFoundException(e));
+		return future;
 	}
 	
 	@SuppressWarnings("unchecked")
