@@ -98,4 +98,59 @@ public class TestDomainMatching {
 		response.assertContains("This is domain2");
 	}
 
+	@Test
+	public void testStaticFileFromDomain1() {
+		HttpRequest req = Requests.createGetRequest("mydomain.com", "/public/myfile", true);
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("org.webpieces.webserver");
+	}
+	
+	@Test
+	public void testStaticFileFromDomain2() {
+		HttpRequest req = Requests.createGetRequest("domain2.com", "/public/myfile", true);
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("org.webpieces.webserver");
+	}
+	
+	@Test
+	public void testStaticDirFromDomain1() {
+		HttpRequest req = Requests.createGetRequest("mydomain.com", "/public/asyncMeta.txt", true);
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("org.webpieces.webserver");
+	}
+	
+	@Test
+	public void testStaticDirFromDomain2() {
+		HttpRequest req = Requests.createGetRequest("domain2.com", "/public/asyncMeta.txt", true);
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("org.webpieces.webserver");
+	}
 }

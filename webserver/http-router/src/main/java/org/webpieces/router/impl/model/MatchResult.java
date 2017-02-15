@@ -9,21 +9,21 @@ public class MatchResult {
 
 	private final Map<String, String> pathParams;
 	private final RouteMeta meta;
-	private boolean isNotFound;
 	
 	public MatchResult(RouteMeta meta, Map<String, String> pathParams) {
+		if(meta == null)
+			throw new IllegalArgumentException("must have meta.  null meta means pageNotFound so use other constructor");
 		this.meta = meta;
 		this.pathParams = pathParams;
 	}
 
 	public MatchResult(RouteMeta meta) {
-		this.meta = meta;
-		this.pathParams = new HashMap<>();
+		this(meta, new HashMap<>());
 	}
 
-	public MatchResult(boolean isNotFound) {
-		this(null, null);
-		this.isNotFound = isNotFound;
+	public MatchResult(boolean isFound) {
+		this.meta = null;
+		this.pathParams = null;
 	}
 
 	public RouteMeta getMeta() {
@@ -36,11 +36,11 @@ public class MatchResult {
 	
 	@Override
 	public String toString() {
-		return "MatchResult [pathParams=" + pathParams + ", meta=" + meta + " notFound="+isNotFound+"]";
+		return "MatchResult [pathParams=" + pathParams + ", meta=" + meta + "]";
 	}
 
-	public boolean isNotFound() {
-		return isNotFound;
+	public boolean isFound() {
+		return meta != null;
 	}
 
 }

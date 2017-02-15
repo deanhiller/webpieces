@@ -1,5 +1,7 @@
 package org.webpieces.router.impl.model;
 
+import java.util.List;
+
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.impl.RouteMeta;
 
@@ -46,8 +48,16 @@ public class L2DomainRoutes {
 		return domain;
 	}
 
-	public MatchResult fetchRoute(RouterRequest req, String relativePath) {
-		return domainRoutes.fetchRoute(req, relativePath, pageNotFoundRoute);
+	public MatchResult fetchRoute(List<RouteMeta> staticRoutes, RouterRequest req, String relativePath) {
+		MatchResult result = domainRoutes.fetchRoute(req, relativePath);
+		if(!result.isFound()) {
+			result = domainRoutes.findRouteMatch(staticRoutes, req, relativePath);
+		}
+		
+		if(!result.isFound()) //if still not found in static routes, return pageNotFoundRoute
+			return new MatchResult(pageNotFoundRoute);
+		
+		return result;
 	}
 	
 }

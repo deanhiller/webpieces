@@ -95,7 +95,7 @@ public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
 		staticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
-		routes.addRoute(meta);
+		allRouting.addStaticRoute(meta);
 	}
 	
 	//only if you happen to create two webservers in two threads is this synchronized(unlikely scenario)

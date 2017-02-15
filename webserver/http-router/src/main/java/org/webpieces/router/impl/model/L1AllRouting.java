@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
 
 public class L1AllRouting {
@@ -15,8 +17,10 @@ public class L1AllRouting {
 	private final Map<String, L2DomainRoutes> specificDomainRoutes = new HashMap<>();
 
 	//routes for all domains EXCEPT those in specificDomainRoutes
-	final L2DomainRoutes main = new L2DomainRoutes(null);
-
+	private final L2DomainRoutes main = new L2DomainRoutes(null);
+	
+	private final List<RouteMeta> staticRoutes = new ArrayList<>();
+	
 	public L2DomainRoutes getMainRoutes() {
 		return main;
 	}
@@ -41,8 +45,8 @@ public class L1AllRouting {
 		String domain = req.domain;
 		L2DomainRoutes domainRoutes = specificDomainRoutes.get(domain);
 		if(domainRoutes != null)
-			return domainRoutes.fetchRoute(req, relativePath);
-		return main.fetchRoute(req, relativePath);
+			return domainRoutes.fetchRoute(staticRoutes, req, relativePath);
+		return main.fetchRoute(staticRoutes, req, relativePath);
 	}
 
 	public RouteMeta getPageNotfoundRoute(String domain) {
@@ -61,5 +65,13 @@ public class L1AllRouting {
 				return domainRoutes.getInternalSvrErrorRoute();
 		}
 		return main.getInternalSvrErrorRoute();
+	}
+
+	public void addStaticRoute(RouteMeta meta) {
+		staticRoutes.add(meta);
+	}
+
+	public List<Route> getStaticRoutes() {
+		return staticRoutes.stream().map(m -> m.getRoute()).collect(Collectors.toList());
 	}	
 }

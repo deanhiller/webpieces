@@ -28,14 +28,7 @@ public class L3PrefixedRouting {
 	}
 
 
-	public MatchResult fetchRoute(RouterRequest request, String subPath, RouteMeta pageNotFoundRoute) {
-		MatchResult result = fetchRouteImpl(request, subPath);
-		if(result.isNotFound())
-			return new MatchResult(pageNotFoundRoute);
-		return result;
-	}
-	
-	private MatchResult fetchRouteImpl(RouterRequest request, String subPath) {
+	public MatchResult fetchRoute(RouterRequest request, String subPath) {
 		if(!subPath.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 
@@ -50,18 +43,22 @@ public class L3PrefixedRouting {
 		L3PrefixedRouting routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
 			String newRelativePath = subPath.substring(index, subPath.length());
-			MatchResult route = routeInfo.fetchRouteImpl(request, newRelativePath);
+			MatchResult route = routeInfo.fetchRoute(request, newRelativePath);
 			if(route != null)
 				return route;
 		}
 
+		return findRouteMatch(routes, request, subPath);
+	}
+
+	public MatchResult findRouteMatch(List<RouteMeta> routes, RouterRequest request, String subPath) {
 		for(RouteMeta meta : routes) {
 			MatchResult result = meta.matches(request, subPath);
 			if(result != null)
 				return result;
 		}
 
-		return new MatchResult(true);
+		return new MatchResult(false);
 	}
 	
 }
