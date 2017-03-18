@@ -116,8 +116,7 @@ public class StaticFileReader {
 		//during startup as I don't feel like paying a cpu penalty for compressing while live
 	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {
 	    	response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compr.getCompressionType()));
-	    	File dir = routerConfig.getCachedCompressedDirectory();
-	    	File routesCache = new File(dir, renderStatic.getStaticRouteId()+"");
+	    	File routesCache = renderStatic.getTargetCache();
 	    	
 	    	File fileReference;
 	    	if(isFile) {

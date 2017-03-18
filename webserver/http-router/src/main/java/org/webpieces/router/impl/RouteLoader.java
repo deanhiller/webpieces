@@ -148,7 +148,7 @@ public class RouteLoader {
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
-		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, config.getUrlEncoding(), injector);
+		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config);
 		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder);
 		invoker.init(reverseRoutes);
 		

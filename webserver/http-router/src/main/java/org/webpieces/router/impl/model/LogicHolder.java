@@ -1,7 +1,9 @@
 package org.webpieces.router.impl.model;
 
+import java.io.File;
 import java.nio.charset.Charset;
 
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.loader.ControllerLoader;
 
@@ -11,15 +13,15 @@ public class LogicHolder {
 
 	private ReverseRoutes reverseRoutes;
 	private ControllerLoader finder;
-	private Charset urlEncoding;
 	private Injector injector;
+	private RouterConfig config;
 
 	public LogicHolder(ReverseRoutes reverseRoutes, 
-			ControllerLoader finder, Charset urlEncoding, Injector injector) {
+			ControllerLoader finder, Injector injector, RouterConfig config) {
 				this.reverseRoutes = reverseRoutes;
 				this.finder = finder;
-				this.urlEncoding = urlEncoding;
 				this.injector = injector;
+				this.config = config;
 	}
 
 	public ReverseRoutes getReverseRoutes() {
@@ -30,12 +32,17 @@ public class LogicHolder {
 		return finder;
 	}
 
-	public Charset getUrlEncoding() {
-		return urlEncoding;
-	}
-
 	public Injector getInjector() {
 		return injector;
 	}
 
+	public Charset getUrlEncoding() {
+		return config.getUrlEncoding();
+	}
+
+	public File getCachedCompressedDirectory() {
+		return config.getCachedCompressedDirectory();
+	}
+	
+	
 }

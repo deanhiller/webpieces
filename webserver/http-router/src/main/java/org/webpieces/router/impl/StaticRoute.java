@@ -20,9 +20,9 @@ public class StaticRoute implements Route {
 	private Pattern patternToMatch;
 	private boolean isOnClassPath;
 	private List<String> pathParamNames = new ArrayList<>();
-	private String uniqueStaticRouteId;
+	private File targetCacheLocation;
 
-	public StaticRoute(int staticRouteId, UrlPath url, String fileSystemPath, boolean isOnClassPath) {
+	public StaticRoute(UrlPath url, String fileSystemPath, boolean isOnClassPath, File cachedCompressedDirectory) {
 		this.fileSystemPath = fileSystemPath;
 		this.isOnClassPath = isOnClassPath;
 		
@@ -46,9 +46,9 @@ public class StaticRoute implements Route {
 		if(!f.exists())
 			throw new IllegalArgumentException("File="+getCanonicalPath(f)+" does not exist");
 
-		if(urlSubPath.endsWith("/")) {
+		if(isDirectory(urlSubPath)) {
 			this.isFile = false;
-			if(!fileSystemPath.endsWith("/"))
+			if(!isDirectory(fileSystemPath))
 				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
 			else if(!f.isDirectory())
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a directory and must be for static directories");
@@ -56,15 +56,19 @@ public class StaticRoute implements Route {
 			this.pathParamNames.add("resource");
 		} else {
 			this.isFile = true;
-			if(fileSystemPath.endsWith("/"))
+			if(isDirectory(fileSystemPath))
 				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
 			else if(!f.isFile())
 				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a file and must be for static file route");
 			this.patternToMatch = Pattern.compile("^"+urlSubPath+"$");
 		}
 		
-		String postFix = urlSubPath.replace("/", "-");
-		this.uniqueStaticRouteId = staticRouteId+postFix;
+		String relativePath = urlSubPath.substring(1);
+		this.targetCacheLocation = new File(cachedCompressedDirectory, relativePath);
+	}
+
+	private boolean isDirectory(String urlSubPath) {
+		return urlSubPath.endsWith("/");
 	}
 
 	private String getCanonicalPath(File f) {
@@ -141,8 +145,8 @@ public class StaticRoute implements Route {
 		return isFile;
 	}
 
-	public String getStaticRouteId() {
-		return this.uniqueStaticRouteId;
+	public File getTargetCacheLocation() {
+		return this.targetCacheLocation;
 	}
 
 	@Override

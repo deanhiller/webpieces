@@ -185,7 +185,7 @@ public class RouteInvoker {
 			StaticRoute route = (StaticRoute) meta.getRoute();
 			boolean isOnClassPath = route.getIsOnClassPath();
 
-			RenderStaticResponse resp = new RenderStaticResponse(route.getStaticRouteId(), isOnClassPath);
+			RenderStaticResponse resp = new RenderStaticResponse(route.getTargetCacheLocation(), isOnClassPath);
 			if(route.isFile()) {
 				resp.setFilePath(route.getFileSystemPath());
 			} else {

@@ -52,9 +52,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private void createCache(StaticRoute route) {
-		String id = route.getStaticRouteId();
-		File dir = config.getCachedCompressedDirectory();
-		File routeCache = new File(dir, id);
+		File routeCache = route.getTargetCacheLocation();
 		createDirectory(routeCache);
 		
 		File metaFile = new File(routeCache, "webpiecesMeta.properties");

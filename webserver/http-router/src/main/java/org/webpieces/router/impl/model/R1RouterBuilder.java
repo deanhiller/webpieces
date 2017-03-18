@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,11 +29,6 @@ public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
 	private List<FilterInfo<?>> routeFilters = new ArrayList<>();
 	private List<FilterInfo<?>> notFoundFilters = new ArrayList<>();
 	private List<FilterInfo<?>> internalErrorFilters = new ArrayList<>();
-	
-	/**
-	 * This is really bad!!!  static means two webservers use the same values..ick!!!
-	 */
-	private static int staticRouteIdCounter;
 	
 	public R1RouterBuilder(RouterInfo info, L1AllRouting allRouting, LogicHolder holder) {
 		super(info, allRouting.getMainRoutes(), allRouting.getMainRoutes().getRoutesForDomain(), holder);
@@ -91,18 +87,13 @@ public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
 		if(isOnClassPath)
 			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
 		
-		StaticRoute route = new StaticRoute(getUniqueId(), new UrlPath(routerInfo, urlPath), fileSystemPath, isOnClassPath);
+		StaticRoute route = new StaticRoute(new UrlPath(routerInfo, urlPath), fileSystemPath, isOnClassPath, holder.getCachedCompressedDirectory());
 		staticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
 		allRouting.addStaticRoute(meta);
 	}
 	
-	//only if you happen to create two webservers in two threads is this synchronized(unlikely scenario)
-	private synchronized int getUniqueId() {
-		return staticRouteIdCounter++;
-	}
-
 	public void applyFilters(WebAppMeta rm) {
 		ReverseRoutes reverseRoutes = holder.getReverseRoutes();
 		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();

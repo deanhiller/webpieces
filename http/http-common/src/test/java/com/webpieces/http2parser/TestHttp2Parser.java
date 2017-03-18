@@ -1,7 +1,5 @@
 package com.webpieces.http2parser;
 
-import static com.webpieces.http2parser.api.dto.lib.Http2FrameType.HEADERS;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,23 +11,13 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpcommon.temp.HeaderDecoding2;
-import org.webpieces.httpcommon.temp.HeaderEncoding2;
 
-import com.twitter.hpack.Decoder;
-import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.UnmarshalState;
-import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
-import com.webpieces.http2parser.api.dto.PushPromiseFrame;
-import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
@@ -77,8 +65,6 @@ public class TestHttp2Parser {
     private static LinkedList<Http2Header> basicResponseHeaders = new LinkedList<>();
     private static LinkedList<Http2Header> ngHttp2ExampleHeaders = new LinkedList<>();
 
-    private Encoder encoder = new Encoder(4096);
-    private HeaderEncoding2 encoding = new HeaderEncoding2(encoder, Integer.MAX_VALUE);
 	private int maxFrameSize;
 	private int maxHeaderSize = 4096;
 	private int maxHeaderTableSize = 4096;
@@ -240,119 +226,6 @@ public class TestHttp2Parser {
         Assert.assertEquals(0, result.getLeftOverDataSize());
         List<Http2Msg> frames = result.getParsedFrames();
         Assert.assertTrue(frames.size() == 0);
-    }
-
-
-    @Test
-    public void testCreateHugeHeadersFrame() {
-        LinkedList<Http2Header> bigHeaderList = new LinkedList<>();
-        for(int i = 0; i < 5; i++) {
-            bigHeaderList.addAll(basicResponseHeaders);
-        }
-        // set a small max frame size for testing
-        encoding.setMaxFrameSize(256);
-
-        HeadersFrame initialFrame = new HeadersFrame();
-        initialFrame.setStreamId(1);
-        List<Http2Frame> headerFrames = encoding.createHeaderFrames(initialFrame, bigHeaderList);
-        
-        Assert.assertEquals(headerFrames.size(), 2);
-        Assert.assertEquals(headerFrames.get(0).getFrameType(), HEADERS);
-        Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
-        Assert.assertEquals(headerFrames.get(0).getStreamId(), 0x1);
-        Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
-        Assert.assertTrue(((HasHeaderFragment) headerFrames.get(1)).isEndHeaders());
-        Assert.assertFalse(((HasHeaderFragment) headerFrames.get(0)).isEndHeaders());
-    }
-
-    @Test
-    public void testCreateHugePushPromiseFrame() {
-        LinkedList<Http2Header> bigHeaderList = new LinkedList<>();
-        for(int i = 0; i < 5; i++) {
-            bigHeaderList.addAll(basicResponseHeaders);
-        }
-        // set a small max frame size for testing
-        encoding.setMaxFrameSize(256);
-
-        List<Http2Frame> headerFrames = encoding.createPushPromises(bigHeaderList, 1, 2);
-        
-        Assert.assertEquals(headerFrames.size(), 2);
-        Assert.assertEquals(headerFrames.get(0).getFrameType(), Http2FrameType.PUSH_PROMISE);
-        Assert.assertEquals(headerFrames.get(1).getFrameType(), Http2FrameType.CONTINUATION);
-        Assert.assertTrue(((HasHeaderFragment) headerFrames.get(1)).isEndHeaders());
-        Assert.assertFalse(((HasHeaderFragment) headerFrames.get(0)).isEndHeaders());
-        Assert.assertEquals(((PushPromiseFrame) headerFrames.get(0)).getPromisedStreamId(), 2);
-        Assert.assertEquals(headerFrames.get(1).getStreamId(), 0x1);
-    }
-
-    @Test
-    public void testParseWithHeaderFrames() {
-        LinkedList<Http2Header> bigHeaderList = new LinkedList<>();
-        for(int i = 0; i < 5; i++) {
-            bigHeaderList.addAll(basicResponseHeaders);
-        }
-        // set a small max frame size for testing
-        encoding.setMaxFrameSize(256);
-
-        HeadersFrame initialFrame = new HeadersFrame();
-        initialFrame.setStreamId(1);
-        List<Http2Frame> headerFrames = encoding.createHeaderFrames(initialFrame, bigHeaderList);
-
-        Assert.assertEquals(headerFrames.size(), 2);
-        DataWrapper serializedHeaderFrames = translate(headerFrames);
-        DataWrapper combined = dataGen.chainDataWrappers(
-                UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames),
-                dataGen.chainDataWrappers(
-                        serializedHeaderFrames,
-                        UtilsForTest2.dataWrapperFromHex(aBunchOfDataFrames)));
-
-    	UnmarshalState result = parser.prepareToUnmarshal(maxHeaderSize, maxHeaderTableSize, maxFrameSize);
-        result = parser.unmarshal(result, combined);
-        Assert.assertEquals(result.getParsedFrames().size(), 9); // there should be 8 data frames and one header frame
-        Http2Msg headerFrame = result.getParsedFrames().get(4);
-        Assert.assertEquals(headerFrame.getClass(), Http2Headers.class);
-        Assert.assertEquals(((Http2Headers) headerFrame).getHeaders().size(), basicResponseHeaders.size() * 5);
-    }
-
-    private DataWrapper translate(List<Http2Frame> frames) {
-    	DataWrapper allData = dataGen.emptyWrapper();
-    	for(Http2Frame f : frames) {
-    		DataWrapper data = parser2.marshal(f);
-    		allData = dataGen.chainDataWrappers(allData, data);
-    	}
-		return allData;
-	}
-    
-    @Test
-    public void testSerializeHeaders() {
-
-        DataWrapper serializedExample = encoding.serializeHeaders(ngHttp2ExampleHeaders);
-        String serializedExampleHex = UtilsForTest2.toHexString(serializedExample.createByteArray());
-        Assert.assertArrayEquals(
-                UtilsForTest2.toByteArray(serializedExampleHex),
-                UtilsForTest2.toByteArray(ngHttp2ExampleHeaderFragment));
-
-        DataWrapper serialized = encoding.serializeHeaders(basicRequestHeaders);
-        String serializedHex = UtilsForTest2.toHexString(serialized.createByteArray());
-        Assert.assertArrayEquals(
-                UtilsForTest2.toByteArray(serializedHex),
-                UtilsForTest2.toByteArray(basicRequestSerializationNghttp2)
-        );
-
-    }
-
-    @Test
-    public void testDeserializeHeaders() {
-    	Decoder decoder = new Decoder(4096, 4096);
-    	HeaderDecoding2 decoding = new HeaderDecoding2(decoder);
-    	
-        List<Http2Header> headers = decoding.decode(UtilsForTest2.dataWrapperFromHex(ngHttp2ExampleHeaderFragment));
-        Assert.assertEquals(headers, ngHttp2ExampleHeaders);
-
-        List<Http2Header> headers2 = decoding.decode(UtilsForTest2.dataWrapperFromHex(basicRequestSerializationNghttp2));
-        Assert.assertEquals(headers2, basicRequestHeaders);
-
-
     }
 
 }

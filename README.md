@@ -100,23 +100,25 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* add file hashes of all app/text file types such that we auto put it in the query params AND on file changes, we auto load new resource avoiding cache(and make sure it works in development mode)
+* start an actual multi-homed project
+* write http2 tests for server
+* write http2 tests for client
+* flow control test cases on http client
+* error test cases http client
+* flow control server test?  client may cover that same code
+* error test case on server http2 and then try H2Test
 * look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.
 * create api / REST method so webserver can be used as api
 * verify upload file can work http2,etc
 * http1.1 protect pipeline errors
-* remove HeaderEncoding2 HeaderDecoding2
 * bootstrap modal tag making ajax example very concise
 * max conccurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
 * more fully integrate the http2 stack
-* add file hashes of all app/text file types such that we auto put it in the query params AND on file changes, we auto load new resource avoiding cache(and make sure it works in development mode)
 * perhaps we want more testing around the CRUD examples
-* add optimistic locking test case
-* flow control test cases on http client
-* error test cases http client
-* flow control server test?  client may cover that same code
-* error test case on server http2 and then try H2Test
+* add optimistic locking test case for hibernate plugin
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
 * Tab state (rather than just global session, but per tab state to put data)
