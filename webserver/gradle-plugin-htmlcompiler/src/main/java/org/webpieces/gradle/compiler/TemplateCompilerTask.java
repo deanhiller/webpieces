@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +20,8 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
 import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.DevTemplateModule;
+import org.webpieces.templating.api.ProdTemplateModule;
+import org.webpieces.templating.api.RouterLookupModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
 
@@ -57,7 +61,7 @@ public class TemplateCompilerTask extends AbstractCompile {
         //need to make customizable...
         File groovySrcGen = new File(buildDir, "groovysrc"); 
         System.out.println("groovy src directory="+groovySrcGen);
-        		
+
 		Charset encoding = Charset.forName(options.getEncoding());
 		TemplateCompileConfig config = new TemplateCompileConfig(false);
 		config.setFileEncoding(encoding);
@@ -65,14 +69,14 @@ public class TemplateCompilerTask extends AbstractCompile {
 		config.setGroovySrcWriteDirectory(groovySrcGen);
 		System.out.println("custom tags="+options.getCustomTags());
 		config.setCustomTagsFromPlugin(options.getCustomTags());
-    	Injector injector = Guice.createInjector(new DevTemplateModule(config));
+    	Injector injector = Guice.createInjector(new RouterLookupModule(), new DevTemplateModule(config));
     	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
     	
         LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
         
         File destinationDir = getDestinationDir();
         System.out.println("destDir="+destinationDir);
-        File routeIdFile = new File(destinationDir, "org.webpieces.routeId.txt");
+        File routeIdFile = new File(destinationDir, ProdTemplateModule.ROUTE_META_FILE);
         if(routeIdFile.exists())
         	routeIdFile.delete();
         routeIdFile.createNewFile();
@@ -96,7 +100,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 	        	
 	        	String source = readSource(f);
 	        	
-	        	compiler.compile(fullName, source, new PluginCompileCallback(destinationDir, bufWrite)); 
+	        	compiler.compile(fullName, source, new PluginCompileCallback(destinationDir, bufWrite));
 	        }
 		}
         
@@ -179,23 +183,39 @@ public class TemplateCompilerTask extends AbstractCompile {
 		}
 
 		@Override
-		public void routeIdFound(String routeId, List<String> argNames, String sourceLocation) {
+		public void recordRouteId(String routeId, List<String> argNames, String sourceLocation) {
 			String argStr = "";
 			for(String s: argNames) {
 				if(s.contains(":"))
-					throw new RuntimeException("bug, argument should not contain : character.  argNames="+argNames+" arg="+s);					
+					throw new RuntimeException("bug, argument should not contain : character.  argNames="+argNames+" arg="+s);
 				
 				argStr += ","+s;
 			}
 
 			if(routeId.contains(":"))
 				throw new RuntimeException("bug, route should not contain : character");
-			else if(sourceLocation.contains(":")) {
-				sourceLocation = sourceLocation.replace(":", "-");
-			}			
+
+			try {
+				String encodedRouteId = URLEncoder.encode(routeId, StandardCharsets.UTF_8.name());
+				String encodedArgs = URLEncoder.encode(argStr, StandardCharsets.UTF_8.name());
+				String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8.name());
+
+				routeOut.write(ProdTemplateModule.ROUTE_TYPE+"/"+encodedSourceLocation+"/"+encodedRouteId+":"+encodedArgs+":dummy\n");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public void recordPath(String relativeUrlPath, String sourceLocation) {
+			if(relativeUrlPath.contains(":"))
+				throw new RuntimeException("bug, route should not contain : character");
 			
 			try {
-				routeOut.write(routeId+":"+argStr+":"+sourceLocation+"\n");
+				String encodedPath = URLEncoder.encode(relativeUrlPath, StandardCharsets.UTF_8.name());
+				String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8.name());
+				
+				routeOut.write(ProdTemplateModule.PATH_TYPE+"/"+encodedSourceLocation+"/"+encodedPath+"\n");
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

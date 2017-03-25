@@ -12,7 +12,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
-import org.webpieces.templating.api.ReverseUrlLookup;
+import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.impl.html.EscapeHTMLFormatter;
 import org.webpieces.templating.impl.html.NullFormatter;
 
@@ -30,11 +30,11 @@ public abstract class GroovyTemplateSuperclass extends Script {
 	private HtmlTagLookup tagLookup;
 	private Map<Object, Object> setTagProperties;
 	private String superTemplateFilePath;
-	private ReverseUrlLookup urlLookup;
+	private RouterLookup urlLookup;
 	private ThreadLocal<String> sourceLocal = new ThreadLocal<>();
 	
     public void initialize(EscapeCharactersFormatter f, HtmlTagLookup tagLookup, 
-    		Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup) {
+    		Map<Object, Object> setTagProps, RouterLookup urlLookup) {
     	formatter = f;
     	this.tagLookup = tagLookup;
     	this.setTagProperties = setTagProps;
@@ -185,9 +185,6 @@ public abstract class GroovyTemplateSuperclass extends Script {
     public void exitExpression() {
     	sourceLocal.set(null);
     }
-	public ReverseUrlLookup getUrlLookup() {
-		return urlLookup;
-	}
 	
 	public static String modifySourceLocation2(String srcLocation) {
 		return "\n\n\t"+srcLocation+"\n";

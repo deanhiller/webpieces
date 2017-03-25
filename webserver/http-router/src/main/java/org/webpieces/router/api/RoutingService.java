@@ -22,4 +22,5 @@ public interface RoutingService {
 	 */
 	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs);
 	
+	String relativeUrlToHash(String urlPath);
 }

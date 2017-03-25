@@ -20,7 +20,7 @@ public class CustomTag extends RenderTagArgsTag implements HtmlTag {
 		if(!file.endsWith(".tag"))
 			throw new IllegalArgumentException("tag file must end in .tag="+file);
 		else if(!file.startsWith("/"))
-			throw new IllegalArgumentException("tag file path must begin with / which is the root of the classpath");
+			throw new IllegalArgumentException("tag file path must begin with / which is the root of the classpath"+file);
 		this.file = file;
 		
 		int extensionIndex = file.lastIndexOf(".");

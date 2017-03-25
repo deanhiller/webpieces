@@ -30,15 +30,43 @@ public abstract class ParseTagArgs implements GroovyGen {
                 tagArgs = "defaultArgument:" + tagArgs; 
             }
             
-            //TODO: record the tag used and source location to be verified at build time(ie. test will verify)
+            //record the tag used and source location to be verified at unit test time
         	while(tagArgs.contains("@[")) {
         		tagArgs = replaceRouteIds(token, tagArgs, indexOfSpace, callback);
         	}
             
+        	while(tagArgs.contains("%[")) {
+        		tagArgs = replacePaths(token, tagArgs, indexOfSpace, callback);
+        	}
+        	
+        	
 		} else {
 			tagArgs = ":";
 		}
 		return tagArgs;
+	}
+
+	private String replacePaths(Token token, String tagArgs, int indexOfSpace, CompileCallback callback) {
+		int atIndex = tagArgs.indexOf("%[");
+		int nextAtIndex = tagArgs.indexOf("]%");
+		if(nextAtIndex < 0)
+			throw new IllegalArgumentException("Missing closing ]% on the route."+token.getSourceLocation(true));
+
+		String prefix = tagArgs.substring(0, atIndex);
+		String relativeUrlPath = tagArgs.substring(atIndex+2, nextAtIndex);
+		String leftover = tagArgs.substring(nextAtIndex+2);
+		
+		String groovyCode = translatePath(relativeUrlPath, token, callback);
+		
+		String groovy = prefix + groovyCode + leftover;
+		return groovy;
+	}
+
+	private String translatePath(String relativeUrlPath, Token token, CompileCallback callback) {
+		
+		callback.recordPath(relativeUrlPath, token.getSourceLocation(false));
+
+		return relativeUrlPath;
 	}
 
 	public static String replaceRouteIds(Token token, String tagArgs, int indexOfSpace, CompileCallback callback) {
@@ -72,8 +100,9 @@ public abstract class ParseTagArgs implements GroovyGen {
 		}
 
 		//TODO: This is not proper as it will break if there is a Map in a Map...but it works for now on validating the key names
+		//add tests eventually and fix
 		List<String> argNames = fetchArgNames(args, token);
-		callback.routeIdFound(route, argNames, token.getSourceLocation(false));
+		callback.recordRouteId(route, argNames, token.getSourceLocation(false));
 		
 		return "fetchUrl('"+route+"', "+args+", '"+token.getSourceLocation(false)+"')";
 	}

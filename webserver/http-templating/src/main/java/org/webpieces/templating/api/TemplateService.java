@@ -12,7 +12,7 @@ public interface TemplateService {
 
 	Template loadTemplate(String templatePath);
 
-	void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup lookup);
+	void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs);
 	
-	String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup);
+	String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps);
 }

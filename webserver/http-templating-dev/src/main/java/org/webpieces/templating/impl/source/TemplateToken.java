@@ -2,11 +2,16 @@ package org.webpieces.templating.impl.source;
 
 public enum TemplateToken {
 
+	//TODO: http2 record the script to pre-emptively send by calling into the groovy
+	//superclass recording all these scripts to send
+	//THEN, after script is run, client can call getScriptsToPreemptivelySend and send
+	//all those scripts before the browser client asks for them(in http2 at least)
+	//BUT we must also RECORD all these on that connection and not send them a 
+	//second time which would be a waste of our CPU
+	
     EOF(null, null),            //end of file
     PLAIN(null, null),          //normal text
     SCRIPT("%{", "}%"),         // %{...}%
-    //for http2 such that server can pre-emptive send data
-    PREMPTIVE_SEND_SCRIPT("%%{", "}%%"),         // %%{...}%%
     EXPR("${", "}$"),           // ${...}$
     START_TAG("#{", "}#"),      // #{...}#
     END_TAG("#{/", "}#"),       // #{/...}#

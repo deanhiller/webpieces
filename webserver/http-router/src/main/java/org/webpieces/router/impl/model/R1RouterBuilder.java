@@ -1,6 +1,5 @@
 package org.webpieces.router.impl.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

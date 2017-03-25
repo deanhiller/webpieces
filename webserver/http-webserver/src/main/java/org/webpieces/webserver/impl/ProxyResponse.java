@@ -26,7 +26,6 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatus;
 import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
@@ -51,8 +50,6 @@ public class ProxyResponse implements ResponseStreamer {
 	//TODO: Actually should inject this so it is swappable.... (never have statics...it's annoying as hell when customizing)...
 	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	@Inject
-	private RoutingService urlLookup;
 	@Inject
 	private TemplateService templatingService;
 	@Inject
@@ -167,7 +164,7 @@ public class ProxyResponse implements ResponseStreamer {
 		StringWriter out = new StringWriter();
 		
 		try {
-			templatingService.runTemplate(template, out, resp.pageArgs, (id, args) -> urlLookup.convertToUrl(id, args));
+			templatingService.runTemplate(template, out, resp.pageArgs);
 		} catch(MissingPropertyException e) {
 			Set<String> keys = resp.pageArgs.keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"

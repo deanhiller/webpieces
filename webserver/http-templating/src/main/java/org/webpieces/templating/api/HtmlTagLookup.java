@@ -14,6 +14,8 @@ import org.webpieces.templating.impl.tags.HtmlSetTag;
 import org.webpieces.templating.impl.tags.JsActionTag;
 import org.webpieces.templating.impl.tags.RenderPageArgsTag;
 import org.webpieces.templating.impl.tags.RenderTagArgsTag;
+import org.webpieces.templating.impl.tags.ScriptTag;
+import org.webpieces.templating.impl.tags.StyleSheetTag;
 import org.webpieces.templating.impl.tags.TemplateLoaderTag;
 
 public class HtmlTagLookup {
@@ -21,7 +23,7 @@ public class HtmlTagLookup {
 	private Map<String, HtmlTag> tags = new HashMap<>();
 	
 	@Inject
-	public HtmlTagLookup(TemplateConfig config) {
+	public HtmlTagLookup(TemplateConfig config, RouterLookup lookup) {
 		put(new HtmlSetTag());
 		put(new HtmlGetTag());
 		put(new ExtendsTag());
@@ -30,6 +32,8 @@ public class HtmlTagLookup {
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());
 		put(new JsActionTag());
+		put(new StyleSheetTag(lookup));
+		put(new ScriptTag(lookup));
 		addFieldTag(config);
 	}
 

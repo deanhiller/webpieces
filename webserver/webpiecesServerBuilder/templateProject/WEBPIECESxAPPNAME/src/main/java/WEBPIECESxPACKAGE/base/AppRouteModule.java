@@ -33,9 +33,10 @@ public class AppRouteModule extends AbstractRouteModule {
 
 		//Add where all the html files exist
 		String workingDir = System.getProperty("user.dir");
-		addStaticDir("/public/", workingDir+"/public/", false);
+		addStaticDir("/assets/", workingDir+"/public/", false);
 		//Add a single file by itself(not really needed)
 		addStaticFile("/favicon.ico", "public/favicon.ico", false);
+		addStaticFile("/test.css", "public/crud/fonts.css", false);
 
 		setPageNotFoundRoute("examples/ExamplesController.notFound");
 		setInternalErrorRoute("examples/ExamplesController.internalError");

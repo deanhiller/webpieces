@@ -101,11 +101,9 @@ public class StaticFileReader {
 		// response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 
 		//On startup, we protect developers from breaking clients.  In http, all files that change
-		//must also change names/url so that clients automatically get the new version right away.
-		//This also means, we set the cache time to one year and browsers will automatically evict 
-		//when cache size is too large.  We only protect on text file changes not images so expire
-		//the cache monthly in case images change without changing names.
-		
+		//must also change the hash automatically and the %%{ }%% tag generates those hashes so the
+	    //files loaded are always the latest
+	    
 		Long timeMs = config.getStaticFileCacheTimeSeconds();
 		if(timeMs != null)
 			response.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "max-age="+timeMs));

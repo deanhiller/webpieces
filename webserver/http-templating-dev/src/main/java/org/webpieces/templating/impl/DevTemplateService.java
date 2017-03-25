@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.tools.GroovyClass;
 import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.api.TemplateService;
@@ -27,8 +28,8 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 	private HtmlTagLookup htmlTagLookup;
 
 	@Inject
-	public DevTemplateService(HtmlTagLookup htmlTagLookup, HtmlToJavaClassCompiler compiler, TemplateCompileConfig config) {
-		super(htmlTagLookup);
+	public DevTemplateService(RouterLookup urlLookup, HtmlTagLookup htmlTagLookup, HtmlToJavaClassCompiler compiler, TemplateCompileConfig config) {
+		super(urlLookup, htmlTagLookup);
 		this.htmlTagLookup = htmlTagLookup;
 		this.compiler = compiler;
 		this.config = config;
@@ -50,7 +51,7 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 			//shortcut for tests that use PlatformOverridesForTest to ensure we test the production groovy class files AND
 			//it ensures we give code coverage numbers on those class files as well.
 			Class<?> compiledTemplate = DevTemplateService.class.getClassLoader().loadClass(templateFullClassName);
-			return new TemplateImpl(htmlTagLookup, compiledTemplate);
+			return new TemplateImpl(urlLookup, htmlTagLookup, compiledTemplate);
 		}
 		
 		VirtualFile theResource = null;
@@ -74,7 +75,7 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 	
 			Class<?> compiledTemplate = createTemplate(templateFullClassName, viewSource);
 			
-			return new TemplateImpl(htmlTagLookup, compiledTemplate);
+			return new TemplateImpl(urlLookup, htmlTagLookup, compiledTemplate);
 		}
 	}
 
@@ -100,8 +101,11 @@ public class DevTemplateService extends ProdTemplateService implements TemplateS
 		}
 
 		@Override
-		public void routeIdFound(String routeId, List<String> argNames, String sourceLocation) {
-			//validate??
+		public void recordRouteId(String routeId, List<String> argNames, String sourceLocation) {
+		}
+
+		@Override
+		public void recordPath(String relativeUrlPath, String sourceLocation) {
 		}
 		
 	}

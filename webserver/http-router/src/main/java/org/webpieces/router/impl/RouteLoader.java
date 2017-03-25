@@ -222,13 +222,17 @@ public class RouteLoader {
 		return internalErrorRoute;
 	}
 
-	public String convertToUrl(String routeId, Map<String, String> args) {
-		return invoker.convertToUrl(routeId, args);
-	}
-
 	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
 		List<FilterInfo<?>> filterInfos = routerBuilder.findMatchingFilters(req.relativePath, req.isHttps);
 		return controllerFinder.createNotFoundService(m, filterInfos);
+	}
+
+	public String convertToUrl(String routeId, Map<String, String> args) {
+		return invoker.convertToUrl(routeId, args);
+	}
+	
+	public String relativeUrlToHash(String urlPath) {
+		return compressionCacheSetup.relativeUrlToHash(urlPath);
 	}
 	
 }

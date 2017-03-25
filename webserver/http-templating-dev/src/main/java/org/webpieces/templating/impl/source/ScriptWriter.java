@@ -242,15 +242,4 @@ public class ScriptWriter {
 		tagStack.set(null);
 	}
 
-	public void printPremptiveSendScript(TokenImpl token, ScriptOutputImpl sourceCode) {
-		//TODO: record the script to pre-emptively send by calling into the groovy
-		//superclass recording all these scripts to send
-		//THEN, after script is run, client can call getScriptsToPreemptivelySend and send
-		//all those scripts before the browser client asks for them(in http2 at least)
-		//BUT we must also RECORD all these on that connection and not send them a 
-		//second time which would be a waste of our CPU
-		String value = token.getCleanValue();
-		sourceCode.println("       __out.print("+value+");", token);
-	}
-
 }

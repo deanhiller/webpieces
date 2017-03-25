@@ -16,7 +16,7 @@ public class ExtendsTag implements HtmlTag {
         if(name == null)
         	throw new IllegalArgumentException("#{extends/}# tag must contain a template name like #{extends '../template.html'/}#. "+srcLocation);
         else if(body != null)
-        	throw new IllegalArgumentException("Only #{extends/}# can be used.  You cannot do #{extends}# #{/extends} as the body is not used with this tag");
+        	throw new IllegalArgumentException("Only #{extends/}# can be used.  You cannot do #{extends}# #{/extends} as the body is not used with this tag"+srcLocation);
         
         //set the supertemplate on the template for later use by the template(This is a special tag where the platform and tag work together)
         template.setSuperTemplateFilePath(name.toString());

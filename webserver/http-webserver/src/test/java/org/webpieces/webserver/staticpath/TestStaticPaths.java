@@ -1,6 +1,13 @@
 package org.webpieces.webserver.staticpath;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Properties;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,18 +28,20 @@ public class TestStaticPaths {
 
 	private RequestListener server;
 	private MockResponseSender mockResponseSender = new MockResponseSender();
+	private File cacheDir;
 
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("staticMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
+		cacheDir = webserver.getCacheDir();
 		server = webserver.start();
 	}
 
 	@Test
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
-		
+
 		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
 		
 		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
@@ -42,6 +51,60 @@ public class TestStaticPaths {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver.staticpath.app.StaticMeta");
 		response.assertContentType("text/plain; charset=utf-8");
+	}
+
+	@Test
+	public void testStaticDirWithHashGeneration() throws FileNotFoundException, IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
+
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		String hash = loadUrlEncodedHash();
+		
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("/public/fonts.css?hash="+hash);
+	}
+
+	@Test
+	public void testStaticDirWithHashLoad() throws FileNotFoundException, IOException {
+		String hash = loadUrlEncodedHash();		
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
+
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("themes.googleusercontent.com");
+		response.assertContentType("text/css; charset=utf-8");
+	}
+	
+	private String loadUrlEncodedHash() throws IOException, FileNotFoundException {
+		File meta = new File(cacheDir, "public/webpiecesMeta.properties");
+		Properties p = new Properties();
+		p.load(new FileInputStream(meta));
+		String hash = p.getProperty("/public/fonts.css");
+		String encodedHash = URLEncoder.encode(hash, StandardCharsets.UTF_8.name());
+		return encodedHash;
+	}
+	
+	@Test
+	public void testStaticDirWithBadHashDoesNotLoadMismatchFileIntoBrowser() throws FileNotFoundException, IOException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
+
+		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		
+		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
 	@Test

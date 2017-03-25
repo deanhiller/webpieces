@@ -43,7 +43,7 @@ public class WebServerConfig {
 	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 	
 	//what gets put in the cache header for static files...
-	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
+	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(255, TimeUnit.DAYS);
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;

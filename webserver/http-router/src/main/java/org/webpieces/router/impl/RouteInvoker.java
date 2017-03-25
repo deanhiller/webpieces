@@ -192,7 +192,7 @@ public class RouteInvoker {
 				String relativeUrl = result.getPathParams().get("resource");
 				resp.setRelativeFile(route.getFileSystemPath(), relativeUrl);
 			}
-			
+
 			return processor.renderStaticResponse(resp);
 		}
 		

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +22,7 @@ public class StaticRoute implements Route {
 	private boolean isOnClassPath;
 	private List<String> pathParamNames = new ArrayList<>();
 	private File targetCacheLocation;
+	private Properties hashMeta;
 
 	public StaticRoute(UrlPath url, String fileSystemPath, boolean isOnClassPath, File cachedCompressedDirectory) {
 		this.fileSystemPath = fileSystemPath;
@@ -98,6 +100,24 @@ public class StaticRoute implements Route {
 		}
 		
 		Matcher matcher = patternToMatch.matcher(subPath);
+		
+		String hash = null;
+		List<String> list = request.queryParams.get("hash");
+		if(list != null && list.size() > 0)
+			hash = list.get(0);
+		
+		if(hashMeta != null) {
+			//MUST be in production mode if we are here as only production sets hashMeta
+			
+			if(matcher.matches() && hash != null) {
+				//DO NOT allow a browser to cache a file not matching the hash because that is unfixable once 
+				//customers have that file until it expires and generally all expires should be infinite since
+				//we hash every file for you so browsers always load latest
+				String filesHash = hashMeta.getProperty(request.relativePath);
+				if(!hash.equals(filesHash))
+					return null;
+			}
+		}
 		return matcher;
 	}
 
@@ -152,6 +172,10 @@ public class StaticRoute implements Route {
 	@Override
 	public boolean isHttpsRoute() {
 		throw new UnsupportedOperationException("This method is not necessary as there are no filters for static routes at this time");
+	}
+
+	public void setHashMeta(Properties hashMeta) {
+		this.hashMeta = hashMeta;
 	}
 
 }

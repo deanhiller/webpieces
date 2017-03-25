@@ -68,7 +68,7 @@ public class TemplateCompilerPlugin implements Plugin<ProjectInternal> {
             compile.setSource(templateSourceSet.getTemplatesSrc());
 
             project.getTasks().getByName(sourceSet.getClassesTaskName()).dependsOn(compileTaskName);
-        }    	
+        }
     }
 
 }

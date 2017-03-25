@@ -47,6 +47,14 @@ public abstract class AbstractRouterService implements RoutingService {
 		return routeLoader.convertToUrl(routeId, args);
 	}
 	
+	@Override
+	public String relativeUrlToHash(String urlPath) {
+		if(!urlPath.startsWith("/"))
+			urlPath = "/"+urlPath;
+		
+		return routeLoader.relativeUrlToHash(urlPath);
+	}
+	
 	protected void runStartupHooks(Injector injector) {
 		log.info("Running startup hooks for server");
 		

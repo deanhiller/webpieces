@@ -15,4 +15,9 @@ public class DevCompressionCacheSetup implements CompressionCacheSetup {
 	public void setupCache(List<StaticRoute> staticRoutes) {
 		log.info("SHORT CIRCUIT CompressionCacheSetup since we are running in development mode");
 	}
+
+	@Override
+	public String relativeUrlToHash(String path) {
+		return null;
+	}
 }

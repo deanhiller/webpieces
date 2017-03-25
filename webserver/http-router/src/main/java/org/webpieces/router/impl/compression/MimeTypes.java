@@ -59,5 +59,11 @@ public class MimeTypes {
 			this.mime = mime;
 			this.htmlResponsePayloadEncoding = htmlResponsePayloadEncoding;
 		}
+
+		@Override
+		public String toString() {
+			return "MimeTypeResult [mime=" + mime + ", htmlResponsePayloadEncoding=" + htmlResponsePayloadEncoding
+					+ "]";
+		}
     }
 }

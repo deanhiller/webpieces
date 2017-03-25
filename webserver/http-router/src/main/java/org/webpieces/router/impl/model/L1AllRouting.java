@@ -20,7 +20,7 @@ public class L1AllRouting {
 	private final L2DomainRoutes main = new L2DomainRoutes(null);
 	
 	private final List<RouteMeta> staticRoutes = new ArrayList<>();
-	
+
 	public L2DomainRoutes getMainRoutes() {
 		return main;
 	}
@@ -73,5 +73,6 @@ public class L1AllRouting {
 
 	public List<Route> getStaticRoutes() {
 		return staticRoutes.stream().map(m -> m.getRoute()).collect(Collectors.toList());
-	}	
+	}
+
 }

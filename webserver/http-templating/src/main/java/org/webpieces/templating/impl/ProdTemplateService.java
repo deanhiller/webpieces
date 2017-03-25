@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.HtmlTagLookup;
-import org.webpieces.templating.api.ReverseUrlLookup;
+import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateService;
@@ -18,9 +18,11 @@ public class ProdTemplateService implements TemplateService {
 
 	private HtmlTagLookup lookup;
 	private boolean isInitialized = false;
+	protected RouterLookup urlLookup;
 
 	@Inject
-	public ProdTemplateService(HtmlTagLookup lookup) {
+	public ProdTemplateService(RouterLookup urlLookup, HtmlTagLookup lookup) {
+		this.urlLookup = urlLookup;
 		this.lookup = lookup;
 	}
 	
@@ -44,26 +46,26 @@ public class ProdTemplateService implements TemplateService {
 		ClassLoader cl = getClass().getClassLoader();
 		try {
 			Class<?> compiledTemplate = cl.loadClass(fullClassName);
-			return new TemplateImpl(lookup, compiledTemplate);
+			return new TemplateImpl(urlLookup, lookup, compiledTemplate);
 		} catch(ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public final void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs, ReverseUrlLookup urlLookup) {
-		String result = runTemplate(template, pageArgs, new HashMap<>(), urlLookup);
+	public final void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
+		String result = runTemplate(template, pageArgs, new HashMap<>());
 		out.write(result);
 	}
 	
 	@Override
-    public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps, ReverseUrlLookup urlLookup) {
+    public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);
 		StringWriter out = new StringWriter();
 		PrintWriter writer = new PrintWriter(out);
 		copy.put(GroovyTemplateSuperclass.OUT_PROPERTY_NAME, writer);
-		TemplateResult info = template.run(copy, setTagProps, urlLookup);
+		TemplateResult info = template.run(copy, setTagProps);
 
 		//cache results of writer into templateProps for body so that template can use #{get 'body'}#
 		Map<Object, Object> setTagProperties = info.getSetTagProperties();
@@ -75,7 +77,7 @@ public class ProdTemplateService implements TemplateService {
 		try {
 			if(superTemplateFilePath != null) {
 				Template superTemplate = loadTemplate(superTemplateFilePath);
-				return runTemplate(superTemplate, pageArgs, setTagProperties, urlLookup);
+				return runTemplate(superTemplate, pageArgs, setTagProperties);
 			} else
 				return out.toString();
 		} catch(Exception e) {

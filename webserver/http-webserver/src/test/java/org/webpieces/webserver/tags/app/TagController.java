@@ -56,6 +56,10 @@ public class TagController {
 	public Action formTag() {
 		return Actions.renderThis("user", "Dean");
 	}
+
+	public Action stylesheetTag() {
+		return Actions.renderThis();
+	}
 	
 	public Redirect postSomething() {
 		return Actions.redirect(TagsRouteId.FIELD_TAG);

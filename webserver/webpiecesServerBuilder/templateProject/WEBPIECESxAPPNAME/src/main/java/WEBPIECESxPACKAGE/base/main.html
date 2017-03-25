@@ -7,20 +7,24 @@
 	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	
     <!-- Styles -->
-    <link rel="stylesheet" href="%%{'/public/crud/css/bootstrap.css'}%%"  />
-    <link rel="stylesheet" href="%%{'/public/crud/css/theme.css'}%%" type="text/css" />
-    <link rel="stylesheet" href="%%{'/public/crud/css/index.css'}%%" type="text/css" media="screen" />
-    <link rel="stylesheet" href="%%{'/public/crud/css/lib/animate.css'}%%" type="text/css" media="screen, projection">
-    <link rel="stylesheet" href="%%{'/public/crud/css/about.css'}%%" type="text/css" media="screen" />
-	<link rel="stylesheet" href="%%{'/public/crud/css/sign-in.css'}%%" type="text/css" media="screen" />
-	<link rel="stylesheet" href="%%{'/public/crud/css/sign-up.css'}%%" type="text/css" media="screen" />
-	<link rel="stylesheet" href="%%{'/public/crud/css/lib/flexslider.css'}%%" type="text/css" media="screen" />
-	<link rel="stylesheet" href="%%{'/public/crud/css/contact.css'}%%" type="text/css" media="screen" />
-	<link rel="stylesheet" href="%%{'/public/crud/css/blog.css'}%%" type="text/css" media="screen" />
-	<link rel="stylesheet" href="%%{'/public/crud/css/blogpost.css'}%%" type="text/css" media="screen" />
-    *{ <link href="%%{'/public/crud/fonts.css'}%%" rel='stylesheet' type='text/css'> }*
-    <script src="%%{'/public/crud/js/jquery/jquery-1.9.1.js'}%%" *{ charset="${_response_encoding}" }*></script>
-	<link rel="stylesheet" href="%%{'/public/crud/overrides.css'}%%" />
+    
+    #{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}#
+    #{stylesheet href:'%[/assets/crud/css/theme.css]%'/}#
+    #{stylesheet href:'%[/assets/crud/css/index.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/lib/animate.css]%', media:'screen, projection'/}#
+    #{stylesheet href:'%[/assets/crud/css/about.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/sign-in.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/sign-up.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/lib/flexslider.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/contact.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/blog.css]%', media:'screen'/}#
+    #{stylesheet href:'%[/assets/crud/css/blogpost.css]%', media:'screen'/}#
+    
+    *{ <link href="%%{'/assets/crud/fonts.css'}%%" rel='stylesheet' type='text/css'> }*
+	
+    #{stylesheet href:'%[/assets/crud/overrides.css]%'/}#
+	
+	#{script src:'%[/assets/crud/js/jquery/jquery-1.9.1.js]%'/}#
 	
 	
 	*{
@@ -54,7 +58,7 @@
       <div class="navbar-inner">
         <div class="container">
             <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            	<img src="%%{'/public/crud/resources/pulldown.png'}%%"/>
+            	<img src="%%{'/assets/crud/resources/pulldown.png'}%%"/>
             	*{<span class="icon-chevron-down"></span>}*
             </a>
             <a class="brand" href="@{Marketing.index()}">
@@ -158,7 +162,7 @@
                             <span></span>
                         </div>
                         <div class="author">
-                            <img src="%%{/public/crud/img/user-display.png}%%" />
+                            <img src="%%{/assets/crud/img/user-display.png}%%" />
                             <div class="name">Alejandra Galvan Castillo</div>
                             <div class="info">
                                 Puzzing
@@ -227,11 +231,11 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="%%{'/public/crud/js/bootstrap/bootstrap.min.js'}%%"></script>
-    <script src="%%{'/public/crud/js/bootstrap/theme.js'}%%"></script>
-    <script src="%%{'/public/crud/js/bootstrap/flexslider.js'}%%"></script>
-    <script src="%%{'/public/crud/js/bootstrap/index-slider.js'}%%"  ></script>	
-    <script src="%%{'/public/crud/js/bootstrap/bootstrap-datepicker.js'}%%" ></script> 	
+    #{script src:'%[/assets/crud/js/bootstrap/bootstrap.min.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/theme.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/flexslider.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/index-slider.js]%'/}#
+    #{script src:'%[/assets/crud/js/bootstrap/bootstrap-datepicker.js]%'/}#
     
     <script type="text/javascript">
     	/* enable tooltips */

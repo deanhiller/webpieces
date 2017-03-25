@@ -7,7 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -28,6 +30,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	private MimeTypes mimeTypes;
 	private List<String> encodings = new ArrayList<>();
 	private FileUtil fileUtil;
+	private Map<String, String> pathToHash = new HashMap<>();
 
 	@Inject
 	public ProdCompressionCacheSetup(CompressionLookup lookup, RouterConfig config, MimeTypes mimeTypes, FileUtil fileUtil) {
@@ -61,15 +64,16 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		if(route.isFile()) {
 			File file = new File(route.getFileSystemPath());
 			log.info("setting up cache for file="+file);
-			maybeAddFileToCache(p, file, new File(routeCache, file.getName()+".gz"), route.getFullPath());
-			return;
+			File destination = new File(routeCache, file.getName()+".gz");
+			maybeAddFileToCache(p, file, destination, route.getFullPath());
+		} else {
+			File directory = new File(route.getFileSystemPath());
+			log.info("setting up cache for directory="+directory);
+			String urlPrefix = route.getFullPath();
+			transferAndCompress(p, directory, routeCache, urlPrefix);
 		}
-
-		File directory = new File(route.getFileSystemPath());
-		log.info("setting up cache for directory="+directory);
-		String urlPrefix = route.getFullPath();
-		transferAndCompress(p, directory, routeCache, urlPrefix);
 		
+		route.setHashMeta(p);
 		store(metaFile, p);
 	}
 
@@ -109,7 +113,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		}
 	}
 
-	private void maybeAddFileToCache(Properties p, File src, File destination, String urlPath) {
+	private void maybeAddFileToCache(Properties properties, File src, File destination, String urlPath) {
 		String name = src.getName();
 		int indexOf = name.lastIndexOf(".");
 		if(indexOf < 0)
@@ -126,9 +130,10 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		long lastModified = destination.lastModified();
 		//if hash is not there, the user may have changed the url so need to recalculate new hashes for new keys
 		//There is a test for this...
-		String previousHash = p.getProperty(urlPath); 
+		String previousHash = properties.getProperty(urlPath); 
 		if(lastModified > lastModifiedSrc && previousHash != null) {
 			log.info("timestamp later than src so skipping writing to="+destination);
+			pathToHash.put(urlPath, previousHash);
 			return; //no need to check anything as destination was written after this source file
 		}
 		
@@ -137,27 +142,30 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 				String hash = Security.hash(allData);
 				
 				if(previousHash != null) {
-					if(!hash.equals(previousHash))
-						throw new IllegalStateException("Your app modified the file="+src.getAbsolutePath()+" from the last release BUT"
-								+ " you did not change the name of the file nor the url path meaning your customer will never get the new version"
-								+ " until the cache expires which can be a month out.  (Modify the names of files/url path when changing them)\n"
-								+ "existing compressed file="+destination+"\nprevious hash="+previousHash+" currentHash="+hash);
-					
-					else if(!destination.exists())
-						throw new IllegalStateException("Previously existing file is missing="+destination+" Your file cache was corrupted.  If you"
-								+ " delete the cache you risk users not getting new files if css or js files were changed");
+					if(hash.equals(previousHash)) {
+						if(!destination.exists())
+							throw new IllegalStateException("Previously existing file is missing="+destination+" Your file cache was "
+									+ "corrupted.  You will need to delete the whole cache directory");
 
-					log.info("Previous file is the same, no need to compress to="+destination);
-					
-					return;
+						log.info("Previous file is the same, no need to compress to="+destination+" hash="+hash);
+						pathToHash.put(urlPath, previousHash);
+						return;
+					}
 				}
 
 				//open, write, and close file with new data
 				writeFile(destination, compression, allData, urlPath, src);
 				//if file writing succeeded, set the hash
-				p.setProperty(urlPath, hash);
-
-				log.info("compressed "+src.length()+" bytes to="+destination.length()+" to file="+destination);
+				properties.setProperty(urlPath, hash);
+				
+				String existing = pathToHash.get(urlPath);
+				if(existing != null)
+					throw new IllegalStateException("this urlpath="+urlPath+" is referencing two files.  hash1="+existing+" hash2="+hash
+							+"  You should search your logs for this hash");
+					
+				pathToHash.put(urlPath, hash);
+				
+				log.info("compressed "+src.length()+" bytes to="+destination.length()+" to file="+destination+" hash="+hash);
 				
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
@@ -185,5 +193,10 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		boolean success = directoryToCreate.mkdirs();
 		if(!success)
 			throw new RuntimeException("Could not create cache directory="+directoryToCreate);
+	}
+
+	@Override
+	public String relativeUrlToHash(String path) {
+		return pathToHash.get(path);
 	}
 }

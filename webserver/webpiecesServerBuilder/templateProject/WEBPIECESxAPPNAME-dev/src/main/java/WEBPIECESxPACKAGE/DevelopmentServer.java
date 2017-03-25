@@ -70,13 +70,6 @@ public class DevelopmentServer {
 		if(usePortZero) {
 			config.setHttpPort(0);
 			config.setHttpsPort(0);
-		} else {
-			//It is very important to run the dev server on different ports than the production server as if
-			//a developer runs the production server locally, it will tell the browser to cache stuff and when
-			//the developer goes back to development mode, they will notice updates to *.js and *.css files no
-			//longer working anymore.  Instead, run production on :8080 and dev on :9000
-			config.setHttpPort(9000);
-			config.setHttpsPort(9443);
 		}
 		
 		//It is very important to turn off caching or developers will get very confused when they

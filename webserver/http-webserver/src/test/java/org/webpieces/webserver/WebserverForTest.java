@@ -25,8 +25,9 @@ import com.google.inject.Module;
 public class WebserverForTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(WebserverForTest.class);
+	private File cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestCache");
 	public static final Charset CHAR_SET_TO_USE = StandardCharsets.UTF_8;
-	
+
 	public static void main(String[] args) throws InterruptedException {
 		new WebserverForTest(null, null, false, null).start();
 		
@@ -58,7 +59,6 @@ public class WebserverForTest {
 			httpsPort = 0;
 		}
 		
-		File cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestCache");
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(testConfig.getPlatformOverrides())
@@ -79,6 +79,7 @@ public class WebserverForTest {
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
+	
 	public void configure(ServerSocketChannel channel) throws SocketException {
 		channel.socket().setReuseAddress(true);
 		//channel.socket().setSoTimeout(timeout);
@@ -95,6 +96,10 @@ public class WebserverForTest {
 
 	public TCPServerChannel getUnderlyingHttpChannel() {
 		return webServer.getUnderlyingHttpChannel();
+	}
+
+	public File getCacheDir() {
+		return cacheDir;
 	}
 
 }

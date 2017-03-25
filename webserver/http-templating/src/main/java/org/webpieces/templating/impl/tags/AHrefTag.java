@@ -18,7 +18,7 @@ public class AHrefTag implements HtmlTag {
         if(url == null)
         	throw new IllegalArgumentException("#{a/}# tag must contain an href argument name like #{a href:@ROUTE[:]}#. "+srcLocation);
         else if(body == null)
-        	throw new IllegalArgumentException("You must have an open and close tag(ie.  #{a}# and #{/a}#).  #{a/}# is not allowed");
+        	throw new IllegalArgumentException("You must have an open and close tag(ie.  #{a}# and #{/a}#).  #{a/}# is not allowed"+srcLocation);
 
         out.print("<a href=\"" + url + "\"" + TemplateUtil.serialize(args, "href") + ">");
         out.print(ClosureUtil.toString(body));

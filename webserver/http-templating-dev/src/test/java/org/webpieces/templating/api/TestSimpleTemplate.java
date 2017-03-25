@@ -19,7 +19,10 @@ public class TestSimpleTemplate {
 
 	@Before
 	public void setup() {
-		Injector injector = Guice.createInjector(new DevTemplateModule(new TemplateCompileConfig(false)));
+		Injector injector = Guice.createInjector(
+				new DevTemplateModule(new TemplateCompileConfig(false)),
+				new RouterLookupModule()
+				);
 		svc = injector.getInstance(DevTemplateService.class);
 	}
 	
@@ -28,12 +31,12 @@ public class TestSimpleTemplate {
 		Template template = svc.loadTemplate("/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 		StringWriter out = new StringWriter();
-		svc.runTemplate(template, out, properties, null);
+		svc.runTemplate(template, out, properties);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		svc.runTemplate(template, new StringWriter(), args, null);
+		svc.runTemplate(template, new StringWriter(), args);
 		
 		System.out.println("HTML=\n"+out.toString());
 	}
@@ -43,12 +46,12 @@ public class TestSimpleTemplate {
 		Template template = svc.loadTemplate("/org/webpieces/mytestfile.html");
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 		StringWriter out = new StringWriter();
-		svc.runTemplate(template, out, properties, null);
+		svc.runTemplate(template, out, properties);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		svc.runTemplate(template, new StringWriter(), args, null);
+		svc.runTemplate(template, new StringWriter(), args);
 		
 		String html = out.toString();
 		Assert.assertTrue("Html was="+html, html.contains("Hi there, my name is Dean Hiller and my favorite color is green"));

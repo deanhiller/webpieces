@@ -13,6 +13,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
+import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -41,6 +42,8 @@ public class WebServerModule implements Module {
 		binder.bind(WebServer.class).to(WebServerImpl.class);
 
 		binder.bind(WebServerConfig.class).toInstance(config);
+		
+		binder.bind(RouterLookup.class).to(RouterLookupProxy.class).asEagerSingleton();
 	}
 
 	@Provides

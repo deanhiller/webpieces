@@ -17,6 +17,8 @@ public interface CompileCallback {
 	 * @param argNames
 	 * @param sourceLocation
 	 */
-	void routeIdFound(String routeId, List<String> argNames, String sourceLocation);
+	void recordRouteId(String routeId, List<String> argNames, String sourceLocation);
+
+	void recordPath(String relativeUrlPath, String sourceLocation);
 
 }
