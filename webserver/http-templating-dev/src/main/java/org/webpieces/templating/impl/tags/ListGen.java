@@ -1,10 +1,16 @@
 package org.webpieces.templating.impl.tags;
 
-import org.webpieces.templating.api.CompileCallback;
+import javax.inject.Inject;
+
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 
 public class ListGen extends ParseTagArgs {
+
+	@Inject
+	public ListGen(RoutePathTranslator callback) {
+		super(callback);
+	}
 
 	@Override
 	public String getName() {
@@ -12,8 +18,8 @@ public class ListGen extends ParseTagArgs {
 	}
 
 	@Override
-	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
-		super.generateStartAttrs(sourceCode, token, uniqueId, callback);
+	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId) {
+		super.generateStartAttrs(sourceCode, token, uniqueId);
 		
 		String tagBody = token.getCleanValue();
 		if(!tagBody.contains("items:"))
@@ -69,7 +75,7 @@ public class ListGen extends ParseTagArgs {
 	}
 
 	@Override
-	public void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
+	public void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId) {
 		throw new UnsupportedOperationException("#{list}# tag must have body and didn't. "+token.getSourceLocation(true));
 	}
 

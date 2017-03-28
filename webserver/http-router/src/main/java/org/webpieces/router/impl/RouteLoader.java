@@ -19,6 +19,7 @@ import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.RouteModule;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
+import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.model.AbstractRouteBuilder;
@@ -231,7 +232,7 @@ public class RouteLoader {
 		return invoker.convertToUrl(routeId, args);
 	}
 	
-	public String relativeUrlToHash(String urlPath) {
+	public FileMeta relativeUrlToHash(String urlPath) {
 		return compressionCacheSetup.relativeUrlToHash(urlPath);
 	}
 	

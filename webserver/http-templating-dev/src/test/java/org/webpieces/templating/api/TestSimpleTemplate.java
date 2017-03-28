@@ -28,30 +28,30 @@ public class TestSimpleTemplate {
 	
 	@Test
 	public void testBasicTemplate() throws IOException {
-		Template template = svc.loadTemplate("/mytestfile.html");
+		String templateName = "/mytestfile.html";
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 		StringWriter out = new StringWriter();
-		svc.runTemplate(template, out, properties);
+		svc.loadAndRunTemplate(templateName, out, properties);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		svc.runTemplate(template, new StringWriter(), args);
+		svc.loadAndRunTemplate(templateName, new StringWriter(), args);
 		
 		System.out.println("HTML=\n"+out.toString());
 	}
 
 	@Test
 	public void testWithPackage() throws IOException {
-		Template template = svc.loadTemplate("/org/webpieces/mytestfile.html");
+		String templateName = "/org/webpieces/mytestfile.html";
 		Map<String, Object> properties = createArgs(new UserBean("Dean Hiller"));
 		StringWriter out = new StringWriter();
-		svc.runTemplate(template, out, properties);
+		svc.loadAndRunTemplate(templateName, out, properties);
 		
 		//NOTE: We should be able to run with UserBean2 as well(this shows if
 		//a Class was recompiled on-demand with our runtimecompiler we won't have issues in development mode
 		Map<String, Object> args = createArgs(new UserBean2("Cooler Guy"));
-		svc.runTemplate(template, new StringWriter(), args);
+		svc.loadAndRunTemplate(templateName, new StringWriter(), args);
 		
 		String html = out.toString();
 		Assert.assertTrue("Html was="+html, html.contains("Hi there, my name is Dean Hiller and my favorite color is green"));

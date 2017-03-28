@@ -10,9 +10,12 @@ import com.google.inject.ImplementedBy;
 @ImplementedBy(ProdTemplateService.class)
 public interface TemplateService {
 
-	Template loadTemplate(String templatePath);
-
-	void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs);
+	void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs);
 	
-	String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps);
+	//Template loadTemplate(String templatePath);
+
+	//void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs);
+	
+	String loadAndRunTemplate(String templatePath, Map<String, Object> pageArgs, Map<Object, Object> setTagProps);
+	//String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps);
 }

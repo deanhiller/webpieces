@@ -40,6 +40,7 @@ public class TestStylesheetScriptTags {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("<img alt=`hi` src=`public/pic.jpg`>".replace('`', '"'));
 		response.assertContains("<link rel=`stylesheet` type=`text/css` href=`/public/fonts.css?hash=kxR6cr1IXKXcWyOAiVdRAQ%3D%3D` />".replace('`', '"'));
 		response.assertContains("<script src=`public/jquery.js?hash=BIgcZnlh8tRzX%2BGIG5TESw%3D%3D`".replace('`', '"'));
 	}

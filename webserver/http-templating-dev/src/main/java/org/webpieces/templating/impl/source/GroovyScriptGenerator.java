@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.templating.api.CompileCallback;
 
 public class GroovyScriptGenerator {
 
@@ -20,7 +19,9 @@ public class GroovyScriptGenerator {
 		this.creator = creator;
 	}
 	
-	public ScriptOutputImpl generate(String filePath, String source, String fullClassName, CompileCallback callbacks) {
+	public ScriptOutputImpl generate(String filePath, String source, String fullClassName) {
+		creator.init();
+		
 		long start = System.currentTimeMillis();
 		source = source.replace("\r", "");
 		
@@ -41,7 +42,7 @@ public class GroovyScriptGenerator {
 			// Class header
 			creator.printHead(sourceCode, packageStr, className);
 	
-			generateBody(sourceCode, tokens, callbacks);
+			generateBody(sourceCode, tokens);
 	
 			// Class end
 			creator.printEnd(sourceCode);
@@ -57,7 +58,7 @@ public class GroovyScriptGenerator {
 		return sourceCode;
 	}
 
-	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens, CompileCallback callbacks) {
+	private void generateBody(ScriptOutputImpl sourceCode, List<TokenImpl> tokens) {
 		for(int i = 0; i < tokens.size(); i++) {
 			TokenImpl token = tokens.get(i);
 			TokenImpl previousToken = null;
@@ -75,6 +76,9 @@ public class GroovyScriptGenerator {
 			case SCRIPT:
 				creator.printScript(token, sourceCode);
 				break;
+			case FILE_VERIFY:
+				creator.printFilePath(token, sourceCode);				
+				break;
 			case EXPR:
 				creator.printExpression(token, sourceCode);
 				break;
@@ -82,19 +86,19 @@ public class GroovyScriptGenerator {
 				creator.printMessage(token, sourceCode);
 				break;
 			case ACTION:
-				creator.printAction(token, sourceCode, false, callbacks);
+				creator.printAction(token, sourceCode, false);
 				break;
 			case ABSOLUTE_ACTION:
-				creator.printAction(token, sourceCode, true, callbacks);
+				creator.printAction(token, sourceCode, true);
 				break;
 			case COMMENT:
 				creator.unprintUpToLastNewLine();
 				break;
 			case START_END_TAG:
-				creator.printStartEndTag(token, sourceCode, callbacks);
+				creator.printStartEndTag(token, sourceCode);
 				break;
 			case START_TAG:
-				creator.printStartTag(token, previousToken, sourceCode, callbacks);
+				creator.printStartTag(token, previousToken, sourceCode);
 				break;
 			case END_TAG:
 				creator.printEndTag(token, sourceCode);

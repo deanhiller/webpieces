@@ -6,12 +6,11 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.AbstractTag;
-import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.templating.impl.tags.ParseTagArgs;
+import org.webpieces.templating.impl.tags.RoutePathTranslator;
 import org.webpieces.templating.impl.tags.TagGen;
 
 public class ScriptWriter {
@@ -26,13 +25,29 @@ public class ScriptWriter {
 	private HtmlTagLookup htmlTagLookup;
 	private UniqueIdGenerator uniqueIdGen;
 	private TemplateCompileConfig config;
+	private RoutePathTranslator translator;
+	private boolean initialized;
 
 	@Inject
-	public ScriptWriter(HtmlTagLookup htmlTagLookup, GenLookup lookup, UniqueIdGenerator generator, TemplateCompileConfig config) {
+	public ScriptWriter(
+			HtmlTagLookup htmlTagLookup, 
+			GenLookup lookup, 
+			UniqueIdGenerator generator,
+			RoutePathTranslator translator,
+			TemplateCompileConfig config) {
 		this.htmlTagLookup = htmlTagLookup;
 		generatorLookup = lookup;
 		this.uniqueIdGen = generator;
+		this.translator = translator;
 		this.config = config;
+	}
+	
+	public void init() {
+		if(initialized)
+			return;
+		
+		initialized = true;
+		generatorLookup.init();
 	}
 	
 	public void printHead(ScriptOutputImpl sourceCode, String packageStr, String className) {
@@ -157,13 +172,13 @@ public class ScriptWriter {
 		}
 	}
 
-	public void printAction(TokenImpl token, ScriptOutputImpl sourceCode, boolean isAbsolute, CompileCallback callbacks) {
+	public void printAction(TokenImpl token, ScriptOutputImpl sourceCode, boolean isAbsolute) {
 		if(isAbsolute)
 			throw new UnsupportedOperationException("not supported yet.  Need to modify to use the Host header as input as the domain");
 
 		String expr = token.getCleanValue();
 
-		String groovySnippet = ParseTagArgs.translateRouteId(expr, token, callbacks);
+		String groovySnippet = translator.translateRouteId(expr, token);
 		//fetchUrl('VERBATIM_ROUTE_ID', [:], 'at org.webpieces.webserver.tags.app.aHrefTag.html(aHrefTag.html:5)')
 		sourceCode.println("       __out.print("+groovySnippet+");", token);
 	}
@@ -175,7 +190,7 @@ public class ScriptWriter {
 	 * @param sourceCode
 	 * @param callbacks 
 	 */
-	public void printStartEndTag(TokenImpl token, ScriptOutputImpl sourceCode, CompileCallback callbacks) {
+	public void printStartEndTag(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String expr = token.getCleanValue();
 		int indexOfSpace = expr.indexOf(" ");
 		String tagName = expr;
@@ -187,15 +202,15 @@ public class ScriptWriter {
 		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
-			generator.generateStartAndEnd(sourceCode, token, id, callbacks);
+			generator.generateStartAndEnd(sourceCode, token, id);
 		} else if(htmltag == null) {
 			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation(true));
 		} else {
-			new TagGen(tagName, token).generateStartAndEnd(sourceCode, token, id, callbacks);
+			new TagGen(tagName, token, translator).generateStartAndEnd(sourceCode, token, id);
 		}
 	}
 
-	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode, CompileCallback callbacks) {
+	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
 		String tagName = token.getTagName();
 
 		GroovyGen generator = generatorLookup.lookup(tagName, token);
@@ -211,11 +226,11 @@ public class ScriptWriter {
 				throw new IllegalArgumentException("Unknown tag=#{"+tagName+"}# OR you didn't add '"
 							+tagName+"' to list of customTags in build.gradle file. "+token.getSourceLocation(true));
 
-			generator = new TagGen(tagName, token);
+			generator = new TagGen(tagName, token, translator);
 		}
 
 		int id = uniqueIdGen.generateId();
-		generator.generateStart(sourceCode, token, id, callbacks);
+		generator.generateStart(sourceCode, token, id);
 		tagStack.get().push(new TagState(token, generator, id));
 	}
 
@@ -240,6 +255,18 @@ public class ScriptWriter {
 
 	public void cleanup() {
 		tagStack.set(null);
+	}
+
+	public void printFilePath(TokenImpl token, ScriptOutputImpl sourceCode) {
+		//TODO: record the script to pre-emptively send by calling into the groovy
+		//superclass recording all these scripts to send
+		//THEN, after script is run, client can call getScriptsToPreemptivelySend and send
+		//all those scripts before the browser client asks for them(in http2 at least)
+		//BUT we must also RECORD all these on that connection and not send them a 
+		//second time which would be a waste of our CPU
+		String value = token.getCleanValue();
+		String path = translator.recordPath(value, token.getSourceLocation(false));
+		sourceCode.println("       __out.print(\""+path+"\");", token);
 	}
 
 }

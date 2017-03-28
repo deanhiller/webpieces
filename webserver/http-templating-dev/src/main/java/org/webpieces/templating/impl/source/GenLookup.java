@@ -3,6 +3,8 @@ package org.webpieces.templating.impl.source;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.impl.tags.ElseIfGen;
 import org.webpieces.templating.impl.tags.ElseGen;
@@ -14,14 +16,17 @@ public class GenLookup {
 
 	private Map<String, GroovyGen> generators = new HashMap<>();
 	
-	public GenLookup() {
+	@Inject
+	private ListGen listGen;
+	
+	protected void init() {
 		put(new VerbatimGen());
 		put(new IfGen());
 		put(new ElseIfGen());
 		put(new ElseGen());
-		put(new ListGen());
+		put(listGen);
 	}
-	
+
 	protected void put(GroovyGen generator) {
 		generators.put(generator.getName(), generator);
 	}

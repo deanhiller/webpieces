@@ -8,6 +8,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
+import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -48,7 +49,7 @@ public abstract class AbstractRouterService implements RoutingService {
 	}
 	
 	@Override
-	public String relativeUrlToHash(String urlPath) {
+	public FileMeta relativeUrlToHash(String urlPath) {
 		if(!urlPath.startsWith("/"))
 			urlPath = "/"+urlPath;
 		

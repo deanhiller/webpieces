@@ -1,9 +1,8 @@
 package org.webpieces.webserver.test;
 
 import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.templating.api.TemplateService;
-import org.webpieces.templating.impl.DevTemplateService;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -31,8 +30,8 @@ public class PlatformOverridesForTest implements Module {
                 //That said, there is a setting when this test runs in gradle that skips this step and runs the
                 //production groovy *.class file that will be run in production (ie. the test run in the IDE
                 //and run in gradle differ just a little :( )
-		binder.bind(TemplateService.class).to(DevTemplateService.class);
-		binder.bind(TemplateCompileConfig.class).toInstance(templateConfig);
+		
+		binder.install(new DevTemplateModule(templateConfig));
 	}
 
 	/**

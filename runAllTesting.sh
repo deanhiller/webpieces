@@ -42,7 +42,7 @@ unzip mytest.zip
 test_result=$?
 if [ $test_result -eq 0 ]
 then
-  echo "Successfully Unzipped Production Server "
+  echo "Successfully Unzipped Production Server to `pwd`"
 else
   echo "Unzip Production server FAILED"
   exit $test_result

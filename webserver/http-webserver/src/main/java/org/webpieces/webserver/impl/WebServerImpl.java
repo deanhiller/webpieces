@@ -22,6 +22,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RoutingService;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.routing.Nullable;
+import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -100,12 +101,12 @@ public class WebServerImpl implements WebServer {
 		try (InputStream in = url.openStream();
 			 InputStreamReader reader = new InputStreamReader(in);
 			 BufferedReader bufReader = new BufferedReader(reader)) {
-			loopThroughFile(bufReader);
+			loopThroughFile(url, bufReader);
 		}
 		log.info("Validation of routeIds complete");
 	}
 
-	private void loopThroughFile(BufferedReader bufReader) throws IOException {
+	private void loopThroughFile(URL url, BufferedReader bufReader) throws IOException {
 		RouteNotFoundException firstException = null;
 		int count = 1;
 		String errorMsg = "";
@@ -126,7 +127,7 @@ public class WebServerImpl implements WebServer {
 				if(ProdTemplateModule.ROUTE_TYPE.equals(type)) {
 					processRoute(line, location, meta);
 				} else if(ProdTemplateModule.PATH_TYPE.equals(type)) {
-					processPath(line, location, meta);
+					processPath(url, line, location, meta);
 				} else 
 					throw new IllegalStateException("wrong type.  corrupt line="+line);				
 			} catch(RouteNotFoundException e) {
@@ -141,11 +142,11 @@ public class WebServerImpl implements WebServer {
 			throw new RuntimeException("There were one or more invalid routeIds in html files="+errorMsg, firstException);
 	}
 
-	private void processPath(String line, String location, String urlPath) throws UnsupportedEncodingException {
+	private void processPath(URL url, String line, String location, String urlPath) throws UnsupportedEncodingException {
 		String path = URLDecoder.decode(urlPath, StandardCharsets.UTF_8.name());
-		String hash = routingService.relativeUrlToHash(path);
-		if(hash == null)
-			throw new RouteNotFoundException("backing file for urlPath="+path+" was not found or route is missing to connect url to path");
+		FileMeta meta = routingService.relativeUrlToHash(path);
+		if(meta == null)
+			throw new RouteNotFoundException("backing file for urlPath="+path+" was not found or route is missing to connect url to path.  url="+url);
 	}
 
 	private void processRoute(String line, String location, String meta) throws UnsupportedEncodingException {

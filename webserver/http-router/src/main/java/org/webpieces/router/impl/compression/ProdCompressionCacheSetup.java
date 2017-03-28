@@ -30,7 +30,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	private MimeTypes mimeTypes;
 	private List<String> encodings = new ArrayList<>();
 	private FileUtil fileUtil;
-	private Map<String, String> pathToHash = new HashMap<>();
+	private Map<String, FileMeta> pathToFileMeta = new HashMap<>();
 
 	@Inject
 	public ProdCompressionCacheSetup(CompressionLookup lookup, RouterConfig config, MimeTypes mimeTypes, FileUtil fileUtil) {
@@ -116,14 +116,18 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	private void maybeAddFileToCache(Properties properties, File src, File destination, String urlPath) {
 		String name = src.getName();
 		int indexOf = name.lastIndexOf(".");
-		if(indexOf < 0)
+		if(indexOf < 0) {
+			pathToFileMeta.put(urlPath, new FileMeta());
 			return; //do nothing
+		}
 		String extension = name.substring(indexOf+1);
 		
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, "application/octet-stream");
 		Compression compression = lookup.createCompressionStream(encodings, extension, mimeType);
-		if(compression == null)
+		if(compression == null) {
+			pathToFileMeta.put(urlPath, new FileMeta());
 			return;
+		}
 
 		//before we do the below, do a quick timestamp check to avoid reading in the files when not necessary
 		long lastModifiedSrc = src.lastModified();
@@ -133,7 +137,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		String previousHash = properties.getProperty(urlPath); 
 		if(lastModified > lastModifiedSrc && previousHash != null) {
 			log.info("timestamp later than src so skipping writing to="+destination);
-			pathToHash.put(urlPath, previousHash);
+			pathToFileMeta.put(urlPath, new FileMeta(previousHash));
 			return; //no need to check anything as destination was written after this source file
 		}
 		
@@ -148,7 +152,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 									+ "corrupted.  You will need to delete the whole cache directory");
 
 						log.info("Previous file is the same, no need to compress to="+destination+" hash="+hash);
-						pathToHash.put(urlPath, previousHash);
+						pathToFileMeta.put(urlPath, new FileMeta(previousHash));
 						return;
 					}
 				}
@@ -158,12 +162,12 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 				//if file writing succeeded, set the hash
 				properties.setProperty(urlPath, hash);
 				
-				String existing = pathToHash.get(urlPath);
+				FileMeta existing = pathToFileMeta.get(urlPath);
 				if(existing != null)
-					throw new IllegalStateException("this urlpath="+urlPath+" is referencing two files.  hash1="+existing+" hash2="+hash
+					throw new IllegalStateException("this urlpath="+urlPath+" is referencing two files.  hash1="+existing.getHash()+" hash2="+hash
 							+"  You should search your logs for this hash");
 					
-				pathToHash.put(urlPath, hash);
+				pathToFileMeta.put(urlPath, new FileMeta(hash));
 				
 				log.info("compressed "+src.length()+" bytes to="+destination.length()+" to file="+destination+" hash="+hash);
 				
@@ -196,7 +200,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	@Override
-	public String relativeUrlToHash(String path) {
-		return pathToHash.get(path);
+	public FileMeta relativeUrlToHash(String path) {
+		return pathToFileMeta.get(path);
 	}
 }

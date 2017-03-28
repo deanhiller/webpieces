@@ -12,6 +12,7 @@ public enum TemplateToken {
     EOF(null, null),            //end of file
     PLAIN(null, null),          //normal text
     SCRIPT("%{", "}%"),         // %{...}%
+    FILE_VERIFY("%[", "]%"),    // %[...]% verify the file exists so we don't deploy with missing files
     EXPR("${", "}$"),           // ${...}$
     START_TAG("#{", "}#"),      // #{...}#
     END_TAG("#{/", "}#"),       // #{/...}#

@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 import org.webpieces.templating.api.HtmlTag;
-import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
@@ -26,10 +25,9 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 		Map<String, Object> customTagArgs = convertTagArgs(tagArgs, pageArgs, body, srcLocation);
 		
 		String filePath = getFilePath(parentTemplate, tagArgs, srcLocation);
-		Template template = svc.loadTemplate(filePath);
 
 		Map<Object, Object> setTagProps = parentTemplate.getSetTagProperties();
-		String s = svc.runTemplate(template, customTagArgs, setTagProps);
+		String s = svc.loadAndRunTemplate(filePath, customTagArgs, setTagProps);
 		out.print(s);
 	}
 	

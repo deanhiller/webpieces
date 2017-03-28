@@ -8,6 +8,6 @@ public interface CompressionCacheSetup {
 
 	void setupCache(List<StaticRoute> staticRoutes);
 
-	String relativeUrlToHash(String path);
+	FileMeta relativeUrlToHash(String path);
 	
 }

@@ -27,7 +27,19 @@ public class ProdTemplateService implements TemplateService {
 	}
 	
 	@Override
-	public final Template loadTemplate(String templatePath) {
+	public void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
+		Template template = loadTemplate(templatePath);
+		runTemplate(template, out, pageArgs);
+	}
+	
+	@Override
+	public String loadAndRunTemplate(String templatePath, Map<String, Object> pageArgs,
+			Map<Object, Object> setTagProps) {
+		Template template = loadTemplate(templatePath);		
+		return runTemplate(template, pageArgs, setTagProps);
+	}
+	
+	protected final Template loadTemplate(String templatePath) {
 		if(!templatePath.startsWith("/"))
 			throw new IllegalArgumentException("templatePath must start with / and be absolute reference from base of classpath");
 		else if(templatePath.contains("_"))
@@ -52,13 +64,11 @@ public class ProdTemplateService implements TemplateService {
 		}
 	}
 
-	@Override
-	public final void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
+	protected final void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
 		String result = runTemplate(template, pageArgs, new HashMap<>());
 		out.write(result);
 	}
 	
-	@Override
     public String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps) {
 		
 		Map<String, Object> copy = new HashMap<>(pageArgs);

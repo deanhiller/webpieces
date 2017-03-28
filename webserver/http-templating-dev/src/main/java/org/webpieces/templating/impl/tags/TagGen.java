@@ -1,16 +1,15 @@
 package org.webpieces.templating.impl.tags;
 
-import org.webpieces.templating.api.CompileCallback;
-import org.webpieces.templating.api.GroovyGen;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 
-public class TagGen extends ParseTagArgs implements GroovyGen {
+public class TagGen extends ParseTagArgs {
 
 	private String name;
 	private Token startToken;
 
-	public TagGen(String tagName, Token startToken) {
+	public TagGen(String tagName, Token startToken, RoutePathTranslator callback) {
+		super(callback);
 		this.name = tagName;
 		this.startToken = startToken;
 	}
@@ -21,15 +20,15 @@ public class TagGen extends ParseTagArgs implements GroovyGen {
 	}
 
 	@Override
-	public void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
-		super.generateStartAttrs(sourceCode, token, uniqueId, callback);
+	public void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId) {
+		super.generateStartAttrs(sourceCode, token, uniqueId);
 		sourceCode.println("runTag('" + name + "', _attrs" + uniqueId + ", null, '"+token.getSourceLocation(false)+"');", token);
 		sourceCode.println();
 	}
 
 	@Override
-	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
-		super.generateStartAttrs(sourceCode, token, uniqueId, callback);
+	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId) {
+		super.generateStartAttrs(sourceCode, token, uniqueId);
 		sourceCode.println("_body" + uniqueId + " = {", token);
 		sourceCode.println();
 	}

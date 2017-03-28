@@ -3,6 +3,7 @@ package org.webpieces.router.api;
 import java.util.Map;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.impl.compression.FileMeta;
 
 public interface RoutingService {
 
@@ -22,5 +23,5 @@ public interface RoutingService {
 	 */
 	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs);
 	
-	String relativeUrlToHash(String urlPath);
+	FileMeta relativeUrlToHash(String urlPath);
 }

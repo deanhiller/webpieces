@@ -33,7 +33,6 @@ import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
-import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.util.logging.Logger;
@@ -156,15 +155,11 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		String templatePath = getTemplatePath(packageStr, templateClassName, extension);
 		
-		//TODO: get html from the request such that we look up the correct template? AND if not found like they request only json, than
-		//we send back a 404 rather than a 500
-		Template template = templatingService.loadTemplate(templatePath);
-
 		//TODO: stream this out with chunked response instead??....
 		StringWriter out = new StringWriter();
 		
 		try {
-			templatingService.runTemplate(template, out, resp.pageArgs);
+			templatingService.loadAndRunTemplate(templatePath, out, resp.pageArgs);
 		} catch(MissingPropertyException e) {
 			Set<String> keys = resp.pageArgs.keySet();
 			throw new ControllerPageArgsException("Controller.method="+view.getControllerName()+"."+view.getMethodName()+" did\nnot"

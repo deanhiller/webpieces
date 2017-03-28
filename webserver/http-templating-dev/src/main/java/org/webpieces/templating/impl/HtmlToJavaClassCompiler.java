@@ -9,10 +9,11 @@ import java.nio.charset.Charset;
 
 import javax.inject.Inject;
 
-import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.impl.source.GroovyScriptGenerator;
 import org.webpieces.templating.impl.source.ScriptOutputImpl;
+
+import groovy.lang.GroovyClassLoader;
 
 public class HtmlToJavaClassCompiler {
 	private GroovyScriptGenerator scriptGen;
@@ -29,16 +30,16 @@ public class HtmlToJavaClassCompiler {
 		this.config = config;
 	}
 	
-	public ScriptOutputImpl compile(String fullClassName, String source, CompileCallback callbacks) {
+	public ScriptOutputImpl compile(GroovyClassLoader cl, String fullClassName, String source) {
 		String filePath = fullClassName.replace(".", "/").replace("_", ".");
 		
-		ScriptOutputImpl scriptCode = scriptGen.generate(filePath, source, fullClassName, callbacks);
+		ScriptOutputImpl scriptCode = scriptGen.generate(filePath, source, fullClassName);
 		
 		if(config.getGroovySrcWriteDirectory() != null)
 			writeSourceFile(scriptCode, fullClassName);
 		
 		try {
-			groovyCompile.compile(scriptCode, callbacks);
+			groovyCompile.compile(cl, scriptCode);
 		} catch(Exception e) {
 			throw new RuntimeException("Generated a groovy script file but compilation failed for file="
 					+filePath+" Script code generated=\n\n"+scriptCode.getScriptSourceCode(), e);

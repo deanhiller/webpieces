@@ -28,6 +28,8 @@ import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import groovy.lang.GroovyClassLoader;
+
 public class TemplateCompilerTask extends AbstractCompile {
 
 //    private TemplateCompileOptions options = new TemplateCompileOptions();
@@ -69,8 +71,6 @@ public class TemplateCompilerTask extends AbstractCompile {
 		config.setGroovySrcWriteDirectory(groovySrcGen);
 		System.out.println("custom tags="+options.getCustomTags());
 		config.setCustomTagsFromPlugin(options.getCustomTags());
-    	Injector injector = Guice.createInjector(new RouterLookupModule(), new DevTemplateModule(config));
-    	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
     	
         LogLevel logLevel = getProject().getGradle().getStartParameter().getLogLevel();
         
@@ -92,6 +92,14 @@ public class TemplateCompilerTask extends AbstractCompile {
         		OutputStreamWriter write = new OutputStreamWriter(routeOut, encoding.name());
         		BufferedWriter bufWrite = new BufferedWriter(write)
         		) {
+        	
+        	Injector injector = Guice.createInjector(
+        			new RouterLookupModule(), 
+        			new DevTemplateModule(config, new PluginCompileCallback(destinationDir, bufWrite))
+        			);
+        	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);
+        	GroovyClassLoader cl = new GroovyClassLoader();
+        	
 	        for(File f : files) {
 	        	System.out.println("file="+f);
 	        	
@@ -100,7 +108,7 @@ public class TemplateCompilerTask extends AbstractCompile {
 	        	
 	        	String source = readSource(f);
 	        	
-	        	compiler.compile(fullName, source, new PluginCompileCallback(destinationDir, bufWrite));
+	        	compiler.compile(cl, fullName, source);
 	        }
 		}
         
@@ -164,8 +172,8 @@ public class TemplateCompilerTask extends AbstractCompile {
 			this.destinationDir = destinationDir;
 			this.routeOut = bufWrite;
 		}
-		
-		public void compiledGroovyClass(GroovyClass clazz) {
+
+		public void compiledGroovyClass(GroovyClassLoader groovyCl, GroovyClass clazz) {
 			String name = clazz.getName();
 			String path = name.replace('.', '/');
 			String fullPathName = path+".class";

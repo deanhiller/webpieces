@@ -94,6 +94,11 @@ public class TemplateTokenizerTask {
 				found(PLAIN, 2, lineNumber);
 			}
 			break;
+		case FILE_VERIFY:
+			if (FILE_VERIFY.matchesEnd(c, c1, c2)) {
+				found(PLAIN, 2, lineNumber);
+			}
+			break;
 		case COMMENT:
 			if (COMMENT.matchesEnd(c, c1, c2)) {
 				found(PLAIN, 2, lineNumber);
@@ -145,6 +150,8 @@ public class TemplateTokenizerTask {
 	private void processStartTagMatches(int lineNumber, char c, char c1, char c2) {
 		if (SCRIPT.matchesStart(c, c1, c2)) {
 			found(SCRIPT, 2, lineNumber);
+		} else if (FILE_VERIFY.matchesStart(c, c1, c2)) {
+			found(FILE_VERIFY, 2, lineNumber);
 		} else if (EXPR.matchesStart(c, c1, c2)) {
 			found(EXPR, 2, lineNumber);
 		} else if (END_TAG.matchesStart(c, c1, c2)) {

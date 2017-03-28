@@ -1,7 +1,6 @@
 package org.webpieces.templating.impl.tags;
 
 import org.webpieces.templating.api.AbstractTag;
-import org.webpieces.templating.api.CompileCallback;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 
@@ -13,7 +12,7 @@ public class ElseGen extends AbstractTag {
 	}
 
 	@Override
-	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId, CompileCallback callback) {
+	public void generateStart(ScriptOutput sourceCode, Token token, int uniqueId) {
 		sourceCode.println(" else {", token);
 		sourceCode.println();
 	}

@@ -6,6 +6,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
+import org.webpieces.router.impl.compression.FileMeta;
 
 public class DevCompressionCacheSetup implements CompressionCacheSetup {
 
@@ -17,7 +18,7 @@ public class DevCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	@Override
-	public String relativeUrlToHash(String path) {
+	public FileMeta relativeUrlToHash(String path) {
 		return null;
 	}
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.RouterLookup;
 
 public class RouterLookupProxy implements RouterLookup {
@@ -26,12 +27,12 @@ public class RouterLookupProxy implements RouterLookup {
 
 	@Override
 	public String pathToUrlEncodedHash(String relativeUrlPath) {
-		String hash = router.relativeUrlToHash(relativeUrlPath);
-		if(hash == null)
+		FileMeta hashMeta = router.relativeUrlToHash(relativeUrlPath);
+		if(hashMeta == null || hashMeta.getHash() == null)
 			return null;
 		
 		try {
-			return URLEncoder.encode(hash, StandardCharsets.UTF_8.name());
+			return URLEncoder.encode(hashMeta.getHash(), StandardCharsets.UTF_8.name());
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
