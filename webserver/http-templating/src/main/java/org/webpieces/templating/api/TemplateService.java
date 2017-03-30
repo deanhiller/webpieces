@@ -11,11 +11,12 @@ import com.google.inject.ImplementedBy;
 public interface TemplateService {
 
 	void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs);
-	
-	//Template loadTemplate(String templatePath);
 
-	//void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs);
-	
+	/**
+	 * Purely for tag use only.
+	 * 
+	 * we could hide this as strictly speaking, this is not for any webserver to call but for tags to use
+	 */
 	String loadAndRunTemplate(String templatePath, Map<String, Object> pageArgs, Map<Object, Object> setTagProps);
-	//String runTemplate(Template template, Map<String, Object> pageArgs, Map<Object, Object> setTagProps);
+	
 }

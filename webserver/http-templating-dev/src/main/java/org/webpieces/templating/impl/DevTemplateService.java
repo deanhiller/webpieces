@@ -14,11 +14,8 @@ import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.api.Template;
 import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.templating.impl.source.ScriptOutputImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
-
-import groovy.lang.GroovyClassLoader;
 
 public class DevTemplateService extends ProdTemplateService {
 
@@ -42,19 +39,20 @@ public class DevTemplateService extends ProdTemplateService {
 
 	@Override
 	public void loadAndRunTemplate(String templatePath, StringWriter out, Map<String, Object> pageArgs) {
-		//
-		GroovyClassLoader startingCl = currentCl.get();
-		if(startingCl == null)
-			currentCl.set(new OurGroovyClassLoader());
+		//TODO: big nit and for fun, we should look into recreating OurGroovyClassLoader ONLY when
+		//the html files have changed.  to do this, I think we would have to save a Holder object with the first 
+		//classloader and only swap him on changes to the html files instead of on every request.  I think if we
+		//do that, the ThreadLocal may go away as well.  This may need some manual testing and we may have to add
+		// more change files during test like we did for the controller testing in TestDevRefreshPageWithNoRestarting.java
+		
+		//prod knows nothing about groovy or the Groovy classloader so we keep it that way 
+		//by setting the classloader used on the thread.  This is NOT A recursive function like the below.
+		currentCl.set(new OurGroovyClassLoader());
 		
 		try {
-			Template template = loadTemplate(templatePath);
-			runTemplate(template, out, pageArgs);
+			super.loadAndRunTemplate(templatePath, out, pageArgs);
 		} finally {
-			if(startingCl == null) {
-				//startingCl is the flag for when we created the original Cl
-				currentCl.set(null);
-			}
+			currentCl.set(null);
 		}
 	}
 	

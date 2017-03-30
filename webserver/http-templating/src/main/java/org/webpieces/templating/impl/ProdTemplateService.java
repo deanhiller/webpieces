@@ -86,8 +86,7 @@ public class ProdTemplateService implements TemplateService {
 		String superTemplateFilePath = info.getSuperTemplateClassName();
 		try {
 			if(superTemplateFilePath != null) {
-				Template superTemplate = loadTemplate(superTemplateFilePath);
-				return runTemplate(superTemplate, pageArgs, setTagProperties);
+				return loadAndRunTemplate(superTemplateFilePath, pageArgs, setTagProperties);
 			} else
 				return out.toString();
 		} catch(Exception e) {

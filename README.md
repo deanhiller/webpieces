@@ -29,7 +29,7 @@ Codecov.io has a bug that incorrectly reports code coverage lower than what it i
 7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart
      the webserver (even in debug mode)
-9. In a browser go to http://localhost:9000
+9. In a browser go to http://localhost:8080
 10. refactor your code like crazy and hit the website again(no restart needed)
 
 #### To try modifying/contributing to the actual webserver
@@ -52,7 +52,9 @@ This project is essentially pieces that can be used to build any http related so
 * unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases.  with Seam/JSF, you lock your users to one node and when that goes out, if they are in the middle of buying a plane ticket, they are pretty much screwed.(ie. not a good design for large scale)
 * be blown away with the optimistic locking pattern.  If your end users both post a change to the same entity, one will win and the other will go through a path of code where you can decide, 1. show the user his changes and the other users, 2. just tell the user it failed and to start over 3. let it overwrite the previous user code 
 * look ma, no restarting the server in development mode with complete java refactoring
-* prod server runs on :8080, dev server on :9000 all locally such that unlike play, dev server never caches files so cached files from :8080 don't interfere with development mode and dev server never caches files making development seamless(modify css file and it's up to date)
+* prod server runs caches files using hash on content so all *.js files and *.css files are cached for a year and if file changes, the hash changes causing a reload
+* dev server never tells browser to cache files so developer can modify file and not need to clear browser cache
+* %[..]% will verify a file actually exists at that route at build time so that you do not accidentally deploy web pages that link to nonexistent files 
 * no erasing users input from forms which many websites do....soooo annoying
 * holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win
 * one liner for declaring a form field which does keeps users input for you, as well as i18n as well as error handling and decorating ALL your fields with your declared field template
@@ -65,9 +67,9 @@ This project is essentially pieces that can be used to build any http related so
 * Override ANY component in your web application for testing to mock remote endpoints and tests can simulate those
 * Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme unlike any server before it)
 * Debug one of the tests after creating the example project and you step right into the platform code making it easier to quickly understand the underlying platform you are using and how componentized it is. (if you happen to run into a bug, this makes it way easier to look into, but of course, we never run into bugs with 3rd party software, right, so you won't need this one) That was in my sarcastic font
-* Selenium test case provided as part of the template so skip setting it up
+* Selenium test case provided as part of the template so skip setting it up except for getting the right firefox version
 * Route files are not in yml but are in java so you can have for loops, dynamic routes and anything you can dream up related to http routing
-* Full form support for arrays(which is hard and play1.3.x+ never got right to make it dead simple..let's not even talk about J2EE )
+* Full form support for arrays(which is hard and play1.3.x+ never got it right to make it dead simple..let's not even talk about J2EE )
 * Protects developers from the frequent caching css/js/html files screwup!!! This is bigger than people realize until they get bitten.  ie. you should not change any static js/css files without also renaming them so that the browser cache is avoided and it loads the new one as soon as a new version is deployed.  Nearly all webservers just let developers screw this up and then customers wonder why things are not working(and it's only specific customers that have old versions that complain making it harder to pinpoint the issue).  Finally, you can live in a world where this is fixed!!!
 * supports multiple domains over SSL with multiple certificates but only for advanced users
 * JPA/hibernate plugin with filter all setup/working so if your backend is a database, you can crank out db models.  NoSQL scales better but for startups, start simple with a database
@@ -100,7 +102,6 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* add file hashes of all app/text file types such that we auto put it in the query params AND on file changes, we auto load new resource avoiding cache(and make sure it works in development mode)
 * start an actual multi-homed project
 * write http2 tests for server
 * write http2 tests for client
@@ -108,17 +109,18 @@ This project is essentially pieces that can be used to build any http related so
 * error test cases http client
 * flow control server test?  client may cover that same code
 * error test case on server http2 and then try H2Test
+* bootstrap modal tag making ajax example very concise
+* tests on whitespace issues on tags and formatting so we can isolate the differences
 * look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.
 * create api / REST method so webserver can be used as api
 * verify upload file can work http2,etc
 * http1.1 protect pipeline errors
-* bootstrap modal tag making ajax example very concise
 * max conccurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
 * more fully integrate the http2 stack
 * perhaps we want more testing around the CRUD examples
-* add optimistic locking test case for hibernate plugin
+* add optimistic locking test case for hibernate plugin with example in webapp and feature tests as examples as well
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
 * Tab state (rather than just global session, but per tab state to put data)
@@ -129,10 +131,10 @@ This project is essentially pieces that can be used to build any http related so
 * codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
 * tweak example project close to 80% code covered
-* escapehtml or verbatim or noescapehtml (this is pretty hard to get right)
+* escapehtml or verbatim or noescapehtml (this is pretty hard to get right sooo definetely need tests on quite a few cases)
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
-* eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as they could have done this  
+* eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
 
 #### Examples.....
 
