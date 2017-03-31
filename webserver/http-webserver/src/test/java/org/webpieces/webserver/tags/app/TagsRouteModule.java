@@ -28,6 +28,10 @@ public class TagsRouteModule extends AbstractRouteModule {
 		//relative path(to user.dir) for stylesheet / javascript testing
 		addStaticDir("/public/", "src/test/resources/staticRoutes/", false);
 		
+		addRoute(GET , "/bootstrap",         "TagController.bootstrapTag", TagsRouteId.BOOTSTRAP);
+		addRoute(GET , "/user/{id}",         "TagController.fakeAjaxAddEditRoute", TagsRouteId.FAKE_ROUTE_ID);
+		
+		
 		addRoute(GET , "/customtag",         "../include/IncludeTagController.customTag", TagsRouteId.CUSTOM_TAG);
 		addRoute(GET , "/renderTagArgs",     "../include/IncludeTagController.renderTagArgsTag", TagsRouteId.RENDER_TAG_ARGS_TAG);
 		addRoute(GET , "/renderPageArgs",    "../include/IncludeTagController.renderPageArgsTag", TagsRouteId.RENDER_PAGE_ARGS_TAG);

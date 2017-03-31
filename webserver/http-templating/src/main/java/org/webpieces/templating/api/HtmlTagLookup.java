@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.webpieces.templating.impl.tags.AHrefTag;
+import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FieldTag;
 import org.webpieces.templating.impl.tags.FormTag;
@@ -34,6 +35,7 @@ public class HtmlTagLookup {
 		put(new JsActionTag());
 		put(new StyleSheetTag(lookup));
 		put(new ScriptTag(lookup));
+		put(new BootstrapModalTag());
 		addFieldTag(config);
 	}
 

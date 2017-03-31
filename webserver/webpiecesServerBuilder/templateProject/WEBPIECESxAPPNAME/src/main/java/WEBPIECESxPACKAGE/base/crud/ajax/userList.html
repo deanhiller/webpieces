@@ -3,7 +3,8 @@
 
 <h4>Users</h4>
 
-<div id="addEditPatternModal" class="modal hide #{if showPopup}#in#{/if}#" tabindex="-1" 
+*{ any changes to this modal 'if showPopup' would need to be retested in ALL browsers!!! }*
+<div id="addEditModal" class="modal hide #{if showPopup}#in#{/if}#" tabindex="-1" 
      role="dialog" data-backdrop="true" aria-labelledby="addEditModalLabel" 
      aria-hidden="#{if showPopup}#false#{/if}##{else}#true#{/else}#"
     #{if showPopup}#style="display: block;"#{/if}#>
@@ -11,12 +12,15 @@
         #{renderPageArgs 'userAddEdit.html'/}#
         <script type="text/javascript">
            $(document).ready(function() { 
-               $("#addEditPatternModal").modal('show');   
+               $("#addEditModal").modal('show');   
            });
         </script>
     #{/if}#
 </div>
-<div id="deletePatternModal"></div>
+<div id="deleteModal" class="modal hide" data-backdrop="true" tabindex="-1" 
+     role="dialog" data-backdrop="false" aria-labelledby="deleteModalLabel" aria-hidden="true">
+</div>
+
 <table class="table">
     <thead>
         <tr>
@@ -33,31 +37,12 @@
                 <td>${entity.lastName}$</td>
                 <td>${entity.email}$</td>
                 <td>
-                        <a href="#" data-toggle="modal" class="btn" id="editLink_${entity.id}$">
-                            Edit
-                        </a>
-                        <script type="text/javascript">
-                            var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
-                             $(document).ready(function() {	
-                                 $("#editLink_${entity.id}$").click(function(e){
-                                     $('#addEditPatternModal').load(getEditRoute({id:${entity.id}$}),function(){
-                                         $("#addEditPatternModal").modal('show');	
-                                      });
-                                 });
-                       	    });
-                        </script>
-                        <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity.id}$"> Delete </a>
-                        <script type="text/javascript">
-							    var getConfirmDeleteRoute = #{jsAction @[AJAX_CONFIRM_DELETE_USER, id:'{id}']@ /}#
-							    $(document).ready(function() {	
-							        $("#deletePattern_${entity.id}$").click(function(e){
-							            $('#deletePatternModal').load(getConfirmDeleteRoute({id:'${entity.id}$'}),function(){
-							                 $("#myDeletePattern").modal('show');	
-							            });
-							        });
-							  	});
-                       </script>
-                   </td>
+                   <a href="#" data-toggle="modal" class="btn" id="editLink_${entity.id}$">Edit</a>
+                   #{bootstrapModal route:@[AJAX_EDIT_USER_FORM, id:'{id}']@, modalId:'addEditModal', linkId:'editLink_'+entity.id, id:entity.id/}#
+                        
+                   <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity.id}$"> Delete </a>
+                   #{bootstrapModal route:@[AJAX_CONFIRM_DELETE_USER, id:'{id}']@, modalId:'deleteModal', linkId:'deletePattern_'+entity.id, id:entity.id/}#
+                </td>
             </tr>
         #{/list}#
         #{else}#
@@ -71,14 +56,47 @@
 </table>
 
 <a href="#" class="btn btn-primary" id="addLink">Add User</a>
-<script type="text/javascript">
+#{bootstrapModal route:@[AJAX_ADD_USER_FORM]@, linkId:'addLink', modalId:'addEditModal'/}#
 
+
+*{ 
+THE ONE LINE bootstrapModal tag for the EDIT button replaces the following...
+
+  <script type="text/javascript">
+      var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
+       $(document).ready(function() {	
+           $("#editLink_${entity.id}$").click(function(e){
+               $('#addEditModal').load(getEditRoute({id:${entity.id}$}),function(){
+                   $("#addEditModal").modal('show');	
+                });
+           });
+ 	    });
+  </script>
+
+                      
+ABOVE ADD BUTTON IS THE SAME AS THIS.....
+
+<script type="text/javascript">
 var getAddRoute= #{jsAction @[AJAX_ADD_USER_FORM]@ /}#
 $(document).ready(function() {	
      $("#addLink").click(function(e){
-         $('#addEditPatternModal').load(getAddRoute(),function(){
-              $("#addEditPatternModal").modal('show');	
+         $('#addEditModal').load(getAddRoute(),function(){
+              $("#addEditModal").modal('show');	
          });
      });
 });
 </script>
+
+                   
+<script type="text/javascript">
+ var getConfirmDeleteRoute = #{jsAction @[AJAX_CONFIRM_DELETE_USER, id:'{id}']@ /}#
+ $(document).ready(function() {	
+     $("#deletePattern_${entity.id}$").click(function(e){
+         $('#deleteDiv').load(getConfirmDeleteRoute({id:'${entity.id}$'}),function(){
+              $("#deleteModal").modal('show');	
+         });
+     });
+});
+</script>
+                       
+}*

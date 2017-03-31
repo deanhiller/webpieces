@@ -4,7 +4,6 @@ import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.webpieces.data.api.DataWrapper;
@@ -16,6 +15,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.util.net.URLEncoder;
 
 public class Requests {
 
@@ -84,8 +84,8 @@ public class Requests {
 
 		String encodedParams = "";
 		for(int i = 0; i < argTuples.length; i+=2) {
-			String key = URLEncoder.encode(argTuples[i], StandardCharsets.UTF_8.name());
-			String value = URLEncoder.encode(argTuples[i+1], StandardCharsets.UTF_8.name());
+			String key = URLEncoder.encode(argTuples[i]);
+			String value = URLEncoder.encode(argTuples[i+1]);
 			if(!"".equals(encodedParams))
 				encodedParams += "&";
 			encodedParams += key+"="+value;

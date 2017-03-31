@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +25,7 @@ import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -120,7 +120,7 @@ public class WebServerImpl implements WebServer {
 				throw new IllegalStateException("size="+split.length+" corrupt line="+line);
 			
 			String type = split[0];
-			String location = URLDecoder.decode(split[1], StandardCharsets.UTF_8.name());
+			String location = URLEncoder.decode(split[1]);
 			String meta = split[2];
 
 			try {
@@ -143,7 +143,7 @@ public class WebServerImpl implements WebServer {
 	}
 
 	private void processPath(URL url, String line, String location, String urlPath) throws UnsupportedEncodingException {
-		String path = URLDecoder.decode(urlPath, StandardCharsets.UTF_8.name());
+		String path = URLEncoder.decode(urlPath);
 		FileMeta meta = routingService.relativeUrlToHash(path);
 		if(meta == null)
 			throw new RouteNotFoundException("backing file for urlPath="+path+" was not found or route is missing to connect url to path.  url="+url);
@@ -153,8 +153,8 @@ public class WebServerImpl implements WebServer {
 		String[] split2 = meta.split(":");
 		if(split2.length != 3)
 			throw new IllegalStateException("size="+split2.length+" Corrupt line, wrong size="+line);
-		String routeId = URLDecoder.decode(split2[0], StandardCharsets.UTF_8.name());
-		String args = URLDecoder.decode(split2[1], StandardCharsets.UTF_8.name());
+		String routeId = URLEncoder.decode(split2[0]);
+		String args = URLEncoder.decode(split2[1]);
 		
 		Map<String, String> argsWithFakeValues = new HashMap<>();
 		if(!"".equals(args.trim())) {

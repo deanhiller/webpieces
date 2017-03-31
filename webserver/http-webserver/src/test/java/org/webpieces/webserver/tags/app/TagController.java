@@ -30,9 +30,9 @@ public class TagController {
 
 	public Action listTag() {
 		List<Account> accounts = new ArrayList<>();
-		accounts.add(new Account("dean", 5, "red"));
-		accounts.add(new Account("jeff", 2, "blue"));
-		accounts.add(new Account("mike", 6, "white"));
+		accounts.add(new Account(2, "dean", 5, "red"));
+		accounts.add(new Account(4, "jeff", 2, "blue"));
+		accounts.add(new Account(6, "mike", 6, "white"));
 		return Actions.renderThis("accounts", accounts);
 	}
 
@@ -59,6 +59,14 @@ public class TagController {
 
 	public Action stylesheetTag() {
 		return Actions.renderThis();
+	}
+
+	public Action bootstrapTag() {
+		return listTag();
+	}
+	
+	public Redirect fakeAjaxAddEditRoute(int id) {
+		return Actions.redirect(TagsRouteId.BOOTSTRAP);
 	}
 	
 	public Redirect postSomething() {

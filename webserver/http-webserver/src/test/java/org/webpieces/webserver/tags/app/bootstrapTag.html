@@ -1,0 +1,32 @@
+<html>
+  <head>
+  </head>
+  <body>
+    
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Color</th>
+            <th>Actions</th>
+        </tr>
+      #{list items:accounts, as:'account'}#
+          <tr>
+             <td>${account.name}$</td>
+             <td>${account.value}$</td>
+             <td>${account.color}$</td>
+             <td>
+             *{  NOT HOW IT IS REALLY USED!!!!! this snippit is only for test.  see demo app for real usage }*
+               <a href="#" data-toggle="modal" class="btn" id="editLink_${account.id}$">Edit</a>
+               #{bootstrapModal route:@[FAKE_ROUTE_ID, id:'{id}']@, modalId:'addEditModal', linkId:'editLink_'+account.id, id:account.id/}#
+             </td>       
+          </tr>
+      #{/list}#
+      #{else}#
+          <tr>
+              <td colspan="3">You have no accounts at this time</td>
+          </tr>
+      #{/else}#
+    </table>
+  </body>
+</html>

@@ -11,11 +11,13 @@ public class Account {
 	private int value;
 	private String color;
 	private List<Address> addresses = new ArrayList<>();
+	private int id;
 
 	public Account() {
 	}
 	
-	public Account(String name, int value, String color) {
+	public Account(int id, String name, int value, String color) {
+		this.setId(id);
 		this.name = name;
 		this.value = value;
 		this.color = color;
@@ -51,5 +53,13 @@ public class Account {
 
 	public void setAddresses(List<Address> addresses) {
 		this.addresses = addresses;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

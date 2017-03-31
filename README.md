@@ -102,14 +102,18 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* test if on form then logout from other tab than post form for ajax and non ajax and may need fix??? verify flash scope
 * start an actual multi-homed project
 * write http2 tests for server
 * write http2 tests for client
 * flow control test cases on http client
 * error test cases http client
 * flow control server test?  client may cover that same code
-* error test case on server http2 and then try H2Test
-* bootstrap modal tag making ajax example very concise
+* error test cases on server http2 and then try H2Test
+* enhanced pulldown menus
+  * enum in menu
+  * child database beans with id
+  * any other ones
 * tests on whitespace issues on tags and formatting so we can isolate the differences
 * look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.
 * create api / REST method so webserver can be used as api
@@ -134,7 +138,7 @@ This project is essentially pieces that can be used to build any http related so
 * escapehtml or verbatim or noescapehtml (this is pretty hard to get right sooo definetely need tests on quite a few cases)
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
-* eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
+* (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
 
 #### Examples.....
 

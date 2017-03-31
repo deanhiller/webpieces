@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
@@ -19,6 +18,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -90,7 +90,7 @@ public class TestStaticPaths {
 		Properties p = new Properties();
 		p.load(new FileInputStream(meta));
 		String hash = p.getProperty("/public/fonts.css");
-		String encodedHash = URLEncoder.encode(hash, StandardCharsets.UTF_8.name());
+		String encodedHash = URLEncoder.encode(hash);
 		return encodedHash;
 	}
 	

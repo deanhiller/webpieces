@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -24,6 +23,7 @@ import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templating.api.RouterLookupModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
+import org.webpieces.util.net.URLEncoder;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -203,11 +203,11 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(routeId.contains(":"))
 				throw new RuntimeException("bug, route should not contain : character");
 
-			try {
-				String encodedRouteId = URLEncoder.encode(routeId, StandardCharsets.UTF_8.name());
-				String encodedArgs = URLEncoder.encode(argStr, StandardCharsets.UTF_8.name());
-				String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8.name());
+			String encodedRouteId = URLEncoder.encode(routeId);
+			String encodedArgs = URLEncoder.encode(argStr);
+			String encodedSourceLocation = URLEncoder.encode(sourceLocation);
 
+			try {
 				routeOut.write(ProdTemplateModule.ROUTE_TYPE+"/"+encodedSourceLocation+"/"+encodedRouteId+":"+encodedArgs+":dummy\n");
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -219,10 +219,10 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(relativeUrlPath.contains(":"))
 				throw new RuntimeException("bug, route should not contain : character");
 			
+			String encodedPath = URLEncoder.encode(relativeUrlPath);
+			String encodedSourceLocation = URLEncoder.encode(sourceLocation);
+			
 			try {
-				String encodedPath = URLEncoder.encode(relativeUrlPath, StandardCharsets.UTF_8.name());
-				String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8.name());
-				
 				routeOut.write(ProdTemplateModule.PATH_TYPE+"/"+encodedSourceLocation+"/"+encodedPath+"\n");
 			} catch (IOException e) {
 				throw new RuntimeException(e);
