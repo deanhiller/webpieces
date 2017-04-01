@@ -80,5 +80,6 @@ public interface Router {
 	Router getDomainScopedRouter(String domainRegEx);
 
 	void addCrud(String entity, String controller, CrudRouteIds routeIds);
+	void addHttpsCrud(String entity, String controller, CrudRouteIds routeIds);
 
 }

@@ -18,7 +18,7 @@ import org.webpieces.router.impl.UrlPath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public class R1RouterBuilder extends AbstractDomainBuilder implements Router  {
+public class R1RouterBuilder extends AbstractDomainBuilder  {
 
 	private static final Logger log = LoggerFactory.getLogger(R2DomainRouterBuilder.class);
 

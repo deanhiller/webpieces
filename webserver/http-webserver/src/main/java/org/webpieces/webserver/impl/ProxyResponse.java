@@ -132,7 +132,7 @@ public class ProxyResponse implements ResponseStreamer {
 		Header location = new Header(KnownHeaderName.LOCATION, url);
 		response.addHeader(location );
 		
-		responseCreator.addCommonHeaders(request, response);
+		responseCreator.addCommonHeaders(request, response, false);
 
 		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
 		response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, 0+""));
@@ -150,10 +150,16 @@ public class ProxyResponse implements ResponseStreamer {
 		String extension = null;
 		if(lastIndexOf > 0) {
 			extension = templateClassName.substring(lastIndexOf+1);
-			templateClassName = templateClassName.substring(0, lastIndexOf);
 		}
 		
-		String templatePath = getTemplatePath(packageStr, templateClassName, extension);
+		String templatePath = templateClassName;
+		if(!templatePath.startsWith("/")) {
+			//relative path so need to form absolute path...
+			if(lastIndexOf > 0) {
+				templateClassName = templateClassName.substring(0, lastIndexOf);
+			}
+			templatePath = getTemplatePath(packageStr, templateClassName, extension);
+		}
 		
 		//TODO: stream this out with chunked response instead??....
 		StringWriter out = new StringWriter();
@@ -215,7 +221,7 @@ public class ProxyResponse implements ResponseStreamer {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 		
-		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime);
+		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, false);
 		HttpResponse resp = tuple.response;
 		//This would force the browser back button to re-request the page as it would never have the page
 		//and is good to use to hide banking information type pages

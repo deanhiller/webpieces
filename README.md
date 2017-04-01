@@ -110,6 +110,7 @@ This project is essentially pieces that can be used to build any http related so
 * error test cases http client
 * flow control server test?  client may cover that same code
 * error test cases on server http2 and then try H2Test
+* I am so anal.  fix config for url encoding charset so it is configurable
 * enhanced pulldown menus
   * enum in menu
   * child database beans with id

@@ -17,7 +17,7 @@ public class ScopesRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/receiveTooLarge",    "ScopesController.receiveLongSession", ScopesRouteId.RECEIVE_TOO_LARGE);
 		
 		addRoute(GET , "/flashmessage",      "ScopesController.flashMessage", ScopesRouteId.FLASH_MESSAGE);
-
+		addStaticDir("/public/", "src/test/resources/staticRoutes/", false);
 		addRoute(GET ,   "/user/new",         "ScopesController.userAddEdit", ScopesRouteId.ADD_USER);
 		addRoute(GET ,   "/user/edit/{id}",   "ScopesController.userAddEdit", ScopesRouteId.EDIT_USER);
 		addRoute(POST,   "/user/post",        "ScopesController.postSaveUser", ScopesRouteId.POST_USER, false);
@@ -35,6 +35,8 @@ public class ScopesRouteModule extends AbstractRouteModule {
 //		addRoute(GET , "/page3/{_tab}",     "ScopesController.page3Form", ScopesRouteId.PAGE3_FORM);
 //		//This one should result in using the hidden field from #{form} tag
 //		addRoute(POST, "/postpage3",        "ScopesController.postPage3Form", ScopesRouteId.POST_PAGE3_FORM);
+		
+		addStaticDir("/public/", "src/test/resources/staticRoutes/", false);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");

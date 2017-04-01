@@ -68,6 +68,7 @@ public class ScopesController {
 	
 	public Action flashMessage() {
 		Current.flash().setMessage("it worked");
+		Current.flash().keep();
 		return Actions.renderThis();
 	}
 

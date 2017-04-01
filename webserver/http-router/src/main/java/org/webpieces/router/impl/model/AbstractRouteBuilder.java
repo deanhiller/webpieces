@@ -57,21 +57,27 @@ public abstract class AbstractRouteBuilder implements Router {
 		holder.getReverseRoutes().addRoute(routeId, meta);
 	}
 
-	@Override
-	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
+	private void addRouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isHttps) {
 		boolean checkSecureToken = false;
 		if(method == HttpMethod.POST)
 			checkSecureToken = true;
+		addRouteImpl(method, path, controllerMethod, routeId, isHttps, checkSecureToken);
+	}
+	
+	private void addRouteImpl(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean isHttps, boolean checkToken) {
 		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(method, p, controllerMethod, routeId, false, checkSecureToken);
+		Route route = new RouteImpl(method, p, controllerMethod, routeId, isHttps, checkToken);
 		addRoute(route, routeId);
+	}
+	
+	@Override
+	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
+		addRouteImpl(method, path, controllerMethod, routeId, false);
 	}
 
 	@Override
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
-		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(method, p, controllerMethod, routeId, false, checkToken);
-		addRoute(route, routeId);
+		addRouteImpl(method, path, controllerMethod, routeId, false, checkToken);
 	}
 	
 	@Override
@@ -83,20 +89,12 @@ public abstract class AbstractRouteBuilder implements Router {
 
 	@Override
 	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
-		boolean checkSecureToken = false;
-		if(method == HttpMethod.POST)
-			checkSecureToken = true; //do this by default (later, add methods to avoid secureToken check
-		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(method, p, controllerMethod, routeId, true, checkSecureToken);
-		addRoute(route, routeId);
+		addRouteImpl(method, path, controllerMethod, routeId, true);
 	}
 
 	@Override
-	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId,
-			boolean checkToken) {
-		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(method, p, controllerMethod, routeId, true, checkToken);
-		addRoute(route, routeId);
+	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
+		addRouteImpl(method, path, controllerMethod, routeId, true, checkToken);
 	}
 	
 	@Override
@@ -117,6 +115,16 @@ public abstract class AbstractRouteBuilder implements Router {
 	 */
 	@Override
 	public void addCrud(String entity, String controller, CrudRouteIds routeIds) {
+		addCrudImpl(entity, controller, routeIds, false);
+	}
+	
+	@Override
+	public void addHttpsCrud(String entity, String controller, CrudRouteIds routeIds) {
+		addCrudImpl(entity, controller, routeIds, true);
+	}	
+	
+	public void addCrudImpl(String entity, String controller, CrudRouteIds routeIds, boolean isHttps) {
+
 		RouteId listRoute = routeIds.getListRoute();
 		RouteId addRoute = routeIds.getAddRoute();
 		RouteId editRoute = routeIds.getEditRoute(); 
@@ -125,19 +133,19 @@ public abstract class AbstractRouteBuilder implements Router {
 		RouteId postDeleteRoute = routeIds.getPostDeleteRoute();
 		
 		String entityWithCapital = entity.substring(0, 1).toUpperCase() + entity.substring(1);
-		addRoute(GET , "/"+entity+"/list",        controller+"."+entity+"List", listRoute);
-		addRoute(GET , "/"+entity+"/new",         controller+"."+entity+"AddEdit", addRoute);
-		addRoute(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute);
-		addRoute(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, postSaveRoute);
-		
+		addRouteImpl(GET , "/"+entity+"/list",        controller+"."+entity+"List", listRoute, isHttps);
+		addRouteImpl(GET , "/"+entity+"/new",         controller+"."+entity+"AddEdit", addRoute, isHttps);
+		addRouteImpl(GET , "/"+entity+"/edit/{id}",   controller+"."+entity+"AddEdit", editRoute, isHttps);
+		addRouteImpl(POST, "/"+entity+"/post",        controller+".postSave"+entityWithCapital, postSaveRoute, isHttps);
+
 		//get the confirm delete page
-		addRoute(GET,  "/"+entity+"/confirmdelete/{id}", controller+".confirmDelete"+entityWithCapital, confirmDelete);
+		addRouteImpl(GET,  "/"+entity+"/confirmdelete/{id}", controller+".confirmDelete"+entityWithCapital, confirmDelete, isHttps);
 		//NOTE: Browsers don't support DELETE.  POST might make more sense here for delete but GET is way way less html
 		//code(ok, 1 line instead of 3).  There are hacks with javascript to support DELETE but seriously, we should just
 		//KISS and YAGNI (google that if you don't know).  
 		//HOWEVER, If you don't like this, copy and paste this method and modify to be a POST OR DELETE and add the 
 		//javascript for next time
-		addRoute(POST, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, postDeleteRoute);
+		addRouteImpl(POST, "/"+entity+"/delete/{id}", controller+".postDelete"+entityWithCapital, postDeleteRoute, isHttps);
 	}
 	
 }

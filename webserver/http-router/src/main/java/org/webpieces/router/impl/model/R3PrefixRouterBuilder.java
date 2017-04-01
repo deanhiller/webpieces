@@ -4,7 +4,7 @@ import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.Router;
 
-public class R3PrefixRouterBuilder extends AbstractRouteBuilder implements Router {
+public class R3PrefixRouterBuilder extends AbstractRouteBuilder {
 
 	public R3PrefixRouterBuilder(RouterInfo info, L3PrefixedRouting routes, LogicHolder holder) {
 		super(info, routes, holder);

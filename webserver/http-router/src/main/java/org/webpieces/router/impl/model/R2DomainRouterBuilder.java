@@ -4,7 +4,7 @@ import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.Router;
 
-public class R2DomainRouterBuilder extends AbstractDomainBuilder implements Router {
+public class R2DomainRouterBuilder extends AbstractDomainBuilder {
 
 	public R2DomainRouterBuilder(RouterInfo info, L2DomainRoutes domainRoutes, L3PrefixedRouting routes, LogicHolder holder) {
 		super(info, domainRoutes, routes, holder);

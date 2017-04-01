@@ -1,17 +1,26 @@
 package org.webpieces.webserver.test;
 
+import java.util.concurrent.ExecutorService;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.TemplateCompileConfig;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.threading.DirectExecutorService;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.Provides;
 
 public class PlatformOverridesForTest implements Module {
 	
 	private static final Logger log = LoggerFactory.getLogger(PlatformOverridesForTest.class);
+	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
+
 	private TemplateCompileConfig templateConfig;
 	
 	public PlatformOverridesForTest() {
@@ -34,6 +43,13 @@ public class PlatformOverridesForTest implements Module {
 		binder.install(new DevTemplateModule(templateConfig));
 	}
 
+	@Provides
+	@Singleton
+	@Named(FILE_READ_EXECUTOR)
+	public ExecutorService provideExecutor() {
+		return new DirectExecutorService();
+	}
+	
 	/**
 	 * If gradle is running, use generated groovy class files so code coverage works AND we actually
 	 * test the production class files instead of regenerating them(though 99.9% of the time, they

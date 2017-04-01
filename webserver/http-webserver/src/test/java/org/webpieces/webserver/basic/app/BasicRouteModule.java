@@ -12,10 +12,12 @@ public class BasicRouteModule extends AbstractRouteModule {
 		addRoute(GET , "/redirect/{id}",     "biz/BasicController.redirect", BasicRouteId.REDIRECT_PAGE);
 		addRoute(GET , "/redirectint/{id}",  "biz/BasicController.redirectWithInt", BasicRouteId.REDIRECT2);
 		addRoute(GET , "/myroute",           "biz/BasicController.myMethod", BasicRouteId.RENDER_PAGE);
+		addRoute(GET , "/myroute2",           "biz/BasicController.myMethodFullPath", BasicRouteId.RENDER_PAGE2);
+
 		addRoute(GET , "/throwNotFound",     "biz/BasicController.throwNotFound", BasicRouteId.THROW_NOT_FOUND);
 		addRoute(GET , "/badtemplate",       "biz/BasicController.badTemplate", BasicRouteId.BAD_TEMPLATE);
 		addRoute(GET , "/somejson",          "biz/BasicController.jsonFile", BasicRouteId.JSON_ROUTE);
-		addRoute(GET , "/rawurlredirect",    "biz/BasicController.redirectRawUrl", BasicRouteId.REDIRECT_RAW_URL);
+		addRoute(GET , "/rawurlredirect",    "/org/webpieces/webserver/basic/app/biz/BasicController.redirectRawUrl", BasicRouteId.REDIRECT_RAW_URL);
 		addRoute(GET , "/rawabsoluteurlredirect",    "biz/BasicController.redirectRawAbsoluteUrl", BasicRouteId.REDIRECT_ABSOLUTE_URL);
 
 		addRoute(GET , "/null",              "biz/BasicController.returnNull", BasicRouteId.NULL_ROUTE);

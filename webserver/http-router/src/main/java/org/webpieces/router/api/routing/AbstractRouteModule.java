@@ -78,5 +78,8 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.addCrud(entity, controller, routes);
 	}	
 	
+	public void addHttpsCrud(String entity, String controller, CrudRouteIds routes) {
+		router.addHttpsCrud(entity, controller, routes);
+	}
 
 }

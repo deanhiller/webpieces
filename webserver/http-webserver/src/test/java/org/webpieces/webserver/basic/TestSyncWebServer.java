@@ -45,6 +45,23 @@ public class TestSyncWebServer {
 		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.CONTENT_TYPE);
 		Assert.assertEquals(1, headers.size());
 	}
+
+	@Test
+	public void testAbsoluteHtmlPath() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute2");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("This is the first raw html page");
+		response.assertContentType("text/html; charset=utf-8");
+		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.CONTENT_TYPE);
+		Assert.assertEquals(1, headers.size());
+	}
 	
 	@Test
 	public void testRedirect() {

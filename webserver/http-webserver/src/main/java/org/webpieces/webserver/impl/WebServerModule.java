@@ -25,7 +25,7 @@ import com.google.inject.util.Providers;
 
 public class WebServerModule implements Module {
 
-	static final String FILE_READ_EXECUTOR = "fileReadExecutor";
+	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	private WebServerConfig config;
 
 	public WebServerModule(WebServerConfig config) {

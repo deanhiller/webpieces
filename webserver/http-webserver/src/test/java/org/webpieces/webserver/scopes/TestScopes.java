@@ -14,6 +14,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -21,6 +23,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestScopes {
 
+	private static final Logger log = LoggerFactory.getLogger(TestScopes.class);
 	private RequestListener server;
 	private MockResponseSender socket = new MockResponseSender();
 	
@@ -37,10 +40,7 @@ public class TestScopes {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = getResponse();
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
 		response.assertContains("result=true");
@@ -53,14 +53,9 @@ public class TestScopes {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = getResponse();
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
-		
-		socket.clear();
 		
 		Header cookie = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
 		String value = cookie.getValue();
@@ -73,10 +68,7 @@ public class TestScopes {
 		
 		server.incomingRequest(req2, new RequestId(0), true, socket);
 		
-		responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		response = responses.get(0);
+		response = getResponse();
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		Header cookie2 = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
@@ -92,14 +84,41 @@ public class TestScopes {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         server.incomingRequest(req, new RequestId(0), true, socket);
 
-        List<FullResponse> responses = socket.getResponses();
-        Assert.assertEquals(1, responses.size());
-
-        FullResponse response = responses.get(0);
+        FullResponse response = getResponse();
+        
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("Msg: it worked");
     }
 
+	private FullResponse getResponse() {
+		log.info("about to get response");
+		List<FullResponse> responses = socket.getResponses();
+        Assert.assertEquals(1, responses.size());
+        FullResponse response = responses.get(0);
+        socket.clear();
+		return response;
+	}
+
+	@Test
+    public void testGetStaticFileDoesNotClearFlashMessage() {
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
+        server.incomingRequest(req, new RequestId(0), true, socket);
+
+        FullResponse response = getResponse();
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        
+		Header header = response.createCookieRequestHeader();
+        HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css");
+        req2.addHeader(header);
+        server.incomingRequest(req2, new RequestId(0), true, socket);
+        
+        FullResponse response2 = getResponse();
+        response2.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        Header cookie = response2.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
+        Assert.assertNull("static routes should not be clearing cookies or things go south", cookie);
+
+    }
+	
 	//A basic POST form with invalid field, redirect to error page and load AND THEN
 	//POST form with valid data and expect success redirect
 	//This tests out the Validation scoped cookie
@@ -124,10 +143,7 @@ public class TestScopes {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = getResponse();
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/user/list", response.getRedirectUrl());
 	}
@@ -142,10 +158,7 @@ public class TestScopes {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = getResponse();
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		socket.clear();
 		return response;
@@ -159,10 +172,7 @@ public class TestScopes {
         
         server.incomingRequest(req, new RequestId(0), true, socket);
 
-        List<FullResponse> responses = socket.getResponses();
-        Assert.assertEquals(1, responses.size());
-
-        FullResponse response = responses.get(0);
+        FullResponse response = getResponse();
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("First name must be more than 2 characters");
         socket.clear();

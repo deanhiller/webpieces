@@ -6,6 +6,7 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.actions.Render;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.webserver.basic.app.BasicRouteId;
 
@@ -46,6 +47,11 @@ public class BasicController {
 		//myMethod.html which must be in the same directory as the Controller
 		return Actions.renderThis("hhhh", 86);
 	}
+	
+	public Render myMethodFullPath() {
+		return Actions.renderView("/org/webpieces/webserver/basic/app/biz/myMethod.html");
+	}
+	
 	public Action badTemplate() {
 		return Actions.renderThis();
 	}

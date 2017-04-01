@@ -6,6 +6,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.webserver.api.login.LoginInfo;
 
 @Singleton
 public class HttpsController {
@@ -24,7 +25,7 @@ public class HttpsController {
 	
 	public Redirect postLogin() {
 		//simulating successful login here...
-		Current.session().put(HttpsRouteModule.LOGIN_TOKEN, "someId");
+		Current.session().put(LoginInfo.LOGIN_TOKEN1, "someId");
 		
 		String url = Current.flash().get("url");
 		if(url != null) {

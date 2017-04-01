@@ -1,0 +1,52 @@
+#{extends 'userTemplate.html' /}#
+#{set subtab:'userlist'/}#
+
+<h4>Home</h4>
+
+Try these scenarios from simple to complicated...
+
+<ol>
+  <li>While logged in like you are now</li>
+  <li>Go to https://localhost:8443/login</li>
+  <li>Notice how you land on this page as you are already logged in</li>
+</ol>
+
+<ol>
+  <li>Logout</li>
+  <li>Login</li>
+  <li>Notice how you land on this page</li>
+</ol>
+
+<ol>
+  <li>Logout</li>
+  <li>Go to https://localhost:8443/secure/user/list</li>
+  <li>Notice how you land on login page</li>
+  <li>Login</li>
+  <li>Notice how you land on the original requested url</li>
+</ol>
+
+<ol>
+  <li>Logout</li>
+  <li>Go to https://localhost:8443/secure/user/list</li>
+  <li>Notice how you land on login page</li>
+  <li>Login with bad creds</li>
+  <li>Login with good creds</li>
+  <li>Notice how you land on the original requested url</li>
+</ol>
+
+<ol>
+  <li>Click the User list tab</li>
+  <li>Click add and fill in the form BUT do not submit yet</li>
+  <li>Go to another tab and logout to simulate session expired</li>
+  <li>Submit the added user</li>
+  <li>You end up on login page so log in</li>
+  <li>Modify login code to make it so they end up on form subit with the data they filled in</li>  
+</ol>
+
+<ol>
+  <li>Click the User list tab</li>
+  <li>Go to another tab and logout to simulate session expired</li>
+  <li>Click edit button on a user in the list</li>
+  <li>You end up on login page so log in</li>
+  <li>You end up on the users list page</li>
+</ol>

@@ -1,8 +1,10 @@
-package org.webpieces.webserver.api;
+package org.webpieces.webserver.api.login;
 
 import org.webpieces.router.api.routing.RouteId;
 
 public class LoginInfo {
+
+	public static final String LOGIN_TOKEN1 = "userId";
 
 	private String tokenThatExistsIfLoggedIn;
 	private RouteId loginRouteId;

@@ -1,4 +1,4 @@
-package org.webpieces.webserver.api;
+package org.webpieces.webserver.api.login;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,13 +17,13 @@ import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.util.filters.Service;
 
 @Singleton
-public class HttpLoginFilter extends RouteFilter<LoginInfo> {
+public class LoginFilter extends RouteFilter<LoginInfo> {
 
 	private String token;
 	private RouteId loginRoute;
 
 	@Inject
-	public HttpLoginFilter() {
+	public LoginFilter() {
 	}
 
 	@Override
@@ -43,6 +43,7 @@ public class HttpLoginFilter extends RouteFilter<LoginInfo> {
 			//store url requested in flash so after logging in, we can redirect the user
 			//back to the original page
 			Current.flash().put("url", Current.request().relativePath);
+			Current.flash().keep();
 		}
 		
 		//redirect to login page..

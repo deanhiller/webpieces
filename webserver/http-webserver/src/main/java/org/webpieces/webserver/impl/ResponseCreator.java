@@ -40,7 +40,8 @@ public class ResponseCreator {
 	@Inject
 	private MimeTypes mimeTypes;
 	
-	public ResponseEncodingTuple createResponse(HttpRequest request, KnownStatusCode statusCode, String extension, String defaultMime) {
+	public ResponseEncodingTuple createResponse(HttpRequest request, KnownStatusCode statusCode, 
+			String extension, String defaultMime, boolean isStaticFile) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
 		HttpResponseStatus status = new HttpResponseStatus();
@@ -53,7 +54,7 @@ public class ResponseCreator {
 		
 		response.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, mimeType.mime));
 
-		addCommonHeaders(request, response);
+		addCommonHeaders(request, response, isStaticFile);
 		return new ResponseEncodingTuple(response, mimeType);
 	}
 	
@@ -67,7 +68,7 @@ public class ResponseCreator {
 		}	
 	}
 	
-	public void addCommonHeaders(HttpRequest request, HttpResponse response) {
+	public void addCommonHeaders(HttpRequest request, HttpResponse response, boolean staticFile) {
 		KnownStatusCode statusCode = response.getStatusLine().getStatus().getKnownStatus();
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		
@@ -81,10 +82,12 @@ public class ResponseCreator {
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
 //		response.addHeader(xFrame);
 		
-		List<RouterCookie> cookies = createCookies(statusCode);
-		for(RouterCookie c : cookies) {
-			Header cookieHeader = create(c);
-			response.addHeader(cookieHeader);
+		if(!staticFile) {
+			List<RouterCookie> cookies = createCookies(statusCode);
+			for(RouterCookie c : cookies) {
+				Header cookieHeader = create(c);
+				response.addHeader(cookieHeader);
+			}
 		}
 		
 		//X-XSS-Protection: 1; mode=block

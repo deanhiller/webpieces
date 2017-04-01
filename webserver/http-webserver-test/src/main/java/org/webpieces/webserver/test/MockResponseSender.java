@@ -40,6 +40,7 @@ public class MockResponseSender implements ResponseSender {
 	@Override
 	public CompletableFuture<Void> sendData(DataWrapper data, ResponseId id, boolean isLastData) {
 		if(isLastData) {
+			log.info("last chunk");
 			HttpLastChunk chunk = new HttpLastChunk();
 			chunk.setBody(data);
 			chunkedResponse.setLastChunk(chunk);
