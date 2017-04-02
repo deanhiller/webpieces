@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
@@ -39,6 +40,11 @@ public class Actions {
 
 	public static Redirect redirect(RouteId routeId, Object ... args) {
 		RedirectImpl redirect = new RedirectImpl(routeId, args);
+		return redirect;
+	}
+	
+	public static AjaxRedirect ajaxRedirect(RouteId routeId, Object ... args) {
+		AjaxRedirectImpl redirect = new AjaxRedirectImpl(routeId, args);
 		return redirect;
 	}
 

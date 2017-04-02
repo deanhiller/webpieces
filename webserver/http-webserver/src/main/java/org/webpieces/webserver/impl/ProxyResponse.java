@@ -35,6 +35,7 @@ import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
+import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -62,7 +63,7 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	private ChannelCloser channelCloser;
 	
-	private ResponseSender responseSender;
+	private ResponseOverrideSender responseSender;
 	//private HttpRequest request;
 	private BufferPool pool;
 	private RouterRequest routerRequest;
@@ -72,13 +73,13 @@ public class ProxyResponse implements ResponseStreamer {
 	public void init(RouterRequest req, ResponseSender responseSender, BufferPool pool, RequestId requestId) {
 		this.routerRequest = req;
 		this.request = (HttpRequest) req.orginalRequest;
-		this.responseSender = responseSender;
+		this.responseSender = new ResponseOverrideSender(responseSender);
 		this.pool = pool;
 		this.requestId = requestId;
 	}
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
-		RedirectResponse httpResponse = new RedirectResponse(req.isHttps, req.domain, req.port, req.relativePath);
+		RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
 		HttpResponse response = createRedirect(httpResponse);
 		
 		responseCreator.addDeleteCookie(response, badCookieName);
@@ -102,7 +103,12 @@ public class ProxyResponse implements ResponseStreamer {
 
 	private HttpResponse createRedirect(RedirectResponse httpResponse) {
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(KnownStatusCode.HTTP_303_SEEOTHER);
+		if(httpResponse.isAjaxRedirect) {
+			status.setCode(BootstrapModalTag.AJAX_REDIRECT_CODE);
+			status.setReason("Ajax redirect");
+		} else
+			status.setKnownStatus(KnownStatusCode.HTTP_303_SEEOTHER);
+		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);
 		HttpResponse response = new HttpResponse();

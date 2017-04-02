@@ -14,13 +14,35 @@ public class L3PrefixedRouting {
 	
 	List<RouteMeta> routes = new ArrayList<>();
 
-	public L3PrefixedRouting getScopedRouter(String path) {
+	public L3PrefixedRouting getScopedRouter(String fullPath) {
+		String[] split = splitInTwo(fullPath);
+		String path = fullPath;
+		if(split != null)
+			path = split[0];
+		
 		L3PrefixedRouting r = pathPrefixToInfo.get(path);
 		if(r == null) {
 			r = new L3PrefixedRouting();
 			pathPrefixToInfo.put(path, r);
 		}
-		return r;
+		
+		if(split == null)
+			return r;
+		else
+			return r.getScopedRouter(split[1]);
+	}
+
+	private String[] splitInTwo(String fullPath) {
+		if(!fullPath.startsWith("/"))
+			throw new IllegalArgumentException("fullPath should start with a / but did not");
+		
+		int indexOf = fullPath.indexOf("/", 1);
+		if(indexOf < 0)
+			return null;
+		
+		String path = fullPath.substring(0, indexOf);
+		String leftover = fullPath.substring(indexOf);
+		return new String[] {path, leftover};
 	}
 
 	public void addRoute(RouteMeta meta) {

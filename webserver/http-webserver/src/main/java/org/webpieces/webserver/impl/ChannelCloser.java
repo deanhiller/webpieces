@@ -7,7 +7,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public class ChannelCloser {
 
-	public Void closeIfNeeded(HttpRequest request, ResponseSender channel) {
+	public Void closeIfNeeded(HttpRequest request, ResponseOverrideSender channel) {
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		boolean close = false;
 		if(connHeader != null) {
@@ -23,4 +23,5 @@ public class ChannelCloser {
 		
 		return null;
 	}
+
 }

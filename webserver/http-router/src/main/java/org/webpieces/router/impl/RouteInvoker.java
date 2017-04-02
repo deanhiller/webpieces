@@ -24,6 +24,7 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
@@ -236,6 +237,8 @@ public class RouteInvoker {
 	public Void continueProcessing(ResponseProcessor processor, Action controllerResponse, ResponseStreamer responseCb) {
 		if(controllerResponse instanceof RedirectImpl) {
 			processor.createFullRedirect((RedirectImpl)controllerResponse);
+		} else if(controllerResponse instanceof AjaxRedirectImpl) {
+			processor.createAjaxRedirect((AjaxRedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderImpl) {
 			processor.createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {

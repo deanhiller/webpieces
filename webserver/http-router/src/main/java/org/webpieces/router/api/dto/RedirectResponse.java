@@ -8,12 +8,14 @@ public class RedirectResponse implements Redirect {
 	public String domain;
 	public int port;
 	public String redirectToPath;
+	public boolean isAjaxRedirect;
 
 	public RedirectResponse(String redirectToPath) {
 		this.redirectToPath = redirectToPath;
 	}
 	
-	public RedirectResponse(Boolean isHttps, String domain, int port, String redirectToPath) {
+	public RedirectResponse(boolean isAjaxRedirect, boolean isHttps, String domain, int port, String redirectToPath) {
+		this.isAjaxRedirect = isAjaxRedirect;
 		this.isHttps = isHttps;
 		this.domain = domain;
 		this.port = port;
@@ -23,7 +25,7 @@ public class RedirectResponse implements Redirect {
 
 	@Override
 	public String toString() {
-		return "Response [isHttps=" + isHttps + ", domain=" + domain + ":" + port + ", path=" + redirectToPath + "]";
+		return "Response [isHttps=" + isHttps + ", domain=" + domain + ":" + port + ", path=" + redirectToPath + ", isAjaxRedirect="+isAjaxRedirect+"]";
 	}
 	
 }

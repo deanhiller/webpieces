@@ -22,6 +22,7 @@ import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
 import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
@@ -54,17 +55,30 @@ public class ResponseProcessor {
 		}
 
 		RouterRequest request = ctx.getRequest();
-		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, request.port, url);
+		RedirectResponse redirectResponse = new RedirectResponse(false, request.isHttps, request.domain, request.port, url);
 		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
 	}
 	
+
+	
+	public void createAjaxRedirect(AjaxRedirectImpl action) {
+		RouteId id = action.getId();
+		Map<String, Object> args = action.getArgs();
+		createRedirect(id, args, true);		
+	}
+	
 	public void createFullRedirect(RedirectImpl action) {
+		RouteId id = action.getId();
+		Map<String, Object> args = action.getArgs();
+		createRedirect(id, args, false);
+	}
+	
+	private void createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
 		RouterRequest request = ctx.getRequest();
 		Method method = matchedMeta.getMethod();
-		RouteId id = action.getId();
 		RouteMeta nextRequestMeta = reverseRoutes.get(id);
 		
 		if(nextRequestMeta == null)
@@ -74,7 +88,7 @@ public class ResponseProcessor {
 
 		Route route = nextRequestMeta.getRoute();
 		
-		Map<String, String> keysToValues = reverseTranslator.formMap(method, route.getPathParamNames(), action.getArgs());
+		Map<String, String> keysToValues = reverseTranslator.formMap(method, route.getPathParamNames(), args);
 
 		Set<String> keySet = keysToValues.keySet();
 		List<String> argNames = route.getPathParamNames();
@@ -91,7 +105,7 @@ public class ResponseProcessor {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		RedirectResponse redirectResponse = new RedirectResponse(request.isHttps, request.domain, request.port, path);
+		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, request.isHttps, request.domain, request.port, path);
 		
 		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
 	}

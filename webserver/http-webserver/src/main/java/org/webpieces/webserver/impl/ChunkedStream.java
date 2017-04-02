@@ -8,7 +8,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -19,12 +18,12 @@ public class ChunkedStream extends OutputStream {
 
 	private ByteArrayOutputStream str = new ByteArrayOutputStream();
 
-	private ResponseSender responseSender;
+	private ResponseOverrideSender responseSender;
 	private int size;
 	private String type;
 	private ResponseId responseId;
 
-	public ChunkedStream(ResponseSender responseSender, int size, boolean compressed, ResponseId responseId) {
+	public ChunkedStream(ResponseOverrideSender responseSender, int size, boolean compressed, ResponseId responseId) {
 		this.responseSender = responseSender;
 		this.size = size;
 		this.str = new ByteArrayOutputStream(size);

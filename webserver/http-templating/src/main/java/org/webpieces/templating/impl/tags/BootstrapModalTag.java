@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.webpieces.templating.api.HtmlTag;
-import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
 import org.webpieces.util.net.URLEncoder;
 
@@ -17,6 +16,7 @@ import groovy.lang.Closure;
 public class BootstrapModalTag implements HtmlTag {
 	private Set<String> excludes = Sets.newHashSet("route", "modalId", "linkId");
 	
+	public static final int AJAX_REDIRECT_CODE = 287;
 // generates this.....
 //
 //	  $(document).ready(function() {	
@@ -45,8 +45,12 @@ public class BootstrapModalTag implements HtmlTag {
         printXX(out, "<script type=`text/javascript`>");
         println(out, "  $(document).ready(function() {");	
         printXX(out, "         $(`#"+linkId+"`).click(function(e){");
-        println(out, "             $('#"+modalId+"').load('"+urlPath+"', function(){");
-        printXX(out, "                 $(`#"+modalId+"`).modal('show');");	
+        println(out, "             $('#"+modalId+"').load('"+urlPath+"', function(response, status, xhr){");
+        println(out, "                 if (xhr.status == "+AJAX_REDIRECT_CODE+") {");
+        println(out, "                     window.location = xhr.getResponseHeader('Location')");
+        println(out, "                 } else {");
+        printXX(out, "                     $(`#"+modalId+"`).modal('show');");
+        println(out, "                 }");
         println(out, "              });");
         println(out, "         });");
         println(out, "   });");

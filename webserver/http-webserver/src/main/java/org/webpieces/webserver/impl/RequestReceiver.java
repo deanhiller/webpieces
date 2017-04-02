@@ -103,6 +103,7 @@ public class RequestReceiver implements RequestListener {
 		headersSupported.add(KnownHeaderName.ORIGIN.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.CACHE_CONTROL.getHeaderName().toLowerCase());
 		headersSupported.add(KnownHeaderName.PRAGMA.getHeaderName().toLowerCase());
+		headersSupported.add(KnownHeaderName.X_REQUESTED_WITH.getHeaderName().toLowerCase());
 		
 		//we don't do redirects or anything like that yet...
 		headersSupported.add(KnownHeaderName.UPGRADE_INSECURE_REQUESTS.getHeaderName().toLowerCase());
@@ -185,6 +186,10 @@ public class RequestReceiver implements RequestListener {
 		if(referHeader != null)
 			routerRequest.referrer = referHeader.getValue().trim();
 
+		Header xRequestedWithHeader = req.getHeaderLookupStruct().getHeader(KnownHeaderName.X_REQUESTED_WITH);
+		if(xRequestedWithHeader != null && "XMLHttpRequest".equals(xRequestedWithHeader.getValue().trim()))
+			routerRequest.isAjaxRequest = true;
+		
 		parseBody(req, routerRequest);
 		routerRequest.method = method;
 		routerRequest.domain = domain;

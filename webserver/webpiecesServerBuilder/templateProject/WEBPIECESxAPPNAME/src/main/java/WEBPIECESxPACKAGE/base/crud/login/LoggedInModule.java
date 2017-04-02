@@ -22,7 +22,7 @@ public class LoggedInModule extends ScopedRouteModule {
 	@Override
 	protected void configure() {
 		
-		addRoute(HttpMethod.GET ,   "/home",        "CrudController.home", LoginRouteId.LOGGED_IN_HOME);
+		addHttpsRoute(HttpMethod.GET ,   "/home",        "CrudController.home", LoginRouteId.LOGGED_IN_HOME);
 		
 		CrudRouteIds routeIds = new CrudRouteIds(
 				LOGIN_LIST_USERS, LOGIN_ADD_USER_FORM, LOGIN_EDIT_USER_FORM,

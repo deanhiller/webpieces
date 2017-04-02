@@ -9,9 +9,12 @@ Codecov.io has a bug that incorrectly reports code coverage lower than what it i
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
-3. cd projectDir
-4. ./gradlew test # runs all the tests and verify everything is working
+3. cd <projectDir>-all
+4. ./gradlew build # runs all the tests and verify everything is working.  If you want the selenium test to work install firefox 47.0.1
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
+6. cd <projectDir>-all/<projectDir>/output/distributions/
+7. unzip <projectDir> which is your whole webserver
+8. ./bin/<procect> to start the production webserver
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
     NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
   * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse

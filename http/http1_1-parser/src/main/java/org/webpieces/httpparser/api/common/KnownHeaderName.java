@@ -67,6 +67,7 @@ public enum KnownHeaderName {
 
 	// For HTTP2 upgrade
 	HTTP2_SETTINGS("HTTP2-Settings", HeaderType.REQUEST),
+	X_REQUESTED_WITH("X-Requested-With", HeaderType.REQUEST),
 	;
 
 	private static Map<String, KnownHeaderName> lookup = new HashMap<>();

@@ -1,5 +1,7 @@
 package org.webpieces.ctx.api;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +18,7 @@ public class RequestContext {
 	private FlashSub flash;
 	private Session session;
 	private Messages messages;
+	private List<OverwritePlatformResponse> callbacks = new ArrayList<>();
 
 	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, Map<String, String> pathParams) {
 		this.request = request;
@@ -61,6 +64,14 @@ public class RequestContext {
 
 	public void setMessages(Messages messages) {
 		this.messages = messages;
+	}
+	
+	public void addModifyResponse(OverwritePlatformResponse callback) {
+		this.callbacks.add(callback);
+	}
+
+	public List<OverwritePlatformResponse> getCallbacks() {
+		return callbacks;
 	}
 
 }

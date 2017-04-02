@@ -19,6 +19,7 @@ public abstract class ScopedRouteModule extends AbstractRouteModule {
 	 * @return
 	 */
 	protected abstract String getScope();
+	 
 
 	@Override
 	protected abstract void configure();

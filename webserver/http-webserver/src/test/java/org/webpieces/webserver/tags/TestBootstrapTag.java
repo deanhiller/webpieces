@@ -41,9 +41,9 @@ public class TestBootstrapTag {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("$(`#editLink_2`).click(function(e){".replaceAll("`", "\""));
-		response.assertContains("$('#addEditModal').load('/user/2', function(){");
+		response.assertContains("$('#addEditModal').load('/user/2', function(response, status, xhr){");
 		response.assertContains("$(`#editLink_4`).click(function(e){".replaceAll("`", "\""));
-		response.assertContains("$('#addEditModal').load('/user/4', function(){");
+		response.assertContains("$('#addEditModal').load('/user/2', function(response, status, xhr){");
 	}
 	
 }
