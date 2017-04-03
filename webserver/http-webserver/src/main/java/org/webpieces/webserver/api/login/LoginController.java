@@ -17,12 +17,11 @@ public abstract class LoginController {
 		if(user != null)
 			return Actions.redirect(LoginRouteId.LOGGED_IN_HOME);
 		
-		Current.flash().keep(); //we must keep previous data
-		
 		return fetchGetLoginPageAction(); //Actions.renderThis();
 	}
 
 	public Redirect postLogin(String username, String password) {
+		
 		boolean authenticated = isValidLogin(username, password);
 		if(!authenticated || Current.validation().hasErrors()) {
 			return Actions.redirectFlashAllSecure(LoginRouteId.LOGIN, Current.getContext(), "password");

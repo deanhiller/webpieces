@@ -1,6 +1,6 @@
 package org.webpieces.templating.api;
 
-public abstract class AbstractTag implements GroovyGen {
+public abstract class AbstractTag implements HtmlGen {
 
 	@Override
 	public void generateStartAndEnd(ScriptOutput sourceCode, Token token, int uniqueId) {

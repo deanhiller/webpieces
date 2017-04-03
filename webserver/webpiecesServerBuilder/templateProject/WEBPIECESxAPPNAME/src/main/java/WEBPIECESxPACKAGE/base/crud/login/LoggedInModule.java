@@ -4,8 +4,6 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.ScopedRouteModule;
 import org.webpieces.webserver.api.login.LoginRouteId;
 
-import WEBPIECESxPACKAGE.base.examples.ExamplesRouteId;
-
 public class LoggedInModule extends ScopedRouteModule {
 
 	@Override
@@ -21,7 +19,7 @@ public class LoggedInModule extends ScopedRouteModule {
 	@Override
 	protected void configure() {
 
-		addRoute(HttpMethod.GET ,   "/loginhome",        "AppLoginController.home", LoginRouteId.LOGGED_IN_HOME);
+		addRoute(HttpMethod.GET ,   "/loggedinhome",        "AppLoginController.home", LoginRouteId.LOGGED_IN_HOME);
 		
 	}
 

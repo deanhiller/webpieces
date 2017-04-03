@@ -1,6 +1,6 @@
 package org.webpieces.templating.api;
 
-public interface GroovyGen {
+public interface HtmlGen {
 
 	String getName();
 	

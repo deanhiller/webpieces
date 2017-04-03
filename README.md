@@ -105,12 +105,13 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* test if on form then logout from other tab than post form for ajax and non ajax and may need fix??? verify flash scope
 * start an actual multi-homed project
+* update main page in example app to link to examples
+* move examples to @examples url instead
 * write http2 tests for server
 * write http2 tests for client
 * flow control test cases on http client
-* error test cases http client
+* error test cases http2 client
 * flow control server test?  client may cover that same code
 * error test cases on server http2 and then try H2Test
 * I am so anal.  fix config for url encoding charset so it is configurable
@@ -118,15 +119,16 @@ This project is essentially pieces that can be used to build any http related so
   * enum in menu
   * child database beans with id
   * any other ones
+* tests on network outage during ajax calls to make that even cooler
 * tests on whitespace issues on tags and formatting so we can isolate the differences
 * look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.
 * create api / REST method so webserver can be used as api
 * verify upload file can work http2,etc
 * http1.1 protect pipeline errors
-* max conccurent streams is 50 right now for safety ...need to rework that 
+* max concurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
-* more fully integrate the http2 stack
+* more fully integrate the http2 stack. ie. finish and use http-frontend2 instead of http-frontend
 * perhaps we want more testing around the CRUD examples
 * add optimistic locking test case for hibernate plugin with example in webapp and feature tests as examples as well
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.webpieces.templating.api.AbstractTag;
-import org.webpieces.templating.api.GroovyGen;
+import org.webpieces.templating.api.HtmlGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateCompileConfig;
@@ -199,7 +199,7 @@ public class ScriptWriter {
 		}
 
 		int id = uniqueIdGen.generateId();
-		GroovyGen generator = generatorLookup.lookup(tagName, token);
+		HtmlGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
 			generator.generateStartAndEnd(sourceCode, token, id);
@@ -213,7 +213,7 @@ public class ScriptWriter {
 	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
 		String tagName = token.getTagName();
 
-		GroovyGen generator = generatorLookup.lookup(tagName, token);
+		HtmlGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
 			if(generator instanceof AbstractTag) {
@@ -244,7 +244,7 @@ public class ScriptWriter {
 			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+currentToken.getCleanValue()
 			+"}# which does not match.  end tag location="+token.getSourceLocation(false)+" begin tag location="+currentToken.getSourceLocation(false));
 
-		GroovyGen generator = currentState.getGenerator();
+		HtmlGen generator = currentState.getGenerator();
 		int uniqueId = currentState.getUniqueId();
 		generator.generateEnd(sourceCode, token, uniqueId);
 	}

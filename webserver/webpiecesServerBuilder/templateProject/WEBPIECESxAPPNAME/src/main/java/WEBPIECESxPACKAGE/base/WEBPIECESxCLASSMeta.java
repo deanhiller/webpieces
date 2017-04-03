@@ -47,11 +47,11 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 	@Override
     public List<RouteModule> getRouteModules() {
 		return Lists.newArrayList(
-				new CrudRouteModule(),
-				new AjaxCrudRouteModule(),
+				new AppRouteModule(),
 				new LoginModule("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController","/secure/.*"),
 				new LoggedInModule(),
-				new AppRouteModule()
+				new CrudRouteModule(),
+				new AjaxCrudRouteModule()
 				);
 	}
 

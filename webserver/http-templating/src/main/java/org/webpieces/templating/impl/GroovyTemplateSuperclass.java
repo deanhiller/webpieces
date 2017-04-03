@@ -111,7 +111,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
 
 			return urlLookup.fetchUrl(routeId, urlParams);
 		} catch(Exception e) {
-			throw new RuntimeException("Error fetching route("+e.getMessage()+").  "+srcLocation+"\nThe list of params fed from html file="+args, e);
+			throw new RuntimeException("Error fetching route='"+routeId+"' ("+e.getMessage()+").  "+srcLocation+"\nThe list of params fed from html file="+args, e);
 		}
 	}
 

@@ -16,9 +16,11 @@
             </div>
         </div>
         #{/if}#
-    	
+    	    	
         #{field 'username', label:'Username'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
+        
+        <br/><span style="color: red"> Type in 'bob' for the username and leave the password blank</span>
         
    </div>
     <div class="modal-footer">

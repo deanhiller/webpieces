@@ -15,9 +15,10 @@ public class AppLoginController extends LoginController {
 	protected boolean isValidLogin(String username, String password) {
 		if(!"dean".equals(username)) {
 			Current.flash().setError("No Soup for you!");
-			Current.validation().addError("username", "I lied, Username must be 'dean'");			
+			Current.validation().addError("username", "I lied, Username must be 'dean'");
 			return false;
 		}
+		
 		return true;
 	}
 	
@@ -27,6 +28,10 @@ public class AppLoginController extends LoginController {
 	}
 
 	public Render home() {
+		return Actions.renderThis();
+	}
+
+	public Render tags() {
 		return Actions.renderThis();
 	}
 	

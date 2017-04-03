@@ -37,7 +37,7 @@
             	<img src="%[/assets/crud/resources/pulldown.png]%"/>
             	*{<span class="icon-chevron-down"></span>}*
             </a>
-            <a class="brand" href="@{Marketing.index()}">
+            <a class="brand" href="@[MAIN_ROUTE]@">
                 <strong>&{'My Webpieces', 'title.createstore'}&</strong>
             </a>
             <div class="nav-collapse collapse">
@@ -51,6 +51,7 @@
 						<ul class="dropdown-menu">
 							<li><a href="@[LIST_USERS]@">&{'CRUD Example', 'crud'}&</a></li>
 			            	<li><a href="@[AJAX_LIST_USERS]@">&{ 'Ajax CRUD Example', 'ajax'}&</a></li>
+			            	<li><a href="@[TAGS]@">&{ 'Tags', 'tags'}&</a></li>
 			        	</ul>
 			        </li>
 			        #{/if}#

@@ -56,11 +56,11 @@
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="#home">Home</a></li>
+                        <li><a href="#examples-section">Examples</a></li>
                         <li><a href="#features-section">Features</a></li>
-                        <li><a href="#services-section">Services</a></li>
 
                         <li><a href="#portfolio-section">Portfolio</a></li>
-                        <li><a href="#pricing-section">Pricing</a></li>
+                        <li><a href="#pricing-section">Free</a></li>
                         <li><a href="#contact-section">Contact</a></li>
                     </ul>
                 </div> 
@@ -82,8 +82,8 @@
 		<p>Webpieces Webserver is the most swappable platform on the market.  You can override any
 			 piece of the webserver so it is the first platform to allow you to customize every corner for your needs</p>
 		                            <div class="top-button">
-                            	<a class="btn btn-top btn-lg" href="#portfolio-section"> Our Portfolio</a>
-                            	<a class="btn btn-top-white btn-lg" href="#features-section"> Learn More</a>
+                            	<a class="btn btn-top btn-lg" href="#examples-section">Examples</a>
+                            	<a class="btn btn-top-white btn-lg" href="#features-section">Features</a>
                             </div>
 	
 					</div>
@@ -96,12 +96,12 @@
 			</div>
 
         <!-- Features -->
-        <div id="features-section" class="features-container">
+        <div id="examples-section" class="features-container">
 	        <div class="container">
 	            <div class="row">
 	                <div class="col-sm-12 features">
-	                    <h3>Features</h3>
-	                    <p>Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+	                    <h3>Examples</h3>
+	                    <p>Three highlights but there is way more than just this</p>
 
 	                </div>
 	            </div>
@@ -110,35 +110,35 @@
 	                	<div class="icon">
 	                		<i class="icon ion-ios-lightbulb-outline"></i>
 	                	</div>
-	                    <h4>Lorem Ipsum</h4>
+	                    <h4>CRUD</h4>
 	                    <p>
-	                    	Phasellus dapibus lorem sit amet convallis posuere. Nulla a luctus nibh. Sed consectetur molestie dui, eu vestibulum risus pulvinar quis.
+	                    	The basic crud example but when you dig into the code you will find it doesn't take much code.
 	                    </p>
-                            	<a class="btn btn-features btn-lg" href="#"> Learn More</a>
+                            	<a class="btn btn-features btn-lg" href="@[LIST_USERS]@"> Learn More</a>
 
 	                </div>
 	                <div class="col-sm-4 features-box">
 	                	<div class="icon">
 	                		<i class="icon ion-ios-flame-outline"></i>
 	                	</div>
-	                    <h4>Lorem Ipsum</h4>
+	                    <h4>Ajax CRUD</h4>
 	                    <p>
-	                    	Phasellus dapibus lorem sit amet convallis posuere. Nulla a luctus nibh. Sed consectetur molestie dui, eu vestibulum risus pulvinar quis.
+	                    	Advanced CRUD example that has to deal with advanced use cases of being logged out when invoking javascript but thankfully we do the heavy lifting
 
 	                    </p>
-                            	<a class="btn btn-features btn-lg" href="#"> Learn More</a>
+                            	<a class="btn btn-features btn-lg" href="@[AJAX_LIST_USERS]@"> Learn More</a>
 
 	                </div>
 	                <div class="col-sm-4 features-box">
 	                	<div class="icon">
 	                		<i class="icon ion-ios-flask-outline"></i>
 	                	</div>
-	                    <h4>Lorem Ipsum</h4>
+	                    <h4>Tags</h4>
 	                    <p>
-	                    	Phasellus dapibus lorem sit amet convallis posuere. Nulla a luctus nibh. Sed consectetur molestie dui, eu vestibulum risus pulvinar quis.
+	                    	An assortment of tags with ability to create your own as well.  
 
 	                    </p>
-                            	<a class="btn btn-features btn-lg" href="#"> Learn More</a>
+                            	<a class="btn btn-features btn-lg" href="@[TAGS]@"> Learn More</a>
 
 	                </div>
 	            </div>
@@ -148,13 +148,13 @@
         
         <!-- Services -->
 
-        <div id="services-section" class="services-container">
+        <div id="features-section" class="services-container">
 	        <div class="container">
 	            <div class="row">
 
 	                <div class="col-sm-12 services">
-	                    <h3>Services</h3>
-	                    <p>Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+	                    <h3>Features</h3>
+	                    <p>Four highlights but there is way more than just this.</p>
 				</div>
 			</div>
 			</div>
@@ -171,8 +171,9 @@
 						</div>
                             <div class="services-text-right">
 
-						<h5>Lorem Ipsum</h5>
-<p>Nulla fringilla dapibus nisieu accumsan arcu convallis tincidunt donec mauris libero laciniade mollis malesuade odio interdum. Integer sed magna vel velit dignissim luctus eu in urna. Dapibus egestas turpis. Praesent faucibus nisl sit amet nulla sollicitudin.</p>
+						<h5>Developer Server Mode</h5>
+						
+<p>Much like ruby development, refactor your code like crazy and never restart your webserver.  Also, without restarting you can place and remove breakpoints in your debugger and they keep working as long as you don't delete that line.</p>
                             </div>
                         </div> 
 					
@@ -183,8 +184,8 @@
 						</div>
                             <div class="services-text-right">
 
-						<h5>Lorem Ipsum</h5>
-<p>Nulla fringilla dapibus nisieu accumsan arcu convallis tincidunt donec mauris libero laciniade mollis malesuade odio interdum. Integer sed magna vel velit dignissim luctus eu in urna. Dapibus egestas turpis. Praesent faucibus nisl sit amet nulla sollicitudin.</p>
+						<h5>Browser caching that works</h5>
+<p>Other webservers have issues like when updating a *.js file, some customers don't get the update breaking their app.  Webpieces solves that issue by modifying urls to have a hash in the url so if you change the javascript we force the update to all customers.</p>
                             </div>
                         </div> 
                             </div>
@@ -197,8 +198,12 @@
 						</div>
                             <div class="services-text-right">
 
-						<h5>Lorem Ipsum</h5>
-<p>Nulla fringilla dapibus nisieu accumsan arcu convallis tincidunt donec mauris libero laciniade mollis malesuade odio interdum. Integer sed magna vel velit dignissim luctus eu in urna. Dapibus egestas turpis. Praesent faucibus nisl sit amet nulla sollicitudin.</p>
+						<h5>Tooling Provided</h5>
+<p>We provide you with the gradle build files.  We provide you with code coverage, and free 
+checking for bad patterns in your code.  We provide you with a build that builds a zip file with 
+your app and webserver that you can upload to production.  We provide you with log4jdbc and an 
+inmemory database out of the box to see if you have 1+n query issues.  We have clickable 
+log statements.</p>
                             </div>
                         </div> 
 					
@@ -209,8 +214,9 @@
 						</div>
                             <div class="services-text-right">
 
-						<h5>Lorem Ipsum</h5>
-<p>Nulla fringilla dapibus nisieu accumsan arcu convallis tincidunt donec mauris libero laciniade mollis malesuade odio interdum. Integer sed magna vel velit dignissim luctus eu in urna. Dapibus egestas turpis. Praesent faucibus nisl sit amet nulla sollicitudin.</p>
+						<h5>Feature Testable</h5>
+<p>One of the best hidden gems.  This server is NOT tested with single class tests but instead is tested in terms of what YOU use.  This also has the added benefit that we can refactor to create new features without the drag of needing to change unit tests</p>
+
                             </div>
                         </div> 
 

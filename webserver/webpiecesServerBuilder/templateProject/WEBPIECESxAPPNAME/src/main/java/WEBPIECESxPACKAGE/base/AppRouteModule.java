@@ -8,7 +8,6 @@ import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE3;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.REDIRECT_PAGE;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.AbstractRouteModule;
 
 import WEBPIECESxPACKAGE.base.examples.ExamplesRouteId;
@@ -29,6 +28,7 @@ public class AppRouteModule extends AbstractRouteModule {
 		addRoute(GET, "/",              "examples/ExamplesController.index", MAIN_ROUTE);
 		
 		addRoute(GET, "/home",          "crud/login/AppLoginController.index", ExamplesRouteId.HOME);
+		addRoute(GET, "/tags",          "crud/login/AppLoginController.tags", ExamplesRouteId.TAGS);
 
 		addRoute(GET, "/main2",         "/WEBPIECESxPACKAGE/base/examples/ExamplesController.index", MAIN_ROUTE2);
 		addRoute(GET, "/main3",         "WEBPIECESxPACKAGE.base.examples.ExamplesController.index", MAIN_ROUTE3);

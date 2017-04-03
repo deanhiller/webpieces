@@ -89,7 +89,7 @@ public class ReverseRoutes {
 		else if(pieces.length > 2) {
 			return getByFullClassAndName(name);
 		} else
-			throw new IllegalStateException("bug, should never reach here");
+			throw new IllegalStateException("route not found='"+name+"'");
 	}
 
 	private RouteMeta getByFullClassAndName(String name) {

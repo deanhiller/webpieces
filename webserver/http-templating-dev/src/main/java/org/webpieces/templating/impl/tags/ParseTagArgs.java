@@ -1,11 +1,11 @@
 package org.webpieces.templating.impl.tags;
 
-import org.webpieces.templating.api.GroovyGen;
+import org.webpieces.templating.api.HtmlGen;
 import org.webpieces.templating.api.ScriptOutput;
 import org.webpieces.templating.api.Token;
 import org.webpieces.templating.impl.source.TemplateToken;
 
-public abstract class ParseTagArgs implements GroovyGen {
+public abstract class ParseTagArgs implements HtmlGen {
 	
 	private RoutePathTranslator callback;
 
