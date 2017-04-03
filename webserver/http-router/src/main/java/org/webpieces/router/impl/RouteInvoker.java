@@ -259,7 +259,7 @@ public class RouteInvoker {
 		this.reverseRoutes = reverseRoutes;
 	}
 
-	public String convertToUrl(String routeId, Map<String, String> args) {
-		return reverseRoutes.convertToUrl(routeId, args);
+	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+		return reverseRoutes.convertToUrl(routeId, args, isValidating);
 	}
 }

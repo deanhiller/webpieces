@@ -1,5 +1,6 @@
-#{extends 'userTemplate.html' /}#
-#{set subtab:'userlist'/}#
+#{extends '../../main.html'/}#
+#{set title:'Logged In Home'/}#
+#{set tab:'loggedin'/}#
 
 <h4>Home</h4>
 
@@ -43,7 +44,7 @@ Seems real simple but with ajax the complexity is high...(lucky we do this for y
   <li>You end up on the users list page</li>
 </ol>
 
-THIS last one is in progress and is quite a bit more complicated.  
+THIS last one is quite a bit more complicated and we could implement later..
 
 <ol>
   <li>Click the User list tab</li>
@@ -51,5 +52,7 @@ THIS last one is in progress and is quite a bit more complicated.
   <li>Go to another tab and logout to simulate session expired</li>
   <li>Submit the added user</li>
   <li>You end up on login page so log in</li>
-  <li>Modify login code to make it so they end up on form subit with the data they filled in</li>  
+  <li>Modify login code to make it so they end up on form submit with the original data they filled in</li>  
 </ol>
+
+Next need to test network outages but only for ajax as old school crud is solid...

@@ -8,7 +8,10 @@ import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE3;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.REDIRECT_PAGE;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.AbstractRouteModule;
+
+import WEBPIECESxPACKAGE.base.examples.ExamplesRouteId;
 
 public class AppRouteModule extends AbstractRouteModule {
 
@@ -24,6 +27,9 @@ public class AppRouteModule extends AbstractRouteModule {
 		//The controller.method is a relative or absolute path with ClassName.method at the end
 		//RouteIds are used to redirect in the webapp itself and must be unique
 		addRoute(GET, "/",              "examples/ExamplesController.index", MAIN_ROUTE);
+		
+		addRoute(GET, "/home",          "crud/login/AppLoginController.index", ExamplesRouteId.HOME);
+
 		addRoute(GET, "/main2",         "/WEBPIECESxPACKAGE/base/examples/ExamplesController.index", MAIN_ROUTE2);
 		addRoute(GET, "/main3",         "WEBPIECESxPACKAGE.base.examples.ExamplesController.index", MAIN_ROUTE3);
 

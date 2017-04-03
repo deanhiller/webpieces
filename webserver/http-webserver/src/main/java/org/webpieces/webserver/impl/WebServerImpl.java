@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -165,7 +164,7 @@ public class WebServerImpl implements WebServer {
 		}
 
 		log.info("validating recorded line="+line);
-		routingService.convertToUrl(routeId, argsWithFakeValues);
+		routingService.convertToUrl(routeId, argsWithFakeValues, true);
 	}
 
 	@Override

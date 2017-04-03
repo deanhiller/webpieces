@@ -44,8 +44,8 @@ public abstract class AbstractRouterService implements RoutingService {
 	protected abstract void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb);
 	
 	@Override
-	public String convertToUrl(String routeId, Map<String, String> args) {
-		return routeLoader.convertToUrl(routeId, args);
+	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+		return routeLoader.convertToUrl(routeId, args, isValidating);
 	}
 	
 	@Override

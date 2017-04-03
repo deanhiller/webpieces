@@ -173,6 +173,34 @@ public class TestHttps {
 		response.assertContains("This is some home page");
 	}
 
+	@Test
+	public void testReverseUrlLookupOnHttpPageForHttpsUrl() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", false); // https
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("https://myhost.com:443"); //notice the Https Route page is not shown	
+	}
+
+	@Test
+	public void testReverseUrlLookupOnHttpPageForHttpsUrl8443() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", false, 8080); // https
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses(200000, 1);
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("https://myhost.com:8443"); //notice the Https Route page is not shown	
+	}
+	
 	private Header simulateLogin() {
 		HttpRequest req1 = Requests.createRequest(KnownHttpMethod.POST, "/postLogin", true);
 		

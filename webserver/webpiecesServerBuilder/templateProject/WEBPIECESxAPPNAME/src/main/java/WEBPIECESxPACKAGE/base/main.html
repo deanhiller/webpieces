@@ -25,30 +25,6 @@
     #{stylesheet href:'%[/assets/crud/overrides.css]%'/}#
 	
 	#{script src:'%[/assets/crud/js/jquery/jquery-1.9.1.js]%'/}#
-	
-	
-	*{
-	#{if controllers.Utility.isProdMode()}
-		#{if controllers.Utility.isLocale('zh')}
-		    <script type="text/javascript">
-			var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
-			document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F0a04038dc38aad75893c42f66eaeffc6' type='text/javascript'%3E%3C/script%3E"));
-			</script>
-		#{/if}
-		#{elseif controllers.Utility.isLocale('en')}
-			<script>
-			  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-			
-			  ga('create', 'UA-71902310-1', 'auto');
-			  ga('send', 'pageview');
-			
-			</script>
-		#{/elseif}
-    #{/if}
-    }*
 
 </head>
 <body>
@@ -66,48 +42,30 @@
             </a>
             <div class="nav-collapse collapse">
                 <ul class="nav pull-right">
-                    <li id="tab_index"><a href="@{Marketing.index()}">&{'Home', 'link.home'}&</a></li>
-                    <li id="tab_contact"><a href="@{Marketing.contact()}">&{'Contact Us', 'link.contactus'}&</a></li>
-                    #{if _session.get('coolguy') != null}#
-            		<li id="tab_admin" class="dropdown">
-            			<a href="#" class="dropdown-toggle" id="pages-drop" data-toggle="dropdown">Admin</a>   
+                    <li id="tab_home"><a href="@[HOME]@">&{'Home', 'link.home'}&</a></li>
+                   	#{if _session.get('userId') != null}#
+                	<li id="tab_loggedin"><a href="@[LOGGED_IN_HOME]@">&{'Logged in Home', 'link.home'}&</a></li>
+            		<li id="tab_store" class="dropdown">
+            			<a href="#" class="dropdown-toggle" id="pages-drop" data-toggle="dropdown">&{'Examples', 'examples'}&</a>   
 						<!-- Dropdown Menu -->
 						<ul class="dropdown-menu">
-							<li><a href="@{backdoor.Backdoor.home()}">Home</a></li>
-			            	<li><a href="@{backdoor.Backdoor.home()}">For Later</a></li>
+							<li><a href="@[LIST_USERS]@">&{'CRUD Example', 'crud'}&</a></li>
+			            	<li><a href="@[AJAX_LIST_USERS]@">&{ 'Ajax CRUD Example', 'ajax'}&</a></li>
 			        	</ul>
 			        </li>
 			        #{/if}#
-                   	#{elseif _session.get('key') != null}#
-            		<li id="tab_store" class="dropdown">
-            			<a href="#" class="dropdown-toggle" id="pages-drop" data-toggle="dropdown">&{'My Store', 'mystore'}&</a>   
-						<!-- Dropdown Menu -->
-						<ul class="dropdown-menu">
-							<li><a href="@{admin.Settings.settings()}">&{'Settings', 'settings'}&</a></li>
-			            	<li><a href="@{admin.Products.products()}">&{ 'Products', 'products'}&</a></li>
-			            	<li><a href="@{admin.Customers.customers()}">&{'Customers', 'customers'}&</a></li>
-			            	<li><a href="@{admin.Customers.orders()}">&{'Orders', 'orders'}&</a></li>
-			            	<li><a href="@{admin.Settings.analytics()}">&{'Analytics', 'analytics'}&</a></li>
-			            	<li><a href="@{admin.Settings.marketing()}">&{'Marketing', 'marketing'}&</a></li>
-			            	<li><a href="@{admin.Settings.email()}">&{'Email', 'youremail'}&</a></li>
-			                <!-- 			                <li><a href="/companydetails">Users</a></li> -->
-			        	</ul>
-			        </li>
-			        #{/elseif}#
-                    #{if _session.get('key')}#
+                    #{if _session.get('userId')}#
                         <li>
                         	<div style="padding-left: 15px;padding-right: 15px">
-                        	<div>${_session.get('key')}$</div>
+                        	<div>${_session.get('userId')}$</div>
                         	<div id="custom_logoutbtn">
-                        		<a href="@{auth.Secure.logout()}"  class="btn btn-primary" style="height: 18px;width: 110px">&{'Logout', 'link.logout'}&</a>
+                        		<a href="@[LOGOUT]@"  class="btn btn-primary" style="height: 18px;width: 110px">&{'Logout', 'link.logout'}&</a>
                         	</div>
                         	</div>
                         </li>
             		#{/if}#
             		#{else}#
-<!--                     	<li><a class="btn-header" href="/signup">Sign up</a></li> -->        	
-					<li id="tab_register"><a class="btn-header" href="@{auth.Register.register()}">&{'Register', 'link.register'}&</a></li>
-                    <li id="tab_login"><a class="btn-header" href="@{auth.Secure.login()}">&{'Login', 'link.login'}&</a></li>
+                    <li id="tab_login"><a class="btn-header" href="@[LOGIN]@">&{'Login', 'link.login'}&</a></li>
                     #{/else}#	
                 </ul>
             </div>
@@ -127,7 +85,13 @@
 		</div>
 	#{/if}#
 
-	#{get 'body'/}#
+	<div id="content">
+  		<div class="container"> 
+			<div class="content rt">
+				#{get 'body'/}#
+			</div>
+  		</div>
+	</div>
 
 	<!-- starts footer -->
     <footer id="footer">

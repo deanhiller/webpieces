@@ -1,7 +1,5 @@
 package org.webpieces.webserver.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -22,7 +20,7 @@ public class RouterLookupProxy implements RouterLookup {
 	
 	@Override
 	public String fetchUrl(String routeId, Map<String, String> args) {
-		return router.convertToUrl(routeId, args);
+		return router.convertToUrl(routeId, args, false );
 	}
 
 	@Override

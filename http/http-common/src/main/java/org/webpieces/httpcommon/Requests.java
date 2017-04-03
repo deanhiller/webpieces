@@ -20,8 +20,12 @@ import org.webpieces.util.net.URLEncoder;
 public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	
+
 	public static HttpRequest createRequest(KnownHttpMethod method, String url, boolean isHttps) {
+		return createRequest(method, url, isHttps, null);
+	}
+	
+	public static HttpRequest createRequest(KnownHttpMethod method, String url, boolean isHttps, Integer port) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(method);
@@ -34,8 +38,11 @@ public class Requests {
 		else
 			req.setHttpScheme(HTTP);
 
-		req.addHeader(new Header(KnownHeaderName.HOST, "myhost.com"));
-
+		if(port == null)
+			req.addHeader(new Header(KnownHeaderName.HOST, "myhost.com"));
+		else
+			req.addHeader(new Header(KnownHeaderName.HOST, "myhost.com:"+port));
+		
 		return req;
 	}
 

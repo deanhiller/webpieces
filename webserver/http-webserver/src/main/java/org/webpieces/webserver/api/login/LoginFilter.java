@@ -9,14 +9,11 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.RouteId;
-import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.util.filters.Service;
 
 @Singleton

@@ -19,9 +19,10 @@ public interface RoutingService {
 	 * 
 	 * @param routeId
 	 * @param notUrlEncodedArgs
+	 * @param isValidating 
 	 * @return
 	 */
-	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs);
+	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs, boolean isValidating);
 	
 	FileMeta relativeUrlToHash(String urlPath);
 }

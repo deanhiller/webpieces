@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 
@@ -138,10 +141,10 @@ public class ReverseRoutes {
 		return "ReverseRoutes [routeIdToRoute=" + routeIdToRoute + "]";
 	}
 
-	public String convertToUrl(String routeId, Map<String, String> args) {
+	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {		
 		RouteMeta routeMeta = get(routeId);
 		Route route = routeMeta.getRoute();
-		String path = route.getFullPath();
+		String urlPath = route.getFullPath();
 		List<String> pathParamNames = route.getPathParamNames();
 		for(String param : pathParamNames) {
 			String val = args.get(param);
@@ -155,10 +158,27 @@ public class ReverseRoutes {
 						+ " to exist(and cannot be null as well).  route="+routeId+" args="+strArgs);
 			}
 			String encodedVal = urlEncode(val);
-			path = path.replace("{"+param+"}", encodedVal);
+			urlPath = urlPath.replace("{"+param+"}", encodedVal);
 		}
 		
-		return path;
+		if(isValidating)
+			return urlPath;
+		
+		RequestContext ctx = Current.getContext();
+		RouterRequest request = ctx.getRequest();
+		
+		if(!route.isHttpsRoute() || request.isHttps)
+			return urlPath;
+		
+		//we are rendering an http page with a link to https so need to do special magic
+		String domain = request.domain;
+		int port = request.port;
+		
+		int httpsPort = 443;
+		if(port == 8080)
+			httpsPort = 8443;
+		
+		return "https://"+domain+":"+httpsPort+urlPath;
 	}
 	
 	private String urlEncode(Object value) {

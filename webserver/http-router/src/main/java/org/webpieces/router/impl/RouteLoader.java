@@ -228,8 +228,8 @@ public class RouteLoader {
 		return controllerFinder.createNotFoundService(m, filterInfos);
 	}
 
-	public String convertToUrl(String routeId, Map<String, String> args) {
-		return invoker.convertToUrl(routeId, args);
+	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+		return invoker.convertToUrl(routeId, args, isValidating);
 	}
 	
 	public FileMeta relativeUrlToHash(String urlPath) {
