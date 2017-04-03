@@ -5,6 +5,7 @@ import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 import org.webpieces.router.api.routing.PortType;
+import org.webpieces.router.api.routing.Router;
 import org.webpieces.webserver.api.login.LoginFilter;
 import org.webpieces.webserver.api.login.LoginInfo;
 
@@ -12,18 +13,19 @@ public class HttpsRouteModule extends AbstractRouteModule {
 
 	@Override
 	public void configure() {
+		Router httpsRouter = router.getScopedRouter(null, true);
 		
-		addHttpsRoute(GET , "/secureRoute",         "HttpsController.home", HttpsRouteId.HOME);
-		addHttpsRoute(GET , "/login",               "HttpsController.login", HttpsRouteId.LOGIN);
-		addHttpsRoute(POST, "/postLogin",           "HttpsController.postLogin", HttpsRouteId.POST_LOGIN, false);
-		addHttpsRoute(GET , "/secure/internal",     "HttpsController.internal", HttpsRouteId.INTERNAL);
+		httpsRouter.addRoute(GET , "/secureRoute",         "HttpsController.home", HttpsRouteId.HOME);
+		httpsRouter.addRoute(GET , "/login",               "HttpsController.login", HttpsRouteId.LOGIN);
+		httpsRouter.addRoute(POST, "/postLogin",           "HttpsController.postLogin", HttpsRouteId.POST_LOGIN, false);
+		httpsRouter.addRoute(GET , "/secure/internal",     "HttpsController.internal", HttpsRouteId.INTERNAL);
 
 		//in this case, https route of same path is never hit since the order is wrong...
 		addRoute(GET ,     "/same",             "HttpsController.httpRoute", HttpsRouteId.HTTP_ROUTE);
-		addHttpsRoute(GET, "/same",             "HttpsController.httpsRoute", HttpsRouteId.HTTPS_ROUTE);
+		httpsRouter.addRoute(GET, "/same",             "HttpsController.httpsRoute", HttpsRouteId.HTTPS_ROUTE);
 		
 		//This is the correct order, https://.../same2 shows the https route and http://.../same2 shows the http route...
-		addHttpsRoute(GET, "/same2",             "HttpsController.httpsRoute", HttpsRouteId.HTTPS_ROUTE2);		
+		httpsRouter.addRoute(GET, "/same2",             "HttpsController.httpsRoute", HttpsRouteId.HTTPS_ROUTE2);		
 		addRoute(GET ,     "/same2",             "HttpsController.httpRoute", HttpsRouteId.HTTP_ROUTE2);
 
 		//Unlike routes which apply regex to request urls, filters regexs are applied to route regexs so if a filter

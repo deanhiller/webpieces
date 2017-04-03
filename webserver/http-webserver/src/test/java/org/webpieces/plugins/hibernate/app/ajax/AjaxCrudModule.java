@@ -18,6 +18,11 @@ public class AjaxCrudModule extends ScopedRouteModule {
 	}
 
 	@Override
+	protected boolean isHttpsOnlyRoutes() {
+		return false;
+	}
+	
+	@Override
 	protected void configure() {
 		CrudRouteIds routeIds = new CrudRouteIds(
 				AJAX_LIST_USERS, AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM,

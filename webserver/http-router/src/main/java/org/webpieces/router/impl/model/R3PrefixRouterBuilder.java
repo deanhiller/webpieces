@@ -6,8 +6,8 @@ import org.webpieces.router.api.routing.Router;
 
 public class R3PrefixRouterBuilder extends AbstractRouteBuilder {
 
-	public R3PrefixRouterBuilder(RouterInfo info, L3PrefixedRouting routes, LogicHolder holder) {
-		super(info, routes, holder);
+	public R3PrefixRouterBuilder(RouterInfo info, L3PrefixedRouting routes, LogicHolder holder, boolean isHttpsOnlyRoutes) {
+		super(info, routes, holder, isHttpsOnlyRoutes);
 	}
 
 	@Override

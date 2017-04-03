@@ -5,6 +5,7 @@ import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.router.api.routing.AbstractRouteModule;
 import org.webpieces.router.api.routing.PortType;
+import org.webpieces.router.api.routing.Router;
 
 public class LoginModule extends AbstractRouteModule {
 
@@ -25,9 +26,10 @@ public class LoginModule extends AbstractRouteModule {
 	@Override
 	protected void configure() {
 		
-		addHttpsRoute(GET , "/logout",              controller+".logout", LoginRouteId.LOGOUT);		
-		addHttpsRoute(GET , "/login",               controller+".login", LoginRouteId.LOGIN);
-		addHttpsRoute(POST, "/postLogin",           controller+".postLogin", LoginRouteId.POST_LOGIN);
+		Router httpsRouter = router.getScopedRouter(null, true);
+		httpsRouter.addRoute(GET , "/logout",              controller+".logout", LoginRouteId.LOGOUT);		
+		httpsRouter.addRoute(GET , "/login",               controller+".login", LoginRouteId.LOGIN);
+		httpsRouter.addRoute(POST, "/postLogin",           controller+".postLogin", LoginRouteId.POST_LOGIN);
 		
 		addFilter(securePath, LoginFilter.class, new LoginInfo(sessionToken, LoginRouteId.LOGIN), PortType.HTTPS_FILTER);
 		

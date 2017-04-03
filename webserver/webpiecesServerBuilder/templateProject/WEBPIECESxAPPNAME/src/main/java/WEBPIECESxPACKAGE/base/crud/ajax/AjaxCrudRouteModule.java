@@ -16,7 +16,12 @@ public class AjaxCrudRouteModule extends ScopedRouteModule {
 	protected String getScope() {
 		return "/secure/ajax";
 	}
-
+	
+	@Override
+	protected boolean isHttpsOnlyRoutes() {
+		return true;
+	}
+	
 	@Override
 	protected void configure() {
 		//basic crud example(which just calls the same addRoute methods for you for Create/Read/Update/Delete and 
@@ -32,7 +37,7 @@ public class AjaxCrudRouteModule extends ScopedRouteModule {
 				AJAX_LIST_USERS, AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM,
 				AJAX_POST_USER_FORM, AJAX_CONFIRM_DELETE_USER, AJAX_POST_DELETE_USER);
 		
-		addHttpsCrud("user", "AjaxCrudUserController", routeIds);
+		addCrud("user", "AjaxCrudUserController", routeIds);
 	}
 
 }

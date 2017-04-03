@@ -11,8 +11,8 @@ public abstract class AbstractDomainBuilder extends AbstractRouteBuilder{
 
 	protected L2DomainRoutes domainRoutes;
 
-	public AbstractDomainBuilder(RouterInfo routerInfo, L2DomainRoutes domainRoutes, L3PrefixedRouting routes, LogicHolder holder) {
-		super(routerInfo, routes, holder);
+	public AbstractDomainBuilder(RouterInfo routerInfo, L2DomainRoutes domainRoutes, L3PrefixedRouting routes, LogicHolder holder, boolean isHttpsOnlyRoutes) {
+		super(routerInfo, routes, holder, isHttpsOnlyRoutes);
 		this.domainRoutes = domainRoutes;
 	}
 

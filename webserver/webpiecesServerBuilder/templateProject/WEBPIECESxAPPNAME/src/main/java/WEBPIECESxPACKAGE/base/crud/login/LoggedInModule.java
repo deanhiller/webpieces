@@ -20,15 +20,20 @@ public class LoggedInModule extends ScopedRouteModule {
 	}
 
 	@Override
+	protected boolean isHttpsOnlyRoutes() {
+		return true;
+	}
+	
+	@Override
 	protected void configure() {
 		
-		addHttpsRoute(HttpMethod.GET ,   "/home",        "CrudController.home", LoginRouteId.LOGGED_IN_HOME);
+		addRoute(HttpMethod.GET ,   "/home",        "CrudController.home", LoginRouteId.LOGGED_IN_HOME);
 		
 		CrudRouteIds routeIds = new CrudRouteIds(
 				LOGIN_LIST_USERS, LOGIN_ADD_USER_FORM, LOGIN_EDIT_USER_FORM,
 				LOGIN_POST_USER_FORM, LOGIN_CONFIRM_DELETE_USER, LOGIN_POST_DELETE_USER);
 		
-		addHttpsCrud("user", "CrudController", routeIds);
+		addCrud("user", "CrudController", routeIds);
 	}
 
 }

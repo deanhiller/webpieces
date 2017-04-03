@@ -150,7 +150,7 @@ public class RouteLoader {
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getUrlEncoding());
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config);
-		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder);
+		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder, false);
 		invoker.init(reverseRoutes);
 		
 		List<RouteModule> all = new ArrayList<>();

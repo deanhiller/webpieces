@@ -21,15 +21,6 @@ public interface Router {
 
 	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
 
-	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId);
-	
-	/**
-	 * Allows you to add POST route with checkToken=false(other addRoutes are defaulted to true) AND allows a GET route
-	 * that does a secure token check(IF you post with GET method which is highly NOT recommended)
-	 */
-	void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
-	void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
-
 	/**
 	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
 	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 
@@ -62,10 +53,10 @@ public interface Router {
 	 * path
 	 * 
 	 * @param path
-	 * @param isSecure true if only available over https otherwise available over http and https
+	 * @param isHttpsOnlyRoutes true if only available over https otherwise available over http and https
 	 * @return
 	 */
-	Router getScopedRouter(String path);
+	Router getScopedRouter(String path, boolean isHttpsOnlyRoutes);
 
 	/**
 	 * Only used if you host multiple domains(like me)!!!!!  All paths refer to all domains EXCEPT the ones defined
@@ -80,6 +71,5 @@ public interface Router {
 	Router getDomainScopedRouter(String domainRegEx);
 
 	void addCrud(String entity, String controller, CrudRouteIds routeIds);
-	void addHttpsCrud(String entity, String controller, CrudRouteIds routeIds);
 
 }

@@ -15,8 +15,6 @@ public abstract class AbstractRouteModule implements RouteModule {
 	}
 
 	protected abstract void configure();
-
-
 	
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
 		router.addRoute(method, path, controllerMethod, routeId);
@@ -28,18 +26,6 @@ public abstract class AbstractRouteModule implements RouteModule {
 
 	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
 		router.addRoute(methods, path, controllerMethod, routeId);
-	}
-
-	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId) {
-		router.addHttpsRoute(method, path, controllerMethod, routeId);
-	}
-
-	public void addHttpsRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
-		router.addHttpsRoute(method, path, controllerMethod, routeId, checkToken);
-	}
-	
-	public void addHttpsRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		router.addHttpsRoute(methods, path, controllerMethod, routeId);
 	}
 
 	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {
@@ -70,16 +56,12 @@ public abstract class AbstractRouteModule implements RouteModule {
 		router.setInternalErrorRoute(controllerMethod);
 	}
 
-	public Router getScopedRouter(String path) {
-		return router.getScopedRouter(path);
+	public Router getScopedRouter(String path, boolean isHttpsOnlyRoutes) {
+		return router.getScopedRouter(path, isHttpsOnlyRoutes);
 	}
 
 	public void addCrud(String entity, String controller, CrudRouteIds routes) {
 		router.addCrud(entity, controller, routes);
 	}	
-	
-	public void addHttpsCrud(String entity, String controller, CrudRouteIds routes) {
-		router.addHttpsCrud(entity, controller, routes);
-	}
 
 }

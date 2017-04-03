@@ -16,7 +16,12 @@ public class CrudRouteModule extends ScopedRouteModule {
 	protected String getScope() {
 		return "/secure/crud";
 	}
-
+	
+	@Override
+	protected boolean isHttpsOnlyRoutes() {
+		return true;
+	}
+	
 	@Override
 	protected void configure() {
 		//basic crud example(which just calls the same addRoute methods for you for Create/Read/Update/Delete and 
@@ -32,7 +37,7 @@ public class CrudRouteModule extends ScopedRouteModule {
 		CrudRouteIds routeIds = new CrudRouteIds(
 				LIST_USERS, GET_ADD_USER_FORM, GET_EDIT_USER_FORM,
 				POST_USER_FORM, CONFIRM_DELETE_USER, POST_DELETE_USER);
-		addHttpsCrud("user", "CrudUserController", routeIds);
+		addCrud("user", "CrudUserController", routeIds);
 	}
 
 }

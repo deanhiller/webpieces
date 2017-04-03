@@ -5,8 +5,8 @@ public abstract class ScopedRouteModule extends AbstractRouteModule {
 	@Override
 	public final void configure(Router router) {
 		String scope = getScope();
-		if(scope != null && scope.length() > 0) {
-			this.router = router.getScopedRouter(scope);
+		if((scope != null && scope.length() > 0) || isHttpsOnlyRoutes()) {
+			this.router = router.getScopedRouter(scope, isHttpsOnlyRoutes());
 		} else {
 			this.router = router;
 		}
@@ -19,7 +19,8 @@ public abstract class ScopedRouteModule extends AbstractRouteModule {
 	 * @return
 	 */
 	protected abstract String getScope();
-	 
+
+	protected abstract boolean isHttpsOnlyRoutes();
 
 	@Override
 	protected abstract void configure();

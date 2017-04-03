@@ -29,8 +29,8 @@ public class R1RouterBuilder extends AbstractDomainBuilder  {
 	private List<FilterInfo<?>> notFoundFilters = new ArrayList<>();
 	private List<FilterInfo<?>> internalErrorFilters = new ArrayList<>();
 	
-	public R1RouterBuilder(RouterInfo info, L1AllRouting allRouting, LogicHolder holder) {
-		super(info, allRouting.getMainRoutes(), allRouting.getMainRoutes().getRoutesForDomain(), holder);
+	public R1RouterBuilder(RouterInfo info, L1AllRouting allRouting, LogicHolder holder, boolean isHttpsOnlyRoutes) {
+		super(info, allRouting.getMainRoutes(), allRouting.getMainRoutes().getRoutesForDomain(), holder, isHttpsOnlyRoutes);
 		this.allRouting = allRouting;
 	}
 
