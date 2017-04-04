@@ -4,8 +4,11 @@
   <body>
     Html is escaped here=${escaped}$ but inside verbatim
     <br/><br/>
-    #{verbatim}#This is not escaped ${verbatim}$ here
-    Hi there
+    
+    #{verbatim}#
+       This is not escaped ${verbatim}$ here
+       and this is as well <a href="">Something</a> 
+    
     #{/verbatim}#
   </body>
 </html>

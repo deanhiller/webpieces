@@ -32,7 +32,7 @@ public class BeansController {
 	private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
 	public Action urlEncoding(String user) {
-		return Actions.renderThis("user", user);
+		return Actions.renderThis("user", user, "html", "<a href=\"\">Text\"</a>");
 	}
 	
 	public Action pageParam() {

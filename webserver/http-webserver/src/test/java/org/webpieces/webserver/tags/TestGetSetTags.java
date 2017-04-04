@@ -46,6 +46,14 @@ public class TestGetSetTags {
 		
 		//tests whitespace cleaned up the line with #{set}# so these don't take up lines in the output
 		response.assertContains("<body>\n    The above line should be cleared");
+		
+		response.assertContains("&lt;a href=&quot;&quot;/&gt;"); //ensure we properly escape html from get/set
+		response.assertContains("<h2>Title2</h2>"); //ensure we use escape:false		
+		
+		//by default we do not escape the body of set when using get as it is used heavily in
+		//templating.  to avoid this if you like, there is an escapeHtml on the set element
+		response.assertContains("<h1 class=\"\">Some Header</h1>");
+		response.assertContains("&lt;h3 class=&quot;&quot;&gt;Header3&lt;/h1&gt;"); //ensure we use escape:true
 	}
 	
 

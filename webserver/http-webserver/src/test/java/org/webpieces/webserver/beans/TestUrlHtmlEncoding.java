@@ -17,7 +17,7 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestUrlEncoding {
+public class TestUrlHtmlEncoding {
 
 	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
@@ -41,6 +41,8 @@ public class TestUrlEncoding {
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains(" Hi Dean Hiller, this is testing param");
+		
+		response.assertContains("&lt;a href=&quot;&quot;&gt;Text&quot;&lt;/a&gt;"); //html should be escaped
 	}
 	
 

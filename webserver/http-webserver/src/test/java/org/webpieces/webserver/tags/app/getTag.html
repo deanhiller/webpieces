@@ -15,5 +15,18 @@
     
     <br/>
     This is set body result='#{get 'something'/}#'
+
+    #{set html:'<a href=""/>'/}# *{ defaults to escaped:true since generally is used with stuff like this #{set html:variable}# }*
+    #{get 'html'/}#
+<br/>
+    #{set html2:'<h2>Title2</h2>', escaped:false/}#
+    #{get 'html2'/}#
+<br/>
+    *{ defaults to escaped:false since generally is used with extending templates and providing entire html body }*
+    #{set 'htmlbody'}#<h1 class="">Some Header</h1>#{/set}#
+    #{get 'htmlbody'/}#
+<br/>
+    #{set 'htmlbody2', escaped:true}#<h3 class="">Header3</h1>#{/set}#
+    #{get 'htmlbody2'/}#
   </body>
 </html>
