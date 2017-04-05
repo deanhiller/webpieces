@@ -63,7 +63,7 @@ public class TestLesson2Errors {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
-				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
+				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(pUnit, true));
 		server = webserver.start();
 	}
 	

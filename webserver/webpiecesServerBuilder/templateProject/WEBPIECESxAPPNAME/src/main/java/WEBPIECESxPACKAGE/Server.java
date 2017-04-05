@@ -49,7 +49,7 @@ public class Server {
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			Server server = new Server(null, null, new ServerConfig("production"));
+			Server server = new Server(null, null, new ServerConfig("production", false));
 			
 			server.start();
 			
@@ -62,8 +62,10 @@ public class Server {
 			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}
 	}
-
+	
 	private WebServer webServer;
+
+	private boolean mockedForTest;
 
 	public Server(
 			Module platformOverrides, 
@@ -71,6 +73,7 @@ public class Server {
 			ServerConfig svrConfig) {
 		String filePath = System.getProperty("user.dir");
 		log.info("original user.dir before modification="+filePath);
+		mockedForTest = svrConfig.isMockedForTest();
 
 		modifyUserDirForManyEnvironments(filePath);
 
@@ -114,8 +117,11 @@ public class Server {
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
-
+	
 	PortConfig fetchPortsForRedirects() {
+		if(mockedForTest)
+			return new PortConfig(8080, 8443);
+		
 		//NOTE: You will need to modify this so it detects when you are in production so redirects continue to work
 		boolean isOnProductionHost = false;
 		

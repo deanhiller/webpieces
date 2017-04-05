@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -73,12 +74,16 @@ public class WebserverForTest {
 											.setDefaultResponseBodyEncoding(CHAR_SET_TO_USE)
 											.setCachedCompressedDirectory(cacheDir)
 											.setSecretKey(SecretKeyInfo.generateForTest())
-											.setTokenCheckOn(testConfig.isUseTokenCheck());
+											.setTokenCheckOn(testConfig.isUseTokenCheck())
+											.setPortConfigCallback(() -> fetchPortsForRedirects());
 		TemplateConfig templateConfig = new TemplateConfig();
 		
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
+	PortConfig fetchPortsForRedirects() {
+		return new PortConfig(8080, 8443);
+	}
 	
 	public void configure(ServerSocketChannel channel) throws SocketException {
 		channel.socket().setReuseAddress(true);
@@ -98,6 +103,10 @@ public class WebserverForTest {
 		return webServer.getUnderlyingHttpChannel();
 	}
 
+	public TCPServerChannel getUnderlyingHttpsChannel() {
+		return webServer.getUnderlyingHttpsChannel();
+	}
+	
 	public File getCacheDir() {
 		return cacheDir;
 	}

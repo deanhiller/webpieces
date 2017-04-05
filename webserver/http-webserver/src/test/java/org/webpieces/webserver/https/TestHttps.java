@@ -184,7 +184,7 @@ public class TestHttps {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("https://myhost.com:443"); //notice the Https Route page is not shown	
+		response.assertContains("https://myhost.com:8443"); //notice the Https Route page is not shown	
 	}
 
 	@Test

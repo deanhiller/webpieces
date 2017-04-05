@@ -147,7 +147,7 @@ public class RouteLoader {
 	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
 		log.info("adding routes");
 		
-		ReverseRoutes reverseRoutes = new ReverseRoutes(config.getPortConfigCallback(), config.getUrlEncoding());
+		ReverseRoutes reverseRoutes = new ReverseRoutes(config);
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config);
 		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder, false);

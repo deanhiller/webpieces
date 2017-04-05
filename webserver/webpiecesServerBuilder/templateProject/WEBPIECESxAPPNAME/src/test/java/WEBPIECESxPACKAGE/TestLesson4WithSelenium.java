@@ -1,5 +1,6 @@
 package WEBPIECESxPACKAGE;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -8,9 +9,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ByIdOrName;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
@@ -20,9 +21,6 @@ import org.webpieces.webserver.test.SeleniumOverridesForTest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-
-import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.Server;
 
 public class TestLesson4WithSelenium {
 	
@@ -41,7 +39,7 @@ public class TestLesson4WithSelenium {
 		driver = new FirefoxDriver();
 	}
 	@AfterClass
-	public static void tearDown() {
+	public static void staticTearDown() {	
 		driver.close();
 		driver.quit();
 	}
@@ -60,6 +58,12 @@ public class TestLesson4WithSelenium {
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();
+	}
+	
+	@After
+	public void tearDown() {
+		Options manage = driver.manage();
+		manage.deleteAllCookies();
 	}
 	
 	//You must have firefox 47.0.1 installed to run this test!!!!

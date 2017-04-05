@@ -16,6 +16,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.PortConfigCallback;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 
@@ -36,11 +37,13 @@ public class ReverseRoutes {
 	private PortConfigCallback portConfigCallback;
 	private volatile PortConfig ports;
 
-	public ReverseRoutes(PortConfigCallback portConfigCallback, Charset urlEncoding) {
-		this.portConfigCallback = portConfigCallback;
-		this.urlEncoding = urlEncoding;
+	public ReverseRoutes(RouterConfig config) {
+		this.portConfigCallback = config.getPortConfigCallback();
+		this.urlEncoding = config.getUrlEncoding();		
+		if(portConfigCallback == null)
+			throw new IllegalArgumentException("RouterConfig.getPortConfigCallback must be non-null");
 	}
-	
+
 	public void addRoute(RouteId routeId, RouteMeta meta) {
 		RouteMeta existingRoute = routeIdToRoute.get(routeId);
 		if(existingRoute != null) {
