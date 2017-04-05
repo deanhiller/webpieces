@@ -17,12 +17,12 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.AbstractCompile;
-import org.webpieces.templating.api.CompileCallback;
-import org.webpieces.templating.api.DevTemplateModule;
 import org.webpieces.templating.api.ProdTemplateModule;
-import org.webpieces.templating.api.RouterLookupModule;
-import org.webpieces.templating.api.TemplateCompileConfig;
-import org.webpieces.templating.impl.HtmlToJavaClassCompiler;
+import org.webpieces.templatingdev.api.CompileCallback;
+import org.webpieces.templatingdev.api.DevTemplateModule;
+import org.webpieces.templatingdev.api.RouterLookupModule;
+import org.webpieces.templatingdev.api.TemplateCompileConfig;
+import org.webpieces.templatingdev.impl.HtmlToJavaClassCompiler;
 import org.webpieces.util.net.URLEncoder;
 
 import com.google.inject.Guice;

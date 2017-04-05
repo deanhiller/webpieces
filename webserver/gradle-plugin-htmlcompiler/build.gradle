@@ -3,8 +3,9 @@ apply plugin: 'maven'
 
 dependencies {
     compile gradleApi()
+	//transitively pulling in http-templating is no longer working...
     compile project(':webserver:http-templating-dev')
-
+	
     testCompile deps['junit']
 }
 

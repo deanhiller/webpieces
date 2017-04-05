@@ -8,7 +8,10 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.templating.impl.DevTemplateService;
+import org.webpieces.templatingdev.api.DevTemplateModule;
+import org.webpieces.templatingdev.api.RouterLookupModule;
+import org.webpieces.templatingdev.api.TemplateCompileConfig;
+import org.webpieces.templatingdev.impl.DevTemplateService;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

@@ -6,8 +6,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.frontend.api.HttpFrontendManager;
-import org.webpieces.templating.api.DevTemplateModule;
-import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.templatingdev.api.DevTemplateModule;
+import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.DirectExecutorService;

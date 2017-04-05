@@ -1,7 +1,7 @@
 package org.webpieces.webserver.test;
 
-import org.webpieces.templating.api.DevTemplateModule;
-import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.templatingdev.api.DevTemplateModule;
+import org.webpieces.templatingdev.api.TemplateCompileConfig;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
