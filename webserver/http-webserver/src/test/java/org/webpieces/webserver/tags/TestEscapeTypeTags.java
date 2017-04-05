@@ -42,6 +42,11 @@ public class TestEscapeTypeTags {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("'''escaped by default &amp;'''");
 		response.assertContains("'''verbatim & so do not escape'''");
+		
+		//ensure maintain the newline
+		response.assertContains("%{...}%  %[...]% ${...}$ #{...}# #{/...}# #{.../}#\n&amp;{...}&amp;  @[...]@  @@[...]@@  *{...}* *[");
+		response.assertContains("&lt;a href=&quot;@[ACTION]@&quot;&gt;Link&lt;/a&gt;");
+
 	}
 	
 }

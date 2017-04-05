@@ -43,6 +43,8 @@ public class RouterConfig {
 
 	private Map<String, String> webAppMetaProperties;
 
+	private PortConfigCallback portConfigCallback;
+
 	public VirtualFile getMetaFile() {
 		return metaFile;
 	}
@@ -141,6 +143,13 @@ public class RouterConfig {
 	}
 	public Map<String, String> getWebAppMetaProperties() {
 		return webAppMetaProperties;
+	}
+	public RouterConfig setPortConfigCallback(PortConfigCallback callback) {
+		this.portConfigCallback = callback;
+		return this;
+	}
+	public PortConfigCallback getPortConfigCallback() {
+		return portConfigCallback;
 	}
 	
 }

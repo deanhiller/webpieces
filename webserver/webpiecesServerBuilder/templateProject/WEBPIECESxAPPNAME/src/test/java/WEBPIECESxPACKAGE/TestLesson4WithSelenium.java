@@ -6,8 +6,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 //import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ByIdOrName;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
@@ -31,6 +34,7 @@ public class TestLesson4WithSelenium {
 	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	
 	private int port;
+	private int httpsPort;
 
 	@BeforeClass
 	public static void staticSetup() {
@@ -55,19 +59,47 @@ public class TestLesson4WithSelenium {
 				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
+		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();
 	}
 	
-	//You must have firefox installed to run this test...
+	//You must have firefox 47.0.1 installed to run this test!!!!
 	//@Ignore
 	@Test
-	public void testSomething() throws ClassNotFoundException {
+	public void testRedirectToOriginallyRequestedUrlAfterLogin() throws ClassNotFoundException {
 
-		driver.get("http://localhost:"+port+"/examples");
+		driver.navigate().to("https://localhost:"+httpsPort+"/secure/crud/user/list");
 		
-		String pageSource = driver.getPageSource();
+		Assert.assertEquals("https://localhost:"+httpsPort+"/login", driver.getCurrentUrl());
 		
-		Assert.assertTrue("pageSource="+pageSource, pageSource.contains("TagArgs from variable otherArgument=Dean Hiller"));
+		driver.findElement(By.id("user")).sendKeys("bob");
+		driver.findElement(By.id("submit")).click();
+
+		String text = driver.findElement(By.id("errorDiv")).getText();
+		Assert.assertTrue(text.contains("No Soup for you!"));
+		String errorMsg = driver.findElement(By.id("username_errorMsg")).getText();
+		Assert.assertTrue(errorMsg.contains("I lied, Username must be 'dean'"));
 		
+		WebElement userInput = driver.findElement(By.id("user"));
+		userInput.clear();
+		userInput.sendKeys("dean");
+		
+		driver.findElement(By.id("submit")).click();
+		
+		//ensure it redirects back to originally requested url...
+		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/crud/user/list", driver.getCurrentUrl());
+	}
+	
+	//@Ignore
+	@Test
+	public void testBasicLogin() throws ClassNotFoundException {
+
+		driver.navigate().to("https://localhost:"+httpsPort+"/login");
+				
+		driver.findElement(By.id("user")).sendKeys("dean");
+		driver.findElement(By.id("submit")).click();
+
+		//ensure we redirect to logged in base home page
+		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/loggedinhome", driver.getCurrentUrl());
 	}
 	
 	//You must have firefox installed to run this test...
@@ -75,6 +107,7 @@ public class TestLesson4WithSelenium {
 	@Test
 	public void testChunking() throws ClassNotFoundException {
 
+		//We know this web page is big enough to test our chunking compatibility with a real browser
 		driver.get("http://localhost:"+port+"");
 		
 		String pageSource = driver.getPageSource();

@@ -21,7 +21,7 @@ public class ProdRouterModule implements Module {
 	
 	@Override
 	public void configure(Binder binder) {
-		binder.bind(RoutingService.class).to(ProdRouterService.class).asEagerSingleton();
+		binder.bind(RouterService.class).to(ProdRouterService.class).asEagerSingleton();
 		binder.bind(MetaLoaderProxy.class).to(ProdLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(ProdClassForName.class).asEagerSingleton();
 		binder.bind(CompressionCacheSetup.class).to(ProdCompressionCacheSetup.class).asEagerSingleton();;

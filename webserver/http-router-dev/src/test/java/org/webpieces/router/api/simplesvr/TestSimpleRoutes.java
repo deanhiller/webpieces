@@ -21,7 +21,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterSvcFactory;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
@@ -39,7 +39,7 @@ import com.google.inject.Module;
 public class TestSimpleRoutes {
 	
 	private static final Logger log = LoggerFactory.getLogger(TestSimpleRoutes.class);
-	private RoutingService server;
+	private RouterService server;
 
 	@SuppressWarnings("rawtypes")
 	@Parameterized.Parameters
@@ -53,7 +53,7 @@ public class TestSimpleRoutes {
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());
 		
-		RoutingService prodSvc = RouterSvcFactory.create(config);
+		RouterService prodSvc = RouterSvcFactory.create(config);
 
 		//for dev must be null
 		config.setWebappOverrides(null);
@@ -61,7 +61,7 @@ public class TestSimpleRoutes {
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
-		RoutingService devSvc = DevRouterFactory.create(config, compileConfig);
+		RouterService devSvc = DevRouterFactory.create(config, compileConfig);
 		
 		return Arrays.asList(new Object[][] {
 	         { prodSvc, module },
@@ -77,7 +77,7 @@ public class TestSimpleRoutes {
 		}
 	}
 	
-	public TestSimpleRoutes(RoutingService svc, TestModule module) {
+	public TestSimpleRoutes(RouterService svc, TestModule module) {
 		this.server = svc;
 		log.info("constructing test class for server="+svc.getClass().getSimpleName());
 	}

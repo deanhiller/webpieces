@@ -74,8 +74,8 @@ public class TokenImpl implements Token {
 
 	public void verifyContentsHaveNoStartTag() {
 		String val = getCleanValue();
-		//TODO: Create how we escape tags in the tag body
-		if(val.contains(state.getStart())) {
+		//the escape token *[ is the only one allowed inside itself
+		if(state != TemplateToken.ESCAPE && val.contains(state.getStart())) {
 			throw new IllegalArgumentException("You have one of two errors\n"
 					+ " 1. Your tag="+state.getStart()+" is missing the end token="+state.getEnd()+" OR\n"
 					+ " 2. you are using "+state.getStart()+" in the tag body which is not allowed and must be escaped\n"

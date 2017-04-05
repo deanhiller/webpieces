@@ -17,6 +17,8 @@ public abstract class LoginController {
 		if(user != null)
 			return Actions.redirect(LoginRouteId.LOGGED_IN_HOME);
 		
+		Current.flash().keep(); //we must keep previous data like the url
+		
 		return fetchGetLoginPageAction(); //Actions.renderThis();
 	}
 

@@ -5,7 +5,7 @@ import java.util.Map;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.impl.compression.FileMeta;
 
-public interface RoutingService {
+public interface RouterService {
 
 	void start();
 

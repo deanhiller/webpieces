@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RouteType;
@@ -32,7 +32,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.Injector;
 
-public class DevRoutingService extends AbstractRouterService implements RoutingService {
+public class DevRoutingService extends AbstractRouterService implements RouterService {
 
 	private static final Logger log = LoggerFactory.getLogger(DevRoutingService.class);
 	private static final Consumer<Injector> NO_OP = whatever -> {};

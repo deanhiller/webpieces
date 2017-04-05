@@ -8,7 +8,7 @@ public class VerbatimGen extends AbstractTag {
 
 	@Override
 	public String getName() {
-		return "verbatim";
+		return "htmlEscapingOff";
 	}
 	
 	@Override

@@ -20,7 +20,8 @@ public enum TemplateToken {
     MESSAGE("&{", "}&"),        // &{...}&
     ACTION("@[", "]@"),         // @[...]@
     ABSOLUTE_ACTION("@@[", "]@@"), // @@[...]@@
-    COMMENT("*{", "}*");          // *{...}*
+    COMMENT("*{", "}*"),        // *{...}*
+	ESCAPE("*[", "]*");         // *[...]* escapes all platform tokens except ]* which does not need escaping AND escapes all html as well;
 	
     private String start;
 	private String end;

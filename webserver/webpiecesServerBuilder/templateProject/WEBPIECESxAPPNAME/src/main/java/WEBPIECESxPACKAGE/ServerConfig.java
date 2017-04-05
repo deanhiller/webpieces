@@ -13,6 +13,7 @@ public class ServerConfig {
 	private boolean validateRouteIdsOnStartup = false;
 	private int httpPort = 8080;
 	private int httpsPort = 8443;
+	private int httpsFirewallPort = 8443; // for real production should generally be 443 but this makes it work locally
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
 	private Map<String, String> webAppMetaProperties = new HashMap<>();
 
@@ -20,6 +21,7 @@ public class ServerConfig {
 		this(persistenceUnit);
 		this.httpPort = httpPort;
 		this.httpsPort = httpsPort;
+		this.httpsFirewallPort = httpsPort;
 	}
 	
 	public ServerConfig(String persistenceUnit) {
@@ -60,6 +62,14 @@ public class ServerConfig {
 
 	public Map<String, String> getWebAppMetaProperties() {
 		return webAppMetaProperties;
+	}
+
+	public int getHttpsFirewallPort() {
+		return httpsFirewallPort;
+	}
+
+	public void setHttpsFirewallPort(int httpsFirewallPort) {
+		this.httpsFirewallPort = httpsFirewallPort;
 	}
 	
 }

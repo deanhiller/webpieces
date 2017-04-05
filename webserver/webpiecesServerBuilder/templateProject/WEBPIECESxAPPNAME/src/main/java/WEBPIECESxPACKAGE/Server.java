@@ -10,6 +10,7 @@ import java.util.Base64;
 
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
 import org.webpieces.util.file.VirtualFile;
@@ -98,7 +99,9 @@ public class Server {
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
-											.setSecretKey(signingKey);
+											.setSecretKey(signingKey)
+											.setPortConfigCallback(() -> fetchPortsForRedirects());
+		
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
@@ -112,6 +115,20 @@ public class Server {
 		webServer = WebServerFactory.create(config, routerConfig, templateConfig);
 	}
 
+	PortConfig fetchPortsForRedirects() {
+		//NOTE: You will need to modify this so it detects when you are in production so redirects continue to work
+		boolean isOnProductionHost = false;
+		
+		int httpPort = 80; //good security teams generally have the firewall on port 80 and your server on something like 8080
+		int httpsPort = 443; //good security teams generally have the firewall on port 443 and your server on something like 8443
+		if(!isOnProductionHost) {
+			//this is for running locally AND for local tests
+			httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
+			httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
+		}
+		return new PortConfig(httpPort, httpsPort);
+	}
+	
 	private byte[] fetchKey() {
 		//This is purely so it works before template creation
 		//NOTE: our build runs all template tests that are generated to make sure we don't break template 

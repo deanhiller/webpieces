@@ -104,6 +104,11 @@ public class TemplateTokenizerTask {
 				found(PLAIN, 2, lineNumber);
 			}
 			break;
+		case ESCAPE:
+			if (ESCAPE.matchesEnd(c, c1, c2)) {
+				found(PLAIN, 2, lineNumber);
+			}
+			break;
 		case START_TAG:
 			if (START_TAG.matchesEnd(c, c1, c2)) {
 				found(PLAIN, 2, lineNumber);
@@ -166,6 +171,8 @@ public class TemplateTokenizerTask {
 			found(ACTION, 2, lineNumber);
 		} else if (COMMENT.matchesStart(c, c1, c2)) {
 			found(COMMENT, 2, lineNumber);
+		} else if (ESCAPE.matchesStart(c, c1, c2)) {
+			found(ESCAPE, 2, lineNumber);
 		} else if (c == '\n') {
 			// We do this so any plain tokens that are all whitespace can be
 			// discarded...

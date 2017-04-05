@@ -5,7 +5,7 @@ import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -17,7 +17,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 @Singleton
-public class ProdRouterService extends AbstractRouterService implements RoutingService {
+public class ProdRouterService extends AbstractRouterService implements RouterService {
 
 	private static final Logger log = LoggerFactory.getLogger(ProdRouterService.class);
 	

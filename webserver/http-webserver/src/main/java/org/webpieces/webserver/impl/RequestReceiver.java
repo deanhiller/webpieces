@@ -41,7 +41,7 @@ import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.httpparser.api.subparsers.UrlEncodedParser;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -58,7 +58,7 @@ public class RequestReceiver implements RequestListener {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	@Inject
-	private RoutingService routingService;
+	private RouterService routingService;
 	@Inject
 	private WebServerConfig config;
 	@Inject

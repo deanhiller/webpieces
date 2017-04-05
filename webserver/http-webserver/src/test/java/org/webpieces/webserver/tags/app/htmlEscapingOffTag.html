@@ -1,0 +1,23 @@
+<html>
+  <head>
+  </head>
+  <body>
+    Html is escaped here=${escaped}$ but inside verbatim
+    <br/><br/>
+    
+    #{htmlEscapingOff}#
+       This is not escaped ${verbatim}$ here
+    
+    #{/htmlEscapingOff}#
+    
+    <br/><br/>
+    *{ escapes all platform tokens except ]* which never needs to be escaped }*
+*[ 
+%{...}%  %[...]% ${...}$ #{...}# #{/...}# #{.../}#
+&{...}&  @[...]@  @@[...]@@  *{...}* *[ 
+]*
+
+    *{ escapes html as well so you can easily type raw html }*
+    *[ <a href="@[ACTION]@">Link</a>  ]*    
+  </body>
+</html>

@@ -10,6 +10,7 @@ import org.webpieces.templating.api.HtmlGen;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.TemplateCompileConfig;
+import org.webpieces.templating.impl.html.HTML;
 import org.webpieces.templating.impl.tags.RoutePathTranslator;
 import org.webpieces.templating.impl.tags.TagGen;
 
@@ -92,7 +93,7 @@ public class ScriptWriter {
 	public void printPlain(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String srcText = token.getValue();
 		if(srcText.length() < maxLineLength) {
-			String text = addEscapesToSrc(srcText);
+			String text = addEscapesForGroovy(srcText);
 			sourceCode.println("      __out.print(\""+text+"\");", token);
 			return;
 		}
@@ -104,12 +105,12 @@ public class ScriptWriter {
 			int cutpoint = Math.min(srcText.length(), maxLineLength);
 			String prefix = srcText.substring(0, cutpoint);
 			srcText = srcText.substring(cutpoint);
-			String text = addEscapesToSrc(prefix);
+			String text = addEscapesForGroovy(prefix);
 			sourceCode.println("       __out.print(\""+text+"\");", token);
 		}
 	}
 
-	private String addEscapesToSrc(String srcText) {
+	private String addEscapesForGroovy(String srcText) {
         String text = srcText.replace("\\", "\\\\");
         text = pattern.matcher(text).replaceAll("\\\\\"");
         text = text.replace("\n", "\\n");
@@ -267,6 +268,13 @@ public class ScriptWriter {
 		String value = token.getCleanValue();
 		String path = translator.recordPath(value, token.getSourceLocation(false));
 		sourceCode.println("       __out.print(\""+path+"\");", token);
+	}
+
+	public void printEscaped(TokenImpl token, ScriptOutputImpl sourceCode) {
+		String value = token.getValue();
+		value = HTML.htmlEscape(value);
+		value = addEscapesForGroovy(value);
+		sourceCode.println("       __out.print(\""+value+"\");", token);
 	}
 
 }

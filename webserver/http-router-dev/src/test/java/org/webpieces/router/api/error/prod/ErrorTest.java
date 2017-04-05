@@ -6,7 +6,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.error.ErrorCommonTest;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.error.dev.NoMethodRouterModules;
@@ -20,7 +20,7 @@ public class ErrorTest {
 	public void testNoMethod() {
 		log.info("starting");
 		String moduleFileContents = NoMethodRouterModules.class.getName();
-		RoutingService server = ErrorCommonTest.createServer(true, moduleFileContents);
+		RouterService server = ErrorCommonTest.createServer(true, moduleFileContents);
 
 		try {
 			server.start();

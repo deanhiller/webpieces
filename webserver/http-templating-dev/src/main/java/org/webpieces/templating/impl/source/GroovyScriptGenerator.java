@@ -94,6 +94,9 @@ public class GroovyScriptGenerator {
 			case COMMENT:
 				creator.unprintUpToLastNewLine();
 				break;
+			case ESCAPE:
+				creator.printEscaped(token, sourceCode);
+				break;
 			case START_END_TAG:
 				creator.printStartEndTag(token, sourceCode);
 				break;

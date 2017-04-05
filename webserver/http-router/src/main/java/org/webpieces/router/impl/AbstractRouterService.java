@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.impl.compression.FileMeta;
@@ -16,7 +16,7 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
-public abstract class AbstractRouterService implements RoutingService {
+public abstract class AbstractRouterService implements RouterService {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractRouterService.class);
 	protected boolean started = false;

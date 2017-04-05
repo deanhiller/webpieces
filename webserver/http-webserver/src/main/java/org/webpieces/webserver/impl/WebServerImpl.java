@@ -17,7 +17,7 @@ import org.webpieces.frontend.api.HttpServer;
 import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.routing.Nullable;
 import org.webpieces.router.impl.compression.FileMeta;
@@ -42,7 +42,7 @@ public class WebServerImpl implements WebServer {
 	@Inject
 	private RequestReceiver serverListener;
 	@Inject
-	private RoutingService routingService;
+	private RouterService routingService;
 	
 	private HttpServer httpServer;
 	private HttpServer httpsServer;

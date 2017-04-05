@@ -14,14 +14,14 @@ public class RouterSvcFactory {
 	
     protected RouterSvcFactory() {}
 
-    public static RoutingService create(VirtualFile routersFile) {
+    public static RouterService create(VirtualFile routersFile) {
     	
     	return create(new RouterConfig().setMetaFile(routersFile).setSecretKey(SecretKeyInfo.generateForTest()));
     }
     
-	public static RoutingService create(RouterConfig config) {
+	public static RouterService create(RouterConfig config) {
 		Injector injector = Guice.createInjector(new ProdRouterModule(config));
-		RoutingService svc = injector.getInstance(RoutingService.class);
+		RouterService svc = injector.getInstance(RouterService.class);
 		return svc;	
 	}
 

@@ -14,6 +14,8 @@ import java.util.Set;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.PortConfig;
+import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
 import org.webpieces.router.api.routing.RouteId;
 
@@ -31,8 +33,11 @@ public class ReverseRoutes {
 	private Map<String, RouteMeta> fullClassAndNameToRoute = new HashMap<>();
 
 	private Charset urlEncoding;
-	
-	public ReverseRoutes(Charset urlEncoding) {
+	private PortConfigCallback portConfigCallback;
+	private volatile PortConfig ports;
+
+	public ReverseRoutes(PortConfigCallback portConfigCallback, Charset urlEncoding) {
+		this.portConfigCallback = portConfigCallback;
 		this.urlEncoding = urlEncoding;
 	}
 	
@@ -172,13 +177,12 @@ public class ReverseRoutes {
 		
 		//we are rendering an http page with a link to https so need to do special magic
 		String domain = request.domain;
-		int port = request.port;
-		
-		int httpsPort = 443;
-		if(port == 8080)
-			httpsPort = 8443;
-		
-		return "https://"+domain+":"+httpsPort+urlPath;
+
+		if(ports == null)
+			ports = portConfigCallback.fetchPortConfig();
+
+		int httpsPort = ports.getHttpsPort();
+		return "https://"+domain+":"+httpsPort +urlPath;
 	}
 	
 	private String urlEncode(Object value) {

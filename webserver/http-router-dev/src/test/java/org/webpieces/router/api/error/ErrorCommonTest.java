@@ -19,7 +19,7 @@ import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterSvcFactory;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.error.dev.CommonRoutesModules;
@@ -57,7 +57,7 @@ public class ErrorCommonTest {
 		//we verify redirects MUST match type and number of method arguments every time
 		//then when we form url, we put the stuff in the path OR put it as query params so it works on the way back in again too
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RoutingService server = createServer(isProdTest, moduleFileContents);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -80,7 +80,7 @@ public class ErrorCommonTest {
 	public void testArgsTypeMismatch() {
 		log.info("starting");
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RoutingService server = createServer(isProdTest, moduleFileContents);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -103,7 +103,7 @@ public class ErrorCommonTest {
 	public void testGetNotMatchPostRoute() {
 		log.info("starting");
 		String moduleFileContents = CommonRoutesModules.class.getName();
-		RoutingService server = createServer(isProdTest, moduleFileContents);
+		RouterService server = createServer(isProdTest, moduleFileContents);
 		
 		server.start();
 		
@@ -137,7 +137,7 @@ public class ErrorCommonTest {
 //		verifyNotFoundRendered(mockResponseStream);
 //	}
 	
-	public static RoutingService createServer(boolean isProdTest, String moduleFileContents) {
+	public static RouterService createServer(boolean isProdTest, String moduleFileContents) {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
 		if(isProdTest)
@@ -148,7 +148,7 @@ public class ErrorCommonTest {
 		File myCodePath = new File(filePath + "/src/test/java");
 		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
 		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
-		RoutingService server = DevRouterFactory.create(f, compileConfig);
+		RouterService server = DevRouterFactory.create(f, compileConfig);
 		return server;
 	}
 }

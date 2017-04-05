@@ -16,7 +16,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterSvcFactory;
-import org.webpieces.router.api.RoutingService;
+import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
@@ -30,7 +30,7 @@ import com.google.inject.Module;
 public class TestProdRouter {
 	
 	private static final Logger log = LoggerFactory.getLogger(TestProdRouter.class);
-	private RoutingService server;
+	private RouterService server;
 	private TestModule overrides;
 
 	@SuppressWarnings("rawtypes")
@@ -44,7 +44,7 @@ public class TestProdRouter {
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());
-		RoutingService prodSvc = RouterSvcFactory.create(config);
+		RouterService prodSvc = RouterSvcFactory.create(config);
 		
 		return Arrays.asList(new Object[][] {
 	         { prodSvc, module }
@@ -59,7 +59,7 @@ public class TestProdRouter {
 		}
 	}
 	
-	public TestProdRouter(RoutingService svc, TestModule module) {
+	public TestProdRouter(RouterService svc, TestModule module) {
 		this.server = svc;
 		this.overrides = module;
 		log.info("constructing test class for server="+svc.getClass().getSimpleName());
