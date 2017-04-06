@@ -59,6 +59,10 @@ ext {
        'hibernate':       'org.hibernate:hibernate-core:5.2.3.Final',
        'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
        'h2db':            'com.h2database:h2:1.4.192',
+	   
+	   //look into removing and using a copied single file as we only use one thing
+	   'commons-lang':    'org.apache.commons:commons-lang3:3.5',
+
     ]
 
 }

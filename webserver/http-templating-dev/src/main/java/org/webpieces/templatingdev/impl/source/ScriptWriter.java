@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
-import org.webpieces.templating.impl.html.HTML;
 import org.webpieces.templatingdev.api.AbstractTag;
 import org.webpieces.templatingdev.api.HtmlGen;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
@@ -272,7 +272,7 @@ public class ScriptWriter {
 
 	public void printEscaped(TokenImpl token, ScriptOutputImpl sourceCode) {
 		String value = token.getValue();
-		value = HTML.htmlEscape(value);
+		value = StringEscapeUtils.escapeHtml4(value);
 		value = addEscapesForGroovy(value);
 		sourceCode.println("       __out.print(\""+value+"\");", token);
 	}

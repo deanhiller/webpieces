@@ -10,6 +10,7 @@ sourceSets {
 
 dependencies {
     compile deps['apache-commons-io']
+	compile deps['commons-lang']
     compile project(':webserver:http-templating')
 }
 
