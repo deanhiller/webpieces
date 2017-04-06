@@ -65,7 +65,7 @@ public class ProdServerForIDE {
 		
 		Module platformOverrides = new DevTemplateModule(templateConfig);
 		
-		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT, false);
+		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
 		
 		//It is very important to turn off caching or developers will get very confused when they
 		//change stuff and they don't see changes in the website

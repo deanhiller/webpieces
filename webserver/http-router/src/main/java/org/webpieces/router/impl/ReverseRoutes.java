@@ -40,8 +40,10 @@ public class ReverseRoutes {
 	public ReverseRoutes(RouterConfig config) {
 		this.portConfigCallback = config.getPortConfigCallback();
 		this.urlEncoding = config.getUrlEncoding();		
-		if(portConfigCallback == null)
-			throw new IllegalArgumentException("RouterConfig.getPortConfigCallback must be non-null");
+		if(portConfigCallback == null) {
+			ports = new PortConfig(8080, 8443);
+		}
+			
 	}
 
 	public void addRoute(RouteId routeId, RouteMeta meta) {

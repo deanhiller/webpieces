@@ -10,13 +10,13 @@ public class MockHttpFrontendMgr implements HttpFrontendManager {
 
 	@Override
 	public HttpServer createHttpServer(FrontendConfig config, RequestListener listener) {
-		return new MockHttpServer();
+		return new MockHttpServer(config);
 	}
 
 	@Override
 	public HttpServer createHttpsServer(FrontendConfig config, RequestListener listener,
                                         SSLEngineFactory factory) {
-		return new MockHttpServer();
+		return new MockHttpServer(config);
 	}
 
 }

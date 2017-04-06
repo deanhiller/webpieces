@@ -66,7 +66,7 @@ public class DevelopmentServer {
 										new DevRouterModule(devConfig),
 										new DevTemplateModule(templateConfig));
 		
-		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT, false);
+		ServerConfig config = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
 		if(usePortZero) {
 			config.setHttpPort(0);
 			config.setHttpsPort(0);

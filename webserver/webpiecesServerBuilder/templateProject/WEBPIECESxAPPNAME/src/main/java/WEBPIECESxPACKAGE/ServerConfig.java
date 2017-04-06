@@ -11,13 +11,6 @@ public class ServerConfig {
 
 	private VirtualFile metaFile;
 	private boolean validateRouteIdsOnStartup = false;
-	
-	/**
-	 * I do not like this. need to figure out how to remove
-	 */
-	@Deprecated
-	private boolean isMockedForTest = false;
-	
 	private int httpPort = 8080;
 	private int httpsPort = 8443;
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
@@ -29,9 +22,8 @@ public class ServerConfig {
 		this.httpsPort = httpsPort;
 	}
 	
-	public ServerConfig(String persistenceUnit, boolean isMockedForTest) {
+	public ServerConfig(String persistenceUnit) {
 		this(8080, 8443, persistenceUnit);
-		this.setMockedForTest(isMockedForTest);
 	}
 	
 	public VirtualFile getMetaFile() {
@@ -68,14 +60,6 @@ public class ServerConfig {
 
 	public Map<String, String> getWebAppMetaProperties() {
 		return webAppMetaProperties;
-	}
-
-	public boolean isMockedForTest() {
-		return isMockedForTest;
-	}
-
-	public void setMockedForTest(boolean isMockedForTest) {
-		this.isMockedForTest = isMockedForTest;
 	}
 
 }

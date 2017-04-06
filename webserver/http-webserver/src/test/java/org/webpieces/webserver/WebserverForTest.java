@@ -82,7 +82,9 @@ public class WebserverForTest {
 	}
 
 	PortConfig fetchPortsForRedirects() {
-		return new PortConfig(8080, 8443);
+		int httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
+		int httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();
+		return new PortConfig(httpPort, httpsPort);
 	}
 	
 	public void configure(ServerSocketChannel channel) throws SocketException {

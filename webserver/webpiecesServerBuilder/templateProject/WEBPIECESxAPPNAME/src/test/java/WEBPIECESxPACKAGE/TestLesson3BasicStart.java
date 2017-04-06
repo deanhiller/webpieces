@@ -31,7 +31,7 @@ public class TestLesson3BasicStart {
 		jdbc.dropAllTablesFromDatabase();
 		
 		//really just making sure we don't throw an exception...which catches quite a few mistakes
-		Server server = new Server(null, null, new ServerConfig(pUnit, true));
+		Server server = new Server(null, null, new ServerConfig(pUnit));
 		//In this case, we bind a port
 		server.start();
 
@@ -44,7 +44,7 @@ public class TestLesson3BasicStart {
 		// non-guice singletons).  A guice singleton is only a singleton within the scope of a server
 		//while a java singleton....well, pretty much sucks.  Google "Singletons are evil".
 		
-		Server server2 = new Server(null, null, new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT, true));
+		Server server2 = new Server(null, null, new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT));
 		//In this case, we bind a port
 		server2.start();
 		System.out.println("bound port="+server.getUnderlyingHttpChannel().getLocalAddress());

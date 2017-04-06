@@ -1,4 +1,4 @@
-package org.webpieces.httpfrontend.api;
+package org.webpieces.webserver.test;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -7,7 +7,7 @@ import java.nio.channels.ServerSocketChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 
-public class MockTcpServerChannel implements TCPServerChannel {
+public class MockServerChannel implements TCPServerChannel {
 
 	private InetSocketAddress addr;
 

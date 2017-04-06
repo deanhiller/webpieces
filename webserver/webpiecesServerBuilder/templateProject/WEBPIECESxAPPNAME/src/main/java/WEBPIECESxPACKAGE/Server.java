@@ -49,7 +49,7 @@ public class Server {
 	//swap literally any piece of
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			Server server = new Server(null, null, new ServerConfig("production", false));
+			Server server = new Server(null, null, new ServerConfig("production"));
 			
 			server.start();
 			
@@ -65,15 +65,12 @@ public class Server {
 	
 	private WebServer webServer;
 
-	private boolean mockedForTest;
-
 	public Server(
 			Module platformOverrides, 
 			Module appOverrides, 
 			ServerConfig svrConfig) {
 		String filePath = System.getProperty("user.dir");
 		log.info("original user.dir before modification="+filePath);
-		mockedForTest = svrConfig.isMockedForTest();
 
 		modifyUserDirForManyEnvironments(filePath);
 
@@ -119,15 +116,16 @@ public class Server {
 	}
 	
 	PortConfig fetchPortsForRedirects() {
-		if(mockedForTest)
-			return new PortConfig(8080, 8443);
+		//NOTE: You will need to modify this so it detects when you are behind a firewall that has ports exposed to 
+		//customers different than the ports your server exposes
+		boolean useFirewallPorts = false;
 		
-		//NOTE: You will need to modify this so it detects when you are in production so redirects continue to work
-		boolean isOnProductionHost = false;
+		//NOTE: for running locally and for tests, you must set useFirewallPorts=false
 		
 		int httpPort = 80; //good security teams generally have the firewall on port 80 and your server on something like 8080
 		int httpsPort = 443; //good security teams generally have the firewall on port 443 and your server on something like 8443
-		if(!isOnProductionHost) {
+		if(!useFirewallPorts) {
+			//otherwise use the same port the webserver is bound to
 			//this is for running locally AND for local tests
 			httpPort = getUnderlyingHttpChannel().getLocalAddress().getPort();
 			httpsPort = getUnderlyingHttpsChannel().getLocalAddress().getPort();

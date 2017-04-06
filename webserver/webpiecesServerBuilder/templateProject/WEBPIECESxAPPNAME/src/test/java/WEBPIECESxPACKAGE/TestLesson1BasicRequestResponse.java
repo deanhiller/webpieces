@@ -19,7 +19,6 @@ import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.router.api.PortConfig;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.test.Asserts;
@@ -66,7 +65,7 @@ public class TestLesson1BasicRequestResponse {
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(
-				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(pUnit, true));
+				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(pUnit));
 		server = webserver.start();
 	}
 	
