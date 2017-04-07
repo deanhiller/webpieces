@@ -9,6 +9,9 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.dto.MethodMeta;
@@ -35,8 +38,10 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
 		Session session = Current.session();
-		if(session.containsKey(token))
+		if(session.containsKey(token)) {
+			Current.addModifyResponse(resp -> addCacheHeaders(resp));
 			return next.invoke(meta);
+		}
 
 		RouterRequest request = Current.request();
 		if(request.isAjaxRequest) {
@@ -63,6 +68,17 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 		
 		//redirect to login page..
 		return CompletableFuture.completedFuture(Actions.redirect(loginRoute));
+	}
+
+	private HttpResponse addCacheHeaders(HttpResponse resp) {
+		//http://stackoverflow.com/questions/49547/how-to-control-web-page-caching-across-all-browsers
+		//This forces the browser back button to re-request the page as it would never have the page
+		//and is good to use to hide banking information type pages
+		//resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
+		resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-cache, no-store, must-revalidate"));
+		resp.addHeader(new Header(KnownHeaderName.PRAGMA, "no-cache"));
+		resp.addHeader(new Header(KnownHeaderName.EXPIRES, "0"));
+		return resp;
 	}
 
 }

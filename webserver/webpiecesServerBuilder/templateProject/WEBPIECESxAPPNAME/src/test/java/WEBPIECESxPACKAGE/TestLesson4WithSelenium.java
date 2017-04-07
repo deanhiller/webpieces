@@ -1,5 +1,9 @@
 package WEBPIECESxPACKAGE;
 
+import java.awt.AWTException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -8,10 +12,12 @@ import org.junit.BeforeClass;
 //import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
@@ -22,6 +28,13 @@ import org.webpieces.webserver.test.SeleniumOverridesForTest;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
+/**
+ * If you install firefox 47.0.1, these tests will just work out of the box
+ * Until then, we mark this test as ignored for you
+ * 
+ * @author dhiller
+ */
+//@Ignore
 public class TestLesson4WithSelenium {
 	
 	private static WebDriver driver;
@@ -29,9 +42,9 @@ public class TestLesson4WithSelenium {
 	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	//see below comments in AppOverrideModule
-	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
+	//private MockRemoteSystem mockRemote = new MockRemoteSystem(); //or your favorite mock library
 	
-	private int port;
+	private int httpPort;
 	private int httpsPort;
 
 	@BeforeClass
@@ -51,12 +64,11 @@ public class TestLesson4WithSelenium {
 		jdbc.dropAllTablesFromDatabase();
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
-		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
-		//This is however pretty fast to do in many systems...
+		//mocks after every test
 		Server webserver = new Server(
 				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
 		webserver.start();
-		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
+		httpPort = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();
 	}
 	
@@ -66,8 +78,6 @@ public class TestLesson4WithSelenium {
 		manage.deleteAllCookies();
 	}
 	
-	//You must have firefox 47.0.1 installed to run this test!!!!
-	//@Ignore
 	@Test
 	public void testRedirectToOriginallyRequestedUrlAfterLogin() throws ClassNotFoundException {
 
@@ -93,7 +103,26 @@ public class TestLesson4WithSelenium {
 		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/crud/user/list", driver.getCurrentUrl());
 	}
 	
-	//@Ignore
+	@Test
+	public void testAjaxRedirect() throws ClassNotFoundException {
+
+		driver.navigate().to("https://localhost:"+httpsPort+"/secure/ajax/user/list");		
+		Assert.assertEquals("https://localhost:"+httpsPort+"/login", driver.getCurrentUrl());
+		
+		driver.findElement(By.id("user")).sendKeys("dean");
+		driver.findElement(By.id("submit")).click();
+		
+		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/ajax/user/list", driver.getCurrentUrl());
+		
+		//open new tab and logout
+		openNewTabAndLogoutAndComeBackToThisTab();
+		
+		driver.findElement(By.id("editLink_2")).click();
+
+		//redirected to login page with ajax redirect
+		Assert.assertEquals("https://localhost:"+httpsPort+"/login", driver.getCurrentUrl());
+	}
+	
 	@Test
 	public void testBasicLogin() throws ClassNotFoundException {
 
@@ -104,15 +133,63 @@ public class TestLesson4WithSelenium {
 
 		//ensure we redirect to logged in base home page
 		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/loggedinhome", driver.getCurrentUrl());
+		
+		//now if we navigate to login page, it automatically redirects us to the loggidinhome page since we are already logged in
+		driver.navigate().to("https://localhost:"+httpsPort+"/login");
+		
+		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/loggedinhome", driver.getCurrentUrl());		
 	}
 	
-	//You must have firefox installed to run this test...
-	//@Ignore
+	/**
+	 * VERY VERY IMPORTANT SECURITY TEST testing that back button cannot go back and see logged in pages when logged
+	 * out.  This makes sure we tell browser pages are cached.  This should be extended to more browsers as browsers in
+	 * the past have varied in their behavior here
+	 */
+	@Test
+	public void testBackButtonToSecurePageWhenLoggedOut() throws ClassNotFoundException, AWTException {
+
+		driver.navigate().to("https://localhost:"+httpsPort+"/login");
+				
+		driver.findElement(By.id("user")).sendKeys("dean");
+		driver.findElement(By.id("submit")).click();
+
+		//ensure we redirect to logged in base home page
+		Assert.assertEquals("https://localhost:"+httpsPort+"/secure/loggedinhome", driver.getCurrentUrl());
+
+		driver.navigate().to("https://localhost:"+httpsPort+"/secure/crud/user/list");
+
+		openNewTabAndLogoutAndComeBackToThisTab();
+		
+		driver.navigate().back(); //back button
+		Assert.assertEquals("https://localhost:"+httpsPort+"/login", driver.getCurrentUrl());
+	}
+	
+	private void openNewTabAndLogoutAndComeBackToThisTab() {
+		WebElement link = driver.findElement(By.id("loggedinhome"));
+		new Actions(driver)
+	    .keyDown(Keys.CONTROL)
+	    .keyDown(Keys.SHIFT)
+	    .click(link)
+	    .keyUp(Keys.SHIFT)
+	    .keyUp(Keys.CONTROL)
+	    .perform();
+		
+		//open new tab
+	    driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL +"t");
+	    List<String> tabs = new ArrayList<String> (driver.getWindowHandles());
+	    driver.switchTo().window(tabs.get(1));
+	    
+		driver.navigate().to("https://localhost:"+httpsPort+"/secure/loggedinhome");
+		driver.findElement(By.id("logout")).click();
+
+		driver.switchTo().window(tabs.get(0));
+	}
+	
 	@Test
 	public void testChunking() throws ClassNotFoundException {
 
 		//We know this web page is big enough to test our chunking compatibility with a real browser
-		driver.get("http://localhost:"+port+"");
+		driver.get("http://localhost:"+httpPort+"");
 		
 		String pageSource = driver.getPageSource();
 		

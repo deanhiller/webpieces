@@ -50,6 +50,7 @@ This project is essentially pieces that can be used to build any http related so
 
 #### Advantages of webpieces
 
+* LogginFilter automatically adds correct cache headers so if you are logged out, back button will not go back to some logged in page instead redirecting to login
 * your project is automatically setup with code coverage (for java and the generated html groovy)
 * built in 'very loose' checkstyle such that developers don't create 70+ line methods or 700+ line files or nasty anti-arrow pattern if statements
 * unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases.  with Seam/JSF, you lock your users to one node and when that goes out, if they are in the middle of buying a plane ticket, they are pretty much screwed.(ie. not a good design for large scale)
@@ -106,7 +107,7 @@ This project is essentially pieces that can be used to build any http related so
 
 #### TODO:
 * start an actual multi-homed project
-* update main page in example app to link to examples
+* add more and more tag examples
 * move examples to @examples url instead
 * write http2 tests for server
 * write http2 tests for client
@@ -121,7 +122,7 @@ This project is essentially pieces that can be used to build any http related so
   * any other ones
 * tests on network outage during ajax calls to make that even cooler
 * tests on whitespace issues on tags and formatting so we can isolate the differences
-* look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.
+* look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.  could be hibernate startup :(.  perhaps should create orm...lol
 * create api / REST method so webserver can be used as api
 * verify upload file can work http2,etc
 * http1.1 protect pipeline errors

@@ -42,6 +42,9 @@ public class WebServerConfig {
 	//in full response sometimes
 	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 	
+	//On startup, we protect developers from breaking clients.  In http, all files that change
+	//must also change the hash url param automatically and the %%{ }%% tag generates those hashes so the
+    //files loaded are always the latest
 	//what gets put in the cache header for static files...
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(255, TimeUnit.DAYS);
 	

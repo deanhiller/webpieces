@@ -229,10 +229,7 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, false);
 		HttpResponse resp = tuple.response;
-		//This would force the browser back button to re-request the page as it would never have the page
-		//and is good to use to hide banking information type pages
-		//resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
-
+		
 		log.debug(()->"content about to be sent back="+content);
 		
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
