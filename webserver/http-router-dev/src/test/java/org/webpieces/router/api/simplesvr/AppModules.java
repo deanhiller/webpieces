@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
@@ -20,8 +20,8 @@ public class AppModules implements WebAppMeta {
 		return Lists.newArrayList(new MtgModule());
 	}
 	
-	public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new MtgRouteModule());
+	public List<Routes> getRouteModules() {
+		return Lists.newArrayList(new MtgRoutes());
 	}
 
 	@Override

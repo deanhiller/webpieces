@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.webpieces.ctx.api.HttpMethod;
 
-public abstract class AbstractRouteModule implements RouteModule {
+public abstract class AbstractRoutes implements Routes {
 
 	protected Router router;
 

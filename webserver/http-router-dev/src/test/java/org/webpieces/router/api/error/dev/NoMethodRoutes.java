@@ -3,10 +3,10 @@ package org.webpieces.router.api.error.dev;
 import static org.webpieces.ctx.api.HttpMethod.getAll;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.Router;
 
-public class NoMethodRouteModule implements RouteModule {
+public class NoMethodRoutes implements Routes {
 	
 	@Override
 	public void configure(Router router) {

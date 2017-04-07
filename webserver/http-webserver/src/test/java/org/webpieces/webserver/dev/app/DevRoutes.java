@@ -5,7 +5,7 @@ import static org.webpieces.ctx.api.HttpMethod.GET;
 import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
 
-public class DevRouteModule extends AbstractRoutes {
+public class DevRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

@@ -7,5 +7,5 @@ import com.google.inject.Module;
 public interface Plugin {
 	public List<Module> getGuiceModules();
 	
-	public List<RouteModule> getRouteModules();
+	public List<Routes> getRouteModules();
 }

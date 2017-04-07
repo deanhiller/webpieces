@@ -2,9 +2,9 @@ package org.webpieces.webserver.basic.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
-public class BasicRouteModule extends AbstractRouteModule {
+public class BasicRoutes extends AbstractRoutes {
 
 	@Override
 	protected void configure() {

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
 
@@ -21,8 +21,8 @@ public class HttpsMeta implements WebAppMeta {
 	}
 	
 	@Override
-    public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new HttpsRouteModule());
+    public List<Routes> getRouteModules() {
+		return Lists.newArrayList(new HttpsRoutes());
 	}
 	@Override
 	public List<Plugin> getPlugins() {

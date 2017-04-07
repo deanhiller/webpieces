@@ -4,9 +4,9 @@ import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.ARGS_MISMATCH;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
-public class CommonRouteModule extends AbstractRouteModule {
+public class CommonRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

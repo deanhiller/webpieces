@@ -16,7 +16,7 @@ import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.FileMeta;
@@ -153,7 +153,7 @@ public class RouteLoader {
 		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder, false);
 		invoker.init(reverseRoutes);
 		
-		List<RouteModule> all = new ArrayList<>();
+		List<Routes> all = new ArrayList<>();
 		all.addAll(rm.getRouteModules()); //the core application routes
 		
 		List<Plugin> plugins = rm.getPlugins();
@@ -163,7 +163,7 @@ public class RouteLoader {
 			}
 		}
 		
-		for(RouteModule module : all) {
+		for(Routes module : all) {
 			AbstractRouteBuilder.currentPackage.set(new RouteModuleInfo(module));
 			module.configure(routerBuilder);
 			AbstractRouteBuilder.currentPackage.set(null);

@@ -1,10 +1,10 @@
 package org.webpieces.webserver.async.app;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.Router;
 
-public class AsyncRouteModule implements RouteModule {
+public class AsyncRoutes implements Routes {
 
 	@Override
 	public void configure(Router router) {

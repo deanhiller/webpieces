@@ -3,10 +3,10 @@ package org.webpieces.webserver.tags.app;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.webserver.basic.app.BasicRouteId;
 
-public class TagsRouteModule extends AbstractRouteModule {
+public class TagRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

@@ -8,11 +8,11 @@ import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.MAIN_ROUTE3;
 import static WEBPIECESxPACKAGE.base.examples.ExamplesRouteId.REDIRECT_PAGE;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
 import WEBPIECESxPACKAGE.base.examples.ExamplesRouteId;
 
-public class AppRouteModule extends AbstractRouteModule {
+public class AppRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
 
@@ -22,8 +22,8 @@ public class AsyncAppMeta implements WebAppMeta {
 	}
 	
 	@Override
-    public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new AsyncRouteModule());
+    public List<Routes> getRouteModules() {
+		return Lists.newArrayList(new AsyncRoutes());
 	}
 	
 	@Override

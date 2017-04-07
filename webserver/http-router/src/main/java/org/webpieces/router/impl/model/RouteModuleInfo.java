@@ -1,13 +1,13 @@
 package org.webpieces.router.impl.model;
 
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 
 public class RouteModuleInfo {
 
 	public String packageName;
 	public String i18nBundleName;
 
-	public RouteModuleInfo(RouteModule m) {
+	public RouteModuleInfo(Routes m) {
 		this.packageName = getPackage(m.getClass());
 		this.i18nBundleName = getI18nBundleName(m);
 	}
@@ -23,8 +23,8 @@ public class RouteModuleInfo {
 	 * locale or another messages file for another language
 	 * @param module 
 	 */
-	public String getI18nBundleName(RouteModule module) {
-		Class<? extends RouteModule> clazz = module.getClass();
+	public String getI18nBundleName(Routes module) {
+		Class<? extends Routes> clazz = module.getClass();
 		String name = clazz.getName();
 		int lastIndexOf = name.lastIndexOf(".");
 		if(lastIndexOf < 0)

@@ -3,13 +3,13 @@ package org.webpieces.webserver.https.app;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.Router;
 import org.webpieces.webserver.api.login.LoginFilter;
 import org.webpieces.webserver.api.login.LoginInfo;
 
-public class HttpsRouteModule extends AbstractRouteModule {
+public class HttpsRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

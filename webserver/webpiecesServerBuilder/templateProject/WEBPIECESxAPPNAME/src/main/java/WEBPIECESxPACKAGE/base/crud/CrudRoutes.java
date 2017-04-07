@@ -8,9 +8,9 @@ import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_DELETE_USER;
 import static WEBPIECESxPACKAGE.base.crud.CrudUserRouteId.POST_USER_FORM;
 
 import org.webpieces.router.api.routing.CrudRouteIds;
-import org.webpieces.router.api.routing.ScopedRouteModule;
+import org.webpieces.router.api.routing.ScopedRoutes;
 
-public class CrudRouteModule extends ScopedRouteModule {
+public class CrudRoutes extends ScopedRoutes {
 
 	@Override
 	protected String getScope() {

@@ -2,9 +2,9 @@ package org.webpieces.webserver.i18n.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
-public class I18nRouteModule extends AbstractRouteModule {
+public class I18nRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

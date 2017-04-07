@@ -2,10 +2,10 @@ package org.webpieces.webserver.domains.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routing.Routes;
 
-public class Domain1Module extends AbstractRouteModule implements RouteModule {
+public class Domain1Routes extends AbstractRoutes implements Routes {
 
 	@Override
 	protected void configure() {

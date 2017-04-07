@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
@@ -24,8 +24,8 @@ public class NoMethodRouterModules implements WebAppMeta {
 			}});
 	}
 	
-	public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new NoMethodRouteModule());
+	public List<Routes> getRouteModules() {
+		return Lists.newArrayList(new NoMethodRoutes());
 	}
 
 	@Override

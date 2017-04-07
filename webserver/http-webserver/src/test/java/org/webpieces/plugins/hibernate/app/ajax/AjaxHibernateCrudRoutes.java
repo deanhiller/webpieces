@@ -8,9 +8,9 @@ import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_
 import static org.webpieces.plugins.hibernate.app.ajax.AjaxCrudTestRouteId.AJAX_POST_USER_FORM;
 
 import org.webpieces.router.api.routing.CrudRouteIds;
-import org.webpieces.router.api.routing.ScopedRouteModule;
+import org.webpieces.router.api.routing.ScopedRoutes;
 
-public class AjaxCrudModule extends ScopedRouteModule {
+public class AjaxHibernateCrudRoutes extends ScopedRoutes {
 
 	@Override
 	protected String getScope() {

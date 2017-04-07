@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.webpieces.plugins.hsqldb.H2DbPlugin;
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
@@ -28,7 +28,7 @@ public class DeveloperMeta implements WebAppMeta {
 	}
 
 	@Override
-	public List<RouteModule> getRouteModules() {
+	public List<Routes> getRouteModules() {
 		return prodMeta.getRouteModules();
 	}
 

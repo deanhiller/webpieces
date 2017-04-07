@@ -3,7 +3,7 @@ package org.webpieces.plugins.hibernate;
 import java.util.List;
 
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -30,8 +30,8 @@ public class HibernatePlugin implements Plugin {
 	}
 
 	@Override
-	public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new HibernateRouteModule());
+	public List<Routes> getRouteModules() {
+		return Lists.newArrayList(new HibernateRoutes());
 	}
 
 }

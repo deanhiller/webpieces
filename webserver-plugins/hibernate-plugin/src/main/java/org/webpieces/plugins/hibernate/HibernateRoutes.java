@@ -1,9 +1,9 @@
 package org.webpieces.plugins.hibernate;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
 
-public class HibernateRouteModule extends AbstractRouteModule {
+public class HibernateRoutes extends AbstractRoutes {
 
 	@Override
 	protected void configure() {

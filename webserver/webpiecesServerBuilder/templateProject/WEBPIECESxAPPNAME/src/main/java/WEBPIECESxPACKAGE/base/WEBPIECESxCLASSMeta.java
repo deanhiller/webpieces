@@ -5,18 +5,18 @@ import java.util.Map;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.webserver.api.login.LoginModule;
+import org.webpieces.webserver.api.login.LoginRoutes;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-import WEBPIECESxPACKAGE.base.crud.CrudRouteModule;
-import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRouteModule;
-import WEBPIECESxPACKAGE.base.crud.login.LoggedInModule;
+import WEBPIECESxPACKAGE.base.crud.CrudRoutes;
+import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRoutes;
+import WEBPIECESxPACKAGE.base.crud.login.LoggedInRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -45,13 +45,13 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 	}
 
 	@Override
-    public List<RouteModule> getRouteModules() {
+    public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
-				new AppRouteModule(),
-				new LoginModule("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController","/secure/.*"),
-				new LoggedInModule(),
-				new CrudRouteModule(),
-				new AjaxCrudRouteModule()
+				new AppRoutes(),
+				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController","/secure/.*"),
+				new LoggedInRoutes(),
+				new CrudRoutes(),
+				new AjaxCrudRoutes()
 				);
 	}
 

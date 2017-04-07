@@ -3,10 +3,10 @@ package org.webpieces.router.api.simplesvr;
 import static org.webpieces.ctx.api.HttpMethod.*;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.*;
 
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.Router;
 
-public class MtgRouteModule implements RouteModule {
+public class MtgRoutes implements Routes {
 	
 	@Override
 	public void configure(Router router) {

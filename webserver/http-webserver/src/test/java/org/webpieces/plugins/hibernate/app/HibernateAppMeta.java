@@ -7,9 +7,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.plugins.hibernate.app.ajax.AjaxCrudModule;
+import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 
 import com.google.common.collect.Lists;
@@ -29,10 +29,10 @@ public class HibernateAppMeta implements WebAppMeta {
 	}
 	
 	@Override
-    public List<RouteModule> getRouteModules() {
+    public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
-				new HibernateTestRouteModule(),
-				new AjaxCrudModule());
+				new HibernateTestRoutes(),
+				new AjaxHibernateCrudRoutes());
 	}
 	
 	@Override

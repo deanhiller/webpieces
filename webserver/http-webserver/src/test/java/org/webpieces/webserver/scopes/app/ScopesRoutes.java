@@ -3,9 +3,9 @@ package org.webpieces.webserver.scopes.app;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
-public class ScopesRouteModule extends AbstractRouteModule {
+public class ScopesRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

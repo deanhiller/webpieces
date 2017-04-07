@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.router.api.routing.Plugin;
-import org.webpieces.router.api.routing.RouteModule;
+import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.webserver.EmptyModule;
 
@@ -27,8 +27,8 @@ public class DevMeta implements WebAppMeta {
 				new NewModule());
 	}
 	
-	public List<RouteModule> getRouteModules() {
-		return Lists.newArrayList(new DevRouteModule());
+	public List<Routes> getRouteModules() {
+		return Lists.newArrayList(new DevRoutes());
 	}
 	
 }

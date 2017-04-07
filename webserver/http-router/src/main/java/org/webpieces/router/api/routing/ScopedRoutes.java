@@ -1,6 +1,6 @@
 package org.webpieces.router.api.routing;
 
-public abstract class ScopedRouteModule extends AbstractRouteModule {
+public abstract class ScopedRoutes extends AbstractRoutes {
 	
 	@Override
 	public final void configure(Router router) {

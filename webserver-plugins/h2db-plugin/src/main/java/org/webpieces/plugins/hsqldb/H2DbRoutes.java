@@ -1,9 +1,9 @@
 package org.webpieces.plugins.hsqldb;
 
 import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
-public class H2DbRouteModule extends AbstractRouteModule {
+public class H2DbRoutes extends AbstractRoutes {
 	
 	@Override
 	protected void configure() {

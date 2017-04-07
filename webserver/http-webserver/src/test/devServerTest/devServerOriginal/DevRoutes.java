@@ -2,10 +2,10 @@ package org.webpieces.webserver.dev.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
 
-public class DevRouteModule extends AbstractRouteModule {
+public class DevRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {

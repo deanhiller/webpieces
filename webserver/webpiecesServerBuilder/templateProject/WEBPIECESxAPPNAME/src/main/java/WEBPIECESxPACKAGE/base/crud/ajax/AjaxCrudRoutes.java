@@ -8,9 +8,9 @@ import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_POST_DEL
 import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_POST_USER_FORM;
 
 import org.webpieces.router.api.routing.CrudRouteIds;
-import org.webpieces.router.api.routing.ScopedRouteModule;
+import org.webpieces.router.api.routing.ScopedRoutes;
 
-public class AjaxCrudRouteModule extends ScopedRouteModule {
+public class AjaxCrudRoutes extends ScopedRoutes {
 
 	@Override
 	protected String getScope() {

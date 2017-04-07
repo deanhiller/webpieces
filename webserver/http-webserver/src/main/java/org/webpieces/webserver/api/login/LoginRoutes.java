@@ -3,21 +3,21 @@ package org.webpieces.webserver.api.login;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
 import org.webpieces.router.api.routing.Router;
 
-public class LoginModule extends AbstractRouteModule {
+public class LoginRoutes extends AbstractRoutes {
 
 	private String controller;
 	private String securePath;
 	private String sessionToken;
 
-	public LoginModule(String controller, String securePath) {
+	public LoginRoutes(String controller, String securePath) {
 		this(controller, securePath, LoginInfo.LOGIN_TOKEN1);
 	}
 	
-	public LoginModule(String controller, String securePath, String sessionToken) {
+	public LoginRoutes(String controller, String securePath, String sessionToken) {
 		this.controller = controller;
 		this.securePath = securePath;
 		this.sessionToken = sessionToken;

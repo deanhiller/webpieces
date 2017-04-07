@@ -9,10 +9,10 @@ import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAG
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.LIST_USERS;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.SAVE_USER;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.CrudRouteIds;
 
-public class HibernateTestRouteModule extends AbstractRouteModule {
+public class HibernateTestRoutes extends AbstractRoutes {
 
 	@Override
 	protected void configure() {

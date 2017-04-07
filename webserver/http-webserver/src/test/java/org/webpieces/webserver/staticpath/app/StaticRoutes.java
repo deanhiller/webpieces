@@ -1,15 +1,14 @@
-package org.webpieces.webserver.domains.app;
+package org.webpieces.webserver.staticpath.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRouteModule;
+import org.webpieces.router.api.routing.AbstractRoutes;
 
-public class Domain2Module extends AbstractRouteModule {
+public class StaticRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {
-		addRoute(GET ,     "/domain2",             "DomainsController.domain2", DomainsRouteId.DOMAIN2);
-		
+		addRoute(GET , "/pageparam",         "StaticController.home", StaticRouteId.PAGE_PARAM);
 		
 		String property = System.getProperty("user.dir");
 		
