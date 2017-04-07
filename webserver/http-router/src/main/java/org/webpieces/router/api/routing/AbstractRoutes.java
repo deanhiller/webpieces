@@ -1,7 +1,5 @@
 package org.webpieces.router.api.routing;
 
-import java.util.Set;
-
 import org.webpieces.ctx.api.HttpMethod;
 
 public abstract class AbstractRoutes implements Routes {
@@ -22,10 +20,6 @@ public abstract class AbstractRoutes implements Routes {
 
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
 		router.addRoute(method, path, controllerMethod, routeId, checkToken);
-	}
-
-	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		router.addRoute(methods, path, controllerMethod, routeId);
 	}
 
 	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {

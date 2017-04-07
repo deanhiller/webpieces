@@ -3,8 +3,6 @@ package org.webpieces.router.impl.model;
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
 
-import java.util.Set;
-
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.CrudRouteIds;
 import org.webpieces.router.api.routing.RouteId;
@@ -76,13 +74,6 @@ public abstract class AbstractRouteBuilder implements Router {
 	public void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken) {
 		UrlPath p = new UrlPath(routerInfo, path);
 		Route route = new RouteImpl(method, p, controllerMethod, routeId, isHttpsOnlyRoutes, checkToken);
-		addRoute(route, routeId);
-	}
-	
-	@Override
-	public void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId) {
-		UrlPath p = new UrlPath(routerInfo, path);
-		Route route = new RouteImpl(methods, p, controllerMethod, routeId, isHttpsOnlyRoutes, false);
 		addRoute(route, routeId);
 	}
 	

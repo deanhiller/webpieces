@@ -18,7 +18,7 @@ public class RouteImpl implements Route {
 
 	private final String path;
 	private final Pattern patternToMatch;
-	private final Set<HttpMethod> methods;
+	private final HttpMethod method;
 	private final List<String> argNames;
 	private final boolean isHttpsRoute;
 	private final RouteType routeType;
@@ -26,12 +26,8 @@ public class RouteImpl implements Route {
 	private boolean checkSecureToken;
 
 	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
-		this(Sets.newHashSet(method), path, controllerMethod, routeId, isSecure, checkSecureToken);
-	}
-	
-	public RouteImpl(Set<HttpMethod> methods, UrlPath path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
 		this.path = path.getFullPath();
-		this.methods = methods;
+		this.method = method;
 		RegExResult result = RegExUtil.parsePath(path.getSubPath());
 		this.patternToMatch = Pattern.compile(result.regExToMatch);
 		this.argNames = result.argNames;
@@ -45,7 +41,7 @@ public class RouteImpl implements Route {
 		this.routeType = routeType;
 		this.path = null;
 		this.patternToMatch = null;
-		this.methods = new HashSet<>();
+		this.method = null;
 		this.argNames = new ArrayList<String>();
 		this.isHttpsRoute = false;
 		this.controllerMethodString = controllerMethod;
@@ -53,7 +49,7 @@ public class RouteImpl implements Route {
 
 	@Override
 	public boolean matchesMethod(HttpMethod method) {
-		if(methods.contains(method))
+		if(this.method == method)
 			return true;
 		return false;
 	}
@@ -62,7 +58,7 @@ public class RouteImpl implements Route {
 		if(isHttpsRoute) {
 			if(!request.isHttps)
 				return null;
-		} else if(!methods.contains(request.method)) {
+		} else if(this.method != request.method) {
 			return null;
 		}
 		
@@ -90,15 +86,12 @@ public class RouteImpl implements Route {
 
 	@Override
 	public String toString() {
-		return "RouteImpl [\n      path=" + path + ", \n      patternToMatch=" + patternToMatch + ", \n      methods=" + methods + ", \n      argNames="
+		return "RouteImpl [\n      path=" + path + ", \n      patternToMatch=" + patternToMatch + ", \n      method=" + method + ", \n      argNames="
 				+ argNames + ", \n      isSecure=" + isHttpsRoute + ", \n      routeType="+routeType+"\n      controllerMethodString=" + controllerMethodString + "]";
 	}
 
 	@Override
 	public boolean isPostOnly() {
-		if(methods.size() != 1)
-			return false;
-		HttpMethod method = methods.iterator().next();
 		if(method == HttpMethod.POST)
 			return true;
 		

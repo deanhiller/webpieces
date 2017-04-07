@@ -19,8 +19,6 @@ public interface Router {
 	 */
 	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
 
-	void addRoute(Set<HttpMethod> methods, String path, String controllerMethod, RouteId routeId);
-
 	/**
 	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in
 	 * hopes that it performs better AND asyncrhonously read such that thread goes and does other 

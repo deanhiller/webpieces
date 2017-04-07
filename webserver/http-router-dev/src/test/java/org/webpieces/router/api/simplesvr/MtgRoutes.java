@@ -28,7 +28,7 @@ public class MtgRoutes implements Routes {
 		//
 		//AND ON TOP of that, we have multi-part fields as well with keys and values for POSTs
 		
-		router.addRoute(getAll(), "/something",    "MeetingController.someExample",     SOME_EXAMPLE);
+		router.addRoute(GET,      "/something",    "MeetingController.someExample",     SOME_EXAMPLE);
 //		router.addRoute(GET,      "/listuser",     "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
 		router.addRoute(POST,     "/meeting",      "MeetingController.postMeeting", POST_MEETING, false); //insecure
 		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",    GET_SHOW_MTG);
