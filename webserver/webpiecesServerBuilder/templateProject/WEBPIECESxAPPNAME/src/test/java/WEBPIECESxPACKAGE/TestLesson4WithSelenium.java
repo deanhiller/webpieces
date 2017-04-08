@@ -3,12 +3,11 @@ package WEBPIECESxPACKAGE;
 import java.awt.AWTException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 //import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -46,25 +45,17 @@ public class TestLesson4WithSelenium {
 	
 	private int httpPort;
 	private int httpsPort;
-
-	@BeforeClass
-	public static void staticSetup() {
-		driver = new FirefoxDriver();
-	}
-	@AfterClass
-	public static void staticTearDown() {	
-		driver.close();
-		driver.quit();
-	}
 	
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
+		driver = new FirefoxDriver();
+		
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		jdbc.dropAllTablesFromDatabase();
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
-		//mocks after every test
+		//mocks after every test and NOT drop tables but clear and re-populate
 		Server webserver = new Server(
 				new SeleniumOverridesForTest(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
 		webserver.start();
@@ -76,6 +67,9 @@ public class TestLesson4WithSelenium {
 	public void tearDown() {
 		Options manage = driver.manage();
 		manage.deleteAllCookies();
+		
+		driver.close();
+		driver.quit();
 	}
 	
 	@Test
@@ -180,9 +174,14 @@ public class TestLesson4WithSelenium {
 	    driver.switchTo().window(tabs.get(1));
 	    
 		driver.navigate().to("https://localhost:"+httpsPort+"/secure/loggedinhome");
+		
+		
+		driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+		
 		driver.findElement(By.id("logout")).click();
-
 		driver.switchTo().window(tabs.get(0));
+		
+		driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 	}
 	
 	@Test

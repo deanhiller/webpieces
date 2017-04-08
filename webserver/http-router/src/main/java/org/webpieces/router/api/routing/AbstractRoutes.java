@@ -22,6 +22,14 @@ public abstract class AbstractRoutes implements Routes {
 		router.addRoute(method, path, controllerMethod, routeId, checkToken);
 	}
 
+	public void addContentRoute(HttpMethod method, String urlPath, String controllerMethod) {
+		router.addContentRoute(method, urlPath, controllerMethod);
+	}
+
+	public MultiRoute addMultiRoute(HttpMethod method, String path) {
+		return router.addMultiRoute(method, path);
+	}
+
 	public void addStaticDir(String urlPath, String fileSystemPath, boolean isOnClassPath) {
 		router.addStaticDir(urlPath, fileSystemPath, isOnClassPath);
 	}

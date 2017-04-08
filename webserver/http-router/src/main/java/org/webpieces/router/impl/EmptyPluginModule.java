@@ -1,5 +1,6 @@
 package org.webpieces.router.impl;
 
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.Startable;
 
@@ -16,6 +17,7 @@ public class EmptyPluginModule implements Module {
 		
 		Multibinder.newSetBinder(binder, EntityLookup.class);
 
+		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 	}
 
 }

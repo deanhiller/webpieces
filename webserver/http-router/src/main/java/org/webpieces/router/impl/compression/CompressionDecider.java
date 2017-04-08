@@ -1,7 +1,5 @@
 package org.webpieces.router.impl.compression;
 
-import java.util.List;
-
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -9,7 +7,7 @@ import org.webpieces.util.logging.LoggerFactory;
 public class CompressionDecider {
 	private static final Logger log = LoggerFactory.getLogger(CompressionDecider.class);
 
-	public boolean shouldCompress(List<String> encodings, String extension, MimeTypeResult mimeType) {
+	public boolean isCompressableType(String extension, MimeTypeResult mimeType) {
 		if(mimeType.mime.startsWith("text"))
 			return true;
 		else if(mimeType.mime.startsWith("application/json"))

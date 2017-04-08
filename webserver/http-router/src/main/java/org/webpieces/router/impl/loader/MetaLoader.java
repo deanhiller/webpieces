@@ -14,6 +14,7 @@ import javax.inject.Singleton;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
@@ -67,6 +68,17 @@ public class MetaLoader {
 			paramNames.add(value);
 		}
 
+		if(meta.getRoute().getRouteType() == RouteType.HTML) {
+			preconditionCheck(meta, controllerMethod);
+		}
+		
+		meta.setMethodParamNames(paramNames);
+		meta.setControllerInstance(controllerInst);
+		meta.setMethod(controllerMethod);
+
+	}
+
+	private void preconditionCheck(RouteMeta meta, Method controllerMethod) {
 		if(meta.getRoute().isPostOnly()) {
 			Class<?> clazz = controllerMethod.getReturnType();
 			if(CompletableFuture.class.isAssignableFrom(clazz)) {
@@ -96,11 +108,6 @@ public class MetaLoader {
 			} else if(!Action.class.isAssignableFrom(clazz))
 				throw new IllegalArgumentException("This route="+meta+" has a method that MUST return a type 'Action' or 'CompletableFuture<Action>' not '"+clazz.getSimpleName()+"' for this method="+controllerMethod);
 		}
-		
-		meta.setMethodParamNames(paramNames);
-		meta.setControllerInstance(controllerInst);
-		meta.setMethod(controllerMethod);
-
 	}
 
 	/**

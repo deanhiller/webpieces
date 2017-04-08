@@ -27,6 +27,7 @@ import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RenderContentResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.View;
@@ -138,7 +139,7 @@ public class ProxyResponse implements ResponseStreamer {
 		Header location = new Header(KnownHeaderName.LOCATION, url);
 		response.addHeader(location );
 		
-		responseCreator.addCommonHeaders(request, response, false);
+		responseCreator.addCommonHeaders(request, response, true);
 
 		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
 		response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, 0+""));
@@ -185,7 +186,7 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		KnownStatusCode statusCode = KnownStatusCode.HTTP_200_OK;
 		switch(resp.routeType) {
-		case BASIC:
+		case HTML:
 			statusCode = KnownStatusCode.HTTP_200_OK;
 			break;
 		case NOT_FOUND:
@@ -223,20 +224,31 @@ public class ProxyResponse implements ResponseStreamer {
 		return TemplateUtil.convertTemplateClassToPath(className);
 	}
 
+	@Override
+	public void sendRenterContent(RenderContentResponse resp) {
+		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), false, resp.getMimeType());		
+		maybeCompressAndSend(null, tuple, resp.getPayload()); 
+	}
+	
 	private void createResponseAndSend(KnownStatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 		
-		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, false);
-		HttpResponse resp = tuple.response;
+		ResponseEncodingTuple tuple = responseCreator.createResponse(request, statusCode, extension, defaultMime, true);
 		
 		log.debug(()->"content about to be sent back="+content);
 		
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);
 		
+		maybeCompressAndSend(extension, tuple, bytes);
+	}
+
+	private void maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
 		
+		HttpResponse resp = tuple.response;
+
 		//This is a cheat sort of since compression can go from 28235 to 4,785 and we are looking at the
 		//non-compressed size so stuff like 16k may be sent chunked even though it is only 3k on the outbound path
 		//(not really a big deal though)

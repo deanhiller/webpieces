@@ -19,6 +19,7 @@ import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
@@ -243,9 +244,10 @@ public class RouteInvoker {
 			processor.createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {
 			processor.createRawRedirect((RawRedirect)controllerResponse);
+		} else if(controllerResponse instanceof RenderContent) {
+			processor.createContentResponse((RenderContent)controllerResponse);
 		} else {
-			throw new UnsupportedOperationException("Not yet done but could "
-					+ "call into the Action witht the responseCb to handle so apps can decide what to send back");
+			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed some code to write");
 		}
 		return null;
 	}

@@ -1,7 +1,5 @@
 package org.webpieces.router.api.routing;
 
-import java.util.Set;
-
 import org.webpieces.ctx.api.HttpMethod;
 
 /**
@@ -18,6 +16,15 @@ public interface Router {
 	 * want to).  Also, use this route to add form that use the GET method so the token is checked as well.
 	 */
 	void addRoute(HttpMethod method, String path, String controllerMethod, RouteId routeId, boolean checkToken);
+
+	void addContentRoute(HttpMethod method, String urlPath, String controllerMethod);
+	
+	/**
+	 * For adding a single url path with different content types backing it.  Clients are forced to set 
+	 * Accept header in this case which can be inconvient in some cases but if you like it that way.
+	 * (I prefer to give my api different url paths than my web gui)
+	 */
+	MultiRoute addMultiRoute(HttpMethod method, String path);
 
 	/**
 	 * If on the classpath, we use classloader and InputStream.  If not, we use memory mapped files in

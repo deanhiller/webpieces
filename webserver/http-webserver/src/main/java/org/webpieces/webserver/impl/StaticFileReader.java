@@ -93,7 +93,7 @@ public class StaticFileReader {
 	    }
 	    	    
 	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(), 
-	    		KnownStatusCode.HTTP_200_OK, extension, "application/octet-stream", true);
+	    		KnownStatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
 	    HttpResponse response = tuple.response;
 
 		// we shouldn't have to add chunked because the responseSender will add chunked for us

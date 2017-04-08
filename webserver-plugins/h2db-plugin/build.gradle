@@ -11,6 +11,5 @@ sourceSets {
 
 dependencies {
     compile deps['h2db']
-    compile project(':webserver-plugins:plugin-api')
 	compile project(':webserver:http-router')
 }

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 
@@ -32,7 +33,11 @@ public class PluginSetup {
 
 		Key<Set<EntityLookup>> key = Key.get(new TypeLiteral<Set<EntityLookup>>(){});
 		Set<EntityLookup> lookupHooks = injector.getInstance(key);
-		translator.install(lookupHooks);
+		
+		Key<Set<BodyContentBinder>> key2 = Key.get(new TypeLiteral<Set<BodyContentBinder>>(){});
+		Set<BodyContentBinder> bodyBinders = injector.getInstance(key2);
+		
+		translator.install(lookupHooks, bodyBinders);
 		
 
 		//wire in startup and start the startables.  This is a function since Dev and Production differ

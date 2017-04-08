@@ -45,6 +45,10 @@ public class ParamMeta implements Meta {
 		return "ParamMeta [paramMeta=" + paramMeta + "]";
 	}
 
+	public Annotation[] getAnnotations() {
+		return annotations;
+	}
+	
 	@Override
 	public void validateNullValue() {
 		//by default, params are required unless some sort of @Nullable annotation

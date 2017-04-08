@@ -178,4 +178,9 @@ public class StaticRoute implements Route {
 		this.hashMeta = hashMeta;
 	}
 
+	@Override
+	public String getMethod() {
+		return "GET";
+	}
+
 }

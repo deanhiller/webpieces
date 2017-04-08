@@ -108,4 +108,12 @@ public class Requests {
 		return req;		
 	}
 
+	public static HttpRequest createJsonRequest(KnownHttpMethod method, String url) {
+		HttpRequest request = createRequest(method, url);
+		String json = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
+		DataWrapper body = gen.wrapByteArray(json.getBytes());
+		request.setBody(body);
+		return request;
+	}
+
 }

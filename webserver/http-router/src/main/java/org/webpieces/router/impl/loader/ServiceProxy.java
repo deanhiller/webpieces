@@ -25,9 +25,9 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		} catch(InvocationTargetException e) {
 			Throwable cause = e.getCause();
 			if(cause instanceof NotFoundException) {
-				return createNotFound(cause);
+				return createNotFound((NotFoundException) cause);
 			}
-			return createRuntimeFuture(new RuntimeException(cause));
+			return createRuntimeFuture(cause);
 		} catch(NotFoundException e) {
 			return createNotFound(e);
 		} catch(Throwable e) {
@@ -37,13 +37,13 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 
 	private CompletableFuture<Action> createRuntimeFuture(Throwable e) {
 		CompletableFuture<Action> future = new CompletableFuture<Action>();
-		future.completeExceptionally(new RuntimeException(e));
+		future.completeExceptionally(e);
 		return future;
 	}
 
-	private CompletableFuture<Action> createNotFound(Throwable e) {
+	private CompletableFuture<Action> createNotFound(NotFoundException e) {
 		CompletableFuture<Action> future = new CompletableFuture<Action>();
-		future.completeExceptionally(new NotFoundException(e));
+		future.completeExceptionally(e);
 		return future;
 	}
 	
@@ -53,6 +53,9 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		
 		Method m = meta.getMethod();
 		Object obj = meta.getControllerInstance();
+		
+		//We chose to do this here so any filters ESPECIALLY API filters 
+		//can catch and translate api errors and send customers a logical response
 		Object[] arguments = translator.createArgs(m, meta.getCtx());
 		
 		Object retVal = m.invoke(obj, arguments);

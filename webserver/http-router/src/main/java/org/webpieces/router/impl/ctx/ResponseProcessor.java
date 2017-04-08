@@ -12,7 +12,9 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RenderContentResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
@@ -122,7 +124,7 @@ public class ResponseProcessor {
 		//If the POST route was not found, just render the notFound page that controller sends us violating the
 		//PRG pattern in this one specific case for now (until we test it with the browser to make sure back button is
 		//not broken)
-		if(matchedMeta.getRoute().getRouteType() == RouteType.BASIC && HttpMethod.POST == request.method) {
+		if(matchedMeta.getRoute().getRouteType() == RouteType.HTML && HttpMethod.POST == request.method) {
 			throw new IllegalReturnValueException("Controller method='"+method+"' MUST follow the PRG "
 					+ "pattern(https://en.wikipedia.org/wiki/Post/Redirect/Get) so "
 					+ "users don't have a poor experience using your website with the browser back button.  "
@@ -176,6 +178,14 @@ public class ResponseProcessor {
 			if(!wasSet) //then reset
 				Current.setContext(null);
 		}
+	}
+
+	public void createContentResponse(RenderContent r) {
+		if(responseSent)
+			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
+
+		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getMimeType());
+		wrapFunctionInContext(s -> responseCb.sendRenterContent(resp));
 	}
 	
 }

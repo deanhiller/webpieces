@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.webpieces.httpparser.api.dto.HttpRequest;
+
 public class RouterRequest {
 
 	/**
 	 * Request in it's original form, but should not be relied upon really
 	 */
-	public Object orginalRequest;
+	public HttpRequest orginalRequest;
 	
 	public boolean isHttps;
 	//true if http2 so we respond with not just the response but all other responses that the client
@@ -50,6 +52,9 @@ public class RouterRequest {
 
 	public String referrer;
 
+	/**
+	 * what the client will accept for encodings(typically compression encodings)
+	 */
 	public List<String> encodings = new ArrayList<>();
 	
 	public boolean isAjaxRequest;

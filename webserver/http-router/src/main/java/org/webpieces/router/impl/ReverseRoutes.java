@@ -3,6 +3,7 @@ package org.webpieces.router.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ public class ReverseRoutes {
 	//I don't like this solution(this class) all that much but it works for verifying routes in web pages exist with a run of
 	//a special test to find web app errors before deploying it.  good enough beats perfect and lookup is still fast
 	
+	private List<RouteMeta> allRoutes = new ArrayList<>();
 	private Map<RouteId, RouteMeta> routeIdToRoute = new HashMap<>();
 	
 	private Map<String, RouteMeta> routeNameToRoute = new HashMap<>();
@@ -46,6 +48,10 @@ public class ReverseRoutes {
 			
 	}
 
+	public void addContentRoute(RouteMeta meta) {
+		allRoutes.add(meta);
+	}
+	
 	public void addRoute(RouteId routeId, RouteMeta meta) {
 		RouteMeta existingRoute = routeIdToRoute.get(routeId);
 		if(existingRoute != null) {
@@ -53,6 +59,7 @@ public class ReverseRoutes {
 					+" first time="+existingRoute.getRoute().getFullPath()+" second time="+meta.getRoute().getFullPath());
 		}
 		
+		allRoutes.add(meta);
 		routeIdToRoute.put(routeId, meta);
 		
 		String enumClassName = routeId.getClass().getSimpleName();
@@ -199,6 +206,6 @@ public class ReverseRoutes {
 	}
 
 	public Collection<RouteMeta> getAllRouteMetas() {
-		return routeIdToRoute.values();
+		return allRoutes;
 	}
 }

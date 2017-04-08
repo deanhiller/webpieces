@@ -22,7 +22,7 @@ public class CompressionLookup {
 	}
 	
 	public Compression createCompressionStream(List<String> encodings, String extension, MimeTypeResult mimeType) {
-		if(!toCompressOrNotToCompress.shouldCompress(encodings, extension, mimeType)) {
+		if(!toCompressOrNotToCompress.isCompressableType(extension, mimeType)) {
 			return null;
 		}
 		

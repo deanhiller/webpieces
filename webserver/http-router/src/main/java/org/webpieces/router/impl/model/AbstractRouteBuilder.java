@@ -5,6 +5,7 @@ import static org.webpieces.ctx.api.HttpMethod.POST;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.CrudRouteIds;
+import org.webpieces.router.api.routing.MultiRoute;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.api.routing.Router;
 import org.webpieces.router.impl.Route;
@@ -53,13 +54,17 @@ public abstract class AbstractRouteBuilder implements Router {
 	}
 	
 	public void addRoute(Route r, RouteId routeId) {
-		log.info("scope:'"+routerInfo+"' adding route="+r.getFullPath()+" method="+r.getControllerMethodString());
+		log.info("scope:'"+routerInfo+"' adding route="+r.getMethod()+" "+r.getFullPath()+" method="+r.getControllerMethodString());
 		RouteMeta meta = new RouteMeta(r, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
 		holder.getFinder().loadControllerIntoMetaObject(meta, true);
 
 		routes.addRoute(meta);
 		
-		holder.getReverseRoutes().addRoute(routeId, meta);
+		if(routeId != null)
+			holder.getReverseRoutes().addRoute(routeId, meta);
+		else {
+			holder.getReverseRoutes().addContentRoute(meta);
+		}
 	}
 
 	@Override
@@ -77,6 +82,16 @@ public abstract class AbstractRouteBuilder implements Router {
 		addRoute(route, routeId);
 	}
 	
+	public void addContentRoute(HttpMethod method, String path, String controllerMethod) {
+		UrlPath p = new UrlPath(routerInfo, path);
+		Route route = new RouteImpl(method, p, controllerMethod, isHttpsOnlyRoutes);
+		addRoute(route, null);
+	}
+
+	public MultiRoute addMultiRoute(HttpMethod method, String path) {
+		throw new UnsupportedOperationException("Not supported yet");
+	}
+
 	/*
 	 * Adds routes like the following all in one method
 	 * 

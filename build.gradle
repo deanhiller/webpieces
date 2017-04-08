@@ -62,7 +62,8 @@ ext {
 	   
 	   //look into removing and using a copied single file as we only use one thing
 	   'commons-lang':    'org.apache.commons:commons-lang3:3.5',
-
+	   'jackson':         'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+	   
     ]
 
 }

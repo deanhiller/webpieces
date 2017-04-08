@@ -11,6 +11,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
+import org.webpieces.router.api.dto.RenderContentResponse;
 import org.webpieces.router.api.dto.RenderResponse;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 
@@ -61,6 +62,12 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
 		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_STATIC_HTML, renderStatic);
+	}
+
+	@Override
+	public void sendRenterContent(RenderContentResponse resp) {
+		throw new UnsupportedOperationException("not implemented yet");
+		
 	}
 
 

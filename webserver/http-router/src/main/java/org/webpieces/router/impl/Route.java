@@ -26,4 +26,6 @@ public interface Route {
 	boolean isCheckSecureToken();
 
 	boolean isHttpsRoute();
+
+	String getMethod();
 }

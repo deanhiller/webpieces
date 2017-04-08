@@ -20,6 +20,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.DataMismatchException;
@@ -32,6 +33,7 @@ public class ParamToObjectTranslatorImpl {
 	private ParamValueTreeCreator treeCreator;
 	private ObjectTranslator objectTranslator;
 	private Set<EntityLookup> lookupHooks;
+	private Set<BodyContentBinder> bodyBinders;
 
 	@Inject
 	public ParamToObjectTranslatorImpl(ParamValueTreeCreator treeCreator, ObjectTranslator primitiveConverter) {
@@ -94,11 +96,38 @@ public class ParamToObjectTranslatorImpl {
 			Annotation[] annotations = paramAnnotations[i];
 			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
-			ParamNode paramNode = paramTree.get(name);
-			Object arg = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
+			ParamNode paramNode = paramTree.get(name);			
+			Object arg = fromContentOrHttpRequest(req, method, paramNode, fieldMeta, ctx);
 			args.add(arg);
 		}
 		return args.toArray();
+	}
+
+	private Object fromContentOrHttpRequest(RouterRequest req, Method method, ParamNode paramNode, ParamMeta fieldMeta,
+			RequestContext ctx) {
+		Annotation[] annotations = fieldMeta.getAnnotations();
+		Class<?> fieldClass = fieldMeta.getFieldClass();
+		if(annotations.length > 0) {
+			BodyContentBinder binder = lookupMatchingBinder(fieldClass, annotations);
+			if(binder != null) {
+				byte[] data = req.orginalRequest.getBodyNonNull().createByteArray();
+				return binder.unmarshal(fieldClass, data);
+			}
+		}
+		
+		Object arg = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
+		return arg;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private BodyContentBinder lookupMatchingBinder(Class entityClass, Annotation[] annotations) {
+		for(BodyContentBinder binder : bodyBinders) {
+			for(Annotation anno : annotations) {
+				if(binder.isManaged(entityClass, anno.annotationType()))
+					return binder;
+			}
+		}
+		return null;
 	}
 
 	private Map<String, String> translate(Map<String, List<String>> queryParams) {
@@ -267,8 +296,9 @@ public class ParamToObjectTranslatorImpl {
 		return null;
 	}
 
-	public void install(Set<EntityLookup> lookupHooks) {
+	public void install(Set<EntityLookup> lookupHooks, Set<BodyContentBinder> bodyBinders) {
 		this.lookupHooks = lookupHooks;
+		this.bodyBinders = bodyBinders;
 	}
 
 }

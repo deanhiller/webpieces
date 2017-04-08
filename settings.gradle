@@ -31,5 +31,6 @@ include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev'
 include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME'
 include 'webserver-plugins:hibernate-plugin'
 include 'webserver-plugins:h2db-plugin'
-include 'webserver-plugins:plugin-api'
+include 'webserver-plugins:json-jackson-plugin'
+
 

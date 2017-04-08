@@ -41,9 +41,14 @@ public class ResponseCreator {
 	private MimeTypes mimeTypes;
 	
 	public ResponseEncodingTuple createResponse(HttpRequest request, KnownStatusCode statusCode, 
-			String extension, String defaultMime, boolean isStaticFile) {
+			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
+		return createContentResponse(request, statusCode, isDynamicPartOfWebsite, mimeType);
+	}
+
+	ResponseEncodingTuple createContentResponse(HttpRequest request, KnownStatusCode statusCode,
+			boolean isDynamicPartOfWebsite, MimeTypeResult mimeType) {
 		HttpResponseStatus status = new HttpResponseStatus();
 		status.setKnownStatus(statusCode);
 		
@@ -54,7 +59,7 @@ public class ResponseCreator {
 		
 		response.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, mimeType.mime));
 
-		addCommonHeaders(request, response, isStaticFile);
+		addCommonHeaders(request, response, isDynamicPartOfWebsite);
 		return new ResponseEncodingTuple(response, mimeType);
 	}
 	
@@ -68,7 +73,7 @@ public class ResponseCreator {
 		}	
 	}
 	
-	public void addCommonHeaders(HttpRequest request, HttpResponse response, boolean staticFile) {
+	public void addCommonHeaders(HttpRequest request, HttpResponse response, boolean isDynamicPartOfWebsite) {
 		KnownStatusCode statusCode = response.getStatusLine().getStatus().getKnownStatus();
 		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
 		
@@ -82,7 +87,7 @@ public class ResponseCreator {
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
 //		response.addHeader(xFrame);
 		
-		if(!staticFile) {
+		if(isDynamicPartOfWebsite) {
 			List<RouterCookie> cookies = createCookies(statusCode);
 			for(RouterCookie c : cookies) {
 				Header cookieHeader = create(c);

@@ -1,9 +1,7 @@
 package org.webpieces.router.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,8 +9,6 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.RouteId;
-
-import com.google.common.collect.Sets;
 
 public class RouteImpl implements Route {
 
@@ -33,10 +29,22 @@ public class RouteImpl implements Route {
 		this.argNames = result.argNames;
 		this.isHttpsRoute = isSecure;
 		this.controllerMethodString = controllerMethod;
-		this.routeType = RouteType.BASIC;
+		this.routeType = RouteType.HTML;
 		this.checkSecureToken = checkSecureToken;
 	}
 
+	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, boolean isSecure) {
+		this.path = path.getFullPath();
+		this.method = method;
+		RegExResult result = RegExUtil.parsePath(path.getSubPath());
+		this.patternToMatch = Pattern.compile(result.regExToMatch);
+		this.argNames = result.argNames;
+		this.isHttpsRoute = isSecure;
+		this.controllerMethodString = controllerMethod;
+		this.routeType = RouteType.CONTENT;
+		this.checkSecureToken = false;
+	}
+	
 	public RouteImpl(String controllerMethod, RouteType routeType) {
 		this.routeType = routeType;
 		this.path = null;
@@ -55,9 +63,13 @@ public class RouteImpl implements Route {
 	}
 	
 	public Matcher matches(RouterRequest request, String path) {
-		if(isHttpsRoute) {
-			if(!request.isHttps)
-				return null;
+		if(isHttpsRoute && !request.isHttps) {
+			//NOTE: we cannot do if isHttpsRoute != request.isHttps as every http route is 
+			//allowed over https as well by default.  so 
+			//isHttpsRoute=false and request.isHttps=true is allowed
+			//isHttpsRoute=false and request.isHttps=false is allowed
+			//isHttpsRoute=true  and request.isHttps=true is allowed
+			return null; //route is https but request is http so not allowed
 		} else if(this.method != request.method) {
 			return null;
 		}
@@ -92,10 +104,7 @@ public class RouteImpl implements Route {
 
 	@Override
 	public boolean isPostOnly() {
-		if(method == HttpMethod.POST)
-			return true;
-		
-		return false;
+		return method == HttpMethod.POST;
 	}
 
 	@Override
@@ -106,6 +115,11 @@ public class RouteImpl implements Route {
 	@Override
 	public boolean isHttpsRoute() {
 		return isHttpsRoute;
+	}
+
+	@Override
+	public String getMethod() {
+		return method+"";
 	}
 	
 }

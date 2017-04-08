@@ -1,4 +1,0 @@
-dependencies {
-    compile deps['guice']
-    compile project(':core:core-util')
-}
