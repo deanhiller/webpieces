@@ -225,7 +225,7 @@ public class RouteInvoker {
 		Current.setContext(requestCtx);
 		CompletableFuture<Action> response;
 		try {
-			response = invokeMethod(service, obj, method);
+			response = invokeMethod(service, obj, method, meta.getRoute());
 		} finally {
 			RequestLocalCtx.set(null);
 			Current.setContext(null);
@@ -252,8 +252,8 @@ public class RouteInvoker {
 		return null;
 	}
 	
-	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m) {
-		MethodMeta meta = new MethodMeta(obj, m, Current.getContext());
+	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, Route r) {
+		MethodMeta meta = new MethodMeta(obj, m, Current.getContext(), r);
 		return service.invoke(meta);
 	}
 

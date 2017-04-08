@@ -52,7 +52,7 @@ public class ParamToObjectTranslatorImpl {
 	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
-	public Object[] createArgs(Method m, RequestContext ctx) {
+	public ArgsResult createArgs(Method m, RequestContext ctx) {
 		RouterRequest req = ctx.getRequest();
 		try {
 			return createArgsImpl(m, ctx);
@@ -73,7 +73,7 @@ public class ParamToObjectTranslatorImpl {
 		}
 	}
 
-	protected Object[] createArgsImpl(Method method, RequestContext ctx) {
+	protected ArgsResult createArgsImpl(Method method, RequestContext ctx) {
 		RouterRequest req = ctx.getRequest();
 		Parameter[] paramMetas = method.getParameters();
 		Annotation[][] paramAnnotations = method.getParameterAnnotations();
@@ -90,33 +90,35 @@ public class ParamToObjectTranslatorImpl {
 		//lastly path params
 		treeCreator.createTree(paramTree, ctx.getPathParams(), FromEnum.URL_PATH);
 		
-		List<Object> args = new ArrayList<>();
+		ArgsResult result = new ArgsResult();
 		for(int i = 0; i < paramMetas.length; i++) {
 			Parameter paramMeta = paramMetas[i];
 			Annotation[] annotations = paramAnnotations[i];
 			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
 			ParamNode paramNode = paramTree.get(name);			
-			Object arg = fromContentOrHttpRequest(req, method, paramNode, fieldMeta, ctx);
-			args.add(arg);
+			fromContentOrHttpRequest(req, method, paramNode, fieldMeta, ctx, result);
 		}
-		return args.toArray();
+		return result;
 	}
 
-	private Object fromContentOrHttpRequest(RouterRequest req, Method method, ParamNode paramNode, ParamMeta fieldMeta,
-			RequestContext ctx) {
+	private void fromContentOrHttpRequest(RouterRequest req, Method method, ParamNode paramNode, ParamMeta fieldMeta,
+			RequestContext ctx, ArgsResult result) {
 		Annotation[] annotations = fieldMeta.getAnnotations();
 		Class<?> fieldClass = fieldMeta.getFieldClass();
 		if(annotations.length > 0) {
 			BodyContentBinder binder = lookupMatchingBinder(fieldClass, annotations);
 			if(binder != null) {
 				byte[] data = req.orginalRequest.getBodyNonNull().createByteArray();
-				return binder.unmarshal(fieldClass, data);
+				Object bean = binder.unmarshal(fieldClass, data);
+				result.setBinder(binder);
+				result.addArgument(bean);
+				return;
 			}
 		}
 		
 		Object arg = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
-		return arg;
+		result.addArgument(arg);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

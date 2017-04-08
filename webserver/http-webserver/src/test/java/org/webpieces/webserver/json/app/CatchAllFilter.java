@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -21,8 +22,9 @@ public class CatchAllFilter extends JsonCatchAllFilter {
 	
 	@Override
 	protected byte[] translateClientError(ClientDataError t) {
+		String escapeJson = StringEscapeUtils.escapeJson(t.getMessage());
 		JsonError error = new JsonError();
-		error.setError(t.getMessage());
+		error.setError(escapeJson);
 		error.setCode(0);
 		
 		try {

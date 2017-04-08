@@ -2,40 +2,48 @@ package org.webpieces.plugins.json;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.ClientDataError;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public abstract class JsonCatchAllFilter extends RouteFilter<Boolean> {
+public abstract class JsonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private static final Logger log = LoggerFactory.getLogger(JsonCatchAllFilter.class);
-	private static final MimeTypeResult mimeType = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
+	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
 	private Boolean isNotFoundFilter;
+	private Pattern pattern;
 
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> nextFilter) {
+		if(isNotFoundFilter)
+			return createNotFoundResponse(nextFilter, meta);
+
 		return nextFilter.invoke(meta).handle((a, t) -> translateFailure(a, t));
 	}
 
 	@Override
-	public void initialize(Boolean isNotFoundFilter) {
-		this.isNotFoundFilter = isNotFoundFilter;
+	public void initialize(JsonConfig config) {
+		this.isNotFoundFilter = config.isNotFoundFilter();
+		this.pattern = config.getFilterPattern();
 	}
 
 	private Action translateFailure(Action action, Throwable t) {
-		if(isNotFoundFilter) {
-			return createNotFoundResponse();
-		} else if(t != null) {
+		if(t != null) {
 			if(t instanceof ClientDataError) {
 				return translate((ClientDataError)t);
+			} else if (t instanceof NotFoundException) {
+				return createNotFound();
 			}
 			
 			log.error("Internal Server Error", t);
@@ -47,25 +55,37 @@ public abstract class JsonCatchAllFilter extends RouteFilter<Boolean> {
 
 	private RenderContent translateError(Throwable t) {
 		byte[] content = translateServerError(t);
-		return new RenderContent(content, KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, mimeType);
+		return new RenderContent(content, KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, MIME_TYPE);
 	}
 
 	private RenderContent translate(ClientDataError t) {
 		byte[] content = translateClientError(t);
-		return new RenderContent(content, KnownStatusCode.HTTP_400_BADREQUEST, mimeType);
+		return new RenderContent(content, KnownStatusCode.HTTP_400_BADREQUEST, MIME_TYPE);
 	}
 
-	private RenderContent createNotFoundResponse() {
-		byte[] content = createNotFoundJsonResponse();
-		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND, mimeType);
+	private CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
+		Matcher matcher = pattern.matcher(meta.getCtx().getRequest().relativePath);
+		if(!matcher.matches())
+			return nextFilter.invoke(meta);
+		
+		return CompletableFuture.completedFuture(
+					createNotFound()
+				);
+	}
+
+	private Action createNotFound() {
+		byte[] content = createNotFoundJsonResponse();		
+		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND, MIME_TYPE);
 	}
 
 	protected abstract byte[] translateServerError(Throwable t);
 
 	protected abstract byte[] translateClientError(ClientDataError t);
-	
+
+	/**
+	 * If you really want, return null and the filter will return the 404 html instead of
+	 * json if you really want
+	 */
 	protected abstract byte[] createNotFoundJsonResponse();
-	
-	
 	
 }

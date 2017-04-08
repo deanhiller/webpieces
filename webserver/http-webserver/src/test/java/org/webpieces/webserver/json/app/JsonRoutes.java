@@ -10,7 +10,12 @@ public class JsonRoutes extends AbstractRoutes {
 	@Override
 	public void configure() {
 		addContentRoute(GET , "/json/{id}",         "JsonController.jsonRequest");
-		addContentRoute(POST , "/json/{id}",         "JsonController.postJson");
+		addContentRoute(POST , "/json/{id}",        "JsonController.postJson");
+
+		addContentRoute(GET , "/json/async/{id}",   "JsonController.asyncJsonRequest");
+		addContentRoute(POST, "/json/async/{id}",   "JsonController.postAsyncJson");
+
+		addContentRoute(GET , "/json/throw/{id}",        "JsonController.throwNotFound");
 
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");

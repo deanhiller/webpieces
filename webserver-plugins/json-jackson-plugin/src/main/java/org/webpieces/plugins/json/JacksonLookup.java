@@ -8,7 +8,9 @@ import javax.inject.Inject;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.BodyContentBinder;
+import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.exceptions.ClientDataError;
 
 public class JacksonLookup implements BodyContentBinder {
@@ -36,16 +38,17 @@ public class JacksonLookup implements BodyContentBinder {
 			
 			return mapper.readValue(data, entityClass);
 		} catch(JsonProcessingException e) {
-			throw new ClientDataError("invalid json in client request", e);
+			throw new ClientDataError("invalid json in client request.  "+e.getMessage(), e);
 		} catch (IOException e) {
 			throw new RuntimeException("should not occur", e);
 		}
 	}
 
 	@Override
-	public <T> byte[] marshal(T bean) {
+	public <T> RenderContent marshal(T bean) {
 		try {
-			return mapper.writeValueAsBytes(bean);
+			byte[] content = mapper.writeValueAsBytes(bean);
+			return new RenderContent(content, KnownStatusCode.HTTP_200_OK, JsonCatchAllFilter.MIME_TYPE);
 		} catch (IOException e) {
 			throw new RuntimeException("should not occur", e);
 		}

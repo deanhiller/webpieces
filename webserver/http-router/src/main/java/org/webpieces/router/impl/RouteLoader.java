@@ -224,7 +224,7 @@ public class RouteLoader {
 	}
 
 	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
-		List<FilterInfo<?>> filterInfos = routerBuilder.findMatchingFilters(req.relativePath, req.isHttps);
+		List<FilterInfo<?>> filterInfos = routerBuilder.findNotFoundFilters(req.relativePath, req.isHttps);
 		return controllerFinder.createNotFoundService(m, filterInfos);
 	}
 

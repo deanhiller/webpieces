@@ -4,9 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.impl.params.ArgsResult;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
@@ -56,16 +60,35 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		
 		//We chose to do this here so any filters ESPECIALLY API filters 
 		//can catch and translate api errors and send customers a logical response
-		Object[] arguments = translator.createArgs(m, meta.getCtx());
+		//On top of that ORM plugins can have a transaction filter and then in this
+		//createArgs can look up the bean before applying values since it is in
+		//the transaction filter
+		ArgsResult argsResult = translator.createArgs(m, meta.getCtx());
 		
-		Object retVal = m.invoke(obj, arguments);
-		if(retVal == null) {
+		Object retVal = m.invoke(obj, argsResult.getArguments());
+		if(retVal == null)
 			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+m);
-		} else if(retVal instanceof CompletableFuture) {
+		
+		RouteType routeType = meta.getRoute().getRouteType();
+		if(routeType == RouteType.CONTENT)
+			return unwrapResult(retVal, argsResult.getBinder());
+
+		if(retVal instanceof CompletableFuture) {
 			return (CompletableFuture<Action>) retVal;
 		} else {
 			Action action = (Action) retVal;
 			return CompletableFuture.completedFuture(action);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private CompletableFuture<Action> unwrapResult(Object retVal, BodyContentBinder binder) {
+		if(retVal instanceof CompletableFuture) {
+			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
+			return future.thenApply((bean) -> binder.marshal(bean));
+		} else {
+			RenderContent content = binder.marshal(retVal);
+			return CompletableFuture.completedFuture(content);
 		}
 	}
 }

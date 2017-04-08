@@ -1,5 +1,7 @@
 package org.webpieces.plugins.json;
 
+import java.util.regex.Pattern;
+
 import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
 
@@ -16,13 +18,10 @@ public class JacksonRoutes extends AbstractRoutes {
 	
 	@Override
 	protected void configure() {
-		//We could also add the TransactionFilter around internal error but usually that is not a good idea
-		//as if the database goes down, you will end up with error to error to webpieces fail-safe 500 page which
-		//does not look like your website
-		//Also, we don't wrap NotFound but you could do that as well
-		addFilter(filterPattern, filter, false, PortType.ALL_FILTER);
+		Pattern pattern = Pattern.compile(filterPattern);
 		
-		addNotFoundFilter(filter, true, PortType.ALL_FILTER);
+		addFilter(filterPattern, filter, new JsonConfig(pattern, false), PortType.ALL_FILTER);		
+		addNotFoundFilter(filter, new JsonConfig(pattern, true), PortType.ALL_FILTER);
 	}
 
 }

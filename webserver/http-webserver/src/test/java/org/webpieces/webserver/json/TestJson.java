@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.RequestId;
@@ -30,9 +29,68 @@ public class TestJson {
 		server = webserver.start();
 	}
 
-	@Ignore
 	@Test
-	public void testJsonGet() {
+	public void testAsyncJsonGet() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/async/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("{`searchTime`:8,`matches`:[`match1`,`match2`]}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testAsyncBadJsonGet() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/async/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
+		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testAsyncJsonPost() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/async/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("{`searchTime`:98,`matches`:[`match1`,`match2`]}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+
+	@Test
+	public void testAsyncBadJsonPost() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/async/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
+		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testSyncJsonGet() {
 		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
@@ -42,18 +100,112 @@ public class TestJson {
 
 		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("some json content");
+		response.assertContains("{`searchTime`:5,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
 	}
 	
-	public void testBadJsonGet() {
-	}	
+	@Test
+	public void testSyncBadJsonGet() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
 
-	public void testPostGoodJson() {
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
+		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
+		response.assertContentType("application/json");
 	}
 	
-	public void testPostBadJson() {
+	@Test
+	public void testSyncJsonPost() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("{`searchTime`:99,`matches`:[`match1`,`match2`]}".replace("`", "\""));
+		response.assertContentType("application/json");
 	}
 	
+	@Test
+	public void testSyncBadJsonPost() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/45");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
 
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
+		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testNotFoundInJsonUrls() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/some/notexist/route");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testNotFoundInHtmlUrls() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/html");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your page was not found");
+		response.assertContentType("text/html; charset=utf-8");
+	}
+	
+	@Test
+	public void testRouteParamConversionFail() {
+		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/somenotexistroute");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND); //clearly this url has nothing there
+		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+
+	@Test
+	public void testControllerThrowsNotFound() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/throw/333");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND); //clearly this url has nothing there
+		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
 }
