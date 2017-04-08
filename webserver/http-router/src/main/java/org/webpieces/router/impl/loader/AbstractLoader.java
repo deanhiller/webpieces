@@ -66,10 +66,6 @@ public abstract class AbstractLoader implements MetaLoaderProxy {
 		//blow away the previous filter.  That was done upstream in the DevRoutingService
 		Class<? extends RouteFilter<T>> filterClass = info.getFilter();
 		
-		Singleton singleton = filterClass.getAnnotation(Singleton.class);
-		if(singleton == null)
-			throw new IllegalArgumentException("EVERY filter must be marked with @javax.inject.Singleton not @com.google.inject.Singleton.  bad filter="+filterClass.getName());
-		
 		RouteFilter<T> f = injector.getInstance(filterClass);
 		f.initialize(info.getInitialConfig());
 		return f;

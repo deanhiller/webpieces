@@ -3,7 +3,6 @@ package org.webpieces.webserver.api.login;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
@@ -19,7 +18,6 @@ import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.util.filters.Service;
 
-@Singleton
 public class LoginFilter extends RouteFilter<LoginInfo> {
 
 	private String token;

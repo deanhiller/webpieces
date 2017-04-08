@@ -140,7 +140,7 @@ public class R1RouterBuilder extends AbstractDomainBuilder  {
 			Pattern patternToMatch = info.getPatternToMatch();
 			Matcher matcher = patternToMatch.matcher(path);
 			if(matcher.matches()) {
-				matchingFilters.add(info);
+				matchingFilters.add(0, info);
 			}
 		}
 		return matchingFilters;
