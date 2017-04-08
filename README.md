@@ -138,11 +138,16 @@ This project is essentially pieces that can be used to build any http related so
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * A/B split testing and experiments - hooks to wire into existing system and hooks to make it easier to create A/B pages
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
+* google protobuf BodyContentBinder plugin
+* thrift BodyContentBinder plugin
+* plugin for localhost:8080/@documentation and install on the development server
+* streaming forever from controller
+* streaming upload but forever into controller
+* remove router depending on http 1 so we avoid creep
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
 * codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
 * tweak example project close to 80% code covered
-* escapehtml or verbatim or noescapehtml (this is pretty hard to get right sooo definetely need tests on quite a few cases)
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
 * (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  

@@ -11,5 +11,7 @@ public interface BodyContentBinder {
 	<T> T unmarshal(Class<T> paramTypeToCreate, byte[] data);
 
 	<T> RenderContent marshal(T bean);
+
+	Class<? extends Annotation> getAnnotation();
 	
 }

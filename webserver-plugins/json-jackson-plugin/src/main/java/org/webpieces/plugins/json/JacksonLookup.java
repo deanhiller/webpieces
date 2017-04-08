@@ -54,4 +54,9 @@ public class JacksonLookup implements BodyContentBinder {
 		}
 	}
 
+	@Override
+	public Class<? extends Annotation> getAnnotation() {
+		return Jackson.class;
+	}
+
 }

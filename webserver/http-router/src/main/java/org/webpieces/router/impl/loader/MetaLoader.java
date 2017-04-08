@@ -1,16 +1,19 @@
 package org.webpieces.router.impl.loader;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.dto.MethodMeta;
@@ -26,6 +29,8 @@ import org.webpieces.util.filters.Service;
 public class MetaLoader {
 
 	private ParamToObjectTranslatorImpl translator;
+	private Set<BodyContentBinder> bodyBinderPlugins;
+	private List<String> allBinderAnnotations = new ArrayList<>();
 
 	@Inject
 	public MetaLoader(ParamToObjectTranslatorImpl translator) {
@@ -70,12 +75,39 @@ public class MetaLoader {
 
 		if(meta.getRoute().getRouteType() == RouteType.HTML) {
 			preconditionCheck(meta, controllerMethod);
+		} else if (meta.getRoute().getRouteType() == RouteType.CONTENT) {
+			contentPreconditionCheck(meta, controllerMethod, parameters);
 		}
-		
+
 		meta.setMethodParamNames(paramNames);
 		meta.setControllerInstance(controllerInst);
 		meta.setMethod(controllerMethod);
+	}
 
+	private void contentPreconditionCheck(RouteMeta meta, Method controllerMethod, Parameter[] parameters) {
+		List<String> binderMatches = new ArrayList<>();
+		for(BodyContentBinder binder : bodyBinderPlugins) {
+			for(Parameter p : parameters) {
+				recordParameterMatches(binderMatches, binder, p);
+			}
+		}
+
+		if(binderMatches.size() == 0)
+			throw new IllegalArgumentException("there was not a single parameter annotated with a Plugin"
+					+ " annotation on method="+controllerMethod+".  looking at your plugins, these are the annotations available="+allBinderAnnotations);
+		else if(binderMatches.size() > 1)
+			throw new IllegalArgumentException("there is more than one parameter with a Plugin"
+					+ " annotation on method="+controllerMethod+".  These are the ones we found(please delete one)="+binderMatches);
+
+	}
+
+	private void recordParameterMatches(List<String> binderMatches, BodyContentBinder binder, Parameter p) {
+		Annotation[] annotations = p.getAnnotations();
+		for(Annotation a : annotations) {
+			Class<?> entityClass = p.getType();
+			if(binder.isManaged(entityClass, a.annotationType()))
+				binderMatches.add("@"+binder.getAnnotation().getSimpleName());
+		}
 	}
 
 	private void preconditionCheck(RouteMeta meta, Method controllerMethod) {
@@ -135,6 +167,13 @@ public class MetaLoader {
 			svc = ChainFilters.addOnTop(svc, f);
 		}
 		return svc;
+	}
+
+	public void install(Set<BodyContentBinder> bodyBinders) {
+		this.bodyBinderPlugins = bodyBinders;
+		for(BodyContentBinder binder : bodyBinders) {
+			allBinderAnnotations.add("@"+binder.getAnnotation().getSimpleName());
+		}
 	}
 
 }
