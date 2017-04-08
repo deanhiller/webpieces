@@ -132,16 +132,19 @@ public class R1RouterBuilder extends AbstractDomainBuilder  {
 	}
 
 	public List<FilterInfo<?>> findNotFoundFilters(String path, boolean isHttps) {
-		return notFoundFilters;
+		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
+		for(FilterInfo<?> info : notFoundFilters) {
+			if(!info.securityMatch(isHttps))
+				continue; //skip this filter
+			
+			matchingFilters.add(0, info);
+		}
+		return matchingFilters;
 	}
 	
 	public List<FilterInfo<?>> findMatchingFilters(String path, boolean isHttps) {
-		return findMatchingFilters2(path, isHttps, routeFilters);
-	}
-	
-	private List<FilterInfo<?>> findMatchingFilters2(String path, boolean isHttps, List<FilterInfo<?>> filters) {
 		List<FilterInfo<?>> matchingFilters = new ArrayList<>();
-		for(FilterInfo<?> info : filters) {
+		for(FilterInfo<?> info : routeFilters) {
 			if(!info.securityMatch(isHttps))
 				continue; //skip this filter
 			

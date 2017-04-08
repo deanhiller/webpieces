@@ -32,7 +32,7 @@ public class LoginRoutes extends AbstractRoutes {
 		httpsRouter.addRoute(POST, "/postLogin",           controller+".postLogin", LoginRouteId.POST_LOGIN);
 		
 		addFilter(securePath, LoginFilter.class, new LoginInfo(sessionToken, LoginRouteId.LOGIN), PortType.HTTPS_FILTER);
-		
+		addNotFoundFilter(LoginFilter.class, new LoginInfo(sessionToken, LoginRouteId.LOGIN), PortType.HTTPS_FILTER);
 	}
 
 }
