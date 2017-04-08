@@ -122,4 +122,32 @@ public class TestSyncWebServer {
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("https://something.com/hi", response.getRedirectUrl());
 	}
+	
+	@Test
+	public void testScopedRoot() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("This is the first raw html page");
+	}	
+	
+	@Test
+	public void testScopedRootWithSlash() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped/");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		List<FullResponse> responses = socket.getResponses();
+		Assert.assertEquals(1, responses.size());
+
+		FullResponse response = responses.get(0);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("This is the first raw html page");
+	}	
 }

@@ -51,7 +51,9 @@ public class L3PrefixedRouting {
 
 
 	public MatchResult fetchRoute(RouterRequest request, String subPath) {
-		if(!subPath.startsWith("/"))
+		if("".equals(subPath))
+			return findRouteMatch(routes, request, subPath);
+		else if(!subPath.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
 
 		String prefix = subPath;
@@ -64,6 +66,9 @@ public class L3PrefixedRouting {
 
 		L3PrefixedRouting routeInfo = pathPrefixToInfo.get(prefix);
 		if(routeInfo != null) {
+			if(index < 0)
+				return routeInfo.fetchRoute(request, "");
+			
 			String newRelativePath = subPath.substring(index, subPath.length());
 			MatchResult route = routeInfo.fetchRoute(request, newRelativePath);
 			if(route != null)

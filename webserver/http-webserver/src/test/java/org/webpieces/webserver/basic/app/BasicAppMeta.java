@@ -22,7 +22,10 @@ public class BasicAppMeta implements WebAppMeta {
 	
 	@Override
     public List<Routes> getRouteModules() {
-		return Lists.newArrayList(new BasicRoutes());
+		return Lists.newArrayList(
+				new BasicRoutes(),
+				new SomeScopedRoutes()
+				);
 	}
 	@Override
 	public List<Plugin> getPlugins() {
