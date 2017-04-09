@@ -27,7 +27,7 @@ Usage in no tag...
 <a href="@ [VERBATIM_ROUTE_ID]@" id="myid">My link2</a>
 
 Usage in an a tag for example..
-#{a href:@[VERBATIM_ROUTE_ID]@, id:'myid'}#My link#{/a}#
+#{ href:@[VERBATIM_ROUTE_ID]@, id:'myid'}#My link#{/a}#
 ]*
 </pre>
     
@@ -55,7 +55,7 @@ Escape to escape platform tokens and also escapes all html so it is good for pri
 <pre>
 *[
 prints as is to the page without executing an action...
-*[ #{a href:@[VERBATIM_ROUTE_ID]@, id:'myid'}#My link#{/a}# ]*]*
+*[ #{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}# ]*]*
 </pre>
 
 <h2>Platform Tokens</h2>

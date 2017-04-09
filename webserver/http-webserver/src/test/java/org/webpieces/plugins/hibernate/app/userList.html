@@ -12,10 +12,10 @@
     	#{list items:users, as:'user'}#
     	    <td>${user.firstName}$</td>
     		<td>${user.lastName}$</td> 
-    		<td>#{a href:@[EDIT_USER_PAGE, id:user.id]@}#Edit#{/a}#</td>
+    		<td><a href="@[EDIT_USER_PAGE, id:user.id]@">Edit</a></td>
     	#{/list}#
     	
-    	#{a href:@[ADD_USER_PAGE]@}#Add User#{/a}#
+    	<a href="@[ADD_USER_PAGE]@">Add User</a>
     </table>
   </body>
 </html>

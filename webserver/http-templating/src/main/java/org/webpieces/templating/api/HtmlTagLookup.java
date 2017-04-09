@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.webpieces.templating.impl.tags.AHrefTag;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.templating.impl.tags.ExtendsTag;
 import org.webpieces.templating.impl.tags.FieldTag;
@@ -28,7 +27,6 @@ public class HtmlTagLookup {
 		put(new HtmlSetTag());
 		put(new HtmlGetTag());
 		put(new ExtendsTag());
-		put(new AHrefTag());
 		put(new FormTag(config.getDefaultFormAcceptEncoding()));
 		put(new RenderTagArgsTag());
 		put(new RenderPageArgsTag());

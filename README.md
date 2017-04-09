@@ -166,13 +166,6 @@ ${user.account.address}$
 
 The last two are special and can be used between tag tokens and between i18n tokens like so...
 
-``` 
-In an href tag..                                                  #{a href:@[ROUTE, user:user, arg:'flag']@}#Some Link#{/a}# 
-In text..                                                This is some text @[ROUTE, user:user, arg:'flag']@
-In basic i18n tag                    &{'Hi, this link is text %1', 'key1', @[ROUTE, user:user, arg:'flag']@}&
-In i18n tag...    &{'Hi %1, <a href="%2">Some link text</a>', 'key', arg1, @[ROUTE, user:user, arg:'flag']@}&
-```
-
 #### DOCUMENTATION Notes:
 
 * Section on links to tests/html files as examples
