@@ -1,7 +1,5 @@
 package org.webpieces.plugins.hibernate;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -23,6 +21,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
@@ -54,15 +53,12 @@ public class TestAjaxHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		response.assertContains("Your page was not found");
 	}
-	
+
 	@Test
 	public void testAjaxAddUser() {
 		HttpRequest req = Requests.createPostRequest("/ajax/user/post",
@@ -73,10 +69,7 @@ public class TestAjaxHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/ajax/user/list", response.getRedirectUrl());
 		

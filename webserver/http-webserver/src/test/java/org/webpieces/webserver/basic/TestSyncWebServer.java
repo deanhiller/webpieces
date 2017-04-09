@@ -13,6 +13,7 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -35,10 +36,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 		response.assertContentType("text/html; charset=utf-8");
@@ -52,10 +50,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 		response.assertContentType("text/html; charset=utf-8");
@@ -69,10 +64,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
@@ -84,10 +76,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("red");
 		response.assertContentType("application/json");
@@ -99,10 +88,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
@@ -114,10 +100,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("https://something.com/hi", response.getRedirectUrl());
@@ -129,10 +112,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}	
@@ -143,10 +123,7 @@ public class TestSyncWebServer {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}	

@@ -1,7 +1,5 @@
 package org.webpieces.plugins.hibernate;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -23,6 +21,7 @@ import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
@@ -55,12 +54,8 @@ public class TestSyncHibernate {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-		socket.clear();
 		
 		return response.getRedirectUrl();
 	}
@@ -70,10 +65,7 @@ public class TestSyncHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name=SomeName email="+email);
 	}
@@ -99,10 +91,7 @@ public class TestSyncHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 
@@ -159,10 +148,7 @@ public class TestSyncHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<a href=`/user/new`>Add User</a>".replace("`", "\""));
 		response.assertContains("<a href=`/user/edit/1`>Edit</a>".replace("`", "\""));
@@ -174,10 +160,7 @@ public class TestSyncHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name='' email=''");
 	}
@@ -189,10 +172,7 @@ public class TestSyncHibernate {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
@@ -207,10 +187,7 @@ public class TestSyncHibernate {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = load(user.getId());
@@ -230,10 +207,7 @@ public class TestSyncHibernate {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = loadByEmail(email);
@@ -251,10 +225,7 @@ public class TestSyncHibernate {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = loadByEmail(email);
@@ -269,10 +240,7 @@ public class TestSyncHibernate {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 
 		Assert.assertEquals(2, TransactionFilter.getState());

@@ -2,9 +2,6 @@ package org.webpieces.webserver.https;
 
 import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
 
-import java.util.List;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
@@ -16,6 +13,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -34,55 +32,14 @@ public class TestHttps {
 	}
 
 	@Test
-	public void testSameRouteHttpAndHttpsWrongOrder() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", true); // https
+	public void testSecureLoginHasHttpsPage() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal", true); // https
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("Http Route"); //notice the Https Route page is not shown		
-		
-		socket.clear();
-
-		req.setHttpScheme(HTTP);
-		server.incomingRequest(req, new RequestId(0), true, socket);
-		
-		responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("Http Route"); //notice the Https Route page is not shown	
-	}
-	
-	@Test
-	public void testSameRouteHttpAndHttpsCorrectOrder() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2", true);
-		
-		server.incomingRequest(req, new RequestId(0), true, socket);
-		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("Https Route");
-		
-		socket.clear();
-
-		req.setHttpScheme(HTTP);
-		server.incomingRequest(req, new RequestId(0), true, socket);
-		
-		responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		response = responses.get(0);
-		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		response.assertContains("Http Route");
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		//before we can show you the page, you need to be logged in, redirect to login page...
+		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
 	
 	@Test
@@ -91,10 +48,7 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("home page");
 	}
@@ -105,12 +59,47 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		//Even though the page exists....if accessed over http, it does not exist...
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+	}
+	
+	@Test
+	public void testSameRouteHttpAndHttpsWrongOrder() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", true); // https
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Http Route"); //notice the Https Route page is not shown		
+		
+		socket.clear();
+
+		req.setHttpScheme(HTTP);
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Http Route"); //notice the Https Route page is not shown	
+	}
+
+	@Test
+	public void testSameRouteHttpAndHttpsCorrectOrder() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2", true);
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Https Route");
+
+		req.setHttpScheme(HTTP);
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Http Route");
 	}
 	
 	@Test
@@ -119,10 +108,7 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		//Even though the page exists....if accessed over http, it does not exist...
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);		
 	}
@@ -133,25 +119,8 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		//Even though the page doesn't exist, we redirect all /secure/* to login page
-		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-	}
-	
-	@Test
-	public void testSecureLoginHasHttpsPage() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal", true); // https
-		
-		server.incomingRequest(req, new RequestId(0), true, socket);
-		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
-		//before we can show you the page, you need to be logged in, redirect to login page...
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
 	
@@ -164,10 +133,7 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		//before we can show you the page, you need to be logged in, redirect to login page...
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is some home page");
@@ -179,10 +145,7 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("https://myhost.com:8443"); //notice the Https Route page is not shown	
 	}
@@ -193,10 +156,7 @@ public class TestHttps {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses(200000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("https://myhost.com:8443"); //notice the Https Route page is not shown	
 	}
@@ -206,16 +166,12 @@ public class TestHttps {
 		
 		server.incomingRequest(req1, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses1 = socket.getResponses();
-		Assert.assertEquals(1, responses1.size());
-
-		FullResponse response1 = responses1.get(0);
+		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
 		Header header = response1.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
 		String value = header.getValue();
 		value = value.replace("; path=/; HttpOnly", "");
 		Header cookie = new Header(KnownHeaderName.COOKIE, value);
 		
-		socket.clear();
 		return cookie;
 	}
 }

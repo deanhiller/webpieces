@@ -14,6 +14,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -36,7 +37,7 @@ public class TestAsynchronousErrors {
 	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockResponseSender mockResponseSocket = new MockResponseSender();
+	private MockResponseSender socket = new MockResponseSender();
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
 
@@ -56,20 +57,17 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 
 		//now resolve the future (which would be done on another thread)
 		future.complete(22);
-		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-		
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your page was not found");
+
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your page was not found");
 	}
 	
 	@Test
@@ -80,24 +78,21 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future2);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 
 		future.completeExceptionally(new NotFoundException("some async NotFound"));
 
-		List<FullResponse> responses3 = mockResponseSocket.getResponses();
+		List<FullResponse> responses3 = socket.getResponses();
 		Assert.assertEquals(0, responses3.size());
 		
 		future2.complete(55);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your page was not found");		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your page was not found");		
 	}
 	
 	@Test
@@ -106,19 +101,16 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new NotFoundException("testing notfound from notfound route"));
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("There was a bug in our software...sorry about that");
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("There was a bug in our software...sorry about that");
 	}
 	
 	@Test
@@ -127,19 +119,16 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("testing notfound from notfound route"));
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("There was a bug in our software...sorry about that");		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("There was a bug in our software...sorry about that");		
 	}
 	
 	@Test
@@ -151,23 +140,21 @@ public class TestAsynchronousErrors {
 
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("fail notfound route"));
 		
-		List<FullResponse> responses3 = mockResponseSocket.getResponses();
+		List<FullResponse> responses3 = socket.getResponses();
 		Assert.assertEquals(0, responses3.size());
 		
 		future2.completeExceptionally(new RuntimeException("fail internal server error route"));
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("The webpieces platform saved them");
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("The webpieces platform saved them");
 	}
 	
 	/**
@@ -180,19 +167,16 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("test async exception"));
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("There was a bug in our software...sorry about that");	
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("There was a bug in our software...sorry about that");	
 	}
 	
 	@Test
@@ -203,23 +187,21 @@ public class TestAsynchronousErrors {
 		mockInternalSvrErrorLib.queueFuture(future2);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("fail notfound route"));
 		
-		List<FullResponse> responses3 = mockResponseSocket.getResponses();
+		List<FullResponse> responses3 = socket.getResponses();
 		Assert.assertEquals(0, responses3.size());
 		
 		future2.completeExceptionally(new RuntimeException("fail internal server error route"));
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("The webpieces platform saved them");	
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("The webpieces platform saved them");	
 	}
 
 	@Test
@@ -229,15 +211,12 @@ public class TestAsynchronousErrors {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
 		//now have the server complete processing
 		future.complete(5);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software");
 	}

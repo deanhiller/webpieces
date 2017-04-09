@@ -1,6 +1,7 @@
 package org.webpieces.webserver.beans;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +15,9 @@ import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.mock.lib.MockExecutor;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -31,10 +34,10 @@ import com.google.inject.Module;
 public class TestBeans {
 
 	private RequestListener server;
-	private MockResponseSender mockResponseSender = new MockResponseSender();
+	private MockResponseSender socket = new MockResponseSender();
 	private MockSomeLib mockSomeLib = new MockSomeLib();
 	private MockSomeOtherLib mockSomeOtherLib = new MockSomeOtherLib();
-	
+	private MockExecutor mockExecutor = new MockExecutor();
 
 	@Before
 	public void setUp() {
@@ -45,35 +48,30 @@ public class TestBeans {
 
 	@Test
     public void testPageParam() {
-        pageParamAux(false);
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Hi Dean Hiller, this is testing");
+		response.assertContains("Or we can try to get a flash: testflashvalue");
     }
 
     @Test
     public void testPageParamAsync() {
-        pageParamAux(true);
-    }
-
-	private void pageParamAux(Boolean async) {
-        String uri;
-        if(async) {
-            uri = "/pageparam_async";
-        } else {
-            uri = "/pageparam";
-        }
-
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, uri);
-
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
-
-        // In case we are async, wait up to 500ms
-		List<FullResponse> responses = mockResponseSender.getResponses(500, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam_async");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		Runnable runnable = mockExecutor.getRunnablesScheduled().get(0);
+		runnable.run();
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Hi Dean Hiller, this is testing");
 		response.assertContains("Or we can try to get a flash: testflashvalue");
-	}
+    }
 
 	@Test
 	public void testPostFailDueToSecureTokenCheck() {
@@ -84,12 +82,9 @@ public class TestBeans {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		//We should change this to a 400 bad request
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
@@ -103,12 +98,9 @@ public class TestBeans {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserDto user = mockSomeOtherLib.getUser();
@@ -127,12 +119,9 @@ public class TestBeans {
 				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		//should not have any errors and should redirect back to list of users page..
 		Assert.assertEquals("http://myhost.com/listusers", response.getRedirectUrl());
@@ -148,12 +137,9 @@ public class TestBeans {
 				"user.address.street", "Coolness Dr.",
 				"password", "should be hidden from flash");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserDto savedUser = mockSomeOtherLib.getUser();
@@ -169,12 +155,9 @@ public class TestBeans {
 	public void testArrayForm() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("value=`FirstAccName`".replace('`', '"'));
 		response.assertContains("value=`SecondAccName`".replace('`', '"'));
@@ -205,14 +188,11 @@ public class TestBeans {
 		req.setBody(dataGen.emptyWrapper());
 		RequestId id = new RequestId(0);
 
-		server.incomingRequest(req, id, false, mockResponseSender);
-		server.incomingData(split.get(0), id, false, mockResponseSender);
-		server.incomingData(split.get(1), id, true, mockResponseSender);
+		server.incomingRequest(req, id, false, socket);
+		server.incomingData(split.get(0), id, false, socket);
+		server.incomingData(split.get(1), id, true, socket);
 
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 
 		UserDto user = mockSomeLib.getUser();
@@ -232,12 +212,9 @@ public class TestBeans {
 				"user.fullName", "Dean Hiller"
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserDto user = mockSomeLib.getUser();
@@ -271,12 +248,9 @@ public class TestBeans {
 				"password", "hi"
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 	
@@ -289,12 +263,9 @@ public class TestBeans {
 				"password", "hi"
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
 	
@@ -302,12 +273,9 @@ public class TestBeans {
 	public void testQueryParamsToUserBean() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
@@ -315,12 +283,9 @@ public class TestBeans {
 	public void testBeanMissingForGetSoNotFoundResults() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser?user.firstName=jeff&password=as");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
 	
@@ -329,6 +294,7 @@ public class TestBeans {
 		public void configure(Binder binder) {
 			binder.bind(SomeOtherLib.class).toInstance(mockSomeOtherLib);
 			binder.bind(SomeLib.class).toInstance(mockSomeLib);
+			binder.bind(Executor.class).toInstance(mockExecutor);
 		}
 	}
 }

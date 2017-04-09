@@ -21,6 +21,7 @@ import org.webpieces.mock.lib.MockExecutor;
 import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
@@ -62,12 +63,8 @@ public class TestAsyncHibernate {
 		runnables.get(0).run();
 		mockExecutor.clear();
 		
-		List<FullResponse> responses2 = socket.getResponses();
-		Assert.assertEquals(1, responses2.size());
-
-		FullResponse response = responses2.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-		socket.clear();
 		
 		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
 		String url = header.getValue();
@@ -83,11 +80,8 @@ public class TestAsyncHibernate {
 		Assert.assertEquals(0, responses1.size());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
-		
-		List<FullResponse> responses2 = socket.getResponses();
-		Assert.assertEquals(1, responses2.size());
 
-		FullResponse response = responses2.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name=SomeName email="+email);
 	}
@@ -117,10 +111,7 @@ public class TestAsyncHibernate {
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
 		
-		List<FullResponse> responses2 = socket.getResponses();
-		Assert.assertEquals(1, responses2.size());
-
-		FullResponse response = responses2.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 	
