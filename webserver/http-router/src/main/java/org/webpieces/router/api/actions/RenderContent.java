@@ -1,15 +1,14 @@
 package org.webpieces.router.api.actions;
 
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 
 public class RenderContent implements Action {
 
 	private byte[] content;
-	private KnownStatusCode statusCode;
+	private int statusCode;
 	private MimeTypeResult mimeType;
 
-	public RenderContent(byte[] payload, KnownStatusCode statusCode, MimeTypeResult mimeType) {
+	public RenderContent(byte[] payload, int statusCode, MimeTypeResult mimeType) {
 		this.content = payload;
 		this.statusCode = statusCode;
 		this.mimeType = mimeType;
@@ -23,7 +22,7 @@ public class RenderContent implements Action {
 		this.content = payload;
 	}
 
-	public KnownStatusCode getStatusCode() {
+	public int getStatusCode() {
 		return statusCode;
 	}
 

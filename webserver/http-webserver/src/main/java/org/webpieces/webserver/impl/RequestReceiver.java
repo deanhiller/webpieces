@@ -295,17 +295,20 @@ public class RequestReceiver implements RequestListener {
 		Headers headers = req.getHeaderLookupStruct();
 		Header lengthHeader = headers.getHeader(KnownHeaderName.CONTENT_LENGTH);
 		Header typeHeader = headers.getHeader(KnownHeaderName.CONTENT_TYPE);
-		if(lengthHeader == null)
+		if(lengthHeader == null) {
+			routerRequest.body = req.getBodyNonNull().createByteArray();
 			return;
-		else if(typeHeader == null) {
-			log.error("Incoming content length was specified, but no contentType was(We will treat like there was no body at all).  req="+req);
+		} else if(typeHeader == null) {
+			routerRequest.body = req.getBodyNonNull().createByteArray();
+			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
 			return;
 		}
 		
 		BodyParser parser = requestBodyParsers.lookup(typeHeader.getValue());
 		if(parser == null) {
-			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will treat like there was no body at all).  req="+req);
-			return;			
+			routerRequest.body = req.getBodyNonNull().createByteArray();			
+			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req);
+			return;
 		}
 
 		DataWrapper body = req.getBody();

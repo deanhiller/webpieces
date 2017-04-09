@@ -44,13 +44,21 @@ public class ResponseCreator {
 			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
-		return createContentResponse(request, statusCode, isDynamicPartOfWebsite, mimeType);
+		return createContentResponse(request, statusCode.getCode(), isDynamicPartOfWebsite, mimeType);
 	}
 
-	ResponseEncodingTuple createContentResponse(HttpRequest request, KnownStatusCode statusCode,
+	ResponseEncodingTuple createContentResponse(HttpRequest request, int statusCode,
 			boolean isDynamicPartOfWebsite, MimeTypeResult mimeType) {
+		
+		KnownStatusCode code = KnownStatusCode.lookup(statusCode);
+		
 		HttpResponseStatus status = new HttpResponseStatus();
-		status.setKnownStatus(statusCode);
+		if(code != null) {
+			status.setKnownStatus(code);
+		} else {
+			status.setCode(statusCode);
+			status.setReason("");
+		}
 		
 		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
 		statusLine.setStatus(status);

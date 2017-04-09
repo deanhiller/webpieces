@@ -1,7 +1,8 @@
 dependencies {
     compile deps['guice']
     compile project(':core:core-util')
-	compile project(':http:http1_1-parser')
+	//DO NOT DEPEND ON HTTP1.1 NOR HTTP2 here!!!!!
+	//this keeps us pluggable with ANY http parser implementation
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

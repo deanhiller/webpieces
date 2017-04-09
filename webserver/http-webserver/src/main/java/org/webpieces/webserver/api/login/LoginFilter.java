@@ -68,7 +68,8 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 		return CompletableFuture.completedFuture(Actions.redirect(loginRoute));
 	}
 
-	private HttpResponse addCacheHeaders(HttpResponse resp) {
+	private Object addCacheHeaders(Object response) {
+		HttpResponse resp = (HttpResponse) response;
 		//http://stackoverflow.com/questions/49547/how-to-control-web-page-caching-across-all-browsers
 		//This forces the browser back button to re-request the page as it would never have the page
 		//and is good to use to hide banking information type pages

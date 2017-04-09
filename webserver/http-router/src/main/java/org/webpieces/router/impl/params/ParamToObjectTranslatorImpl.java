@@ -109,7 +109,7 @@ public class ParamToObjectTranslatorImpl {
 		if(annotations.length > 0) {
 			BodyContentBinder binder = lookupMatchingBinder(fieldClass, annotations);
 			if(binder != null) {
-				byte[] data = req.orginalRequest.getBodyNonNull().createByteArray();
+				byte[] data = req.body;
 				Object bean = binder.unmarshal(fieldClass, data);
 				result.setBinder(binder);
 				result.addArgument(bean);

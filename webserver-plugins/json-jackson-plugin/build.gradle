@@ -1,4 +1,4 @@
 dependencies {
     compile deps['jackson']
-    compile project(':webserver:http-router')
+    compile project(':webserver:http-router'), project(':http:http1_1-parser')
 }
