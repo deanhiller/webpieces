@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Properties;
 
 import org.junit.Assert;
@@ -19,6 +17,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.net.URLEncoder;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -27,7 +26,7 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 public class TestStaticPaths {
 
 	private RequestListener server;
-	private MockResponseSender mockResponseSender = new MockResponseSender();
+	private MockResponseSender socket = new MockResponseSender();
 	private File cacheDir;
 
 	@Before
@@ -42,12 +41,9 @@ public class TestStaticPaths {
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver.staticpath.app.StaticMeta");
 		response.assertContentType("text/plain; charset=utf-8");
@@ -57,14 +53,12 @@ public class TestStaticPaths {
 	public void testStaticDirWithHashGeneration() throws FileNotFoundException, IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 
 		String hash = loadUrlEncodedHash();
 		
-		FullResponse response = responses.get(0);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("/public/fonts.css?hash="+hash);
 	}
@@ -74,12 +68,9 @@ public class TestStaticPaths {
 		String hash = loadUrlEncodedHash();		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
 
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("themes.googleusercontent.com");
 		response.assertContentType("text/css; charset=utf-8");
@@ -98,12 +89,9 @@ public class TestStaticPaths {
 	public void testStaticDirWithBadHashDoesNotLoadMismatchFileIntoBrowser() throws FileNotFoundException, IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
 
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
@@ -111,12 +99,9 @@ public class TestStaticPaths {
 	public void testStaticDirJpg() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContentType("image/jpeg");
 		int size = response.getBody().getReadableSize();
@@ -127,12 +112,9 @@ public class TestStaticPaths {
 	public void testStaticDirAndNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		//render html page when not found...
 		response.assertContentType("text/html; charset=utf-8");
@@ -142,12 +124,9 @@ public class TestStaticPaths {
 	public void testStaticFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses(2000, 1);
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("app.TagsMeta");
 	}

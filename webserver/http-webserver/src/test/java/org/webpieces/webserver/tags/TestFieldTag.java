@@ -12,6 +12,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -35,10 +36,7 @@ public class TestFieldTag {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		//This can be a bit brittle if people change field.tag but we HAVE to verify this html was not escaped on accident as it was previously
 		response.assertContains("<div class=`controls`>".replace('`', '"'));

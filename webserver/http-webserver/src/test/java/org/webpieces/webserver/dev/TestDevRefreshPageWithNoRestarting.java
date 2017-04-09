@@ -24,6 +24,7 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
@@ -117,12 +118,9 @@ public class TestDevRefreshPageWithNoRestarting {
 	public void testRouteAdditionWithNewControllerPath() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
 		server.incomingRequest(req, new RequestId(0), true, socket);
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		socket.clear();
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/routeChange");
 		
@@ -134,22 +132,16 @@ public class TestDevRefreshPageWithNoRestarting {
 	public void testFilterChanged() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
 		server.incomingRequest(req, new RequestId(0), true, socket);
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
-		socket.clear();
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
-		
-		responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
 
-		response = responses.get(0);
+		response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/causeError", response.getRedirectUrl());
 	}
@@ -158,10 +150,8 @@ public class TestDevRefreshPageWithNoRestarting {
 	public void testNotFoundDisplaysWithIframeANDSpecialUrl() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
 		server.incomingRequest(req, new RequestId(0), true, socket);
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		//platform should convert request into a development not found page which has an iframe
@@ -208,13 +198,9 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 
 	private void verify303(String url) {
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(url, response.getRedirectUrl());
-		socket.clear();
 	}
 	
 	@Test
@@ -235,33 +221,21 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 
 	private void verifyPageContents(String contents) {
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains(contents);
-		socket.clear();
 	}
 	
 	private void verify404PageContents(String contents) {
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains(contents);
-		socket.clear();
 	}
 	
 	private void verify500PageContents(String contents) {
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains(contents);
-		socket.clear();
 	}
 	
 }

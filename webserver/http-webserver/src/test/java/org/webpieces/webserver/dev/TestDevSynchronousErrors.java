@@ -3,7 +3,6 @@ package org.webpieces.webserver.dev;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
@@ -18,6 +17,7 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -41,7 +41,7 @@ public class TestDevSynchronousErrors {
 	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockResponseSender mockResponseSocket = new MockResponseSender();
+	private MockResponseSender socket = new MockResponseSender();
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
 
@@ -72,14 +72,11 @@ public class TestDevSynchronousErrors {
 	public void testNotFoundRoute() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your app's webpage was not found");
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your app's webpage was not found");
 	}
 	
 	@Test
@@ -88,28 +85,22 @@ public class TestDevSynchronousErrors {
 		//no int doesn't really exist so it's a NotFound
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your app's webpage was not found");		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your app's webpage was not found");		
 	}
 	
 	@Test
 	public void testWebappThrowsNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
-		httpPayload.assertContains("Your app's webpage was not found");		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		response.assertContains("Your app's webpage was not found");		
 	}
 	
 	//This would be very weird but make sure it works in case they do it...
@@ -119,14 +110,11 @@ public class TestDevSynchronousErrors {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
-		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
+		server.incomingRequest(req, new RequestId(0), true, socket);
 
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("The webpieces platform saved them");
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("The webpieces platform saved them");
 	}
 	
 	/**
@@ -138,14 +126,11 @@ public class TestDevSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("There was a bug in our software...sorry about that");	
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("There was a bug in our software...sorry about that");	
 	}
 	
 	@Test
@@ -154,14 +139,11 @@ public class TestDevSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
-		httpPayload.assertContains("The webpieces platform saved them");	
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
+		response.assertContains("The webpieces platform saved them");	
 	}
 
 	private class AppOverridesModule implements Module {

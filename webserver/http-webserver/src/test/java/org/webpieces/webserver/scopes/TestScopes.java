@@ -1,7 +1,5 @@
 package org.webpieces.webserver.scopes;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +14,7 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
@@ -40,7 +39,8 @@ public class TestScopes {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		FullResponse response = getResponse();
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
 		response.assertContains("result=true");
@@ -53,7 +53,8 @@ public class TestScopes {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		FullResponse response = getResponse();
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
 		
@@ -68,7 +69,7 @@ public class TestScopes {
 		
 		server.incomingRequest(req2, new RequestId(0), true, socket);
 		
-		response = getResponse();
+        response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		Header cookie2 = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
@@ -84,27 +85,20 @@ public class TestScopes {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         server.incomingRequest(req, new RequestId(0), true, socket);
 
-        FullResponse response = getResponse();
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
         
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("Msg: it worked");
     }
-
-	private FullResponse getResponse() {
-		log.info("about to get response");
-		List<FullResponse> responses = socket.getResponses();
-        Assert.assertEquals(1, responses.size());
-        FullResponse response = responses.get(0);
-        socket.clear();
-		return response;
-	}
 
 	@Test
     public void testGetStaticFileDoesNotClearFlashMessage() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         server.incomingRequest(req, new RequestId(0), true, socket);
 
-        FullResponse response = getResponse();
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         
 		Header header = response.createCookieRequestHeader();
@@ -112,7 +106,7 @@ public class TestScopes {
         req2.addHeader(header);
         server.incomingRequest(req2, new RequestId(0), true, socket);
         
-        FullResponse response2 = getResponse();
+        FullResponse response2 = ResponseExtract.assertSingleResponse(socket);
         response2.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         Header cookie = response2.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
         Assert.assertNull("static routes should not be clearing cookies or things go south", cookie);
@@ -143,7 +137,8 @@ public class TestScopes {
 
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		FullResponse response = getResponse();
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/user/list", response.getRedirectUrl());
 	}
@@ -158,7 +153,8 @@ public class TestScopes {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		FullResponse response = getResponse();
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		socket.clear();
 		return response;
@@ -172,7 +168,8 @@ public class TestScopes {
         
         server.incomingRequest(req, new RequestId(0), true, socket);
 
-        FullResponse response = getResponse();
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("First name must be more than 2 characters");
         socket.clear();

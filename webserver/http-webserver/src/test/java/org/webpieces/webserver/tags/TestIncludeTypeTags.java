@@ -12,6 +12,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
 import org.webpieces.webserver.test.FullResponse;
@@ -40,10 +41,7 @@ public class TestIncludeTypeTags {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using Custom Tag");
 		response.assertContains("This is a custom tag which can also use tags in itself <a href=`/verbatim`>Some Link Here</a>".replace('`', '"'));
@@ -59,10 +57,7 @@ public class TestIncludeTypeTags {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using renderTagArgs Tag");
 		response.assertContains("The user is override"); //using variable from tag args in the called template
@@ -75,10 +70,7 @@ public class TestIncludeTypeTags {
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
-		List<FullResponse> responses = socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse response = responses.get(0);
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using renderPageArgs Tag");
 		response.assertContains("The user is Dean Hiller"); //using variable from page args in the called template

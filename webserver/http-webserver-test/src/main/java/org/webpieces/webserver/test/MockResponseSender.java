@@ -46,7 +46,6 @@ public class MockResponseSender implements ResponseSender {
 			chunkedResponse.setLastChunk(chunk);
 			payloads.add(chunkedResponse);
 			chunkedResponse = null;
-			synchronized (this) { this.notifyAll(); }
 		} else {
 			HttpChunk chunk = new HttpChunk();
 			chunk.setBody(data);
@@ -72,7 +71,6 @@ public class MockResponseSender implements ResponseSender {
 			FullResponse nextResp = new FullResponse(response);
 			if (response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
 				payloads.add(nextResp);
-				synchronized (this) { this.notifyAll(); }
 			} else
 				chunkedResponse = nextResp;
 		}
@@ -89,29 +87,6 @@ public class MockResponseSender implements ResponseSender {
 	}
 
 	public List<FullResponse> getResponses() {
-		return payloads;
-	}
-
-	public synchronized List<FullResponse> getResponses(long waitTimeMs, int count) {
-		try {
-			return getResponsesImpl(waitTimeMs, count);
-		} catch (InterruptedException e) {
-			throw new RuntimeException("failed waiting", e);
-		}
-	}
-	
-	public synchronized List<FullResponse> getResponsesImpl(long waitTimeMs, int count) throws InterruptedException {
-		long start = System.currentTimeMillis();
-		while(payloads.size() < count) {
-			this.wait(waitTimeMs+500);
-			if(payloads.size() >= count)
-				return payloads;
-			
-			long time = System.currentTimeMillis() - start;
-			if(time > waitTimeMs)
-				throw new IllegalStateException("While waiting for "+count+" responses, some or all never came.  count that came="+payloads.size());
-		}
-		
 		return payloads;
 	}
 	
