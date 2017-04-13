@@ -3,6 +3,7 @@ package org.webpieces.router.api;
 import java.util.Map;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.impl.compression.FileMeta;
 
 public interface RouterService {
@@ -25,4 +26,7 @@ public interface RouterService {
 	String convertToUrl(String routeId, Map<String, String> notUrlEncodedArgs, boolean isValidating);
 	
 	FileMeta relativeUrlToHash(String urlPath);
+
+	<T> WebConverter<T> getConverter(Class<T> class1);
+	
 }

@@ -24,6 +24,7 @@ import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.ServiceProxy;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
@@ -47,10 +48,14 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 
 	@Inject
 	public DevRoutingService(
-			RouteLoader routeConfig, RouterConfig config, DevClassForName loader, ControllerLoader finder,
+			RouteLoader routeConfig, 
+			RouterConfig config, 
+			DevClassForName loader, 
+			ControllerLoader finder,
+			ObjectTranslator objTranslator,
 			ParamToObjectTranslatorImpl translator
 	) {
-		super(routeConfig);
+		super(routeConfig, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.classLoader = loader;

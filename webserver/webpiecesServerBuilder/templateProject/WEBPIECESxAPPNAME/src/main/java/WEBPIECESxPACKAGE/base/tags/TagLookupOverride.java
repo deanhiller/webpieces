@@ -9,7 +9,7 @@ public class TagLookupOverride implements Module {
 
 	@Override
 	public void configure(Binder binder) {
-		binder.bind(HtmlTagLookup.class).to(MyHtmlTagLookup.class);
+		binder.bind(HtmlTagLookup.class).to(MyHtmlTagLookup.class).asEagerSingleton();;
 	}
 
 }

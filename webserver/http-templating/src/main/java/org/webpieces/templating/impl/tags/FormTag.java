@@ -50,7 +50,7 @@ public class FormTag implements HtmlTag {
         
         out.println(formHeader.replaceAll("`", "\""));
         out.println(secureInputElement.replaceAll("`", "\""));
-        out.println(ClosureUtil.toString(body));
+        out.println(ClosureUtil.toString(getName(), body, null));
         out.print("</form>");
 	}
 

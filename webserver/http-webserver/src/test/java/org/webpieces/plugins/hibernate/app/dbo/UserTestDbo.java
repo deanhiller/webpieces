@@ -53,6 +53,9 @@ public class UserTestDbo {
 
 	private boolean isNewPasswordChange;
 
+	//@Convert( converter = LevelEducationConverter.class )
+	private LevelEducation levelOfEducation = null;
+	
 	public boolean isNewPasswordChange() {
 		return isNewPasswordChange;
 	}
@@ -155,4 +158,13 @@ public class UserTestDbo {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public LevelEducation getLevelOfEducation() {
+		return levelOfEducation;
+	}
+
+	public void setLevelOfEducation(LevelEducation levelOfEducation) {
+		this.levelOfEducation = levelOfEducation;
+	}
+	
 }

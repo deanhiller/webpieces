@@ -12,6 +12,7 @@ import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.model.MatchResult;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -25,8 +26,8 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 	private ClassForName loader;
 	
 	@Inject
-	public ProdRouterService(RouteLoader routeLoader, ProdClassForName loader) {
-		super(routeLoader);
+	public ProdRouterService(RouteLoader routeLoader, ObjectTranslator translator, ProdClassForName loader) {
+		super(routeLoader, translator);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 	}

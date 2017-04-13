@@ -11,6 +11,7 @@ import javax.persistence.Query;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
+import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.FlashAndRedirect;
@@ -34,12 +35,15 @@ public class CrudTestController {
 	
 	public Render userAddEdit(Integer id) {
 		if(id == null) {
-			return Actions.renderThis("user", new UserTestDbo());
+			return Actions.renderThis("entity", new UserTestDbo(),
+					"levels", LevelEducation.values());
 		}
 		
 		EntityManager mgr = Em.get();
 		UserTestDbo user = mgr.find(UserTestDbo.class, id);
-		return Actions.renderThis("user", user);
+		return Actions.renderThis(
+				"entity", user,
+				"levels", LevelEducation.values());
 	}
 	
 	public Redirect postSaveUser(UserTestDbo user) {

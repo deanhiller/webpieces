@@ -4,11 +4,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.impl.compression.FileMeta;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -21,9 +23,11 @@ public abstract class AbstractRouterService implements RouterService {
 	private static final Logger log = LoggerFactory.getLogger(AbstractRouterService.class);
 	protected boolean started = false;
 	private RouteLoader routeLoader;
+	private ObjectTranslator translator;
 	
-	public AbstractRouterService(RouteLoader routeLoader) {
+	public AbstractRouterService(RouteLoader routeLoader, ObjectTranslator translator) {
 		this.routeLoader = routeLoader;
+		this.translator = translator;
 	}
 
 	@Override
@@ -75,5 +79,10 @@ public abstract class AbstractRouterService implements RouterService {
 		} catch(Throwable e) {
 			throw new RuntimeException("Startup hook="+s.getClass().getSimpleName()+" failed", e);
 		}
+	}
+	
+	@Override
+	public <T> WebConverter<T> getConverter(Class<T> class1) {
+		return translator.getConverter(class1);
 	}
 }

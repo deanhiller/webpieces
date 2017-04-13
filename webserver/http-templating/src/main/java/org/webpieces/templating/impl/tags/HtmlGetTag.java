@@ -38,7 +38,7 @@ public class HtmlGetTag implements HtmlTag {
         			+ "you would like it to not fail and just print whatever the body of the get is when the property is not found.\nlocation="+srcLocation);
         } else if(body != null){
         	//put the body of the #{get}#...body...#{/get}# into the page
-        	String value = ClosureUtil.toString(body);
+        	String value = ClosureUtil.toString(getName(), body, null);
         	out.print(value);
         }
 	}

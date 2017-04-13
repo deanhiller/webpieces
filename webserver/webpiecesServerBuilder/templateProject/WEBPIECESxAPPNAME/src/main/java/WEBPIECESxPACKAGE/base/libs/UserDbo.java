@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
@@ -19,6 +20,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import WEBPIECESxPACKAGE.base.libs.Education.EducationConverter;
 
 @Entity
 @Table(name="USERS", 
@@ -50,6 +53,9 @@ public class UserDbo {
 	@OneToMany(mappedBy = "manager")
 	private List<UserDbo> employees = new ArrayList<UserDbo>();
 
+	@Convert( converter = EducationConverter.class )
+	private Education levelOfEducation = null;
+	
 	public Integer getId() {
 		return id;
 	}
@@ -135,5 +141,13 @@ public class UserDbo {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Education getLevelOfEducation() {
+		return levelOfEducation;
+	}
+
+	public void setLevelOfEducation(Education levelOfEducation) {
+		this.levelOfEducation = levelOfEducation;
 	}
 }

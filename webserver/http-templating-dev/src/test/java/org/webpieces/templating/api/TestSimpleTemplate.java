@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.templatingdev.api.DevTemplateModule;
-import org.webpieces.templatingdev.api.RouterLookupModule;
+import org.webpieces.templatingdev.api.StubModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.DevTemplateService;
 
@@ -24,7 +24,7 @@ public class TestSimpleTemplate {
 	public void setup() {
 		Injector injector = Guice.createInjector(
 				new DevTemplateModule(new TemplateCompileConfig(false)),
-				new RouterLookupModule()
+				new StubModule()
 				);
 		svc = injector.getInstance(DevTemplateService.class);
 	}

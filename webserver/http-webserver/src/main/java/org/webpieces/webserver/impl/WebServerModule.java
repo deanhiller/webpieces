@@ -14,6 +14,7 @@ import org.webpieces.frontend.api.HttpFrontendFactory;
 import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.templating.api.RouterLookup;
+import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -44,6 +45,8 @@ public class WebServerModule implements Module {
 		binder.bind(WebServerConfig.class).toInstance(config);
 		
 		binder.bind(RouterLookup.class).to(RouterLookupProxy.class).asEagerSingleton();
+		
+		binder.bind(ConverterLookup.class).to(ConverterLookupProxy.class).asEagerSingleton();
 	}
 
 	@Provides

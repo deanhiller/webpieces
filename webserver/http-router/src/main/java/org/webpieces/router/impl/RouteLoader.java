@@ -52,11 +52,12 @@ public class RouteLoader {
 	private PluginSetup pluginSetup;
 	
 	@Inject
-	public RouteLoader(RouterConfig config, 
-						RouteInvoker invoker,
-						ControllerLoader controllerFinder,
-						CompressionCacheSetup compressionCacheSetup,
-						PluginSetup pluginSetup
+	public RouteLoader(
+		RouterConfig config, 
+		RouteInvoker invoker,
+		ControllerLoader controllerFinder,
+		CompressionCacheSetup compressionCacheSetup,
+		PluginSetup pluginSetup
 	) {
 		this.config = config;
 		this.invoker = invoker;

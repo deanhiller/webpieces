@@ -24,6 +24,8 @@ public class TemplateImpl implements Template {
 
 	@Override
 	public TemplateResult run(Map<String, Object> args, Map<Object, Object> templateProps) {
+		
+		
 		Binding binding = new Binding(args);
 
 		GroovyTemplateSuperclass t = (GroovyTemplateSuperclass) InvokerHelper.createScript(compiledTemplate, binding);		

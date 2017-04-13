@@ -4,10 +4,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
 
 public class ObjectToParamTranslator {
@@ -19,6 +19,7 @@ public class ObjectToParamTranslator {
 		this.translator = translator;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Map<String, String> formMap(Method method, List<String> pathParamNames, Map<String, Object> redirectArgs) {
 		if(pathParamNames.size() != redirectArgs.size())
 			throw new IllegalReturnValueException("The Redirect object returned from method='"+method+"' has the wrong number of arguments. args.size="+redirectArgs.size()+" should be size="+pathParamNames.size());
@@ -33,9 +34,9 @@ public class ObjectToParamTranslator {
 				throw new IllegalArgumentException("Controller did not set key='"+key+"' or passed in null"
 						+ " for '"+key+"' and this is not allowed as you end up with the word 'null' in your url");
 			
-			Function<Object, String> function = translator.getMarshaller(value.getClass());
+			WebConverter function = translator.getConverter(value.getClass());
 			if(function != null) {
-				nameToValue.put(key, function.apply(value));
+				nameToValue.put(key, function.objectToString(value));
 			} else {
 				nameToValue.put(key,  value.toString());
 			}

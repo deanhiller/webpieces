@@ -2,6 +2,31 @@
   <head>
   </head>
   <body>
-    This is the first raw html page.  name='${user.name}$' email='${user.email}$'
+  
+    #{form action:@[SAVE_USER]@, id:'form1'}#
+    
+        <input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+
+        #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+
+        *{
+         must cover use cases
+         1. default select what entity is set to 
+         2. if pulldown allows user to not choose anything, need unique id
+         3. size=5 and multiple
+        }*
+		#{field 'entity.levelOfEducation', label:'School Level'}#
+			<select size="1" name="${field.name}$" class="input-xlarge">
+				#{list items:levels, as:'level'}#
+					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
+				#{/list}#
+			</select>
+		#{/field}#
+	       	 			
+		<input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
+        <a href="@[LIST_USERS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
+    #{/form}#
+    
+    This is the first raw html page.  name='${entity.name}$' email='${entity.email}$'
   </body>
 </html>

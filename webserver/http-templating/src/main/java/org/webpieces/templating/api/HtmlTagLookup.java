@@ -12,6 +12,7 @@ import org.webpieces.templating.impl.tags.FormTag;
 import org.webpieces.templating.impl.tags.HtmlGetTag;
 import org.webpieces.templating.impl.tags.HtmlSetTag;
 import org.webpieces.templating.impl.tags.JsActionTag;
+import org.webpieces.templating.impl.tags.OptionTag;
 import org.webpieces.templating.impl.tags.RenderPageArgsTag;
 import org.webpieces.templating.impl.tags.RenderTagArgsTag;
 import org.webpieces.templating.impl.tags.ScriptTag;
@@ -21,9 +22,12 @@ import org.webpieces.templating.impl.tags.TemplateLoaderTag;
 public class HtmlTagLookup {
 	
 	private Map<String, HtmlTag> tags = new HashMap<>();
+	protected ConverterLookup converter;
 	
 	@Inject
-	public HtmlTagLookup(TemplateConfig config, RouterLookup lookup) {
+	public HtmlTagLookup(TemplateConfig config, RouterLookup lookup, ConverterLookup converter) {
+		this.converter = converter;
+		put(new OptionTag(converter));
 		put(new HtmlSetTag());
 		put(new HtmlGetTag());
 		put(new ExtendsTag());
@@ -38,7 +42,7 @@ public class HtmlTagLookup {
 	}
 
 	protected void addFieldTag(TemplateConfig config) {
-		put(new FieldTag(config.getFieldTagTemplatePath(), "error"));		
+		put(new FieldTag(converter, config.getFieldTagTemplatePath()));		
 	}
 
 	protected void put(HtmlTag tag) {

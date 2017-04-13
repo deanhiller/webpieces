@@ -70,7 +70,7 @@ public abstract class GroovyTemplateSuperclass extends Script {
     protected String runClosure(String tagName, Closure<?> closure, String srcLocation) {
     	srcLocation = modifySourceLocation2(srcLocation);
     	try {
-    		return ClosureUtil.toString(closure);
+    		return ClosureUtil.toString(tagName, closure, null);
     	} catch(Exception e) {
 			throw new RuntimeException("Error running tag #{"+tagName+"}#.  See exception cause below."+srcLocation, e);
     	}
@@ -121,6 +121,11 @@ public abstract class GroovyTemplateSuperclass extends Script {
 		} catch(MissingPropertyException e) {
 			return null;
 		}
+	}
+	
+	@Override
+	public void setProperty(String property, Object value) {
+		super.setProperty(property, value);
 	}
 	
     @Override

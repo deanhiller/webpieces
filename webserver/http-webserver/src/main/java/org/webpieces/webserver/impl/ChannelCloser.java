@@ -1,6 +1,5 @@
 package org.webpieces.webserver.impl;
 
-import org.webpieces.httpcommon.api.ResponseSender;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;

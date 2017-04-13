@@ -20,7 +20,7 @@ import org.gradle.api.tasks.compile.AbstractCompile;
 import org.webpieces.templating.api.ProdTemplateModule;
 import org.webpieces.templatingdev.api.CompileCallback;
 import org.webpieces.templatingdev.api.DevTemplateModule;
-import org.webpieces.templatingdev.api.RouterLookupModule;
+import org.webpieces.templatingdev.api.StubModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.HtmlToJavaClassCompiler;
 import org.webpieces.util.net.URLEncoder;
@@ -94,7 +94,7 @@ public class TemplateCompilerTask extends AbstractCompile {
         		) {
         	
         	Injector injector = Guice.createInjector(
-        			new RouterLookupModule(), 
+        			new StubModule(), 
         			new DevTemplateModule(config, new PluginCompileCallback(destinationDir, bufWrite))
         			);
         	HtmlToJavaClassCompiler compiler = injector.getInstance(HtmlToJavaClassCompiler.class);

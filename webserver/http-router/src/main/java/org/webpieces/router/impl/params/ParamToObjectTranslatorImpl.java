@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,6 +19,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.exceptions.ClientDataError;
@@ -150,16 +150,17 @@ public class ParamToObjectTranslatorImpl {
 		return newForm;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object translate(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
 		Class<?> fieldClass = fieldMeta.getFieldClass();
-		Function<String, Object> converter = objectTranslator.getUnmarshaller(fieldClass);
+		WebConverter<?> converter = objectTranslator.getConverter(fieldClass);
 		if(converter != null) {
 			return convert(req, method, valuesToUse, fieldMeta, converter, validator);
 		} else if(fieldClass.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
 		} else if(fieldClass.isEnum()) {
-			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
+			throw new UnsupportedOperationException("You need to install a "+WebConverter.class.getSimpleName()+" for this enum "+fieldMeta);
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
 				return null;
@@ -248,7 +249,8 @@ public class ParamToObjectTranslatorImpl {
 		}
 	}
 
-	private Object convert(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Function<String, Object> converter, Validation validator) {
+	@SuppressWarnings("rawtypes")
+	private Object convert(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, WebConverter converter, Validation validator) {
 		Class<?> paramTypeToCreate = fieldMeta.getFieldClass();
 		if(fieldMeta instanceof ParamMeta) {
 			//for params only not fields as with fields, we just don't set the field and skip it...before we call a method,
@@ -262,10 +264,8 @@ public class ParamToObjectTranslatorImpl {
 			throw new IllegalArgumentException("method takes param type="+paramTypeToCreate+" but complex structure found");
 		ValueNode node = (ValueNode) valuesToUse;
 		String value = node.getValue();
-		if(paramTypeToCreate == String.class)
-			return value;
 		try {
-			return converter.apply(value);
+			return converter.stringToObject(value);
 		} catch(Exception e) {
 			if(node.getFrom() == FromEnum.FORM_MULTIPART) {
 				validator.addError(node.getFullKeyName(), "Could not convert value");

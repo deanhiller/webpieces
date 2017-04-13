@@ -2,9 +2,12 @@ package org.webpieces.router.impl.params;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import javax.inject.Singleton;
+
+import org.webpieces.ctx.api.WebConverter;
 
 /**
  * This is THE class to translate objects to strings and strings to objects.  Overriding this, you can also add types 
@@ -18,48 +21,46 @@ import javax.inject.Singleton;
 @Singleton
 public class ObjectTranslator {
 
-	private Map<Class<?>, Function<String, Object>> classToUnmarshaller = new HashMap<>();
-	private Map<Class<?>, Function<Object, String>> classToMarshaller = new HashMap<>();
+	protected Map<Class<?>, WebConverter<?>> classToConverter = new HashMap<>();
+	protected Map<Class<?>, WebConverter<?>> appConverters;
 	
 	public ObjectTranslator() {
-		classToUnmarshaller.put(Boolean.class, s -> s == null ? null : Boolean.parseBoolean(s));
-		classToUnmarshaller.put(Boolean.TYPE, s -> Boolean.parseBoolean(s));
-		classToUnmarshaller.put(Byte.class, s -> s == null ? null : Byte.parseByte(s));
-		classToUnmarshaller.put(Byte.TYPE, s -> Byte.parseByte(s));
-		classToUnmarshaller.put(Short.class, s -> s == null ? null : Short.parseShort(s));
-		classToUnmarshaller.put(Short.TYPE, s -> Short.parseShort(s));
-		classToUnmarshaller.put(Integer.class, s -> s == null ? null : Integer.parseInt(s));
-		classToUnmarshaller.put(Integer.TYPE, s -> Integer.parseInt(s));
-		classToUnmarshaller.put(Long.class, s -> s == null ? null : Long.parseLong(s));
-		classToUnmarshaller.put(Long.TYPE, s -> Long.parseLong(s));
-		classToUnmarshaller.put(Float.class, s -> s == null ? null : Float.parseFloat(s));
-		classToUnmarshaller.put(Float.TYPE, s -> Float.parseFloat(s));
-		classToUnmarshaller.put(Double.class, s -> s == null ? null : Double.parseDouble(s));
-		classToUnmarshaller.put(Double.TYPE, s -> Double.parseDouble(s));
-		classToUnmarshaller.put(String.class, s -> s);
-		
-		classToMarshaller.put(Boolean.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Boolean.TYPE, s -> s.toString());
-		classToMarshaller.put(Byte.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Byte.TYPE, s -> s.toString());
-		classToMarshaller.put(Short.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Short.TYPE, s -> s.toString());
-		classToMarshaller.put(Integer.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Integer.TYPE, s -> s.toString());
-		classToMarshaller.put(Long.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Long.TYPE, s -> s.toString());
-		classToMarshaller.put(Float.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Float.TYPE, s -> s.toString());
-		classToMarshaller.put(Double.class, s -> s == null ? null : s.toString());
-		classToMarshaller.put(Double.TYPE, s -> s.toString());
-		classToMarshaller.put(String.class, s -> s == null ? null : s.toString());
+		add(Boolean.class, s -> s == null ? null : Boolean.parseBoolean(s), s -> s == null ? null : s.toString());
+		add(Byte.class, s -> s == null ? null : Byte.parseByte(s), s -> s == null ? null : s.toString());
+		add(Short.class, s -> s == null ? null : Short.parseShort(s), s -> s == null ? null : s.toString());
+		add(Integer.class, s -> s == null ? null : Integer.parseInt(s), s -> s == null ? null : s.toString());
+		add(Long.class, s -> s == null ? null : Long.parseLong(s), s -> s == null ? null : s.toString());
+		add(Float.class, s -> s == null ? null : Float.parseFloat(s), s -> s == null ? null : s.toString());
+		add(Double.class, s -> s == null ? null : Double.parseDouble(s), s -> s == null ? null : s.toString());
+		add(String.class, s -> s, s -> s);
+
+		add(Boolean.TYPE, s -> Boolean.parseBoolean(s), s -> s.toString());
+		add(Byte.TYPE, s -> Byte.parseByte(s), s -> s.toString());
+		add(Short.TYPE, s -> Short.parseShort(s), s -> s.toString());
+		add(Integer.TYPE, s -> Integer.parseInt(s), s -> s.toString());
+		add(Long.TYPE, s -> Long.parseLong(s), s -> s.toString());
+		add(Float.TYPE, s -> Float.parseFloat(s), s -> s.toString());
+		add(Double.TYPE, s -> Double.parseDouble(s), s -> s.toString());
+	}
+	
+	private <T> void add(Class<T> clazz, Function<String, T> toObj, Function<T, String> toStr) {
+		classToConverter.put(clazz, new PrimitiveConverter<T>(clazz, toObj, toStr));
 	}
 
-	public Function<String, Object> getUnmarshaller(Class<?> paramTypeToCreate) {
-		return classToUnmarshaller.get(paramTypeToCreate);
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <T> WebConverter<T> getConverter(Class<T> fieldClass) {
+		WebConverter webConverter = classToConverter.get(fieldClass);
+		if(webConverter != null)
+			return webConverter;
+		return (WebConverter<T>) appConverters.get(fieldClass);
 	}
 
-	public Function<Object, String> getMarshaller(Class<?> type) {
-		return classToMarshaller.get(type);
+	@SuppressWarnings("rawtypes")
+	public void install(Set<WebConverter> converters) {
+		//have to recreate for dev mode.  prod only calls this once
+		appConverters = new HashMap<>();
+		for(WebConverter converter : converters) {
+			appConverters.put(converter.getConverterType(), converter);
+		}
 	}
 }

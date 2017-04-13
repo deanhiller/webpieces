@@ -10,20 +10,24 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.Validation;
 import org.webpieces.templating.api.ClosureUtil;
+import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.impl.GroovyTemplateSuperclass;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import groovy.lang.Closure;
 
 public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 
+	private static final Logger log = LoggerFactory.getLogger(FieldTag.class);
 	private Pattern pattern = Pattern.compile("\\[(.*?)\\]"); //for arrays only
 	private String fieldHtmlPath;
-	private String errorClass;
+	private ConverterLookup converter;
 
-	public FieldTag(String fieldHtmlPath, String errorClass) {
+	public FieldTag(ConverterLookup converter, String fieldHtmlPath) {
+		this.converter = converter;
 		this.fieldHtmlPath = fieldHtmlPath;
-		this.errorClass = errorClass;
 	}
 
 	@Override
@@ -31,6 +35,10 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		return "field";
 	}
 
+	protected String getErrorClass() {
+		return "error";
+	}
+	
 	@Override
 	protected String getFilePath(GroovyTemplateSuperclass callingTemplate, Map<Object, Object> args, String srcLocation) {
 		return fieldHtmlPath;
@@ -47,10 +55,12 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		Map<String, Object> field = createFieldData(fieldName, pageArgs);
         
 		Map<String, Object> copyOfTagArgs = new HashMap<>();
+		Map<String, Object> closureProps = new HashMap<>();		
 		for(Map.Entry<Object, Object> entry : tagArgs.entrySet()) {
 			String key = entry.getKey().toString();
 			copyOfTagArgs.put(key, entry.getValue());
 			body.setProperty(key, entry.getValue());
+			closureProps.put(key, entry.getValue());
 		}
 		
 		copyOfTagArgs.put("field", field);
@@ -58,10 +68,11 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		String bodyStr = "";
 		if(body != null) {
 			body.setProperty("field", field);
-			bodyStr = ClosureUtil.toString(body);
+			closureProps.put("field", field);
+			bodyStr = ClosureUtil.toString(getName(), body, closureProps);
 		}
 		//variables starting with _ will not be html escaped so the body html won't be converted like other variables
-		copyOfTagArgs.put("_body", bodyStr); 
+		copyOfTagArgs.put("_body", bodyStr);
 		
 		return copyOfTagArgs;
 	}
@@ -88,7 +99,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         field.put("i18nKey", result.i18nName); //different from fieldName only for Arrays
         field.put("flash", flashValue);
         field.put("error", validation.getError(fieldName));
-        field.put("errorClass", field.get("error") != null ? errorClass : "");
+        field.put("errorClass", field.get("error") != null ? getErrorClass() : "");
         String[] pieces = fieldName.split("\\.");
         Object pageArgValue = null;
         Object obj = pageArgs.get(pieces[0]);
@@ -99,14 +110,18 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
             } catch (Exception e) {
                 // if there is a problem reading the field we dont set any
                 // value
+            	log.trace(() -> "exception", e);
             }
         } else {
         	pageArgValue = obj;
         }
-        field.put("value", pageArgValue);
         
-        field.put("flashOrValue", preferFirst(flashValue, pageArgValue));
-        field.put("valueOrFlash", preferFirst(pageArgValue, flashValue));
+        field.put("value", pageArgValue);
+
+        String valAsStr = converter.convert(pageArgValue);
+        
+        field.put("flashOrValue", preferFirst(flashValue, valAsStr));
+        field.put("valueOrFlash", preferFirst(valAsStr, flashValue));
         
 		return field;
 	}
@@ -136,7 +151,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		return fieldName.replace('.', '_').replace("[", ":").replace("]", ":");
 	}
 
-	private Object preferFirst(Object first, Object last) {
+	private Object preferFirst(String first, String last) {
 		if(first != null)
 			return first;
 		return last;

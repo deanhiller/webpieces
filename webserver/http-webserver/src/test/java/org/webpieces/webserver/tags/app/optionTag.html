@@ -1,0 +1,20 @@
+<html>
+  <head>
+  </head>
+  <body>
+    
+    *{ 
+       NOTE: see hibernate for these examples...
+       
+       support an enum set on a hibernate bean
+       support a entity set on an entity from list of choices
+    }*
+    
+	<select size="1" name="city.id">
+        #{list items:cities, as:'city'}
+        <option value="${city.id}">${city.name}</option>
+        #{/list}
+	</select>
+
+  </body>
+</html>

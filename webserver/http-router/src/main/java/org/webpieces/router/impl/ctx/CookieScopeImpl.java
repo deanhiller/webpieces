@@ -2,9 +2,9 @@ package org.webpieces.router.impl.ctx;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.webpieces.ctx.api.CookieScope;
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.impl.params.ObjectTranslator;
 
 
@@ -64,6 +64,7 @@ public abstract class CookieScopeImpl implements CookieScope {
 		return cookie.containsKey(key);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void put(String key, Object value) {
 		if(value == null) {
@@ -73,8 +74,8 @@ public abstract class CookieScopeImpl implements CookieScope {
 		
 		hasModifiedData = true;
 		Class<? extends Object> clazz = value.getClass();
-		Function<Object, String> marshaller = objectTranslator.getMarshaller(clazz);
-		String strValue = marshaller.apply(value);
+		WebConverter marshaller = objectTranslator.getConverter(clazz);
+		String strValue = marshaller.objectToString(value);
 		cookie.put(key, strValue);
 	}
 	@Override
@@ -85,9 +86,8 @@ public abstract class CookieScopeImpl implements CookieScope {
 	}
 
 	private <T> T translate(Class<T> type, String valueStr) {
-		Function<String, Object> unmarshaller = objectTranslator.getUnmarshaller(type);
-		@SuppressWarnings("unchecked")
-		T result = (T) unmarshaller.apply(valueStr);
+		WebConverter<T> unmarshaller = objectTranslator.getConverter(type);
+		T result = unmarshaller.stringToObject(valueStr);
 		return result;
 	}
 

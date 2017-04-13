@@ -2,13 +2,11 @@ package org.webpieces.router.impl.params;
 
 import java.lang.reflect.Type;
 
-public class GenericMeta implements Meta {
+public class GenericMeta<T> implements Meta {
 
-	@SuppressWarnings("rawtypes")
-	private Class type2;
+	private Class<T> type2;
 
-	@SuppressWarnings("rawtypes")
-	public GenericMeta(Class type2) {
+	public GenericMeta(Class<T> type2) {
 		this.type2 = type2;
 	}
 
@@ -18,7 +16,7 @@ public class GenericMeta implements Meta {
 	}
 
 	@Override
-	public Class<?> getFieldClass() {
+	public Class<T> getFieldClass() {
 		return type2;
 	}
 

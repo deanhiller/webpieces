@@ -11,6 +11,7 @@ import org.webpieces.router.api.Startable;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import WEBPIECESxPACKAGE.base.libs.Education;
 import WEBPIECESxPACKAGE.base.libs.UserDbo;
 
 public class PopulateDatabase implements Startable {
@@ -48,6 +49,7 @@ public class PopulateDatabase implements Startable {
 		user2.setName("Bob'sName");
 		user2.setFirstName("Bob");
 		user2.setLastName("LastBob");
+		user2.setLevelOfEducation(Education.MIDDLE_SCHOOL);
 		
 		log.info("classloader="+user1.getClass().getClassLoader());
 		

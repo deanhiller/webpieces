@@ -16,6 +16,9 @@ public class HibernateTestRoutes extends AbstractRoutes {
 
 	@Override
 	protected void configure() {
+		CrudRouteIds routeIds = new CrudRouteIds(LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
+		addCrud("user", "CrudTestController", routeIds);
+		
 		addRoute(POST, "/save",          "HibernateController.save", HibernateRouteId.SAVE_ENTITY);
 		addRoute(GET , "/get/{id}",      "HibernateController.display", HibernateRouteId.DISPLAY_ENTITY);
 		addRoute(GET , "/dynamic/{id}",  "HibernateController.entityLoad", HibernateRouteId.ENTITY_LOAD);
@@ -27,9 +30,6 @@ public class HibernateTestRoutes extends AbstractRoutes {
 		addRoute(GET , "/async/dynamic/{id}","HibernateAsyncController.entityLoad", HibernateRouteId.ASYNC_ENTITY_LOAD);
 
 		addRoute(GET , "/fail",          "HibernateController.saveThenFail", HibernateRouteId.ROLLBACK);
-
-		CrudRouteIds routeIds = new CrudRouteIds(LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
-		addCrud("user", "CrudTestController", routeIds);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
 		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");

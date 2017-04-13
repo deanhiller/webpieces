@@ -19,6 +19,7 @@ import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import WEBPIECESxPACKAGE.base.libs.Education;
 import WEBPIECESxPACKAGE.base.libs.UserDbo; 
 
 @Singleton
@@ -36,11 +37,15 @@ public class CrudUserController {
 	
 	public Action userAddEdit(Integer id) {
 		if(id == null) {
-			return Actions.renderThis("entity", new UserDbo());
+			return Actions.renderThis(
+					"entity", new UserDbo(),
+					"levels", Education.values());
 		}
 		
 		UserDbo user = Em.get().find(UserDbo.class, id);
-		return Actions.renderThis("entity", user);
+		return Actions.renderThis(
+				"entity", user,
+				"levels", Education.values());
 	}
 
 	public Redirect postSaveUser(UserDbo entity, String password) {

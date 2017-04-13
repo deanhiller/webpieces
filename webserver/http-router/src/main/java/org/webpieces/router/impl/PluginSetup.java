@@ -6,9 +6,11 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.impl.loader.MetaLoader;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 
 import com.google.inject.Injector;
@@ -20,17 +22,24 @@ public class PluginSetup {
 
 	private ParamToObjectTranslatorImpl translator;
 	private MetaLoader loader;
+	private ObjectTranslator translation;
 
 	@Inject
-	public PluginSetup(ParamToObjectTranslatorImpl translator, MetaLoader loader) {
+	public PluginSetup(
+			ParamToObjectTranslatorImpl translator, 
+			MetaLoader loader,
+			ObjectTranslator translation
+	) {
 		this.translator = translator;
 		this.loader = loader;
+		this.translation = translation;
 	}
 
 	/**
 	 * This is where we wire in all plugin points EXCEPT the Startup one
 	 * we can't inject them 
 	 */
+	@SuppressWarnings("rawtypes")
 	public void wireInPluginPoints(Injector appInjector, Consumer<Injector> startupFunction) {
 
 		Key<Set<EntityLookup>> key = Key.get(new TypeLiteral<Set<EntityLookup>>(){});
@@ -40,6 +49,12 @@ public class PluginSetup {
 		Set<BodyContentBinder> bodyBinders = appInjector.getInstance(key2);
 
 		translator.install(lookupHooks, bodyBinders);
+		
+		Key<Set<WebConverter>> key3 = Key.get(new TypeLiteral<Set<WebConverter>>(){});
+		Set<WebConverter> converters = appInjector.getInstance(key3);
+		translation.install(converters);
+
+		
 		loader.install(bodyBinders);
 		
 		//wire in startup and start the startables.  This is a function since Dev and Production differ

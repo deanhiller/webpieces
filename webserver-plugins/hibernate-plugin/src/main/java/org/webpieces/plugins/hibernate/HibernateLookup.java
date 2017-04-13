@@ -8,6 +8,7 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.hibernate.metamodel.internal.EntityTypeImpl;
+import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamNode;
@@ -63,8 +64,9 @@ public class HibernateLookup implements EntityLookup {
 		if(value == null)
 			return beanCreate.apply(paramTypeToCreate);
 		
-		Function<String, Object> unmarshaller = translator.getUnmarshaller(idClazz);
-		Object id = unmarshaller.apply(value);
+		@SuppressWarnings("rawtypes")
+		WebConverter unmarshaller = translator.getConverter(idClazz);
+		Object id = unmarshaller.stringToObject(value);
 		return entityManager.find(paramTypeToCreate, id);
 	}
 

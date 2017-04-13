@@ -33,7 +33,7 @@ public class HtmlSetTag implements HtmlTag {
 		if(escaped != null)
 			isEscaped = escaped;
 		
-		String value = ClosureUtil.toString(body);
+		String value = ClosureUtil.toString(getName(), body, null);
 		if(isEscaped && value != null)
 			value = HTML.htmlEscape(value);
 		template.putSetTagProperty(name, value);

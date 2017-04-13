@@ -12,6 +12,7 @@
 			</div>
 		#{/if}#
     	
+    	*{optional in case this is the add operation and so this is used in case of edits only }*
     	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
         
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#

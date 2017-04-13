@@ -17,6 +17,7 @@
         </div>
         #{/if}#
     	
+    	*{optional in case this is the add operation and so this is used in case of edits only }*
     	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
         
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
@@ -24,6 +25,14 @@
         #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
         
+        #{field 'entity.levelOfEducation', label:'School Level'}#
+			<select size="1" name="${field.name}$" class="input-xlarge">
+				#{list items:levels, as:'level'}#
+					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
+				#{/list}#
+			</select>
+		#{/field}#
+		
         *{        
         #{field 'entity.status'}#
         <div class="control-group ${field.errorClass}">
