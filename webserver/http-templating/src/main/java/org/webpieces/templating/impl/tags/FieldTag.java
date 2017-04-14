@@ -9,6 +9,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.Validation;
+import org.webpieces.ctx.api.Value;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.HtmlTag;
@@ -95,7 +96,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         field.put("name", fieldName);
         String id = makeValidHtml4Id(fieldName);
         field.put("id", id);
-        String flashValue = flash.get(fieldName);
+        Value flashValue = flash.getHolder(fieldName);
         field.put("i18nKey", result.i18nName); //different from fieldName only for Arrays
         field.put("flash", flashValue);
         field.put("error", validation.getError(fieldName));
@@ -151,10 +152,18 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		return fieldName.replace('.', '_').replace("[", ":").replace("]", ":");
 	}
 
-	private Object preferFirst(String first, String last) {
+	private Object preferFirst(Value first, String last) {
+		if(first != null)
+			return first.getValue();
+		return last;
+	}
+
+	private Object preferFirst(String first, Value last) {
 		if(first != null)
 			return first;
-		return last;
+		else if(last == null)
+			return null;
+		return last.getValue();
 	}
 	
 	private static class Result {

@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.webpieces.ctx.api.CookieScope;
-import org.webpieces.ctx.api.WebConverter;
+import org.webpieces.ctx.api.Value;
+import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.impl.params.ObjectTranslator;
 
 
@@ -15,7 +16,7 @@ public abstract class CookieScopeImpl implements CookieScope {
 	protected boolean previouslyExisted = false;
 	protected boolean hasModifiedData = false;
 	
-	protected Map<String, String> cookie = new HashMap<>();
+	protected Map<String, Value> cookie = new HashMap<>();
 
 	private ObjectTranslator objectTranslator;
 	
@@ -51,11 +52,11 @@ public abstract class CookieScopeImpl implements CookieScope {
 	
 	protected abstract boolean isKeep();
 	
-	public Map<String, String> getMapData() {
+	public Map<String, Value> getMapData() {
 		return cookie;
 	}
 
-	public void setMapData(Map<String, String> dataMap) {
+	public void setMapData(Map<String, Value> dataMap) {
 		this.cookie = dataMap;
 	}
 	
@@ -66,18 +67,13 @@ public abstract class CookieScopeImpl implements CookieScope {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public void put(String key, Object value) {
-		if(value == null) {
-			remove(key);
-			return;
-		}
-		
+	public void put(String key, Object value) {		
 		hasModifiedData = true;
-		Class<? extends Object> clazz = value.getClass();
-		WebConverter marshaller = objectTranslator.getConverter(clazz);
+		ObjectStringConverter marshaller = objectTranslator.getConverterFor(value);
 		String strValue = marshaller.objectToString(value);
-		cookie.put(key, strValue);
+		cookie.put(key, new Value(strValue));
 	}
+	
 	@Override
 	public <T> T remove(String key, Class<T> type) {
 		hasModifiedData = true;
@@ -86,7 +82,7 @@ public abstract class CookieScopeImpl implements CookieScope {
 	}
 
 	private <T> T translate(Class<T> type, String valueStr) {
-		WebConverter<T> unmarshaller = objectTranslator.getConverter(type);
+		ObjectStringConverter<T> unmarshaller = objectTranslator.getConverter(type);
 		T result = unmarshaller.stringToObject(valueStr);
 		return result;
 	}
@@ -99,12 +95,23 @@ public abstract class CookieScopeImpl implements CookieScope {
 
 	@Override
 	public String get(String key) {
+		Value value = cookie.get(key);
+		if(value == null)
+			return null;
+		return value.getValue();
+	}
+
+	@Override
+	public Value getHolder(String key) {
 		return cookie.get(key);
 	}
 
 	@Override
 	public String remove(String key) {
 		hasModifiedData = true;
-		return cookie.remove(key);
+		Value value = cookie.remove(key);
+		if (value == null)
+			return null;
+		return value.getValue();
 	}
 }

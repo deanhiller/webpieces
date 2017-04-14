@@ -7,8 +7,11 @@
     
         <input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
 
+        #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
-
+        #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
+  
         *{
          must cover use cases
          1. default select what entity is set to 
@@ -17,6 +20,7 @@
         }*
 		#{field 'entity.levelOfEducation', label:'School Level'}#
 			<select size="1" name="${field.name}$" class="input-xlarge">
+			    <option value="" #{if !field.flashOrValue}#selected="selected"#{/if}#>Unselected</option>
 				#{list items:levels, as:'level'}#
 					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
 				#{/list}#

@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import org.webpieces.ctx.api.WebConverter;
+import org.webpieces.router.api.ObjectStringConverter;
 
 public enum LevelEducation {
 
@@ -70,7 +70,7 @@ public enum LevelEducation {
 	    }
 	}
 	
-	public static class EnumStringConverter implements WebConverter<LevelEducation> {
+	public static class EnumStringConverter implements ObjectStringConverter<LevelEducation> {
 
 		@Override
 		public String objectToString(LevelEducation value) {

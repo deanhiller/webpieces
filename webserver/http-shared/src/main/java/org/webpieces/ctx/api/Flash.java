@@ -19,4 +19,5 @@ public interface Flash extends FlashScope {
 	void setShowEditPopup(boolean b);
 
 	boolean isShowEditPopup();
+	
 }

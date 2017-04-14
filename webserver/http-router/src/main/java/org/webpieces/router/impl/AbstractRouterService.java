@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.Startable;
+import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.params.ObjectTranslator;
@@ -82,7 +82,7 @@ public abstract class AbstractRouterService implements RouterService {
 	}
 	
 	@Override
-	public <T> WebConverter<T> getConverter(Class<T> class1) {
-		return translator.getConverter(class1);
+	public <T> ObjectStringConverter<T> getConverterFor(T bean) {
+		return translator.getConverterFor(bean);
 	}
 }

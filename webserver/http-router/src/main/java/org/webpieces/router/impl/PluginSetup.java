@@ -6,9 +6,9 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
+import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.impl.loader.MetaLoader;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
@@ -50,8 +50,8 @@ public class PluginSetup {
 
 		translator.install(lookupHooks, bodyBinders);
 		
-		Key<Set<WebConverter>> key3 = Key.get(new TypeLiteral<Set<WebConverter>>(){});
-		Set<WebConverter> converters = appInjector.getInstance(key3);
+		Key<Set<ObjectStringConverter>> key3 = Key.get(new TypeLiteral<Set<ObjectStringConverter>>(){});
+		Set<ObjectStringConverter> converters = appInjector.getInstance(key3);
 		translation.install(converters);
 
 		

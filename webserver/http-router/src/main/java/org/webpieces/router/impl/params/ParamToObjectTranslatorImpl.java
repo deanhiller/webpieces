@@ -19,9 +19,9 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Validation;
-import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
+import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.DataMismatchException;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -154,13 +154,13 @@ public class ParamToObjectTranslatorImpl {
 	private Object translate(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
 		Class<?> fieldClass = fieldMeta.getFieldClass();
-		WebConverter<?> converter = objectTranslator.getConverter(fieldClass);
+		ObjectStringConverter<?> converter = objectTranslator.getConverter(fieldClass);
 		if(converter != null) {
 			return convert(req, method, valuesToUse, fieldMeta, converter, validator);
 		} else if(fieldClass.isArray()) {
 			throw new UnsupportedOperationException("not done yet...let me know and I will do it="+fieldMeta);
 		} else if(fieldClass.isEnum()) {
-			throw new UnsupportedOperationException("You need to install a "+WebConverter.class.getSimpleName()+" for this enum "+fieldMeta);
+			throw new UnsupportedOperationException("You need to install a "+ObjectStringConverter.class.getSimpleName()+" for this enum "+fieldMeta);
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
 				return null;
@@ -250,7 +250,7 @@ public class ParamToObjectTranslatorImpl {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Object convert(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, WebConverter converter, Validation validator) {
+	private Object convert(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, ObjectStringConverter converter, Validation validator) {
 		Class<?> paramTypeToCreate = fieldMeta.getFieldClass();
 		if(fieldMeta instanceof ParamMeta) {
 			//for params only not fields as with fields, we just don't set the field and skip it...before we call a method,

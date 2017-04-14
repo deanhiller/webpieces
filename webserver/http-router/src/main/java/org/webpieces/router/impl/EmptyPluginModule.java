@@ -1,9 +1,9 @@
 package org.webpieces.router.impl;
 
-import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.Startable;
+import org.webpieces.router.api.ObjectStringConverter;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -20,7 +20,7 @@ public class EmptyPluginModule implements Module {
 
 		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 		
-		Multibinder.newSetBinder(binder, WebConverter.class);		
+		Multibinder.newSetBinder(binder, ObjectStringConverter.class);		
 	}
 
 }

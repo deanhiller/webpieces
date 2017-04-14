@@ -19,6 +19,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
+import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.ResponseExtract;
@@ -203,7 +204,8 @@ public class TestSyncHibernate {
 				"user.id", "",
 				"user.email", email,
 				"user.name", "blah1",
-				"user.firstName", "blah2");
+				"user.firstName", "blah2",
+				"user.levelOfEducation", LevelEducation.COLLEGE.getDbCode()+"");
 		
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
@@ -213,6 +215,7 @@ public class TestSyncHibernate {
 		UserTestDbo user2 = loadByEmail(email);
 		Assert.assertEquals("blah1", user2.getName()); //name changed
 		Assert.assertEquals("blah2", user2.getFirstName()); //firstname changed
+		Assert.assertEquals(LevelEducation.COLLEGE, user2.getLevelOfEducation());
 	}
 	
 	@Test

@@ -2,9 +2,9 @@ package org.webpieces.router.impl.params;
 
 import java.util.function.Function;
 
-import org.webpieces.ctx.api.WebConverter;
+import org.webpieces.router.api.ObjectStringConverter;
 
-public class PrimitiveConverter<T> implements WebConverter<T> {
+public class PrimitiveConverter<T> implements ObjectStringConverter<T> {
 
 	private Function<String, T> toObj;
 	private Function<T, String> toStr;

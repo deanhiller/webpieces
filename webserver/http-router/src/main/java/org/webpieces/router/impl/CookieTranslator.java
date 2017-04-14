@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.CookieScope;
 import org.webpieces.ctx.api.RouterCookie;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Value;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
@@ -65,7 +66,7 @@ public class CookieTranslator {
 	}
 	
 	private RouterCookie scopeToCookie(CookieScopeImpl scopeData) throws UnsupportedEncodingException {
-		Map<String, String> mapData = scopeData.getMapData();
+		Map<String, Value> mapData = scopeData.getMapData();
 		RouterCookie cookie = createBase(scopeData.getName(), null);
 		
 		StringBuilder data = translateValuesToCookieFormat(mapData);
@@ -103,21 +104,27 @@ public class CookieTranslator {
 		return cookie;
 	}
 
-	private StringBuilder translateValuesToCookieFormat(Map<String, String> value) throws UnsupportedEncodingException {
+	private StringBuilder translateValuesToCookieFormat(Map<String, Value> value) throws UnsupportedEncodingException {
 		StringBuilder data = new StringBuilder();
         String separator = "";
-        for (Map.Entry<String, String> entry : value.entrySet()) {
-        	String val = entry.getValue();
+        for (Map.Entry<String, Value> entry : value.entrySet()) {
+			String key = entry.getKey();
+			Value holder = entry.getValue();
+        	String val = holder.getValue();
+			String encodedKey = URLEncoder.encode(key, config.getUrlEncoding().name());
             if (val != null) {
-    			String key = entry.getKey();
-    			String encodedKey = URLEncoder.encode(key, config.getUrlEncoding().name());
-    			String encodedVal = URLEncoder.encode(val, config.getUrlEncoding().name());
-	                data.append(separator)
-	                        .append(encodedKey)
-	                        .append("=")
-	                        .append(encodedVal);
-	                separator = "&";
-            }
+            	String encodedVal = URLEncoder.encode(val, config.getUrlEncoding().name());
+                data.append(separator)
+                    .append(encodedKey)
+                    .append("=")
+                    .append(encodedVal);
+            } else {
+            	//append just key if null.  must flash nulls or we would be resetting user changes in niche cases like clearing data or enums
+                data.append(separator)
+                    .append(encodedKey);
+			}
+            
+            separator = "&";
         }
 		return data;
 	}
@@ -138,7 +145,7 @@ public class CookieTranslator {
 		}
 		
 		data.setExisted(true);
-		Map<String, String> dataMap = new HashMap<>();
+		Map<String, Value> dataMap = new HashMap<>();
 		String value = routerCookie.value;
 		int colonIndex = value.indexOf(":");
 		String version = value.substring(0, colonIndex);
@@ -166,7 +173,10 @@ public class CookieTranslator {
 			if(split.length == 2) {
 				String key = URLDecoder.decode(split[0], config.getUrlEncoding().name());
 				String val = URLDecoder.decode(split[1], config.getUrlEncoding().name());
-				dataMap.put(key, val);
+				dataMap.put(key, new Value(val));
+			} else {
+				String key = URLDecoder.decode(split[0], config.getUrlEncoding().name());
+				dataMap.put(key, new Value(null));				
 			}
 		}
 		

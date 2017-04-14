@@ -46,21 +46,23 @@ public class CrudTestController {
 				"levels", LevelEducation.values());
 	}
 	
-	public Redirect postSaveUser(UserTestDbo user) {
-		if(user.getPassword().length() < 4) {
+	public Redirect postSaveUser(UserTestDbo entity) {
+		if(entity.getPassword() == null) {
+			Current.validation().addError("password", "password is required");
+		} else if(entity.getPassword().length() < 4) {
 			Current.validation().addError("password", "Value is too short");
 		}
 		
 		if(Current.validation().hasErrors()) {
 			log.info("page has errors");
 			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
-			redirect.setIdFieldAndValue("id", user.getId());
-			redirect.setPageAndRouteArguments("other", "value", "key3", "value3");
-			Actions.redirectFlashAll(ADD_USER_PAGE, EDIT_USER_PAGE, redirect);
+			redirect.setSecureFields("entity.password"); //make sure secure fields are not put in flash cookie!!!
+			redirect.setIdFieldAndValue("id", entity.getId());
+			return Actions.redirectFlashAll(ADD_USER_PAGE, EDIT_USER_PAGE, redirect);
 		}
 		
 		Current.flash().setMessage("User successfully saved");
-		Em.get().merge(user);
+		Em.get().merge(entity);
         Em.get().flush();
         
 		return Actions.redirect(HibernateRouteId.LIST_USERS);

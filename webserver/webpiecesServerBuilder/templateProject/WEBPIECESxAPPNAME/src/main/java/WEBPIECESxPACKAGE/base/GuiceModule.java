@@ -1,7 +1,7 @@
 package WEBPIECESxPACKAGE.base;
 
-import org.webpieces.ctx.api.WebConverter;
 import org.webpieces.router.api.Startable;
+import org.webpieces.router.api.ObjectStringConverter;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -27,7 +27,7 @@ public class GuiceModule implements Module {
 		Multibinder<Startable> uriBinder = Multibinder.newSetBinder(binder, Startable.class);
 	    uriBinder.addBinding().to(PopulateDatabase.class);
 
-		Multibinder<WebConverter> conversionBinder = Multibinder.newSetBinder(binder, WebConverter.class);
+		Multibinder<ObjectStringConverter> conversionBinder = Multibinder.newSetBinder(binder, ObjectStringConverter.class);
 		conversionBinder.addBinding().to(Education.EduConverter.class);
 	    
 	    binder.bind(SomeLibrary.class).to(SomeLibraryImpl.class);

@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import javax.inject.Singleton;
 
-import org.webpieces.ctx.api.WebConverter;
+import org.webpieces.router.api.ObjectStringConverter;
 
 /**
  * This is THE class to translate objects to strings and strings to objects.  Overriding this, you can also add types 
@@ -21,8 +21,9 @@ import org.webpieces.ctx.api.WebConverter;
 @Singleton
 public class ObjectTranslator {
 
-	protected Map<Class<?>, WebConverter<?>> classToConverter = new HashMap<>();
-	protected Map<Class<?>, WebConverter<?>> appConverters;
+	protected Map<Class<?>, ObjectStringConverter<?>> classToConverter = new HashMap<>();
+	protected Map<Class<?>, ObjectStringConverter<?>> appConverters;
+	protected ObjectStringConverter<Object> SIMPLE_CONVERTER = new SimpleConverter();
 	
 	public ObjectTranslator() {
 		add(Boolean.class, s -> s == null ? null : Boolean.parseBoolean(s), s -> s == null ? null : s.toString());
@@ -47,19 +48,31 @@ public class ObjectTranslator {
 		classToConverter.put(clazz, new PrimitiveConverter<T>(clazz, toObj, toStr));
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> ObjectStringConverter<T> getConverterFor(T bean) {
+		if(bean == null) {
+			return (ObjectStringConverter<T>) SIMPLE_CONVERTER;
+		}
+		
+		ObjectStringConverter<T> converter = (ObjectStringConverter<T>) getConverter(bean.getClass());
+		if(converter != null)
+			return converter;
+		return (ObjectStringConverter<T>) SIMPLE_CONVERTER;
+	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <T> WebConverter<T> getConverter(Class<T> fieldClass) {
-		WebConverter webConverter = classToConverter.get(fieldClass);
+	public <T> ObjectStringConverter<T> getConverter(Class<T> fieldClass) {
+		ObjectStringConverter webConverter = classToConverter.get(fieldClass);
 		if(webConverter != null)
 			return webConverter;
-		return (WebConverter<T>) appConverters.get(fieldClass);
+		return (ObjectStringConverter<T>) appConverters.get(fieldClass);
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void install(Set<WebConverter> converters) {
+	public void install(Set<ObjectStringConverter> converters) {
 		//have to recreate for dev mode.  prod only calls this once
 		appConverters = new HashMap<>();
-		for(WebConverter converter : converters) {
+		for(ObjectStringConverter converter : converters) {
 			appConverters.put(converter.getConverterType(), converter);
 		}
 	}

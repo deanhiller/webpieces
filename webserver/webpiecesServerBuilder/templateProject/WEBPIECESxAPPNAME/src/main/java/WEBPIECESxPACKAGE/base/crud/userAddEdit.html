@@ -27,6 +27,8 @@
         
         #{field 'entity.levelOfEducation', label:'School Level'}#
 			<select size="1" name="${field.name}$" class="input-xlarge">
+			    *{ If you require a selection, remove this next <option> line }*
+			    <option value="" #{if entity.levelOfEducation}#selected="selected"#{/if}#>Unselected</option>
 				#{list items:levels, as:'level'}#
 					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
 				#{/list}#

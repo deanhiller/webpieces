@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-import org.webpieces.ctx.api.WebConverter;
+import org.webpieces.router.api.ObjectStringConverter;
 
 public enum Education {
 
@@ -69,7 +69,7 @@ public enum Education {
 	    }
 	}
 	
-	public static class EduConverter implements WebConverter<Education> {
+	public static class EduConverter implements ObjectStringConverter<Education> {
 
 	    public String objectToString( Education value ) {
 	        if ( value == null ) {

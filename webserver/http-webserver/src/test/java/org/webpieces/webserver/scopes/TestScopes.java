@@ -12,8 +12,6 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.FullResponse;
@@ -22,7 +20,6 @@ import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 public class TestScopes {
 
-	private static final Logger log = LoggerFactory.getLogger(TestScopes.class);
 	private RequestListener server;
 	private MockResponseSender socket = new MockResponseSender();
 	
@@ -154,9 +151,7 @@ public class TestScopes {
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		FullResponse response = ResponseExtract.assertSingleResponse(socket);
-
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-		socket.clear();
 		return response;
 	}
 	
@@ -172,7 +167,6 @@ public class TestScopes {
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("First name must be more than 2 characters");
-        socket.clear();
 		return response;
 	}
 }

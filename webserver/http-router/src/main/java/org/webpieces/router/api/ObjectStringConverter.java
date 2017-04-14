@@ -1,6 +1,6 @@
-package org.webpieces.ctx.api;
+package org.webpieces.router.api;
 
-public interface WebConverter<T> {
+public interface ObjectStringConverter<T> {
 
 	Class<T> getConverterType();
 	
