@@ -66,7 +66,7 @@ public class CookieTranslator {
 	}
 	
 	private RouterCookie scopeToCookie(CookieScopeImpl scopeData) throws UnsupportedEncodingException {
-		Map<String, Value> mapData = scopeData.getMapData();
+		Map<String, String> mapData = scopeData.getMapData();
 		RouterCookie cookie = createBase(scopeData.getName(), null);
 		
 		StringBuilder data = translateValuesToCookieFormat(mapData);
@@ -104,15 +104,16 @@ public class CookieTranslator {
 		return cookie;
 	}
 
-	private StringBuilder translateValuesToCookieFormat(Map<String, Value> value) throws UnsupportedEncodingException {
+	private StringBuilder translateValuesToCookieFormat(Map<String, String> value) throws UnsupportedEncodingException {
 		StringBuilder data = new StringBuilder();
         String separator = "";
-        for (Map.Entry<String, Value> entry : value.entrySet()) {
+        for (Map.Entry<String, String> entry : value.entrySet()) {
 			String key = entry.getKey();
-			Value holder = entry.getValue();
-        	String val = holder.getValue();
+			String val = entry.getValue();
 			String encodedKey = URLEncoder.encode(key, config.getUrlEncoding().name());
-            if (val != null) {
+			if(val == null) {
+				continue;
+			} else if (!"".equals(val)) {
             	String encodedVal = URLEncoder.encode(val, config.getUrlEncoding().name());
                 data.append(separator)
                     .append(encodedKey)
@@ -145,7 +146,7 @@ public class CookieTranslator {
 		}
 		
 		data.setExisted(true);
-		Map<String, Value> dataMap = new HashMap<>();
+		Map<String, String> dataMap = new HashMap<>();
 		String value = routerCookie.value;
 		int colonIndex = value.indexOf(":");
 		String version = value.substring(0, colonIndex);
@@ -173,10 +174,10 @@ public class CookieTranslator {
 			if(split.length == 2) {
 				String key = URLDecoder.decode(split[0], config.getUrlEncoding().name());
 				String val = URLDecoder.decode(split[1], config.getUrlEncoding().name());
-				dataMap.put(key, new Value(val));
+				dataMap.put(key, val);
 			} else {
 				String key = URLDecoder.decode(split[0], config.getUrlEncoding().name());
-				dataMap.put(key, new Value(null));				
+				dataMap.put(key, "");				
 			}
 		}
 		

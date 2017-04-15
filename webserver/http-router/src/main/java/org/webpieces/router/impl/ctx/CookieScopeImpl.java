@@ -16,7 +16,10 @@ public abstract class CookieScopeImpl implements CookieScope {
 	protected boolean previouslyExisted = false;
 	protected boolean hasModifiedData = false;
 	
-	protected Map<String, Value> cookie = new HashMap<>();
+	/**
+	 * "" represents user set to null vs user did not set to null
+	 */
+	protected Map<String, String> cookie = new HashMap<>();
 
 	private ObjectTranslator objectTranslator;
 	
@@ -52,11 +55,11 @@ public abstract class CookieScopeImpl implements CookieScope {
 	
 	protected abstract boolean isKeep();
 	
-	public Map<String, Value> getMapData() {
+	public Map<String, String> getMapData() {
 		return cookie;
 	}
 
-	public void setMapData(Map<String, Value> dataMap) {
+	public void setMapData(Map<String, String> dataMap) {
 		this.cookie = dataMap;
 	}
 	
@@ -71,7 +74,7 @@ public abstract class CookieScopeImpl implements CookieScope {
 		hasModifiedData = true;
 		ObjectStringConverter marshaller = objectTranslator.getConverterFor(value);
 		String strValue = marshaller.objectToString(value);
-		cookie.put(key, new Value(strValue));
+		cookie.put(key, strValue);
 	}
 	
 	@Override
@@ -95,23 +98,12 @@ public abstract class CookieScopeImpl implements CookieScope {
 
 	@Override
 	public String get(String key) {
-		Value value = cookie.get(key);
-		if(value == null)
-			return null;
-		return value.getValue();
-	}
-
-	@Override
-	public Value getHolder(String key) {
 		return cookie.get(key);
 	}
 
 	@Override
 	public String remove(String key) {
 		hasModifiedData = true;
-		Value value = cookie.remove(key);
-		if (value == null)
-			return null;
-		return value.getValue();
+		return cookie.remove(key);
 	}
 }

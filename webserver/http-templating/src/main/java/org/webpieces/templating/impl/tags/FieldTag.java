@@ -96,7 +96,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         field.put("name", fieldName);
         String id = makeValidHtml4Id(fieldName);
         field.put("id", id);
-        Value flashValue = flash.getHolder(fieldName);
+        String flashValue = flash.get(fieldName);
         field.put("i18nKey", result.i18nName); //different from fieldName only for Arrays
         field.put("flash", flashValue);
         field.put("error", validation.getError(fieldName));
@@ -152,20 +152,12 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		return fieldName.replace('.', '_').replace("[", ":").replace("]", ":");
 	}
 
-	private Object preferFirst(Value first, String last) {
+	private String preferFirst(String first, String last) {
 		if(first != null)
-			return first.getValue();
+			return first;
 		return last;
 	}
 
-	private Object preferFirst(String first, Value last) {
-		if(first != null)
-			return first;
-		else if(last == null)
-			return null;
-		return last.getValue();
-	}
-	
 	private static class Result {
 		public String fieldName;
 		public String i18nName;

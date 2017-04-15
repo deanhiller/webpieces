@@ -29,11 +29,4 @@ public interface CookieScope {
 	
 	String remove(String key);
 
-	/**
-	 * A peculiar case exists in flash were FieldTag needs to know the difference between 
-	 * null("") being set by the user and 
-	 * @param key
-	 * @return
-	 */
-	Value getHolder(String key);
 }
