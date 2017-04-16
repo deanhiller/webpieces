@@ -1,4 +1,4 @@
-package WEBPIECESxPACKAGE.base.libs;
+package org.webpieces.plugins.hibernate.app.dbo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,27 +8,29 @@ import javax.persistence.Converter;
 
 import org.webpieces.router.api.ObjectStringConverter;
 
-public enum Education {
+public enum RoleEnum {
+	BADASS('b', "Badass"), 
+	JERK('j', "Jerk"), 
+	DELINQUINT('d', "Delinquint"), 
+	FOOL('f', "Fool"),
+	MANAGER('m', "Manager"),
+	FATHER('f', "Father"),
+	MOTHER('f', "Mother"),
+	;
 
-	KINDERGARTEN('k', "Kindergarten"), 
-	ELEMENTARY('e', "Elementary School"), 
-	MIDDLE_SCHOOL('m', "Middle School"), 
-	HIGH_SCHOOL('h', "High School"), 
-	COLLEGE('c', "College");
-
-	private final static Map<Character, Education> enums = new HashMap<>();
+	private final static Map<Character, RoleEnum> enums = new HashMap<>();
 	
 	static {
-		for(Education level : Education.values()) {
+		for(RoleEnum level : RoleEnum.values()) {
 			enums.put(level.getDbCode(), level);
 		}
 	}
-	
+
 	//could use an int....
 	private Character dbCode;
 	private String guiLabel;
-	
-	private Education(Character dbCode, String guiLabel) {
+
+	private RoleEnum(Character dbCode, String guiLabel) {
 		this.dbCode = dbCode;
 		this.guiLabel = guiLabel;
 	}
@@ -41,7 +43,7 @@ public enum Education {
 		this.dbCode = dbCode;
 	}
 	
-	public static Education lookup(Character code) {
+	public static RoleEnum lookup(Character code) {
 		return enums.get(code);
 	}
 	
@@ -50,9 +52,9 @@ public enum Education {
 	}
 
 	@Converter
-	public static class EducationConverter implements AttributeConverter<Education, Character>  {
+	public static class RoleEnumConverter implements AttributeConverter<RoleEnum, Character>  {
 
-	    public Character convertToDatabaseColumn( Education value ) {
+	    public Character convertToDatabaseColumn( RoleEnum value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
@@ -60,18 +62,18 @@ public enum Education {
 	        return value.getDbCode();
 	    }
 
-	    public Education convertToEntityAttribute( Character value ) {
+	    public RoleEnum convertToEntityAttribute( Character value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
 
-	        return Education.lookup( value );
+	        return RoleEnum.lookup( value );
 	    }
 	}
 	
-	public static class EduConverter implements ObjectStringConverter<Education> {
+	public static class WebConverter implements ObjectStringConverter<RoleEnum> {
 
-	    public String objectToString( Education value ) {
+	    public String objectToString( RoleEnum value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
@@ -79,7 +81,7 @@ public enum Education {
 	        return value.getDbCode()+"";
 	    }
 
-	    public Education stringToObject( String value ) {
+	    public RoleEnum stringToObject( String value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
@@ -87,13 +89,12 @@ public enum Education {
 	        if(value.length() != 1)
 	        	throw new IllegalArgumentException("cannot convert="+value);
 	        Character c = value.charAt(0);
-	        return Education.lookup( c );
+	        return RoleEnum.lookup( c );
 	    }
 
 		@Override
-		public Class<Education> getConverterType() {
-			return Education.class;
+		public Class<RoleEnum> getConverterType() {
+			return RoleEnum.class;
 		}
-
 	}
 }

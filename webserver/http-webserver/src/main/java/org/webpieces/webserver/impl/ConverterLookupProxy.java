@@ -20,7 +20,7 @@ public class ConverterLookupProxy implements ConverterLookup {
 	public String convert(Object value) {
 		if(value == null)
 			return null;
-		
+
 		@SuppressWarnings("rawtypes")
 		ObjectStringConverter converter = router.getConverterFor(value);
 		return converter.objectToString(value);

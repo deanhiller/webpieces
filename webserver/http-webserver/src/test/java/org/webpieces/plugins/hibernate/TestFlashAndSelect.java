@@ -30,7 +30,7 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.MockResponseSender;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
-public class TestFlash {
+public class TestFlashAndSelect {
 	private MockResponseSender socket = new MockResponseSender();
 	private RequestListener server;
 	
@@ -101,7 +101,40 @@ public class TestFlash {
         response.assertContains("<option value=`` selected=`selected`>Unselected</option>".replace('`', '\"'));
         response.assertContains("<option value=`k` >Kindergarten</script>".replace('`', '\"'));
 	}
-
+//
+//	@Test
+//	public void testMultiSelect() {
+//		HttpRequest req1 = Requests.createPostRequest("/multiselect", 
+//				"entity.id", user.getId()+"",
+//				"entity.firstName", "NextName", //invalid first name
+//				"entity.email", "dean@zz.com",
+//				"entity.lastName", "",
+//				"entity.password", "",
+//				"entity.levelOfEducation", ""
+//				);
+//		
+//		server.incomingRequest(req1, new RequestId(0), true, socket);
+//		
+//		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
+//		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+//		
+//		String urlPath = "/user/edit/"+user.getId();
+//		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
+//        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+//        Header cookieHeader = response1.createCookieRequestHeader();
+//        req.addHeader(cookieHeader);
+//        
+//        server.incomingRequest(req, new RequestId(0), true, socket);
+//
+//        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+//
+//        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+//        //assert the nulls came through
+//        response.assertContains("<input type=`text` name=`entity.lastName` value=`` class=`input-xlarge`>".replace('`', '\"'));
+//        response.assertContains("<option value=`` selected=`selected`>Unselected</option>".replace('`', '\"'));
+//        response.assertContains("<option value=`k` >Kindergarten</script>".replace('`', '\"'));
+//	}
+	
 	public static UserTestDbo loadDataInDb() {
 		String email = "dean2@sync.xsoftware.biz";
 		//populate database....

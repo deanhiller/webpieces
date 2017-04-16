@@ -1,8 +1,11 @@
 package org.webpieces.plugins.hibernate;
 
+import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
@@ -10,7 +13,9 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.hibernate.metamodel.internal.EntityTypeImpl;
 import org.webpieces.router.api.EntityLookup;
 import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.impl.params.Meta;
 import org.webpieces.router.impl.params.ObjectTranslator;
+import org.webpieces.router.impl.params.ParamMeta;
 import org.webpieces.router.impl.params.ParamNode;
 import org.webpieces.router.impl.params.ParamTreeNode;
 import org.webpieces.router.impl.params.ValueNode;
@@ -20,6 +25,12 @@ import org.webpieces.util.logging.LoggerFactory;
 public class HibernateLookup implements EntityLookup {
 
 	private static final Logger log = LoggerFactory.getLogger(HibernateLookup.class);
+	private ObjectTranslator translator;
+	
+	@Inject
+	public HibernateLookup(ObjectTranslator translator) {
+		this.translator = translator;
+	}
 	
 	@Override
 	public <T> boolean isManaged(Class<T> paramTypeToCreate) {
@@ -38,9 +49,15 @@ public class HibernateLookup implements EntityLookup {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> T find(Class<T> paramTypeToCreate, ParamTreeNode tree, 
-			ObjectTranslator translator, Function<Class<T>, T> beanCreate) {
+	public <T> T find(Meta paramMeta, ParamTreeNode tree, 
+			Function<Class<T>, T> beanCreate) {
+		if(!(paramMeta instanceof ParamMeta))
+			throw new UnsupportedOperationException("this plugin does not support type="+paramMeta.getClass());
+		
+		ParamMeta m = (ParamMeta) paramMeta;
+		Class<T> paramTypeToCreate = (Class<T>) m.getFieldClass();
 		EntityManager entityManager = Em.get();
 		Metamodel metamodel = entityManager.getMetamodel();
 		ManagedType<T> managedType = metamodel.managedType(paramTypeToCreate);
@@ -52,7 +69,6 @@ public class HibernateLookup implements EntityLookup {
 		
 		String value = null;
 		if(paramNode != null) {
-		
 			if(!(paramNode instanceof ValueNode))
 				throw new IllegalStateException("The id field in the hibernate entity should have matched to a "
 						+ "ValueNode on incoming data and did not. node="+paramNode+".  bad multipart form?  (Please "
@@ -67,7 +83,23 @@ public class HibernateLookup implements EntityLookup {
 		@SuppressWarnings("rawtypes")
 		ObjectStringConverter unmarshaller = translator.getConverter(idClazz);
 		Object id = unmarshaller.stringToObject(value);
-		return entityManager.find(paramTypeToCreate, id);
+		
+		UseQuery namedQuery = fetchUseQuery(m.getAnnotations());
+		if(namedQuery == null) 
+			return entityManager.find(paramTypeToCreate, id);
+		
+		Query query = entityManager.createNamedQuery(namedQuery.value());
+		query.setParameter(namedQuery.id(), id);
+		return (T) query.getSingleResult();
 	}
+
+	private UseQuery fetchUseQuery(Annotation[] annotations) {
+		for(Annotation anno : annotations) {
+			if(anno instanceof UseQuery)
+				return (UseQuery)anno; 
+		}
+		return null;
+	}
+
 
 }

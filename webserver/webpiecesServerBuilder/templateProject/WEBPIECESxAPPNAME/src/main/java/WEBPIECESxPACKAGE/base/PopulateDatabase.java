@@ -1,6 +1,9 @@
 package WEBPIECESxPACKAGE.base;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -11,8 +14,10 @@ import org.webpieces.router.api.Startable;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import WEBPIECESxPACKAGE.base.libs.Education;
+import WEBPIECESxPACKAGE.base.libs.EducationEnum;
+import WEBPIECESxPACKAGE.base.libs.RoleEnum;
 import WEBPIECESxPACKAGE.base.libs.UserDbo;
+import WEBPIECESxPACKAGE.base.libs.UserRole;
 
 public class PopulateDatabase implements Startable {
 
@@ -49,13 +54,17 @@ public class PopulateDatabase implements Startable {
 		user2.setName("Bob'sName");
 		user2.setFirstName("Bob");
 		user2.setLastName("LastBob");
-		user2.setLevelOfEducation(Education.MIDDLE_SCHOOL);
-		
-		log.info("classloader="+user1.getClass().getClassLoader());
+		user2.setLevelOfEducation(EducationEnum.MIDDLE_SCHOOL);
+
+		UserRole role1 = new UserRole(user2, RoleEnum.DELINQUINT);
+		UserRole role2 = new UserRole(user2, RoleEnum.BADASS);
 		
 		mgr.persist(user1);
 		mgr.persist(user2);
 
+		mgr.persist(role1);
+		mgr.persist(role2);
+		
 		mgr.flush();
 		
 		tx.commit();

@@ -56,6 +56,9 @@ public class UserTestDbo {
 	//@Convert( converter = LevelEducationConverter.class )
 	private LevelEducation levelOfEducation = null;
 	
+	@OneToMany(mappedBy = "user")
+	private List<UserRole> roles = new ArrayList<UserRole>();
+
 	public boolean isNewPasswordChange() {
 		return isNewPasswordChange;
 	}
@@ -165,6 +168,14 @@ public class UserTestDbo {
 
 	public void setLevelOfEducation(LevelEducation levelOfEducation) {
 		this.levelOfEducation = levelOfEducation;
+	}
+
+	public List<UserRole> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<UserRole> roles) {
+		this.roles = roles;
 	}
 	
 }

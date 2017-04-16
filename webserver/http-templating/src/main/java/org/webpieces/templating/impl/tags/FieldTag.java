@@ -9,7 +9,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.Validation;
-import org.webpieces.ctx.api.Value;
 import org.webpieces.templating.api.ClosureUtil;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.HtmlTag;
@@ -19,6 +18,16 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import groovy.lang.Closure;
 
+/**
+ * challenging to get right so heavily tested
+ * 
+ * 1. on first GET request must render bean from an enum, array, collection, or just prmitive field as string
+ * 2. on second GET request must render flash IF set(even if null!!!) or the bean BUT the twist is flash is all Strings
+ *
+ * 
+ * @author dhiller
+ *
+ */
 public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 
 	private static final Logger log = LoggerFactory.getLogger(FieldTag.class);
@@ -79,16 +88,13 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 	}
 
 	/**
-	 * 
-	 * @param fieldName Is the argument like 'user.account.name' 
-	 * @param pageArgs
-	 * @return
+	 *
 	 */
 	private Map<String, Object> createFieldData(String fieldName2, Map<String, Object> pageArgs) {
-		
+
 		Result result = reworkNameForArrayOnly(fieldName2, pageArgs);
 		String fieldName = result.fieldName;
-		
+
         Flash flash = Current.flash();
         Validation validation = Current.validation();
         
@@ -116,11 +122,11 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         } else {
         	pageArgValue = obj;
         }
-        
+
         field.put("value", pageArgValue);
 
         String valAsStr = converter.convert(pageArgValue);
-        
+
         field.put("flashOrValue", preferFirst(flashValue, valAsStr));
         field.put("valueOrFlash", preferFirst(valAsStr, flashValue));
         

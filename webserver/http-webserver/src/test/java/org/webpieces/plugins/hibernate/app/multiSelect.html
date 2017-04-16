@@ -19,15 +19,14 @@
          3. size=5 and multiple
          4. hibernate entities
         }*
-		#{field 'entity.levelOfEducation', label:'School Level'}#
-			<select size="1" name="${field.name}$" class="input-xlarge">
-			    <option value="" #{if !field.flashOrValue}#selected="selected"#{/if}#>Unselected</option>
+		#{field 'entity.multiLevel', label:'School Level'}#
+			<select size="8" name="${field.name}$" class="input-xlarge" multiple>
 				#{list items:levels, as:'level'}#
-					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
+					#{option value:level, multiselected:field.flashOrValue}#${level.guiLabel}$#{/option}#
 				#{/list}#
 			</select>
 		#{/field}#
-			       	 			
+
 		<input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
         <a href="@[LIST_USERS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
     #{/form}#

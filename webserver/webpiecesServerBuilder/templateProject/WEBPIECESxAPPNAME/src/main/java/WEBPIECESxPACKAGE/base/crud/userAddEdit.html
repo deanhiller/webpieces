@@ -7,7 +7,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
          <h4 id="myModalLabel"> User </h4>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="max-height: 600px">
         #{if _flash.error}#
         <div class="row-fluid">
             <div class="offset3 span6 alert alert-error">
@@ -27,26 +27,23 @@
         
         #{field 'entity.levelOfEducation', label:'School Level'}#
 			<select size="1" name="${field.name}$" class="input-xlarge">
-			    *{ If you require a selection, remove this next <option> line }*
-			    <option value="" #{if entity.levelOfEducation}#selected="selected"#{/if}#>Unselected</option>
 				#{list items:levels, as:'level'}#
 					#{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
 				#{/list}#
 			</select>
 		#{/field}#
-		
-        *{        
-        #{field 'entity.status'}#
-        <div class="control-group ${field.errorClass}">
-            <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>Status</label>
-            <div class="controls">
-            	#{select field.name, items: EnumSet.allOf(models.EntityStatus.class), value: field.value, labelProperty:'guiLabel' /}
-                <span class="help-block">${field.error}</span>
-            </div>
-        </div>
-        #{/field}#
+
+        *{
+		<input type="hidden" name="multiselect" value="entity.roles"/>
+		#{field 'entity.roles', label:'Role'}#
+			<select size="7" name="${field.name}$" class="input-xlarge" multiple>
+				#{list items:roles, as:'role'}#
+					#{option value:role, multiselected:field.flashOrValue}#${role.guiLabel}$#{/option}#
+				#{/list}#
+			</select>
+		#{/field}#
         }*
-        
+
    </div>
     <div class="modal-footer">
         <input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />

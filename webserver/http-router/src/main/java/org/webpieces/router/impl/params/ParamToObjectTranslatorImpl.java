@@ -203,7 +203,7 @@ public class ParamToObjectTranslatorImpl {
 		
 		Object bean = null;
 		if(pluginLookup != null) {
-			bean = pluginLookup.find(fieldClass, tree, objectTranslator, c -> createBean(c));
+			bean = pluginLookup.find(fieldMeta, tree, c -> createBean(c));
 			if(bean == null)
 				throw new IllegalStateException("plugin="+pluginLookup.getClass()+" failed to create bean.  This is a plugin bug");
 		} else 

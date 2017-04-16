@@ -11,6 +11,7 @@ import javax.persistence.Query;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.plugins.hibernate.Em;
+import org.webpieces.plugins.hibernate.UseQuery;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.FlashAndRedirect;
@@ -19,7 +20,8 @@ import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import WEBPIECESxPACKAGE.base.libs.Education;
+import WEBPIECESxPACKAGE.base.libs.EducationEnum;
+import WEBPIECESxPACKAGE.base.libs.RoleEnum;
 import WEBPIECESxPACKAGE.base.libs.UserDbo; 
 
 @Singleton
@@ -39,16 +41,18 @@ public class CrudUserController {
 		if(id == null) {
 			return Actions.renderThis(
 					"entity", new UserDbo(),
-					"levels", Education.values());
+					"levels", EducationEnum.values(),
+					"roles", RoleEnum.values());
 		}
 		
-		UserDbo user = Em.get().find(UserDbo.class, id);
+		UserDbo user = UserDbo.findWithJoin(Em.get(), id);
 		return Actions.renderThis(
 				"entity", user,
-				"levels", Education.values());
+				"levels", EducationEnum.values(),
+				"roles", RoleEnum.values());
 	}
 
-	public Redirect postSaveUser(UserDbo entity, String password) {
+	public Redirect postSaveUser(@UseQuery("findByIdWithRoleJoin") UserDbo entity, String password) {
 		//TODO: if we wire in JSR303 bean validation into the platform, it could be 
 		//done there as well though would
 		//need to figure out how to do i18n for the messages in that case
@@ -57,7 +61,7 @@ public class CrudUserController {
 		} else if(password.length() < 4) {
 			Current.validation().addError("password", "Value is too short");
 		}
-		
+
 		if(entity.getFirstName() == null) {
 			Current.validation().addError("entity.firstName", "First name is required");
 		} else if(entity.getFirstName().length() < 3) {

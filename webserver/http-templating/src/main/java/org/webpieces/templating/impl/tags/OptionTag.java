@@ -27,7 +27,7 @@ public class OptionTag implements HtmlTag {
         	throw new IllegalArgumentException("Only #{option}#Some text#{/option}# can be used.  You cannot do #{option/}# "+srcLocation);
 
         String valueAsString = converters.convert(value);
-        
+
         String selectedString = "";
         if(selected == null) {
         	if(value == null)

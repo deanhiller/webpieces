@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
@@ -21,8 +20,6 @@ import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import WEBPIECESxPACKAGE.base.libs.Education.EducationConverter;
-
 @Entity
 @Table(name="USERS", 
        indexes={
@@ -31,7 +28,9 @@ import WEBPIECESxPACKAGE.base.libs.Education.EducationConverter;
 )
 @NamedQueries({
 	@NamedQuery(name = "findAllUsers", query = "select u from UserDbo as u"),
-	@NamedQuery(name = "findByEmailId", query = "select u from UserDbo as u where u.email=:email") })
+	@NamedQuery(name = "findByEmailId", query = "select u from UserDbo as u where u.email=:email"),
+	@NamedQuery(name = "findByIdWithRoleJoin", query = "select u from UserDbo as u left join fetch u.roles as r where u.id = :id")
+})
 public class UserDbo {
 
 	@Id
@@ -53,8 +52,10 @@ public class UserDbo {
 	@OneToMany(mappedBy = "manager")
 	private List<UserDbo> employees = new ArrayList<UserDbo>();
 
-	@Convert( converter = EducationConverter.class )
-	private Education levelOfEducation = null;
+	@OneToMany(mappedBy = "user")
+	private List<UserRole> roles = new ArrayList<UserRole>();
+
+	private EducationEnum levelOfEducation = null;
 	
 	public Integer getId() {
 		return id;
@@ -136,6 +137,16 @@ public class UserDbo {
 		}
 	}
 
+	public static UserDbo findWithJoin(EntityManager mgr, int id) {
+		Query query = mgr.createNamedQuery("findByIdWithRoleJoin");
+		query.setParameter("id", id);
+		try {
+			return (UserDbo) query.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -143,11 +154,20 @@ public class UserDbo {
 		this.name = name;
 	}
 
-	public Education getLevelOfEducation() {
+	public EducationEnum getLevelOfEducation() {
 		return levelOfEducation;
 	}
 
-	public void setLevelOfEducation(Education levelOfEducation) {
+	public void setLevelOfEducation(EducationEnum levelOfEducation) {
 		this.levelOfEducation = levelOfEducation;
 	}
+
+	public List<UserRole> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<UserRole> roles) {
+		this.roles = roles;
+	}
+
 }

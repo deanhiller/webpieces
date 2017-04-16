@@ -1,15 +1,16 @@
 package WEBPIECESxPACKAGE.base;
 
-import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.ObjectStringConverter;
+import org.webpieces.router.api.Startable;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
-import WEBPIECESxPACKAGE.base.libs.Education;
+import WEBPIECESxPACKAGE.base.libs.EducationEnum;
 import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.base.libs.RemoteServiceImpl;
+import WEBPIECESxPACKAGE.base.libs.RoleEnum;
 import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
 import WEBPIECESxPACKAGE.base.libs.SomeLibraryImpl;
 
@@ -28,7 +29,8 @@ public class GuiceModule implements Module {
 	    uriBinder.addBinding().to(PopulateDatabase.class);
 
 		Multibinder<ObjectStringConverter> conversionBinder = Multibinder.newSetBinder(binder, ObjectStringConverter.class);
-		conversionBinder.addBinding().to(Education.EduConverter.class);
+		conversionBinder.addBinding().to(EducationEnum.WebConverter.class);
+		conversionBinder.addBinding().to(RoleEnum.WebConverter.class);
 	    
 	    binder.bind(SomeLibrary.class).to(SomeLibraryImpl.class);
 	    binder.bind(RemoteService.class).to(RemoteServiceImpl.class);
