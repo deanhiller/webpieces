@@ -25,7 +25,7 @@ public class ServerConfig {
 	public ServerConfig(String persistenceUnit) {
 		this(8080, 8443, persistenceUnit);
 	}
-	
+
 	public VirtualFile getMetaFile() {
 		return metaFile;
 	}
