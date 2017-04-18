@@ -26,6 +26,7 @@ public class UserRole {
 	
 	public UserRole(UserDbo user, RoleEnum r) {
 		this.user = user;
+		this.user.addRole(this);
 		this.role = r;
 	}
 

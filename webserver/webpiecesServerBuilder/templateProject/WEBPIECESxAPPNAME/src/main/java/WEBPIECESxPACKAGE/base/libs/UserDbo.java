@@ -170,4 +170,12 @@ public class UserDbo {
 		this.roles = roles;
 	}
 
+	public void addRole(UserRole userRole) {
+		this.roles.add(userRole);
+	}
+
+	public void removeRole(UserRole r) {
+		this.roles.remove(r);
+	}
+
 }

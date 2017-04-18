@@ -33,16 +33,13 @@
 			</select>
 		#{/field}#
 
-        *{
-		<input type="hidden" name="multiselect" value="entity.roles"/>
-		#{field 'entity.roles', label:'Role'}#
+		#{field 'selectedRoles', label:'Role'}#
 			<select size="7" name="${field.name}$" class="input-xlarge" multiple>
 				#{list items:roles, as:'role'}#
 					#{option value:role, multiselected:field.flashOrValue}#${role.guiLabel}$#{/option}#
 				#{/list}#
 			</select>
 		#{/field}#
-        }*
 
    </div>
     <div class="modal-footer">

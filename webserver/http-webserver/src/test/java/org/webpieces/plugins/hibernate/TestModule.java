@@ -3,6 +3,7 @@ package org.webpieces.plugins.hibernate;
 import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
+import org.webpieces.plugins.hibernate.app.dbo.Role;
 import org.webpieces.router.api.ObjectStringConverter;
 
 import com.google.inject.Binder;
@@ -25,6 +26,7 @@ class TestModule implements Module {
 		
 		@SuppressWarnings("rawtypes")
 		Multibinder<ObjectStringConverter> conversionBinder = Multibinder.newSetBinder(binder, ObjectStringConverter.class);
-		conversionBinder.addBinding().to(LevelEducation.EnumStringConverter.class);
+		conversionBinder.addBinding().to(LevelEducation.WebConverter.class);
+		conversionBinder.addBinding().to(Role.WebConverter.class);
 	}
 }

@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-public class UserRole {
+public class UserRoleDbo {
 
 	@Id
 	@SequenceGenerator(name="roleuser_id_gen",sequenceName="roleuser_sequence" ,initialValue=1,allocationSize=10)
@@ -19,21 +19,21 @@ public class UserRole {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private UserTestDbo user;
 
-	private RoleEnum role;
+	private Role role;
 
-	public UserRole() {
+	public UserRoleDbo() {
 	}
 	
-	public UserRole(UserTestDbo user, RoleEnum r) {
+	public UserRoleDbo(UserTestDbo user, Role r) {
 		this.user = user;
 		this.role = r;
 	}
 
-	public RoleEnum getRole() {
+	public Role getRole() {
 		return role;
 	}
 
-	public void setRole(RoleEnum role) {
+	public void setRole(Role role) {
 		this.role = role;
 	}
 

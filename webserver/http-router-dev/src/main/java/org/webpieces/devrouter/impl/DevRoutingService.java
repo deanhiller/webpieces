@@ -150,8 +150,8 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 			reason = e.getMessage();
 		
 		RouterRequest newRequest = new RouterRequest();
-		newRequest.multiPartFields.put("webpiecesError", "Exception message="+reason);
-		newRequest.multiPartFields.put("url", req.relativePath);
+		newRequest.putMultipart("webpiecesError", "Exception message="+reason);
+		newRequest.putMultipart("url", req.relativePath);
 		
 		return new NotFoundInfo(meta, meta.getService222(), newRequest);
 	}

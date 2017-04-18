@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.ctx;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -14,12 +15,28 @@ public class FlashImpl extends FlashScopeImpl implements FlashSub {
 		super(objectTranslator);
 	}
 
-	public void saveFormParams(Map<String, String> fields, Set<String> secureFieldNames) {
-		for(Entry<String, String> entry : fields.entrySet()) {
+	public void saveFormParams(Map<String, List<String>> fields, Set<String> secureFieldNames) {
+		for(Entry<String, List<String>> entry : fields.entrySet()) {
 			String key = entry.getKey();
-			if(!secureFieldNames.contains(key))
-				put(key, entry.getValue());
+			if(!secureFieldNames.contains(key)) {
+				List<String> value = entry.getValue();
+				if(value.size() == 1)
+					put(key, value.get(0));
+				else
+					put(key, form(value));
+			}
 		}
+	}
+
+	private String form(List<String> values) {
+		String result = "";
+		String seperator = "";
+		for(String val : values) {
+			result += seperator + val;
+			if(seperator.equals(""))
+				seperator = ",";
+		}
+		return result;
 	}
 
 	@Override

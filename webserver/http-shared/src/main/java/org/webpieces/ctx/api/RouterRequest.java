@@ -41,8 +41,11 @@ public class RouterRequest {
 	/**
 	 * this will be the multi-part form
 	 * upload with fields such as user.id, user.name, user.email, user.address, etc. etc.
+	 * 
+	 * In the case of <select multiple>, we need to support selectedRoles=j&selectedRoles=f meaning
+	 * we need to support String to array lookup
 	 */
-	public Map<String, String> multiPartFields = new HashMap<>();
+	public Map<String, List<String>> multiPartFields = new HashMap<>();
 
 	public List<Locale> preferredLocales = new ArrayList<>();
 	
@@ -58,6 +61,21 @@ public class RouterRequest {
 	public boolean isAjaxRequest;
 	
 	public byte[] body;
+	
+	public void putMultipart(String key, String value) {
+		List<String> values = new ArrayList<>();
+		values.add(value);
+		multiPartFields.put(key, values);
+	}
+	
+	public String getSingleMultipart(String key) {
+		List<String> list = multiPartFields.get(key);
+		if(list.size() > 1)
+			throw new IllegalStateException("too many values");
+		else if(list.size() == 1)
+			return list.get(0);
+		return null;
+	}
 	
 	@Override
 	public String toString() {

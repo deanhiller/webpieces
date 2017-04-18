@@ -12,21 +12,14 @@
         #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
   
-        *{
-         must cover use cases
-         1. default select what entity is set to 
-         2. if pulldown allows user to not choose anything, need unique id
-         3. size=5 and multiple
-         4. hibernate entities
-        }*
-		#{field 'entity.multiLevel', label:'School Level'}#
-			<select size="8" name="${field.name}$" class="input-xlarge" multiple>
-				#{list items:levels, as:'level'}#
-					#{option value:level, multiselected:field.flashOrValue}#${level.guiLabel}$#{/option}#
+		#{field 'selectedRoles', label:'Role'}#
+			<select size="7" name="${field.name}$" class="input-xlarge" multiple>
+				#{list items:roles, as:'role'}#
+					#{option value:role, multiselected:field.flashOrValue}#${role.guiLabel}$#{/option}#
 				#{/list}#
 			</select>
 		#{/field}#
-
+		
 		<input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
         <a href="@[LIST_USERS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
     #{/form}#

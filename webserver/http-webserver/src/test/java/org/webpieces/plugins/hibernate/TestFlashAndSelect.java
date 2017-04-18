@@ -21,6 +21,8 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
+import org.webpieces.plugins.hibernate.app.dbo.Role;
+import org.webpieces.plugins.hibernate.app.dbo.UserRoleDbo;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.ResponseExtract;
@@ -77,7 +79,8 @@ public class TestFlashAndSelect {
 				"entity.email", "dean@zz.com",
 				"entity.lastName", "",
 				"entity.password", "",
-				"entity.levelOfEducation", ""
+				"selectedRoles", "h",
+				"selectedRoles", "s"
 				);
 		
 		server.incomingRequest(req1, new RequestId(0), true, socket);
@@ -101,39 +104,89 @@ public class TestFlashAndSelect {
         response.assertContains("<option value=`` selected=`selected`>Unselected</option>".replace('`', '\"'));
         response.assertContains("<option value=`k` >Kindergarten</script>".replace('`', '\"'));
 	}
-//
-//	@Test
-//	public void testMultiSelect() {
-//		HttpRequest req1 = Requests.createPostRequest("/multiselect", 
-//				"entity.id", user.getId()+"",
-//				"entity.firstName", "NextName", //invalid first name
-//				"entity.email", "dean@zz.com",
-//				"entity.lastName", "",
-//				"entity.password", "",
-//				"entity.levelOfEducation", ""
-//				);
-//		
-//		server.incomingRequest(req1, new RequestId(0), true, socket);
-//		
-//		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
-//		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-//		
-//		String urlPath = "/user/edit/"+user.getId();
-//		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
-//        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
-//        Header cookieHeader = response1.createCookieRequestHeader();
-//        req.addHeader(cookieHeader);
-//        
-//        server.incomingRequest(req, new RequestId(0), true, socket);
-//
-//        FullResponse response = ResponseExtract.assertSingleResponse(socket);
-//
-//        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-//        //assert the nulls came through
-//        response.assertContains("<input type=`text` name=`entity.lastName` value=`` class=`input-xlarge`>".replace('`', '\"'));
-//        response.assertContains("<option value=`` selected=`selected`>Unselected</option>".replace('`', '\"'));
-//        response.assertContains("<option value=`k` >Kindergarten</script>".replace('`', '\"'));
-//	}
+
+	@Test
+	public void testRenderGetMultiselect() {
+		String urlPath = "/multiselect/"+user.getId();
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        
+        server.incomingRequest(req, new RequestId(0), true, socket);
+
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        //assert the nulls came through
+        response.assertContains("<option value=`b` selected=`selected`>Badass</script>".replace('`', '\"'));
+        response.assertContains("<option value=`j` >Jerk</script>".replace('`', '\"'));
+        response.assertContains("<option value=`d` selected=`selected`>Delinquint</script>".replace('`', '\"'));
+	}
+	
+	@Test
+	public void testMultiSelect() {
+		HttpRequest req1 = Requests.createPostRequest("/multiselect", 
+				"entity.id", user.getId()+"",
+				"entity.firstName", "NextName", //invalid first name
+				"entity.email", "dean@zz.com",
+				"entity.lastName", "",
+				"entity.password", "",
+				"entity.levelOfEducation", "",
+				"selectedRoles", "j",
+				"selectedRoles", "d"
+				);
+		
+		server.incomingRequest(req1, new RequestId(0), true, socket);
+		
+		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
+		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		String urlPath = "/multiselect/"+user.getId();
+		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        Header cookieHeader = response1.createCookieRequestHeader();
+        req.addHeader(cookieHeader);
+        
+        server.incomingRequest(req, new RequestId(0), true, socket);
+
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        response.assertContains("<option value=`b` >Badass</script>".replace('`', '\"'));
+        response.assertContains("<option value=`j` selected=`selected`>Jerk</script>".replace('`', '\"'));
+        response.assertContains("<option value=`d` selected=`selected`>Delinquint</script>".replace('`', '\"'));
+	}
+	
+	@Test
+	public void testMultiSelectSingleSelection() {
+		HttpRequest req1 = Requests.createPostRequest("/multiselect", 
+				"entity.id", user.getId()+"",
+				"entity.firstName", "NextName", //invalid first name
+				"entity.email", "dean@zz.com",
+				"entity.lastName", "",
+				"entity.password", "",
+				"entity.levelOfEducation", "",
+				"selectedRoles", "j"
+				);
+		
+		server.incomingRequest(req1, new RequestId(0), true, socket);
+		
+		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
+		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+		
+		String urlPath = "/multiselect/"+user.getId();
+		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
+        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        Header cookieHeader = response1.createCookieRequestHeader();
+        req.addHeader(cookieHeader);
+        
+        server.incomingRequest(req, new RequestId(0), true, socket);
+
+        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+
+        response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+        response.assertContains("<option value=`b` >Badass</script>".replace('`', '\"'));
+        response.assertContains("<option value=`j` selected=`selected`>Jerk</script>".replace('`', '\"'));
+        response.assertContains("<option value=`d` >Delinquint</script>".replace('`', '\"'));
+	}
 	
 	public static UserTestDbo loadDataInDb() {
 		String email = "dean2@sync.xsoftware.biz";
@@ -155,8 +208,14 @@ public class TestFlashAndSelect {
 		user.setLevelOfEducation(LevelEducation.KINDERGARTEN);
 		user.setManager(manager);
 		
+		UserRoleDbo role1 = new UserRoleDbo(user, Role.DELINQUINT);
+		UserRoleDbo role2 = new UserRoleDbo(user, Role.BADASS);
+
 		mgr.persist(manager);
 		mgr.persist(user);
+
+		mgr.persist(role1);
+		mgr.persist(role2);
 
 		mgr.flush();
 		

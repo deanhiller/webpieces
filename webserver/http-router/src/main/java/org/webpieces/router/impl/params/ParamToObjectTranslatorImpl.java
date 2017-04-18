@@ -86,7 +86,8 @@ public class ParamToObjectTranslatorImpl {
 		Map<String, String> queryParams = translate(req.queryParams);
 		treeCreator.createTree(paramTree, queryParams, FromEnum.QUERY_PARAM);
 		//next multi-part params
-		treeCreator.createTree(paramTree, req.multiPartFields, FromEnum.FORM_MULTIPART);
+		Map<String, String> multiPartParams = translate(req.multiPartFields);		
+		treeCreator.createTree(paramTree, multiPartParams, FromEnum.FORM_MULTIPART);
 		//lastly path params
 		treeCreator.createTree(paramTree, ctx.getPathParams(), FromEnum.URL_PATH);
 		
@@ -150,7 +151,6 @@ public class ParamToObjectTranslatorImpl {
 		return newForm;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Object translate(RouterRequest req, Method method, ParamNode valuesToUse, Meta fieldMeta, Validation validator) {
 
 		Class<?> fieldClass = fieldMeta.getFieldClass();
@@ -164,27 +164,15 @@ public class ParamToObjectTranslatorImpl {
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
 				return null;
-			else if(!(valuesToUse instanceof ArrayNode)) {
-				throw new IllegalArgumentException("Found List on field or param="+fieldMeta+" but did not find ArrayNode type");
-			}
-
-			List<Object> list = new ArrayList<>();
-			ArrayNode n = (ArrayNode) valuesToUse;
-			List<ParamNode> paramNodes = n.getList();
-			ParameterizedType type = (ParameterizedType) fieldMeta.getParameterizedType();
-			Type[] actualTypeArguments = type.getActualTypeArguments();
-			Type type2 = actualTypeArguments[0];
-			@SuppressWarnings("rawtypes")
-			GenericMeta genMeta = new GenericMeta((Class) type2);
-			for(ParamNode node : paramNodes) {
-				Object bean = null;
-				if(node != null)
-					bean = translate(req, method, node, genMeta, validator);
-					
-				list.add(bean);
-			}
-			return list;
-			
+			else if(valuesToUse instanceof ArrayNode) {
+				List<ParamNode> paramNodes = ((ArrayNode) valuesToUse).getList();
+				return createList(req, method, fieldMeta, validator, paramNodes);
+			} else if(valuesToUse instanceof ValueNode) {
+				List<ParamNode> paramNodes = new ArrayList<>();
+				paramNodes.add(valuesToUse);
+				return createList(req, method, fieldMeta, validator, paramNodes);
+			}	
+			throw new IllegalArgumentException("Found List on field or param="+fieldMeta+" but did not find ArrayNode type");
 		} else if(valuesToUse instanceof ArrayNode) {
 			throw new IllegalArgumentException("Incoming array need a type List but instead found type="+fieldClass+" on field="+fieldMeta);
 		} else if(valuesToUse instanceof ValueNode) {
@@ -220,6 +208,24 @@ public class ParamToObjectTranslatorImpl {
 			nextFieldMeta.setValueOnBean(bean, translatedValue);
 		}
 		return bean;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Object createList(RouterRequest req, Method method, Meta fieldMeta, Validation validator, List<ParamNode> paramNodes) {
+		List<Object> list = new ArrayList<>();
+		ParameterizedType type = (ParameterizedType) fieldMeta.getParameterizedType();
+		Type[] actualTypeArguments = type.getActualTypeArguments();
+		Type type2 = actualTypeArguments[0];
+		@SuppressWarnings("rawtypes")
+		GenericMeta genMeta = new GenericMeta((Class) type2);
+		for(ParamNode node : paramNodes) {
+			Object bean = null;
+			if(node != null)
+				bean = translate(req, method, node, genMeta, validator);
+				
+			list.add(bean);
+		}
+		return list;
 	}
 
 	private Field findBeanFieldType(Class<?> beanType, String key, List<String> classList) {

@@ -19,8 +19,8 @@ public class HibernateTestRoutes extends AbstractRoutes {
 		CrudRouteIds routeIds = new CrudRouteIds(LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
 		addCrud("user", "CrudTestController", routeIds);
 		
-		//addRoute(POST, "/multiselect", "CrudTestController.postSaveUserForMultiSelect", HibernateRouteId.POST_MULTISELECT);
-
+		addRoute(GET , "/multiselect/{id}", "CrudTestController.multiSelect", HibernateRouteId.MULTISELECT);
+		addRoute(POST, "/multiselect", "CrudTestController.postSaveUserForMultiSelect", HibernateRouteId.POST_MULTISELECT);
 		
 		addRoute(POST, "/save",          "HibernateController.save", HibernateRouteId.SAVE_ENTITY);
 		addRoute(GET , "/get/{id}",      "HibernateController.display", HibernateRouteId.DISPLAY_ENTITY);

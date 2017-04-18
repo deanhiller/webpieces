@@ -8,20 +8,20 @@ import javax.persistence.Converter;
 
 import org.webpieces.router.api.ObjectStringConverter;
 
-public enum RoleEnum {
+public enum Role {
 	BADASS('b', "Badass"), 
 	JERK('j', "Jerk"), 
 	DELINQUINT('d', "Delinquint"), 
 	FOOL('f', "Fool"),
 	MANAGER('m', "Manager"),
-	FATHER('f', "Father"),
-	MOTHER('f', "Mother"),
+	FATHER('a', "Father"),
+	MOTHER('o', "Mother"),
 	;
 
-	private final static Map<Character, RoleEnum> enums = new HashMap<>();
+	private final static Map<Character, Role> enums = new HashMap<>();
 	
 	static {
-		for(RoleEnum level : RoleEnum.values()) {
+		for(Role level : Role.values()) {
 			enums.put(level.getDbCode(), level);
 		}
 	}
@@ -30,7 +30,7 @@ public enum RoleEnum {
 	private Character dbCode;
 	private String guiLabel;
 
-	private RoleEnum(Character dbCode, String guiLabel) {
+	private Role(Character dbCode, String guiLabel) {
 		this.dbCode = dbCode;
 		this.guiLabel = guiLabel;
 	}
@@ -43,7 +43,7 @@ public enum RoleEnum {
 		this.dbCode = dbCode;
 	}
 	
-	public static RoleEnum lookup(Character code) {
+	public static Role lookup(Character code) {
 		return enums.get(code);
 	}
 	
@@ -52,9 +52,9 @@ public enum RoleEnum {
 	}
 
 	@Converter
-	public static class RoleEnumConverter implements AttributeConverter<RoleEnum, Character>  {
+	public static class RoleEnumConverter implements AttributeConverter<Role, Character>  {
 
-	    public Character convertToDatabaseColumn( RoleEnum value ) {
+	    public Character convertToDatabaseColumn( Role value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
@@ -62,18 +62,18 @@ public enum RoleEnum {
 	        return value.getDbCode();
 	    }
 
-	    public RoleEnum convertToEntityAttribute( Character value ) {
+	    public Role convertToEntityAttribute( Character value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
 
-	        return RoleEnum.lookup( value );
+	        return Role.lookup( value );
 	    }
 	}
 	
-	public static class WebConverter implements ObjectStringConverter<RoleEnum> {
+	public static class WebConverter implements ObjectStringConverter<Role> {
 
-	    public String objectToString( RoleEnum value ) {
+	    public String objectToString( Role value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
@@ -81,7 +81,7 @@ public enum RoleEnum {
 	        return value.getDbCode()+"";
 	    }
 
-	    public RoleEnum stringToObject( String value ) {
+	    public Role stringToObject( String value ) {
 	        if ( value == null ) {
 	            return null;
 	        }
@@ -89,12 +89,12 @@ public enum RoleEnum {
 	        if(value.length() != 1)
 	        	throw new IllegalArgumentException("cannot convert="+value);
 	        Character c = value.charAt(0);
-	        return RoleEnum.lookup( c );
+	        return Role.lookup( c );
 	    }
 
 		@Override
-		public Class<RoleEnum> getConverterType() {
-			return RoleEnum.class;
+		public Class<Role> getConverterType() {
+			return Role.class;
 		}
 	}
 }

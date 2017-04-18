@@ -12,8 +12,8 @@ public class NotFoundController {
 
 	public Action notFound() {
 		RouterRequest request = Current.request();
-		String error = request.multiPartFields.get("webpiecesError");
-		String url = request.multiPartFields.get("url");
+		String error = request.getSingleMultipart("webpiecesError");
+		String url = request.getSingleMultipart("url");
 		
 		if(url.contains("?")) {
 			url += "&webpiecesShowPage=true";

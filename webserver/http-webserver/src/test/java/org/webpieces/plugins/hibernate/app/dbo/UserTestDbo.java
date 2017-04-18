@@ -28,7 +28,9 @@ import javax.persistence.Table;
 )
 @NamedQueries({
 	@NamedQuery(name = "findAllUsers", query = "select u from UserTestDbo as u"),
-	@NamedQuery(name = "findByEmailId", query = "select u from UserTestDbo as u where u.email=:email") })
+	@NamedQuery(name = "findByEmailId", query = "select u from UserTestDbo as u where u.email=:email"),
+	@NamedQuery(name = "findByIdWithRoleJoin", query = "select u from UserTestDbo as u left join fetch u.roles as r where u.id = :id")
+})
 public class UserTestDbo {
 
 	@Id
@@ -57,7 +59,7 @@ public class UserTestDbo {
 	private LevelEducation levelOfEducation = null;
 	
 	@OneToMany(mappedBy = "user")
-	private List<UserRole> roles = new ArrayList<UserRole>();
+	private List<UserRoleDbo> roles = new ArrayList<UserRoleDbo>();
 
 	public boolean isNewPasswordChange() {
 		return isNewPasswordChange;
@@ -139,22 +141,6 @@ public class UserTestDbo {
 		this.manager = manager;
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<UserTestDbo> findAllField(EntityManager mgr) {
-		Query query = mgr.createNamedQuery("findAll");
-		return query.getResultList();
-	}
-
-	public static UserTestDbo findByEmailId(EntityManager mgr, String email) {
-		Query query = mgr.createNamedQuery("findByEmailId");
-		query.setParameter("email", email);
-		try {
-			return (UserTestDbo) query.getSingleResult();
-		} catch (NoResultException e) {
-			return null;
-		}
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -170,12 +156,37 @@ public class UserTestDbo {
 		this.levelOfEducation = levelOfEducation;
 	}
 
-	public List<UserRole> getRoles() {
+	public List<UserRoleDbo> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(List<UserRole> roles) {
+	public void setRoles(List<UserRoleDbo> roles) {
 		this.roles = roles;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static List<UserTestDbo> findAllField(EntityManager mgr) {
+		Query query = mgr.createNamedQuery("findAll");
+		return query.getResultList();
+	}
+
+	public static UserTestDbo findByEmailId(EntityManager mgr, String email) {
+		Query query = mgr.createNamedQuery("findByEmailId");
+		query.setParameter("email", email);
+		try {
+			return (UserTestDbo) query.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
+	
+	public static UserTestDbo findWithJoin(EntityManager mgr, int id) {
+		Query query = mgr.createNamedQuery("findByIdWithRoleJoin");
+		query.setParameter("id", id);
+		try {
+			return (UserTestDbo) query.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
+	}
 }

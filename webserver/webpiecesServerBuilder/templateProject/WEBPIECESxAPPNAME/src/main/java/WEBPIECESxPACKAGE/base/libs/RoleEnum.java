@@ -14,8 +14,8 @@ public enum RoleEnum {
 	DELINQUINT('d', "Delinquint"), 
 	FOOL('f', "Fool"),
 	MANAGER('m', "Manager"),
-	FATHER('f', "Father"),
-	MOTHER('f', "Mother"),
+	FATHER('t', "Father"),
+	MOTHER('o', "Mother"),
 	;
 
 	private final static Map<Character, RoleEnum> enums = new HashMap<>();

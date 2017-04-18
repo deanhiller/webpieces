@@ -264,7 +264,7 @@ public class RequestReceiver implements RequestListener {
 		routerRequest.cookies = copy(cookies);
 	}
 
-	private String addToMap(String k, String v, Map<String, List<String>> queryParams) {
+	private Void addToMap(String k, String v, Map<String, List<String>> queryParams) {
 		List<String> list = queryParams.get(k);
 		if(list == null) {
 			list = new ArrayList<>();

@@ -6,7 +6,7 @@ import org.webpieces.util.net.URLEncoder;
 
 public class UrlEncodedParser {
 	
-	public void parse(String multiPartData, BiFunction<String, String, String> mapAddFunction) {
+	public void parse(String multiPartData, BiFunction<String, String, Void> mapAddFunction) {
 	    String[] pairs = multiPartData.split("\\&");
 	    for (int i = 0; i < pairs.length; i++) {
 	      String[] fields = pairs[i].split("=");

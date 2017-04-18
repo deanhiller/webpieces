@@ -70,7 +70,7 @@ public enum LevelEducation {
 	    }
 	}
 	
-	public static class EnumStringConverter implements ObjectStringConverter<LevelEducation> {
+	public static class WebConverter implements ObjectStringConverter<LevelEducation> {
 
 		@Override
 		public String objectToString(LevelEducation value) {

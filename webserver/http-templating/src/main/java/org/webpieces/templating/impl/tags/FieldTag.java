@@ -1,6 +1,8 @@
 package org.webpieces.templating.impl.tags;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,6 +92,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 	/**
 	 *
 	 */
+	@SuppressWarnings("rawtypes")
 	private Map<String, Object> createFieldData(String fieldName2, Map<String, Object> pageArgs) {
 
 		Result result = reworkNameForArrayOnly(fieldName2, pageArgs);
@@ -120,17 +123,38 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
             	log.trace(() -> "exception", e);
             }
         } else {
+        	//for method parameters not fields in the bean like above
         	pageArgValue = obj;
         }
 
         field.put("value", pageArgValue);
 
-        String valAsStr = converter.convert(pageArgValue);
-
+        String valAsStr = null;
+        if(pageArgValue instanceof Collection) {
+        	//For multiple select html OptionTag to work, this was needed
+        	valAsStr = convert((Collection)pageArgValue);
+        } else {
+        	valAsStr = converter.convert(pageArgValue);
+        }
         field.put("flashOrValue", preferFirst(flashValue, valAsStr));
         field.put("valueOrFlash", preferFirst(valAsStr, flashValue));
         
 		return field;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private String convert(Collection pageArgValue) {
+		Iterator iterator = pageArgValue.iterator();
+		String result = "";
+		String seperator = "";
+		while(iterator.hasNext()) {
+			Object bean = iterator.next();
+        	String valAsStr = converter.convert(bean);
+        	result += seperator + valAsStr;
+        	if(seperator.equals(""))
+        		seperator = ",";
+		}
+		return result;
 	}
 
 	protected Result reworkNameForArrayOnly(String fieldName, Map<String, Object> pageArgs) {
