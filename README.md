@@ -116,14 +116,8 @@ This project is essentially pieces that can be used to build any http related so
 * flow control server test?  client may cover that same code
 * error test cases on server http2 and then try H2Test
 * I am so anal.  fix config for url encoding charset so it is configurable
-* enhanced pulldown menus
-  * enum in menu
-  * child database beans with id
-  * any other ones
 * tests on network outage during ajax calls to make that even cooler
 * tests on whitespace issues on tags and formatting so we can isolate the differences
-* look into 1.8 second test TestAjaxHibernate.testNotFoundInSubRoute....odd that it took 1.8 seconds.  I REALLY REALLY don't like that.  oh, frontend2 new version probably fixes this.  check after that is in.  could be hibernate startup :(.  perhaps should create orm...lol
-* create api / REST method so webserver can be used as api
 * verify upload file can work http2,etc
 * http1.1 protect pipeline errors
 * max concurent streams is 50 right now for safety ...need to rework that 
