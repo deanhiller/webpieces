@@ -79,8 +79,7 @@ public class TestFlashAndSelect {
 				"entity.email", "dean@zz.com",
 				"entity.lastName", "",
 				"entity.password", "",
-				"selectedRoles", "h",
-				"selectedRoles", "s"
+				"entity.levelOfEducation", ""
 				);
 		
 		server.incomingRequest(req1, new RequestId(0), true, socket);
