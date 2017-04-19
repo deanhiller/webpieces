@@ -6,10 +6,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * The format of this class caters to the router so it has everything the router uses and no more.  It
+ * also keeps the router independent of any http1.1 or http2 stack as well.  The most important piece is
+ * it is really self documenting as to what the router needs and where in the router it uses that info
+ * 
+ * @author dhiller
+ *
+ */
 public class RouterRequest {
 
 	/**
-	 * Request in it's original form, but should not be relied upon really
+	 * Request in it's original form, but should not be relied upon really at all.  It is here 
+	 * for clients just in case they need more detail about the request
 	 */
 	public Object orginalRequest;
 	
@@ -39,7 +48,7 @@ public class RouterRequest {
 	public Map<String, List<String>> queryParams = new HashMap<>();
 	
 	/**
-	 * this will be the multi-part form
+	 * this will be the multi-part form on a POST request
 	 * upload with fields such as user.id, user.name, user.email, user.address, etc. etc.
 	 * 
 	 * In the case of <select multiple>, we need to support selectedRoles=j&selectedRoles=f meaning

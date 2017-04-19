@@ -1,6 +1,7 @@
 package org.webpieces.templating.impl.tags;
 
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -58,14 +59,14 @@ public class BootstrapModalTag implements HtmlTag {
 	}
 
 	private String fillInUrlParams(String route, Map<Object, Object> args) {
-		String modifiedRoute = URLEncoder.decode(route);
+		String modifiedRoute = URLEncoder.decode(route, StandardCharsets.UTF_8);
 		for(Entry<Object, Object> entry : args.entrySet()) {
 			String key = entry.getKey()+"";
 			if(excludes.contains(key))
 				continue;
 			
 			String value = entry.getValue()+"";
-			String encodedValue = URLEncoder.encode(value);
+			String encodedValue = URLEncoder.encode(value, StandardCharsets.UTF_8);
 			modifiedRoute = modifiedRoute.replace("{"+key+"}", encodedValue);
 		}
 		

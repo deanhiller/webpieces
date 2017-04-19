@@ -1,5 +1,6 @@
 package org.webpieces.router.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class RegExUtil {
 	}
 
 	private static void validateName(String varName) {
-		String encodedName = URLEncoder.encode(varName);
+		String encodedName = URLEncoder.encode(varName, StandardCharsets.UTF_8);
 		if(!varName.equals(encodedName))
 			throw new IllegalArgumentException("The variable name="+varName+" is not correct and would need to be url encoded."
 					+ "  Please only use normal variable names allowing safe javascript");

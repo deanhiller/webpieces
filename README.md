@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
 
-Codecov.io has a bug that incorrectly reports code coverage lower than what it is(so we are actually higher than this number)
+Codecov.io has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 #### Steps to try the webserver
@@ -115,16 +115,14 @@ This project is essentially pieces that can be used to build any http related so
 * error test cases http2 client
 * flow control server test?  client may cover that same code
 * error test cases on server http2 and then try H2Test
-* I am so anal.  fix config for url encoding charset so it is configurable
 * tests on network outage during ajax calls to make that even cooler
 * tests on whitespace issues on tags and formatting so we can isolate the differences
 * verify upload file can work http2,etc
-* http1.1 protect pipeline errors
+* http1.1 protect pipeline errors with tests
 * max concurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
 * more fully integrate the http2 stack. ie. finish and use http-frontend2 instead of http-frontend
-* perhaps we want more testing around the CRUD examples
 * add optimistic locking test case for hibernate plugin with example in webapp and feature tests as examples as well
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
@@ -137,11 +135,9 @@ This project is essentially pieces that can be used to build any http related so
 * plugin for localhost:8080/@documentation and install on the development server
 * streaming forever from controller
 * streaming upload but forever into controller
-* remove router depending on http 1 so we avoid creep
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
 * codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
-* tweak example project close to 80% code covered
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
 * turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
 * (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
@@ -160,7 +156,7 @@ ${user.account.address}$
 
 The last two are special and can be used between tag tokens and between i18n tokens like so...
 
-#### DOCUMENTATION Notes:
+#### @documentation Notes:
 
 * Section on links to tests/html files as examples
 * Section on Generator Tags and RuntimeTags and html.tag files
@@ -195,3 +191,6 @@ The last two are special and can be used between tag tokens and between i18n tok
 * refactor a bunch of code
 * hit the webpage (no need to stop dev server) 
 
+codecov.io bugs
+* we have a test in project 2 that covers code in project 1.  That code shows as not being covered in red but is the only way to truly test that code. 
+* in the rollup of stats, they incorrectly assume projects are independent so if 1 projed is 0 out of 1000 lines tested WITHIN that project BUT is 100% tested from another project, they ding you big and we are based on feature testing so we get dinged alot

@@ -203,9 +203,9 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(routeId.contains(":"))
 				throw new RuntimeException("bug, route should not contain : character");
 
-			String encodedRouteId = URLEncoder.encode(routeId);
-			String encodedArgs = URLEncoder.encode(argStr);
-			String encodedSourceLocation = URLEncoder.encode(sourceLocation);
+			String encodedRouteId = URLEncoder.encode(routeId, StandardCharsets.UTF_8);
+			String encodedArgs = URLEncoder.encode(argStr, StandardCharsets.UTF_8);
+			String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8);
 
 			try {
 				routeOut.write(ProdTemplateModule.ROUTE_TYPE+"/"+encodedSourceLocation+"/"+encodedRouteId+":"+encodedArgs+":dummy\n");
@@ -219,8 +219,8 @@ public class TemplateCompilerTask extends AbstractCompile {
 			if(relativeUrlPath.contains(":"))
 				throw new RuntimeException("bug, route should not contain : character");
 			
-			String encodedPath = URLEncoder.encode(relativeUrlPath);
-			String encodedSourceLocation = URLEncoder.encode(sourceLocation);
+			String encodedPath = URLEncoder.encode(relativeUrlPath, StandardCharsets.UTF_8);
+			String encodedSourceLocation = URLEncoder.encode(sourceLocation, StandardCharsets.UTF_8);
 			
 			try {
 				routeOut.write(ProdTemplateModule.PATH_TYPE+"/"+encodedSourceLocation+"/"+encodedPath+"\n");

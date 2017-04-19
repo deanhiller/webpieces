@@ -1,5 +1,6 @@
 package org.webpieces.webserver.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ public class RouterLookupProxy implements RouterLookup {
 		if(hashMeta == null || hashMeta.getHash() == null)
 			return null;
 		
-		return URLEncoder.encode(hashMeta.getHash());
+		return URLEncoder.encode(hashMeta.getHash(), StandardCharsets.UTF_8);
 	}
 
 }

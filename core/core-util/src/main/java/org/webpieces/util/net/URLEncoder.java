@@ -2,17 +2,16 @@ package org.webpieces.util.net;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 public class URLEncoder {
 
 	/**
 	 * need do convert all to taking a charset in configuration
 	 */
-	@Deprecated
-	public static String encode(String value) {
+	public static String encode(String value, Charset charset) {
 		try {
-			return java.net.URLEncoder.encode(value, StandardCharsets.UTF_8.name());
+			return java.net.URLEncoder.encode(value, charset.name());
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
@@ -21,10 +20,9 @@ public class URLEncoder {
 	/**
 	 * need do convert all to taking a charset in configuration
 	 */
-	@Deprecated
-	public static String decode(String value) {
+	public static String decode(String value, Charset charset) {
 		try {
-			return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+			return URLDecoder.decode(value, charset.name());
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

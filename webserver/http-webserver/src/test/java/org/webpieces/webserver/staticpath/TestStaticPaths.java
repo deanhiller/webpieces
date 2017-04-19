@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.junit.Assert;
@@ -81,7 +82,7 @@ public class TestStaticPaths {
 		Properties p = new Properties();
 		p.load(new FileInputStream(meta));
 		String hash = p.getProperty("/public/fonts.css");
-		String encodedHash = URLEncoder.encode(hash);
+		String encodedHash = URLEncoder.encode(hash, StandardCharsets.UTF_8);
 		return encodedHash;
 	}
 	

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,7 +120,7 @@ public class WebServerImpl implements WebServer {
 				throw new IllegalStateException("size="+split.length+" corrupt line="+line);
 			
 			String type = split[0];
-			String location = URLEncoder.decode(split[1]);
+			String location = URLEncoder.decode(split[1], StandardCharsets.UTF_8);
 			String meta = split[2];
 
 			try {
@@ -142,7 +143,7 @@ public class WebServerImpl implements WebServer {
 	}
 
 	private void processPath(URL url, String line, String location, String urlPath) throws UnsupportedEncodingException {
-		String path = URLEncoder.decode(urlPath);
+		String path = URLEncoder.decode(urlPath, StandardCharsets.UTF_8);
 		FileMeta meta = routingService.relativeUrlToHash(path);
 		if(meta == null)
 			throw new RouteNotFoundException("backing file for urlPath="+path+" was not found or route is missing to connect url to path.  url="+url);
@@ -152,8 +153,8 @@ public class WebServerImpl implements WebServer {
 		String[] split2 = meta.split(":");
 		if(split2.length != 3)
 			throw new IllegalStateException("size="+split2.length+" Corrupt line, wrong size="+line);
-		String routeId = URLEncoder.decode(split2[0]);
-		String args = URLEncoder.decode(split2[1]);
+		String routeId = URLEncoder.decode(split2[0], StandardCharsets.UTF_8);
+		String args = URLEncoder.decode(split2[1], StandardCharsets.UTF_8);
 		
 		Map<String, String> argsWithFakeValues = new HashMap<>();
 		if(!"".equals(args.trim())) {

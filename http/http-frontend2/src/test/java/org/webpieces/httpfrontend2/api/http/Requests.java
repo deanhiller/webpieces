@@ -50,8 +50,8 @@ public class Requests {
 
 		String encodedParams = "";
 		for(int i = 0; i < argTuples.length; i+=2) {
-			String key = URLEncoder.encode(argTuples[i]);
-			String value = URLEncoder.encode(argTuples[i+1]);
+			String key = URLEncoder.encode(argTuples[i], StandardCharsets.UTF_8);
+			String value = URLEncoder.encode(argTuples[i+1], StandardCharsets.UTF_8);
 			if(!"".equals(encodedParams))
 				encodedParams += "&";
 			encodedParams += key+"="+value;
