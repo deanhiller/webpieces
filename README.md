@@ -126,6 +126,7 @@ This project is essentially pieces that can be used to build any http related so
 * add optimistic locking test case for hibernate plugin with example in webapp and feature tests as examples as well
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
+* Database session state plugin tab state as well?
 * Tab state (rather than just global session, but per tab state to put data)
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * A/B split testing and experiments - hooks to wire into existing system and hooks to make it easier to create A/B pages
