@@ -7,9 +7,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.FrameHeaderData;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
@@ -35,8 +35,8 @@ public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements F
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 4)
-			throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, "payload of window update must be exactly 4 and wasn't per http/2 spec", true);
-		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
+            throw new Http2ParseException(ParseFailReason.FRAME_SIZE_INCORRECT_CONNECTION, streamId, 
+            		"window update size not 4 and instead is="+state.getFrameHeaderData().getPayloadLength());
 		
 		WindowUpdateFrame frame = new WindowUpdateFrame();
 		super.unmarshalFrame(state, frame);
@@ -47,7 +47,8 @@ public class WindowUpdateMarshaller extends AbstractFrameMarshaller implements F
 		bufferPool.releaseBuffer(payloadByteBuffer);
 		
 		if(frame.getWindowSizeIncrement() == 0)
-			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, "Window size increment cannot be 0 per http/2 spec and was", true);
+            throw new Http2ParseException(ParseFailReason.WINDOW_SIZE_INVALID, streamId, 
+            		"Window size increment cannot be 0 per http/2 spec and was");
 		
 		return frame;
 	}

@@ -1,4 +1,4 @@
-package com.webpieces.http2parser.api.exception;
+package com.webpieces.http2parser.api;
 
 public enum ErrorType {
 

@@ -1,6 +1,7 @@
 package org.webpieces.nio.impl.cm.basic.chanimpl;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;

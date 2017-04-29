@@ -5,6 +5,7 @@ import org.webpieces.javasm.api.Memento;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class Stream {
@@ -55,9 +56,8 @@ public class Stream {
 	public long incrementRemoteWindow(long windowSizeIncrement) {
 		remoteWindowSize+= windowSizeIncrement;
 		if(remoteWindowSize > Integer.MAX_VALUE) {
-			throw new Http2ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR, streamId, 
-					"(remote end bad)remoteWindowSize too large="+remoteWindowSize+" from windows increment="+windowSizeIncrement+" streamId="+streamId,
-					false);
+			throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_STREAM, streamId, 
+					"(remote end bad)remoteWindowSize too large="+remoteWindowSize+" from windows increment="+windowSizeIncrement+" streamId="+streamId);
 		}
 		return remoteWindowSize;
 	}

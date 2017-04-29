@@ -2,6 +2,7 @@ package org.webpieces.data.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.webpieces.data.api.BufferPool;
@@ -66,6 +67,16 @@ public class ByteBufferDataWrapper extends SliceableDataWrapper {
 	protected void releaseImpl(BufferPool pool) {
 		buffer.position(buffer.limit());
 		pool.releaseBuffer(buffer);
+	}
+
+	@Override
+	public String toString() {
+		return "ByteBufferDataWrapper [remaining=" + buffer.remaining() + ", buf="+buffer+"]";
+	}
+
+	@Override
+	public String createStringFromUtf8(int offset, int length) {
+		return createStringFrom(offset, length, StandardCharsets.UTF_8);
 	}
 
 }

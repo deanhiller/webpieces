@@ -3,11 +3,14 @@ package org.webpieces.http2client.mock;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
@@ -35,12 +38,13 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		INCOMING_FRAME
 	}
 	
-	private ByteBuffer prefaceBuffer;
 	private boolean prefaceReceived;
 	private HpackParser parser;
 	private UnmarshalState unmarshalState;
 	private boolean connected;
-	private SocketWriter writer;
+	private MarshalState marshalState;
+	private DataListener listener;
+	private boolean isClosed;
 
 	public MockHttp2Channel() {
 		BufferPool bufferPool = new BufferCreationPool();
@@ -56,19 +60,40 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 			throw new IllegalArgumentException("listener can't be null");
 		
 		connected = true;
-		MarshalState marshalState = parser.prepareToMarshal(4096, 4096);
-		writer = new SocketWriter(this, parser, marshalState, listener);
+		this.marshalState = parser.prepareToMarshal(4096, 4096);
+		this.listener = listener;
 		return CompletableFuture.completedFuture(this);
 	}
 
+	public void writeHexBack(String hex) {
+		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
+		ByteBuffer buf = ByteBuffer.wrap(bytes);
+		listener.incomingData(this, buf);		
+	}
+	
+	public void write(Http2Msg msg) {
+		if(listener == null)
+			throw new IllegalStateException("Not connected so we cannot write back");
+		DataWrapper data = parser.marshal(marshalState, msg);
+		byte[] bytes = data.createByteArray();
+		if(bytes.length == 0)
+			throw new IllegalArgumentException("how do you marshal to 0 bytes...WTF");
+		ByteBuffer buf = ByteBuffer.wrap(bytes);
+		listener.incomingData(this, buf);
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {
 		if(!prefaceReceived) {
 			//copy and store preface
-			prefaceBuffer = ByteBuffer.allocate(b.remaining());
+			ByteBuffer prefaceBuffer = ByteBuffer.allocate(b.remaining());
 			prefaceBuffer.put(b);
 			prefaceReceived = true;
-			return CompletableFuture.completedFuture(null);
+			Preface preface = new Preface(prefaceBuffer);
+			List<Http2Msg> msgs = new ArrayList<>();
+			msgs.add(preface);
+			return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, msgs);
 		}
 		
 		return processData(b);
@@ -109,6 +134,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	
 	@Override
 	public CompletableFuture<Channel> close() {
+		isClosed = true;
 		return null;
 	}
 
@@ -204,8 +230,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 
 	@Override
 	public boolean isClosed() {
-		// TODO Auto-generated method stub
-		return false;
+		return isClosed;
 	}
 
 	@Override
@@ -232,10 +257,6 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		
 	}
 	
-	public SocketWriter getSocketWriter() {
-		return writer;
-	}
-
 	public void assertNoIncomingMessages() {
 		List<ParametersPassedIn> list = this.calledMethods.get(Method.INCOMING_FRAME);
 		if(list == null)

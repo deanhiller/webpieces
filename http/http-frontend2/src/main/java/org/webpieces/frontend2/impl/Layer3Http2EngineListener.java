@@ -10,6 +10,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.ResponseHandler;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
+import com.webpieces.http2parser.api.Http2ParseException;
 
 public class Layer3Http2EngineListener implements ServerEngineListener {
 
@@ -38,4 +39,9 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		httpListener.socketClosed(socket);
 	}
 	
+	public void closeSocket(Http2ParseException reason) {
+		socket.close("");
+		httpListener.socketClosed(socket);
+	}
+
 }

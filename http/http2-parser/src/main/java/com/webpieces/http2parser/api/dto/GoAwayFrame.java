@@ -59,11 +59,14 @@ public class GoAwayFrame extends AbstractHttp2Frame implements Http2Msg {
     
     @Override
     public String toString() {
+    	String debug = null;
+    	if(debugData != null)
+    		debug = "" + debugData.getReadableSize();
         return "GoAwayFrame{" +
         		super.toString() +
                 ", lastStreamId=" + lastStreamId +
                 ", errorCode=" + errorCode +
-                ", debugData.len=" + debugData.getReadableSize() +
+                ", debugData.len=" + debug +
                 "}";
     }
 }

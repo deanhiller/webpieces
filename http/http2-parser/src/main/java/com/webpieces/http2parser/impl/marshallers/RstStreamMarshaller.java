@@ -7,9 +7,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.FrameHeaderData;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
@@ -37,9 +37,12 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 4)
-			throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, true);
-		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
-		
+            throw new Http2ParseException(ParseFailReason.FRAME_SIZE_INCORRECT_CONNECTION, streamId, 
+            		"rststream size not 4 and instead is="+state.getFrameHeaderData().getPayloadLength());
+		else if(frameHeaderData.getStreamId() == 0)
+            throw new Http2ParseException(ParseFailReason.INVALID_STREAM_ID, frameHeaderData.getStreamId(), 
+            		"rst stream cannot be streamid 0 and was="+frameHeaderData.getStreamId());
+            
 		RstStreamFrame frame = new RstStreamFrame();
 		super.unmarshalFrame(state, frame);
 

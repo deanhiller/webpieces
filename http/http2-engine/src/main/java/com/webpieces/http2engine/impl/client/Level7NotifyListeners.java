@@ -11,6 +11,8 @@ import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.Stream;
+import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -18,10 +20,10 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level7NotifyListeners implements EngineResultListener {
 
-	private ClientEngineListener resultListener;
+	private ClientEngineListener listener;
 
 	public Level7NotifyListeners(ClientEngineListener socketListener) {
-		this.resultListener = socketListener;
+		this.listener = socketListener;
 	}
 
 	public void sendPreface(DataWrapper prefaceData) {
@@ -31,7 +33,7 @@ public class Level7NotifyListeners implements EngineResultListener {
 
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
-		return resultListener.sendToSocket(buffer);
+		return listener.sendToSocket(buffer);
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class Level7NotifyListeners implements EngineResultListener {
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		try {
 			if(msg instanceof GoAwayFrame) {
-				resultListener.sendControlFrameToClient((Http2Frame) msg);
+				listener.sendControlFrameToClient((Http2Frame) msg);
 			} else
 				throw new UnsupportedOperationException("not done yet. frame="+msg);
 			
@@ -51,9 +53,14 @@ public class Level7NotifyListeners implements EngineResultListener {
 	}
 	
 	public void farEndClosed() {
-		this.resultListener.engineClosedByFarEnd();
+		this.listener.engineClosedByFarEnd();
 	}
 
+	@Override
+	public void closeSocket(Http2ParseException reason) {
+		listener.closeSocket(reason);
+	}
+	
 	@Override
 	public CompletableFuture<Void> sendPieceToClient(Stream stream, PartialStream payload) {
 		if(payload.getStreamId() % 2 == 1 && !(payload instanceof Http2Push)) {

@@ -1,6 +1,7 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -46,12 +47,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param pool 
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SelectorManager2 selMgr, BufferPool pool) {
+	public BasTCPChannel(IdObject id, SocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr, pool);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
-		setConnecting(true);
+		setConnecting(remoteAddr);
 	}
 	
     protected void bindImpl2(SocketAddress address) throws IOException {
@@ -123,7 +124,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			boolean connected = channel.connect(addr);
 			log.trace(()->this+"connected status="+connected);
 	
-			setConnecting(true);
+			setConnecting(addr);
 			if(connected) {
 				try {
 					future.complete(this);
@@ -183,7 +184,14 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 
 
     public void finishConnect() throws IOException {
-		channel.finishConnect();
+    	try {
+    		channel.finishConnect();
+    	} catch(ConnectException e) {
+    		ConnectException exc = new ConnectException("could not connect to="+isConnectingTo);
+    		exc.initCause(e);
+    		throw exc;
+    		
+    	}
 	}
     
     public void setKeepAlive(boolean b) {

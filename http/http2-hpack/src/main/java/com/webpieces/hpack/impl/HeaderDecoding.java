@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.Http2ParseException;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class HeaderDecoding {
@@ -20,33 +20,33 @@ public class HeaderDecoding {
 		}
 	}
 
-	public List<Http2Header> decode(Decoder decoder, DataWrapper data) {
+	public List<Http2Header> decode(Decoder decoder, DataWrapper data, int streamId) {
 		try {
-			return decodeImpl(decoder, data);
+			return decodeImpl(decoder, data, streamId);
         } catch (IOException e) {
             // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment
-            throw new Http2ParseException(Http2ErrorCode.COMPRESSION_ERROR);
-        }			
+            throw new Http2ParseException(ParseFailReason.HEADER_DECODE, streamId, "IOException from hpack library", e);
+        }
 	}
 	
-	private List<Http2Header> decodeImpl(Decoder decoder, DataWrapper data) throws IOException {
+	private List<Http2Header> decodeImpl(Decoder decoder, DataWrapper data, int streamId) throws IOException {
         List<Http2Header> headers = new ArrayList<>();
         byte[] bytes = data.createByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
         //keep this synchronized very very small...
 		synchronized(decoder) {
-	        decoder.decode(in, (n, v, s) -> addToHeaders(headers, n, v, s));
+	        decoder.decode(in, (n, v, s) -> addToHeaders(headers, n, v, s, streamId));
 	        decoder.endHeaderBlock();
 	        return headers;
 		}
     }
 
-	private Object addToHeaders(List<Http2Header> headers, byte[] name, byte[] value, boolean sensitive) {
+	private Object addToHeaders(List<Http2Header> headers, byte[] name, byte[] value, boolean sensitive, int streamId) {
         String h = new String(name);
         String v = new String(value);
         if(!h.equals(h.toLowerCase()))
-            throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR);
+            throw new Http2ParseException(ParseFailReason.HEADER_NOT_LOWER_CASE, streamId, "header="+h+" was not lower case in stream="+streamId);
         
         headers.add(new Http2Header(h, v));
 

@@ -12,7 +12,7 @@ public class TestHttp2Priority {
             "00 00 05" + //length
             "02" + //type
             "00" + //flags
-            "00 00 00 00" + // R + streamid
+            "00 00 00 02" + // R + streamid
             "80 00 00 04" + // stream dependency
             "05"; // weight
 
@@ -20,13 +20,14 @@ public class TestHttp2Priority {
             "00 00 05" + //length
                     "02" + //type
                     "00" + //flags
-                    "00 00 00 00" + // R + streamid
+                    "00 00 00 02" + // R + streamid
                     "80 00 00 04" + // stream dependency
                     "FF"; // weight
 
     @Test
     public void testCreatePriorityFrame() {
         PriorityFrame frame = new PriorityFrame();
+        frame.setStreamId(2);
         PriorityDetails details = frame.getPriorityDetails();
         details.setStreamDependency(4);
         details.setStreamDependencyIsExclusive(true);
@@ -54,6 +55,7 @@ public class TestHttp2Priority {
     @Test
     public void testCreatePriorityFrameMSB() {
         PriorityFrame frame = new PriorityFrame();
+        frame.setStreamId(2);
         PriorityDetails details = frame.getPriorityDetails();
 
         details.setStreamDependency(4);

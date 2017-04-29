@@ -13,6 +13,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.impl.DataTry;
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -154,7 +155,8 @@ public class Level5RemoteFlowControl {
 	public CompletableFuture<Void> updateConnectionWindowSize(WindowUpdateFrame msg) {
 		int increment = msg.getWindowSizeIncrement();
 		if(increment == 0) {
-			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, msg.getStreamId(), "Received windowUpdate size increment=0", true);
+			throw new Http2ParseException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
+					"Received windowUpdate size increment=0");
 		}
 		
 		DataTry dataTry = null;
@@ -162,9 +164,8 @@ public class Level5RemoteFlowControl {
 		synchronized(remoteLock) {
 			remoteWindowSize += increment;
 			if(remoteWindowSize > Integer.MAX_VALUE)
-				throw new Http2ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR, 0, 
-						"(remote end bad)global remoteWindowSize too large="+remoteWindowSize+" from windows increment="+increment,
-						true);
+				throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_CONNECTION, 0, 
+						"(remote end bad)global remoteWindowSize too large="+remoteWindowSize+" from windows increment="+increment);
 			
 			if(temp != null && remoteWindowSize > temp.getDataFrame().getTransmitFrameLength())
 				dataTry = dataQueue.poll();
@@ -182,7 +183,8 @@ public class Level5RemoteFlowControl {
 
 	public CompletableFuture<Void> updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
 		if(msg.getWindowSizeIncrement() == 0) {
-			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, msg.getStreamId(), "Received windowUpdate size increment=0", true);
+			throw new Http2ParseException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
+					"Received windowUpdate size increment=0");
 		}
 		
 		DataTry dataTry = null;

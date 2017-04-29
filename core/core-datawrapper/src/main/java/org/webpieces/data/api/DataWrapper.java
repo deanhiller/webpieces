@@ -22,6 +22,8 @@ public interface DataWrapper {
 
 	public String createStringFrom(int offset, int length, Charset charSet);
 
+	public String createStringFromUtf8(int offset, int length);
+	
 	/**
 	 * This may or may not copy all the underlying data and is mostly for
 	 * debugging scenarios, or in some cases where you are using an api that 

@@ -8,8 +8,10 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpClient {
 
-	/*
-	 * This can be used ONLY if 'you' know that the far end does NOT sended a chunked download. 
+	/**
+	 * This is generally used for api request/response calls
+	 * 
+	 * This can be used ONLY if 'you' know that the far end does NOT send a very large chunked download. 
 	 * The reason is in a chunked download, we don't want to blow up your RAM.  Some apis like
 	 * twitters streaming api and we would never ever be done and have a full response.  Others
 	 * are just a very very large download you don't want existing in RAM anyways.
@@ -20,9 +22,11 @@ public interface HttpClient {
 	
 	/**
 	 * Opens and closes a single socket connection to send a request and receive a
-	 * response (therefore it is not very efficient, so you could use openHttpSocket instead).
+	 * response (therefore it is not very efficient, so you could use openHttpSocket instead and pipeline requests).
 	 * ResponseListener will be called for the initial response and then called for every chunk
 	 * of the download after that.
+	 * 
+	 * On an upload, it returns a HttpChunkWriter so you can keep writing chunks up to the server
 	 * 
 	 * @param request
 	 * @param l

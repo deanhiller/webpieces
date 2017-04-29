@@ -8,12 +8,12 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 import com.webpieces.http2parser.impl.UnsignedData;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
 
 public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
     public GoAwayMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
@@ -37,9 +37,13 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         UnsignedData.putUnsignedInt(prelude, castFrame.getErrorCode());
         prelude.flip();
 
+        DataWrapper debug = dataGen.emptyWrapper();
+        if(castFrame.getDebugData() != null)
+        	debug = castFrame.getDebugData();
+        
         DataWrapper payload = dataGen.chainDataWrappers(
                 dataGen.wrapByteBuffer(prelude),
-                castFrame.getDebugData()
+                debug
         );		
 		return super.marshalFrame(frame, (byte)0, payload);
 	}
@@ -50,7 +54,8 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         super.unmarshalFrame(state, frame);
         int streamId = state.getFrameHeaderData().getStreamId();
         if(streamId != 0)
-            throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamId, true);
+            throw new Http2ParseException(ParseFailReason.INVALID_STREAM_ID, streamId, 
+            		"goaway frame had stream id="+streamId);
         
         List<? extends DataWrapper> split = dataGen.split(framePayloadData, 8);
         ByteBuffer preludeBytes = bufferPool.createWithDataWrapper(split.get(0));

@@ -31,6 +31,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.http2parser.api.ErrorType;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -44,8 +45,6 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
-import com.webpieces.http2parser.api.exception.ErrorType;
-import com.webpieces.http2parser.api.exception.ResetStreamException;
 
 class Http2DataListener implements DataListener {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -405,28 +404,21 @@ class Http2DataListener implements DataListener {
 		    }
 		}
 		catch (Http2ParseException e) {
-		    if(e.isConnectionLevel()) {
+		    if(e.getReason().getErrorType() == ErrorType.CONNECTION) {
 		        if(e.hasStream()) {
-		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
+		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getReason().getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
 		        }
 		        else {
-		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
+		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getReason().getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
 		        }
 		    } else {
-		        throw new RstStreamError(e.getErrorCode(), e.getStreamId(), e);
+		        throw new RstStreamError(e.getReason().getErrorCode(), e.getStreamId(), e);
 		    }
 		}
 	}
 
 	private void parseStuffTranslate(DataWrapper newData) {
-		try {
-			unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData);
-		} catch(ResetStreamException e) {
-			if(e.getType() == ErrorType.CONNECTION)
-				throw new GoAwayError(0, e.getCode(), DataWrapperGeneratorFactory.EMPTY);
-			else if(e.getType() == ErrorType.STREAM)
-				throw new RstStreamError(e.getCode(), 0, e);
-		}
+		unmarshalState = this.http2EngineImpl.http2Parser.unmarshal(unmarshalState, newData);
 	}
 
     private ByteBuffer translate(List<Http2Msg> frames) {

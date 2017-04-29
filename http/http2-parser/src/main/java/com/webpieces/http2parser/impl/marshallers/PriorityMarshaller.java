@@ -7,9 +7,9 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 import com.webpieces.http2parser.impl.FrameHeaderData;
@@ -56,9 +56,9 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 	public AbstractHttp2Frame unmarshal(Http2MementoImpl state, DataWrapper framePayloadData) {
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
-		if(state.getFrameHeaderData().getPayloadLength() > 5)
-			throw new Http2ParseException(Http2ErrorCode.FRAME_SIZE_ERROR, streamId, false);
-		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true
+		if(state.getFrameHeaderData().getPayloadLength() != 5)
+            throw new Http2ParseException(ParseFailReason.FRAME_SIZE_INCORRECT_STREAM, streamId, 
+            		"priority size not 5 and instead is="+state.getFrameHeaderData().getPayloadLength());
 		
         PriorityFrame frame = new PriorityFrame();
         PriorityDetails priorityDetails = frame.getPriorityDetails();
@@ -69,9 +69,13 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
         int firstInt = payloadByteBuffer.getInt();
         priorityDetails.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
         int streamDependency = firstInt & 0x7FFFFFFF;
-        if(streamDependency == frame.getStreamId()) {
+        if(frame.getStreamId() == 0) {
+            throw new Http2ParseException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
+            		"priority cannot be streamid 0 and was="+frame.getStreamId());
+        } else if(streamDependency == frame.getStreamId()) {
             // Can't depend on self
-            throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+            throw new Http2ParseException(ParseFailReason.BAD_STREAM_DEPENDENCY, streamDependency, 
+            		"stream id="+streamDependency+" depends on itself");
         }
         priorityDetails.setStreamDependency(streamDependency);
         priorityDetails.setWeight((short) (payloadByteBuffer.get() & 0xFF));

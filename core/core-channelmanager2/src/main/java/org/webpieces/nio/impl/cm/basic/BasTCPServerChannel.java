@@ -70,8 +70,9 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
             
             org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
 		
+            SocketAddress remoteAddress = newChan.getRemoteAddress();
 			IdObject obj = new IdObject(getIdObject(), newSocketNum);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, getSelectorManager(), pool);
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, remoteAddress, getSelectorManager(), pool);
 			log.trace(()->tcpChan+"Accepted new incoming connection");
 			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
 			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));

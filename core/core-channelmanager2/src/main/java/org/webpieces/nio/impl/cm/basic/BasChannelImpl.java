@@ -38,7 +38,6 @@ public abstract class BasChannelImpl
     private ChannelSession session = new ChannelSessionImpl();
     private long waitingBytesCounter = 0;
 	private ConcurrentLinkedQueue<WriteInfo> dataToBeWritten = new ConcurrentLinkedQueue<WriteInfo>();
-	private boolean isConnecting = false;
 	private boolean isClosed = false;
 	private boolean doNotAllowWrites;
 	private int maxBytesWaitingSize = 500_000; //0.5 megabyte before telling client to backpressure the channel
@@ -49,6 +48,7 @@ public abstract class BasChannelImpl
 	private Object writeLock = new Object();
 	private boolean inDelayedWriteMode;
 	private boolean isRecording;
+	protected SocketAddress isConnectingTo;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr);
@@ -314,7 +314,7 @@ public abstract class BasChannelImpl
 	public CompletableFuture<Channel> registerForReads() {
 		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
-		else if(!isConnecting && !isConnected()) {
+		else if(!isConnecting() && !isConnected()) {
 			throw new IllegalStateException(this+"Must call one of the connect methods first(ie. connect THEN register for reads)");
 		} else if(isClosed())
 			throw new IllegalStateException("Channel is closed");
@@ -345,12 +345,12 @@ public abstract class BasChannelImpl
 		}
 	}	
            
-	protected void setConnecting(boolean b) {
-		isConnecting = b;
+	protected void setConnecting(SocketAddress addr) {
+		this.isConnectingTo = addr;
 	}
 
 	protected boolean isConnecting() {
-		return isConnecting;
+		return this.isConnectingTo != null;
 	}
 
 	protected void setClosed(boolean b) {

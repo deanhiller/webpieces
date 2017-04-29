@@ -16,6 +16,7 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
@@ -72,10 +73,10 @@ public class HpackParserImpl implements HpackParser {
 			if(headerFrame.isEndHeaders())
 				combineAndSendHeadersToClient(state);
 			return;
-		} else if(headerFragList.size() > 0) {
-			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, frame.getStreamId(), 
+		} else if(headerFragList.size() > 0) {			
+			throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, frame.getStreamId(), 
 					"Parser in the middle of accepting headers(spec "
-					+ "doesn't allow frames between header fragments).  frame="+frame+" list="+headerFragList, true);
+					+ "doesn't allow frames between header fragments).  frame="+frame+" list="+headerFragList);
 		}
 		
 		if(frame instanceof UnknownFrame && ignoreUnkownFrames) {
@@ -99,15 +100,15 @@ public class HpackParserImpl implements HpackParser {
 		
 		if(list.size() == 1) {
 			if(!(first instanceof HeadersFrame) && !(first instanceof PushPromiseFrame))
-				throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
-						"First has header frame must be HeadersFrame or PushPromiseFrame first frame="+first, true);				
+				throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+						"First has header frame must be HeadersFrame or PushPromiseFrame first frame="+first);				
 		} else if(streamId != lowLevelFrame.getStreamId()) {
-			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
+			throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
 					"Headers/continuations from two different streams per spec cannot be"
-					+ " interleaved.  frames="+list, true);
+					+ " interleaved.  frames="+list);
 		} else if(!(lowLevelFrame instanceof ContinuationFrame)) {
-			throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, lowLevelFrame.getStreamId(), 
-					"Must be continuation frame and wasn't.  frames="+list, true);			
+			throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+					"Must be continuation frame and wasn't.  frames="+list);			
 		}
 	}
 	
@@ -120,7 +121,7 @@ public class HpackParserImpl implements HpackParser {
 		    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, iterFrame.getHeaderFragment());
 		}
 		
-		List<Http2Header> headers = decoding.decode(state.getDecoder(), allSerializedHeaders);
+		List<Http2Header> headers = decoding.decode(state.getDecoder(), allSerializedHeaders, firstFrame.getStreamId());
 
 		if(firstFrame instanceof HeadersFrame) {
 			HeadersFrame f = (HeadersFrame) firstFrame;

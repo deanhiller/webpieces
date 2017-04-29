@@ -10,6 +10,8 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2parser.api.ErrorType;
+import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -60,6 +62,15 @@ public class Level2ParsingAndRemoteSettings {
 		try {
 			CompletableFuture<Void> future = parseImpl(newData);
 			future.handle((resp, t) -> handleError(resp, t));
+		} catch(Http2ParseException e) {
+			if(e.getReason().getErrorType() == ErrorType.CONNECTION) {
+				log.warn("shutting the connection down due to error", e);
+				marshalLayer.goAway(e); //send GoAway
+			} else {
+				log.warn("shutting the stream down due to error", e);
+				//shut down just the stream
+				throw new UnsupportedOperationException("not done yet");
+			}
 		} catch(Throwable e) {
 			handleError(null, e);
 		}

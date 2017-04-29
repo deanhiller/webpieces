@@ -10,6 +10,10 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
+import com.webpieces.http2parser.api.ErrorType;
+import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
@@ -71,6 +75,17 @@ public class Level6MarshalAndPing {
 		marshalState.setOutgoingMaxTableSize(value);
 	}
 	
+	public void goAway(Http2ParseException e) {
+		ParseFailReason reason = e.getReason();
+		if(reason.getErrorType() == ErrorType.STREAM) {
+			
+		} else {
+			GoAwayFrame frame = new GoAwayFrame();
+			frame.setKnownErrorCode(reason.getErrorCode());
+			sendControlDataToSocket(frame);
+			finalLayer.closeSocket(e);
+		}
+	}
 	
 	public CompletableFuture<Void> sendControlDataToSocket(Http2Msg msg) {
 		int streamId = msg.getStreamId();
@@ -81,7 +96,7 @@ public class Level6MarshalAndPing {
 	}
 
 	public CompletableFuture<Void> sendFrameToSocket(Http2Msg msg) {
-		log.info("sending frame down to socket(from client)="+msg);
+		log.info("sending frame down to socket(from client)=\n"+msg);
 		DataWrapper data = parser.marshal(marshalState, msg);
 		ByteBuffer buffer = ByteBuffer.wrap(data.createByteArray());
 		return sendToSocket(buffer);

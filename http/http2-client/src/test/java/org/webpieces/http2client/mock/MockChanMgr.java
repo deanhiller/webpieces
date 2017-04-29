@@ -38,6 +38,10 @@ public class MockChanMgr extends MockSuperclass implements ChannelManager {
 	public void addTCPChannelToReturn(TCPChannel toReturn) {
 		super.addValueToReturn(Method.CREATE_TCP_CHANNEL, toReturn);
 	}
+
+	public void addSSLChannelToReturn(TCPChannel toReturn) {
+		super.addValueToReturn(Method.CREATE_SSL_CHANNEL, toReturn);
+	}
 	
 	@Override
 	public TCPChannel createTCPChannel(String id, SSLEngine engine) {

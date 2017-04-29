@@ -30,6 +30,8 @@ import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
+import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -49,8 +51,8 @@ public class IntegSingleRequest {
 
 		boolean isHttp = true;
 		
-		//String host = "www.google.com"; 
-		String host = "localhost"; //jetty
+		String host = "www.google.com"; 
+		//String host = "localhost"; //jetty
 		//String host = "api.push.apple.com";
 		//String host = "gcm-http.googleapis.com";
 		//String host = "nghttp2.org";
@@ -61,7 +63,7 @@ public class IntegSingleRequest {
 		if("localhost".equals(host)) {
 			port = 8443;
 			if(isHttp)
-				port = 51518;
+				port = 8080;
 		}
 		
 		List<Http2Header> req = createRequest(host, isHttp);
@@ -114,7 +116,12 @@ public class IntegSingleRequest {
 
 		@Override
 		public void farEndClosed(Http2Socket socket) {
-			log.info("far end closed");
+			log.info("far end closed");			
+		}
+		
+		@Override
+		public void socketClosed(Http2Socket socket, Http2ParseException e) {
+			log.info("far end closed", e);
 		}
 
 		@Override

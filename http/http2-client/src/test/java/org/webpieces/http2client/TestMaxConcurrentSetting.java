@@ -13,10 +13,9 @@ import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.mock.MockChanMgr;
+import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockServerListener;
-import org.webpieces.http2client.mock.MockHttp2Channel;
-import org.webpieces.http2client.mock.SocketWriter;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2Config;
@@ -30,7 +29,6 @@ public class TestMaxConcurrentSetting {
 	private MockChanMgr mockChanMgr;
 	private MockHttp2Channel mockChannel;
 	private Http2Socket socket;
-	private SocketWriter socketWriter;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
 
 	@Before
@@ -53,11 +51,8 @@ public class TestMaxConcurrentSetting {
 		Assert.assertTrue(connect.isDone());
 		Assert.assertEquals(socket, connect.get());
 
-		//verify settings on connect were sent
-		Http2Msg settings = mockChannel.getFrameAndClear();
-		Assert.assertEquals(HeaderSettings.createSettingsFrame(localSettings), settings);
-		
-		socketWriter = mockChannel.getSocketWriter();
+		//clear expected preface and settings
+		mockChannel.getFramesAndClear();
 	}
 	
 	@Test
@@ -88,8 +83,8 @@ public class TestMaxConcurrentSetting {
 		//server's settings frame is finally coming in as well with maxConcurrent=1
 		HeaderSettings settings = new HeaderSettings();
 		settings.setMaxConcurrentStreams(2L);
-		socketWriter.write(HeaderSettings.createSettingsFrame(settings));
-		socketWriter.write(new SettingsFrame(true)); //ack client frame
+		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
+		mockChannel.write(new SettingsFrame(true)); //ack client frame
 		List<Http2Msg> msgs = mockChannel.getFramesAndClear();
 		
 		Assert.assertEquals(sent.getRequest2().getRequest(), msgs.get(0));
@@ -101,10 +96,10 @@ public class TestMaxConcurrentSetting {
 	
 	private void sendHeadersAndData(int streamId1, CompletableFuture<Http2SocketDataWriter> future2,
 			MockResponseListener listener1) throws InterruptedException, ExecutionException {
-		socketWriter.write(Requests.createResponse(streamId1)); //endOfStream=false
+		mockChannel.write(Requests.createResponse(streamId1)); //endOfStream=false
 		listener1.getSingleReturnValueIncomingResponse();
 				
-		socketWriter.write(new DataFrame(streamId1, false)); //endOfStream=false
+		mockChannel.write(new DataFrame(streamId1, false)); //endOfStream=false
 		listener1.getSingleReturnValueIncomingResponse();
 		
 		//at this point, should not have a call outstanding
@@ -113,7 +108,7 @@ public class TestMaxConcurrentSetting {
 
 		listener1.addReturnValueIncomingResponse(CompletableFuture.completedFuture(null));
 		Assert.assertFalse(future2.isDone());
-		socketWriter.write(new DataFrame(streamId1, true));//endOfStream = true
+		mockChannel.write(new DataFrame(streamId1, true));//endOfStream = true
 	}
 	
 	private RequestsSent sendTwoRequests() {
@@ -143,8 +138,8 @@ public class TestMaxConcurrentSetting {
 		//server's settings frame is finally coming in as well with maxConcurrent=1
 		HeaderSettings settings = new HeaderSettings();
 		settings.setMaxConcurrentStreams(max);
-		socketWriter.write(HeaderSettings.createSettingsFrame(settings));
-		socketWriter.write(new SettingsFrame(true)); //ack client frame
+		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
+		mockChannel.write(new SettingsFrame(true)); //ack client frame
 		SettingsFrame ack = (SettingsFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(true, ack.isAck());
 	}

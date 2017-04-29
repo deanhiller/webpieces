@@ -2,6 +2,7 @@ package org.webpieces.data.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,4 +140,8 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		}
 	}
 
+	@Override
+	public String createStringFromUtf8(int offset, int length) {
+		return createStringFrom(offset, length, StandardCharsets.UTF_8);
+	}
 }

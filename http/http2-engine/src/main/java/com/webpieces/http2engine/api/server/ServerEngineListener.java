@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.Http2ParseException;
 
 public interface ServerEngineListener {
 
@@ -17,5 +18,7 @@ public interface ServerEngineListener {
 	CompletableFuture<Void> sendToSocket(ByteBuffer newData);
 
 	void engineClosedByFarEnd();
+	
+	void closeSocket(Http2ParseException reason);
 	
 }

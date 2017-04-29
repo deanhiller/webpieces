@@ -6,14 +6,16 @@ import java.util.concurrent.CompletableFuture;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.Stream;
+import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Level6NotifySvrListeners implements EngineResultListener {
+public class Level7NotifySvrListeners implements EngineResultListener {
 
 	private ServerEngineListener listener;
 
-	public Level6NotifySvrListeners(ServerEngineListener listener) {
+	public Level7NotifySvrListeners(ServerEngineListener listener) {
 		this.listener = listener;
 	}
 
@@ -31,8 +33,14 @@ public class Level6NotifySvrListeners implements EngineResultListener {
 
 	@Override
 	public void farEndClosed() {
+		listener.engineClosedByFarEnd();
 	}
 
+	@Override
+	public void closeSocket(Http2ParseException reason) {
+		listener.closeSocket(reason);
+	}
+	
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return listener.sendToSocket(buffer).thenApply(s -> null);

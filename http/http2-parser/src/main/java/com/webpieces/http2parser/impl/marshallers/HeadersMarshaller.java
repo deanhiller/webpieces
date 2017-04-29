@@ -8,16 +8,14 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
-import com.webpieces.http2parser.api.exception.ErrorType;
-import com.webpieces.http2parser.api.exception.ResetStreamException;
 import com.webpieces.http2parser.impl.DataSplit;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
 import com.webpieces.http2parser.impl.PaddingUtil;
-import com.webpieces.http2parser.api.dto.HeadersFrame;
 
 public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameMarshaller {
 
@@ -85,7 +83,8 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
             int streamDependency = firstInt & 0x7FFFFFFF;
             if(streamDependency == frame.getStreamId()) {
                 // Can't depend on self
-                throw new Http2ParseException(Http2ErrorCode.PROTOCOL_ERROR, streamDependency, true);
+                throw new Http2ParseException(ParseFailReason.BAD_STREAM_DEPENDENCY, streamDependency, 
+                		"stream id="+streamDependency+" depends on itself");
             }
             priorityDetails.setStreamDependency(streamDependency);
             priorityDetails.setWeight((short) (preludeBytes.get() & 0xFF));
@@ -96,7 +95,8 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
         }
         
         if(frame.getStreamId() == 0)
-        	throw new ResetStreamException("Headers frame has streamId=0 which is not allowed per spec. frame="+frame, Http2ErrorCode.PROTOCOL_ERROR, ErrorType.CONNECTION);
+            throw new Http2ParseException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
+            		"headers frame had invalid stream id="+frame.getStreamId());        
         
         return frame;
 	}

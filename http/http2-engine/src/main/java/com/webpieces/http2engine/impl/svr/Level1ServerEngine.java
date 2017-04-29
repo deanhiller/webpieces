@@ -18,7 +18,7 @@ import com.webpieces.http2engine.impl.shared.StreamState;
 public class Level1ServerEngine implements Http2ServerEngine {
 
 	private Level6MarshalAndPing marshalLayer;
-	private Level6NotifySvrListeners finalLayer;
+	private Level7NotifySvrListeners finalLayer;
 	private Level3ServerStreams streamInit;
 	private Level2ParsingAndRemoteSettings parsing;
 
@@ -30,7 +30,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		//we have to release items in the map inside this or release the engine
 		StreamState streamState = new StreamState();
 		
-		finalLayer = new Level6NotifySvrListeners(listener);
+		finalLayer = new Level7NotifySvrListeners(listener);
 		marshalLayer = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, marshalLayer, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(marshalLayer, finalLayer, localSettings);

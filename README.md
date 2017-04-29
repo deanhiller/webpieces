@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
 
-Codecov.io has two bugs (so we are actually way higher than this number) documented at bottom of this page
+Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 #### Steps to try the webserver
@@ -32,6 +32,7 @@ Codecov.io has two bugs (so we are actually way higher than this number) documen
 7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart
      the webserver (even in debug mode)
+  * today 4/27/17 newest intellij introduced a bug where dev server fails to start as src/main/resources is not on classpath
 9. In a browser go to http://localhost:8080
 10. refactor your code like crazy and hit the website again(no restart needed)
 
@@ -50,13 +51,13 @@ This project is essentially pieces that can be used to build any http related so
 
 #### Advantages of webpieces
 
-* LogginFilter automatically adds correct cache headers so if you are logged out, back button will not go back to some logged in page instead redirecting to login
+* LoginFilter automatically adds correct cache headers so if you are logged out, back button will not go back to some logged in page instead redirecting to login
 * your project is automatically setup with code coverage (for java and the generated html groovy)
 * built in 'very loose' checkstyle such that developers don't create 70+ line methods or 700+ line files or nasty anti-arrow pattern if statements
 * unlike Seam/JSF and heavyweight servers, you can slap down 1000+ of these as it is built for clustering and scale and being stateless!!! especially with noSQL databases.  with Seam/JSF, you lock your users to one node and when that goes out, if they are in the middle of buying a plane ticket, they are pretty much screwed.(ie. not a good design for large scale)
 * be blown away with the optimistic locking pattern.  If your end users both post a change to the same entity, one will win and the other will go through a path of code where you can decide, 1. show the user his changes and the other users, 2. just tell the user it failed and to start over 3. let it overwrite the previous user code 
 * look ma, no restarting the server in development mode with complete java refactoring
-* prod server runs caches files using hash on content so all *.js files and *.css files are cached for a year and if file changes, the hash changes causing a reload
+* prod server caches files using hash on content so all *.js files and *.css files are cached for a year and if file changes, the hash changes causing a reload
 * dev server never tells browser to cache files so developer can modify file and not need to clear browser cache
 * %[..]% will verify a file actually exists at that route at build time so that you do not accidentally deploy web pages that link to nonexistent files 
 * no erasing users input from forms which many websites do....soooo annoying

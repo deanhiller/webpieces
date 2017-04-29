@@ -4,6 +4,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -39,13 +40,13 @@ public class Level5LocalFlowControl {
 
 		synchronized(this) {
 			if(frameLength > connectionLocalWindowSize) {
-				throw new Http2ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR, f.getStreamId(), 
+				throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_CONNECTION, f.getStreamId(), 
 						"connectionLocalWindowSize too small="+connectionLocalWindowSize
-						+" frame len="+frameLength+" for frame="+f, true);
+						+" frame len="+frameLength+" for frame="+f);
 			} else if(frameLength > stream.getLocalWindowSize()) {
-				throw new Http2ParseException(Http2ErrorCode.FLOW_CONTROL_ERROR, f.getStreamId(), 
+				throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_STREAM, f.getStreamId(), 
 						"connectionLocalWindowSize too small="+connectionLocalWindowSize
-						+" frame len="+frameLength+" for frame="+f, false);				
+						+" frame len="+frameLength+" for frame="+f);
 			}
 			
 			totalSent += frameLength;

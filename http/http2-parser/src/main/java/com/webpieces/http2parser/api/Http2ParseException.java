@@ -1,50 +1,22 @@
 package com.webpieces.http2parser.api;
 
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
-
 public class Http2ParseException extends RuntimeException {
 
     private static final long serialVersionUID = -2704718008204232741L;
-    private Http2ErrorCode errorCode;
     private int streamId = 0x0;
-    private boolean connectionLevel = false;
+	private ParseFailReason reason;
 
-    public Http2ParseException() {
-        super();
+    public Http2ParseException(ParseFailReason reason, int streamId, String msg) {
+        super(msg+" reason="+reason+" stream="+streamId);
+		this.reason = reason;
+		this.streamId = streamId;
     }
 
-    public Http2ParseException(Http2ErrorCode errorCode, int streamId, String msg, boolean connectionLevel) {
-        super(msg);
-        this.errorCode = errorCode;
-        this.streamId = streamId;
-        this.connectionLevel = connectionLevel;
-    }
-    
-//    public ParseException(Http2ErrorCode errorCode, int streamId, String msg) {
-//        super(msg);
-//        this.errorCode = errorCode;
-//        this.streamId = streamId;
-//    }
-    
-    public Http2ParseException(Http2ErrorCode errorCode, int streamId, boolean connectionLevel) {
-        this.errorCode = errorCode;
-        this.streamId = streamId;
-        this.connectionLevel = connectionLevel;
-    }
-
-    public Http2ParseException(Http2ErrorCode errorCode, int streamId) {
-        super();
-        this.errorCode = errorCode;
-        this.streamId = streamId;
-    }
-
-    public Http2ParseException(Http2ErrorCode errorCode) {
-        this.errorCode = errorCode;
-        this.connectionLevel = true;
-    }
-
-    public Http2ErrorCode getErrorCode() {
-        return errorCode;
+    public Http2ParseException(ParseFailReason reason, int streamId, String msg, Throwable e) {
+        super(msg+" reason="+reason+" stream="+streamId, e);
+        this.reason = reason;
+		this.streamId = streamId;
+        
     }
 
     public int getStreamId() {
@@ -55,7 +27,8 @@ public class Http2ParseException extends RuntimeException {
         return streamId == 0x0;
     }
 
-    public boolean isConnectionLevel() {
-        return connectionLevel;
-    }
+	public ParseFailReason getReason() {
+		return reason;
+	}
+
 }
