@@ -6,14 +6,14 @@ import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.Protocol;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.server.ServerStreamWriter;
 
 class RequestListenerForTest implements HttpRequestListener {
 
 	private boolean isClosed;
 
 	@Override
-	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+	public ServerStreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
 		return null;
 	}
 

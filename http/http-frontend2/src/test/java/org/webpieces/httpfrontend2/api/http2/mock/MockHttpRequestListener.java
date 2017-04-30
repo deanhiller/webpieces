@@ -13,7 +13,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.server.ServerStreamWriter;
 
 public class MockHttpRequestListener extends MockSuperclass implements HttpRequestListener {
 
@@ -22,9 +22,9 @@ public class MockHttpRequestListener extends MockSuperclass implements HttpReque
 	}
 	
 	@Override
-	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+	public ServerStreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
 		RequestData data = new RequestData(stream, headers, type);
-		return (StreamWriter) super.calledMethod(Method.INCOMING_FRAME, data);
+		return (ServerStreamWriter) super.calledMethod(Method.INCOMING_FRAME, data);
 	}
 
 	public RequestData getRequestDataAndClear() {

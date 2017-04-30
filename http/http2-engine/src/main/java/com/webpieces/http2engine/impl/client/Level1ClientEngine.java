@@ -12,8 +12,8 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
@@ -48,7 +48,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, marshalLayer, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(marshalLayer, finalLayer, localSettings);
 		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
-		streamInit = new Level3ClientStreams(streamState, clientSm, remoteFlowCtrl, config, remoteSettings);
+		streamInit = new Level3ClientStreams(streamState, clientSm, localFlowCtrl, remoteFlowCtrl, config, remoteSettings);
 		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, marshalLayer, parser, config, remoteSettings);
 	}
 
@@ -67,7 +67,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
+	public CompletableFuture<ClientStreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
 		int streamId = headers.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException("frames for requests must have a streamId > 0");

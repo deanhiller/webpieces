@@ -13,7 +13,6 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2parser.api.Http2ParseException;
-import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class Layer3Outgoing implements ClientEngineListener {

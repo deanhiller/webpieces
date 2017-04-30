@@ -12,6 +12,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public abstract class Level4AbstractStateMachine {
@@ -92,6 +93,8 @@ public abstract class Level4AbstractStateMachine {
 			return Http2PayloadType.DATA;
 		} else if(payload instanceof Http2Push) {
 			return Http2PayloadType.PUSH_PROMISE;
+		} else if(payload instanceof RstStreamFrame) {
+			return Http2PayloadType.RESET_STREAM;
 		} else
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
 	}

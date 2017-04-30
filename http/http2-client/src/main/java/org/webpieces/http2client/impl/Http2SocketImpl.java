@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -15,6 +14,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
@@ -70,7 +70,7 @@ public class Http2SocketImpl implements Http2Socket {
 			DataFrame data = createData(request, true);
 			
 			return sendRequest(request.getHeaders(), responseListener)
-						.thenCompose(writer -> writer.sendData(data))
+						.thenCompose(writer -> writer.sendMore(data))
 						.thenCompose(writer -> responseListener.fetchResponseFuture());
 		}
 		
@@ -79,8 +79,8 @@ public class Http2SocketImpl implements Http2Socket {
 		request.getTrailingHeaders().setEndOfStream(true);
 		
 		return sendRequest(request.getHeaders(), responseListener)
-			.thenCompose(writer -> writer.sendData(data))
-			.thenCompose(writer -> writer.sendData(request.getTrailingHeaders()))
+			.thenCompose(writer -> writer.sendMore(data))
+			.thenCompose(writer -> writer.sendMore(request.getTrailingHeaders()))
 			.thenCompose(writer -> responseListener.fetchResponseFuture());
 	}
 
@@ -93,7 +93,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
+	public CompletableFuture<ClientStreamWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
 		return incoming.sendRequest(request, listener);
 	}
 

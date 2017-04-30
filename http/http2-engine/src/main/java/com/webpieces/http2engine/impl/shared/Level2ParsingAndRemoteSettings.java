@@ -63,16 +63,24 @@ public class Level2ParsingAndRemoteSettings {
 			CompletableFuture<Void> future = parseImpl(newData);
 			future.handle((resp, t) -> handleError(resp, t));
 		} catch(Http2ParseException e) {
-			if(e.getReason().getErrorType() == ErrorType.CONNECTION) {
-				log.warn("shutting the connection down due to error", e);
-				marshalLayer.goAway(e); //send GoAway
-			} else {
-				log.warn("shutting the stream down due to error", e);
-				//shut down just the stream
-				throw new UnsupportedOperationException("not done yet");
-			}
+			fireError(e);
 		} catch(Throwable e) {
 			handleError(null, e);
+		}
+	}
+
+	private Void logExc(String thing, Throwable t) {
+		log.error("error trying to close "+thing, t);
+		return null;
+	}
+
+	private void fireError(Http2ParseException e) {
+		if(e.getReason().getErrorType() == ErrorType.CONNECTION) {
+			log.error("shutting the connection down due to error", e);
+			marshalLayer.goAway(e).exceptionally( t -> logExc("connection", t)); //send GoAway
+		} else {
+			log.error("shutting the stream down due to error", e);
+			level3StreamInit.sendRstToServerAndClient(e).exceptionally( t -> logExc("stream", t));
 		}
 	}
 

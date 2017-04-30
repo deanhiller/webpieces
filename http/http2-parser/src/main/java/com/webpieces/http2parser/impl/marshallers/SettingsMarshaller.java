@@ -34,14 +34,21 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
     		throw new IllegalArgumentException("SettingsFrame can never be any other stream id except 0 which is already set");
     	
 		SettingsFrame castFrame = (SettingsFrame) frame;
+		for(Http2Setting setting : castFrame.getSettings()) {
+			validate(setting);
+		}
 
 		byte flags = 0x0;
 		if (castFrame.isAck())
 			flags |= 0x1;
 
 		DataWrapper dataPayload;
-		if (castFrame.isAck() || castFrame.getSettings().size() == 0) {
-			// If ack or empty settings
+		if (castFrame.isAck()) {
+			if(castFrame.getSettings() != null && castFrame.getSettings().size() > 0)
+	    		throw new IllegalArgumentException("Ack SettingsFrame can not have setting in it");
+
+			dataPayload = dataGen.emptyWrapper();
+		} else if(castFrame.getSettings().size() == 0) {
 			dataPayload = dataGen.emptyWrapper();
 		} else {
 			List<Http2Setting> settings = castFrame.getSettings();
@@ -80,9 +87,6 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 		bufferPool.releaseBuffer(payloadByteBuffer);
 
-    	if(frame.getStreamId() != 0)
-    		throw new IllegalArgumentException("SettingsFrame can never be any other stream id except 0 which is already set");
-    	
 		return frame;
 	}
 
@@ -91,14 +95,16 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		while (payloadByteBuffer.hasRemaining()) {
 			int id = UnsignedData.getUnsignedShort(payloadByteBuffer);
 			long value = UnsignedData.getUnsignedInt(payloadByteBuffer);
-			SettingsParameter key = SettingsParameter.lookup(id);
-			settings.add(new Http2Setting(id, value));
-			validate(key, value);
+			Http2Setting http2Setting = new Http2Setting(id, value);
+			settings.add(http2Setting);
+			validate(http2Setting);
 		}
 		return settings;
 	}
 
-	private void validate(SettingsParameter key, long value) {
+	private void validate(Http2Setting http2Setting) {
+		SettingsParameter key = SettingsParameter.lookup(http2Setting.getId());
+		long value = http2Setting.getValue();
 		if(key == null)
 			return; //unknown setting
 		

@@ -1,16 +1,18 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
-import com.webpieces.http2parser.api.ErrorType;
 import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -20,7 +22,8 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 public class Level6MarshalAndPing {
 
 	private static final Logger log = LoggerFactory.getLogger(Level6MarshalAndPing.class);
-	
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+
 	private HpackParser parser;
 	private EngineResultListener finalLayer;
 	private HeaderSettings remoteSettings;
@@ -75,16 +78,18 @@ public class Level6MarshalAndPing {
 		marshalState.setOutgoingMaxTableSize(value);
 	}
 	
-	public void goAway(Http2ParseException e) {
+	public CompletableFuture<Void> goAway(Http2ParseException e) {
 		ParseFailReason reason = e.getReason();
-		if(reason.getErrorType() == ErrorType.STREAM) {
-			
-		} else {
-			GoAwayFrame frame = new GoAwayFrame();
-			frame.setKnownErrorCode(reason.getErrorCode());
-			sendControlDataToSocket(frame);
-			finalLayer.closeSocket(e);
-		}
+		byte[] bytes = e.getMessage().getBytes(StandardCharsets.UTF_8);
+		DataWrapper debug = dataGen.wrapByteArray(bytes);
+
+		GoAwayFrame frame = new GoAwayFrame();
+		frame.setDebugData(debug);
+		frame.setKnownErrorCode(reason.getErrorCode());
+		
+		CompletableFuture<Void> future1 = sendControlDataToSocket(frame);
+		finalLayer.closeSocket(e);
+		return future1;
 	}
 	
 	public CompletableFuture<Void> sendControlDataToSocket(Http2Msg msg) {

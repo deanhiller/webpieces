@@ -16,7 +16,6 @@ import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level5RemoteFlowControl {

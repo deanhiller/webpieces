@@ -42,4 +42,10 @@ public class MockServerListener extends MockSuperclass implements Http2ServerLis
 		
 		return (Http2ParseException) calledMethodList.get(0).getArgs()[1];
 	}
+
+	public void assertNotClosedd() {
+		int num = super.getCalledMethodList(Method.SOCKET_CLOSED2).size();
+		if(num > 0)
+			throw new IllegalStateException("the library told the client the socket closed when it should not in this case");
+	}
 }

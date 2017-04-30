@@ -35,7 +35,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, marshalLayer, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(marshalLayer, finalLayer, localSettings);
 		Level4ServerStateMachine clientSm = new Level4ServerStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
-		streamInit = new Level3ServerStreams(streamState, clientSm, remoteFlowCtrl, localSettings, remoteSettings);
+		streamInit = new Level3ServerStreams(streamState, clientSm, localFlowCtrl, remoteFlowCtrl, localSettings, remoteSettings);
 		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, marshalLayer, parser, config, remoteSettings);
 	}
 

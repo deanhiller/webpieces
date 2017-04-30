@@ -2,19 +2,19 @@ package org.webpieces.http2client;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.mock.MockResponseListener;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 
 public class RequestHolder {
 
 	private Http2Headers request;
 	private MockResponseListener listener;
-	private CompletableFuture<Http2SocketDataWriter> future;
+	private CompletableFuture<ClientStreamWriter> future;
 
 	public RequestHolder(Http2Headers request, MockResponseListener listener,
-			CompletableFuture<Http2SocketDataWriter> future) {
+			CompletableFuture<ClientStreamWriter> future) {
 				this.request = request;
 				this.listener = listener;
 				this.future = future;
@@ -28,7 +28,7 @@ public class RequestHolder {
 		return listener;
 	}
 
-	public CompletableFuture<Http2SocketDataWriter> getFuture() {
+	public CompletableFuture<ClientStreamWriter> getFuture() {
 		return future;
 	}
 	

@@ -7,6 +7,7 @@ import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.Http2Response;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 
 public interface Http2Socket {
@@ -44,7 +45,7 @@ public interface Http2Socket {
      *  
      *  @param isComplete true if you are only sending request headers with content-length = 0
      */
-    CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener);
+    CompletableFuture<ClientStreamWriter> sendRequest(Http2Headers request, Http2ResponseListener listener);
     
     CompletableFuture<Void> close();
 

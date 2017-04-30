@@ -20,7 +20,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.server.ServerStreamWriter;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Layer2Http1_1Handler {
@@ -98,7 +98,7 @@ public class Layer2Http1_1Handler {
 			Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
 			//socket.setActiveHttp11Stream(stream);
 			
-			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
+			ServerStreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
 			
 
 		} else if(payload instanceof HttpChunk) {

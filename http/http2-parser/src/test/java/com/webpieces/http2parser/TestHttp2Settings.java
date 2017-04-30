@@ -83,8 +83,6 @@ public class TestHttp2Settings {
     public void testCreateAck() {
         SettingsFrame frame = new SettingsFrame();
         frame.setAck(true);
-        frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_ENABLE_PUSH, 1L));
-        frame.addSetting(new Http2Setting(SettingsParameter.SETTINGS_MAX_CONCURRENT_STREAMS, 256L));
         
         String hexFrame = UtilsForTest.frameToHex(frame);
         Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(ackFrame));

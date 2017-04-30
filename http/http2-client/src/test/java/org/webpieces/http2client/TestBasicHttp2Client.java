@@ -10,13 +10,13 @@ import org.junit.Test;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockServerListener;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -71,8 +71,8 @@ public class TestBasicHttp2Client {
 		MockResponseListener clientResponseListener1 = new MockResponseListener();
 		clientResponseListener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
 		MockResponseListener listener2 = new MockResponseListener();
-		CompletableFuture<Http2SocketDataWriter> future = socket.sendRequest(request1, clientResponseListener1);
-		CompletableFuture<Http2SocketDataWriter> future2 = socket.sendRequest(request2, listener2);
+		CompletableFuture<ClientStreamWriter> future = socket.sendRequest(request1, clientResponseListener1);
+		CompletableFuture<ClientStreamWriter> future2 = socket.sendRequest(request2, listener2);
 		
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(1, req.getStreamId());

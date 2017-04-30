@@ -7,7 +7,6 @@ import com.webpieces.http2engine.api.server.ServerEngineListener;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2parser.api.Http2ParseException;
-import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 

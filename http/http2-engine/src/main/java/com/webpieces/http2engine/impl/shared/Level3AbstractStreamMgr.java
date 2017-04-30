@@ -2,6 +2,8 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -10,14 +12,27 @@ public abstract class Level3AbstractStreamMgr {
 	protected StreamState streamState;
 	protected HeaderSettings remoteSettings;
 	private Level5RemoteFlowControl remoteFlowControl;
+	private Level5LocalFlowControl localFlowControl;
 	
-	public Level3AbstractStreamMgr(Level5RemoteFlowControl level5FlowControl2, HeaderSettings remoteSettings2) {
-		this.remoteFlowControl = level5FlowControl2;
+	public Level3AbstractStreamMgr(Level5RemoteFlowControl level5RemoteFlow, Level5LocalFlowControl localFlowControl, HeaderSettings remoteSettings2) {
+		this.remoteFlowControl = level5RemoteFlow;
+		this.localFlowControl = localFlowControl;
 		this.remoteSettings = remoteSettings2;
 	}
 
 	public abstract CompletableFuture<Void> sendPayloadToClient(PartialStream msg);
+	protected abstract CompletableFuture<Void> fireToSocket(Stream stream, RstStreamFrame frame);
 
+	public CompletableFuture<Void> sendRstToServerAndClient(Http2ParseException e) {		
+		RstStreamFrame frame = new RstStreamFrame();
+		frame.setKnownErrorCode(e.getReason().getErrorCode());
+		frame.setStreamId(e.getStreamId());
+		
+		Stream stream = streamState.get(frame);
+		return fireToSocket(stream, frame)
+			.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
+	}
+	
 	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
 		if(msg.getStreamId() == 0) {
 			return remoteFlowControl.updateConnectionWindowSize(msg);

@@ -7,14 +7,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -38,7 +37,7 @@ public class Layer1Incoming implements DataListener {
 		return layer2.sendPing();
 	}
 	
-	public CompletableFuture<Http2SocketDataWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
+	public CompletableFuture<ClientStreamWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
 		if(request.getStreamId() != 0)
 			throw new IllegalStateException("Client MUST NOT set Http2Headers.streamId.  that is filled in by library");
 		int streamId = getNextAvailableStreamId();
@@ -48,24 +47,24 @@ public class Layer1Incoming implements DataListener {
 						.thenApply(c -> createWriter(request, c));
 	}
 
-	private Http2SocketDataWriter createWriter(Http2Headers request, StreamWriter requestWriter) {
-		Http2SocketDataWriter writer = new Writer(request.getStreamId(), request.isEndOfStream(), requestWriter);
+	private ClientStreamWriter createWriter(Http2Headers request, ClientStreamWriter requestWriter) {
+		ClientStreamWriter writer = new Writer(request.getStreamId(), request.isEndOfStream(), requestWriter);
 		return writer;
 	}
 	
-	private class Writer implements Http2SocketDataWriter {
-		private StreamWriter requestWriter;
+	private class Writer implements ClientStreamWriter {
+		private ClientStreamWriter requestWriter;
 		private int streamId;
 		private boolean isEndOfStream;
 
-		public Writer(int streamId, boolean isEndOfStream, StreamWriter requestWriter) {
+		public Writer(int streamId, boolean isEndOfStream, ClientStreamWriter requestWriter) {
 			this.streamId = streamId;
 			this.isEndOfStream = isEndOfStream;
 			this.requestWriter = requestWriter;
 		}
 
 		@Override
-		public CompletableFuture<Http2SocketDataWriter> sendData(PartialStream data) {
+		public CompletableFuture<ClientStreamWriter> sendMore(PartialStream data) {
 			if(isEndOfStream)
 				throw new IllegalStateException("Client has already sent a PartialStream"
 						+ " object with endOfStream=true so no more data can be sent");

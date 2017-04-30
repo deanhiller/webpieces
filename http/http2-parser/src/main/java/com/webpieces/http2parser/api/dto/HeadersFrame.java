@@ -75,12 +75,15 @@ public class HeadersFrame extends AbstractHttp2Frame implements HasHeaderFragmen
 
 	@Override
     public String toString() {
+		int fragSize = 0;
+		if(headerFragment != null)
+			fragSize = headerFragment.getReadableSize();
         return "HeadersFrame{" +
         		super.toString() +
                 ", endStream=" + endOfStream +
                 ", endHeaders=" + endHeaders +
                 ", priorityDetails=" + priorityDetails +
-                ", headerFragment=" + headerFragment.getReadableSize() +
+                ", headerFragment=" + fragSize +
                 ", padding=" + padding +
                 "} ";
     }

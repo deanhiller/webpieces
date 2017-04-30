@@ -30,7 +30,7 @@ public class RstStreamFrame extends AbstractHttp2Frame implements PartialStream 
 
 	@Override
 	public boolean isEndOfStream() {
-		return true;
+		return false;
 	}
 	
     @Override
@@ -46,7 +46,7 @@ public class RstStreamFrame extends AbstractHttp2Frame implements PartialStream 
     public String toString() {
         return "RstStreamFrame{" +
         		super.toString() +
-                "errorCode=" + errorCode +
+                ", errorCode=" + errorCode +
                 "} ";
     }
 

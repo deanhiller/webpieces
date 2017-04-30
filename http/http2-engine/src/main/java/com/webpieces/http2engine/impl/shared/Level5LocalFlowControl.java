@@ -1,5 +1,7 @@
 package com.webpieces.http2engine.impl.shared;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -7,7 +9,6 @@ import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level5LocalFlowControl {
@@ -29,10 +30,9 @@ public class Level5LocalFlowControl {
 		this.connectionLocalWindowSize = localSettings.getInitialWindowSize();
 	}
 
-	public void fireToClient(Stream stream, PartialStream payload) {
+	public CompletableFuture<Void> fireToClient(Stream stream, PartialStream payload) {
 		if(!(payload instanceof DataFrame)) {
-			notifyListener.sendPieceToClient(stream, payload);
-			return;
+			return notifyListener.sendPieceToClient(stream, payload);
 		}
 		
 		DataFrame f = (DataFrame) payload;
@@ -56,7 +56,7 @@ public class Level5LocalFlowControl {
 					+connectionLocalWindowSize+" streamSize="+stream.getLocalWindowSize()+" totalSent="+totalSent);
 		}
 		
-		notifyListener.sendPieceToClient(stream, payload)
+		return notifyListener.sendPieceToClient(stream, payload)
 			.thenApply(c -> updateFlowControl(frameLength, stream));
 	}
 

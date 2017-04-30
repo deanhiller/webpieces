@@ -11,13 +11,13 @@ import org.junit.Test;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.Http2SocketDataWriter;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.MockServerListener;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -62,7 +62,7 @@ public class TestMaxConcurrentSetting {
 		sendAndAckSettingsFrame(1L);
 
 		int streamId1 = sent.getRequest1().getRequest().getStreamId();
-		CompletableFuture<Http2SocketDataWriter> future2 = sent.getRequest2().getFuture();
+		CompletableFuture<ClientStreamWriter> future2 = sent.getRequest2().getFuture();
 		MockResponseListener listener1 = sent.getRequest1().getListener(); 
 		
 		sendHeadersAndData(streamId1, future2, listener1);
@@ -94,7 +94,7 @@ public class TestMaxConcurrentSetting {
 		Assert.assertEquals(true, ack.isAck());
 	}
 	
-	private void sendHeadersAndData(int streamId1, CompletableFuture<Http2SocketDataWriter> future2,
+	private void sendHeadersAndData(int streamId1, CompletableFuture<ClientStreamWriter> future2,
 			MockResponseListener listener1) throws InterruptedException, ExecutionException {
 		mockChannel.write(Requests.createResponse(streamId1)); //endOfStream=false
 		listener1.getSingleReturnValueIncomingResponse();
@@ -118,8 +118,8 @@ public class TestMaxConcurrentSetting {
 		MockResponseListener listener2 = new MockResponseListener();
 
 		listener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
-		CompletableFuture<Http2SocketDataWriter> future = socket.sendRequest(request1, listener1);
-		CompletableFuture<Http2SocketDataWriter> future2 = socket.sendRequest(request2, listener2);
+		CompletableFuture<ClientStreamWriter> future = socket.sendRequest(request1, listener1);
+		CompletableFuture<ClientStreamWriter> future2 = socket.sendRequest(request2, listener2);
 		
 		RequestHolder r1 = new RequestHolder(request1, listener1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, future2);		

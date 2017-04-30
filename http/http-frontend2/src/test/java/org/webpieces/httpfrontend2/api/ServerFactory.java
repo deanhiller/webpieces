@@ -23,7 +23,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.server.ServerStreamWriter;
 
 class ServerFactory {
     static final String MAIN_RESPONSE = "Here's the file";
@@ -61,7 +61,7 @@ class ServerFactory {
         }
 
 		@Override
-		public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+		public ServerStreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
 			// TODO Auto-generated method stub
 			return null;
 		}

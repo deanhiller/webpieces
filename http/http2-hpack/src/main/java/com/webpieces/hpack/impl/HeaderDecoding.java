@@ -25,7 +25,8 @@ public class HeaderDecoding {
 			return decodeImpl(decoder, data, streamId);
         } catch (IOException e) {
             // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment
-            throw new Http2ParseException(ParseFailReason.HEADER_DECODE, streamId, "IOException from hpack library", e);
+            throw new Http2ParseException(ParseFailReason.HEADER_DECODE, streamId, "Error from hpack library", e);
+            //TODO: clone hpack and fix so they throw with debug info as their errors contain no info :(
         }
 	}
 	

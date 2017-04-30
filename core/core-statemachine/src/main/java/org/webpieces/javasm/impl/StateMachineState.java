@@ -31,7 +31,7 @@ public class StateMachineState implements Memento
 
     @Override
     public String toString() {
-        return "["+id+"] ";
+        return "["+id+", state="+state+"] ";
     }
 
     public State getCurrentState()
