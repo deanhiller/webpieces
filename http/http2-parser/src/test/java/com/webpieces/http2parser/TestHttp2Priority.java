@@ -1,80 +1,112 @@
 package com.webpieces.http2parser;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.DataWrapper;
+
+import com.webpieces.http2parser.api.Http2Memento;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
 public class TestHttp2Priority {
-    static private String priorityFrame =
-            "00 00 05" + //length
+    private static Http2Parser parser = Http2ParserFactory.createParser(new BufferCreationPool());
+
+    static private String priorityFrame() {
+           String priorityFrame = 
+        	"00 00 05" + //length
             "02" + //type
             "00" + //flags
-            "00 00 00 02" + // R + streamid
+            "00 00 00 01" + // R + streamid
             "80 00 00 04" + // stream dependency
             "05"; // weight
+           return priorityFrame.replaceAll("\\s+","");
+    }
 
-    static private String priorityFrameMSB =
+    static private String priorityFrameMSB() {
+    	String priorityMSB =
             "00 00 05" + //length
                     "02" + //type
                     "00" + //flags
-                    "00 00 00 02" + // R + streamid
+                    "00 00 00 01" + // R + streamid
                     "80 00 00 04" + // stream dependency
                     "FF"; // weight
+    	return priorityMSB.replaceAll("\\s+","");
+    }
 
+	private Http2Memento memento;
+
+    @Before
+    public void setUp() {
+    	memento = parser.prepareToParse(Long.MAX_VALUE);    	
+    }
+    
     @Test
-    public void testCreatePriorityFrame() {
+    public void testParsePriorityFrame() {
+    	DataWrapper data = Util.hexToBytes(priorityFrame());
+    	parser.parse(memento, data);
+    	
+    	PriorityFrame frame = (PriorityFrame) assertGood();
+    	Assert.assertEquals(1, frame.getStreamId());
+    	PriorityDetails details = frame.getPriorityDetails();
+    	Assert.assertTrue(details.isStreamDependencyIsExclusive());
+    	Assert.assertEquals(5, details.getWeight());
+    	Assert.assertEquals(4, details.getStreamDependency());
+    }
+    
+    @Test
+    public void testParsePriorityFrameMSB() {
+    	DataWrapper data = Util.hexToBytes(priorityFrameMSB());
+    	parser.parse(memento, data);
+    	
+    	PriorityFrame frame = (PriorityFrame) assertGood();
+    	Assert.assertEquals(1, frame.getStreamId());
+    	PriorityDetails details = frame.getPriorityDetails();
+    	Assert.assertTrue(details.isStreamDependencyIsExclusive());
+    	Assert.assertEquals(255, details.getWeight());
+    	Assert.assertEquals(4, details.getStreamDependency());
+    }
+    
+	private Http2Frame assertGood() {
+		Assert.assertEquals(0, memento.getLeftOverData().getReadableSize());
+    	List<Http2Frame> frames = memento.getParsedFrames();
+    	Assert.assertEquals(1, frames.size());
+    	return frames.get(0);
+	}
+	
+    @Test
+    public void testMarshalPriorityFrame() {
         PriorityFrame frame = new PriorityFrame();
-        frame.setStreamId(2);
+        frame.setStreamId(1);
         PriorityDetails details = frame.getPriorityDetails();
         details.setStreamDependency(4);
         details.setStreamDependencyIsExclusive(true);
         details.setWeight((short) 0x5);
 
-        String hexFrame = UtilsForTest.frameToHex(frame);
-        Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(priorityFrame));
-
-        UtilsForTest.testBidiFromBytes(hexFrame);
+        byte[] data = parser.marshal(frame).createByteArray();
+        String hexFrame = Util.toHexString(data);
+        Assert.assertEquals(priorityFrame(), hexFrame);
     }
-
+	
     @Test
-    public void testParsePriorityFrame() {
-        Http2Frame frame = UtilsForTest.frameFromHex(priorityFrame);
-        Assert.assertTrue(PriorityFrame.class.isInstance(frame));
-
-        PriorityFrame castFrame = (PriorityFrame) frame;
-
-        PriorityDetails details = castFrame.getPriorityDetails();
-
-        Assert.assertEquals(details.getStreamDependency(), 4);
-        Assert.assertTrue(details.isStreamDependencyIsExclusive());
-    }
-
-    @Test
-    public void testCreatePriorityFrameMSB() {
+    public void testMarshalPriorityFrameMSB() {
         PriorityFrame frame = new PriorityFrame();
-        frame.setStreamId(2);
+        frame.setStreamId(1);
         PriorityDetails details = frame.getPriorityDetails();
-
         details.setStreamDependency(4);
         details.setStreamDependencyIsExclusive(true);
         details.setWeight((short) 0xFF);
         Assert.assertEquals(details.getWeight(), 255);
-        String hexFrame = UtilsForTest.frameToHex(frame);
-        Assert.assertArrayEquals(UtilsForTest.toByteArray(hexFrame), UtilsForTest.toByteArray(priorityFrameMSB));
-
-        UtilsForTest.testBidiFromBytes(hexFrame);
+        
+        byte[] data = parser.marshal(frame).createByteArray();
+        String hexFrame = Util.toHexString(data);
+        Assert.assertEquals(priorityFrameMSB(), hexFrame);
     }
 
-    @Test
-    public void testParsePriorityFrameMSB() {
-        Http2Frame frame = UtilsForTest.frameFromHex(priorityFrameMSB);
-        Assert.assertTrue(PriorityFrame.class.isInstance(frame));
-
-        PriorityFrame castFrame = (PriorityFrame) frame;
-        PriorityDetails details = castFrame.getPriorityDetails();
-        Assert.assertEquals(details.getWeight(), 255);
-    }
 }
