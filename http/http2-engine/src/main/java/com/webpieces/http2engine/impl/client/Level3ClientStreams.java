@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.javasm.api.Memento;
-import org.webpieces.javasm.api.State;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -21,7 +20,7 @@ import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -127,7 +126,7 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	public CompletableFuture<Void> sendPushPromiseToClient(Http2Push fullPromise) {		
 		int newStreamId = fullPromise.getPromisedStreamId();
 		if(newStreamId % 2 == 1)
-			throw new Http2ParseException(ParseFailReason.INVALID_STREAM_ID, newStreamId, 
+			throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, newStreamId, 
 					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number");
 
 		Stream causalStream = streamState.get(fullPromise);

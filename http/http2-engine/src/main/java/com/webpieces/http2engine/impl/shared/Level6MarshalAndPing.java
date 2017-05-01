@@ -13,7 +13,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
@@ -78,7 +78,7 @@ public class Level6MarshalAndPing {
 		marshalState.setOutgoingMaxTableSize(value);
 	}
 	
-	public CompletableFuture<Void> goAway(Http2ParseException e) {
+	public CompletableFuture<Void> goAway(Http2Exception e) {
 		ParseFailReason reason = e.getReason();
 		byte[] bytes = e.getMessage().getBytes(StandardCharsets.UTF_8);
 		DataWrapper debug = dataGen.wrapByteArray(bytes);

@@ -10,8 +10,8 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.http2engine.api.client.Http2Config;
-import com.webpieces.http2parser.api.ErrorType;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
@@ -62,8 +62,13 @@ public class Level2ParsingAndRemoteSettings {
 		try {
 			CompletableFuture<Void> future = parseImpl(newData);
 			future.handle((resp, t) -> handleError(resp, t));
-		} catch(Http2ParseException e) {
-			fireError(e);
+		} catch(StreamException e) {
+			log.error("shutting the stream down due to error", e);
+			level3StreamInit.sendRstToServerAndClient(e).exceptionally( t -> logExc("stream", t));
+		} catch(ConnectionException e) {
+			log.error("shutting the connection down due to error", e);
+			marshalLayer.goAway(e).exceptionally( t -> logExc("connection", t));
+			//level3StreamInit.sendClientResetsAndSvrGoAway(e).exceptionally( t -> logExc("connection", t)); //send GoAway
 		} catch(Throwable e) {
 			handleError(null, e);
 		}
@@ -72,16 +77,6 @@ public class Level2ParsingAndRemoteSettings {
 	private Void logExc(String thing, Throwable t) {
 		log.error("error trying to close "+thing, t);
 		return null;
-	}
-
-	private void fireError(Http2ParseException e) {
-		if(e.getReason().getErrorType() == ErrorType.CONNECTION) {
-			log.error("shutting the connection down due to error", e);
-			marshalLayer.goAway(e).exceptionally( t -> logExc("connection", t)); //send GoAway
-		} else {
-			log.error("shutting the stream down due to error", e);
-			level3StreamInit.sendRstToServerAndClient(e).exceptionally( t -> logExc("stream", t));
-		}
 	}
 
 	private Void handleError(Object object, Throwable e) {

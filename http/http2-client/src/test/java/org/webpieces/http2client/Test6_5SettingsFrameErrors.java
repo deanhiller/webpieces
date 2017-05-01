@@ -19,6 +19,7 @@ import org.webpieces.http2client.mock.MockServerListener;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.ErrorType;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -84,11 +85,11 @@ public class Test6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("size of payload of a settings frame ack must be 0 but was=1 reason=FRAME_SIZE_INCORRECT_CONNECTION stream=0", msg);
+		Assert.assertEquals("size of payload of a settings frame ack must be 0 but was=1 reason=FRAME_SIZE_INCORRECT stream=0", msg);
 		
 		//local is notified...
-		ParseFailReason reason = mockSvrListener.getClosedReason().getReason();
-		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, reason.getErrorCode());
+		Http2Exception reason = mockSvrListener.getClosedReason();
+		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, reason.getReason().getErrorCode());
 		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
@@ -109,10 +110,10 @@ public class Test6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		
 		//local is notified...
-		ParseFailReason reason = mockSvrListener.getClosedReason().getReason();
-		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, reason.getErrorCode());
+		Http2Exception reason = mockSvrListener.getClosedReason();
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, reason.getReason().getErrorCode());
 		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
-		Assert.assertEquals(ParseFailReason.INVALID_STREAM_ID, reason);
+		Assert.assertEquals(ParseFailReason.INVALID_STREAM_ID, reason.getReason());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -132,10 +133,10 @@ public class Test6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		
 		//local is notified...
-		ParseFailReason reason = mockSvrListener.getClosedReason().getReason();
-		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, reason.getErrorCode());
+		Http2Exception reason = mockSvrListener.getClosedReason();
+		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, reason.getReason().getErrorCode());
 		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
-		Assert.assertEquals(ParseFailReason.FRAME_SIZE_INCORRECT_CONNECTION, reason);
+		Assert.assertEquals(ParseFailReason.FRAME_SIZE_INCORRECT, reason.getReason());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -155,10 +156,10 @@ public class Test6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		
 		//local is notified...
-		ParseFailReason reason = mockSvrListener.getClosedReason().getReason();
-		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, reason.getErrorCode());
+		Http2Exception reason = mockSvrListener.getClosedReason();
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, reason.getReason().getErrorCode());
 		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
-		Assert.assertEquals(ParseFailReason.INVALID_SETTING, reason);
+		Assert.assertEquals(ParseFailReason.INVALID_SETTING, reason.getReason());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -178,10 +179,10 @@ public class Test6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		
 		//local is notified...
-		ParseFailReason reason = mockSvrListener.getClosedReason().getReason();
-		Assert.assertEquals(Http2ErrorCode.FLOW_CONTROL_ERROR, reason.getErrorCode());
+		Http2Exception reason = mockSvrListener.getClosedReason();
+		Assert.assertEquals(Http2ErrorCode.FLOW_CONTROL_ERROR, reason.getReason().getErrorCode());
 		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
-		Assert.assertEquals(ParseFailReason.WINDOW_SIZE_INVALID2, reason);
+		Assert.assertEquals(ParseFailReason.WINDOW_SIZE_INVALID2, reason.getReason());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -201,10 +202,10 @@ public class Test6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		
 		//local is notified...
-		ParseFailReason reason = mockSvrListener.getClosedReason().getReason();
-		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, reason.getErrorCode());
+		Http2Exception reason = mockSvrListener.getClosedReason();
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, reason.getReason().getErrorCode());
 		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
-		Assert.assertEquals(ParseFailReason.INVALID_SETTING, reason);
+		Assert.assertEquals(ParseFailReason.INVALID_SETTING, reason.getReason());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	

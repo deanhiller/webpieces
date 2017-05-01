@@ -1,8 +1,10 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -14,6 +16,8 @@ public abstract class Level3AbstractStreamMgr {
 	private Level5RemoteFlowControl remoteFlowControl;
 	private Level5LocalFlowControl localFlowControl;
 	
+	private AtomicReference<ConnectionException> engineClosedReason;
+
 	public Level3AbstractStreamMgr(Level5RemoteFlowControl level5RemoteFlow, Level5LocalFlowControl localFlowControl, HeaderSettings remoteSettings2) {
 		this.remoteFlowControl = level5RemoteFlow;
 		this.localFlowControl = localFlowControl;
@@ -23,7 +27,7 @@ public abstract class Level3AbstractStreamMgr {
 	public abstract CompletableFuture<Void> sendPayloadToClient(PartialStream msg);
 	protected abstract CompletableFuture<Void> fireToSocket(Stream stream, RstStreamFrame frame);
 
-	public CompletableFuture<Void> sendRstToServerAndClient(Http2ParseException e) {		
+	public CompletableFuture<Void> sendRstToServerAndClient(StreamException e) {		
 		RstStreamFrame frame = new RstStreamFrame();
 		frame.setKnownErrorCode(e.getReason().getErrorCode());
 		frame.setStreamId(e.getStreamId());
@@ -31,6 +35,11 @@ public abstract class Level3AbstractStreamMgr {
 		Stream stream = streamState.get(frame);
 		return fireToSocket(stream, frame)
 			.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
+	}
+	
+	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionException e) {
+		engineClosedReason.set(e);
+		return null;
 	}
 	
 	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
@@ -49,4 +58,5 @@ public abstract class Level3AbstractStreamMgr {
 	}
 
 	protected abstract void modifyMaxConcurrentStreams(long value);
+
 }

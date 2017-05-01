@@ -5,8 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -40,11 +41,11 @@ public class Level5LocalFlowControl {
 
 		synchronized(this) {
 			if(frameLength > connectionLocalWindowSize) {
-				throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_CONNECTION, f.getStreamId(), 
+				throw new ConnectionException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
 						"connectionLocalWindowSize too small="+connectionLocalWindowSize
 						+" frame len="+frameLength+" for frame="+f);
 			} else if(frameLength > stream.getLocalWindowSize()) {
-				throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_STREAM, f.getStreamId(), 
+				throw new StreamException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
 						"connectionLocalWindowSize too small="+connectionLocalWindowSize
 						+" frame len="+frameLength+" for frame="+f);
 			}

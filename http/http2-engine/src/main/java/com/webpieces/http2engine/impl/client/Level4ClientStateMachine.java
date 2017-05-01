@@ -28,28 +28,35 @@ public class Level4ClientStateMachine extends Level4AbstractStateMachine {
 		halfClosedLocal.addNoTransitionListener(failIfNoTransition);
 		closed.addNoTransitionListener(failIfNoTransition);
 		
-		Http2Event sentHeaders = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS);
-		Http2Event recvPushPromise = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.PUSH_PROMISE);
-		Http2Event sentEndStreamFlag = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG);
-		Http2Event sentResetStream = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.RESET_STREAM);
-		Http2Event recvHeaders = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS);
-		Http2Event receivedResetStream = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.RESET_STREAM);
-		Http2Event recvEndStreamFlag = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG);
-		Http2Event dataSend = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA);
-		Http2Event dataRecv = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA);
+		Http2Event sentHeadersNoEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS2);
+		Http2Event sentHeadersEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS_EOS);
 		
-		stateMachine.createTransition(idleState, openState, sentHeaders);
-		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
-		stateMachine.createTransition(openState, halfClosedLocal, sentEndStreamFlag);
-		stateMachine.createTransition(openState, closed, sentResetStream, receivedResetStream);		
-		stateMachine.createTransition(reservedState, halfClosedLocal, recvHeaders);
-		stateMachine.createTransition(reservedState, closed, sentResetStream, receivedResetStream);
-		stateMachine.createTransition(halfClosedLocal, closed, recvEndStreamFlag, receivedResetStream, sentResetStream);
-		
-		//extra transitions defined such that we can catch unknown transitions
-		stateMachine.createTransition(openState, openState, dataSend, sentHeaders);
+		Http2Event recvHeadersNoEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS2);
+		Http2Event recvHeadersEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS_EOS);
 
-		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeaders, dataRecv);
+		Http2Event recvPushPromise = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.PUSH_PROMISE);
+		Http2Event sentResetStream = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.RESET_STREAM);		
+		Http2Event recvResetStream = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.RESET_STREAM);
+		
+		Http2Event dataSendNoEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA2);
+		Http2Event dataSendEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA_EOS);
+		
+		Http2Event dataRecvNoEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA2);
+		Http2Event dataRecvEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA_EOS);
+
+		stateMachine.createTransition(idleState, openState, sentHeadersNoEos);
+		stateMachine.createTransition(idleState, halfClosedLocal, sentHeadersEos); //jump to half closed as is send H AND send ES
+		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
+		
+		stateMachine.createTransition(openState, openState, dataSendNoEos);
+		stateMachine.createTransition(openState, halfClosedLocal, dataSendEos);
+		stateMachine.createTransition(openState, closed, sentResetStream, recvResetStream);
+		
+		stateMachine.createTransition(reservedState, halfClosedLocal, recvHeadersNoEos);
+		stateMachine.createTransition(reservedState, closed, recvHeadersEos, sentResetStream, recvResetStream);
+		
+		stateMachine.createTransition(halfClosedLocal, closed, dataRecvEos, recvResetStream, sentResetStream);
+		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeadersNoEos, dataRecvNoEos);
 	}
 
 }

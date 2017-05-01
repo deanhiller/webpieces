@@ -13,8 +13,8 @@ import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.Http2Memento;
-import com.webpieces.http2parser.api.Http2ParseException;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
@@ -22,7 +22,6 @@ import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -74,7 +73,7 @@ public class HpackParserImpl implements HpackParser {
 				combineAndSendHeadersToClient(state);
 			return;
 		} else if(headerFragList.size() > 0) {			
-			throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, frame.getStreamId(), 
+			throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, frame.getStreamId(), 
 					"Parser in the middle of accepting headers(spec "
 					+ "doesn't allow frames between header fragments).  frame="+frame+" list="+headerFragList);
 		}
@@ -100,14 +99,14 @@ public class HpackParserImpl implements HpackParser {
 		
 		if(list.size() == 1) {
 			if(!(first instanceof HeadersFrame) && !(first instanceof PushPromiseFrame))
-				throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+				throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
 						"First has header frame must be HeadersFrame or PushPromiseFrame first frame="+first);				
 		} else if(streamId != lowLevelFrame.getStreamId()) {
-			throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+			throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
 					"Headers/continuations from two different streams per spec cannot be"
 					+ " interleaved.  frames="+list);
 		} else if(!(lowLevelFrame instanceof ContinuationFrame)) {
-			throw new Http2ParseException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+			throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
 					"Must be continuation frame and wasn't.  frames="+list);			
 		}
 	}
@@ -163,42 +162,29 @@ public class HpackParserImpl implements HpackParser {
 	}
 
 	private DataWrapper createPushPromiseData(MarshalStateImpl state, Http2Push p) {
-    	PushPromiseFrame promise = new PushPromiseFrame();
-    	promise.setStreamId(p.getStreamId());
-    	promise.setPromisedStreamId(p.getPromisedStreamId());
-		List<Http2Header> headers = p.getHeaders();
-    	
-		return marshal(state, promise, headers);
+		long maxFrameSize = state.getMaxRemoteFrameSize();
+		Encoder encoder = state.getEncoder();
+    	List<Http2Frame> headerFrames = encoding.translateToFrames(maxFrameSize, encoder, p);
+		return translate(headerFrames);
 	}
 
 	private DataWrapper createHeadersData(MarshalStateImpl state, Http2Headers headers) {
-    	HeadersFrame frame = new HeadersFrame();
-    	frame.setStreamId(headers.getStreamId());
-    	frame.setEndOfStream(headers.isEndOfStream());
-    	frame.setPriorityDetails(headers.getPriorityDetails());
-    	List<Http2Header> headerList = headers.getHeaders();
-		
-		return marshal(state, frame, headerList);
-	}
-	
-	private DataWrapper marshal(MarshalStateImpl state, HasHeaderFragment promise,
-			List<Http2Header> headers) {
-		
-		if(headers.size() == 0)
-			throw new IllegalArgumentException("No headers found, at least one required");
-			
 		long maxFrameSize = state.getMaxRemoteFrameSize();
-		
-		List<Http2Frame> headerFrames = encoding.createHeaderFrames(promise, headers, state.getEncoder(), maxFrameSize);
-		
+		Encoder encoder = state.getEncoder();
+    	List<Http2Frame> headerFrames = encoding.translateToFrames(maxFrameSize, encoder, headers);
+		return translate(headerFrames);
+	}
+
+	private DataWrapper translate(List<Http2Frame> headerFrames) {
 		DataWrapper allData = DataWrapperGeneratorFactory.EMPTY;
 		for(Http2Frame f : headerFrames) {
 			DataWrapper frameData = parser.marshal(f);
 			allData = dataGen.chainDataWrappers(allData, frameData);
 		}
-		
 		return allData;
 	}
+	
+
 
 	@Override
 	public List<Http2Setting> unmarshalSettingsPayload(String base64SettingsPayload) {

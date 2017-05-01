@@ -32,7 +32,7 @@ import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2parser.api.ErrorType;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
@@ -403,8 +403,8 @@ class Http2DataListener implements DataListener {
 		        handleFrame(frame);
 		    }
 		}
-		catch (Http2ParseException e) {
-		    if(e.getReason().getErrorType() == ErrorType.CONNECTION) {
+		catch (Http2Exception e) {
+		    if(e.getErrorType() == ErrorType.CONNECTION) {
 		        if(e.hasStream()) {
 		            throw new GoAwayError(this.http2EngineImpl.lastClosedRemoteOriginatedStream().orElse(0), e.getStreamId(), e.getReason().getErrorCode(), Http2EngineImpl.wrapperGen.emptyWrapper());
 		        }

@@ -29,6 +29,9 @@ import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.http2parser.api.Http2Parser;
+import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
@@ -40,6 +43,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	
 	private boolean prefaceReceived;
 	private HpackParser parser;
+	private Http2Parser frameParser;
 	private UnmarshalState unmarshalState;
 	private boolean connected;
 	private MarshalState marshalState;
@@ -50,6 +54,8 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		BufferPool bufferPool = new BufferCreationPool();
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		unmarshalState = parser.prepareToUnmarshal(4096, 4096, 4096);
+		BufferPool pool = new BufferCreationPool();
+		frameParser = Http2ParserFactory.createParser(pool);
 	}
 	
 	@Override
@@ -75,6 +81,15 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
 		DataWrapper data = parser.marshal(marshalState, msg);
+		byte[] bytes = data.createByteArray();
+		if(bytes.length == 0)
+			throw new IllegalArgumentException("how do you marshal to 0 bytes...WTF");
+		ByteBuffer buf = ByteBuffer.wrap(bytes);
+		listener.incomingData(this, buf);
+	}
+	
+	public void writeFrame(Http2Frame frame) {
+		DataWrapper data = frameParser.marshal(frame);
 		byte[] bytes = data.createByteArray();
 		if(bytes.length == 0)
 			throw new IllegalArgumentException("how do you marshal to 0 bytes...WTF");

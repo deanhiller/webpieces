@@ -1,9 +1,11 @@
 package org.webpieces.util.locking;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.util.threading.NamedThreadFactory;
 
@@ -12,7 +14,101 @@ import com.webpieces.util.locking.PermitQueue;
 public class TestPermitQueue {
 
 	private Executor executor = Executors.newFixedThreadPool(5, new NamedThreadFactory("deansThr"));
-	private PermitQueue<Long> queue = new PermitQueue<>(1);
+	private PermitQueue<Long> queue1 = new PermitQueue<>(1);
+	private MockService svc = new MockService();
+	
+	@Test
+	public void testPermits1() throws InterruptedException {
+		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		svc.addToReturn(future1);
+		CompletableFuture<Long> future2 = new CompletableFuture<Long>();
+		svc.addToReturn(future2);
+		
+		queue1.runRequest(() -> svc.runFunction(1));
+		queue1.runRequest(() -> svc.runFunction(2));
+		
+		List<Integer> results = svc.getAndClear();
+		Assert.assertEquals(1,results.size()); 
+		Assert.assertEquals(1, results.get(0).intValue());
+		
+		future1.complete(3L);
+		queue1.releasePermit();
+		
+		List<Integer> results2 = svc.getAndClear();
+		Assert.assertEquals(1,results2.size());
+		Assert.assertEquals(2, results2.get(0).intValue());
+	}
+	
+	@Test
+	public void testReducePermits() throws InterruptedException {
+		PermitQueue<Long> queue = new PermitQueue<>(2);
+		
+		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		svc.addToReturn(future1);
+		svc.addToReturn(future1);
+		svc.addToReturn(future1);
+		svc.addToReturn(future1);
+		
+		queue.runRequest(() -> svc.runFunction(1));
+		queue.runRequest(() -> svc.runFunction(2));
+		queue.runRequest(() -> svc.runFunction(3));
+		queue.runRequest(() -> svc.runFunction(4));
+
+
+		List<Integer> results = svc.getAndClear();
+		Assert.assertEquals(2,results.size()); 
+		Assert.assertEquals(1, results.get(0).intValue());
+		Assert.assertEquals(2, results.get(1).intValue());
+		
+		queue.modifyPermitPoolSize(-1);
+		
+		//release two
+		queue.releasePermit();
+		queue.releasePermit();
+		
+		//only one will run
+		List<Integer> results2 = svc.getAndClear();
+		Assert.assertEquals(1,results2.size());
+		Assert.assertEquals(3, results2.get(0).intValue());
+		
+		queue.releasePermit();
+		List<Integer> results3 = svc.getAndClear();
+		Assert.assertEquals(1,results3.size());
+		Assert.assertEquals(4, results3.get(0).intValue());		
+	}
+	
+	@Test
+	public void testAddPermits() throws InterruptedException {
+		PermitQueue<Long> queue = new PermitQueue<>(1);
+		
+		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		svc.addToReturn(future1);
+		svc.addToReturn(future1);
+		svc.addToReturn(future1);
+		svc.addToReturn(future1);
+		
+		queue.runRequest(() -> svc.runFunction(1));
+		queue.runRequest(() -> svc.runFunction(2));
+		queue.runRequest(() -> svc.runFunction(3));
+		queue.runRequest(() -> svc.runFunction(4));
+
+		List<Integer> results = svc.getAndClear();
+		Assert.assertEquals(1,results.size()); 
+		Assert.assertEquals(1, results.get(0).intValue());
+		
+		queue.modifyPermitPoolSize(2);
+		
+		List<Integer> results2 = svc.getAndClear();
+		Assert.assertEquals(2,results2.size());
+		Assert.assertEquals(2, results2.get(0).intValue());
+		Assert.assertEquals(3, results2.get(1).intValue());
+		
+		queue.releasePermit();
+		
+		List<Integer> results3 = svc.getAndClear();
+		Assert.assertEquals(1,results3.size());
+		Assert.assertEquals(4, results3.get(0).intValue());		
+	}
 	
 	@Test
 	public void testPermits() throws InterruptedException {
@@ -56,7 +152,7 @@ public class TestPermitQueue {
 
 		@Override
 		public void run() {
-			queue.runRequest(() -> someFunction(id)).thenApply( longId -> {
+			queue1.runRequest(() -> someFunction(id)).thenApply( longId -> {
 				System.out.println("id="+longId);
 				return longId;
 			});

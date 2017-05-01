@@ -26,4 +26,5 @@ public interface HpackParser {
 	 * Base 64 of the 'payload' of the SettingsFrame only, excluding the frame piece
 	 */
 	String marshalSettingsPayload(List<Http2Setting> settings);
+	
 }

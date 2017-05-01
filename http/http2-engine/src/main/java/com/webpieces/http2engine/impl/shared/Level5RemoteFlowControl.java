@@ -12,7 +12,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.impl.DataTry;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
@@ -154,7 +154,7 @@ public class Level5RemoteFlowControl {
 	public CompletableFuture<Void> updateConnectionWindowSize(WindowUpdateFrame msg) {
 		int increment = msg.getWindowSizeIncrement();
 		if(increment == 0) {
-			throw new Http2ParseException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
+			throw new ConnectionException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
 					"Received windowUpdate size increment=0");
 		}
 		
@@ -163,7 +163,7 @@ public class Level5RemoteFlowControl {
 		synchronized(remoteLock) {
 			remoteWindowSize += increment;
 			if(remoteWindowSize > Integer.MAX_VALUE)
-				throw new Http2ParseException(ParseFailReason.FLOW_CONTROL_ERROR_CONNECTION, 0, 
+				throw new ConnectionException(ParseFailReason.FLOW_CONTROL_ERROR, 0, 
 						"(remote end bad)global remoteWindowSize too large="+remoteWindowSize+" from windows increment="+increment);
 			
 			if(temp != null && remoteWindowSize > temp.getDataFrame().getTransmitFrameLength())
@@ -182,7 +182,7 @@ public class Level5RemoteFlowControl {
 
 	public CompletableFuture<Void> updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
 		if(msg.getWindowSizeIncrement() == 0) {
-			throw new Http2ParseException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
+			throw new ConnectionException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
 					"Received windowUpdate size increment=0");
 		}
 		

@@ -6,8 +6,9 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -57,7 +58,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 5)
-            throw new Http2ParseException(ParseFailReason.FRAME_SIZE_INCORRECT_STREAM, streamId, 
+            throw new StreamException(ParseFailReason.FRAME_SIZE_INCORRECT, streamId, 
             		"priority size not 5 and instead is="+state.getFrameHeaderData().getPayloadLength());
 		
         PriorityFrame frame = new PriorityFrame();
@@ -70,11 +71,11 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
         priorityDetails.setStreamDependencyIsExclusive((firstInt >>> 31)== 0x1);
         int streamDependency = firstInt & 0x7FFFFFFF;
         if(frame.getStreamId() == 0) {
-            throw new Http2ParseException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
+            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
             		"priority cannot be streamid 0 and was="+frame.getStreamId());
         } else if(streamDependency == frame.getStreamId()) {
             // Can't depend on self
-            throw new Http2ParseException(ParseFailReason.BAD_STREAM_DEPENDENCY, streamDependency, 
+            throw new ConnectionException(ParseFailReason.BAD_STREAM_DEPENDENCY, streamDependency, 
             		"stream id="+streamDependency+" depends on itself");
         }
         priorityDetails.setStreamDependency(streamDependency);

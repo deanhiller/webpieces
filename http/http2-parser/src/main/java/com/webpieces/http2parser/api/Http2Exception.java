@@ -1,18 +1,18 @@
 package com.webpieces.http2parser.api;
 
-public class Http2ParseException extends RuntimeException {
+public abstract class Http2Exception extends RuntimeException {
 
     private static final long serialVersionUID = -2704718008204232741L;
     private int streamId = 0x0;
 	private ParseFailReason reason;
 
-    public Http2ParseException(ParseFailReason reason, int streamId, String msg) {
+    public Http2Exception(ParseFailReason reason, int streamId, String msg) {
         super(msg+" reason="+reason+" stream="+streamId);
 		this.reason = reason;
 		this.streamId = streamId;
     }
 
-    public Http2ParseException(ParseFailReason reason, int streamId, String msg, Throwable e) {
+    public Http2Exception(ParseFailReason reason, int streamId, String msg, Throwable e) {
         super(msg+" reason="+reason+" stream="+streamId, e);
         this.reason = reason;
 		this.streamId = streamId;
@@ -31,4 +31,5 @@ public class Http2ParseException extends RuntimeException {
 		return reason;
 	}
 
+	public abstract ErrorType getErrorType();
 }

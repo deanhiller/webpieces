@@ -12,7 +12,11 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Encoder;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
+import com.webpieces.http2parser.api.dto.HeadersFrame;
+import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -21,11 +25,43 @@ public class HeaderEncoding {
 	private static final Logger log = LoggerFactory.getLogger(HeaderEncoding.class);
     private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
     
-    public List<Http2Frame> createHeaderFrames(HasHeaderFragment initialFrame, List<Http2Header> headers, Encoder encoder, long maxFrameSize) {
+	public List<Http2Frame> translateToFrames(long maxFrameSize, Encoder encoder, Http2Push p) {
+		PushPromiseFrame frame = new PushPromiseFrame();
+    	frame.setStreamId(p.getStreamId());
+    	frame.setPromisedStreamId(p.getPromisedStreamId());
+		List<Http2Header> headerList = p.getHeaders();
+    	
+    	List<Http2Frame> headerFrames = toHeaderFrames(maxFrameSize, encoder, frame, headerList);
+		return headerFrames;
+	}
+	
+	public List<Http2Frame> translateToFrames(long maxFrameSize, Encoder encoder, Http2Headers headers) {
+		HeadersFrame frame = new HeadersFrame();
+    	frame.setStreamId(headers.getStreamId());
+    	frame.setEndOfStream(headers.isEndOfStream());
+    	frame.setPriorityDetails(headers.getPriorityDetails());
+    	List<Http2Header> headerList = headers.getHeaders();
+		
+    	List<Http2Frame> headerFrames = toHeaderFrames(maxFrameSize, encoder, frame, headerList);
+		return headerFrames;
+	}
+	
+	private List<Http2Frame> toHeaderFrames(long maxFrameSize, Encoder encoder, HasHeaderFragment firstFrame,
+			List<Http2Header> headers) {
+		
+		if(headers.size() == 0)
+			throw new IllegalArgumentException("No headers found, at least one required");
+					
+		List<Http2Frame> headerFrames = createHeaderFrames(firstFrame, headers, encoder, maxFrameSize);
+		
+		return headerFrames;
+	}
+    
+    private List<Http2Frame> createHeaderFrames(HasHeaderFragment initialFrame, List<Http2Header> headers, Encoder encoder, long maxFrameSize) {
     	
     	int maxSize = (int) maxFrameSize;
     	if(maxFrameSize > Integer.MAX_VALUE) 
-    		maxSize = Integer.MAX_VALUE;
+    		throw new IllegalStateException("max frame size too large for this hpack library");
     	
         List<Http2Frame> headerFrames = new LinkedList<>();
     	
@@ -53,7 +89,7 @@ public class HeaderEncoding {
 		return headerFrames;
 	}
 
-    public DataWrapper serializeHeaders(Encoder encoder, List<Http2Header> headers) {
+    private DataWrapper serializeHeaders(Encoder encoder, List<Http2Header> headers) {
     	try {
 			return serializeHeadersImpl(encoder, headers);
 		} catch (IOException e) {

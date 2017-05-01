@@ -107,6 +107,8 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* look into bug then another bug...need test and fix
+* post not found was quirky so fix with redirect instead of render and test
 * start an actual multi-homed project
 * add more and more tag examples
 * move examples to @examples url instead

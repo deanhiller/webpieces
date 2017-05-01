@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.Stream;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -36,7 +36,7 @@ public class Level7NotifySvrListeners implements EngineResultListener {
 	}
 
 	@Override
-	public void closeSocket(Http2ParseException reason) {
+	public void closeSocket(Http2Exception reason) {
 		listener.closeSocket(reason);
 	}
 	

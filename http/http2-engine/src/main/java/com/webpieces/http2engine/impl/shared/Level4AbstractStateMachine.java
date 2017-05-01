@@ -37,16 +37,10 @@ public abstract class Level4AbstractStateMachine {
 
 	public CompletableFuture<Void> fireToSocket(Stream stream, PartialStream payload) {
 		Memento state = stream.getCurrentState();
-		Http2PayloadType payloadType = translate(payload);
-		Http2Event event = new Http2Event(Http2SendRecieve.SEND, payloadType);
+		Http2Event event = translate(Http2SendRecieve.SEND, payload);
 
 		CompletableFuture<State> result = stateMachine.fireEvent(state, event);
-		return result.thenCompose( s -> {
-					//sometimes a single frame has two events :( per http2 spec
-					if(payload.isEndOfStream())
-						return stateMachine.fireEvent(state, new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.END_STREAM_FLAG));			
-					return CompletableFuture.completedFuture(s);
-				}).thenCompose( s -> 
+		return result.thenCompose( s -> 
 					//if no exceptions occurred, send it on to flow control layer
 					remoteFlowControl.sendPayloadToSocket(stream, payload)
 				);
@@ -54,21 +48,16 @@ public abstract class Level4AbstractStateMachine {
 	
 	public CompletableFuture<State> fireToClient(Stream stream, PartialStream payload, Runnable possiblyModifyState) {
 		Memento currentState = stream.getCurrentState();
-		Http2PayloadType payloadType = translate(payload);
-		Http2Event event = new Http2Event(Http2SendRecieve.RECEIVE, payloadType);
+		Http2Event event = translate(Http2SendRecieve.RECEIVE, payload);
 		
 		CompletableFuture<State> result = stateMachine.fireEvent(currentState, event);
-		return result.thenCompose( s -> {
-			if(payload.isEndOfStream())
-				return stateMachine.fireEvent(currentState, new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.END_STREAM_FLAG)); //validates state transition is ok
-			return CompletableFuture.completedFuture(s);
-		}).thenApply( s -> {
+		return result.thenApply( s -> {
 			//modifying the stream state should be done BEFORE firing to client as if the stream is closed
 			//then this will prevent windowUpdateFrame with increment being sent to a closed stream
 			if(possiblyModifyState != null)
 				possiblyModifyState.run();
 			
-			localFlowControl.fireToClient(stream, payload);			
+			localFlowControl.fireToClient(stream, payload);
 			
 			return s;
 		});
@@ -86,17 +75,27 @@ public abstract class Level4AbstractStateMachine {
 		return stateMachine.createMementoFromState("stream"+streamId, idleState);
 	}
 	
-	protected Http2PayloadType translate(PartialStream payload) {
+	
+	protected Http2Event translate(Http2SendRecieve sendRecv, PartialStream payload) {
+		Http2PayloadType payloadType;
 		if(payload instanceof Http2Headers) {
-			return Http2PayloadType.HEADERS;
+			if(payload.isEndOfStream())
+				payloadType = Http2PayloadType.HEADERS_EOS;
+			else
+				payloadType = Http2PayloadType.HEADERS2;
 		} else if(payload instanceof DataFrame) {
-			return Http2PayloadType.DATA;
+			if(payload.isEndOfStream())
+				payloadType = Http2PayloadType.DATA_EOS;
+			else
+				payloadType = Http2PayloadType.DATA2;
 		} else if(payload instanceof Http2Push) {
-			return Http2PayloadType.PUSH_PROMISE;
+			payloadType = Http2PayloadType.PUSH_PROMISE;
 		} else if(payload instanceof RstStreamFrame) {
-			return Http2PayloadType.RESET_STREAM;
+			payloadType = Http2PayloadType.RESET_STREAM;
 		} else
 			throw new IllegalArgumentException("unknown payload type for payload="+payload);
+		
+		return new Http2Event(sendRecv, payloadType);
 	}
 	
 

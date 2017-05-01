@@ -3,7 +3,7 @@ package com.webpieces.http2engine.impl.shared;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -14,7 +14,7 @@ public interface EngineResultListener {
 
 	void farEndClosed();
 	
-	void closeSocket(Http2ParseException reason);
+	void closeSocket(Http2Exception reason);
 
 	CompletableFuture<Void> sendToSocket(ByteBuffer buffer);
 

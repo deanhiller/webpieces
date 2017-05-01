@@ -11,7 +11,7 @@ import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.Stream;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -56,7 +56,7 @@ public class Level7NotifyListeners implements EngineResultListener {
 	}
 
 	@Override
-	public void closeSocket(Http2ParseException reason) {
+	public void closeSocket(Http2Exception reason) {
 		listener.closeSocket(reason);
 	}
 	

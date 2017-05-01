@@ -7,6 +7,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 public class StreamState {
 
 	private ConcurrentHashMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
+	//private AtomicReference<Function<Stream, Stream>> createFunction = new AtomicReference<Function<Stream,Stream>>((s) -> create(s));
 
 	public Stream create(Stream stream) {
 		Stream oldStream = streamIdToStream.putIfAbsent(stream.getStreamId(), stream);

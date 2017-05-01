@@ -12,7 +12,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.ClientEngineListener;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class Layer3Outgoing implements ClientEngineListener {
@@ -66,7 +66,7 @@ public class Layer3Outgoing implements ClientEngineListener {
 	}
 	
 	@Override
-	public void closeSocket(Http2ParseException reason) {
+	public void closeSocket(Http2Exception reason) {
 		channel.close();
 		clientListener.socketClosed(socket, reason);		
 	}

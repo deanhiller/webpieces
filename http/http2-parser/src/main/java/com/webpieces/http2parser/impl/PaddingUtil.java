@@ -6,7 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 
 public class PaddingUtil {
@@ -19,7 +19,7 @@ public class PaddingUtil {
     	
         short padLength = (short) (data.readByteAt(0) & 0xFF);
         if(padLength > data.getReadableSize()) {
-            throw new Http2ParseException(ParseFailReason.NOT_ENOUGH_PAD_DATA, streamId, 
+            throw new ConnectionException(ParseFailReason.NOT_ENOUGH_PAD_DATA, streamId, 
             		"expected padLenth of="+padLength+" but only found="+data.getReadableSize());
         }
         List<? extends DataWrapper> split1 = dataGen.split(data, 1);

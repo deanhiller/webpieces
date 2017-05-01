@@ -96,7 +96,7 @@ public class PermitQueue<RESP> {
 			}
 		} else {
 			log.info("decreasing permits in pool by "+permitCnt);
-			toBeRemoved.addAndGet(permitCnt);
+			toBeRemoved.addAndGet(-permitCnt);
 		}
 	}
 

@@ -13,7 +13,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -59,7 +59,7 @@ public class IntegColoradoEdu {
 		}
 		
 		@Override
-		public void socketClosed(Http2Socket socket, Http2ParseException e) {
+		public void socketClosed(Http2Socket socket, Http2Exception e) {
 			log.info("far end closed", e);
 		}
 

@@ -8,8 +8,9 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.Http2ParseException;
+import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
 public class HeaderDecoding {
@@ -25,7 +26,7 @@ public class HeaderDecoding {
 			return decodeImpl(decoder, data, streamId);
         } catch (IOException e) {
             // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment
-            throw new Http2ParseException(ParseFailReason.HEADER_DECODE, streamId, "Error from hpack library", e);
+            throw new StreamException(ParseFailReason.HEADER_DECODE, streamId, "Error from hpack library", e);
             //TODO: clone hpack and fix so they throw with debug info as their errors contain no info :(
         }
 	}
@@ -47,7 +48,7 @@ public class HeaderDecoding {
         String h = new String(name);
         String v = new String(value);
         if(!h.equals(h.toLowerCase()))
-            throw new Http2ParseException(ParseFailReason.HEADER_NOT_LOWER_CASE, streamId, "header="+h+" was not lower case in stream="+streamId);
+            throw new StreamException(ParseFailReason.HEADER_NOT_LOWER_CASE, streamId, "header="+h+" was not lower case in stream="+streamId);
         
         headers.add(new Http2Header(h, v));
 
