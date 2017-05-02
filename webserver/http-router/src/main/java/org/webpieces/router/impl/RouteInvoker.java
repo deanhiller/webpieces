@@ -62,14 +62,20 @@ public class RouteInvoker {
 
 	public CompletableFuture<Void> invoke(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
 
-		return invokeImpl(result, responseCb, errorRoutes, requestCtx);
-	}
-	
-	public CompletableFuture<Void> invokeImpl(
-			MatchResult result, ResponseStreamer responseCb, ErrorRoutes errorRoutes, RequestContext requestCtx) {
-		//We convert all exceptions from invokeAsync into CompletableFuture..
-		return invokeAsync(result, requestCtx, responseCb, errorRoutes);
-		//future.exceptionally(e -> processException(responseCb, requestCtx, e, errorRoutes, result.getMeta()));
+		//This makes us consistent with other NotFoundExceptions and without the cost of 
+		//throwing an exception and filling in stack trace...
+		//We could convert the exc. to FastException and override method so stack is not filled in but that
+		//can get very annoying
+		RouteMeta meta = result.getMeta();
+		Route route = meta.getRoute();
+		RouteType routeType = route.getRouteType();
+		if(routeType == RouteType.NOT_FOUND) {
+			processException(responseCb, requestCtx, null, errorRoutes, null);
+			//This is a special case....check the NotFound tests
+			return CompletableFuture.completedFuture(null);
+		}
+		
+		return invokeImpl(result, meta.getService222(), requestCtx, responseCb);
 	}
 	
 	public Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, Object meta) {
@@ -104,24 +110,6 @@ public class RouteInvoker {
 		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, null, responseCb);
 		processor.failureRenderingInternalServerErrorPage(e);
 		return null;
-	}
-	
-	public CompletableFuture<Void> invokeAsync(
-		MatchResult result, RequestContext reqCtx, ResponseStreamer responseCb, ErrorRoutes notFoundRoute) {
-		//This makes us consistent with other NotFoundExceptions and without the cost of 
-		//throwing an exception and filling in stack trace...
-		//We could convert the exc. to FastException and override method so stack is not filled in but that
-		//can get very annoying
-		RouteMeta meta = result.getMeta();
-		Route route = meta.getRoute();
-		RouteType routeType = route.getRouteType();
-		if(routeType == RouteType.NOT_FOUND) {
-			processException(responseCb, reqCtx, null, notFoundRoute, null);
-			//This is a special case....check the NotFound tests
-			return CompletableFuture.completedFuture(null);
-		}
-
-		return invokeImpl(result, meta.getService222(), reqCtx, responseCb);
 	}
 	
 	private CompletableFuture<Void> notFound(RouteMeta notFoundResult, Service<MethodMeta, Action> service, NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
