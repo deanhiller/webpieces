@@ -2,14 +2,24 @@ package org.webpieces.router.impl;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.ctx.api.FlashSub;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.ctx.api.Session;
+import org.webpieces.ctx.api.Validation;
 import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.impl.compression.FileMeta;
+import org.webpieces.router.impl.ctx.FlashImpl;
+import org.webpieces.router.impl.ctx.SessionImpl;
+import org.webpieces.router.impl.ctx.ValidationImpl;
+import org.webpieces.router.impl.loader.HaveRouteException;
+import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -24,19 +34,27 @@ public abstract class AbstractRouterService implements RouterService {
 	protected boolean started = false;
 	private RouteLoader routeLoader;
 	private ObjectTranslator translator;
+	private CookieTranslator cookieTranslator;
 	
-	public AbstractRouterService(RouteLoader routeLoader, ObjectTranslator translator) {
+	public AbstractRouterService(RouteLoader routeLoader, CookieTranslator cookieTranslator, ObjectTranslator translator) {
 		this.routeLoader = routeLoader;
+		this.cookieTranslator = cookieTranslator;
 		this.translator = translator;
 	}
 
 	@Override
-	public final void incomingCompleteRequest(RouterRequest req, ResponseStreamer responseCb) {
+	public final void incomingCompleteRequest(RouterRequest routerRequest, ResponseStreamer responseCb) {
 		try {
 			if(!started)
 				throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
 			
-			incomingRequestImpl(req, responseCb);
+			Session session = (Session) cookieTranslator.translateCookieToScope(routerRequest, new SessionImpl(translator));
+			FlashSub flash = (FlashSub) cookieTranslator.translateCookieToScope(routerRequest, new FlashImpl(translator));
+			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(translator));
+			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
+			
+			processRequest(requestCtx, responseCb);
+			
 		} catch(BadCookieException e) {
 			throw e;
 		} catch (Throwable e) {
@@ -45,7 +63,36 @@ public abstract class AbstractRouterService implements RouterService {
 		}
 	}
 
-	protected abstract void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb);
+	private void processRequest(RequestContext requestCtx, ResponseStreamer responseCb) {
+		CompletableFuture<Void> future;
+		try {
+			future = incomingRequestImpl(requestCtx, responseCb);
+		} catch(Throwable e) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(e);			
+		}
+		future.exceptionally(e -> processException(responseCb, requestCtx, e));
+	}
+
+	private Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e) {
+		Object meta = "unknown RouteMeta"; 
+		if(e instanceof HaveRouteException) {
+			HaveRouteException exc = (HaveRouteException) e;
+			 meta = exc.getResult().getMeta();
+		}
+		ErrorRoutes errorRoutes = getErrorRoutes(requestCtx);
+		routeLoader.processException(responseCb, requestCtx, e, errorRoutes, meta);
+		return null;
+	}
+	
+	protected MatchResult fetchRoute(RequestContext ctx) {
+		MatchResult result = routeLoader.fetchRoute(ctx.getRequest());
+		ctx.setPathParams(result.getPathParams());
+		return result;
+	}
+	
+	protected abstract ErrorRoutes getErrorRoutes(RequestContext ctx);
+	protected abstract CompletableFuture<Void> incomingRequestImpl(RequestContext req, ResponseStreamer responseCb);
 	
 	@Override
 	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {

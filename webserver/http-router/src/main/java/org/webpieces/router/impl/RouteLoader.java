@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
@@ -207,11 +209,15 @@ public class RouteLoader {
 		return meta;
 	}
 	
-	public void invokeRoute(MatchResult result, RouterRequest routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+	public CompletableFuture<Void> invokeRoute(MatchResult result, RequestContext routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
 		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
-		invoker.invoke(result, routerRequest, responseCb, errorRoutes);
+		return invoker.invoke(result, routerRequest, responseCb, errorRoutes);
 	}
 
+	public Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, Object meta) {
+		return invoker.processException(responseCb, requestCtx, e, errorRoutes, meta);
+	}
+	
 	public RouteMeta fetchNotFoundRoute(String domain) {
 		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
 		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute(domain);

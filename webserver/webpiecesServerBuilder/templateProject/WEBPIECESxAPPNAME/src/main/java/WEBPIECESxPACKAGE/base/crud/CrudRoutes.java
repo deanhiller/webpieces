@@ -21,7 +21,7 @@ public class CrudRoutes extends ScopedRoutes {
 	protected boolean isHttpsOnlyRoutes() {
 		return true;
 	}
-	
+
 	@Override
 	protected void configure() {
 		//basic crud example(which just calls the same addRoute methods for you for Create/Read/Update/Delete and 
@@ -33,7 +33,7 @@ public class CrudRoutes extends ScopedRoutes {
 		//addRoute(POST,   "/user/post",        "crud/CrudUserController.postSaveUser", saveRoute);
 		//addRoute(GET,    "/user/confirmdelete/{id}", "crud/CrudUserController.confirmDeleteUser", confirmDelete);
 		//addRoute(POST,   "/user/delete/{id}", "crud/CrudUserController.postDeleteUser", deleteRoute);
-		
+
 		CrudRouteIds routeIds = new CrudRouteIds(
 				LIST_USERS, GET_ADD_USER_FORM, GET_EDIT_USER_FORM,
 				POST_USER_FORM, CONFIRM_DELETE_USER, POST_DELETE_USER);

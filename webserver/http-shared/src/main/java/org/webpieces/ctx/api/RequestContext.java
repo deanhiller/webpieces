@@ -1,6 +1,7 @@
 package org.webpieces.ctx.api;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +13,7 @@ public class RequestContext {
 	//incoming router request
 	private RouterRequest request;
 	//the params parsed from the request url if any
-	private Map<String, String> pathParams;
+	private Map<String, String> pathParams = new HashMap<>();
 
 	private Validation validation;
 	private FlashSub flash;
@@ -20,10 +21,8 @@ public class RequestContext {
 	private Messages messages;
 	private List<OverwritePlatformResponse> callbacks = new ArrayList<>();
 
-	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request, Map<String, String> pathParams) {
+	public RequestContext(Validation validation, FlashSub flash, Session session, RouterRequest request) {
 		this.request = request;
-		this.pathParams = pathParams;
-
 		this.validation = validation;
 		this.flash = flash;
 		this.session = session;
@@ -72,6 +71,10 @@ public class RequestContext {
 
 	public List<OverwritePlatformResponse> getCallbacks() {
 		return callbacks;
+	}
+
+	public void setPathParams(Map<String, String> pathParams2) {
+		this.pathParams = pathParams2;
 	}
 
 }

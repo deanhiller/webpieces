@@ -1,5 +1,7 @@
 package org.webpieces.router.api.error.dev;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,6 +10,8 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterService;
+import org.webpieces.router.api.dto.RenderResponse;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.error.ErrorCommonTest;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.mocks.MockResponseStream;
@@ -34,15 +38,11 @@ public class ErrorTest {
 		
 		server.incomingCompleteRequest(req, mockResponseStream);
 
-		//BIT NOTE: The failure MUST come from processHttpReqeusts which proves the compilation/validation
-		//happened on incomingCompleteRequest and not during the start() method call like production does it
-		//ie. production fails fast while dev keeps recompiling code and only compiles what is going to be
-		//run keeping startup times real fast for the dev server(which developers want!!!).  The prod server
-		//then starts up slower constructing everything which is ok as webapp users would rather have
-		//startup be slow and requesting web pages to be faster
-		Exception e = mockResponseStream.getOnlyException();
-		Assert.assertEquals(IllegalArgumentException.class, e.getClass());
-		Assert.assertTrue(e.getMessage().contains("Cannot find 'public' method="));
+		List<RenderResponse> renders = mockResponseStream.getSendRenderHtmlList();
+		Assert.assertEquals(1, renders.size());
+		
+		RenderResponse renderResponse = renders.get(0);
+		Assert.assertEquals(RouteType.INTERNAL_SERVER_ERROR, renderResponse.routeType);
 	}
 
 }

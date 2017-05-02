@@ -1,10 +1,12 @@
 package org.webpieces.devrouter.impl;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
@@ -15,12 +17,14 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
+import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.ErrorRoutes;
 import org.webpieces.router.impl.NotFoundInfo;
 import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.loader.ServiceProxy;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
@@ -52,10 +56,11 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 			RouterConfig config, 
 			DevClassForName loader, 
 			ControllerLoader finder,
+			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator,
 			ParamToObjectTranslatorImpl translator
 	) {
-		super(routeConfig, objTranslator);
+		super(routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.classLoader = loader;
@@ -77,27 +82,33 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 	}
 	
 	@Override
-	public void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> incomingRequestImpl(RequestContext ctx, ResponseStreamer responseCb) {
 		//In DevRouter, check if we need to reload the text file as it points to a new RouterModules.java implementation file
 		boolean reloaded = reloadIfTextFileChanged();
 		
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		MatchResult result = routeLoader.fetchRoute(req);
-		
-		RouteMeta meta = result.getMeta();
-		if(meta.getRoute().getRouteType() == RouteType.STATIC) {
-			//RESET the encodings to known so we don't try to go the compressed cache which doesn't
-			//exist in dev server since we want the latest files always
-			req.encodings = new ArrayList<>();
-		} else if(meta.getControllerInstance() == null) {
-			finder.loadControllerIntoMetaObject(meta, false);
-			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
-		}
-		
+		MatchResult result = fetchRoute(ctx);
 
-		routeLoader.invokeRoute(result, req, responseCb, new DevErrorRoutes(req));
+		CompletableFuture<Void> future;
+		try {
+			RouteMeta meta = result.getMeta();
+			if(meta.getRoute().getRouteType() == RouteType.STATIC) {
+				//RESET the encodings to known so we don't try to go the compressed cache which doesn't
+				//exist in dev server since we want the latest files always
+				ctx.getRequest().encodings = new ArrayList<>();
+			} else if(meta.getControllerInstance() == null) {
+				finder.loadControllerIntoMetaObject(meta, false);
+				finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
+			}
+	
+			future = routeLoader.invokeRoute(result, ctx, responseCb, new DevErrorRoutes(ctx.getRequest()));
+		} catch(Throwable e) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(new HaveRouteException(result, e));
+		}
+		return future;
 	}
 	
 	private class DevErrorRoutes implements ErrorRoutes {
@@ -199,5 +210,10 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 
 	private void loadOrReload(Consumer<Injector> startupHook) {
 		routerModule = routeLoader.load(classLoader, startupHook);
+	}
+
+	@Override
+	protected ErrorRoutes getErrorRoutes(RequestContext ctx) {
+		return new DevErrorRoutes(ctx.getRequest());
 	}
 }

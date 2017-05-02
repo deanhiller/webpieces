@@ -1,8 +1,11 @@
 package org.webpieces.router.impl;
 
+import java.util.concurrent.CompletableFuture;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
@@ -26,8 +29,13 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 	private ClassForName loader;
 	
 	@Inject
-	public ProdRouterService(RouteLoader routeLoader, ObjectTranslator translator, ProdClassForName loader) {
-		super(routeLoader, translator);
+	public ProdRouterService(
+			RouteLoader routeLoader, 
+			CookieTranslator cookieTranslator, 
+			ObjectTranslator translator, 
+			ProdClassForName loader
+	) {
+		super(routeLoader, cookieTranslator, translator);
 		this.routeLoader = routeLoader;
 		this.loader = loader;
 	}
@@ -47,11 +55,11 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 	}
 
 	@Override
-	public void incomingRequestImpl(RouterRequest req, ResponseStreamer responseCb) {
-		MatchResult meta = routeLoader.fetchRoute(req);
+	public CompletableFuture<Void> incomingRequestImpl(RequestContext ctx, ResponseStreamer responseCb) {
+		MatchResult meta = fetchRoute(ctx);
 		
-		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(req, routeLoader);
-		routeLoader.invokeRoute(meta, req, responseCb, errorRoutes);
+		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(ctx.getRequest(), routeLoader);
+		return routeLoader.invokeRoute(meta, ctx, responseCb, errorRoutes);
 	}
 
 	//This only exists so dev mode can swap it out and load error routes dynamically as code changes..
@@ -77,6 +85,11 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 		public RouteMeta fetchInternalServerErrorRoute() {
 			return routeLoader.fetchInternalErrorRoute(req.domain);
 		}
+	}
+
+	@Override
+	protected ErrorRoutes getErrorRoutes(RequestContext ctx) {
+		return new ProdErrorRoutes(ctx.getRequest(), routeLoader);
 	}
 
 }

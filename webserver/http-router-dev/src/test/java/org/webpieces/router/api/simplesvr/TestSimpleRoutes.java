@@ -91,7 +91,7 @@ public class TestSimpleRoutes {
 	public void testBasicRoute() {
 		RouterRequest req = createHttpRequest(HttpMethod.GET, "/something");
 		MockResponseStream mockResponseStream = new MockResponseStream();
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.incomingCompleteRequest(req, mockResponseStream);
 		
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();
@@ -107,7 +107,7 @@ public class TestSimpleRoutes {
 	public void testOneParamRoute() {
 		RouterRequest req = createHttpRequest(HttpMethod.POST, "/meeting");
 		MockResponseStream mockResponseStream = new MockResponseStream();
-		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req, new HashMap<>()));
+		Current.setContext(new RequestContext(new ValidationImpl(null), new FlashImpl(null), new SessionImpl(null), req));
 		server.incomingCompleteRequest(req, mockResponseStream);
 		
 		List<RedirectResponse> responses = mockResponseStream.getSendRedirectCalledList();

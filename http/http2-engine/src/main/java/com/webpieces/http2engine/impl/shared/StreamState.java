@@ -9,6 +9,12 @@ public class StreamState {
 	private ConcurrentHashMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
 	//private AtomicReference<Function<Stream, Stream>> createFunction = new AtomicReference<Function<Stream,Stream>>((s) -> create(s));
 
+	//chanmgr thread only
+	public void closeEngine() {
+		
+	}
+	
+	//client threads
 	public Stream create(Stream stream) {
 		Stream oldStream = streamIdToStream.putIfAbsent(stream.getStreamId(), stream);
 		if(oldStream == stream)
@@ -23,6 +29,8 @@ public class StreamState {
 		return stream;
 	}
 
+	//this method and create happen on a virtual single thread from channelmgr
+	//so we do not need to synchronize
 	public void updateAllStreams(long initialWindow) {
 		for(Stream stream : streamIdToStream.values()) {
 			stream.updateInitialWindow(initialWindow);

@@ -16,8 +16,6 @@ public abstract class Level3AbstractStreamMgr {
 	private Level5RemoteFlowControl remoteFlowControl;
 	private Level5LocalFlowControl localFlowControl;
 	
-	private AtomicReference<ConnectionException> engineClosedReason;
-
 	public Level3AbstractStreamMgr(Level5RemoteFlowControl level5RemoteFlow, Level5LocalFlowControl localFlowControl, HeaderSettings remoteSettings2) {
 		this.remoteFlowControl = level5RemoteFlow;
 		this.localFlowControl = localFlowControl;
@@ -38,7 +36,7 @@ public abstract class Level3AbstractStreamMgr {
 	}
 	
 	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionException e) {
-		engineClosedReason.set(e);
+		streamState.closeEngine();
 		return null;
 	}
 	
