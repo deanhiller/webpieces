@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -34,7 +33,6 @@ import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.util.filters.Service;
-import org.webpieces.util.future.FutureLib;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
