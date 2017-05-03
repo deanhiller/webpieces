@@ -13,6 +13,7 @@ import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.hooks.ClassForName;
+import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.loader.ProdClassForName;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectTranslator;
@@ -56,10 +57,20 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 
 	@Override
 	public CompletableFuture<Void> incomingRequestImpl(RequestContext ctx, ResponseStreamer responseCb) {
-		MatchResult meta = fetchRoute(ctx);
-		
-		ProdErrorRoutes errorRoutes = new ProdErrorRoutes(ctx.getRequest(), routeLoader);
-		return routeLoader.invokeRoute(meta, ctx, responseCb, errorRoutes);
+		MatchResult result = fetchRoute(ctx);
+	
+		CompletableFuture<Void> future;
+		try {
+			ProdErrorRoutes errorRoutes = new ProdErrorRoutes(ctx.getRequest(), routeLoader);
+			future = routeLoader.invokeRoute(result, ctx, responseCb, errorRoutes);
+		} catch(Throwable e) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(e);
+		}
+		return future.exceptionally( t -> { 
+			throw new HaveRouteException(result, t); 
+			
+		});
 	}
 
 	//This only exists so dev mode can swap it out and load error routes dynamically as code changes..

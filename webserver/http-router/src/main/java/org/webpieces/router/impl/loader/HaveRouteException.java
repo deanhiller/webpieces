@@ -1,8 +1,10 @@
 package org.webpieces.router.impl.loader;
 
+import java.util.concurrent.CompletionException;
+
 import org.webpieces.router.impl.model.MatchResult;
 
-public class HaveRouteException extends RuntimeException {
+public class HaveRouteException extends CompletionException {
 
 	private static final long serialVersionUID = 1L;
 

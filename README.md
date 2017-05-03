@@ -107,6 +107,11 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* write test for bad json in request
+* write test for Content-Type: application/x-www-form-urlencoded
+* test for hitting json url with webbrowser which is empty body
+* method that takes no json object and returns one
+* method that takes json and returns void or Completable<Void>
 * start an actual multi-homed project
 * add more and more tag examples
 * move examples to @examples url instead

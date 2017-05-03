@@ -3,6 +3,7 @@ package org.webpieces.router.impl;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
@@ -14,6 +15,7 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
@@ -76,9 +78,11 @@ public abstract class AbstractRouterService implements RouterService {
 
 	private Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e) {
 		Object meta = "unknown RouteMeta"; 
+		//Damn them for wrapping in CompletionException making life really hard....(they should do it the scala way!!!!)
+		//that decision results in the below mess instead of clean code
 		if(e instanceof HaveRouteException) {
 			HaveRouteException exc = (HaveRouteException) e;
-			 meta = exc.getResult().getMeta();
+			meta = exc.getResult().getMeta();
 		}
 		ErrorRoutes errorRoutes = getErrorRoutes(requestCtx);
 		routeLoader.processException(responseCb, requestCtx, e, errorRoutes, meta);

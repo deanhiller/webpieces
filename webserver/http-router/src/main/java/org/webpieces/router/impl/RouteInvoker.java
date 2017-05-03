@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,8 +33,8 @@ import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
-import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.future.FutureLib;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.logging.SupressedExceptionLog;
@@ -47,20 +48,38 @@ public class RouteInvoker {
 	private ObjectToParamTranslator reverseTranslator;
 	private RouterConfig config;
 
-	private ObjectTranslator objectTranslator;
-	
 	@Inject
 	public RouteInvoker(
 		ObjectToParamTranslator reverseTranslator,
-		RouterConfig config,
-		ObjectTranslator objectTranslator
+		RouterConfig config
 	) {
 		this.reverseTranslator = reverseTranslator;
 		this.config = config;
-		this.objectTranslator = objectTranslator;
 	}
 
 	public CompletableFuture<Void> invoke(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+		CompletableFuture<Void> future;
+		try{
+			future = invoke2(result, requestCtx, responseCb, errorRoutes);
+		} catch(Throwable e) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(e);
+		}
+		
+		return future.handle((r, t) -> {
+			if(t instanceof NotFoundException)
+				return processNotFound(responseCb, requestCtx, (NotFoundException) t, errorRoutes, null);
+			else if(t != null) {
+				CompletableFuture<Void> failFuture = new CompletableFuture<>();
+				failFuture.completeExceptionally(t);
+				return failFuture;
+			}
+			
+			return CompletableFuture.completedFuture(r);
+		}).thenCompose(Function.identity());
+	}
+	
+	public CompletableFuture<Void> invoke2(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
 
 		//This makes us consistent with other NotFoundExceptions and without the cost of 
 		//throwing an exception and filling in stack trace...
@@ -70,38 +89,29 @@ public class RouteInvoker {
 		Route route = meta.getRoute();
 		RouteType routeType = route.getRouteType();
 		if(routeType == RouteType.NOT_FOUND) {
-			processException(responseCb, requestCtx, null, errorRoutes, null);
-			//This is a special case....check the NotFound tests
-			return CompletableFuture.completedFuture(null);
+			CompletableFuture<Void> future = new CompletableFuture<Void>();
+			future.completeExceptionally(new NotFoundException("route not found"));
+			return future;
 		}
 		
 		return invokeImpl(result, meta.getService222(), requestCtx, responseCb);
 	}
+
+	public CompletableFuture<Void> processNotFound(ResponseStreamer responseCb, RequestContext requestCtx, NotFoundException e, ErrorRoutes errorRoutes, Object meta) {		
+		NotFoundException exc = (NotFoundException) e;
+		NotFoundInfo notFoundInfo = errorRoutes.fetchNotfoundRoute(exc);
+		RouteMeta notFoundResult = notFoundInfo.getResult();
+		RouterRequest overridenRequest = notFoundInfo.getReq();
+		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest);
+		
+		//http 404...(unless an exception happens in calling this code and that then goes to 500)
+		return notFound(notFoundResult, notFoundInfo.getService(), exc, overridenCtx, responseCb);
+	}
 	
 	public Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, Object meta) {
-		if(e instanceof CompletionException) {
-			//unwrap the exception to deliver the 'real' exception that occurred
-			e = e.getCause();
-		}
-		
-		if(e == null || e instanceof NotFoundException) {
-			NotFoundException exc = (NotFoundException) e;
-			NotFoundInfo notFoundInfo = errorRoutes.fetchNotfoundRoute(exc);
-			RouteMeta notFoundResult = notFoundInfo.getResult();
-			RouterRequest overridenRequest = notFoundInfo.getReq();
-			RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest);
-			
-			//http 404...(unless an exception happens in calling this code and that then goes to 500)
-			CompletableFuture<Void> future = notFound(notFoundResult, notFoundInfo.getService(), exc, overridenCtx, responseCb);
-			//If not found fails with sync or async exception, we processException and wrap in new Runtime to process as 500 next
-			future.exceptionally(exception -> processException(responseCb, overridenCtx, new RuntimeException("notFound page failed", exception), errorRoutes, notFoundResult));
-			return null;
-		}
-
 		//If this fails, then the users 5xx page is messed up and we then render our own 5xx page
 		CompletableFuture<Void> future = internalServerError(errorRoutes, e, requestCtx, responseCb, meta);
 		future.exceptionally(finalExc -> finalFailure(responseCb, finalExc, requestCtx));
-		
 		return null;
 	}
 	
@@ -120,8 +130,8 @@ public class RouteInvoker {
 			//http 500...
 			//return a completed future with the exception inside...
 			CompletableFuture<Void> futExc = new CompletableFuture<Void>();
-			futExc.completeExceptionally(e);
-			return futExc;			
+			futExc.completeExceptionally(new RuntimeException("NotFound Route had an exception", e));
+			return futExc;
 		}
 	}
 

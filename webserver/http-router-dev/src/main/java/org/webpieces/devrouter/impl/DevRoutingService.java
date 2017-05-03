@@ -106,9 +106,9 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 			future = routeLoader.invokeRoute(result, ctx, responseCb, new DevErrorRoutes(ctx.getRequest()));
 		} catch(Throwable e) {
 			future = new CompletableFuture<Void>();
-			future.completeExceptionally(new HaveRouteException(result, e));
+			future.completeExceptionally(e);
 		}
-		return future;
+		return future.exceptionally( t -> { throw new HaveRouteException(result, t); });
 	}
 	
 	private class DevErrorRoutes implements ErrorRoutes {

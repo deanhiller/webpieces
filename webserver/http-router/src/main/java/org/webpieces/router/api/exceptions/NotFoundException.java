@@ -1,15 +1,13 @@
 package org.webpieces.router.api.exceptions;
 
-public class NotFoundException extends RuntimeException {
+import java.util.concurrent.CompletionException;
+
+public class NotFoundException extends CompletionException {
 
 	private static final long serialVersionUID = 7804145831639203745L;
 
 	public NotFoundException() {
 		super();
-	}
-
-	public NotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
 	public NotFoundException(String message, Throwable cause) {
