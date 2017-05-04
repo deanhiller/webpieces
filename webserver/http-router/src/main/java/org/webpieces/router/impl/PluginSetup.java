@@ -44,17 +44,15 @@ public class PluginSetup {
 
 		Key<Set<EntityLookup>> key = Key.get(new TypeLiteral<Set<EntityLookup>>(){});
 		Set<EntityLookup> lookupHooks = appInjector.getInstance(key);
-		
-		Key<Set<BodyContentBinder>> key2 = Key.get(new TypeLiteral<Set<BodyContentBinder>>(){});
-		Set<BodyContentBinder> bodyBinders = appInjector.getInstance(key2);
 
-		translator.install(lookupHooks, bodyBinders);
+		translator.install(lookupHooks);
 		
 		Key<Set<ObjectStringConverter>> key3 = Key.get(new TypeLiteral<Set<ObjectStringConverter>>(){});
 		Set<ObjectStringConverter> converters = appInjector.getInstance(key3);
 		translation.install(converters);
 
-		
+		Key<Set<BodyContentBinder>> key2 = Key.get(new TypeLiteral<Set<BodyContentBinder>>(){});
+		Set<BodyContentBinder> bodyBinders = appInjector.getInstance(key2);
 		loader.install(bodyBinders);
 		
 		//wire in startup and start the startables.  This is a function since Dev and Production differ

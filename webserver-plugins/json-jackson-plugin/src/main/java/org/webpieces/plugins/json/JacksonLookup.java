@@ -33,6 +33,9 @@ public class JacksonLookup implements BodyContentBinder {
 	@Override
 	public <T> T unmarshal(Class<T> entityClass, byte[] data) {
 		try {
+			if(data.length == 0)
+				throw new ClientDataError("Client did not provide a json request in the body of the request");
+			
 			if(JsonNode.class.isAssignableFrom(entityClass))
 				return (T) mapper.readTree(data);
 			
@@ -48,7 +51,7 @@ public class JacksonLookup implements BodyContentBinder {
 	public <T> RenderContent marshal(T bean) {
 		try {
 			byte[] content = mapper.writeValueAsBytes(bean);
-			return new RenderContent(content, KnownStatusCode.HTTP_200_OK.getCode(), JsonCatchAllFilter.MIME_TYPE);
+			return new RenderContent(content, KnownStatusCode.HTTP_200_OK.getCode(), JacksonCatchAllFilter.MIME_TYPE);
 		} catch (IOException e) {
 			throw new RuntimeException("should not occur", e);
 		}

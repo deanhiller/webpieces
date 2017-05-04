@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.plugins.json.JacksonPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
@@ -17,6 +18,8 @@ import com.google.inject.Module;
 import WEBPIECESxPACKAGE.base.crud.CrudRoutes;
 import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRoutes;
 import WEBPIECESxPACKAGE.base.crud.login.LoggedInRoutes;
+import WEBPIECESxPACKAGE.base.json.JsonCatchAllFilter;
+import WEBPIECESxPACKAGE.base.json.JsonRoutes;
 
 //This is where the list of Guice Modules go as well as the list of RouterModules which is the
 //core of anything you want to plugin to your web app.  To make re-usable components, you create
@@ -51,7 +54,8 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController","/secure/.*"),
 				new LoggedInRoutes(),
 				new CrudRoutes(),
-				new AjaxCrudRoutes()
+				new AjaxCrudRoutes(),
+				new JsonRoutes()
 				);
 	}
 
@@ -62,7 +66,8 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				//if you want to remove hibernate, just remove it first from the build file and then remove
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
-				new HibernatePlugin(persistenceUnit)
+				new HibernatePlugin(persistenceUnit),
+				new JacksonPlugin("/json/.*", JsonCatchAllFilter.class)
 				);
 	}
 

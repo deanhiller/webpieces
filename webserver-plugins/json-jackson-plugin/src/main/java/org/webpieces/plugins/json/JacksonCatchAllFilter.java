@@ -17,9 +17,9 @@ import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public abstract class JsonCatchAllFilter extends RouteFilter<JsonConfig> {
+public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
-	private static final Logger log = LoggerFactory.getLogger(JsonCatchAllFilter.class);
+	private static final Logger log = LoggerFactory.getLogger(JacksonCatchAllFilter.class);
 	public static final MimeTypeResult MIME_TYPE = new MimeTypeResult("application/json", StandardCharsets.UTF_8);
 	private Boolean isNotFoundFilter;
 	private Pattern pattern;

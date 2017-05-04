@@ -45,6 +45,8 @@ public class RouterConfig {
 
 	private PortConfigCallback portConfigCallback;
 
+	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
+	
 	public VirtualFile getMetaFile() {
 		return metaFile;
 	}
@@ -150,6 +152,15 @@ public class RouterConfig {
 	}
 	public PortConfigCallback getPortConfigCallback() {
 		return portConfigCallback;
+	}
+	
+	public Charset getDefaultFormAcceptEncoding() {
+		return defaultFormAcceptEncoding;
+	}
+	
+	public RouterConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
+		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
+		return this;
 	}
 	
 }

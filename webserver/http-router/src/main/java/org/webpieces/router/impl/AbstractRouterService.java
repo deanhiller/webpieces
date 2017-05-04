@@ -3,7 +3,6 @@ package org.webpieces.router.impl;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
@@ -15,7 +14,6 @@ import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;

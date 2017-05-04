@@ -1,7 +1,6 @@
 package org.webpieces.router.impl;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -21,7 +20,6 @@ import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.actions.AjaxRedirectImpl;
 import org.webpieces.router.impl.actions.RawRedirect;
@@ -29,7 +27,6 @@ import org.webpieces.router.impl.actions.RedirectImpl;
 import org.webpieces.router.impl.actions.RenderImpl;
 import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
-import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
 import org.webpieces.util.filters.Service;
@@ -180,26 +177,14 @@ public class RouteInvoker {
 		if(service == null)
 			throw new IllegalStateException("Bug, service should never be null at this point");
 		
-		RouterRequest req = requestCtx.getRequest();
 		Messages messages = new Messages(meta.getI18nBundleName(), "webpieces");
 		requestCtx.setMessages(messages);
-
-		if(config.isTokenCheckOn() && meta.getRoute().isCheckSecureToken()) {
-			String token = requestCtx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
-			List<String> formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);
-			if(formToken == null)
-				throw new BadRequestException("missing form token(or route added without setting checkToken variable to false)"
-						+ "...someone posting form without getting it first(hacker or otherwise) OR "
-						+ "you are not using the #{form}# tag or the #{secureToken}# tag to secure your forms");
-			else if(!token.equals(formToken.get(0)))
-				throw new BadRequestException("bad form token...someone posting form with invalid token(hacker or otherwise)");
-		}
 
 		RequestLocalCtx.set(processor);
 		Current.setContext(requestCtx);
 		CompletableFuture<Action> response;
 		try {
-			response = invokeMethod(service, obj, method, meta.getRoute());
+			response = invokeMethod(service, obj, method, meta);
 		} finally {
 			RequestLocalCtx.set(null);
 			Current.setContext(null);
@@ -226,9 +211,9 @@ public class RouteInvoker {
 		return null;
 	}
 	
-	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, Route r) {
-		MethodMeta meta = new MethodMeta(obj, m, Current.getContext(), r);
-		return service.invoke(meta);
+	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, RouteMeta meta) {
+		MethodMeta methodMeta = new MethodMeta(obj, m, Current.getContext(), meta.getRoute(), meta.getBodyContentBinder());
+		return service.invoke(methodMeta);
 	}
 
 	public void init(ReverseRoutes reverseRoutes) {

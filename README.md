@@ -108,9 +108,6 @@ This project is essentially pieces that can be used to build any http related so
 
 #### TODO:
 * write test for bad json in request
-* write test for Content-Type: application/x-www-form-urlencoded
-* test for hitting json url with webbrowser which is empty body
-* method that takes no json object and returns one
 * method that takes json and returns void or Completable<Void>
 * start an actual multi-homed project
 * add more and more tag examples

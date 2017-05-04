@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.webpieces.data.api.DataWrapper;
+
 /**
  * The format of this class caters to the router so it has everything the router uses and no more.  It
  * also keeps the router independent of any http1.1 or http2 stack as well.  The most important piece is
@@ -69,7 +71,11 @@ public class RouterRequest {
 	
 	public boolean isAjaxRequest;
 	
-	public byte[] body;
+	public Integer contentLengthHeaderValue;
+
+	public String contentTypeHeaderValue;
+
+	public DataWrapper body;
 	
 	public void putMultipart(String key, String value) {
 		List<String> values = new ArrayList<>();

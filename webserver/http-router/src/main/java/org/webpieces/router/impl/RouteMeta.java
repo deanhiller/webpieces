@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.impl.model.MatchResult;
@@ -31,7 +32,8 @@ public class RouteMeta {
 	private Object controllerInstance;
 	private Method method;
 	private List<String> methodParamNames;
-	
+	private BodyContentBinder bodyContentBinder;
+
 	public RouteMeta(Route r, Injector injector, RouteModuleInfo routerInfo, Charset urlEncoding) {
 		if(routerInfo == null)
 			throw new IllegalArgumentException("routerInfo must be non-null");
@@ -128,5 +130,13 @@ public class RouteMeta {
 
 	public Service<MethodMeta, Action> getService222() {
 		return filtersAndMethodToCall;
+	}
+
+	public void setContentBinder(BodyContentBinder binder) {
+		this.bodyContentBinder = binder;
+	}
+	
+	public BodyContentBinder getBodyContentBinder() {
+		return bodyContentBinder;
 	}
 }

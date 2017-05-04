@@ -1,10 +1,14 @@
-package org.webpieces.httpparser.api.subparsers;
+package org.webpieces.util.urlparse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.BiFunction;
 
 import org.webpieces.util.net.URLEncoder;
 
+/**
+ * This is here as it is really independent of http1.1 and http2 parsers and we do not want
+ * the router dependent on anyones http parser so it can be reused
+ */
 public class UrlEncodedParser {
 	
 	public void parse(String multiPartData, BiFunction<String, String, Void> mapAddFunction) {

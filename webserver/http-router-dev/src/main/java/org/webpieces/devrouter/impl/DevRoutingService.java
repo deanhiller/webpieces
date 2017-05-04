@@ -25,11 +25,9 @@ import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.loader.HaveRouteException;
-import org.webpieces.router.impl.loader.ServiceProxy;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.params.ObjectTranslator;
-import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -48,7 +46,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 	private WebAppMeta routerModule;
 	private RouterConfig config;
 	private ControllerLoader finder;
-	private ParamToObjectTranslatorImpl translator;
+	private ServiceCreator serviceCreator;
 
 	@Inject
 	public DevRoutingService(
@@ -58,14 +56,14 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 			ControllerLoader finder,
 			CookieTranslator cookieTranslator,
 			ObjectTranslator objTranslator,
-			ParamToObjectTranslatorImpl translator
+			ServiceCreator serviceCreator
 	) {
 		super(routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
 		this.classLoader = loader;
 		this.finder = finder;
-		this.translator = translator;
+		this.serviceCreator = serviceCreator;
 		this.lastFileTimestamp = config.getMetaFile().lastModified();
 	}
 
@@ -153,7 +151,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		
 		if(meta.getControllerInstance() == null) {
 			finder.loadControllerIntoMetaObject(meta, false);
-			meta.setService(new ServiceProxy(translator));
+			meta.setService(serviceCreator.create());
 		}
 		
 		String reason = "Your route was not found in routes table";

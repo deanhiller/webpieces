@@ -2,8 +2,6 @@ package org.webpieces.webserver.api;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +33,6 @@ public class WebServerConfig {
 	private SSLEngineFactory sslEngineFactory;
 	
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
-	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 	private Locale defaultLocale = Locale.getDefault();
 	//The max size of body for dynamic pages for Full responses and chunked responses.  This
 	//is used to determine send chunks instead of full response as well since it won't fit
@@ -99,15 +96,6 @@ public class WebServerConfig {
 
 	public WebServerConfig setFunctionToConfigureServerSocket(ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket) {
 		this.functionToConfigureServerSocket = functionToConfigureServerSocket;
-		return this;
-	}
-
-	public Charset getDefaultFormAcceptEncoding() {
-		return defaultFormAcceptEncoding;
-	}
-	
-	public WebServerConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
-		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
 		return this;
 	}
 

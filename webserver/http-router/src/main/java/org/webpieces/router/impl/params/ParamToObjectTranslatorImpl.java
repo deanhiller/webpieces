@@ -33,7 +33,6 @@ public class ParamToObjectTranslatorImpl {
 	private ParamValueTreeCreator treeCreator;
 	private ObjectTranslator objectTranslator;
 	private Set<EntityLookup> lookupHooks;
-	private Set<BodyContentBinder> bodyBinders;
 
 	@Inject
 	public ParamToObjectTranslatorImpl(ParamValueTreeCreator treeCreator, ObjectTranslator primitiveConverter) {
@@ -52,10 +51,10 @@ public class ParamToObjectTranslatorImpl {
 	//ON TOP of this, do you maintain a separate structure for params IN THE PATH /user/{var1} vs in the query params /user/{var1}?var1=xxx
 	//
 	//AND ON TOP of that, we have multi-part fields as well with keys and values
-	public ArgsResult createArgs(Method m, RequestContext ctx) {
+	public List<Object> createArgs(Method m, RequestContext ctx, BodyContentBinder binder) {
 		RouterRequest req = ctx.getRequest();
 		try {
-			return createArgsImpl(m, ctx);
+			return createArgsImpl(m, ctx, binder);
 		} catch(DataMismatchException e) {
 			if(req.method == HttpMethod.GET) {
 				//For GET with query params or path urls, if we can't convert, it should be a 404...
@@ -73,7 +72,7 @@ public class ParamToObjectTranslatorImpl {
 		}
 	}
 
-	protected ArgsResult createArgsImpl(Method method, RequestContext ctx) {
+	protected List<Object> createArgsImpl(Method method, RequestContext ctx, BodyContentBinder binder) {
 		RouterRequest req = ctx.getRequest();
 		Parameter[] paramMetas = method.getParameters();
 		Annotation[][] paramAnnotations = method.getParameterAnnotations();
@@ -91,46 +90,32 @@ public class ParamToObjectTranslatorImpl {
 		//lastly path params
 		treeCreator.createTree(paramTree, ctx.getPathParams(), FromEnum.URL_PATH);
 		
-		ArgsResult result = new ArgsResult();
+		List<Object> result = new ArrayList<>();
 		for(int i = 0; i < paramMetas.length; i++) {
 			Parameter paramMeta = paramMetas[i];
 			Annotation[] annotations = paramAnnotations[i];
 			ParamMeta fieldMeta = new ParamMeta(method, paramMeta, annotations);
 			String name = fieldMeta.getName();
-			ParamNode paramNode = paramTree.get(name);			
-			fromContentOrHttpRequest(req, method, paramNode, fieldMeta, ctx, result);
+			ParamNode paramNode = paramTree.get(name);
+			if(binder != null && isManagedBy(binder, fieldMeta)) {
+				Object bean = binder.unmarshal(fieldMeta.getFieldClass(), req.body.createByteArray());
+				result.add(bean);
+			} else {
+				Object arg = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
+				result.add(arg);
+			}
 		}
 		return result;
 	}
 
-	private void fromContentOrHttpRequest(RouterRequest req, Method method, ParamNode paramNode, ParamMeta fieldMeta,
-			RequestContext ctx, ArgsResult result) {
-		Annotation[] annotations = fieldMeta.getAnnotations();
+	private boolean isManagedBy(BodyContentBinder binder, ParamMeta fieldMeta) {
 		Class<?> fieldClass = fieldMeta.getFieldClass();
-		if(annotations.length > 0) {
-			BodyContentBinder binder = lookupMatchingBinder(fieldClass, annotations);
-			if(binder != null) {
-				byte[] data = req.body;
-				Object bean = binder.unmarshal(fieldClass, data);
-				result.setBinder(binder);
-				result.addArgument(bean);
-				return;
-			}
+		Annotation[] annotations = fieldMeta.getAnnotations();
+		for(Annotation anno : annotations) {
+			if(binder.isManaged(fieldClass, anno.annotationType()))
+				return true;
 		}
-		
-		Object arg = translate(req, method, paramNode, fieldMeta, ctx.getValidation());
-		result.addArgument(arg);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private BodyContentBinder lookupMatchingBinder(Class entityClass, Annotation[] annotations) {
-		for(BodyContentBinder binder : bodyBinders) {
-			for(Annotation anno : annotations) {
-				if(binder.isManaged(entityClass, anno.annotationType()))
-					return binder;
-			}
-		}
-		return null;
+		return false;
 	}
 
 	private Map<String, String> translate(Map<String, List<String>> queryParams) {
@@ -304,9 +289,8 @@ public class ParamToObjectTranslatorImpl {
 		return null;
 	}
 
-	public void install(Set<EntityLookup> lookupHooks, Set<BodyContentBinder> bodyBinders) {
+	public void install(Set<EntityLookup> lookupHooks) {
 		this.lookupHooks = lookupHooks;
-		this.bodyBinders = bodyBinders;
 	}
 
 }

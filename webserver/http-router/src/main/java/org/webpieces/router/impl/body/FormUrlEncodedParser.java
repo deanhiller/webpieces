@@ -1,4 +1,4 @@
-package org.webpieces.webserver.impl.parsing;
+package org.webpieces.router.impl.body;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpparser.api.subparsers.UrlEncodedParser;
+import org.webpieces.util.urlparse.UrlEncodedParser;
 
 public class FormUrlEncodedParser implements BodyParser {
 

@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
 import org.webpieces.httpcommon.api.RequestId;
 import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -79,6 +81,20 @@ public class TestJson {
 	public void testSyncJsonGet() {
 		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
 		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("{`searchTime`:5,`matches`:[`match1`,`match2`]}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
+	//had a bug on this one so add a test
+	@Test
+	public void testSimulateCurl() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
+		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
+		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, ""+req.getBody().getReadableSize()));
 		server.incomingRequest(req, new RequestId(0), true, socket);
 		
 		FullResponse response = ResponseExtract.assertSingleResponse(socket);
@@ -170,4 +186,17 @@ public class TestJson {
 		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
 		response.assertContentType("application/json");
 	}
+	
+	@Test
+	public void testReadOnly() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/read");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("{`searchTime`:1,`matches`:[]}".replace("`", "\""));
+		response.assertContentType("application/json");
+	}
+	
 }

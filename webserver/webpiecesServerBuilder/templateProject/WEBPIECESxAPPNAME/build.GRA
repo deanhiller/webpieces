@@ -45,6 +45,10 @@ dependencies {
   compile deps['web-webserver']
   //optional plugin for if you use hibernate
   compile deps['plugin-hibernate']
+  //optional plugin for if you have a json api
+  compile deps['plugin-jackson']
+  compile deps['commons-lang'] //used in json escaping
+  
   //REMOVE once you are on a real database
   compile deps['h2db']
   

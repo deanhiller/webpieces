@@ -3,6 +3,7 @@ package org.webpieces.router.api.dto;
 import java.lang.reflect.Method;
 
 import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.impl.Route;
 
 public class MethodMeta {
@@ -11,13 +12,15 @@ public class MethodMeta {
 	private Method method;
 	private RequestContext ctx;
 	private Route route;
+	private BodyContentBinder bodyContentBinder;
 
 	public MethodMeta(
-			Object controllerInstance, Method method, RequestContext ctx, Route route) {
+			Object controllerInstance, Method method, RequestContext ctx, Route route, BodyContentBinder bodyContentBinder) {
 		this.controllerInstance = controllerInstance;
 		this.method = method;
 		this.ctx = ctx;
 		this.route = route;
+		this.bodyContentBinder = bodyContentBinder;
 	}
 
 	public Object getControllerInstance() {
@@ -34,6 +37,10 @@ public class MethodMeta {
 
 	public Route getRoute() {
 		return route;
+	}
+
+	public BodyContentBinder getBodyContentBinder() {
+		return bodyContentBinder;
 	}
 
 }

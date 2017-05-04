@@ -28,6 +28,6 @@ public class JsonMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.<Plugin>newArrayList(
-				new JacksonPlugin("/json/.*", CatchAllFilter.class));
+				new JacksonPlugin("/json/.*", TestCatchAllFilter.class));
 	}
 }

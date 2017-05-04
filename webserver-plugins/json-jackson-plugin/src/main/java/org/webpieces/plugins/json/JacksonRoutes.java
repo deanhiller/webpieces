@@ -8,10 +8,10 @@ import org.webpieces.router.api.routing.PortType;
 public class JacksonRoutes extends AbstractRoutes {
 
 	private String filterPattern;
-	private Class<? extends JsonCatchAllFilter> filter;
+	private Class<? extends JacksonCatchAllFilter> filter;
 
 	public JacksonRoutes(String filterPattern, 
-			Class<? extends JsonCatchAllFilter> filter) {
+			Class<? extends JacksonCatchAllFilter> filter) {
 		this.filterPattern = filterPattern;
 		this.filter = filter;
 	}

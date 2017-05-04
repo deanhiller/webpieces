@@ -11,9 +11,9 @@ import com.google.inject.Module;
 public class JacksonPlugin implements Plugin {
 
 	private String filterPattern;
-	private Class<? extends JsonCatchAllFilter> filterClazz;
+	private Class<? extends JacksonCatchAllFilter> filterClazz;
 	
-	public JacksonPlugin(String filterPattern, Class<? extends JsonCatchAllFilter> filterClazz) {
+	public JacksonPlugin(String filterPattern, Class<? extends JacksonCatchAllFilter> filterClazz) {
 		super();
 		this.filterPattern = filterPattern;
 		this.filterClazz = filterClazz;

@@ -2,24 +2,41 @@ package org.webpieces.router.impl.loader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.ctx.api.RequestContext;
+import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.data.api.DataWrapper;
 import org.webpieces.router.api.BodyContentBinder;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.exceptions.BadRequestException;
+import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.NotFoundException;
-import org.webpieces.router.impl.params.ArgsResult;
+import org.webpieces.router.impl.Route;
+import org.webpieces.router.impl.body.BodyParser;
+import org.webpieces.router.impl.body.BodyParsers;
+import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class ServiceProxy implements Service<MethodMeta, Action> {
 
+	private final static Logger log = LoggerFactory.getLogger(ServiceProxy.class);
 	private ParamToObjectTranslatorImpl translator;
-
-	public ServiceProxy(ParamToObjectTranslatorImpl translator) {
+	private BodyParsers requestBodyParsers;
+	private RouterConfig config;
+	
+	public ServiceProxy(ParamToObjectTranslatorImpl translator, BodyParsers requestBodyParsers, RouterConfig config) {
 		this.translator = translator;
+		this.requestBodyParsers = requestBodyParsers;
+		this.config = config;
 	}
 	
 	@Override
@@ -55,6 +72,12 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
+		RouterRequest req = meta.getCtx().getRequest();
+		
+		log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
+
+		parseBodyFromContentType(meta.getRoute(), meta.getCtx(), meta.getBodyContentBinder());
+
 		Method m = meta.getMethod();
 		Object obj = meta.getControllerInstance();
 		
@@ -63,21 +86,55 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		//On top of that ORM plugins can have a transaction filter and then in this
 		//createArgs can look up the bean before applying values since it is in
 		//the transaction filter
-		ArgsResult argsResult = translator.createArgs(m, meta.getCtx());
+		List<Object> argsResult = translator.createArgs(m, meta.getCtx(), meta.getBodyContentBinder());
 		
-		Object retVal = m.invoke(obj, argsResult.getArguments());
+		Object retVal = m.invoke(obj, argsResult.toArray());
+		
 		if(retVal == null)
 			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+m);
 		
-		RouteType routeType = meta.getRoute().getRouteType();
-		if(routeType == RouteType.CONTENT)
-			return unwrapResult(retVal, argsResult.getBinder());
+		if(meta.getBodyContentBinder() != null)
+			return unwrapResult(retVal, meta.getBodyContentBinder());
 
 		if(retVal instanceof CompletableFuture) {
 			return (CompletableFuture<Action>) retVal;
 		} else {
 			Action action = (Action) retVal;
 			return CompletableFuture.completedFuture(action);
+		}
+	}
+
+	private void parseBodyFromContentType(Route route, RequestContext ctx, BodyContentBinder bodyContentBinder) {
+		RouterRequest req = ctx.getRequest();
+		if(bodyContentBinder != null)
+			return; //A route that defines the content gets to override the content type header so just return
+		if(req.contentLengthHeaderValue == null)
+			return;
+		
+		if(req.contentTypeHeaderValue == null) {
+			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
+			return;
+		}
+		
+		BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue);
+		if(parser == null) {
+			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req);
+			return;
+		}
+
+		DataWrapper body = req.body;
+		Charset encoding = config.getDefaultFormAcceptEncoding();
+		parser.parse(body, req, encoding);
+		
+		if(config.isTokenCheckOn() && route.isCheckSecureToken()) {
+			String token = ctx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
+			List<String> formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);
+			if(formToken == null)
+				throw new BadRequestException("missing form token(or route added without setting checkToken variable to false)"
+						+ "...someone posting form without getting it first(hacker or otherwise) OR "
+						+ "you are not using the #{form}# tag or the #{secureToken}# tag to secure your forms");
+			else if(!token.equals(formToken.get(0)))
+				throw new BadRequestException("bad form token...someone posting form with invalid token(hacker or otherwise)");
 		}
 	}
 

@@ -1,4 +1,4 @@
-package org.webpieces.webserver.json.app;
+package WEBPIECESxPACKAGE.base.json;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
@@ -20,8 +20,6 @@ public class JsonRoutes extends AbstractRoutes {
 
 		addContentRoute(GET , "/json/throw/{id}",        "JsonController.throwNotFound");
 
-		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
-		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

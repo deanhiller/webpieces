@@ -1,6 +1,5 @@
 package org.webpieces.webserver.impl;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,14 +39,12 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
-import org.webpieces.httpparser.api.subparsers.UrlEncodedParser;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.urlparse.UrlEncodedParser;
 import org.webpieces.webserver.api.WebServerConfig;
-import org.webpieces.webserver.impl.parsing.BodyParser;
-import org.webpieces.webserver.impl.parsing.BodyParsers;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 
@@ -63,8 +60,6 @@ public class RequestReceiver implements RequestListener {
 	private WebServerConfig config;
 	@Inject
 	private UrlEncodedParser urlEncodedParser;
-	@Inject
-	private BodyParsers requestBodyParsers;
 	@Inject
 	private BufferPool bufferPool;
 	
@@ -295,25 +290,18 @@ public class RequestReceiver implements RequestListener {
 		Headers headers = req.getHeaderLookupStruct();
 		Header lengthHeader = headers.getHeader(KnownHeaderName.CONTENT_LENGTH);
 		Header typeHeader = headers.getHeader(KnownHeaderName.CONTENT_TYPE);
-		if(lengthHeader == null) {
-			routerRequest.body = req.getBodyNonNull().createByteArray();
-			return;
-		} else if(typeHeader == null) {
-			routerRequest.body = req.getBodyNonNull().createByteArray();
-			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
-			return;
-		}
-		
-		BodyParser parser = requestBodyParsers.lookup(typeHeader.getValue());
-		if(parser == null) {
-			routerRequest.body = req.getBodyNonNull().createByteArray();			
-			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req);
-			return;
-		}
 
-		DataWrapper body = req.getBody();
-		Charset encoding = config.getDefaultFormAcceptEncoding();
-		parser.parse(body, routerRequest, encoding);
+		routerRequest.body = req.getBodyNonNull();
+
+		if(lengthHeader != null) {
+			//Integer.parseInt(lengthHeader.getValue()); should not fail as it would have failed earlier in the parser when
+			//reading in the body
+			routerRequest.contentLengthHeaderValue = Integer.parseInt(lengthHeader.getValue());
+		} 
+		
+		if(typeHeader != null) {
+			routerRequest.contentTypeHeaderValue = typeHeader.getValue();
+		}
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package org.webpieces.router.api.simplesvr;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Assert;

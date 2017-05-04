@@ -8,15 +8,15 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.webpieces.plugins.json.JsonCatchAllFilter;
+import org.webpieces.plugins.json.JacksonCatchAllFilter;
 import org.webpieces.router.api.exceptions.ClientDataError;
 
-public class CatchAllFilter extends JsonCatchAllFilter {
+public class TestCatchAllFilter extends JacksonCatchAllFilter {
 
 	private ObjectMapper mapper;
 
 	@Inject
-	public CatchAllFilter(ObjectMapper mapper) {
+	public TestCatchAllFilter(ObjectMapper mapper) {
 		this.mapper = mapper;
 	}
 	

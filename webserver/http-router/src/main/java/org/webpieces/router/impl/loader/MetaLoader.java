@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.router.api.BodyContentBinder;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Redirect;
 import org.webpieces.router.api.dto.MethodMeta;
@@ -22,6 +24,7 @@ import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
@@ -31,10 +34,14 @@ public class MetaLoader {
 	private ParamToObjectTranslatorImpl translator;
 	private Set<BodyContentBinder> bodyBinderPlugins;
 	private List<String> allBinderAnnotations = new ArrayList<>();
+	private BodyParsers requestBodyParsers;
+	private RouterConfig config;
 
 	@Inject
-	public MetaLoader(ParamToObjectTranslatorImpl translator) {
+	public MetaLoader(ParamToObjectTranslatorImpl translator, BodyParsers requestBodyParsers, RouterConfig config) {
 		this.translator = translator;
+		this.requestBodyParsers = requestBodyParsers;
+		this.config = config;
 	}
 	
 	public void loadInstIntoMeta(RouteMeta meta, Object controllerInst, String methodStr) {
@@ -76,7 +83,8 @@ public class MetaLoader {
 		if(meta.getRoute().getRouteType() == RouteType.HTML) {
 			preconditionCheck(meta, controllerMethod);
 		} else if (meta.getRoute().getRouteType() == RouteType.CONTENT) {
-			contentPreconditionCheck(meta, controllerMethod, parameters);
+			BodyContentBinder binder = contentPreconditionCheck(meta, controllerMethod, parameters);
+			meta.setContentBinder(binder);
 		}
 
 		meta.setMethodParamNames(paramNames);
@@ -84,29 +92,41 @@ public class MetaLoader {
 		meta.setMethod(controllerMethod);
 	}
 
-	private void contentPreconditionCheck(RouteMeta meta, Method controllerMethod, Parameter[] parameters) {
+	private BodyContentBinder contentPreconditionCheck(RouteMeta meta, Method controllerMethod, Parameter[] parameters) {
 		List<String> binderMatches = new ArrayList<>();
+		AtomicReference<BodyContentBinder> lastMatch = new AtomicReference<BodyContentBinder>(null);
 		for(BodyContentBinder binder : bodyBinderPlugins) {
 			for(Parameter p : parameters) {
-				recordParameterMatches(binderMatches, binder, p);
+				Annotation[] annotations = p.getAnnotations();
+				Class<?> entityClass = p.getType();
+				recordParameterMatches(lastMatch, binderMatches, binder, annotations, entityClass);
 			}
+			
+			Annotation[] annotations = controllerMethod.getAnnotations();
+			recordParameterMatches(lastMatch, binderMatches, binder, annotations, null);
 		}
 
 		if(binderMatches.size() == 0)
-			throw new IllegalArgumentException("there was not a single parameter annotated with a Plugin"
-					+ " annotation on method="+controllerMethod+".  looking at your plugins, these are the annotations available="+allBinderAnnotations);
+			throw new IllegalArgumentException("there was not a single method parameter annotated with a Plugin"
+					+ " annotation on method="+controllerMethod+".  looking at your\n"
+					+ "plugins, these are the annotations available="+allBinderAnnotations+"\n"
+					+ "You either need one parameter with one of the annotations OR\n"
+					+ "you need to annotata the method(if it is read only and no request is supplied)");
 		else if(binderMatches.size() > 1)
 			throw new IllegalArgumentException("there is more than one parameter with a Plugin"
-					+ " annotation on method="+controllerMethod+".  These are the ones we found(please delete one)="+binderMatches);
+					+ " annotation on method="+controllerMethod+".  These\n"
+					+ "are the ones we found(please delete one)="+binderMatches+"\n"		
+					+ "Also make sure one parameter OR the method has the annotation, not both");
 
+		return lastMatch.get();
 	}
 
-	private void recordParameterMatches(List<String> binderMatches, BodyContentBinder binder, Parameter p) {
-		Annotation[] annotations = p.getAnnotations();
+	private void recordParameterMatches(AtomicReference<BodyContentBinder> lastMatch, List<String> binderMatches, BodyContentBinder binder, Annotation[] annotations, Class<?> entityClass) {
 		for(Annotation a : annotations) {
-			Class<?> entityClass = p.getType();
-			if(binder.isManaged(entityClass, a.annotationType()))
+			if(binder.isManaged(entityClass, a.annotationType())) {
 				binderMatches.add("@"+binder.getAnnotation().getSimpleName());
+				lastMatch.set(binder);
+			}
 		}
 	}
 
@@ -162,7 +182,7 @@ public class MetaLoader {
 	}
 
 	public Service<MethodMeta, Action> loadFilters(List<RouteFilter<?>> filters) {
-		Service<MethodMeta, Action> svc = new ServiceProxy(translator);
+		Service<MethodMeta, Action> svc = new ServiceProxy(translator, requestBodyParsers, config);
 		for(RouteFilter<?> f : filters) {
 			svc = ChainFilters.addOnTop(svc, f);
 		}
