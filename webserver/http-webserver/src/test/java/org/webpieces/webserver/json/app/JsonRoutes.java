@@ -11,7 +11,9 @@ public class JsonRoutes extends AbstractRoutes {
 	public void configure() {
 		
 		addContentRoute(GET , "/json/read",         "JsonController.readOnly");
-
+		addContentRoute(POST, "/json/write",        "JsonController.writeOnly");
+		addContentRoute(POST, "/json/writeasync",   "JsonController.writeAsync");
+		
 		addContentRoute(GET , "/json/{id}",         "JsonController.jsonRequest");
 		addContentRoute(POST , "/json/{id}",        "JsonController.postJson");
 

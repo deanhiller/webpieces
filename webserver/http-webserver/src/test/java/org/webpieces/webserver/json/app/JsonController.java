@@ -53,6 +53,14 @@ public class JsonController {
 		resp.setSearchTime(1);
 		return resp;
 	}
+
+	public void writeOnly(@Jackson SearchRequest request) {
+		
+	}
+
+	public CompletableFuture<Void> writeAsync(@Jackson SearchRequest request) {
+		return CompletableFuture.completedFuture(null);
+	}
 	
 	public SearchResponse throwNotFound(int id, @Jackson SearchRequest request) {
 		throw new NotFoundException("to test it out");

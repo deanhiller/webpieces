@@ -50,7 +50,11 @@ public class JacksonLookup implements BodyContentBinder {
 	@Override
 	public <T> RenderContent marshal(T bean) {
 		try {
-			byte[] content = mapper.writeValueAsBytes(bean);
+			byte[] content;
+			if(bean == null)
+				content = new byte[0];
+			else
+				content = mapper.writeValueAsBytes(bean);
 			return new RenderContent(content, KnownStatusCode.HTTP_200_OK.getCode(), JacksonCatchAllFilter.MIME_TYPE);
 		} catch (IOException e) {
 			throw new RuntimeException("should not occur", e);

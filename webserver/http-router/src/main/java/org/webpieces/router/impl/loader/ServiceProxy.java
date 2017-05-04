@@ -15,7 +15,6 @@ import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.BadRequestException;
-import org.webpieces.router.api.exceptions.ClientDataError;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.body.BodyParser;
@@ -90,12 +89,12 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		
 		Object retVal = m.invoke(obj, argsResult.toArray());
 		
+		if(meta.getBodyContentBinder() != null)
+			return unwrapResult(m, retVal, meta.getBodyContentBinder());
+
 		if(retVal == null)
 			throw new IllegalStateException("Your controller method returned null which is not allowed.  offending method="+m);
 		
-		if(meta.getBodyContentBinder() != null)
-			return unwrapResult(retVal, meta.getBodyContentBinder());
-
 		if(retVal instanceof CompletableFuture) {
 			return (CompletableFuture<Action>) retVal;
 		} else {
@@ -139,8 +138,13 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private CompletableFuture<Action> unwrapResult(Object retVal, BodyContentBinder binder) {
-		if(retVal instanceof CompletableFuture) {
+	private CompletableFuture<Action> unwrapResult(Method method, Object retVal, BodyContentBinder binder) {
+		Class<?> returnType = method.getReturnType();
+		
+		
+		if(CompletableFuture.class.isAssignableFrom(returnType)) {
+			if(retVal == null)
+				throw new IllegalStateException("Your method returned a null CompletableFuture which it not allowed.  method="+method);
 			CompletableFuture<Object> future = (CompletableFuture<Object>) retVal;
 			return future.thenApply((bean) -> binder.marshal(bean));
 		} else {

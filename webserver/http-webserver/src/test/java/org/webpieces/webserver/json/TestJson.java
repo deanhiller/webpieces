@@ -1,5 +1,6 @@
 package org.webpieces.webserver.json;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
@@ -66,6 +67,17 @@ public class TestJson {
 	}
 
 	@Test
+	public void testAsyncWriteOnlyPost() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/writeasync");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		Assert.assertEquals("", response.getBodyAsString());
+	}
+	
+	@Test
 	public void testAsyncBadJsonPost() {
 		HttpRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/async/45");
 		
@@ -125,6 +137,17 @@ public class TestJson {
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:99,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
+	}
+	
+	@Test
+	public void testSyncWriteOnlyPost() {
+		HttpRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/write");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		Assert.assertEquals("", response.getBodyAsString());
 	}
 	
 	@Test
