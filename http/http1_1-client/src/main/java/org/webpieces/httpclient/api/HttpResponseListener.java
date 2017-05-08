@@ -3,7 +3,7 @@ package org.webpieces.httpclient.api;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-public interface ResponseListener {
+public interface HttpResponseListener {
 
 	/**
 	 * This is sort of a hard api issue to solve.  When you send a request out to an http server
@@ -37,5 +37,5 @@ public interface ResponseListener {
 	public void incomingChunk(HttpChunk chunk, boolean isLastChunk);
 	
 	public void failure(Throwable e);
-	
+
 }

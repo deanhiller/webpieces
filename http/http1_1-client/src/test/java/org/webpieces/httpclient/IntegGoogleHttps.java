@@ -9,11 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
-import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.HttpResponseListener;
+import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.common.Header;
@@ -56,9 +55,7 @@ public class IntegGoogleHttps {
 		req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
 		req.addHeader(new Header(KnownHeaderName.USER_AGENT, "webpieces/0.9"));
 		
-		HttpClient client = createHttpClient(isHttp);
-		
-		HttpClientSocket socket = client.openHttpSocket("oneTimer", new OurCloseListener());
+		HttpSocket socket = createSocket(isHttp, host, port);
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(p -> sendRequest(socket, req))
@@ -67,7 +64,19 @@ public class IntegGoogleHttps {
 		Thread.sleep(100000);
 	}
 
-	public static HttpClient createHttpClient(boolean isHttp) {
+	public static HttpSocket createSocket(boolean isHttp, String host, int port) {
+		HttpClient client = createHttpClient();
+		HttpSocket socket;
+		if(isHttp)
+			socket = client.createHttpSocket("oneTimer");
+		else {
+			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
+			socket = client.createHttpsSocket("oneTimer", sslFactory.createSslEngine(host, port));
+		}
+		return socket;
+	}
+	
+	public static HttpClient createHttpClient() {
 		BufferPool pool2 = new BufferCreationPool();
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
@@ -75,26 +84,20 @@ public class IntegGoogleHttps {
 		
 		HttpParser parser = HttpParserFactory.createParser(pool2);
 		
-		HttpClient client;
-		if(isHttp)
-			client = HttpClientFactory.createHttpClient(mgr, parser);
-		else {
-			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
-			client = HttpClientFactory.createHttpsClient(mgr, parser, sslFactory);
-		}
+		HttpClient client = HttpClientFactory.createHttpClient(mgr, parser);
 		return client;
 	}
 
-	private void sendRequest(HttpClientSocket socket, HttpRequest req) {
+	private void sendRequest(HttpSocket socket, HttpRequest req) {
 		socket.send(req, new OurListener());
 	}
 
-	private Void reportException(HttpClientSocket socket, Throwable e) {
+	private Void reportException(HttpSocket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
 	}
 
-	private static class OurListener implements ResponseListener {
+	private static class OurListener implements HttpResponseListener {
 		@Override
 		public void incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("resp="+resp+" complete="+isComplete);
@@ -113,11 +116,4 @@ public class IntegGoogleHttps {
 		}
 	}
 	
-	private class OurCloseListener implements CloseListener {
-		@Override
-		public void farEndClosed(HttpClientSocket socket) {
-			log.info(socket+" far end closed");
-		}
-		
-	}
 }

@@ -8,6 +8,8 @@ import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
+import org.webpieces.util.threading.SessionExecutor;
+import org.webpieces.util.threading.SessionExecutorImpl;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -26,18 +28,20 @@ public abstract class Http2ClientFactory {
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 
 		Http2ClientEngineFactory parseFactory = new Http2ClientEngineFactory();
-		return createHttpClient(config, mgr, hpackParser, parseFactory);
+		return createHttpClient(config, mgr, hpackParser, parseFactory, executor);
 	}
 	
-	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr) {
+	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, Executor executor) {
 		Http2ClientEngineFactory engineFactory = new Http2ClientEngineFactory();
 		BufferCreationPool pool = new BufferCreationPool();
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
-		return createHttpClient(config, mgr, hpackParser, engineFactory);
+		return createHttpClient(config, mgr, hpackParser, engineFactory, executor);
 	}
 	
-	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, HpackParser hpackParser, Http2ClientEngineFactory engineFactory) {
-		return new Http2ClientImpl(config, mgr, hpackParser, engineFactory);
+	public static Http2Client createHttpClient(
+			Http2Config config, ChannelManager mgr, HpackParser hpackParser, Http2ClientEngineFactory engineFactory, Executor executor) {
+		SessionExecutor sessionExecutor = new SessionExecutorImpl(executor);
+		return new Http2ClientImpl(config, mgr, hpackParser, engineFactory, sessionExecutor);
 	}
 }

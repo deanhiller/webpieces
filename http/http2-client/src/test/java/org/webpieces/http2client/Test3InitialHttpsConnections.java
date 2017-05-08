@@ -16,8 +16,8 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.integ.ForTestSslClientEngineFactory;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
-import org.webpieces.http2client.mock.MockServerListener;
 import org.webpieces.http2client.mock.Preface;
+import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -44,7 +44,7 @@ public class Test3InitialHttpsConnections {
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr);
+        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
         
         mockChanMgr.addSSLChannelToReturn(mockChannel);
 		
@@ -55,8 +55,7 @@ public class Test3InitialHttpsConnections {
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		socket = client.createHttpsSocket("simple", engine);
 		
-		MockServerListener mockSvrListener = new MockServerListener();
-		CompletableFuture<Http2Socket> connect = socket.connect(addr, mockSvrListener);
+		CompletableFuture<Http2Socket> connect = socket.connect(addr);
 		Assert.assertTrue(connect.isDone());
 		Assert.assertEquals(socket, connect.get());
 

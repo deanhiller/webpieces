@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import org.webpieces.util.logging.Logger;
@@ -21,6 +23,42 @@ public class SessionExecutorImpl implements SessionExecutor {
 
 	public SessionExecutorImpl(Executor executor) {
 		this.executor = executor;
+	}
+	
+	@Override
+	public <T> CompletableFuture<T> execute(Object key, Callable<CompletableFuture<T>> callable) {
+		CompletableFuture<T> future = new CompletableFuture<T>();
+		FutureRunnable<T> r = new FutureRunnable<>(callable, future);
+
+		execute(key, r);
+		
+		return future;
+	}
+	
+	private class FutureRunnable<T> implements Runnable {
+		private Callable<CompletableFuture<T>> callable;
+		private CompletableFuture<T> future;
+
+		public FutureRunnable(Callable<CompletableFuture<T>> callable, CompletableFuture<T> future) {
+			this.callable = callable;
+			this.future = future;
+		}
+
+		@Override
+		public void run() {
+			try {
+				CompletableFuture<T> result = callable.call();
+				result.handle((r, t) -> {
+					if(t != null) {
+						future.completeExceptionally(t);
+					}
+					future.complete(r);
+					return null;
+				});
+			} catch(Throwable e) {
+				future.completeExceptionally(e);
+			}
+		}
 	}
 	
 	@Override

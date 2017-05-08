@@ -6,9 +6,9 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-public interface HttpClientSocket {
+public interface HttpSocket {
 
-	public CompletableFuture<HttpClientSocket> connect(InetSocketAddress addr);
+	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr);
 
 	/**
 	 * This can be used ONLY if 'you' know that the far end does NOT sended a chunked download. 
@@ -21,9 +21,9 @@ public interface HttpClientSocket {
 	//TODO: Implement timeout for clients so that requests will timeout
 	public CompletableFuture<HttpResponse> send(HttpRequest request);
 	
-	public CompletableFuture<HttpChunkWriter> send(HttpRequest request, ResponseListener l);
+	public CompletableFuture<HttpChunkWriter> send(HttpRequest request, HttpResponseListener l);
 
-	public CompletableFuture<HttpClientSocket> closeSocket();
+	public CompletableFuture<HttpSocket> close();
 
 	
 }

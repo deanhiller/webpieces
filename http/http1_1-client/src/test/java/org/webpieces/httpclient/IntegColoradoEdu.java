@@ -4,9 +4,8 @@ import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
@@ -33,21 +32,20 @@ public class IntegColoradoEdu {
 		log.info("starting socket");
 		ChunkedResponseListener listener = new ChunkedResponseListener();
 		
-		HttpClient client = IntegGoogleHttps.createHttpClient(isHttp);
+		HttpSocket socket = IntegGoogleHttps.createSocket(isHttp, host, port);
 		
-		HttpClientSocket socket = client.openHttpSocket("oneTimer");
 		socket
 			.connect(new InetSocketAddress(host, port))
 			.thenAccept(p -> socket.send(req, listener))
 			.exceptionally(e -> reportException(socket, e));
 	}
 
-	private static Void reportException(HttpClientSocket socket, Throwable e) {
+	private static Void reportException(HttpSocket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
 	}
 
-	private static class ChunkedResponseListener implements ResponseListener {
+	private static class ChunkedResponseListener implements HttpResponseListener {
 
 		@Override
 		public void incomingResponse(HttpResponse resp, boolean isComplete) {

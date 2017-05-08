@@ -19,9 +19,9 @@ public class HttpChunkWriterImpl implements HttpChunkWriter {
 	}
 
 	@Override
-	public CompletableFuture<Void> send(HttpChunk chunk) {
+	public CompletableFuture<HttpChunkWriter> send(HttpChunk chunk) {
 		ByteBuffer buffer = parser.marshalToByteBuffer(chunk);
-		return channel.write(buffer).thenApply(c -> null);
+		return channel.write(buffer).thenApply(c -> this);
 	}
 
 }

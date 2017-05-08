@@ -13,8 +13,8 @@ import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
-import org.webpieces.http2client.mock.MockServerListener;
 import org.webpieces.http2client.mock.Preface;
+import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -42,13 +42,13 @@ public class Test3InitialHttpConnections {
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr);
+        
+        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket("simple");
 		
-		MockServerListener mockSvrListener = new MockServerListener();
-		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555), mockSvrListener);
+		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555));
 		Assert.assertTrue(connect.isDone());
 		Assert.assertEquals(socket, connect.get());
 		

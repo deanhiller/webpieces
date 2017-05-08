@@ -1,17 +1,19 @@
 package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class StreamState {
 
-	private ConcurrentHashMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
+	private ConcurrentMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
 	//private AtomicReference<Function<Stream, Stream>> createFunction = new AtomicReference<Function<Stream,Stream>>((s) -> create(s));
 
 	//chanmgr thread only
-	public void closeEngine() {
-		
+	public ConcurrentMap<Integer, Stream> closeEngine(ConnectionException e) {
+		return streamIdToStream;
 	}
 	
 	//client threads
@@ -22,7 +24,7 @@ public class StreamState {
 		return stream;
 	}
 	
-	public Stream get(Http2Msg frame) {
+	public Stream getStream(Http2Msg frame) {
 		Stream stream = streamIdToStream.get(frame.getStreamId());
 		if (stream == null)
 			throw new IllegalArgumentException("bug, Stream not found for frame="+frame);

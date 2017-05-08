@@ -13,7 +13,7 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
-import org.webpieces.http2client.mock.MockServerListener;
+import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2Config;
@@ -38,13 +38,12 @@ public class TestErrors {
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr);
+        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket("simple");
 		
-		MockServerListener mockSvrListener = new MockServerListener();
-		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555), mockSvrListener);
+		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555));
 		Assert.assertTrue(connect.isDone());
 		Assert.assertEquals(socket, connect.get());
 
@@ -67,7 +66,7 @@ public class TestErrors {
 		Http2Headers request1 = Requests.createRequest();
 
 		MockResponseListener listener1 = new MockResponseListener();
-		socket.sendRequest(request1, listener1);
+		socket.send(request1, listener1);
 
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);

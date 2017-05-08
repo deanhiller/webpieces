@@ -18,15 +18,17 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
-import org.webpieces.http2client.mock.MockServerListener;
+import org.webpieces.util.threading.DirectExecutor;
 
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.impl.HeaderEncoding;
+import com.webpieces.http2engine.api.ConnectionClosedException;
+import com.webpieces.http2engine.api.ConnectionReset;
+import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
-import com.webpieces.http2parser.api.ErrorType;
-import com.webpieces.http2parser.api.Http2Exception;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -48,9 +50,8 @@ public class Test4FrameSizeAndHeaders {
 
 	private MockChanMgr mockChanMgr;
 	private MockHttp2Channel mockChannel;
-	private Http2Socket socket;
+	private Http2Socket httpSocket;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
-	private MockServerListener mockSvrListener;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException {
@@ -63,15 +64,14 @@ public class Test4FrameSizeAndHeaders {
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         localSettings.setInitialWindowSize(localSettings.getMaxFrameSize()*4);
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr);
+        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
-		socket = client.createHttpSocket("simple");
+		httpSocket = client.createHttpSocket("simple");
 		
-		mockSvrListener = new MockServerListener();
-		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555), mockSvrListener);
+		CompletableFuture<Http2Socket> connect = httpSocket.connect(new InetSocketAddress(555));
 		Assert.assertTrue(connect.isDone());
-		Assert.assertEquals(socket, connect.get());
+		Assert.assertEquals(httpSocket, connect.get());
 
 		//clear preface and settings frame from client
 		mockChannel.getFramesAndClear();
@@ -96,20 +96,27 @@ public class Test4FrameSizeAndHeaders {
 
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
 		Assert.assertEquals("Frame size=16389 was greater than max="+localSettings.getMaxFrameSize()+" reason=EXCEEDED_MAX_FRAME_SIZE stream=1", msg);
-		
-		//local is notified...
-		Http2Exception reason = mockSvrListener.getClosedReason();
-		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, reason.getReason().getErrorCode());
-		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
 		Assert.assertTrue(mockChannel.isClosed());
+		
+		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
+		Assert.assertEquals(1, results.size());
+		ConnectionReset failResp = (ConnectionReset) results.get(0);
+		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, failResp.getReason().getReason());
+
+		//send new request on closed connection
+		Http2Headers request1 = Requests.createRequest();
+		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
+		
+		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
+		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
 	}
 
-	
 	@Test
-	public void testSection4_2LargestFrame() {		
+	public void testSection4_2CanSendLargestFrame() {
 		MockResponseListener listener1 = new MockResponseListener();
 		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
 		Http2Headers request = sendRequestToServer(listener1);
@@ -120,7 +127,6 @@ public class Test4FrameSizeAndHeaders {
 		dataFrame.setData(dataGen.wrapByteArray(buf));
 		mockChannel.write(dataFrame); //endOfStream=false
 
-		//remote receives goAway
 		DataFrame fr = (DataFrame) listener1.getSingleReturnValueIncomingResponse();
 		Assert.assertEquals(localSettings.getMaxFrameSize(), fr.getData().getReadableSize());
 	}
@@ -135,7 +141,7 @@ public class Test4FrameSizeAndHeaders {
 	private Http2Headers sendRequestToServer(MockResponseListener listener1) {
 		Http2Headers request1 = Requests.createRequest();
 
-		socket.sendRequest(request1, listener1);
+		httpSocket.send(request1, listener1);
 		
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);
@@ -158,10 +164,16 @@ public class Test4FrameSizeAndHeaders {
 	            "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"; //payload 
 		mockChannel.writeHexBack(badHeaderFrame); //endOfStream=false
 
-		mockSvrListener.assertNotClosedd();
+		//remote receives goAway
+		RstStreamFrame errorFrame = (RstStreamFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, errorFrame.getKnownErrorCode());
 		Assert.assertFalse(mockChannel.isClosed());
+		
 		RstStreamFrame reset = (RstStreamFrame) listener1.getSingleReturnValueIncomingResponse();
 		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, reset.getKnownErrorCode());
+		
+		//can still send new stream
+		sendRequestToServer(listener1);
 	}
 	
 	@Test
@@ -179,13 +191,18 @@ public class Test4FrameSizeAndHeaders {
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
 
 		mockChannel.writeFrame(frames.get(1));
-		Http2Exception reason = mockSvrListener.getClosedReason();
-		ParseFailReason failReason = reason.getReason();
-		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, failReason.getErrorCode());
-		Assert.assertEquals(ErrorType.CONNECTION, reason.getErrorType());
-
-		//Assert.assertEquals(1, listener1.getReturnValuesIncomingResponse().size());
-
+		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
+		Assert.assertEquals(1, results.size());
+		ConnectionReset reset = (ConnectionReset) results.get(0);
+		Assert.assertEquals(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, reset.getReason().getReason());
+		
+		//remote receives goAway
+		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
+		DataWrapper debugData = goAway.getDebugData();
+		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
+		Assert.assertTrue(msg.contains("Headers/continuations from two different streams per spec cannot be interleaved. "));
+		Assert.assertTrue(mockChannel.isClosed());
 	}
 
 	private List<Http2Frame> createInterleavedFrames() {

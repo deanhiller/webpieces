@@ -4,13 +4,13 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.threading.SessionExecutor;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -27,23 +27,17 @@ public class Http2SocketImpl implements Http2Socket {
 	private Layer1Incoming incoming;
 	private Layer3Outgoing outgoing;
 
-	public Http2SocketImpl(Http2Config config, TCPChannel channel, HpackParser http2Parser, Http2ClientEngineFactory factory) {
+	public Http2SocketImpl(Http2Config config, TCPChannel channel, HpackParser http2Parser, Http2ClientEngineFactory factory, SessionExecutor sessionExecutor) {
 		outgoing = new Layer3Outgoing(channel, this);
-		Http2ClientEngine parseLayer = factory.createClientParser(config, http2Parser, outgoing);
+		Http2ClientEngine parseLayer = factory.createClientParser(config, http2Parser, outgoing, sessionExecutor);
 		incoming = new Layer1Incoming(parseLayer);
 	}
 
 	@Override
-	public CompletableFuture<Http2Socket> connect(InetSocketAddress addr, Http2ServerListener listener) {
-		if(outgoing.getClientListener() != null)
-			throw new IllegalStateException("Cannot call connect on an HttpSocket twice");
-		else if(listener == null)
-			throw new IllegalArgumentException("listener cannot be null");
-		else if(addr == null)
+	public CompletableFuture<Http2Socket> connect(InetSocketAddress addr) {
+		if(addr == null)
 			throw new IllegalArgumentException("addr cannot be null");
 			
-		outgoing.setClientListener(listener);
-		
 		return outgoing.connect(addr, incoming)
 				.thenCompose(c -> incoming.sendInitialFrames())  //make sure 'sending' initial frames is part of connecting
 				.thenApply(f -> {
@@ -53,9 +47,9 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Void> close() {
+	public CompletableFuture<Http2Socket> close() {
 		//TODO: For http/2, please send GOAWAY first(crap, do we need reason in the close method?...probably)
-		return outgoing.close().thenApply(channel -> null);
+		return outgoing.close().thenApply(channel -> this);
 	}
 
 	@Override
@@ -64,13 +58,13 @@ public class Http2SocketImpl implements Http2Socket {
 		
 		if(request.getPayload() == null) {
 			request.getHeaders().setEndOfStream(true);
-			sendRequest(request.getHeaders(), responseListener);
+			send(request.getHeaders(), responseListener);
 			return responseListener.fetchResponseFuture();
 		} else if(request.getTrailingHeaders() == null) {
 			DataFrame data = createData(request, true);
 			
-			return sendRequest(request.getHeaders(), responseListener)
-						.thenCompose(writer -> writer.sendMore(data))
+			return send(request.getHeaders(), responseListener)
+						.thenCompose(writer -> writer.send(data))
 						.thenCompose(writer -> responseListener.fetchResponseFuture());
 		}
 		
@@ -78,9 +72,9 @@ public class Http2SocketImpl implements Http2Socket {
 		DataFrame data = createData(request, false);
 		request.getTrailingHeaders().setEndOfStream(true);
 		
-		return sendRequest(request.getHeaders(), responseListener)
-			.thenCompose(writer -> writer.sendMore(data))
-			.thenCompose(writer -> writer.sendMore(request.getTrailingHeaders()))
+		return send(request.getHeaders(), responseListener)
+			.thenCompose(writer -> writer.send(data))
+			.thenCompose(writer -> writer.send(request.getTrailingHeaders()))
 			.thenCompose(writer -> responseListener.fetchResponseFuture());
 	}
 
@@ -93,7 +87,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<ClientStreamWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
+	public CompletableFuture<ClientStreamWriter> send(Http2Headers request, Http2ResponseListener listener) {
 		return incoming.sendRequest(request, listener);
 	}
 

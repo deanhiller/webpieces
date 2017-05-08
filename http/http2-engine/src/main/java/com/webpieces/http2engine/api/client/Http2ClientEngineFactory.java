@@ -1,5 +1,7 @@
 package com.webpieces.http2engine.api.client;
 
+import org.webpieces.util.threading.SessionExecutor;
+
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2engine.impl.client.Level1ClientEngine;
 
@@ -15,8 +17,13 @@ public class Http2ClientEngineFactory {
 		//localSettings.setInitialWindowSize(1000);
 		localSettings.setInitialWindowSize(initialWindowSize);
 	 */
-	public Http2ClientEngine createClientParser(Http2Config config, HpackParser lowLevelParser, ClientEngineListener resultListener) {
-		return new Level1ClientEngine(config, lowLevelParser, resultListener);
+	public Http2ClientEngine createClientParser(
+			Http2Config config, 
+			HpackParser lowLevelParser, 
+			ClientEngineListener resultListener,
+			SessionExecutor executor
+	) {
+		return new Level1ClientEngine(config, lowLevelParser, resultListener, executor);
 	}
 	
 }

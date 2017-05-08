@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -20,7 +19,6 @@ public class Layer3Outgoing implements ClientEngineListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer3Outgoing.class);
 	private TCPChannel channel;
 	
-	private Http2ServerListener clientListener;
 	private Http2Socket socket;
 
 	public Layer3Outgoing(TCPChannel channel, Http2Socket socket) {
@@ -33,14 +31,6 @@ public class Layer3Outgoing implements ClientEngineListener {
 		log.info("writing out data to socket size="+data.remaining());
 		return channel.write(data)
 						.thenApply(c -> null);
-	}
-
-	public void setClientListener(Http2ServerListener listener) {
-		this.clientListener = listener;
-	}
-
-	public Http2ServerListener getClientListener() {
-		return clientListener;
 	}
 
 	public void sendPreface(ByteBuffer buf) {
@@ -57,17 +47,14 @@ public class Layer3Outgoing implements ClientEngineListener {
 
 	@Override
 	public void sendControlFrameToClient(Http2Frame lowLevelFrame) {
-		clientListener.incomingControlFrame(lowLevelFrame);
 	}
 
 	@Override
 	public void engineClosedByFarEnd() {
-		clientListener.farEndClosed(socket);
 	}
 	
 	@Override
 	public void closeSocket(Http2Exception reason) {
 		channel.close();
-		clientListener.socketClosed(socket, reason);		
 	}
 }

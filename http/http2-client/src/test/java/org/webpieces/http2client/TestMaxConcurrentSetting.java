@@ -14,7 +14,7 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
-import org.webpieces.http2client.mock.MockServerListener;
+import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.ClientStreamWriter;
@@ -41,13 +41,12 @@ public class TestMaxConcurrentSetting {
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr);
+        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket("simple");
 		
-		MockServerListener mockSvrListener = new MockServerListener();
-		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555), mockSvrListener);
+		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555));
 		Assert.assertTrue(connect.isDone());
 		Assert.assertEquals(socket, connect.get());
 
@@ -118,8 +117,8 @@ public class TestMaxConcurrentSetting {
 		MockResponseListener listener2 = new MockResponseListener();
 
 		listener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
-		CompletableFuture<ClientStreamWriter> future = socket.sendRequest(request1, listener1);
-		CompletableFuture<ClientStreamWriter> future2 = socket.sendRequest(request2, listener2);
+		CompletableFuture<ClientStreamWriter> future = socket.send(request1, listener1);
+		CompletableFuture<ClientStreamWriter> future2 = socket.send(request2, listener2);
 		
 		RequestHolder r1 = new RequestHolder(request1, listener1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, future2);		

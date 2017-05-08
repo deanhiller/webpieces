@@ -6,6 +6,6 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public interface ClientStreamWriter {
 
-	CompletableFuture<ClientStreamWriter> sendMore(PartialStream data);
+	CompletableFuture<ClientStreamWriter> send(PartialStream data);
 
 }

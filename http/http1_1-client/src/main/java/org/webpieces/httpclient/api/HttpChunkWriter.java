@@ -6,5 +6,5 @@ import org.webpieces.httpparser.api.dto.HttpChunk;
 
 public interface HttpChunkWriter {
 
-	CompletableFuture<Void> send(HttpChunk chunk);
+	CompletableFuture<HttpChunkWriter> send(HttpChunk chunk);
 }

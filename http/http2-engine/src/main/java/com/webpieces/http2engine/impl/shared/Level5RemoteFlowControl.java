@@ -62,30 +62,28 @@ public class Level5RemoteFlowControl {
 		Stream stream = data.getStream();
 
 		boolean send;
-		synchronized (remoteLock) {
-			long min = Math.min(remoteWindowSize, stream.getRemoteWindowSize());
-			long lengthToSend = Math.min(length, min);
-			if(length != lengthToSend) {
-				//must split DataFrame into two since WindowUpdateSize is not large enough
-				List<DataTry> tuple = splitDataFrame(data, lengthToSend);
-				data = tuple.get(0); //swap the right size to send
-				dataQueue.add(0, tuple.get(1));
-			}
-
-			if(lengthToSend > 0) {
-				stream.incrementRemoteWindow(-lengthToSend);
-				remoteWindowSize -= lengthToSend;
-				send = true;
-			} else if(data.isWasQueuedBefore()) {
-				dataQueue.add(0, data); //insert BACK at beginning of queue
-				send = false;
-			} else {
-				dataQueue.add(data); //insert at end of queue
-				send = false;
-			}
-			
-			log.info("flow control.  send="+send+" window="+remoteWindowSize+" streamWindow="+stream.getRemoteWindowSize());
+		long min = Math.min(remoteWindowSize, stream.getRemoteWindowSize());
+		long lengthToSend = Math.min(length, min);
+		if(length != lengthToSend) {
+			//must split DataFrame into two since WindowUpdateSize is not large enough
+			List<DataTry> tuple = splitDataFrame(data, lengthToSend);
+			data = tuple.get(0); //swap the right size to send
+			dataQueue.add(0, tuple.get(1));
 		}
+
+		if(lengthToSend > 0) {
+			stream.incrementRemoteWindow(-lengthToSend);
+			remoteWindowSize -= lengthToSend;
+			send = true;
+		} else if(data.isWasQueuedBefore()) {
+			dataQueue.add(0, data); //insert BACK at beginning of queue
+			send = false;
+		} else {
+			dataQueue.add(data); //insert at end of queue
+			send = false;
+		}
+		
+		log.info("flow control.  send="+send+" window="+remoteWindowSize+" streamWindow="+stream.getRemoteWindowSize());
 		
 		if(send) {
 			DataTry finalTry = data;
@@ -138,15 +136,13 @@ public class Level5RemoteFlowControl {
 		
 		log.info("modify window size="+initialWindow);
 		
-		synchronized(remoteLock) {
-			remoteWindowSize += difference;
-			//next line MUST be set before updating all streams or some streams could be created
-			//just after updating all streams and before updating initial window size(ie. they are created with old size).  instead
-			//make sure all new streams are using this initialWindow first
-			remoteSettings.setInitialWindowSize(initialWindow); 
-			//now, update all streams that need updating
-			streamState.updateAllStreams(initialWindow);
-		}
+		remoteWindowSize += difference;
+		//next line MUST be set before updating all streams or some streams could be created
+		//just after updating all streams and before updating initial window size(ie. they are created with old size).  instead
+		//make sure all new streams are using this initialWindow first
+		remoteSettings.setInitialWindowSize(initialWindow); 
+		//now, update all streams that need updating
+		streamState.updateAllStreams(initialWindow);
 	}
 
 	//NOTE: this method virtually single threaded when used with channelmanager
@@ -206,6 +202,10 @@ public class Level5RemoteFlowControl {
 
 		//someday, remove synchronized above and then complete future when it is complete instead maybe
 		return CompletableFuture.completedFuture(null);
+	}
+
+	public CompletableFuture<Void> goAway(ConnectionException e) {
+		return layer6NotifyListener.goAway(e);
 	}
 
 }

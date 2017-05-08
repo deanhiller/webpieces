@@ -64,7 +64,7 @@ public class Layer1Incoming implements DataListener {
 		}
 
 		@Override
-		public CompletableFuture<ClientStreamWriter> sendMore(PartialStream data) {
+		public CompletableFuture<ClientStreamWriter> send(PartialStream data) {
 			if(isEndOfStream)
 				throw new IllegalStateException("Client has already sent a PartialStream"
 						+ " object with endOfStream=true so no more data can be sent");
@@ -74,7 +74,7 @@ public class Layer1Incoming implements DataListener {
 			
 			data.setStreamId(streamId);
 
-			return requestWriter.sendMore(data).thenApply(c -> this);
+			return requestWriter.send(data).thenApply(c -> this);
 		}
 	}
 	

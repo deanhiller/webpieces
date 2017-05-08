@@ -4,7 +4,7 @@ import com.webpieces.http2engine.impl.shared.HeaderSettings;
 
 public class Http2Config {
 	//will be logged.  only useful if you create many http2 clients which is not needed as one client can
-	//talk to everyone though you may want to give each it's own thread pool
+	//talk to everyone
 	private String id = "";
 
 	//you may want to start off with 1 rather than 100.  some apis like Apple send a settings frame of

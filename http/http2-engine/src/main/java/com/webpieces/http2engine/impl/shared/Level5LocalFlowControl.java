@@ -39,23 +39,21 @@ public class Level5LocalFlowControl {
 		DataFrame f = (DataFrame) payload;
 		long frameLength = f.getTransmitFrameLength();
 
-		synchronized(this) {
-			if(frameLength > connectionLocalWindowSize) {
-				throw new ConnectionException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
-						"connectionLocalWindowSize too small="+connectionLocalWindowSize
-						+" frame len="+frameLength+" for frame="+f);
-			} else if(frameLength > stream.getLocalWindowSize()) {
-				throw new StreamException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
-						"connectionLocalWindowSize too small="+connectionLocalWindowSize
-						+" frame len="+frameLength+" for frame="+f);
-			}
-			
-			totalSent += frameLength;
-			connectionLocalWindowSize -= frameLength;
-			stream.incrementLocalWindow(-frameLength);
-			log.info("received framelen="+frameLength+" newConnectionWindowSize="
-					+connectionLocalWindowSize+" streamSize="+stream.getLocalWindowSize()+" totalSent="+totalSent);
+		if(frameLength > connectionLocalWindowSize) {
+			throw new ConnectionException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
+					"connectionLocalWindowSize too small="+connectionLocalWindowSize
+					+" frame len="+frameLength+" for frame="+f);
+		} else if(frameLength > stream.getLocalWindowSize()) {
+			throw new StreamException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
+					"connectionLocalWindowSize too small="+connectionLocalWindowSize
+					+" frame len="+frameLength+" for frame="+f);
 		}
+		
+		totalSent += frameLength;
+		connectionLocalWindowSize -= frameLength;
+		stream.incrementLocalWindow(-frameLength);
+		log.info("received framelen="+frameLength+" newConnectionWindowSize="
+				+connectionLocalWindowSize+" streamSize="+stream.getLocalWindowSize()+" totalSent="+totalSent);
 		
 		return notifyListener.sendPieceToClient(stream, payload)
 			.thenApply(c -> updateFlowControl(frameLength, stream));
@@ -67,11 +65,9 @@ public class Level5LocalFlowControl {
 		
 		//TODO: we could optimize this to send very large window updates and send less window updates instead of
 		//what we do currently sending many increase window by 13 byte updates and such.
-		synchronized(this) {
-			connectionLocalWindowSize += frameLength;
-			stream.incrementLocalWindow(frameLength);
-			totalRecovered += frameLength;
-		}
+		connectionLocalWindowSize += frameLength;
+		stream.incrementLocalWindow(frameLength);
+		totalRecovered += frameLength;
 
 		int len = (int) frameLength;
 		WindowUpdateFrame w1 = new WindowUpdateFrame();

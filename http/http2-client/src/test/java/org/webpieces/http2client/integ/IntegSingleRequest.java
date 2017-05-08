@@ -1,7 +1,6 @@
 package org.webpieces.http2client.integ;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -12,10 +11,8 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
-import org.webpieces.http2client.api.Http2ServerListener;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
@@ -30,9 +27,6 @@ import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2parser.api.Http2Exception;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -73,8 +67,8 @@ public class IntegSingleRequest {
 		Http2Socket socket = createHttpClient("testRunSocket", isHttp, addr);
 		
 		socket
-			.connect(addr, new ServerListenerImpl())
-			.thenAccept(s -> s.sendRequest(request, new ChunkedResponseListener()))
+			.connect(addr)
+			.thenAccept(s -> s.send(request, new ChunkedResponseListener()))
 			.exceptionally(e -> reportException(socket, e));
 		
 		Thread.sleep(10000000);
@@ -94,7 +88,7 @@ public class IntegSingleRequest {
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		
-		Http2Client client = Http2ClientFactory.createHttpClient(new Http2Config(), mgr, hpackParser, http2HighLevelFactory);
+		Http2Client client = Http2ClientFactory.createHttpClient(new Http2Config(), mgr, hpackParser, http2HighLevelFactory, executor2);
 		
 		Http2Socket socket;
 		if(isHttp) {
@@ -109,35 +103,6 @@ public class IntegSingleRequest {
 	private Void reportException(Http2Socket socket, Throwable e) {
 		log.error("exception on socket="+socket, e);
 		return null;
-	}
-
-	private static class ServerListenerImpl implements Http2ServerListener {
-
-		@Override
-		public void farEndClosed(Http2Socket socket) {
-			log.info("far end closed");			
-		}
-		
-		@Override
-		public void socketClosed(Http2Socket socket, Http2Exception e) {
-			log.info("far end closed", e);
-		}
-
-		@Override
-		public void failure(Exception e) {
-			log.warn("exception", e);
-		}
-
-		@Override
-		public void incomingControlFrame(Http2Frame lowLevelFrame) {
-			if(lowLevelFrame instanceof GoAwayFrame) {
-				GoAwayFrame goAway = (GoAwayFrame) lowLevelFrame;
-				DataWrapper debugData = goAway.getDebugData();
-				String debug = debugData.createStringFrom(0, debugData.getReadableSize(), StandardCharsets.UTF_8);
-				log.info("go away received.  debug="+debug);
-			} else 
-				throw new UnsupportedOperationException("not done yet.  frame="+lowLevelFrame);
-		}
 	}
 	
 	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {

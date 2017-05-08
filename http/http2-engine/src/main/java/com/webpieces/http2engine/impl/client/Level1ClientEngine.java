@@ -9,6 +9,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.threading.SessionExecutor;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -34,8 +35,10 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	private Level3ClientStreams streamInit;
 	private Level7NotifyListeners finalLayer;
 	private Level6MarshalAndPing marshalLayer;
+	private SessionExecutor executor;
 
-	public Level1ClientEngine(Http2Config config, HpackParser parser, ClientEngineListener clientEngineListener) {
+	public Level1ClientEngine(Http2Config config, HpackParser parser, ClientEngineListener clientEngineListener, SessionExecutor executor) {
+		this.executor = executor;
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = config.getLocalSettings();
 
@@ -54,11 +57,16 @@ public class Level1ClientEngine implements Http2ClientEngine {
 
 	@Override
 	public CompletableFuture<Void> sendInitializationToSocket() {
-		log.info("sending preface");
-		DataWrapper prefaceData = dataGen.wrapByteArray(preface);
-		finalLayer.sendPreface(prefaceData);
-
-		return parsing.sendSettings();
+		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
+		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
+		//just connect more sockets
+		return executor.execute(this, () -> { 
+			log.info("sending preface");
+			DataWrapper prefaceData = dataGen.wrapByteArray(preface);
+			finalLayer.sendPreface(prefaceData);
+	
+			return parsing.sendSettings();
+		});
 	}
 	
 	@Override
@@ -68,27 +76,47 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	
 	@Override
 	public CompletableFuture<ClientStreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
-		int streamId = headers.getStreamId();
-		if(streamId <= 0)
-			throw new IllegalArgumentException("frames for requests must have a streamId > 0");
-		else if(streamId % 2 == 0)
-			throw new IllegalArgumentException("Client cannot send frames with even stream ids to server per http/2 spec");
-		
-		return streamInit.createStreamAndSend(headers, responseListener);
+		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
+		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
+		//just connect more sockets
+		return executor.execute(this, () -> { 
+			int streamId = headers.getStreamId();
+			if(streamId <= 0)
+				throw new IllegalArgumentException("frames for requests must have a streamId > 0");
+			else if(streamId % 2 == 0)
+				throw new IllegalArgumentException("Client cannot send frames with even stream ids to server per http/2 spec");
+			
+			return streamInit.createStreamAndSend(headers, responseListener);
+		});
 	}
 
 	@Override
 	public void parse(DataWrapper newData) {
-		parsing.parse(newData);
+		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
+		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
+		//just connect more sockets
+		executor.execute(this, () -> { 
+			parsing.parse(newData);
+		});
 	}
 
 	@Override
 	public void farEndClosed() {
-		marshalLayer.farEndClosed();
+		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
+		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
+		//just connect more sockets
+		executor.execute(this, () -> { 
+			marshalLayer.farEndClosed();
+		});
 	}
 
 	@Override
 	public void initiateClose(String reason) {
-		
+		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
+		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
+		//just connect more sockets
+		executor.execute(this, () -> { 
+			
+		});
 	}
 }

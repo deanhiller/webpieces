@@ -12,7 +12,7 @@ import com.webpieces.http2engine.api.client.Http2ResponseListener;
 
 public interface Http2Socket {
 	
-	CompletableFuture<Http2Socket> connect(InetSocketAddress addr, Http2ServerListener listener);
+	CompletableFuture<Http2Socket> connect(InetSocketAddress addr);
 	
     /**
      * This can be used ONLY if 'you' know that the far end does NOT send a chunked download
@@ -45,9 +45,9 @@ public interface Http2Socket {
      *  
      *  @param isComplete true if you are only sending request headers with content-length = 0
      */
-    CompletableFuture<ClientStreamWriter> sendRequest(Http2Headers request, Http2ResponseListener listener);
+    CompletableFuture<ClientStreamWriter> send(Http2Headers request, Http2ResponseListener listener);
     
-    CompletableFuture<Void> close();
+    CompletableFuture<Http2Socket> close();
 
     /**
      * Future is complete when ping response is returned such that you can measure latency

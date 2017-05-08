@@ -14,13 +14,11 @@ import javax.net.ssl.X509TrustManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient.api.HttpsSslEngineFactory;
 
-public class ForTestSslClientEngineFactory implements HttpsSslEngineFactory {
+public class ForTestSslClientEngineFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(ForTestSslClientEngineFactory.class);
 
-	@Override
 	public SSLEngine createSslEngine(String host, int port) {
 		try {
 			return createSslEngineImpl(host, port);

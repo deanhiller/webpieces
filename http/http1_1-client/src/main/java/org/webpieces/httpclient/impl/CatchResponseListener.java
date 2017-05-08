@@ -2,17 +2,17 @@ package org.webpieces.httpclient.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
-public class CatchResponseListener implements ResponseListener {
+public class CatchResponseListener implements HttpResponseListener {
 
 	private static final Logger log = LoggerFactory.getLogger(CatchResponseListener.class);
 	
-	private ResponseListener listener;
+	private HttpResponseListener listener;
 
-	public CatchResponseListener(ResponseListener listener) {
+	public CatchResponseListener(HttpResponseListener listener) {
 		this.listener = listener;
 	}
 
@@ -40,7 +40,7 @@ public class CatchResponseListener implements ResponseListener {
 			listener.failure(e);
 		} catch(Throwable ee) {
 			log.error("exception", ee);
-		}			
+		}
 	}
 
 }

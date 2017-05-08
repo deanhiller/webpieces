@@ -9,6 +9,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.StreamException;
@@ -24,7 +25,6 @@ import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 public class Level2ParsingAndRemoteSettings {
 
 	private static final Logger log = LoggerFactory.getLogger(Level2ParsingAndRemoteSettings.class);
-	private static final HeaderSettings DEFAULT = new HeaderSettings();
 
 	private HpackParser lowLevelParser;
 	private UnmarshalState parsingState;
@@ -62,13 +62,14 @@ public class Level2ParsingAndRemoteSettings {
 		try {
 			CompletableFuture<Void> future = parseImpl(newData);
 			future.handle((resp, t) -> handleError(resp, t));
+		} catch(ConnectionClosedException e) {
+			log.trace(() -> "Normal exception since we are closing and they do not know yet", e);
 		} catch(StreamException e) {
 			log.error("shutting the stream down due to error", e);
 			level3StreamInit.sendRstToServerAndClient(e).exceptionally( t -> logExc("stream", t));
 		} catch(ConnectionException e) {
 			log.error("shutting the connection down due to error", e);
-			marshalLayer.goAway(e).exceptionally( t -> logExc("connection", t));
-			//level3StreamInit.sendClientResetsAndSvrGoAway(e).exceptionally( t -> logExc("connection", t)); //send GoAway
+			level3StreamInit.sendClientResetsAndSvrGoAway(e).exceptionally( t -> logExc("connection", t)); //send GoAway
 		} catch(Throwable e) {
 			handleError(null, e);
 		}

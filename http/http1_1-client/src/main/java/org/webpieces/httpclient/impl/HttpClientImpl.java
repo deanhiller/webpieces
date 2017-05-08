@@ -1,23 +1,15 @@
 package org.webpieces.httpclient.impl;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
+import javax.net.ssl.SSLEngine;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient.api.CloseListener;
-import org.webpieces.httpclient.api.HttpChunkWriter;
 import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.channels.TCPChannel;
 
 public class HttpClientImpl implements HttpClient {
 
-	private static final Logger log = LoggerFactory.getLogger(HttpClientImpl.class);
 	private ChannelManager mgr;
 	private HttpParser parser;
 
@@ -27,40 +19,15 @@ public class HttpClientImpl implements HttpClient {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponse> sendSingleRequest(InetSocketAddress addr, HttpRequest request) {
-		HttpClientSocket socket = openHttpSocket(addr+"");
-		CompletableFuture<HttpClientSocket> connect = socket.connect(addr);
-		return connect.thenCompose(p -> socket.send(request));
+	public HttpSocket createHttpSocket(String idForLogging) {
+		TCPChannel channel = mgr.createTCPChannel(idForLogging);
+		return new HttpSocketImpl(channel, parser);
 	}
 	
 	@Override
-	public CompletableFuture<HttpChunkWriter> sendSingleRequest(InetSocketAddress addr, HttpRequest request, ResponseListener listener) {
-		HttpClientSocket socket = openHttpSocket(addr+"");
-
-		CompletableFuture<HttpClientSocket> connect = socket.connect(addr);
-		return connect.thenCompose(p -> socket.send(request, listener));
-	}
-
-//	private HttpChunkWriter fail(HttpSocket socket, ResponseListener listener, Throwable e) {
-//		CompletableFuture<HttpSocket> closeSocket = socket.closeSocket();
-//		closeSocket.exceptionally(ee -> {
-//			log.error("could not close socket due to exception");
-//			return socket;
-//		});
-//		listener.failure(e);
-//		
-//		
-//		return null;
-//	}
-
-	@Override
-	public HttpClientSocket openHttpSocket(String idForLogging) {
-		return openHttpSocket(idForLogging, null);
-	}
-	
-	@Override
-	public HttpClientSocket openHttpSocket(String idForLogging, CloseListener listener) {
-		return new HttpSocketImpl(mgr, idForLogging, null, parser, listener);
+	public HttpSocket createHttpsSocket(String idForLogging, SSLEngine engine) {
+		TCPChannel channel = mgr.createTCPChannel(idForLogging, engine);
+		return new HttpSocketImpl(channel, parser);
 	}
 
 }

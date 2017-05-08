@@ -19,7 +19,7 @@ public class RequestWriterImpl implements ClientStreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<ClientStreamWriter> sendMore(PartialStream data) {
+	public CompletableFuture<ClientStreamWriter> send(PartialStream data) {
 		if(data.getStreamId() != stream.getStreamId())
 			throw new IllegalArgumentException("PartialStream has incorrect stream id="+data
 					+" it should be="+stream.getStreamId()+" since initial request piece had that id");

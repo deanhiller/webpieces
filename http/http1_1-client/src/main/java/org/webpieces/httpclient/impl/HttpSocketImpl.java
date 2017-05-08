@@ -1,25 +1,19 @@
 package org.webpieces.httpclient.impl;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.net.ssl.SSLEngine;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.CloseListener;
 import org.webpieces.httpclient.api.HttpChunkWriter;
-import org.webpieces.httpclient.api.HttpClientSocket;
-import org.webpieces.httpclient.api.HttpsSslEngineFactory;
-import org.webpieces.httpclient.api.ResponseListener;
+import org.webpieces.httpclient.api.HttpResponseListener;
+import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpChunk;
@@ -33,47 +27,35 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
-public class HttpSocketImpl implements HttpClientSocket, Closeable {
+public class HttpSocketImpl implements HttpSocket {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
 	private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private TCPChannel channel;
 
-	private CompletableFuture<HttpClientSocket> connectFuture;
+	private CompletableFuture<HttpSocket> connectFuture;
 	private boolean isClosed;
 	private boolean connected;
 	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
 	
 	private HttpParser parser;
 	private Memento memento;
-	private ConcurrentLinkedQueue<ResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
+	private ConcurrentLinkedQueue<HttpResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private DataListener dataListener = new MyDataListener();
-	private CloseListener closeListener;
-	private HttpsSslEngineFactory factory;
-	private ChannelManager mgr;
-	private String idForLogging;
 	private boolean isRecording = false;
 	
-	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpsSslEngineFactory factory, HttpParser parser2,
-			CloseListener listener) {
-		this.factory = factory;
-		this.mgr = mgr;
-		this.idForLogging = idForLogging;
-		this.parser = parser2;
+	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
+		this.channel = channel;
+		this.parser = parser;
 		memento = parser.prepareToParse();
-		this.closeListener = listener;		
+	}
+
+	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser2, Object object) {
 	}
 
 	@Override
-	public CompletableFuture<HttpClientSocket> connect(InetSocketAddress addr) {
-		if(factory == null) {
-			channel = mgr.createTCPChannel(idForLogging);
-		} else {
-			SSLEngine engine = factory.createSslEngine(addr.getHostName(), addr.getPort());
-			channel = mgr.createTCPChannel(idForLogging, engine);
-		}
-		
+	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr) {
 		if(isRecording ) {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
@@ -85,12 +67,12 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 	@Override
 	public CompletableFuture<HttpResponse> send(HttpRequest request) {
 		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
-		ResponseListener l = new CompletableListener(future);
+		HttpResponseListener l = new CompletableListener(future);
 		send(request, l);
 		return future;
 	}
 	
-	private synchronized HttpClientSocket connected() {
+	private synchronized HttpSocket connected() {
 		connected = true;
 		
 		while(!pendingRequests.isEmpty()) {
@@ -102,7 +84,7 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 	}
 
 	@Override
-	public CompletableFuture<HttpChunkWriter> send(HttpRequest request, ResponseListener listener) {
+	public CompletableFuture<HttpChunkWriter> send(HttpRequest request, HttpResponseListener listener) {
 		if(connectFuture == null) 
 			throw new IllegalArgumentException("You must at least call httpSocket.connect first(it "
 					+ "doesn't have to complete...you just have to call it before caling send)");
@@ -122,8 +104,8 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 		return future;
 	}
 
-	private void actuallySendRequest(CompletableFuture<HttpChunkWriter> future, HttpRequest request, ResponseListener listener) {
-		ResponseListener l = new CatchResponseListener(listener);
+	private void actuallySendRequest(CompletableFuture<HttpChunkWriter> future, HttpRequest request, HttpResponseListener listener) {
+		HttpResponseListener l = new CatchResponseListener(listener);
 		ByteBuffer wrap = parser.marshalToByteBuffer(request);
 		
 		//put this on the queue before the write to be completed from the listener below
@@ -147,22 +129,9 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 		
 		return null;
 	}
-
-	@Override
-	public void close() throws IOException {
-		if(isClosed)
-			return;
-		
-		//best effort and ignore exception except log it
-		CompletableFuture<HttpClientSocket> future = closeSocket();
-		future.exceptionally(e -> {
-			log.info("close failed", e);
-			return this;
-		});
-	}
 	
 	@Override
-	public CompletableFuture<HttpClientSocket> closeSocket() {
+	public CompletableFuture<HttpSocket> close() {
 		if(isClosed) {
 			return CompletableFuture.completedFuture(this);
 		}
@@ -179,7 +148,7 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 	private void cleanUpPendings(String msg) {
 		//do we need an isClosing state and cache that future?  (I don't think so but time will tell)
 		while(!responsesToComplete.isEmpty()) {
-			ResponseListener listener = responsesToComplete.poll();
+			HttpResponseListener listener = responsesToComplete.poll();
 			if(listener != null) {
 				listener.failure(new NioClosedChannelException(msg+" before responses were received"));
 			}
@@ -206,7 +175,7 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 			for(HttpPayload msg : parsedMessages) {
 				if(processingChunked) {
 					HttpChunk chunk = (HttpChunk) msg;
-					ResponseListener listener = responsesToComplete.peek();
+					HttpResponseListener listener = responsesToComplete.peek();
 					if(chunk.isLastChunk()) {
 						processingChunked = false;
 						responsesToComplete.poll();
@@ -215,12 +184,12 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 					listener.incomingChunk(chunk, chunk.isLastChunk());
 				} else if(!msg.isHasChunkedTransferHeader()) {
 					HttpResponse resp = (HttpResponse) msg;
-					ResponseListener listener = responsesToComplete.poll();
+					HttpResponseListener listener = responsesToComplete.poll();
 					listener.incomingResponse(resp, true);
 				} else {
 					processingChunked = true;
 					HttpResponse resp = (HttpResponse) msg;
-					ResponseListener listener = responsesToComplete.peek();
+					HttpResponseListener listener = responsesToComplete.peek();
 					listener.incomingResponse(resp, false);
 				}
 			}
@@ -230,18 +199,14 @@ public class HttpSocketImpl implements HttpClientSocket, Closeable {
 		public void farEndClosed(Channel channel) {
 			log.info("far end closed");
 			isClosed = true;
-			cleanUpPendings("Remote end closed");
-			
-			if(closeListener != null)
-				closeListener.farEndClosed(HttpSocketImpl.this);
-		
+			cleanUpPendings("Remote end closed");		
 		}
 
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.error("Failure on channel="+channel, e);
 			while(!responsesToComplete.isEmpty()) {
-				ResponseListener listener = responsesToComplete.poll();
+				HttpResponseListener listener = responsesToComplete.poll();
 				if(listener != null) {
 					listener.failure(e);
 				}

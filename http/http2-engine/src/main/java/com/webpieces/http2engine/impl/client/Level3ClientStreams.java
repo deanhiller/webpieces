@@ -9,6 +9,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
@@ -18,6 +19,7 @@ import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.Level3AbstractStreamMgr;
 import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Level6MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2parser.api.ConnectionException;
@@ -57,6 +59,12 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	}
 
 	public CompletableFuture<ClientStreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
+		if(closedReason != null) {
+			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
+			CompletableFuture<ClientStreamWriter> future = new CompletableFuture<>();
+			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
+			return future;
+		}
 		return permitQueue.runRequest(() -> createStreamSendImpl(frame, responseListener));
 	}
 
@@ -69,8 +77,13 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 				.thenApply(s -> new RequestWriterImpl(stream, this));
 	}
 
-	public CompletableFuture<Void> sendMoreStreamData(
-			Stream stream, PartialStream data) {
+	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
+		if(closedReason != null) {
+			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
+			CompletableFuture<Void> future = new CompletableFuture<>();
+			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
+			return future;
+		}
 		CompletableFuture<Void> future = clientSm.fireToSocket(stream, data);
 		checkForClosedState(stream, data);
 		return future;
@@ -113,23 +126,32 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 
 	@Override
 	public CompletableFuture<Void> sendPayloadToClient(PartialStream frame) {
+		if(closedReason != null) {
+			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
+			return CompletableFuture.completedFuture(null);
+		}
+		
 		if(frame instanceof Http2Push) {
 			return sendPushPromiseToClient((Http2Push) frame);
 		}
 		
-		Stream stream = streamState.get(frame);
+		Stream stream = streamState.getStream(frame);
 		
 		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame))
 					.thenApply(s -> null);
 	}
 		
 	public CompletableFuture<Void> sendPushPromiseToClient(Http2Push fullPromise) {		
+		if(closedReason != null) {
+			log.info("ignoring incoming push="+fullPromise+" since socket is shutting down");
+			return CompletableFuture.completedFuture(null);
+		}
 		int newStreamId = fullPromise.getPromisedStreamId();
 		if(newStreamId % 2 == 1)
 			throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, newStreamId, 
 					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number");
 
-		Stream causalStream = streamState.get(fullPromise);
+		Stream causalStream = streamState.getStream(fullPromise);
 		
 		Http2ResponseListener listener = causalStream.getResponseListener();
 		PushPromiseListener pushListener = listener.newIncomingPush(newStreamId);
