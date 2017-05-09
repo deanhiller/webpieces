@@ -1,5 +1,6 @@
 package com.webpieces.http2engine.impl.shared;
 
+import java.net.ConnectException;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
@@ -11,6 +12,8 @@ import org.webpieces.javasm.api.StateMachineFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.Http2Event.Http2SendRecieve;
+import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -60,6 +63,11 @@ public abstract class Level4AbstractStateMachine {
 			localFlowControl.fireToClient(stream, payload);
 			
 			return s;
+		}).exceptionally(t -> {
+			if(t instanceof NoTransitionException) {
+				throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, stream.getStreamId(), t.getMessage(), t);
+			}
+			throw new RuntimeException(t);
 		});
 
 	}
@@ -80,14 +88,14 @@ public abstract class Level4AbstractStateMachine {
 		Http2PayloadType payloadType;
 		if(payload instanceof Http2Headers) {
 			if(payload.isEndOfStream())
-				payloadType = Http2PayloadType.HEADERS_EOS;
+				payloadType = Http2PayloadType.HEADERS_WITH_EOS;
 			else
-				payloadType = Http2PayloadType.HEADERS2;
+				payloadType = Http2PayloadType.HEADERS;
 		} else if(payload instanceof DataFrame) {
 			if(payload.isEndOfStream())
-				payloadType = Http2PayloadType.DATA_EOS;
+				payloadType = Http2PayloadType.DATA_WITH_EOS;
 			else
-				payloadType = Http2PayloadType.DATA2;
+				payloadType = Http2PayloadType.DATA;
 		} else if(payload instanceof Http2Push) {
 			payloadType = Http2PayloadType.PUSH_PROMISE;
 		} else if(payload instanceof RstStreamFrame) {
@@ -105,7 +113,7 @@ public abstract class Level4AbstractStateMachine {
 
 		@Override
 		public void noTransitionFromEvent(State state, Object event) {
-			throw new RuntimeException("No transition defined on statemachine for event="+event+" when in state="+state);
+			throw new NoTransitionException("No transition defined on statemachine for event="+event+" when in state="+state);
 		}
 	}
 }

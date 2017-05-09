@@ -73,15 +73,19 @@ public abstract class MockSuperclass {
 	}
 
 	protected Stream<ParametersPassedIn> getCalledMethods(MethodEnum method) {
-		return getCalledMethodList(method).stream();
+		 return getCalledMethodList(method).stream();
 	}
 	
 	protected List<ParametersPassedIn> getCalledMethodList(MethodEnum method) {
 		List<ParametersPassedIn> params = calledMethods.get(method);
 		if(params == null) {
-			params = new ArrayList<>();
+			return new ArrayList<>();
 		}
-		return params;		
+		
+		List<ParametersPassedIn> copy = new ArrayList<>();
+		copy.addAll(params);
+		params.clear();
+		return copy;		
 	}
 	
 	public void clear() {

@@ -38,6 +38,17 @@ public class MockResponseListener extends MockSuperclass implements Http2Respons
 		super.addValueToReturn(Method.INCOMING_PUSH, retVal);
 	}
 
+	public Integer getSinglePushStreamId() {
+		List<Integer> list = getIncomingPushStreamIds();
+		if(list.size() != 1)
+			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+list.size());
+		return list.get(0);
+	}
+	public List<Integer> getIncomingPushStreamIds() {
+		Stream<Integer> map = super.getCalledMethods(Method.INCOMING_PUSH).map(s -> (Integer)s.getArgs()[0]);
+		return map.collect(Collectors.toList());
+	}
+	
 	public PartialStream getSingleReturnValueIncomingResponse() {
 		List<PartialStream> list = getReturnValuesIncomingResponse();
 		if(list.size() != 1)
@@ -57,6 +68,10 @@ public class MockResponseListener extends MockSuperclass implements Http2Respons
 
 	public void setIncomingRespDefault(CompletableFuture<Void> retVal) {
 		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
+	}
+
+	public void setIncomingPushDefault(PushPromiseListener pushListener) {
+		super.setDefaultReturnValue(Method.INCOMING_PUSH, pushListener);
 	}
 
 }

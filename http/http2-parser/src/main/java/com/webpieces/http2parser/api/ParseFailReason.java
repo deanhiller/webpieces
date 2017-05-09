@@ -20,6 +20,8 @@ public enum ParseFailReason {
 
 	FAR_END_CLOSED_SOCKET(Http2ErrorCode.NO_ERROR),
 	FLOW_CONTROL_ERROR(Http2ErrorCode.FLOW_CONTROL_ERROR),
+	BAD_FRAME_RECEIVED_FOR_THIS_STATE(Http2ErrorCode.PROTOCOL_ERROR), 
+	BUG(Http2ErrorCode.INTERNAL_ERROR),
 	;
 
 	private Http2ErrorCode errorCode;

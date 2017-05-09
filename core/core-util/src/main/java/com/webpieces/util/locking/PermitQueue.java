@@ -67,7 +67,7 @@ public class PermitQueue<RESP> {
 
 	private Void handle(RESP resp, Throwable t, CompletableFuture<RESP> future) {
 		if(t != null)
-			future.completeExceptionally(new RuntimeException(t));
+			future.completeExceptionally(t);
 		else
 			future.complete(resp);
 		

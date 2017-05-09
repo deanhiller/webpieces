@@ -28,11 +28,9 @@ import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
-import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -83,9 +81,20 @@ public class Test4FrameSizeAndHeaders {
 		mockChannel.getFrameAndClear(); //clear the ack frame 
 	}
 	
+	/**
+	 * An endpoint MUST send an error code of FRAME_SIZE_ERROR if a frame 
+	 * exceeds the size defined in SETTINGS_MAX_FRAME_SIZE, exceeds any 
+	 * limit defined for the frame type, or is too small to contain 
+	 * mandatory frame data. A frame size error in a frame that could alter 
+	 * the state of the entire connection MUST be treated as a connection 
+	 * error (Section 5.4.1); this includes any frame carrying a header 
+	 * block (Section 4.3) (that is, HEADERS, PUSH_PROMISE, and 
+	 * CONTINUATION), SETTINGS, and any frame with a stream identifier of 0.
+	 */
 	@Test
 	public void testSection4_2FrameTooLarge() {		
 		MockResponseListener listener1 = new MockResponseListener();
+		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
 		Http2Headers request = sendRequestToServer(listener1);
 		sendResponseFromServer(listener1, request);
 		
@@ -102,9 +111,7 @@ public class Test4FrameSizeAndHeaders {
 		Assert.assertEquals("Frame size=16389 was greater than max="+localSettings.getMaxFrameSize()+" reason=EXCEEDED_MAX_FRAME_SIZE stream=1", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
-		Assert.assertEquals(1, results.size());
-		ConnectionReset failResp = (ConnectionReset) results.get(0);
+		ConnectionReset failResp = (ConnectionReset) listener1.getSingleReturnValueIncomingResponse();
 		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, failResp.getReason().getReason());
 
 		//send new request on closed connection
@@ -115,6 +122,9 @@ public class Test4FrameSizeAndHeaders {
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
 	}
 
+	/**
+	 * success case of edge testing off by one or not
+	 */
 	@Test
 	public void testSection4_2CanSendLargestFrame() {
 		MockResponseListener listener1 = new MockResponseListener();
@@ -148,6 +158,10 @@ public class Test4FrameSizeAndHeaders {
 		return request1;
 	}
 
+	/**
+	 *  A decoding error in a header block MUST be treated as a connection error (Section 5.4.1) of type COMPRESSION_ERROR.
+	 *  
+	 */
 	@Test
 	public void testSection4_3BadDecompression() {		
 		MockResponseListener listener1 = new MockResponseListener();
@@ -165,17 +179,35 @@ public class Test4FrameSizeAndHeaders {
 		mockChannel.writeHexBack(badHeaderFrame); //endOfStream=false
 
 		//remote receives goAway
-		RstStreamFrame errorFrame = (RstStreamFrame) mockChannel.getFrameAndClear();
-		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, errorFrame.getKnownErrorCode());
-		Assert.assertFalse(mockChannel.isClosed());
+		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, goAway.getKnownErrorCode());
+		DataWrapper debugData = goAway.getDebugData();
+		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
+		Assert.assertEquals("Error from hpack library reason=HEADER_DECODE stream=1", msg);
+		Assert.assertTrue(mockChannel.isClosed());
 		
-		RstStreamFrame reset = (RstStreamFrame) listener1.getSingleReturnValueIncomingResponse();
-		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, reset.getKnownErrorCode());
-		
-		//can still send new stream
-		sendRequestToServer(listener1);
+		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
+		Assert.assertEquals(1, results.size());
+		ConnectionReset failResp = (ConnectionReset) results.get(0);
+		Assert.assertEquals(ParseFailReason.HEADER_DECODE, failResp.getReason().getReason());
 	}
 	
+	/**
+	 * Each header block is processed as a discrete unit. Header blocks 
+	 * MUST be transmitted as a contiguous sequence of frames, with no interleaved 
+	 * frames of any other type or from any other stream. The last frame in a 
+	 * sequence of HEADERS or CONTINUATION frames has the END_HEADERS flag set. The 
+	 * last frame in a sequence of PUSH_PROMISE or CONTINUATION frames has the 
+	 * END_HEADERS flag set. This allows a header block to be logically equivalent to a single frame.
+	 * 
+	 * Header block fragments can only be sent as the payload of HEADERS, PUSH_PROMISE, or 
+	 * CONTINUATION frames because these frames carry data that can modify the 
+	 * compression context maintained by a receiver. An endpoint receiving 
+	 * HEADERS, PUSH_PROMISE, or CONTINUATION frames needs to reassemble header 
+	 * blocks and perform decompression even if the frames are to be discarded. A receiver 
+	 * MUST terminate the connection with a connection error (Section 5.4.1) of 
+	 * type COMPRESSION_ERROR if it does not decompress a header block.
+	 */
 	@Test
 	public void testSection4_3InterleavedFrames() {
 		MockResponseListener listener1 = new MockResponseListener();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -48,6 +49,15 @@ public class Requests {
 	    response.setStreamId(streamId);
 	    
 		return response;
+	}
+
+	public static Http2Push createPush(int streamId) {
+		Http2Push push = new Http2Push();
+		push.setStreamId(streamId);
+		push.setPromisedStreamId(2);
+	    push.addHeader(new Http2Header(Http2HeaderName.SERVER, "me"));
+
+		return push;
 	}
 
 }

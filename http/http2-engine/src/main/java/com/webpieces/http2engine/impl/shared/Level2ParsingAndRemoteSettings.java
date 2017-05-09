@@ -12,6 +12,7 @@ import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
@@ -59,20 +60,15 @@ public class Level2ParsingAndRemoteSettings {
 	 * @return 
 	 */
 	public void parse(DataWrapper newData) {
+		CompletableFuture<Void> future;
 		try {
-			CompletableFuture<Void> future = parseImpl(newData);
-			future.handle((resp, t) -> handleError(resp, t));
-		} catch(ConnectionClosedException e) {
-			log.trace(() -> "Normal exception since we are closing and they do not know yet", e);
-		} catch(StreamException e) {
-			log.error("shutting the stream down due to error", e);
-			level3StreamInit.sendRstToServerAndClient(e).exceptionally( t -> logExc("stream", t));
-		} catch(ConnectionException e) {
-			log.error("shutting the connection down due to error", e);
-			level3StreamInit.sendClientResetsAndSvrGoAway(e).exceptionally( t -> logExc("connection", t)); //send GoAway
-		} catch(Throwable e) {
-			handleError(null, e);
+			future = parseImpl(newData);
+		} catch(Throwable t) {
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(t);
 		}
+		
+		future.handle((resp, t) -> handleError(resp, t));
 	}
 
 	private Void logExc(String thing, Throwable t) {
@@ -81,9 +77,20 @@ public class Level2ParsingAndRemoteSettings {
 	}
 
 	private Void handleError(Object object, Throwable e) {
-		if(e != null)
-			log.warn("Exception", e);
-		
+		if(e == null) 
+			return null;
+		else if(e instanceof ConnectionClosedException) {
+			log.trace(() -> "Normal exception since we are closing and they do not know yet", e);
+		} else if(e instanceof StreamException) {
+			log.error("shutting the stream down due to error", e);
+			level3StreamInit.sendRstToServerAndClient((StreamException) e).exceptionally( t -> logExc("stream", t));
+		} else if(e instanceof ConnectionException) {
+			log.error("shutting the connection down due to error", e);
+			level3StreamInit.sendClientResetsAndSvrGoAway((ConnectionException) e).exceptionally( t -> logExc("connection", t)); //send GoAway
+		} else {
+			log.error("shutting the connection down due to error", e);
+			level3StreamInit.sendClientResetsAndSvrGoAway(new ConnectionException(ParseFailReason.BUG, 0, e.getMessage(), e)).exceptionally( t -> logExc("connection", t)); //send GoAwa
+		}
 		return null;
 	}
 

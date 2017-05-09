@@ -8,6 +8,7 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
+import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.StreamException;
@@ -26,7 +27,7 @@ public class HeaderDecoding {
 			return decodeImpl(decoder, data, streamId);
         } catch (IOException e) {
             // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment
-            throw new StreamException(ParseFailReason.HEADER_DECODE, streamId, "Error from hpack library", e);
+            throw new ConnectionException(ParseFailReason.HEADER_DECODE, streamId, "Error from hpack library", e);
             //TODO: clone hpack and fix so they throw with debug info as their errors contain no info :(
         }
 	}

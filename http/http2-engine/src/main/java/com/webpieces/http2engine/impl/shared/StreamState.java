@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class StreamState {
@@ -27,7 +28,7 @@ public class StreamState {
 	public Stream getStream(Http2Msg frame) {
 		Stream stream = streamIdToStream.get(frame.getStreamId());
 		if (stream == null)
-			throw new IllegalArgumentException("bug, Stream not found for frame="+frame);
+			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, frame.getStreamId(), "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame);
 		return stream;
 	}
 

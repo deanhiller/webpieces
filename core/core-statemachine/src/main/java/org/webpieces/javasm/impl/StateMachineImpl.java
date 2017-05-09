@@ -125,7 +125,7 @@ public class StateMachineImpl implements StateMachine
 		queue.releasePermit(); //release the next event to the statemachine
 		
 		if(t != null)
-			f.completeExceptionally(new RuntimeException(t));
+			f.completeExceptionally(t);
 		else
 			f.complete(s);
 		
@@ -145,7 +145,7 @@ public class StateMachineImpl implements StateMachine
             //NOTE: Stack trace is not logged here.  That is the responsibility of the javasm client
             //so exceptions don't get logged multiple times.
             smState.getLogger().warn(this+"Exception occurred going out of state="+smState.getCurrentState()+", event="+evt);
-            future.completeExceptionally(new RuntimeException(e));
+            future.completeExceptionally(e);
         }
 		return future;
 	}

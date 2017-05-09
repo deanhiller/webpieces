@@ -1,6 +1,8 @@
 package com.webpieces.http2parser.api;
 
-public abstract class Http2Exception extends RuntimeException {
+import java.util.concurrent.CompletionException;
+
+public abstract class Http2Exception extends CompletionException {
 
     private static final long serialVersionUID = -2704718008204232741L;
     private int streamId = 0x0;
