@@ -23,13 +23,14 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.util.time.TimeImpl;
 
 public class IntegSingleRequest {
 
@@ -76,19 +77,20 @@ public class IntegSingleRequest {
 
 	public static Http2Socket createHttpClient(String id, boolean isHttp, InetSocketAddress addr) {
 		BufferPool pool2 = new BufferCreationPool();
+		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
+
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
-		HpackParser hpackParser = HpackParserFactory.createParser(pool2, false);
-		Http2ClientEngineFactory http2HighLevelFactory = new Http2ClientEngineFactory();
+		InjectionConfig injConfig = new InjectionConfig(executor2, hpackParser);
 		
 		String host = addr.getHostName();
 		int port = addr.getPort();
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		
-		Http2Client client = Http2ClientFactory.createHttpClient(new Http2Config(), mgr, hpackParser, http2HighLevelFactory, executor2);
+		Http2Client client = Http2ClientFactory.createHttpClient(mgr, injConfig);
 		
 		Http2Socket socket;
 		if(isHttp) {

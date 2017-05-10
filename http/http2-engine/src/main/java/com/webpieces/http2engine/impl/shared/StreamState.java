@@ -6,11 +6,18 @@ import java.util.concurrent.ConcurrentMap;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.util.time.Time;
 
 public class StreamState {
 
 	private ConcurrentMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
-	//private AtomicReference<Function<Stream, Stream>> createFunction = new AtomicReference<Function<Stream,Stream>>((s) -> create(s));
+	private long highestOddStream = 0;
+	private long highestEvenStream = 0;
+	private Time time;
+
+	public StreamState(Time time) {
+		this.time = time;
+	}
 
 	//chanmgr thread only
 	public ConcurrentMap<Integer, Stream> closeEngine(ConnectionException e) {
@@ -19,17 +26,40 @@ public class StreamState {
 	
 	//client threads
 	public Stream create(Stream stream) {
-		Stream oldStream = streamIdToStream.putIfAbsent(stream.getStreamId(), stream);
+		int id = stream.getStreamId();
+		if(id % 2 == 0) {
+			if(id < highestEvenStream)
+				throw new IllegalStateException("stream id="+id+" is too low and must be higher than="+highestEvenStream);
+			highestEvenStream = id;
+		} else {
+			if(id < highestOddStream)
+				throw new IllegalStateException("stream id="+id+" is too low and must be higher than="+highestOddStream);
+			highestOddStream = id;			
+		}
+			
+		Stream oldStream = streamIdToStream.putIfAbsent(id, stream);
 		if(oldStream == stream)
-			throw new IllegalStateException("stream id="+stream.getStreamId()+" already exists");
+			throw new IllegalStateException("stream id="+id+" already exists");
 		return stream;
 	}
 	
 	public Stream getStream(Http2Msg frame) {
 		Stream stream = streamIdToStream.get(frame.getStreamId());
-		if (stream == null)
-			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, frame.getStreamId(), "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame);
+		if (stream == null) {
+			int id = frame.getStreamId();
+			if(id % 2 == 0) {
+				check(frame, id, highestEvenStream);
+			} else {
+				check(frame, id, highestOddStream);
+			}			
+		}
 		return stream;
+	}
+
+	private void check(Http2Msg frame, int id, long highestOpen) {
+		if(id > highestOpen)
+			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, id, "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame); 
+		throw new ConnectionException(ParseFailReason.CLOSED_STREAM, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
 	}
 
 	//this method and create happen on a virtual single thread from channelmgr

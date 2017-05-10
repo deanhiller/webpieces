@@ -23,7 +23,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 
 	@Override
-	public ServerStreamWriter sendRequestToClient(Http2Headers request, ResponseHandler responseHandler) {
+	public ServerStreamWriter sendRequestToServer(Http2Headers request, ResponseHandler responseHandler) {
 		//every request received is a new stream
 		Http2StreamImpl stream = new Http2StreamImpl(socket, responseHandler);
 		return httpListener.incomingRequest(stream, request, Protocol.HTTP2);		
@@ -34,14 +34,8 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		return socket.getChannel().write(newData).thenApply(c -> null);
 	}
 
-	@Override
-	public void engineClosedByFarEnd() {
-		httpListener.socketClosed(socket);
-	}
-	
 	public void closeSocket(Http2Exception reason) {
 		socket.close("");
-		httpListener.socketClosed(socket);
 	}
 
 }

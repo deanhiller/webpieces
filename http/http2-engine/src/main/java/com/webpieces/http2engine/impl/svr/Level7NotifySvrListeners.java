@@ -31,11 +31,6 @@ public class Level7NotifySvrListeners implements EngineResultListener {
 	}
 
 	@Override
-	public void farEndClosed() {
-		listener.engineClosedByFarEnd();
-	}
-
-	@Override
 	public void closeSocket(Http2Exception reason) {
 		listener.closeSocket(reason);
 	}

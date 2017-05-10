@@ -13,6 +13,14 @@ public class PriorityFrame extends AbstractHttp2Frame implements PartialStream {
     /* payload */
     private PriorityDetails priorityDetails = new PriorityDetails();
 
+    public PriorityFrame() {
+	}
+
+    public PriorityFrame(int streamId, PriorityDetails details) {
+    	super(streamId);
+    	this.priorityDetails = details;
+	}
+    
     public PriorityDetails getPriorityDetails() {
         return priorityDetails;
     }

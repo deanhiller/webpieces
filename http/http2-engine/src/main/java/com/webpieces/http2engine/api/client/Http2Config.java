@@ -12,6 +12,10 @@ public class Http2Config {
 	private int initialRemoteMaxConcurrent = 100;
 	private HeaderSettings localSettings = new HeaderSettings();
 	
+	//unfortunately, since the spec has no ack for a sent stream reset, we must keep state around to discard 
+	//messages for a time period when you the client send a stream reset.  
+	private int afterResetExpireSeconds = 5;
+	
 	public String getId() {
 		return id;
 	}
@@ -29,5 +33,11 @@ public class Http2Config {
 	}
 	public void setLocalSettings(HeaderSettings localSettings) {
 		this.localSettings = localSettings;
+	}
+	public int getAfterResetExpireSeconds() {
+		return afterResetExpireSeconds;
+	}
+	public void setAfterResetExpireSeconds(int afterResetExpireSeconds) {
+		this.afterResetExpireSeconds = afterResetExpireSeconds;
 	}
 }

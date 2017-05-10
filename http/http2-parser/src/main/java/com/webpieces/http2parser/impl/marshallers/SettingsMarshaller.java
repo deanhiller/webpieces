@@ -135,7 +135,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		int max = 2147483647;
 		
 		if(value < min || value > max)
-            throw new ConnectionException(ParseFailReason.WINDOW_SIZE_INVALID2, 0, 
+            throw new ConnectionException(ParseFailReason.SETTINGS_WINDOW_SIZE_INVALID, 0, 
             		"window size must be between "+min+" and "+max+" but was="+value);
 	}
 	

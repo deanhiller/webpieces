@@ -106,10 +106,6 @@ public class Level6MarshalAndPing {
 		ByteBuffer buffer = ByteBuffer.wrap(data.createByteArray());
 		return sendToSocket(buffer);
 	}
-	
-	public void farEndClosed() {
-		finalLayer.farEndClosed();
-	}
 
 	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return finalLayer.sendToSocket(buffer);

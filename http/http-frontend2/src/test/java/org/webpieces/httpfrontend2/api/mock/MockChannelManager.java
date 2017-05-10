@@ -4,6 +4,7 @@ import java.util.stream.Stream;
 
 import javax.net.ssl.SSLEngine;
 
+import org.webpieces.httpfrontend2.api.mock2.MockTcpServerChannel;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
@@ -16,6 +17,7 @@ import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
 
+@Deprecated
 public class MockChannelManager extends MockSuperclass implements ChannelManager {
 
 	private static enum Method implements MethodEnum {

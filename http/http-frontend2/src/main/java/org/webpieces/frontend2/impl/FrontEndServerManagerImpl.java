@@ -4,47 +4,48 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
-import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.api.FrontendConfig;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
-import org.webpieces.frontend2.api.ParsingLogic;
+import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
 	private static final Logger log = LoggerFactory.getLogger(FrontEndServerManagerImpl.class);
 	private AsyncServerManager svrManager;
-	private BufferPool bufferPool;
 	private ScheduledExecutorService timer;
-	private ParsingLogic parsing;
+	private HttpParser httpParser;
+	private Http2ServerEngineFactory http2EngineFactory;
 
-	public FrontEndServerManagerImpl(AsyncServerManager svrManager, ScheduledExecutorService svc, BufferPool bufferPool, ParsingLogic parsing) {
+	public FrontEndServerManagerImpl(
+			AsyncServerManager svrManager, ScheduledExecutorService svc, Http2ServerEngineFactory http2EngineFactory, HttpParser httpParser) {
 		this.timer = svc;
 		this.svrManager = svrManager;
-		this.bufferPool = bufferPool;
-		this.parsing = parsing;
+		this.http2EngineFactory = http2EngineFactory;
+		this.httpParser = httpParser;
 	}
 
 	@Override
 	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
 		preconditionCheck(config);
 
-		Layer1ServerListener listener = buildDatalListener(httpListener, config.http2Config);
+		Layer1ServerListener listener = buildDatalListener(httpListener);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 
 		return frontend;
 	}
 
-	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener, Http2Config config) {
-		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(parsing.getHttpParser(), httpListener);
-		Layer2Http2Handler http2 = new Layer2Http2Handler(parsing.getSvrEngineFactory(), parsing.getHttp2Parser(), httpListener, config);
+	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener) {
+		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(httpParser, httpListener);
+		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener);
 		Layer1ServerListener listener = new Layer1ServerListener(http1_1, http2);
 		return listener;
 	}
@@ -63,7 +64,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		Layer1ServerListener listener = buildDatalListener(httpListener, config.http2Config);
+		Layer1ServerListener listener = buildDatalListener(httpListener);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 		

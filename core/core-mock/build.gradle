@@ -1,3 +1,7 @@
+dependencies {
+	compile project(':core:core-util')
+}
+
 uploadArchives.repositories.mavenDeployer.pom.project {
    description='a simple mock superclass that mock objects can use to have less code'
 }

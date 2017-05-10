@@ -11,20 +11,19 @@ import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level3ServerStreams extends Level3AbstractStreamMgr {
 
-	private StreamState streamState;
 	private Level4ServerStateMachine serverSm;
 	private HeaderSettings localSettings;
 	private volatile int streamsInProcess = 0;
 
 	public Level3ServerStreams(StreamState streamState, Level4ServerStateMachine clientSm, Level5LocalFlowControl localFlowControl,
 			Level5RemoteFlowControl remoteFlowCtrl, HeaderSettings localSettings, HeaderSettings remoteSettings) {
-		super(remoteFlowCtrl, localFlowControl, remoteSettings);
-		this.streamState = streamState;
+		super(remoteFlowCtrl, localFlowControl, remoteSettings, streamState);
 		this.serverSm = clientSm;
 		this.localSettings = localSettings;
 	}
@@ -56,8 +55,14 @@ public class Level3ServerStreams extends Level3AbstractStreamMgr {
 	}
 
 	@Override
-	protected CompletableFuture<Void> fireToSocket(Stream stream, RstStreamFrame frame) {
+	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg) {
 		throw new UnsupportedOperationException("not supported yet");
+	}
+
+	@Override
+	protected CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

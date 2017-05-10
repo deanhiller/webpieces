@@ -6,6 +6,7 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -22,13 +23,15 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	private Level3ServerStreams streamInit;
 	private Level2ParsingAndRemoteSettings parsing;
 
-	public Level1ServerEngine(Http2Config config, HpackParser parser, ServerEngineListener listener) {
+	public Level1ServerEngine(ServerEngineListener listener, InjectionConfig injectionConfig) {
+		Http2Config config = injectionConfig.getConfig();
+		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = config.getLocalSettings();
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
 		//we have to release items in the map inside this or release the engine
-		StreamState streamState = new StreamState();
+		StreamState streamState = new StreamState(injectionConfig.getTime());
 		
 		finalLayer = new Level7NotifySvrListeners(listener);
 		marshalLayer = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
@@ -56,7 +59,6 @@ public class Level1ServerEngine implements Http2ServerEngine {
 
 	@Override
 	public void farEndClosed() {
-		marshalLayer.farEndClosed();
 	}
 
 	@Override

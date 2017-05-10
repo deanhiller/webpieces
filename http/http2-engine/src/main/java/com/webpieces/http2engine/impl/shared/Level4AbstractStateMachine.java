@@ -1,6 +1,5 @@
 package com.webpieces.http2engine.impl.shared;
 
-import java.net.ConnectException;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;

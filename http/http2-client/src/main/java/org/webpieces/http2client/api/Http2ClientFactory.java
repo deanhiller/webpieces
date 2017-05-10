@@ -8,13 +8,14 @@ import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
-import org.webpieces.util.threading.SessionExecutor;
-import org.webpieces.util.threading.SessionExecutorImpl;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
+import com.webpieces.util.time.Time;
+import com.webpieces.util.time.TimeImpl;
 
 public abstract class Http2ClientFactory {
 
@@ -27,21 +28,21 @@ public abstract class Http2ClientFactory {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
 
-		Http2ClientEngineFactory parseFactory = new Http2ClientEngineFactory();
-		return createHttpClient(config, mgr, hpackParser, parseFactory, executor);
+		InjectionConfig injConfig = new InjectionConfig(executor, hpackParser, new TimeImpl(), config);
+		return createHttpClient(mgr, injConfig);
 	}
 	
-	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, Executor executor) {
-		Http2ClientEngineFactory engineFactory = new Http2ClientEngineFactory();
+	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, Executor executor, Time time) {
 		BufferCreationPool pool = new BufferCreationPool();
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
-		return createHttpClient(config, mgr, hpackParser, engineFactory, executor);
+		InjectionConfig injConfig = new InjectionConfig(executor, hpackParser, time, config);
+
+		return createHttpClient(mgr, injConfig);
 	}
 	
-	public static Http2Client createHttpClient(
-			Http2Config config, ChannelManager mgr, HpackParser hpackParser, Http2ClientEngineFactory engineFactory, Executor executor) {
-		SessionExecutor sessionExecutor = new SessionExecutorImpl(executor);
-		return new Http2ClientImpl(config, mgr, hpackParser, engineFactory, sessionExecutor);
+	public static Http2Client createHttpClient(ChannelManager mgr, InjectionConfig injectionConfig) {
+		Http2ClientEngineFactory engineFactory = new Http2ClientEngineFactory(injectionConfig);
+		return new Http2ClientImpl(mgr, engineFactory );
 	}
 }

@@ -14,11 +14,14 @@ import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
+import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 /**
  * Test this section of rfc..
@@ -30,6 +33,7 @@ public class Test6_5SettingsFrameErrors {
 	private MockHttp2Channel mockChannel;
 	private Http2Socket socket;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
+	private MockTime mockTime = new MockTime(true);
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException {
@@ -41,7 +45,8 @@ public class Test6_5SettingsFrameErrors {
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
+		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
+        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket("simple");
@@ -97,7 +102,7 @@ public class Test6_5SettingsFrameErrors {
 		mockChannel.writeHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-		
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -115,7 +120,8 @@ public class Test6_5SettingsFrameErrors {
 		mockChannel.writeHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-		
+		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
+
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -133,7 +139,8 @@ public class Test6_5SettingsFrameErrors {
 		mockChannel.writeHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-		
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
+
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -151,7 +158,8 @@ public class Test6_5SettingsFrameErrors {
 		mockChannel.writeHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-		
+		Assert.assertEquals(Http2ErrorCode.FLOW_CONTROL_ERROR, goAway.getKnownErrorCode());
+
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -169,7 +177,8 @@ public class Test6_5SettingsFrameErrors {
 		mockChannel.writeHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-		
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
+
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	

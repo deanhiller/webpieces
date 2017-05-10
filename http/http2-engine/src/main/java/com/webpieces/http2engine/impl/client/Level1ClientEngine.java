@@ -18,6 +18,7 @@ import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
 import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
@@ -37,14 +38,17 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	private Level6MarshalAndPing marshalLayer;
 	private SessionExecutor executor;
 
-	public Level1ClientEngine(Http2Config config, HpackParser parser, ClientEngineListener clientEngineListener, SessionExecutor executor) {
-		this.executor = executor;
+	public Level1ClientEngine(ClientEngineListener clientEngineListener, InjectionConfig injectionConfig) {
+		
+		this.executor = injectionConfig.getExecutor();
+		Http2Config config = injectionConfig.getConfig();
+		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = config.getLocalSettings();
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
 		//we have to release items in the map inside this or release the engine
-		StreamState streamState = new StreamState();
+		StreamState streamState = new StreamState(injectionConfig.getTime());
 		
 		finalLayer = new Level7NotifyListeners(clientEngineListener);
 		marshalLayer = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
@@ -106,7 +110,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
 		//just connect more sockets
 		executor.execute(this, () -> { 
-			marshalLayer.farEndClosed();
+
 		});
 	}
 

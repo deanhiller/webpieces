@@ -44,7 +44,4 @@ public class MockHttpRequestListener extends MockSuperclass implements HttpReque
 		return retVal.collect(Collectors.toList());
 	}
 
-	@Override
-	public void socketClosed(FrontendSocket socket) {
-	}
 }

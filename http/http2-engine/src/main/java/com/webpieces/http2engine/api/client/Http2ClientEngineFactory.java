@@ -1,12 +1,14 @@
 package com.webpieces.http2engine.api.client;
 
-import org.webpieces.util.threading.SessionExecutor;
-
-import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2engine.impl.client.Level1ClientEngine;
 
 public class Http2ClientEngineFactory {
 
+	private InjectionConfig injectionConfig;
+	
+	public Http2ClientEngineFactory(InjectionConfig injectionConfig) {
+		this.injectionConfig = injectionConfig;
+	}
 	/*
 	 * TODO: move this to client...
 	 * 		HeaderSettings localSettings = new HeaderSettings();
@@ -17,13 +19,8 @@ public class Http2ClientEngineFactory {
 		//localSettings.setInitialWindowSize(1000);
 		localSettings.setInitialWindowSize(initialWindowSize);
 	 */
-	public Http2ClientEngine createClientParser(
-			Http2Config config, 
-			HpackParser lowLevelParser, 
-			ClientEngineListener resultListener,
-			SessionExecutor executor
-	) {
-		return new Level1ClientEngine(config, lowLevelParser, resultListener, executor);
+	public Http2ClientEngine createClientParser(ClientEngineListener resultListener) {
+		return new Level1ClientEngine(resultListener, injectionConfig);
 	}
 	
 }

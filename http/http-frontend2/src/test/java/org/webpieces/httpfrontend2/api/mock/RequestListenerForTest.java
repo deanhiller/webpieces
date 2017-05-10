@@ -21,9 +21,5 @@ class RequestListenerForTest implements HttpRequestListener {
 		return false;
 	}
 
-	@Override
-	public void socketClosed(FrontendSocket socket) {
-	}
-
 
 }

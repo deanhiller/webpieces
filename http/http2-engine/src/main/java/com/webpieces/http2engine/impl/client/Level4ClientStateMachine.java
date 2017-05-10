@@ -55,7 +55,7 @@ public class Level4ClientStateMachine extends Level4AbstractStateMachine {
 		stateMachine.createTransition(reservedState, halfClosedLocal, recvHeadersNoEos);
 		stateMachine.createTransition(reservedState, closed, recvHeadersEos, sentResetStream, recvResetStream);
 		
-		stateMachine.createTransition(halfClosedLocal, closed, dataRecvEos, recvResetStream, sentResetStream);
+		stateMachine.createTransition(halfClosedLocal, closed, recvHeadersEos, dataRecvEos, recvResetStream, sentResetStream);
 		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeadersNoEos, dataRecvNoEos);
 	}
 

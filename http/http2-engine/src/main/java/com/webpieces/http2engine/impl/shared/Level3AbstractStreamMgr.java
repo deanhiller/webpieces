@@ -12,6 +12,7 @@ import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.StreamException;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -28,14 +29,16 @@ public abstract class Level3AbstractStreamMgr {
 	public Level3AbstractStreamMgr(
 			Level5RemoteFlowControl level5RemoteFlow, 
 			Level5LocalFlowControl localFlowControl, 
-			HeaderSettings remoteSettings2) {
+			HeaderSettings remoteSettings2,
+			StreamState streamState) {
 		this.remoteFlowControl = level5RemoteFlow;
 		this.localFlowControl = localFlowControl;
 		this.remoteSettings = remoteSettings2;
+		this.streamState = streamState;
 	}
 
 	public abstract CompletableFuture<Void> sendPayloadToClient(PartialStream msg);
-	protected abstract CompletableFuture<Void> fireToSocket(Stream stream, RstStreamFrame frame);
+	protected abstract CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame);
 
 	public CompletableFuture<Void> sendRstToServerAndClient(StreamException e) {
 		if(closedReason != null) {
@@ -47,7 +50,7 @@ public abstract class Level3AbstractStreamMgr {
 		frame.setStreamId(e.getStreamId());
 		
 		Stream stream = streamState.getStream(frame);
-		return fireToSocket(stream, frame)
+		return fireRstToSocket(stream, frame)
 			.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
 	}
 	
@@ -88,7 +91,9 @@ public abstract class Level3AbstractStreamMgr {
 			return remoteFlowControl.updateConnectionWindowSize(msg);
 		} else {
 			Stream stream = streamState.getStream(msg);
-			return remoteFlowControl.updateStreamWindowSize(stream, msg);
+			if(stream != null)
+				return remoteFlowControl.updateStreamWindowSize(stream, msg);
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 
@@ -99,5 +104,8 @@ public abstract class Level3AbstractStreamMgr {
 	}
 
 	protected abstract void modifyMaxConcurrentStreams(long value);
+
+	public abstract CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg);
+
 
 }

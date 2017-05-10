@@ -14,9 +14,11 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.Preface;
+import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -31,6 +33,7 @@ public class Test3InitialHttpConnections {
 	private MockHttp2Channel mockChannel;
 	private Http2Socket socket;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
+	private MockTime mockTime = new MockTime(true);
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException {
@@ -41,9 +44,9 @@ public class Test3InitialHttpConnections {
 
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
-        config.setLocalSettings(localSettings);
-        
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
+        config.setLocalSettings(localSettings);        
+		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
+        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		socket = client.createHttpSocket("simple");

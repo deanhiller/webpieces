@@ -110,10 +110,6 @@ public class Layer2Http1_1Handler {
 		}
 	}
 
-	public void farEndClosed(FrontendSocketImpl socket) {
-		httpListener.socketClosed(socket);
-	}
-
 	public void socketOpened(FrontendSocketImpl socket, boolean isReadyForWrites) {
 		Memento parseState = httpParser.prepareToParse();
 		socket.setHttp1_1ParseState(parseState);

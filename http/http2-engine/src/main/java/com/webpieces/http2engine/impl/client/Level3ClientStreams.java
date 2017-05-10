@@ -19,11 +19,11 @@ import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.Level3AbstractStreamMgr;
 import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
-import com.webpieces.http2engine.impl.shared.Level6MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.util.locking.PermitQueue;
@@ -40,6 +40,7 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	//purely for logging!!!  do not use for something else
 	private AtomicInteger acquiredCnt = new AtomicInteger(0);
 	private AtomicInteger releasedCnt = new AtomicInteger(0);
+	private int afterResetExpireSeconds;
 
 	public Level3ClientStreams(
 			StreamState state,
@@ -49,12 +50,12 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 			Http2Config config,
 			HeaderSettings remoteSettings
 	) {
-		super(level5FlowControl, localFlowControl, remoteSettings);
-		this.streamState = state;
+		super(level5FlowControl, localFlowControl, remoteSettings, state);
 		this.clientSm = clientSm;
 		this.localSettings = config.getLocalSettings();
 		this.remoteSettings = remoteSettings;
 		this.permitCount = config.getInitialRemoteMaxConcurrent();
+		afterResetExpireSeconds = config.getAfterResetExpireSeconds();
 		permitQueue = new PermitQueue<>(config.getInitialRemoteMaxConcurrent());
 	}
 
@@ -84,20 +85,23 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
 			return future;
 		}
-		CompletableFuture<Void> future = clientSm.fireToSocket(stream, data);
-		checkForClosedState(stream, data);
-		return future;
+		
+		return fireToSocket(stream, data, false);
 	}
 	
 	@Override
-	protected CompletableFuture<Void> fireToSocket(Stream stream, RstStreamFrame frame) {
+	protected CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
+		return fireToSocket(stream, frame, true);
+	}
+	
+	private CompletableFuture<Void> fireToSocket(Stream stream, PartialStream frame, boolean keepDelayedState) {
 		return clientSm.fireToSocket(stream, frame).thenApply(v -> {
-			checkForClosedState(stream, frame);
+			checkForClosedState(stream, frame, keepDelayedState);
 			return null;
 		});
 	}
 	
-	private void checkForClosedState(Stream stream, PartialStream cause) {
+	private void checkForClosedState(Stream stream, PartialStream cause, boolean keepDelayedState) {
 		//If a stream ends up in closed state, for request type streams, we must release a permit on
 		//max concurrent streams
 		boolean isClosed = clientSm.isInClosedState(stream);
@@ -105,10 +109,16 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 			return; //do nothing
 		
 		log.info("stream closed="+stream.getStreamId());
-		Stream removedStream = streamState.remove(stream);
-		if(removedStream == null)
-			return; //someone else closed the stream. they beat us to it so just return
-
+		
+		if(!keepDelayedState) {
+			Stream removedStream = streamState.remove(stream);
+			if(removedStream == null)
+				return; //someone else closed the stream. they beat us to it so just return
+		} else {
+			//streamState.addDelayedRemove(stream, afterResetExpireSeconds);
+			throw new UnsupportedOperationException("not supported");
+		}
+		
 		//request stream, so increase permits
 		permitQueue.releasePermit();
 		int val = releasedCnt.decrementAndGet();
@@ -125,6 +135,26 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	}
 
 	@Override
+	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame frame) {
+		if(closedReason != null) {
+			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
+			return CompletableFuture.completedFuture(null);
+		}
+		
+		Stream stream;
+		try {
+			stream = streamState.getStream(frame);
+		} catch(ConnectionException e) {
+			//per spec, priority frames can be received on closed stream but ignore it
+			return CompletableFuture.completedFuture(null);
+		}			
+		
+		return clientSm.fireToClient(stream, frame, null)
+						.thenApply(s -> null);
+
+	}
+	
+	@Override
 	public CompletableFuture<Void> sendPayloadToClient(PartialStream frame) {
 		if(closedReason != null) {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
@@ -136,8 +166,12 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 		}
 		
 		Stream stream = streamState.getStream(frame);
+		if(stream == null) {
+			//RstStreamFrame only...
+			return CompletableFuture.completedFuture(null);
+		}
 		
-		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame))
+		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
 					.thenApply(s -> null);
 	}
 		

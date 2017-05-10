@@ -66,12 +66,5 @@ class ServerFactory {
 			return null;
 		}
 
-		@Override
-		public void socketClosed(FrontendSocket socket) {
-			// TODO Auto-generated method stub
-			
-		}
-
-
     }
 }

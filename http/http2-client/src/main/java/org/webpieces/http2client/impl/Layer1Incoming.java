@@ -16,6 +16,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Layer1Incoming implements DataListener {
@@ -65,7 +66,7 @@ public class Layer1Incoming implements DataListener {
 
 		@Override
 		public CompletableFuture<ClientStreamWriter> send(PartialStream data) {
-			if(isEndOfStream)
+			if(isEndOfStream && !(data instanceof RstStreamFrame))
 				throw new IllegalStateException("Client has already sent a PartialStream"
 						+ " object with endOfStream=true so no more data can be sent");
 			

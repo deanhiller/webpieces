@@ -16,6 +16,7 @@ import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
@@ -108,7 +109,9 @@ public class Level2ParsingAndRemoteSettings {
 
 	public CompletableFuture<Void> process(Http2Msg msg) {
 		log.info(id+"frame from socket="+msg);
-		if(msg instanceof PartialStream) {
+		if(msg instanceof PriorityFrame) {
+			return level3StreamInit.sendPriorityFrame((PriorityFrame)msg);
+		} else if(msg instanceof PartialStream) {
 			return level3StreamInit.sendPayloadToClient((PartialStream) msg);
 		} else if(msg instanceof GoAwayFrame) {
 			return marshalLayer.sendControlFrameToClient(msg);

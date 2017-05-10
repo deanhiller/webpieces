@@ -13,6 +13,13 @@ public class WindowUpdateFrame extends AbstractHttp2Frame implements Http2Msg {
     //1bit reserved
     private int windowSizeIncrement; //31 bits
 
+    public WindowUpdateFrame() {
+	}
+    public WindowUpdateFrame(int streamId, int size) {
+    	super(streamId);
+    	this.windowSizeIncrement = size;
+	}    
+    
     public int getWindowSizeIncrement() {
         return windowSizeIncrement;
     }

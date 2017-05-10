@@ -66,7 +66,6 @@ public class Layer1ServerListener implements AsyncDataListener {
 			http2Handler.farEndClosed(socket);
 			break;
 		case HTTP1_1:
-			http1_1Handler.farEndClosed(socket);
 			break;
 		case UNKNOWN:
 			//timeoutHandler.connectionClosedBeforeRequest(socket);

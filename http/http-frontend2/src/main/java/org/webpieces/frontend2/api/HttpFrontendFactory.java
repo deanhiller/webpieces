@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.frontend2.impl.FrontEndServerManagerImpl;
 import org.webpieces.httpparser.api.HttpParser;
@@ -16,7 +17,10 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
+import com.webpieces.util.time.TimeImpl;
 
 public abstract class HttpFrontendFactory {
 	
@@ -42,19 +46,36 @@ public abstract class HttpFrontendFactory {
 	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, ScheduledExecutorService timer, BufferPool pool) {
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
-		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory();
-		ParsingLogic parsing = new ParsingLogic(httpParser, http2Parser, svrEngineFactory);
+		
+		Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("http2Engine"));
 
-		return createFrontEnd(svrMgr, timer, pool, parsing);		
+		InjectionConfig injConfig = new InjectionConfig(executor, http2Parser, new TimeImpl(), new Http2Config());
+		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );
+		
+		return createFrontEnd(svrMgr, timer, httpParser, svrEngineFactory);		
 	}
 	
 	public static HttpFrontendManager createFrontEnd(
 			AsyncServerManager svrManager, 
 			ScheduledExecutorService svc, 
-			BufferPool bufferPool, 
-			ParsingLogic parsing 
+			HttpParser parsing,
+			Http2ServerEngineFactory engineFactory
 	) {
-		return new FrontEndServerManagerImpl(svrManager, svc, bufferPool, parsing);
+		return new FrontEndServerManagerImpl(svrManager, svc, engineFactory, parsing);
+	}
+
+	public static HttpFrontendManager createFrontEnd(
+			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig) {
+        BufferCreationPool pool = new BufferCreationPool();
+		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		return createFrontEnd(chanMgr, timer, injConfig, httpParser);
+	}
+	
+	public static HttpFrontendManager createFrontEnd(
+			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig, HttpParser parsing) {
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
+		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );
+		return new FrontEndServerManagerImpl(svrMgr, timer, svrEngineFactory, parsing);
 	}
 	
 }

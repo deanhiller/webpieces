@@ -18,6 +18,7 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
+import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
 import com.twitter.hpack.Encoder;
@@ -27,6 +28,7 @@ import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -50,6 +52,7 @@ public class Test4FrameSizeAndHeaders {
 	private MockHttp2Channel mockChannel;
 	private Http2Socket httpSocket;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
+	private MockTime mockTime = new MockTime(true);
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException {
@@ -62,7 +65,8 @@ public class Test4FrameSizeAndHeaders {
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         localSettings.setInitialWindowSize(localSettings.getMaxFrameSize()*4);
         config.setLocalSettings(localSettings);
-        Http2Client client = Http2ClientFactory.createHttpClient(config, mockChanMgr, new DirectExecutor());
+		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
+        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
 		httpSocket = client.createHttpSocket("simple");
@@ -119,6 +123,7 @@ public class Test4FrameSizeAndHeaders {
 		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
+		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
 	}
 

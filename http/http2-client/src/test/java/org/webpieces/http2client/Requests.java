@@ -6,6 +6,8 @@ import java.util.List;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
@@ -51,6 +53,18 @@ public class Requests {
 		return response;
 	}
 
+	static Http2Headers createEosResponse(int streamId) {
+		List<Http2Header> headers = new ArrayList<>();
+	    headers.add(new Http2Header(Http2HeaderName.SERVER, "me"));
+	    
+	    Http2Headers response = new Http2Headers(headers);
+	    response.setEndOfStream(true);
+	    
+	    response.setStreamId(streamId);
+	    
+		return response;
+	}
+	
 	public static Http2Push createPush(int streamId) {
 		Http2Push push = new Http2Push();
 		push.setStreamId(streamId);
@@ -58,6 +72,10 @@ public class Requests {
 	    push.addHeader(new Http2Header(Http2HeaderName.SERVER, "me"));
 
 		return push;
+	}
+
+	public static RstStreamFrame createReset(int streamId) {
+		return new RstStreamFrame(streamId, Http2ErrorCode.CANCEL);
 	}
 
 }
