@@ -16,7 +16,7 @@ public interface EngineResultListener {
 
 	CompletableFuture<Void> sendToSocket(ByteBuffer buffer);
 
-	CompletableFuture<Void> sendPieceToClient(Stream stream, PartialStream payload);
+	CompletableFuture<Void> sendPieceToApp(Stream stream, PartialStream payload);
 
 //	/**
 //	 * Data comes in as a single Http2Headers, then many Http2Data if there is a payload, then a

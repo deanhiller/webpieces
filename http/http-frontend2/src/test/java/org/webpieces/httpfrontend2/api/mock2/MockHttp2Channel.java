@@ -3,6 +3,7 @@ package org.webpieces.httpfrontend2.api.mock2;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -31,6 +32,7 @@ import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.Http2ParserFactory;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
@@ -53,6 +55,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		BufferPool bufferPool = new BufferCreationPool();
 		parser = HpackParserFactory.createParser(bufferPool, false);
 		unmarshalState = parser.prepareToUnmarshal(4096, 4096, 4096);
+		marshalState = parser.prepareToMarshal(4096, 4096);
 		BufferPool pool = new BufferCreationPool();
 		frameParser = Http2ParserFactory.createParser(pool);
 	}
@@ -62,6 +65,16 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
+	public void sendPrefaceAndSettings(SettingsFrame settings) {
+		String preface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
+		byte[] bytes = preface.getBytes(StandardCharsets.UTF_8);
+		DataWrapper data = parser.marshal(marshalState, settings);
+		DataWrapper prefaceWrapper = dataGen.wrapByteArray(bytes);
+		DataWrapper all = dataGen.chainDataWrappers(prefaceWrapper, data);
+		ByteBuffer buf = ByteBuffer.wrap(all.createByteArray());
+		listener.incomingData(this, buf);
+	}
+	
 	public void writeHexBack(String hex) {
 		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);

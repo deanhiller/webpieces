@@ -35,7 +35,7 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 
 	public void closeSocket(Http2Exception reason) {
-		socket.close("");
+		socket.internalClose();
 	}
 
 }

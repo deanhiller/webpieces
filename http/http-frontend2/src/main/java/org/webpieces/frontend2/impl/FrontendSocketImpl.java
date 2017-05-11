@@ -27,8 +27,14 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	@Override
 	public void close(String reason) {
+		//need to do goAway here
+		internalClose();
 	}
 
+	public void internalClose() {
+		channel.close();
+	}
+	
 	public void setHttp1_1ParseState(Memento parseState) {
 		this.http1_1ParseState = parseState;
 	}

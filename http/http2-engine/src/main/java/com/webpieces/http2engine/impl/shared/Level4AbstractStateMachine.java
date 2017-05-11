@@ -25,7 +25,8 @@ public abstract class Level4AbstractStateMachine {
 	protected StateMachine stateMachine;
 	protected State idleState;
 	protected State closed;
-	
+	protected State openState;
+
 	public Level4AbstractStateMachine(String id, Level5RemoteFlowControl remoteFlowControl, Level5LocalFlowControl localFlowControl) {
 		this.remoteFlowControl = remoteFlowControl;
 		this.localFlowControl = localFlowControl;
@@ -34,6 +35,7 @@ public abstract class Level4AbstractStateMachine {
 		stateMachine = factory.createStateMachine(id);
 
 		idleState = stateMachine.createState("idle");
+		openState = stateMachine.createState("Open");
 		closed = stateMachine.createState("closed");
 	}
 

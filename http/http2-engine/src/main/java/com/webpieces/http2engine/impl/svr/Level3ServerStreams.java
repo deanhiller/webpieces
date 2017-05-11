@@ -29,7 +29,7 @@ public class Level3ServerStreams extends Level3AbstractStreamMgr {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPayloadToClient(PartialStream msg) {
+	public CompletableFuture<Void> sendPayloadToApp(PartialStream msg) {
 		if(msg instanceof Http2Headers) {
 			return processHeaders((Http2Headers) msg);
 		} else

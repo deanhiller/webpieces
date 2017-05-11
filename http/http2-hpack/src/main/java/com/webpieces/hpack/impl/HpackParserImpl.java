@@ -148,6 +148,8 @@ public class HpackParserImpl implements HpackParser {
 
 	@Override
 	public DataWrapper marshal(MarshalState memento, Http2Msg msg) {
+		if(memento == null || msg == null)
+			throw new IllegalArgumentException("no parameters can be null");
 		MarshalStateImpl state = (MarshalStateImpl) memento;
 		if(msg instanceof Http2Headers) {
 			Http2Headers h = (Http2Headers) msg;

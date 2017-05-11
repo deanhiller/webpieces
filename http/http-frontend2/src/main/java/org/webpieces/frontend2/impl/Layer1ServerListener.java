@@ -50,6 +50,9 @@ public class Layer1ServerListener implements AsyncDataListener {
 		} else if(initialData.getInitialStatus() == InitiationStatus.PREFACE) {
 			socket.setProtocol(ProtocolType.HTTP2);
 			http2Handler.initialize(socket);
+			
+			//process any leftover data next
+			http2Handler.incomingData(socket, initialData.getLeftOverData());
 		} else {
 			throw new UnsupportedOperationException("Did not implement case="+initialData.getInitialStatus()+" yet");
 		}

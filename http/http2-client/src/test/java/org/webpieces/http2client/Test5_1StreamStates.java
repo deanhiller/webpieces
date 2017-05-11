@@ -42,44 +42,7 @@ import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class Test5_1StreamStates {
-
-	private MockChanMgr mockChanMgr;
-	private MockHttp2Channel mockChannel;
-	private Http2Socket httpSocket;
-	private HeaderSettings localSettings = Requests.createSomeSettings();
-	private MockTime mockTime = new MockTime(true);
-
-	@Before
-	public void setUp() throws InterruptedException, ExecutionException {
-		
-        mockChanMgr = new MockChanMgr();
-        mockChannel = new MockHttp2Channel();
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
-
-        Http2Config config = new Http2Config();
-        config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
-        localSettings.setInitialWindowSize(localSettings.getMaxFrameSize()*4);
-        config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
-        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
-        
-        mockChanMgr.addTCPChannelToReturn(mockChannel);
-		httpSocket = client.createHttpSocket("simple");
-		
-		CompletableFuture<Http2Socket> connect = httpSocket.connect(new InetSocketAddress(555));
-		Assert.assertTrue(connect.isDone());
-		Assert.assertEquals(httpSocket, connect.get());
-
-		//clear preface and settings frame from client
-		mockChannel.getFramesAndClear();
-		
-		//server's settings frame is finally coming in as well with maxConcurrent=1
-		HeaderSettings settings = new HeaderSettings();
-		settings.setMaxConcurrentStreams(1L);
-		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
-		mockChannel.getFrameAndClear(); //clear the ack frame 
-	}
+public class Test5_1StreamStates extends AbstractTest {
 	
 	/**
 	 * Receiving any frame other than HEADERS or PRIORITY on a stream in this state
@@ -324,14 +287,5 @@ public class Test5_1StreamStates {
 		Assert.assertEquals(resp1, response1);
 	}
 
-	private Http2Headers sendRequestToServer(MockResponseListener listener1) {
-		Http2Headers request1 = Requests.createRequest();
-
-		httpSocket.send(request1, listener1);
-		
-		Http2Msg req = mockChannel.getFrameAndClear();
-		Assert.assertEquals(request1, req);
-		return request1;
-	}
 
 }

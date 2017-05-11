@@ -155,7 +155,7 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPayloadToClient(PartialStream frame) {
+	public CompletableFuture<Void> sendPayloadToApp(PartialStream frame) {
 		if(closedReason != null) {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
 			return CompletableFuture.completedFuture(null);

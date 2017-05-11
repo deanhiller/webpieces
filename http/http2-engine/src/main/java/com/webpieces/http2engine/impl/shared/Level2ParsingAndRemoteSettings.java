@@ -112,7 +112,8 @@ public class Level2ParsingAndRemoteSettings {
 		if(msg instanceof PriorityFrame) {
 			return level3StreamInit.sendPriorityFrame((PriorityFrame)msg);
 		} else if(msg instanceof PartialStream) {
-			return level3StreamInit.sendPayloadToClient((PartialStream) msg);
+			//we may be sending to client app or server app depending on if this is serverside or clientside
+			return level3StreamInit.sendPayloadToApp((PartialStream) msg);
 		} else if(msg instanceof GoAwayFrame) {
 			return marshalLayer.sendControlFrameToClient(msg);
 		} else if(msg instanceof PingFrame) {

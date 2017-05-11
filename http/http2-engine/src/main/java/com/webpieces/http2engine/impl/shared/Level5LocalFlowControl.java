@@ -33,7 +33,7 @@ public class Level5LocalFlowControl {
 
 	public CompletableFuture<Void> fireToClient(Stream stream, PartialStream payload) {
 		if(!(payload instanceof DataFrame)) {
-			return notifyListener.sendPieceToClient(stream, payload);
+			return notifyListener.sendPieceToApp(stream, payload);
 		}
 		
 		DataFrame f = (DataFrame) payload;
@@ -55,7 +55,7 @@ public class Level5LocalFlowControl {
 		log.info("received framelen="+frameLength+" newConnectionWindowSize="
 				+connectionLocalWindowSize+" streamSize="+stream.getLocalWindowSize()+" totalSent="+totalSent);
 		
-		return notifyListener.sendPieceToClient(stream, payload)
+		return notifyListener.sendPieceToApp(stream, payload)
 			.thenApply(c -> updateFlowControl(frameLength, stream));
 	}
 

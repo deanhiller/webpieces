@@ -4,6 +4,7 @@ import org.webpieces.javasm.api.Memento;
 
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
+import com.webpieces.http2engine.api.server.ServerStreamWriter;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.StreamException;
 
@@ -17,6 +18,7 @@ public class Stream {
 	private long localWindowSize;
 	private long remoteInitialWindowSize;
 	private volatile boolean isClosed = false;
+	private ServerStreamWriter streamWriter;
 
 	public Stream(
 			int streamId, 
@@ -91,5 +93,12 @@ public class Stream {
 		return isClosed;
 	}
 
+	public void setStreamWriter(ServerStreamWriter writer) {
+		this.streamWriter = writer;
+	}
+
+	public ServerStreamWriter getStreamWriter() {
+		return streamWriter;
+	}
 	
 }

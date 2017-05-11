@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface SessionExecutor {
 
-	public <T> CompletableFuture<T> execute(Object key, Callable<CompletableFuture<T>> r);
+	public <T> CompletableFuture<T> executeCall(Object key, Callable<CompletableFuture<T>> r);
 
 	public void execute(Object key, Runnable r);
 

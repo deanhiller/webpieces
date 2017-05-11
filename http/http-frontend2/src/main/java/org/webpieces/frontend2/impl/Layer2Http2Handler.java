@@ -33,8 +33,12 @@ public class Layer2Http2Handler {
 	}
 	
 	public void incomingData(FrontendSocketImpl socket, ByteBuffer b) {
+		DataWrapper wrapper = dataGen.wrapByteBuffer(b);
+		incomingData(socket, wrapper);
+	}
+	
+	public void incomingData(FrontendSocketImpl socket, DataWrapper data) {
 		Http2ServerEngine engine = socket.getHttp2Engine();
-		DataWrapper data = dataGen.wrapByteBuffer(b);
 		engine.parse(data);
 	}
 

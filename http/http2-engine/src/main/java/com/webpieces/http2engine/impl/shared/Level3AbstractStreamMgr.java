@@ -10,6 +10,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
+import com.webpieces.http2engine.api.server.ServerStreamWriter;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
@@ -37,7 +38,7 @@ public abstract class Level3AbstractStreamMgr {
 		this.streamState = streamState;
 	}
 
-	public abstract CompletableFuture<Void> sendPayloadToClient(PartialStream msg);
+	public abstract CompletableFuture<Void> sendPayloadToApp(PartialStream msg);
 	protected abstract CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame);
 
 	public CompletableFuture<Void> sendRstToServerAndClient(StreamException e) {
@@ -64,6 +65,9 @@ public abstract class Level3AbstractStreamMgr {
 			PushPromiseListener pushListener = stream.getPushListener();
 			if(pushListener != null)
 				fireReset(e, (c) -> pushListener.incomingPushPromise(c));
+			ServerStreamWriter writer = stream.getStreamWriter();
+			if(writer != null)
+				fireReset(e, (c) -> writer.sendMore(c).thenApply((w) -> null));
 		}
 		
 		return remoteFlowControl.goAway(e);

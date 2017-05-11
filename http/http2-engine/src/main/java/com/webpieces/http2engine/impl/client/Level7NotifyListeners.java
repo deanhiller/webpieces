@@ -61,7 +61,7 @@ public class Level7NotifyListeners implements EngineResultListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPieceToClient(Stream stream, PartialStream payload) {
+	public CompletableFuture<Void> sendPieceToApp(Stream stream, PartialStream payload) {
 		if(payload.getStreamId() % 2 == 1 && !(payload instanceof Http2Push)) {
 			Http2ResponseListener listener = stream.getResponseListener();
 			return listener.incomingPartialResponse(payload);

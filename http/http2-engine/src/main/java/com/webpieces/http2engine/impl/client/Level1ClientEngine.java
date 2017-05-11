@@ -64,7 +64,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
 		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
 		//just connect more sockets
-		return executor.execute(this, () -> { 
+		return executor.executeCall(this, () -> { 
 			log.info("sending preface");
 			DataWrapper prefaceData = dataGen.wrapByteArray(preface);
 			finalLayer.sendPreface(prefaceData);
@@ -83,7 +83,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
 		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
 		//just connect more sockets
-		return executor.execute(this, () -> { 
+		return executor.executeCall(this, () -> { 
 			int streamId = headers.getStreamId();
 			if(streamId <= 0)
 				throw new IllegalArgumentException("frames for requests must have a streamId > 0");

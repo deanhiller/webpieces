@@ -3,6 +3,7 @@ package com.webpieces.http2engine.impl.svr;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.threading.SessionExecutor;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.http2engine.api.client.Http2Config;
@@ -22,8 +23,10 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	private Level7NotifySvrListeners finalLayer;
 	private Level3ServerStreams streamInit;
 	private Level2ParsingAndRemoteSettings parsing;
+	private SessionExecutor executor;
 
 	public Level1ServerEngine(ServerEngineListener listener, InjectionConfig injectionConfig) {
+		this.executor = injectionConfig.getExecutor();
 		Http2Config config = injectionConfig.getConfig();
 		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
@@ -33,7 +36,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		//we have to release items in the map inside this or release the engine
 		StreamState streamState = new StreamState(injectionConfig.getTime());
 		
-		finalLayer = new Level7NotifySvrListeners(listener);
+		finalLayer = new Level7NotifySvrListeners(listener, this);
 		marshalLayer = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
 		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, marshalLayer, remoteSettings);
 		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(marshalLayer, finalLayer, localSettings);
@@ -54,11 +57,15 @@ public class Level1ServerEngine implements Http2ServerEngine {
 
 	@Override
 	public void parse(DataWrapper newData) {
-		parsing.parse(newData);
+		executor.execute(this, () -> { 
+			parsing.parse(newData);	
+		});
 	}
 
 	@Override
 	public void farEndClosed() {
+		executor.execute(this, () -> { 
+		});
 	}
 
 	@Override

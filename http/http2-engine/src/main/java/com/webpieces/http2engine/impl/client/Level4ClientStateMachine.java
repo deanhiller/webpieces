@@ -17,7 +17,6 @@ public class Level4ClientStateMachine extends Level4AbstractStateMachine {
 	) {
 		super(id, remoteFlowControl, localFlowControl);
 		
-		State openState = stateMachine.createState("Open");
 		State reservedState = stateMachine.createState("Reserved(remote)");
 		State halfClosedLocal = stateMachine.createState("Half Closed(local)");
 	

@@ -26,7 +26,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 	}
 	
 	@Override
-	public <T> CompletableFuture<T> execute(Object key, Callable<CompletableFuture<T>> callable) {
+	public <T> CompletableFuture<T> executeCall(Object key, Callable<CompletableFuture<T>> callable) {
 		CompletableFuture<T> future = new CompletableFuture<T>();
 		FutureRunnable<T> r = new FutureRunnable<>(callable, future);
 

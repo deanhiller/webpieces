@@ -20,4 +20,9 @@ public class InitiationResult {
 		return initStatus;
 	}
 
+	public DataWrapper getLeftOverData() {
+		return leftOverData;
+	}
+
+
 }
