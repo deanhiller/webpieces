@@ -20,7 +20,7 @@ public class Http2Requests {
 		return settings;
 	}
 
-	public static Http2Headers createRequest(boolean eos) {
+	public static Http2Headers createRequest(int streamId, boolean eos) {
 		List<Http2Header> headers = new ArrayList<>();
 		
 	    headers.add(new Http2Header(Http2HeaderName.METHOD, "GET"));
@@ -33,16 +33,18 @@ public class Http2Requests {
 	    headers.add(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/1.15.0"));
 	    
 	    Http2Headers request = new Http2Headers(headers);
+	    request.setStreamId(streamId);
 	    request.setEndOfStream(eos);
 		return request;
 	}
 	
-	public static Http2Headers createResponse() {
+	public static Http2Headers createResponse(int streamId) {
 		List<Http2Header> headers = new ArrayList<>();
 	    headers.add(new Http2Header(Http2HeaderName.SERVER, "id"));
 	    
 	    Http2Headers response = new Http2Headers(headers);
 	    response.setEndOfStream(true);
+	    response.setStreamId(streamId);
 	    
 		return response;
 	}

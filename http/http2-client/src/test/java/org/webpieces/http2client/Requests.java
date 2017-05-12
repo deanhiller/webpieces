@@ -3,15 +3,22 @@ package org.webpieces.http2client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.http2client.api.dto.Http2Request;
+
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class Requests {
+	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	public static HeaderSettings createSomeSettings() {
 		HeaderSettings settings = new HeaderSettings();
@@ -76,6 +83,20 @@ public class Requests {
 
 	public static RstStreamFrame createReset(int streamId) {
 		return new RstStreamFrame(streamId, Http2ErrorCode.CANCEL);
+	}
+
+	public static Http2Request createHttp2Request() {
+		Http2Request req = new Http2Request();
+		req.setHeaders(createRequest());
+		req.setPayload(dataGen.wrapByteArray(new byte[] { 3, 4 }));
+		return req;
+	}
+
+	public static DataFrame createData(int streamId) {
+		DataFrame data = new DataFrame(streamId, true);
+		DataWrapper wrapByteArray = dataGen.wrapByteArray(new byte[] {2, 3});
+		data.setData(wrapByteArray);
+		return data;
 	}
 
 }

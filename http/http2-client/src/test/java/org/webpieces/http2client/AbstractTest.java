@@ -21,6 +21,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -59,7 +60,8 @@ public class AbstractTest {
 		HeaderSettings settings = new HeaderSettings();
 		settings.setMaxConcurrentStreams(1L);
 		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
-		mockChannel.getFrameAndClear(); //clear the ack frame 
+		SettingsFrame ack = (SettingsFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(true, ack.isAck());
 	}
 	
 	protected void sendResponseFromServer(MockResponseListener listener1, Http2Headers request) {

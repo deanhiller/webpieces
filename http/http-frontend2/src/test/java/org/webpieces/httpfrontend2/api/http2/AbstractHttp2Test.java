@@ -82,8 +82,7 @@ public class AbstractHttp2Test {
 	}
 	
 	protected PassedIn sendRequestToServer(int streamId, boolean eos) {
-		Http2Headers request1 = Http2Requests.createRequest(eos);
-		request1.setStreamId(streamId);
+		Http2Headers request1 = Http2Requests.createRequest(streamId, eos);
 
 		mockChannel.write(request1);
 		

@@ -73,7 +73,7 @@ public class Test4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, reset.getReason().getReason());
 
 		//send response with request not complete but failed as well anyways
-		Http2Headers response = Http2Requests.createResponse();
+		Http2Headers response = Http2Requests.createResponse(request.getStreamId());
 		CompletableFuture<StreamWriter> future = stream.sendResponse(response);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);

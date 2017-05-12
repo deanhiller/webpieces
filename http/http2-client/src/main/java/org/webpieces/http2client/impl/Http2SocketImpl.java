@@ -60,6 +60,7 @@ public class Http2SocketImpl implements Http2Socket {
 			send(request.getHeaders(), responseListener);
 			return responseListener.fetchResponseFuture();
 		} else if(request.getTrailingHeaders() == null) {
+			request.getHeaders().setEndOfStream(false);
 			DataFrame data = createData(request, true);
 			
 			return send(request.getHeaders(), responseListener)
