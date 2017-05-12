@@ -16,7 +16,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class TestBasicRequestResponse extends AbstractTest {
+public class TestCBasicRequestResponse extends AbstractTest {
 
 	@Test
 	public void testWithNoData() throws InterruptedException, ExecutionException, TimeoutException {

@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.PassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -14,6 +15,11 @@ public class TestBasicHttp2Server extends AbstractHttp2Test {
 	
 	@Test
 	public void testBasicIntegration() throws InterruptedException, ExecutionException {
+        MockStreamWriter mockSw = new MockStreamWriter();
+		mockListener.addMockStreamToReturn(mockSw );
+        MockStreamWriter mockSw2 = new MockStreamWriter();
+		mockListener.addMockStreamToReturn(mockSw2 );
+		
 		Http2Headers request1 = Http2Requests.createRequest(1, true);
 		Http2Headers request2 = Http2Requests.createRequest(3, true);
 
@@ -21,6 +27,9 @@ public class TestBasicHttp2Server extends AbstractHttp2Test {
 		PassedIn requestAndStream1 = mockListener.getSingleRequest();
 		mockChannel.write(request2);
 		PassedIn requestAndStream2 = mockListener.getSingleRequest();
+		
+		//each stream given to webapp is a unique one....
+		Assert.assertTrue(requestAndStream1.stream != requestAndStream2.stream);
 		
 		Assert.assertEquals(request1, requestAndStream1.request);
 		Assert.assertEquals(request2, requestAndStream2.request);

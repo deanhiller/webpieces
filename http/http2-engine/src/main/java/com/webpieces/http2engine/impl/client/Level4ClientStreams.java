@@ -121,10 +121,6 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 		}
 		
 		Stream stream = streamState.getStream(frame);
-		if(stream == null) {
-			//RstStreamFrame only...
-			return CompletableFuture.completedFuture(null);
-		}
 		
 		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
 					.thenApply(s -> null);

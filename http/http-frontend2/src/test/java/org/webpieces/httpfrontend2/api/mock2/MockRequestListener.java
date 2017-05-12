@@ -77,4 +77,8 @@ public class MockRequestListener extends MockSuperclass implements HttpRequestLi
 		return super.getCalledMethodList(Method.CANCEL).size();
 	}
 
+	public void addMockStreamToReturn(StreamWriter writer) {
+		super.addValueToReturn(Method.INCOMING, writer);
+	}
+
 }

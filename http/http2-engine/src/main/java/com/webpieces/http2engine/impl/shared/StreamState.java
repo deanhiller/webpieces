@@ -43,6 +43,11 @@ public class StreamState {
 		return stream;
 	}
 	
+	public boolean isStreamExist(Http2Msg frame) {
+		Stream stream = streamIdToStream.get(frame.getStreamId());
+		return stream != null;
+	}
+	
 	public Stream getStream(Http2Msg frame) {
 		Stream stream = streamIdToStream.get(frame.getStreamId());
 		if (stream == null) {

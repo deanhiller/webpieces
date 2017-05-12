@@ -29,7 +29,7 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class Test4FrameSizeAndHeaders extends AbstractTest {
+public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	
 	/**
 	 * An endpoint MUST send an error code of FRAME_SIZE_ERROR if a frame 

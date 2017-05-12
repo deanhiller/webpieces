@@ -8,8 +8,6 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.ConnectionClosedException;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.Level4AbstractStreamMgr;
 import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
@@ -36,11 +34,21 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendPayloadToApp(PartialStream msg) {
-		if(msg instanceof Http2Headers) {
-			return processHeaders((Http2Headers) msg);
-		} else
-			throw new UnsupportedOperationException("not implemented yet="+msg);
+	public CompletableFuture<Void> sendPayloadToApp(PartialStream frame) {
+		if(frame instanceof Http2Headers && !streamState.isStreamExist(frame)) {
+			return processHeaders((Http2Headers) frame);
+		} else {
+			//this copied from client but for server this should not occur and if does is a connection error?
+//			if(closedReason != null) {
+//				log.info("ignoring incoming frame="+frame+" since socket is shutting down");
+//				return CompletableFuture.completedFuture(null);
+//			}
+			
+			Stream stream = streamState.getStream(frame);
+			
+			return serverSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
+						.thenApply(s -> null);
+		}
 	}
 
 	private CompletableFuture<Void> processHeaders(Http2Headers msg) {

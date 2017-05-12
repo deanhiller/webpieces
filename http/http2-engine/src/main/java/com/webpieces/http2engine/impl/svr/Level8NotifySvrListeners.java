@@ -48,13 +48,16 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 
 	@Override
 	public CompletableFuture<Void> sendPieceToApp(Stream stream, PartialStream payload) {
-		if(payload instanceof Http2Headers) {
-			StreamReference writer = listener.sendRequestToServer((Http2Headers) payload, 
+		StreamReference writer = stream.getStreamWriter();
+		
+		if(payload instanceof Http2Headers && writer == null) {
+			writer = listener.sendRequestToServer((Http2Headers) payload, 
 					new ResponseHandlerImpl(level1ServerEngine, stream, pushIdGenerator));
 			stream.setStreamWriter(writer);
 			return CompletableFuture.completedFuture(null);
 		}
-		throw new UnsupportedOperationException();
+		
+		return writer.sendMore(payload).thenApply((s) -> null);
 	}
 
 }

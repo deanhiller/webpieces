@@ -46,7 +46,7 @@ public class Level5ServerStateMachine extends Level5AbstractStateMachine {
 		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
 		
 		stateMachine.createTransition(openState, openState, dataRecvNoEos);
-		stateMachine.createTransition(openState, halfClosedLocal, dataRecvEos);
+		stateMachine.createTransition(openState, halfClosedLocal, dataRecvEos, recvHeadersEos);
 		stateMachine.createTransition(openState, closed, sentResetStream, recvResetStream);
 		
 		stateMachine.createTransition(reservedState, halfClosedLocal, sentHeadersNoEos);

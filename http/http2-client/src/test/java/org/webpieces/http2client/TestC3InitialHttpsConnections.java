@@ -29,7 +29,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#starting
  */
-public class Test3InitialHttpsConnections {
+public class TestC3InitialHttpsConnections {
 
 	private MockChanMgr mockChanMgr;
 	private MockHttp2Channel mockChannel;
