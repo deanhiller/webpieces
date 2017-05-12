@@ -1,39 +1,27 @@
 package org.webpieces.http2client;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2client.api.Http2Client;
-import org.webpieces.http2client.api.Http2ClientFactory;
-import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.mock.MockChanMgr;
-import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockPushListener;
 import org.webpieces.http2client.mock.MockResponseListener;
-import org.webpieces.mock.time.MockTime;
-import org.webpieces.util.threading.DirectExecutor;
+import org.webpieces.http2client.mock.TestAssert;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
-import com.webpieces.http2engine.api.client.Http2Config;
-import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;

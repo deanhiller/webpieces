@@ -65,6 +65,13 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
+	public void sendPreface() {
+		String preface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
+		byte[] bytes = preface.getBytes(StandardCharsets.UTF_8);
+		ByteBuffer wrap = ByteBuffer.wrap(bytes);
+		listener.incomingData(this, wrap);
+	}
+	
 	public void sendPrefaceAndSettings(SettingsFrame settings) {
 		String preface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
 		byte[] bytes = preface.getBytes(StandardCharsets.UTF_8);

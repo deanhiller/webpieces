@@ -8,8 +8,6 @@ import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.TCPChannel;
 
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
-import com.webpieces.http2engine.api.client.Http2Config;
-import com.webpieces.http2engine.api.client.InjectionConfig;
 
 public class Http2ClientImpl implements Http2Client {
 

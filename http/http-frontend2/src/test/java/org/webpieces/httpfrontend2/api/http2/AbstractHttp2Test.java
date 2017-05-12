@@ -73,7 +73,8 @@ public class AbstractHttp2Test {
 		mockChannel.setDataListener(dataListener);
 	}
 
-	private void simulateClientSendingPrefaceAndSettings() {
+	protected void simulateClientSendingPrefaceAndSettings() {
+		//this method is overloaded by one test
 		HeaderSettings settings = Http2Requests.createSomeSettings();
 		mockChannel.sendPrefaceAndSettings(HeaderSettings.createSettingsFrame(settings));
 		List<Http2Msg> frames = mockChannel.getFramesAndClear();

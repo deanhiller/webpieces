@@ -1,4 +1,4 @@
-package org.webpieces.http2client;
+package org.webpieces.http2client.mock;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

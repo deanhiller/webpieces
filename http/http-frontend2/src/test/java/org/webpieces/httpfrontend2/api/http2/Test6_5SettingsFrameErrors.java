@@ -1,60 +1,26 @@
-package org.webpieces.http2client;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+package org.webpieces.httpfrontend2.api.http2;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.http2client.api.Http2Client;
-import org.webpieces.http2client.api.Http2ClientFactory;
-import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.mock.MockChanMgr;
-import org.webpieces.http2client.mock.MockHttp2Channel;
-import org.webpieces.mock.time.MockTime;
-import org.webpieces.util.threading.DirectExecutor;
 
-import com.webpieces.http2engine.api.client.Http2Config;
-import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 /**
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class Test6_5SettingsFrameErrors {
-
-	private MockChanMgr mockChanMgr = new MockChanMgr();;
-	private MockHttp2Channel mockChannel = new MockHttp2Channel();
-	private HeaderSettings localSettings = Requests.createSomeSettings();
-	private MockTime mockTime = new MockTime(true);
-
-	private Http2Socket socket;
-
-	@Before
-	public void setUp() throws InterruptedException, ExecutionException {
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
-
-        Http2Config config = new Http2Config();
-        config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
-        config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
-        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
-        
-        mockChanMgr.addTCPChannelToReturn(mockChannel);
-		socket = client.createHttpSocket("simple");
-		
-		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555));
-		Assert.assertTrue(connect.isDone());
-		Assert.assertEquals(socket, connect.get());
-
-		//clear preface and settings frame from client
-		mockChannel.getFramesAndClear();
+public class Test6_5SettingsFrameErrors extends AbstractHttp2Test {
+	
+	@Override
+	protected void simulateClientSendingPrefaceAndSettings() {
+		//null out the settings stuff
+		mockChannel.sendPreface();
+		SettingsFrame settings = (SettingsFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(0, settings.getStreamId());
 	}
 	
 	@Ignore
@@ -63,12 +29,7 @@ public class Test6_5SettingsFrameErrors {
 	}
 	
 	@Test
-	public void testSection6_5AckNonEmptyPayload() {
-		//server's settings frame is finally coming in as well with maxConcurrent=1
-		HeaderSettings settings = new HeaderSettings();
-		settings.setMaxConcurrentStreams(1L);
-		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
-		mockChannel.getFrameAndClear(); //clear the ack frame 
+	public void testSection6_5AckNonEmptyPayload() {		
 		
 	    String badAckFrame =
 	            "00 00 01" + // length
@@ -121,11 +82,6 @@ public class Test6_5SettingsFrameErrors {
 		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
 
 		Assert.assertTrue(mockChannel.isClosed());
-	}
-	
-	@Test
-	public void testSection6_5_2PushPromiseOffButServerSentIt() {
-
 	}
 	
 	@Test

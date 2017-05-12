@@ -2,6 +2,9 @@ package org.webpieces.httpfrontend2.api.http2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,15 +12,17 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.PassedIn;
+import org.webpieces.httpfrontend2.api.mock2.TestAssert;
 
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.impl.HeaderEncoding;
+import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -38,9 +43,12 @@ public class Test4FrameSizeAndHeaders extends AbstractHttp2Test {
 	 * error (Section 5.4.1); this includes any frame carrying a header 
 	 * block (Section 4.3) (that is, HEADERS, PUSH_PROMISE, and 
 	 * CONTINUATION), SETTINGS, and any frame with a stream identifier of 0.
+	 * @throws TimeoutException 
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testSection4_2FrameTooLarge() {
+	public void testSection4_2FrameTooLarge() throws InterruptedException, ExecutionException, TimeoutException {
 		int streamId = 1;
 		PassedIn info = sendRequestToServer(streamId, false);
 		FrontendStream stream = info.stream;
@@ -66,30 +74,11 @@ public class Test4FrameSizeAndHeaders extends AbstractHttp2Test {
 
 		//send response with request not complete but failed as well anyways
 		Http2Headers response = Http2Requests.createResponse();
-		stream.sendResponse(response);
+		CompletableFuture<StreamWriter> future = stream.sendResponse(response);
 		
-//		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
-//		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
-//		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
-	}
-
-	/**
-	 * success case of edge testing off by one or not
-	 */
-	@Test
-	public void testSection4_2CanSendLargestFrame() {
-//		MockResponseListener listener1 = new MockResponseListener();
-//		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-//		Http2Headers request = sendRequestToServer(listener1);
-//		sendResponseFromServer(listener1, request);
-//		
-//		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
-//		byte[] buf = new byte[localSettings.getMaxFrameSize()];
-//		dataFrame.setData(dataGen.wrapByteArray(buf));
-//		mockChannel.write(dataFrame); //endOfStream=false
-//
-//		DataFrame fr = (DataFrame) listener1.getSingleReturnValueIncomingResponse();
-//		Assert.assertEquals(localSettings.getMaxFrameSize(), fr.getData().getReadableSize());
+		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
+		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
+		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
 	}
 
 	/**
@@ -98,32 +87,26 @@ public class Test4FrameSizeAndHeaders extends AbstractHttp2Test {
 	 */
 	@Test
 	public void testSection4_3BadDecompression() {		
-//		MockResponseListener listener1 = new MockResponseListener();
-//		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-//		Http2Headers request = sendRequestToServer(listener1);
-//		
-//		Assert.assertEquals(1, request.getStreamId()); //has to be 1 since we use 1 in the response
-//		
-//	    String badHeaderFrame =
-//	            "00 00 10" + // length
-//	            "01" +  // type
-//	            "05" + // flags (ack)
-//	            "00 00 00 01" + // R + streamid
-//	            "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"; //payload 
-//		mockChannel.writeHexBack(badHeaderFrame); //endOfStream=false
-//
-//		//remote receives goAway
-//		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-//		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, goAway.getKnownErrorCode());
-//		DataWrapper debugData = goAway.getDebugData();
-//		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-//		Assert.assertEquals("Error from hpack library reason=HEADER_DECODE stream=1", msg);
-//		Assert.assertTrue(mockChannel.isClosed());
-//		
-//		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
-//		Assert.assertEquals(1, results.size());
-//		ConnectionReset failResp = (ConnectionReset) results.get(0);
-//		Assert.assertEquals(ParseFailReason.HEADER_DECODE, failResp.getReason().getReason());
+	    String badHeaderFrame =
+	            "00 00 10" + // length
+	            "01" +  // type
+	            "05" + // flags (ack)
+	            "00 00 00 01" + // R + streamid
+	            "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"; //payload 
+		mockChannel.writeHexBack(badHeaderFrame); //endOfStream=false
+
+		//no request comes in
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
+		//no cancels
+		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		//remote receives goAway
+		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, goAway.getKnownErrorCode());
+		DataWrapper debugData = goAway.getDebugData();
+		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
+		Assert.assertEquals("Error from hpack library reason=HEADER_DECODE stream=1", msg);
+		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
 	/**
@@ -144,31 +127,25 @@ public class Test4FrameSizeAndHeaders extends AbstractHttp2Test {
 	 */
 	@Test
 	public void testSection4_3InterleavedFrames() {
-//		MockResponseListener listener1 = new MockResponseListener();
-//		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-//		Http2Headers request = sendRequestToServer(listener1);
-//		
-//		Assert.assertEquals(1, request.getStreamId()); //has to be 1 since we use 1 in the response
-//	
-//		List<Http2Frame> frames = createInterleavedFrames();
-//		Assert.assertTrue(frames.size() >= 3); //for this test, need interleaved
-//		
-//		mockChannel.writeFrame(frames.get(0));
-//		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
-//
-//		mockChannel.writeFrame(frames.get(1));
-//		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
-//		Assert.assertEquals(1, results.size());
-//		ConnectionReset reset = (ConnectionReset) results.get(0);
-//		Assert.assertEquals(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, reset.getReason().getReason());
-//		
-//		//remote receives goAway
-//		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
-//		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
-//		DataWrapper debugData = goAway.getDebugData();
-//		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-//		Assert.assertTrue(msg.contains("Headers/continuations from two different streams per spec cannot be interleaved. "));
-//		Assert.assertTrue(mockChannel.isClosed());
+		List<Http2Frame> frames = createInterleavedFrames();
+		Assert.assertTrue(frames.size() >= 3); //for this test, need interleaved
+
+		mockChannel.writeFrame(frames.get(0));
+		mockChannel.writeFrame(frames.get(1));
+		
+		//no request comes in
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
+		//no cancels
+		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		//remote receives goAway
+		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
+		DataWrapper debugData = goAway.getDebugData();
+		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
+		Assert.assertTrue(msg.contains("Headers/continuations from two different streams per spec cannot be interleaved. "));
+		Assert.assertTrue(mockChannel.isClosed());
+
 	}
 
 	private List<Http2Frame> createInterleavedFrames() {

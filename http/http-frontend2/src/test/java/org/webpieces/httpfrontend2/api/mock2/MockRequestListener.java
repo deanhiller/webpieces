@@ -50,6 +50,10 @@ public class MockRequestListener extends MockSuperclass implements HttpRequestLi
 		super.setDefaultReturnValue(Method.INCOMING, writer);
 	}
 	
+	public int getNumRequestsThatCameIn() {
+		return super.getCalledMethodList(Method.INCOMING).size();
+	}
+	
 	public PassedIn getSingleRequest() {
 		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
 		if(list.size() != 1)
@@ -67,6 +71,10 @@ public class MockRequestListener extends MockSuperclass implements HttpRequestLi
 		if(list.size() != 1)
 			throw new IllegalArgumentException("method was not called exactly once. numTimes="+list.size());
 		return (Cancel) list.get(0).getArgs()[0];
+	}
+
+	public int getNumCancelsThatCameIn() {
+		return super.getCalledMethodList(Method.CANCEL).size();
 	}
 
 }
