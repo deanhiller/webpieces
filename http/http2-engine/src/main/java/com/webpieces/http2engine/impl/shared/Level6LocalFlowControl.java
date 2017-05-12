@@ -12,17 +12,17 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Level5LocalFlowControl {
+public class Level6LocalFlowControl {
 
-	private static final Logger log = LoggerFactory.getLogger(Level5LocalFlowControl.class);
-	private Level6MarshalAndPing marshalLayer;
+	private static final Logger log = LoggerFactory.getLogger(Level6LocalFlowControl.class);
+	private Level7MarshalAndPing marshalLayer;
 	private long connectionLocalWindowSize;
 	private long totalSent = 0;
 	private long totalRecovered = 0;
 	private EngineResultListener notifyListener;
 
-	public Level5LocalFlowControl(
-			Level6MarshalAndPing marshalLayer,
+	public Level6LocalFlowControl(
+			Level7MarshalAndPing marshalLayer,
 			EngineResultListener notifyListener,
 			HeaderSettings localSettings
 	) {

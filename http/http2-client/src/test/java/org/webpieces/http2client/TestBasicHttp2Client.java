@@ -17,7 +17,7 @@ import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -74,8 +74,8 @@ public class TestBasicHttp2Client {
 		MockResponseListener clientResponseListener1 = new MockResponseListener();
 		clientResponseListener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
 		MockResponseListener listener2 = new MockResponseListener();
-		CompletableFuture<ClientStreamWriter> future = socket.send(request1, clientResponseListener1);
-		CompletableFuture<ClientStreamWriter> future2 = socket.send(request2, listener2);
+		CompletableFuture<StreamWriter> future = socket.send(request1, clientResponseListener1);
+		CompletableFuture<StreamWriter> future2 = socket.send(request2, listener2);
 		
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(1, req.getStreamId());

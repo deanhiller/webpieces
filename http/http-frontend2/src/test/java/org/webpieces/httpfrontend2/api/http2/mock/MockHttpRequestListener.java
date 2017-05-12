@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.Protocol;
@@ -13,7 +12,8 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.server.ServerStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
 public class MockHttpRequestListener extends MockSuperclass implements HttpRequestListener {
 
@@ -22,9 +22,9 @@ public class MockHttpRequestListener extends MockSuperclass implements HttpReque
 	}
 	
 	@Override
-	public ServerStreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
 		RequestData data = new RequestData(stream, headers, type);
-		return (ServerStreamWriter) super.calledMethod(Method.INCOMING_FRAME, data);
+		return (StreamWriter) super.calledMethod(Method.INCOMING_FRAME, data);
 	}
 
 	public RequestData getRequestDataAndClear() {
@@ -42,6 +42,12 @@ public class MockHttpRequestListener extends MockSuperclass implements HttpReque
 		this.calledMethods.remove(Method.INCOMING_FRAME);
 		
 		return retVal.collect(Collectors.toList());
+	}
+
+	@Override
+	public void cancel(FrontendStream stream, RstStreamFrame c) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

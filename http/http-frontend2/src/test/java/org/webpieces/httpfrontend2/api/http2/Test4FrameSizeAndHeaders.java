@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.PassedIn;
 
 import com.twitter.hpack.Encoder;
@@ -16,6 +17,7 @@ import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -58,8 +60,9 @@ public class Test4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertEquals("Frame size=16389 was greater than max="+localSettings.getMaxFrameSize()+" reason=EXCEEDED_MAX_FRAME_SIZE stream=1", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		ConnectionReset failResp = (ConnectionReset) mockStreamWriter.getSingleFrame();
-		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, failResp.getReason().getReason());
+		Cancel failResp = mockListener.getCancelInfo();
+		ConnectionReset reset = (ConnectionReset) failResp.reset;
+		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, reset.getReason().getReason());
 
 		//send response with request not complete but failed as well anyways
 		Http2Headers response = Http2Requests.createResponse();

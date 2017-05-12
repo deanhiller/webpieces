@@ -18,13 +18,13 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Level5RemoteFlowControl {
+public class Level6RemoteFlowControl {
 
-	private static final Logger log = LoggerFactory.getLogger(Level5RemoteFlowControl.class);
+	private static final Logger log = LoggerFactory.getLogger(Level6RemoteFlowControl.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private HeaderSettings remoteSettings;
-	private Level6MarshalAndPing layer6NotifyListener;
+	private Level7MarshalAndPing layer6NotifyListener;
 
 	private long remoteWindowSize;
 	
@@ -34,9 +34,9 @@ public class Level5RemoteFlowControl {
 
 	private StreamState streamState;
 
-	public Level5RemoteFlowControl(
+	public Level6RemoteFlowControl(
 			StreamState streamState,
-			Level6MarshalAndPing layer6NotifyListener, 
+			Level7MarshalAndPing layer6NotifyListener, 
 			HeaderSettings remoteSettings
 	) {
 		this.streamState = streamState;

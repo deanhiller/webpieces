@@ -2,45 +2,31 @@ package com.webpieces.http2engine.impl.client;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.SessionExecutor;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
-import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
-import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
-import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
-import com.webpieces.http2engine.impl.shared.Level6MarshalAndPing;
+import com.webpieces.http2engine.impl.shared.Level3ParsingAndRemoteSettings;
+import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
+import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.StreamState;
 
 public class Level1ClientEngine implements Http2ClientEngine {
 	
-	private static final Logger log = LoggerFactory.getLogger(Level1ClientEngine.class);
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
-
-	private Level2ParsingAndRemoteSettings parsing;
-	private Level3ClientStreams streamInit;
-	private Level7NotifyListeners finalLayer;
-	private Level6MarshalAndPing marshalLayer;
-	private SessionExecutor executor;
+	private Level7MarshalAndPing marshalLayer;
+	private Level1BClientSynchro synchronization;
 
 	public Level1ClientEngine(ClientEngineListener clientEngineListener, InjectionConfig injectionConfig) {
-		
-		this.executor = injectionConfig.getExecutor();
+		SessionExecutor executor = injectionConfig.getExecutor();
 		Http2Config config = injectionConfig.getConfig();
 		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
@@ -50,77 +36,45 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		//we have to release items in the map inside this or release the engine
 		StreamState streamState = new StreamState(injectionConfig.getTime());
 		
-		finalLayer = new Level7NotifyListeners(clientEngineListener);
-		marshalLayer = new Level6MarshalAndPing(parser, remoteSettings, finalLayer);
-		Level5RemoteFlowControl remoteFlowCtrl = new Level5RemoteFlowControl(streamState, marshalLayer, remoteSettings);
-		Level5LocalFlowControl localFlowCtrl = new Level5LocalFlowControl(marshalLayer, finalLayer, localSettings);
-		Level4ClientStateMachine clientSm = new Level4ClientStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
-		streamInit = new Level3ClientStreams(streamState, clientSm, localFlowCtrl, remoteFlowCtrl, config, remoteSettings);
-		parsing = new Level2ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, marshalLayer, parser, config, remoteSettings);
+		Level8NotifyListeners finalLayer = new Level8NotifyListeners(clientEngineListener);
+		marshalLayer = new Level7MarshalAndPing(parser, remoteSettings, finalLayer);
+		Level6RemoteFlowControl remoteFlowCtrl = new Level6RemoteFlowControl(streamState, marshalLayer, remoteSettings);
+		Level6LocalFlowControl localFlowCtrl = new Level6LocalFlowControl(marshalLayer, finalLayer, localSettings);
+		Level5ClientStateMachine clientSm = new Level5ClientStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
+		Level4ClientStreams streamInit = new Level4ClientStreams(streamState, clientSm, localFlowCtrl, remoteFlowCtrl, config, remoteSettings);
+		Level3ParsingAndRemoteSettings parsing = new Level3ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, marshalLayer, parser, config, remoteSettings);
+		synchronization = new Level1BClientSynchro(streamInit, parsing, finalLayer, executor);
+
 	}
 
-	@Override
-	public CompletableFuture<Void> sendInitializationToSocket() {
-		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
-		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
-		//just connect more sockets
-		return executor.executeCall(this, () -> { 
-			log.info("sending preface");
-			DataWrapper prefaceData = dataGen.wrapByteArray(preface);
-			finalLayer.sendPreface(prefaceData);
-	
-			return parsing.sendSettings();
-		});
-	}
-	
 	@Override
 	public CompletableFuture<Void> sendPing() {
 		return marshalLayer.sendPing();
 	}
 	
 	@Override
-	public CompletableFuture<ClientStreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
-		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
-		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
-		//just connect more sockets
-		return executor.executeCall(this, () -> { 
-			int streamId = headers.getStreamId();
-			if(streamId <= 0)
-				throw new IllegalArgumentException("frames for requests must have a streamId > 0");
-			else if(streamId % 2 == 0)
-				throw new IllegalArgumentException("Client cannot send frames with even stream ids to server per http/2 spec");
-			
-			return streamInit.createStreamAndSend(headers, responseListener);
-		});
+	public CompletableFuture<Void> sendInitializationToSocket() {
+		return synchronization.sendInitializationToSocket();
+	}
+	
+	@Override
+	public CompletableFuture<StreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
+		return synchronization.sendFrameToSocket(headers, responseListener);
 	}
 
 	@Override
 	public void parse(DataWrapper newData) {
-		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
-		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
-		//just connect more sockets
-		executor.execute(this, () -> { 
-			parsing.parse(newData);
-		});
+		synchronization.parse(newData);
+
 	}
 
 	@Override
 	public void farEndClosed() {
-		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
-		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
-		//just connect more sockets
-		executor.execute(this, () -> { 
-
-		});
+		synchronization.farEndClosed();
 	}
 
 	@Override
 	public void initiateClose(String reason) {
-		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
-		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
-		//just connect more sockets
-		executor.execute(this, () -> { 
-			
-		});
+		synchronization.initiateClose(reason);
 	}
 }

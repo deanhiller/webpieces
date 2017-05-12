@@ -10,15 +10,13 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.ConnectionClosedException;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
-import com.webpieces.http2engine.impl.shared.Level3AbstractStreamMgr;
-import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
-import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Level4AbstractStreamMgr;
+import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
+import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2parser.api.ConnectionException;
@@ -28,29 +26,29 @@ import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.util.locking.PermitQueue;
 
-public class Level3ClientStreams extends Level3AbstractStreamMgr {
+public class Level4ClientStreams extends Level4AbstractStreamMgr {
 
-	private static final Logger log = LoggerFactory.getLogger(Level3ClientStreams.class);
-	private Level4ClientStateMachine clientSm;
+	private static final Logger log = LoggerFactory.getLogger(Level4ClientStreams.class);
+	private Level5ClientStateMachine clientSm;
 
 	private HeaderSettings localSettings;
 	private int permitCount;
-	private PermitQueue<ClientStreamWriter> permitQueue;
+	private PermitQueue<Stream> permitQueue;
 
 	//purely for logging!!!  do not use for something else
 	private AtomicInteger acquiredCnt = new AtomicInteger(0);
 	private AtomicInteger releasedCnt = new AtomicInteger(0);
 	private int afterResetExpireSeconds;
 
-	public Level3ClientStreams(
+	public Level4ClientStreams(
 			StreamState state,
-			Level4ClientStateMachine clientSm, 
-			Level5LocalFlowControl localFlowControl,
-			Level5RemoteFlowControl level5FlowControl,
+			Level5ClientStateMachine clientSm, 
+			Level6LocalFlowControl localFlowControl,
+			Level6RemoteFlowControl level5FlowControl,
 			Http2Config config,
 			HeaderSettings remoteSettings
 	) {
-		super(level5FlowControl, localFlowControl, remoteSettings, state);
+		super(clientSm, level5FlowControl, localFlowControl, remoteSettings, state);
 		this.clientSm = clientSm;
 		this.localSettings = config.getLocalSettings();
 		this.remoteSettings = remoteSettings;
@@ -59,71 +57,28 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 		permitQueue = new PermitQueue<>(config.getInitialRemoteMaxConcurrent());
 	}
 
-	public CompletableFuture<ClientStreamWriter> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
+	public CompletableFuture<Stream> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
 		if(closedReason != null) {
 			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
-			CompletableFuture<ClientStreamWriter> future = new CompletableFuture<>();
+			CompletableFuture<Stream> future = new CompletableFuture<>();
 			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
 			return future;
 		}
 		return permitQueue.runRequest(() -> createStreamSendImpl(frame, responseListener));
 	}
 
-	private CompletableFuture<ClientStreamWriter> createStreamSendImpl(Http2Headers frame, Http2ResponseListener responseListener) {
+	private CompletableFuture<Stream> createStreamSendImpl(Http2Headers frame, Http2ResponseListener responseListener) {
 		int val = acquiredCnt.incrementAndGet();
 		log.info("got permit(cause="+frame+").  size="+permitQueue.availablePermits()+" acquired="+val);
 		
 		Stream stream = createStream(frame.getStreamId(), responseListener, null);
 		return clientSm.fireToSocket(stream, frame)
-				.thenApply(s -> new RequestWriterImpl(stream, this));
-	}
-
-	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
-		if(closedReason != null) {
-			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
-			CompletableFuture<Void> future = new CompletableFuture<>();
-			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
-			return future;
-		}
-		
-		return fireToSocket(stream, data, false);
+				.thenApply(s -> stream);
 	}
 	
 	@Override
 	protected CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
 		return fireToSocket(stream, frame, true);
-	}
-	
-	private CompletableFuture<Void> fireToSocket(Stream stream, PartialStream frame, boolean keepDelayedState) {
-		return clientSm.fireToSocket(stream, frame).thenApply(v -> {
-			checkForClosedState(stream, frame, keepDelayedState);
-			return null;
-		});
-	}
-	
-	private void checkForClosedState(Stream stream, PartialStream cause, boolean keepDelayedState) {
-		//If a stream ends up in closed state, for request type streams, we must release a permit on
-		//max concurrent streams
-		boolean isClosed = clientSm.isInClosedState(stream);
-		if(!isClosed)
-			return; //do nothing
-		
-		log.info("stream closed="+stream.getStreamId());
-		
-		if(!keepDelayedState) {
-			Stream removedStream = streamState.remove(stream);
-			if(removedStream == null)
-				return; //someone else closed the stream. they beat us to it so just return
-		} else {
-			//streamState.addDelayedRemove(stream, afterResetExpireSeconds);
-			throw new UnsupportedOperationException("not supported");
-		}
-		
-		//request stream, so increase permits
-		permitQueue.releasePermit();
-		int val = releasedCnt.decrementAndGet();
-		log.info("release permit(cause="+cause+").  size="+permitQueue.availablePermits()+" releasedCnt="+val);
-		return; //we closed the stream
 	}
 	
 	private Stream createStream(int streamId, Http2ResponseListener responseListener, PushPromiseListener pushListener) {
@@ -203,6 +158,14 @@ public class Level3ClientStreams extends Level3AbstractStreamMgr {
 
 		int modifyPermitsCnt = (int) (value - permitCount);
 		permitQueue.modifyPermitPoolSize(modifyPermitsCnt);
+	}
+
+	@Override
+	protected void release(PartialStream cause) {
+		//request stream, so increase permits
+		permitQueue.releasePermit();
+		int val = releasedCnt.decrementAndGet();
+		log.info("release permit(cause="+cause+").  size="+permitQueue.availablePermits()+" releasedCnt="+val);
 	}
 
 }

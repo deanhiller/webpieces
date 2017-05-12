@@ -24,23 +24,23 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.http2parser.api.dto.lib.SettingsParameter;
 
-public class Level2ParsingAndRemoteSettings {
+public class Level3ParsingAndRemoteSettings {
 
-	private static final Logger log = LoggerFactory.getLogger(Level2ParsingAndRemoteSettings.class);
+	private static final Logger log = LoggerFactory.getLogger(Level3ParsingAndRemoteSettings.class);
 
 	private HpackParser lowLevelParser;
 	private UnmarshalState parsingState;
-	private Level6MarshalAndPing marshalLayer;
+	private Level7MarshalAndPing marshalLayer;
 	private String id;
-	private Level5RemoteFlowControl remoteFlowControl;
-	private Level3AbstractStreamMgr level3StreamInit;
+	private Level6RemoteFlowControl remoteFlowControl;
+	private Level4AbstractStreamMgr level3StreamInit;
 	private HeaderSettings remoteSettings;
 	private HeaderSettings localSettings;
 
-	public Level2ParsingAndRemoteSettings(
-			Level3AbstractStreamMgr level3StreamInit,
-			Level5RemoteFlowControl level5FlowControl,
-			Level6MarshalAndPing level6NotifyListener, 
+	public Level3ParsingAndRemoteSettings(
+			Level4AbstractStreamMgr level3StreamInit,
+			Level6RemoteFlowControl level5FlowControl,
+			Level7MarshalAndPing level6NotifyListener, 
 			HpackParser lowLevelParser, 
 			Http2Config config,
 			HeaderSettings remoteSettings
@@ -72,11 +72,6 @@ public class Level2ParsingAndRemoteSettings {
 		future.handle((resp, t) -> handleError(resp, t));
 	}
 
-	private Void logExc(String thing, Throwable t) {
-		log.error("error trying to close "+thing, t);
-		return null;
-	}
-
 	private Void handleError(Object object, Throwable e) {
 		if(e == null) 
 			return null;
@@ -95,6 +90,11 @@ public class Level2ParsingAndRemoteSettings {
 		return null;
 	}
 
+	private Void logExc(String thing, Throwable t) {
+		log.error("error trying to close "+thing, t);
+		return null;
+	}
+	
 	public CompletableFuture<Void> parseImpl(DataWrapper newData) {
 		parsingState = lowLevelParser.unmarshal(parsingState, newData);
 		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();

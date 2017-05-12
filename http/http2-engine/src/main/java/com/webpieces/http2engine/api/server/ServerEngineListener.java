@@ -12,8 +12,8 @@ public interface ServerEngineListener {
 	 * A request is either headers only, headers plus data, more data, more data(using StreamWriter), or
 	 * headers, data, data, data, headers, OR headers, data, data, stream reset(ie. cancel)
 	 */
-	ServerStreamWriter sendRequestToServer(Http2Headers request, ResponseHandler responseHandler);
-
+	StreamReference sendRequestToServer(Http2Headers request, ResponseHandler responseHandler);
+	
 	CompletableFuture<Void> sendToSocket(ByteBuffer newData);
 
 	void closeSocket(Http2Exception reason);

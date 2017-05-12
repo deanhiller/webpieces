@@ -12,9 +12,9 @@ import org.webpieces.http2client.mock.MockResponseListener;
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.impl.HeaderEncoding;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -65,7 +65,7 @@ public class Test4FrameSizeAndHeaders extends AbstractTest {
 
 		//send new request on closed connection
 		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
+		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));

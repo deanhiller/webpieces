@@ -18,7 +18,7 @@ import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -65,7 +65,7 @@ public class TestMaxConcurrentSetting {
 		sendAndAckSettingsFrame(1L);
 
 		int streamId1 = sent.getRequest1().getRequest().getStreamId();
-		CompletableFuture<ClientStreamWriter> future2 = sent.getRequest2().getFuture();
+		CompletableFuture<StreamWriter> future2 = sent.getRequest2().getFuture();
 		MockResponseListener listener1 = sent.getRequest1().getListener(); 
 		
 		sendHeadersAndData(streamId1, future2, listener1);
@@ -97,7 +97,7 @@ public class TestMaxConcurrentSetting {
 		Assert.assertEquals(true, ack.isAck());
 	}
 	
-	private void sendHeadersAndData(int streamId1, CompletableFuture<ClientStreamWriter> future2,
+	private void sendHeadersAndData(int streamId1, CompletableFuture<StreamWriter> future2,
 			MockResponseListener listener1) throws InterruptedException, ExecutionException {
 		mockChannel.write(Requests.createResponse(streamId1)); //endOfStream=false
 		listener1.getSingleReturnValueIncomingResponse();
@@ -121,8 +121,8 @@ public class TestMaxConcurrentSetting {
 		MockResponseListener listener2 = new MockResponseListener();
 
 		listener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
-		CompletableFuture<ClientStreamWriter> future = socket.send(request1, listener1);
-		CompletableFuture<ClientStreamWriter> future2 = socket.send(request2, listener2);
+		CompletableFuture<StreamWriter> future = socket.send(request1, listener1);
+		CompletableFuture<StreamWriter> future2 = socket.send(request2, listener2);
 		
 		RequestHolder r1 = new RequestHolder(request1, listener1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, future2);		

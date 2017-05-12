@@ -12,7 +12,7 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.server.ServerStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Http1_1StreamImpl implements FrontendStream {
@@ -26,17 +26,17 @@ public class Http1_1StreamImpl implements FrontendStream {
 	}
 	
 	@Override
-	public ServerStreamWriter sendResponse(Http2Headers headers) {
+	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headers) {
 		HttpResponse response = Http2Translations.translateResponse(headers);
 		
 		ByteBuffer buf = http11Parser.marshalToByteBuffer(response);
 		socket.write(buf);
-		return new StreamImpl();
+		return CompletableFuture.completedFuture(new StreamImpl());
 	}
 
-	private class StreamImpl implements ServerStreamWriter {
+	private class StreamImpl implements StreamWriter {
 		@Override
-		public CompletableFuture<ServerStreamWriter> sendMore(PartialStream data) {
+		public CompletableFuture<StreamWriter> send(PartialStream data) {
 			HttpPayload response = Http2Translations.translate(data);
 			
 			ByteBuffer buf = http11Parser.marshalToByteBuffer(response);
@@ -45,7 +45,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 	}
 	
 	@Override
-	public ServerStreamWriter sendPush(Http2Push push) {
+	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
 		throw new UnsupportedOperationException("not supported for http1.1 requests");
 	}
 

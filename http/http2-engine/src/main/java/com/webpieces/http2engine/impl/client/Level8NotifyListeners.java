@@ -17,11 +17,11 @@ import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Level7NotifyListeners implements EngineResultListener {
+public class Level8NotifyListeners implements EngineResultListener {
 
 	private ClientEngineListener listener;
 
-	public Level7NotifyListeners(ClientEngineListener socketListener) {
+	public Level8NotifyListeners(ClientEngineListener socketListener) {
 		this.listener = socketListener;
 	}
 

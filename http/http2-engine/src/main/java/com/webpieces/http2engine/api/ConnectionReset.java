@@ -1,10 +1,14 @@
 package com.webpieces.http2engine.api;
 
 import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class ConnectionReset implements PartialStream {
+/**
+ * when a connection reset occurs, we need to reset all streams on the client
+ *
+ */
+public class ConnectionReset extends RstStreamFrame {
 
 	private ConnectionException reason;
 

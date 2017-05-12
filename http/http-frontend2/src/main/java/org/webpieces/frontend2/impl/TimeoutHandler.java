@@ -6,7 +6,7 @@ import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.Protocol;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.server.ServerStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class TimeoutHandler {
 
@@ -17,7 +17,7 @@ public class TimeoutHandler {
 		this.httpListener = httpListener;
 	}
 
-	public ServerStreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
 		FrontendSocket socket = stream.getSocket();
 		
 		//record last incoming data timestamp

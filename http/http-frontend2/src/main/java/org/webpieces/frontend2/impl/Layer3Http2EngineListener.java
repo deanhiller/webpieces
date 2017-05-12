@@ -7,9 +7,10 @@ import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.Protocol;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.ResponseHandler;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
-import com.webpieces.http2engine.api.server.ServerStreamWriter;
+import com.webpieces.http2engine.api.server.StreamReference;
 import com.webpieces.http2parser.api.Http2Exception;
 
 public class Layer3Http2EngineListener implements ServerEngineListener {
@@ -23,10 +24,11 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 
 	@Override
-	public ServerStreamWriter sendRequestToServer(Http2Headers request, ResponseHandler responseHandler) {
+	public StreamReference sendRequestToServer(Http2Headers request, ResponseHandler responseHandler) {
 		//every request received is a new stream
 		Http2StreamImpl stream = new Http2StreamImpl(socket, responseHandler);
-		return httpListener.incomingRequest(stream, request, Protocol.HTTP2);		
+		StreamWriter writer = httpListener.incomingRequest(stream, request, Protocol.HTTP2);
+		return new StreamRefImpl(stream, httpListener, writer);
 	}
 
 	@Override

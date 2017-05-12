@@ -22,9 +22,9 @@ import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -65,7 +65,7 @@ public class Test5_1StreamStates extends AbstractTest {
 		//send new request on closed connection
 		MockResponseListener listener1 = new MockResponseListener();
 		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
+		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -143,7 +143,7 @@ public class Test5_1StreamStates extends AbstractTest {
 		
 		//send new request on closed connection
 		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
+		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -181,7 +181,7 @@ public class Test5_1StreamStates extends AbstractTest {
 		
 		//send new request on closed connection
 		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
+		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -231,8 +231,8 @@ public class Test5_1StreamStates extends AbstractTest {
 		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
 
 		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<ClientStreamWriter> future = httpSocket.send(request1, listener1);
-		ClientStreamWriter writer = future.get(2, TimeUnit.SECONDS);
+		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);
 		

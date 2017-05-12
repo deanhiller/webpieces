@@ -7,24 +7,24 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
-import com.webpieces.http2engine.api.server.ServerStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class MockStreamWriter extends MockSuperclass implements ServerStreamWriter {
+public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 
 	private enum Method implements MethodEnum {
 		SEND_MORE
 	}
 	
 	public void setDefaultRetValToThis() {
-		CompletableFuture<ServerStreamWriter> completedFuture = CompletableFuture.completedFuture(this);
+		CompletableFuture<StreamWriter> completedFuture = CompletableFuture.completedFuture(this);
 		super.setDefaultReturnValue(Method.SEND_MORE, completedFuture);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<ServerStreamWriter> sendMore(PartialStream data) {
-		return (CompletableFuture<ServerStreamWriter>) super.calledMethod(Method.SEND_MORE, data);
+	public CompletableFuture<StreamWriter> send(PartialStream data) {
+		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.SEND_MORE, data);
 	}
 
 	public PartialStream getSingleFrame() {

@@ -1,29 +1,31 @@
-package com.webpieces.http2engine.impl.svr;
+package com.webpieces.http2engine.impl.client;
 
 import org.webpieces.javasm.api.State;
 
 import com.webpieces.http2engine.impl.shared.Http2Event;
 import com.webpieces.http2engine.impl.shared.Http2Event.Http2SendRecieve;
 import com.webpieces.http2engine.impl.shared.Http2PayloadType;
-import com.webpieces.http2engine.impl.shared.Level4AbstractStateMachine;
-import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
-import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Level5AbstractStateMachine;
+import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
+import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 
-public class Level4ServerStateMachine extends Level4AbstractStateMachine {
+public class Level5ClientStateMachine extends Level5AbstractStateMachine {
 
-	public Level4ServerStateMachine(String id, Level5RemoteFlowControl remoteFlowControl,
-			Level5LocalFlowControl localFlowControl) {
+	public Level5ClientStateMachine(String id,
+			Level6RemoteFlowControl remoteFlowControl, 
+			Level6LocalFlowControl localFlowControl
+	) {
 		super(id, remoteFlowControl, localFlowControl);
 		
-		State reservedState = stateMachine.createState("Reserved(local)");
-		State halfClosedLocal = stateMachine.createState("Half Closed(remote)");
+		State reservedState = stateMachine.createState("Reserved(remote)");
+		State halfClosedLocal = stateMachine.createState("Half Closed(local)");
 	
 		NoTransitionImpl failIfNoTransition = new NoTransitionImpl();
 		idleState.addNoTransitionListener(failIfNoTransition);
 		openState.addNoTransitionListener(failIfNoTransition);
-		closed.addNoTransitionListener(failIfNoTransition);
 		reservedState.addNoTransitionListener(failIfNoTransition);
 		halfClosedLocal.addNoTransitionListener(failIfNoTransition);
+		closed.addNoTransitionListener(failIfNoTransition);
 		
 		Http2Event sentHeadersNoEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS);
 		Http2Event sentHeadersEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS_WITH_EOS);
@@ -41,19 +43,19 @@ public class Level4ServerStateMachine extends Level4AbstractStateMachine {
 		Http2Event dataRecvNoEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA);
 		Http2Event dataRecvEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA_WITH_EOS);
 
-		stateMachine.createTransition(idleState, openState, recvHeadersNoEos);
-		stateMachine.createTransition(idleState, halfClosedLocal, recvHeadersEos); //jump to half closed as is send H AND send ES
+		stateMachine.createTransition(idleState, openState, sentHeadersNoEos);
+		stateMachine.createTransition(idleState, halfClosedLocal, sentHeadersEos); //jump to half closed as is send H AND send ES
 		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
 		
-		stateMachine.createTransition(openState, openState, dataRecvNoEos);
-		stateMachine.createTransition(openState, halfClosedLocal, dataRecvEos);
+		stateMachine.createTransition(openState, openState, dataSendNoEos);
+		stateMachine.createTransition(openState, halfClosedLocal, dataSendEos);
 		stateMachine.createTransition(openState, closed, sentResetStream, recvResetStream);
 		
-		stateMachine.createTransition(reservedState, halfClosedLocal, sentHeadersNoEos);
-		stateMachine.createTransition(reservedState, closed, sentHeadersEos, sentResetStream, recvResetStream);
+		stateMachine.createTransition(reservedState, halfClosedLocal, recvHeadersNoEos);
+		stateMachine.createTransition(reservedState, closed, recvHeadersEos, sentResetStream, recvResetStream);
 		
-		stateMachine.createTransition(halfClosedLocal, closed, sentHeadersEos, dataSendEos, recvResetStream, sentResetStream);
-		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, sentHeadersNoEos, dataSendNoEos);
+		stateMachine.createTransition(halfClosedLocal, closed, recvHeadersEos, dataRecvEos, recvResetStream, sentResetStream);
+		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeadersNoEos, dataRecvNoEos);
 	}
 
 }

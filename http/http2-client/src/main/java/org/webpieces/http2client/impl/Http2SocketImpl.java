@@ -12,7 +12,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.ClientStreamWriter;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
@@ -86,7 +86,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<ClientStreamWriter> send(Http2Headers request, Http2ResponseListener listener) {
+	public CompletableFuture<StreamWriter> send(Http2Headers request, Http2ResponseListener listener) {
 		return incoming.sendRequest(request, listener);
 	}
 

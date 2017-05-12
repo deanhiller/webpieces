@@ -3,28 +3,35 @@ package com.webpieces.http2engine.impl.svr;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.ConnectionClosedException;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
-import com.webpieces.http2engine.impl.shared.Level3AbstractStreamMgr;
-import com.webpieces.http2engine.impl.shared.Level5LocalFlowControl;
-import com.webpieces.http2engine.impl.shared.Level5RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.Level4AbstractStreamMgr;
+import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
+import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Level3ServerStreams extends Level3AbstractStreamMgr {
+public class Level4ServerStreams extends Level4AbstractStreamMgr {
 
-	private Level4ServerStateMachine serverSm;
+	private final static Logger log = LoggerFactory.getLogger(Level4ServerStreams.class);
+
+	private Level5ServerStateMachine serverSm;
 	private HeaderSettings localSettings;
 	private volatile int streamsInProcess = 0;
 
-	public Level3ServerStreams(StreamState streamState, Level4ServerStateMachine clientSm, Level5LocalFlowControl localFlowControl,
-			Level5RemoteFlowControl remoteFlowCtrl, HeaderSettings localSettings, HeaderSettings remoteSettings) {
-		super(remoteFlowCtrl, localFlowControl, remoteSettings, streamState);
-		this.serverSm = clientSm;
+	public Level4ServerStreams(StreamState streamState, Level5ServerStateMachine serverSm, Level6LocalFlowControl localFlowControl,
+			Level6RemoteFlowControl remoteFlowCtrl, HeaderSettings localSettings, HeaderSettings remoteSettings) {
+		super(serverSm, remoteFlowCtrl, localFlowControl, remoteSettings, streamState);
+		this.serverSm = serverSm;
 		this.localSettings = localSettings;
 	}
 
@@ -49,6 +56,19 @@ public class Level3ServerStreams extends Level3AbstractStreamMgr {
 		return streamState.create(stream);
 	}
 
+	public CompletableFuture<Stream> sendResponseHeaderToSocket(Stream origStream, Http2Headers frame) {
+		if(closedReason != null) {
+			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
+			CompletableFuture<Stream> future = new CompletableFuture<>();
+			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
+			return future;
+		}
+		Stream stream = streamState.getStream(frame);
+		
+		return serverSm.fireToSocket(stream, frame)
+				.thenApply(s -> stream);
+	}
+	
 	@Override
 	protected void modifyMaxConcurrentStreams(long value) {
 		//this is max promises to send at a time basically...we ignore for now
@@ -63,6 +83,10 @@ public class Level3ServerStreams extends Level3AbstractStreamMgr {
 	protected CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	protected void release(PartialStream cause) {
 	}
 
 }

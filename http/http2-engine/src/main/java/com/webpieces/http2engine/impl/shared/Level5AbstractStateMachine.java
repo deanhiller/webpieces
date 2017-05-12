@@ -17,17 +17,17 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public abstract class Level4AbstractStateMachine {
+public abstract class Level5AbstractStateMachine {
 
-	private Level5RemoteFlowControl remoteFlowControl;
-	private Level5LocalFlowControl localFlowControl;
+	private Level6RemoteFlowControl remoteFlowControl;
+	private Level6LocalFlowControl localFlowControl;
 
 	protected StateMachine stateMachine;
 	protected State idleState;
 	protected State closed;
 	protected State openState;
 
-	public Level4AbstractStateMachine(String id, Level5RemoteFlowControl remoteFlowControl, Level5LocalFlowControl localFlowControl) {
+	public Level5AbstractStateMachine(String id, Level6RemoteFlowControl remoteFlowControl, Level6LocalFlowControl localFlowControl) {
 		this.remoteFlowControl = remoteFlowControl;
 		this.localFlowControl = localFlowControl;
 		

@@ -19,9 +19,9 @@ import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class Level6MarshalAndPing {
+public class Level7MarshalAndPing {
 
-	private static final Logger log = LoggerFactory.getLogger(Level6MarshalAndPing.class);
+	private static final Logger log = LoggerFactory.getLogger(Level7MarshalAndPing.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private HpackParser parser;
@@ -30,7 +30,7 @@ public class Level6MarshalAndPing {
 	private MarshalState marshalState;
 	private AtomicReference<CompletableFuture<Void>> pingFutureRef;
 	
-	public Level6MarshalAndPing(HpackParser parser, HeaderSettings remoteSettings, EngineResultListener finalLayer) {
+	public Level7MarshalAndPing(HpackParser parser, HeaderSettings remoteSettings, EngineResultListener finalLayer) {
 		this.parser = parser;
 		this.remoteSettings = remoteSettings;
 		this.finalLayer = finalLayer;
