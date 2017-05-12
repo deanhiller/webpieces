@@ -65,37 +65,36 @@ public class TestBasicRequestResponse extends AbstractTest {
 		Assert.assertEquals(2, response.getPayload().getReadableSize());
 	}
 	
-//	@Test
-//	public void testWithDataAndTrailingHeaders() throws InterruptedException, ExecutionException, TimeoutException {
-//		Http2Request request1 = Requests.createHttp2Request();
-//		Http2Headers trailing = Requests.createRequest();
-//		request1.setTrailingHeaders(trailing);
-//
-//		MockResponseListener respListener1 = new MockResponseListener();
-//		respListener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
-//		CompletableFuture<Http2Response> future = httpSocket.send(request1);
-//		
-//		future.get();
-//		Assert.assertFalse(future.isDone());
-//		
-//		List<Http2Msg> frames = mockChannel.getFramesAndClear();
-//		Assert.assertEquals(3, frames.size());
-//		
-//		Http2Headers resp = Requests.createResponse(request1.getHeaders().getStreamId());
-//		mockChannel.write(resp);
-//		
-//		Assert.assertFalse(future.isDone());
-//
-//		DataFrame data = Requests.createData(request1.getHeaders().getStreamId());
-//		data.setEndOfStream(false);
-//		mockChannel.write(data);
-//		
-//		Assert.assertFalse(future.isDone());
-//
-//		mockChannel.write(trailing);
-//
-//		Http2Response response = future.get(2, TimeUnit.SECONDS);
-//		Assert.assertEquals(2, response.getPayload().getReadableSize());
-//		Assert.assertNotNull(response.getTrailingHeaders());
-//	}
+	@Test
+	public void testWithDataAndTrailingHeaders() throws InterruptedException, ExecutionException, TimeoutException {
+		Http2Request request1 = Requests.createHttp2Request();
+		Http2Headers trailing = Requests.createRequest();
+		request1.setTrailingHeaders(trailing);
+
+		MockResponseListener respListener1 = new MockResponseListener();
+		respListener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
+		CompletableFuture<Http2Response> future = httpSocket.send(request1);
+		
+		Assert.assertFalse(future.isDone());
+		
+		List<Http2Msg> frames = mockChannel.getFramesAndClear();
+		Assert.assertEquals(3, frames.size());
+		
+		Http2Headers resp = Requests.createResponse(request1.getHeaders().getStreamId());
+		mockChannel.write(resp);
+		
+		Assert.assertFalse(future.isDone());
+
+		DataFrame data = Requests.createData(request1.getHeaders().getStreamId());
+		data.setEndOfStream(false);
+		mockChannel.write(data);
+		
+		Assert.assertFalse(future.isDone());
+
+		mockChannel.write(trailing);
+
+		Http2Response response = future.get(2, TimeUnit.SECONDS);
+		Assert.assertEquals(2, response.getPayload().getReadableSize());
+		Assert.assertNotNull(response.getTrailingHeaders());
+	}
 }

@@ -48,7 +48,7 @@ public class Level5ClientStateMachine extends Level5AbstractStateMachine {
 		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
 		
 		stateMachine.createTransition(openState, openState, dataSendNoEos);
-		stateMachine.createTransition(openState, halfClosedLocal, dataSendEos);
+		stateMachine.createTransition(openState, halfClosedLocal, dataSendEos, sentHeadersEos); //headers here is trailing headers
 		stateMachine.createTransition(openState, closed, sentResetStream, recvResetStream);
 		
 		stateMachine.createTransition(reservedState, halfClosedLocal, recvHeadersNoEos);
