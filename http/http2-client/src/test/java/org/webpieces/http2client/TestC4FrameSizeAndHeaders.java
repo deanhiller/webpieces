@@ -63,7 +63,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		ConnectionReset failResp = (ConnectionReset) listener1.getSingleReturnValueIncomingResponse();
-		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, failResp.getReason().getReason());
+		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, failResp.getCause().getReason());
 
 		//send new request on closed connection
 		Http2Headers request1 = Requests.createRequest();
@@ -124,7 +124,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
 		Assert.assertEquals(1, results.size());
 		ConnectionReset failResp = (ConnectionReset) results.get(0);
-		Assert.assertEquals(ParseFailReason.HEADER_DECODE, failResp.getReason().getReason());
+		Assert.assertEquals(ParseFailReason.HEADER_DECODE, failResp.getCause().getReason());
 	}
 	
 	/**
@@ -161,7 +161,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
 		Assert.assertEquals(1, results.size());
 		ConnectionReset reset = (ConnectionReset) results.get(0);
-		Assert.assertEquals(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, reset.getReason().getReason());
+		Assert.assertEquals(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, reset.getCause().getReason());
 		
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();

@@ -88,10 +88,7 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 
 	public CompletableFuture<Stream> sendResponseHeaderToSocket(Stream origStream, Http2Headers frame) {
 		if(closedReason != null) {
-			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
-			CompletableFuture<Stream> future = new CompletableFuture<>();
-			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
-			return future;
+			return createExcepted("sending response headers").thenApply((s) -> null);
 		}
 		Stream stream = streamState.getStream(frame);
 		

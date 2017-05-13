@@ -26,7 +26,7 @@ public abstract class Level4AbstractStreamMgr {
 	protected HeaderSettings remoteSettings;
 	private Level6RemoteFlowControl remoteFlowControl;
 	private Level6LocalFlowControl localFlowControl;
-	protected ConnectionException closedReason;
+	protected ConnectionReset closedReason;
 	private Level5AbstractStateMachine stateMachine;
 	
 	public Level4AbstractStreamMgr(
@@ -57,29 +57,36 @@ public abstract class Level4AbstractStreamMgr {
 		return fireRstToSocket(stream, frame)
 			.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
 	}
+
+	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionException reset) {
+		return sendClientResetsAndSvrGoAway(new ConnectionReset(reset));
+	}
 	
-	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionException e) {
-		closedReason = e;
-		ConcurrentMap<Integer, Stream> streams = streamState.closeEngine(e);
+	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionReset reset) {
+		closedReason = reset;
+		ConcurrentMap<Integer, Stream> streams = streamState.closeEngine();
 		for(Stream stream : streams.values()) {
 			Http2ResponseListener responseListener = stream.getResponseListener();
 			if(responseListener != null)
-				fireReset(e, (c) -> responseListener.incomingPartialResponse(c));
+				fireReset((c) -> responseListener.incomingPartialResponse(c));
 			PushPromiseListener pushListener = stream.getPushListener();
 			if(pushListener != null)
-				fireReset(e, (c) -> pushListener.incomingPushPromise(c));
+				fireReset((c) -> pushListener.incomingPushPromise(c));
 			StreamReference writer = stream.getStreamWriter();
 			if(writer != null)
-				fireReset(e, (c) -> writer.cancel(c).thenApply((w) -> null));
+				fireReset((c) -> writer.cancel(c).thenApply((w) -> null));
 		}
 		
-		return remoteFlowControl.goAway(e);
+		if(!reset.isFarEndClosed())
+			return remoteFlowControl.goAway(reset.getCause());
+		
+		return CompletableFuture.completedFuture(null);
 	}
 
-	private void fireReset(ConnectionException e, Function<ConnectionReset, CompletableFuture<Void>> clientFunction) {
+	private void fireReset(Function<ConnectionReset, CompletableFuture<Void>> clientFunction) {
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		try {
-			future = clientFunction.apply(new ConnectionReset(e));
+			future = clientFunction.apply(closedReason);
 		} catch(Throwable t) {
 			future.completeExceptionally(t);
 		}
@@ -106,14 +113,24 @@ public abstract class Level4AbstractStreamMgr {
 
 	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
 		if(closedReason != null) {
-			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
-			CompletableFuture<Void> future = new CompletableFuture<>();
-			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
-			return future;
+			return createExcepted("sending "+data.getClass().getSimpleName());
 		}
 		
 		return fireToSocket(stream, data, false);
 	}
+	
+	
+	public CompletableFuture<Void> createExcepted(String extra) {
+		log.info("returning CompletableFuture.exception since this socket is closed(while doing '"+extra+"'):"+closedReason.getReason());
+		CompletableFuture<Void> future = new CompletableFuture<>();
+
+		ConnectionClosedException exception = new ConnectionClosedException("Connection closed or closing:"+closedReason.getReason());
+		if(closedReason.getCause() != null)
+			exception.initCause(closedReason.getCause());
+		future.completeExceptionally(exception);
+		return future;
+	}
+	
 	
 	protected CompletableFuture<Void> fireToSocket(Stream stream, PartialStream frame, boolean keepDelayedState) {
 		return stateMachine.fireToSocket(stream, frame).thenApply(v -> {
@@ -156,6 +173,5 @@ public abstract class Level4AbstractStreamMgr {
 	protected abstract void modifyMaxConcurrentStreams(long value);
 
 	public abstract CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg);
-
 
 }

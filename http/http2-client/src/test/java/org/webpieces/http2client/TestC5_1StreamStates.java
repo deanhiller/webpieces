@@ -94,10 +94,10 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		ConnectionReset failResp1 = (ConnectionReset) listener1.getSingleReturnValueIncomingResponse();
-		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp1.getReason().getReason());
+		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp1.getCause().getReason());
 		
 		ConnectionReset failResp2 = (ConnectionReset) pushListener.getSingleParam();
-		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp2.getReason().getReason());
+		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp2.getCause().getReason());
 	}
 
 	/**

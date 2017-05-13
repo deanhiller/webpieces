@@ -57,10 +57,7 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 
 	public CompletableFuture<Stream> createStreamAndSend(Http2Headers frame, Http2ResponseListener responseListener) {
 		if(closedReason != null) {
-			log.info("returning CompletableFuture.exception since this socket is closed(or closing)");
-			CompletableFuture<Stream> future = new CompletableFuture<>();
-			future.completeExceptionally(new ConnectionClosedException("Connection closed or closing", closedReason));
-			return future;
+			return createExcepted("send request headers").thenApply((s) -> null);
 		}
 		return permitQueue.runRequest(() -> createStreamSendImpl(frame, responseListener));
 	}

@@ -70,7 +70,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		
 		Cancel failResp = mockListener.getCancelInfo();
 		ConnectionReset reset = (ConnectionReset) failResp.reset;
-		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, reset.getReason().getReason());
+		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReason());
 
 		//send response with request not complete but failed as well anyways
 		Http2Headers response = Http2Requests.createResponse(request.getStreamId());

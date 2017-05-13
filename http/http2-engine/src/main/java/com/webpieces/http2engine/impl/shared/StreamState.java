@@ -20,7 +20,7 @@ public class StreamState {
 	}
 
 	//chanmgr thread only
-	public ConcurrentMap<Integer, Stream> closeEngine(ConnectionException e) {
+	public ConcurrentMap<Integer, Stream> closeEngine() {
 		return streamIdToStream;
 	}
 	

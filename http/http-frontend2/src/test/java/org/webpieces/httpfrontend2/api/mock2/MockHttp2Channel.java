@@ -129,9 +129,6 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		Stream<Http2Msg> retVal = calledMethodList.map(p -> (List<Http2Msg>)p.getArgs()[0])
 														.flatMap(Collection::stream);
 
-		//clear out read values
-		this.calledMethods.remove(Method.INCOMING_FRAME);
-		
 		return retVal.collect(Collectors.toList());
 	}
 	
@@ -277,4 +274,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		this.listener = dataListener;
 	}
 
+	public void simulateClose() {
+		listener.farEndClosed(this);
+	}
 }

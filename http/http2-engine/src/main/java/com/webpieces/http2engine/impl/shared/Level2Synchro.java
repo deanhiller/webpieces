@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.threading.SessionExecutor;
 
+import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level2Synchro {
@@ -40,7 +41,8 @@ public class Level2Synchro {
 		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
 		//just connect more sockets
 		executor.execute(this, () -> { 
-
+			ConnectionReset reset = new ConnectionReset("Far end closed the socket", true);
+			level3.sendClientResetsAndSvrGoAway(reset );
 		});		
 	}
 	

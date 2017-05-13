@@ -134,4 +134,8 @@ public class Layer2Http1_1Handler {
 		//timeoutListener.connectionOpened(socket, isReadyForWrites);
 	}
 
+	public void farEndClosed(FrontendSocketImpl socket) {
+		socket.farEndClosed(httpListener);
+	}
+
 }

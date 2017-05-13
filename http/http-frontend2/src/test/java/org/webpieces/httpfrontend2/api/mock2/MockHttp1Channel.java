@@ -237,4 +237,8 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		this.listener = dataListener;
 	}
 
+	public void simulateClose() {
+		listener.farEndClosed(this);
+	}
+
 }

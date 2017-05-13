@@ -10,14 +10,29 @@ import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
  */
 public class ConnectionReset extends RstStreamFrame {
 
-	private ConnectionException reason;
+	private ConnectionException cause;
+	private String reason;
+	private boolean farEndClosed;
 
-	public ConnectionReset(ConnectionException reason) {
-		this.reason = reason;
+	public ConnectionReset(ConnectionException cause) {
+		this.cause = cause;
+		this.reason = cause.getMessage();
 	}
 
-	public ConnectionException getReason() {
+	public ConnectionReset(String message, boolean farEndClosed) {
+		this.reason = message;
+		this.farEndClosed = farEndClosed;
+	}
+	
+	public ConnectionException getCause() {
+		return cause;
+	}
+	public String getReason() {
 		return reason;
+	}
+
+	public boolean isFarEndClosed() {
+		return farEndClosed;
 	}
 
 	@Override
