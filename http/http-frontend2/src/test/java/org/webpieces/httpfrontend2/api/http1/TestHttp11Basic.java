@@ -13,7 +13,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpfrontend2.api.Responses;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
-import org.webpieces.httpfrontend2.api.mock2.TestAssert;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
@@ -30,6 +29,16 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class TestHttp11Basic extends AbstractHttp1Test {
 	
+	@Test
+	public void testConnectionKeepAliveOffAndFrontEndCloses() {
+		
+	}
+	@Test
+	public void testConnectionKeepAliveOn() {
+		
+	}	
+	
+		
 	@Test
 	public void testFileUploadWithMultipartFormData() {
 		
