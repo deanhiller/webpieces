@@ -138,6 +138,8 @@ public class Http2Translations {
 		for(Http2Header header : headers.getHeaders()) {
 			if(header.getKnownName() == Http2HeaderName.STATUS) {
 				fillStatus(header, status);
+			} else if(header.getKnownName() == Http2HeaderName.SCHEME) {
+				//do nothing and drop it
 			} else {
 				Header http1Header = convertHeader(header);
 				response.addHeader(http1Header);

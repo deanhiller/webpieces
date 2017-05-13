@@ -18,13 +18,17 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 
 public class TestHttp11Basic extends AbstractHttp1Test {
 	
 	@Test
-	public void testUploadWithChunking() {
+	public void testFileUploadWithMultipartFormData() {
+		
+	}
+	
+	@Test
+	public void testFileUploadWithChunking() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 		req.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
 

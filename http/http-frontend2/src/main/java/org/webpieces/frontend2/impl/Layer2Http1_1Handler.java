@@ -99,7 +99,6 @@ public class Layer2Http1_1Handler {
 			processInitialPieceOfRequest(socket, payload, msg);
 		} else if(payload instanceof HttpChunk) {
 			processChunk(socket, (HttpChunk)payload, (DataFrame) msg);
-			
 		} else {
 			throw new IllegalArgumentException("payload not supported="+payload);
 		}
