@@ -1,24 +1,22 @@
 package org.webpieces.httpfrontend2.api.http1;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
-import org.webpieces.httpfrontend2.api.Responses;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpMessage;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 
 public class TestHttp11Basic extends AbstractHttp1Test {
@@ -53,8 +51,16 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		DataWrapper data = frame.getData();
 		Assert.assertEquals(bodyStr, data.createStringFromUtf8(0, data.getReadableSize()));
 		Assert.assertTrue(frame.isEndOfStream());
+		
+		
+		HttpResponse resp = Requests.createResponse();
+		Http2Headers http2Resp = (Http2Headers) Http2Translations.translate(resp, false);
+		in1.stream.sendResponse(http2Resp);
+		
+		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
+		Assert.assertEquals(resp, respToClient);
 	}
-	
+
 	@Test
 	public void testSendTwoRequestsAndMisorderedResponses() throws InterruptedException, ExecutionException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");

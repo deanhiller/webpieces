@@ -9,8 +9,12 @@ import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
+import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.httpparser.api.dto.HttpResponseStatus;
+import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.net.URLEncoder;
 
 public class Requests {
@@ -64,6 +68,21 @@ public class Requests {
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
 		
 		return req;		
+	}
+
+	public static HttpResponse createResponse() {
+		HttpResponseStatus status = new HttpResponseStatus();
+		status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
+
+		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
+		statusLine.setStatus(status);
+		
+		HttpResponse resp = new HttpResponse();
+		resp.setStatusLine(statusLine);
+		
+		resp.addHeader(new Header(KnownHeaderName.CONNECTION, "keep"));
+		resp.addHeader(new Header(KnownHeaderName.AGE, "hh"));
+		return resp;
 	}
 
 }

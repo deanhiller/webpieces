@@ -1,5 +1,6 @@
 package org.webpieces.frontend2.impl.translation;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,10 +40,23 @@ public class Http2Translations {
 	public static Http2Msg translate(HttpPayload payload, boolean isHttps) {
 		if(payload instanceof HttpRequest)
 			return requestToHeaders((HttpRequest) payload, isHttps);
+		else if(payload instanceof HttpResponse)
+			return responseToHeaders((HttpResponse)payload, isHttps);
 		throw new UnsupportedOperationException("not supported yet");
 	}
 	
-    private static Http2Headers requestToHeaders(HttpRequest request, boolean fromSslChannel) {
+    private static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
+        List<Http2Header> headers = new ArrayList<>();
+        headers.add(new Http2Header(":status", response.getStatusLine().getStatus().getCode().toString()));
+        for(Header header: response.getHeaders()) {
+            headers.add(new Http2Header(header.getName(), header.getValue()));
+        }
+        
+    	Http2Headers req = new Http2Headers(headers);
+        return req;
+	}
+
+	private static Http2Headers requestToHeaders(HttpRequest request, boolean fromSslChannel) {
         HttpRequestLine requestLine = request.getRequestLine();
         List<Header> requestHeaders = request.getHeaders();
 
