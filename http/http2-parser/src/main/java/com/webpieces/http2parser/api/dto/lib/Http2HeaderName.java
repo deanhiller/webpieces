@@ -66,6 +66,7 @@ public enum Http2HeaderName {
 	EXPIRES("expires", HeaderType.ENTITY),       
 	LAST_MODIFIED("last-modified", HeaderType.ENTITY),
 
+	STATUS(":status", HeaderType.REQUEST),
 	METHOD(":method", HeaderType.REQUEST),
 	SCHEME(":scheme", HeaderType.REQUEST),
 	PATH(":path", HeaderType.REQUEST), 

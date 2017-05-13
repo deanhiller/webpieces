@@ -16,7 +16,7 @@ import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.httpfrontend2.api.mock2.MockChanMgr;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
-import org.webpieces.httpfrontend2.api.mock2.MockRequestListener;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.MockTcpServerChannel;
 import org.webpieces.httpfrontend2.api.mock2.MockTimer;
@@ -42,7 +42,7 @@ public class TestS3InitialHttpConnections {
 	private HeaderSettings localSettings = Http2Requests.createSomeSettings();
 	private MockTime mockTime = new MockTime(true);
 	private MockTimer mockTimer = new MockTimer();
-	private MockRequestListener mockListener = new MockRequestListener();
+	private MockHttp2RequestListener mockListener = new MockHttp2RequestListener();
 	private MockStreamWriter mockStreamWriter = new MockStreamWriter();
 
 	@Before

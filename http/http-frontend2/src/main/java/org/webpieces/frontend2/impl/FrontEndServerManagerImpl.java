@@ -13,7 +13,6 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
@@ -36,16 +35,16 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
 		preconditionCheck(config);
 
-		Layer1ServerListener listener = buildDatalListener(httpListener);
+		Layer1ServerListener listener = buildDatalListener(httpListener, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 
 		return frontend;
 	}
 
-	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener) {
-		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(httpParser, httpListener);
-		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener);
+	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener, boolean isHttps) {
+		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(httpParser, httpListener, isHttps);
+		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener, isHttps);
 		Layer1ServerListener listener = new Layer1ServerListener(http1_1, http2);
 		return listener;
 	}
@@ -64,7 +63,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		
-		Layer1ServerListener listener = buildDatalListener(httpListener);
+		Layer1ServerListener listener = buildDatalListener(httpListener, true);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
 		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
 		

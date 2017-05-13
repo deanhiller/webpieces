@@ -12,7 +12,7 @@ import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 public class Http2Headers implements PartialStream {
 
 	private int streamId;
-	private boolean endOfStream = false;
+	private boolean endOfStream = true;
     private PriorityDetails priorityDetails; /* optional */
 	protected List<Http2Header> headers = new ArrayList<>();
 	//Convenience structure that further morphs the headers into a Map that can

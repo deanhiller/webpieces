@@ -13,7 +13,7 @@ import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
-public class MockRequestListener extends MockSuperclass implements HttpRequestListener {
+public class MockHttp2RequestListener extends MockSuperclass implements HttpRequestListener {
 
 	private enum Method implements MethodEnum {
 		INCOMING, CANCEL

@@ -10,7 +10,10 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
 public class DataFrame extends AbstractHttp2Frame implements PartialStream {
 
     /* flags */
-    private boolean endOfStream = false; /* 0x1 */
+	//defaulted to true as it is easier 
+	//  1. to notice a stream ending immediately instead if it was false
+	//  2. having something hang and wondering where it is(though that could be hard as well)
+    private boolean endOfStream = true; /* 0x1 */
     //private boolean padded = false;    /* 0x8 */
     /* payload */
     private DataWrapper data = dataGen.emptyWrapper();

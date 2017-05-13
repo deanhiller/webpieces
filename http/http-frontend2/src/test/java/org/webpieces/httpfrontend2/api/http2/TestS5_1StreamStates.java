@@ -3,13 +3,7 @@ package org.webpieces.httpfrontend2.api.http2;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.data.api.DataWrapper;
-
-import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 /**
  * Test this section of rfc..

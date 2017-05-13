@@ -12,6 +12,7 @@ public class Responses {
 	public static Http2Headers createResponse(int id) {
 		List<Http2Header> headers = new ArrayList<>();
 	    headers.add(new Http2Header(Http2HeaderName.SERVER, "id"));
+	    headers.add(new Http2Header(Http2HeaderName.STATUS, "200"));
 	    
 	    Http2Headers response = new Http2Headers(headers);
 	    response.setEndOfStream(true);

@@ -7,6 +7,7 @@ import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.TCPChannel;
 
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
 
 public class FrontendSocketImpl implements FrontendSocket {
@@ -15,6 +16,8 @@ public class FrontendSocketImpl implements FrontendSocket {
 	private ProtocolType protocol;
 	private Memento http1_1ParseState;
 	private Http2ServerEngine http2Engine;
+	private RequestState state = RequestState.WAITING_ON_REQUEST_TO_FINISH;
+	private StreamWriter writer;
 
 	public FrontendSocketImpl(TCPChannel channel, ProtocolType protocol) {
 		this.channel = channel;
@@ -61,6 +64,14 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	public CompletableFuture<FrontendSocket> write(ByteBuffer buf) {
 		return channel.write(buf).thenApply(c -> this);
+	}
+
+	public void setSendRequestState(RequestState state) {
+		this.state = state;
+	}
+
+	public void addWriter(StreamWriter writer) {
+		this.writer = writer;
 	}
 
 }

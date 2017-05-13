@@ -15,17 +15,19 @@ public class Layer2Http2Handler {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ServerEngineFactory svrEngineFactory;
 	private HttpRequestListener httpListener;
+	private boolean isHttps;
 
 	public Layer2Http2Handler(
 			Http2ServerEngineFactory svrEngineFactory, 
-			HttpRequestListener httpListener
+			HttpRequestListener httpListener, boolean isHttps
 	) {
 		this.svrEngineFactory = svrEngineFactory;
 		this.httpListener = httpListener;
+		this.isHttps = isHttps;
 	}
 
 	public void initialize(FrontendSocketImpl socket) {
-		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener);
+		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener, isHttps);
 		Http2ServerEngine engine = svrEngineFactory.createEngine(listener);
 		socket.setHttp2Engine(engine);
 		

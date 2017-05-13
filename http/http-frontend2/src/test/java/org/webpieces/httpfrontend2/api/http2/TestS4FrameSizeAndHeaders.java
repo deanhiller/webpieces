@@ -10,8 +10,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.api.FrontendStream;
-import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.Cancel;
-import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.PassedIn;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.TestAssert;
 
 import com.twitter.hpack.Encoder;

@@ -3,7 +3,6 @@ package org.webpieces.httpfrontend2.api.mock2;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +16,11 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
+import org.webpieces.httpparser.api.Memento;
+import org.webpieces.httpparser.api.dto.HttpMessage;
+import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
@@ -26,37 +30,23 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
 
-import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.hpack.api.MarshalState;
-import com.webpieces.hpack.api.UnmarshalState;
-import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.Http2ParserFactory;
-import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Frame;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-
-public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
+public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private enum Method implements MethodEnum {
 		INCOMING_FRAME
 	}
 	
-	private HpackParser parser;
-	private Http2Parser frameParser;
-	private UnmarshalState unmarshalState;
-	private MarshalState marshalState;
 	private DataListener listener;
 	private boolean isClosed;
 	private ChannelSession session = new ChannelSessionImpl();
+	private HttpParser parser;
+	private Memento memento;
 
-	public MockHttp2Channel() {
-		BufferPool bufferPool = new BufferCreationPool();
-		parser = HpackParserFactory.createParser(bufferPool, false);
-		unmarshalState = parser.prepareToUnmarshal(4096, 4096, 4096);
-		marshalState = parser.prepareToMarshal(4096, 4096);
-		frameParser = Http2ParserFactory.createParser(bufferPool);
+	public MockHttp1Channel() {
+		BufferPool pool = new BufferCreationPool();
+		parser = HttpParserFactory.createParser(pool);
+		memento = parser.prepareToParse();
 	}
 	
 	@Override
@@ -64,46 +54,16 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
-	public void sendPreface() {
-		String preface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
-		byte[] bytes = preface.getBytes(StandardCharsets.UTF_8);
-		ByteBuffer wrap = ByteBuffer.wrap(bytes);
-		listener.incomingData(this, wrap);
-	}
-	
-	public void sendPrefaceAndSettings(SettingsFrame settings) {
-		String preface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
-		byte[] bytes = preface.getBytes(StandardCharsets.UTF_8);
-		DataWrapper data = parser.marshal(marshalState, settings);
-		DataWrapper prefaceWrapper = dataGen.wrapByteArray(bytes);
-		DataWrapper all = dataGen.chainDataWrappers(prefaceWrapper, data);
-		ByteBuffer buf = ByteBuffer.wrap(all.createByteArray());
-		listener.incomingData(this, buf);
-	}
-	
 	public void writeHexBack(String hex) {
 		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
 		listener.incomingData(this, buf);		
 	}
 	
-	public void write(Http2Msg msg) {
+	public void write(HttpPayload msg) {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
-		DataWrapper data = parser.marshal(marshalState, msg);
-		byte[] bytes = data.createByteArray();
-		if(bytes.length == 0)
-			throw new IllegalArgumentException("how do you marshal to 0 bytes...WTF");
-		ByteBuffer buf = ByteBuffer.wrap(bytes);
-		listener.incomingData(this, buf);
-	}
-	
-	public void writeFrame(Http2Frame frame) {
-		DataWrapper data = frameParser.marshal(frame);
-		byte[] bytes = data.createByteArray();
-		if(bytes.length == 0)
-			throw new IllegalArgumentException("how do you marshal to 0 bytes...WTF");
-		ByteBuffer buf = ByteBuffer.wrap(bytes);
+		ByteBuffer buf = parser.marshalToByteBuffer(msg);
 		listener.incomingData(this, buf);
 	}
 	
@@ -111,22 +71,22 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	@Override
 	public CompletableFuture<Channel> write(ByteBuffer b) {		
 		DataWrapper data = dataGen.wrapByteBuffer(b);
-		parser.unmarshal(unmarshalState, data);
-		List<Http2Msg> parsedFrames = unmarshalState.getParsedFrames();
-		return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
+		parser.parse(memento, data);
+		List<HttpPayload> payloads = memento.getParsedMessages();
+		return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, payloads);
 	}
 
-	public Http2Msg getFrameAndClear() {
-		List<Http2Msg> msgs = getFramesAndClear();
+	public HttpMessage getFrameAndClear() {
+		List<HttpMessage> msgs = getFramesAndClear();
 		if(msgs.size() != 1)
 			throw new IllegalStateException("not correct number of responses.  number="+msgs.size()+" but expected 1.  list="+msgs);
 		return msgs.get(0);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Http2Msg> getFramesAndClear() {
+	public List<HttpMessage> getFramesAndClear() {
 		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.INCOMING_FRAME);
-		Stream<Http2Msg> retVal = calledMethodList.map(p -> (List<Http2Msg>)p.getArgs()[0])
+		Stream<HttpMessage> retVal = calledMethodList.map(p -> (List<HttpMessage>)p.getArgs()[0])
 														.flatMap(Collection::stream);
 
 		//clear out read values

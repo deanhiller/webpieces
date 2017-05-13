@@ -21,6 +21,9 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Layer2Http1_1Handler {
@@ -28,10 +31,12 @@ public class Layer2Http1_1Handler {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser httpParser;
 	private HttpRequestListener httpListener;
+	private boolean isHttps;
 
-	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener) {
+	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener, boolean isHttps) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
+		this.isHttps = isHttps;
 	}
 
 	public InitiationResult initialData(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -85,28 +90,43 @@ public class Layer2Http1_1Handler {
 			processCorrectly(socket, payload);
 		}
 	}
-	
+
 	private void processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
-		Http2Msg msg = Http2Translations.translate(payload);
+		Http2Msg msg = Http2Translations.translate(payload, isHttps);
 		//TODO: close socket on violation of pipelining like previous request did not end
 
 		if(payload instanceof HttpRequest) {
-			Http2Headers headers = (Http2Headers) msg;
-//			if(socket.getActiveStream() != null)
-//				throw new IllegalStateException("previous stream not complete");
-
-			Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
-			//socket.setActiveHttp11Stream(stream);
-			
-			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
-			
-
+			processInitialPieceOfRequest(socket, payload, msg);
 		} else if(payload instanceof HttpChunk) {
 			
 		} else if(payload instanceof HttpLastChunk) {
 			
 		} else {
 			throw new IllegalArgumentException("payload not supported="+payload);
+		}
+	}
+
+	private void processInitialPieceOfRequest(FrontendSocketImpl socket, HttpPayload payload, Http2Msg msg) {
+		HttpRequest http1Req = (HttpRequest) payload;
+		Http2Headers headers = (Http2Headers) msg;
+		
+		Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
+		//socket.setActiveHttp11Stream(stream);
+					
+		Http2Header lengthHeader = headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH);
+		if(lengthHeader != null) {
+			DataFrame frame = Http2Translations.translateBody(payload.getBody());
+			socket.setSendRequestState(RequestState.SENT_REQUEST);
+			
+			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
+			writer.send(frame);
+			
+		} else if(http1Req.isHasChunkedTransferHeader()) {
+			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
+			socket.addWriter(writer);
+		} else {
+			socket.setSendRequestState(RequestState.SENT_REQUEST);
+			httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
 		}
 	}
 

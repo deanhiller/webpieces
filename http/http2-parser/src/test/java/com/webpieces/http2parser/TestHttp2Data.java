@@ -22,7 +22,7 @@ public class TestHttp2Data{
     	String data = 
             "00 00 08" + // Length
             "00" + // Type
-            "00" + // Flags
+            "01" + // Flags
             "00 00 00 01" + // R + streamid
             "FF FF FF FF FF FF FF FF"; // payload
     	return data.replaceAll("\\s+","");
@@ -42,7 +42,7 @@ public class TestHttp2Data{
     	String data =
             "00 00 0B" + // Length
             "00" + // Type
-            "08" + // Flags (padded = true)
+            "09" + // Flags (padded = true)
             "00 00 00 01" + // R + streamid
             "02" + // padding length
             "FF FF FF FF FF FF FF FF" + // data
@@ -78,7 +78,7 @@ public class TestHttp2Data{
     	Assert.assertEquals(1, frame.getStreamId());
     	Assert.assertEquals(8, frame.getData().getReadableSize());
     	Assert.assertEquals(0, frame.getPadding().getReadableSize());  
-    	Assert.assertFalse(frame.isEndOfStream());
+    	Assert.assertTrue(frame.isEndOfStream());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class TestHttp2Data{
     	Assert.assertEquals(1, frame.getStreamId());
     	Assert.assertEquals(8, frame.getData().getReadableSize());
     	Assert.assertEquals(2, frame.getPadding().getReadableSize());  
-    	Assert.assertFalse(frame.isEndOfStream());
+    	Assert.assertTrue(frame.isEndOfStream());
     }
 
     @Test

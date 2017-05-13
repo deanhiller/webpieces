@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.PassedIn;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
