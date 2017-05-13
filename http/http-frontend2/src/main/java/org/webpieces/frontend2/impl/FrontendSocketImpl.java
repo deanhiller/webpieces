@@ -74,4 +74,8 @@ public class FrontendSocketImpl implements FrontendSocket {
 		this.writer = writer;
 	}
 
+	public StreamWriter getWriter() {
+		return writer;
+	}
+
 }

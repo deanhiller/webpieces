@@ -73,6 +73,6 @@ public class HttpChunk extends HttpPayload {
 	public String toString() {
 		String metaLine = createMetaLine();
 		String trailer = createTrailer();
-		return metaLine+trailer;
+		return "HttpChunk("+metaLine+trailer+")";
 	}
 }

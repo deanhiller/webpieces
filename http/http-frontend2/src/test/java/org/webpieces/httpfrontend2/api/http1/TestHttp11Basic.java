@@ -10,28 +10,46 @@ import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 
 public class TestHttp11Basic extends AbstractHttp1Test {
 	
 	@Test
 	public void testUploadWithChunking() {
-//		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
-//		req.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
-//
-//		mockChannel.write(req);		
-//		PassedIn in1 = mockListener.getSingleRequest();
-//		HttpRequest req1 = Http2Translations.translateRequest(in1.request);
-//		Assert.assertEquals(req, req1);
-//		
-//		mockStreamWriter.getSingleFrame()
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+		req.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+
+		mockChannel.write(req);		
+		PassedIn in1 = mockListener.getSingleRequest();
+		HttpRequest req1 = Http2Translations.translateRequest(in1.request);
+		Assert.assertEquals(req, req1);
+
+		HttpChunk chunk = new HttpChunk();
+		String bodyStr = "hi here and there";
+		DataWrapper data = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
+		chunk.setBody(data);
+		mockChannel.write(chunk);
+		
+		DataFrame singleFrame = (DataFrame) mockStreamWriter.getSingleFrame();
+		Assert.assertTrue(!singleFrame.isEndOfStream());
+		DataWrapper data2 = singleFrame.getData();
+		String result = data2.createStringFromUtf8(0, data2.getReadableSize());
+		Assert.assertEquals(bodyStr, result);
+		
+		HttpLastChunk last = new HttpLastChunk();
+		mockChannel.write(last);
+		DataFrame lastEmpty = (DataFrame) mockStreamWriter.getSingleFrame();
+		Assert.assertTrue(lastEmpty.isEndOfStream());
+		Assert.assertEquals(0, lastEmpty.getData().getReadableSize());
 	}
 	
 	@Test

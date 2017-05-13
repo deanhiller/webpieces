@@ -9,6 +9,8 @@ import java.util.Set;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
@@ -42,12 +44,30 @@ public class Http2Translations {
 			return requestToHeaders((HttpRequest) payload, isHttps);
 		else if(payload instanceof HttpResponse)
 			return responseToHeaders((HttpResponse)payload, isHttps);
+		else if(payload instanceof HttpLastChunk)
+			return translateChunk((HttpChunk)payload, true);
+		else if(payload instanceof HttpChunk)
+			return translateChunk((HttpChunk)payload, false);
 		throw new UnsupportedOperationException("not supported yet");
 	}
 	
-    private static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
+
+	private static Http2Msg translateChunk(HttpChunk payload, boolean eos) {
+		DataFrame frame = new DataFrame();
+		frame.setData(payload.getBodyNonNull());
+		frame.setEndOfStream(eos);
+		return frame;
+	}
+
+
+	private static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
         List<Http2Header> headers = new ArrayList<>();
-        headers.add(new Http2Header(":status", response.getStatusLine().getStatus().getCode().toString()));
+        headers.add(new Http2Header(Http2HeaderName.STATUS, response.getStatusLine().getStatus().getCode().toString()));
+        String scheme = "http";
+        if(isHttps)
+        	scheme = "https";
+        headers.add(new Http2Header(Http2HeaderName.SCHEME, scheme));
+
         for(Header header: response.getHeaders()) {
             headers.add(new Http2Header(header.getName(), header.getValue()));
         }

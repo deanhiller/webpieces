@@ -98,12 +98,16 @@ public class Layer2Http1_1Handler {
 		if(payload instanceof HttpRequest) {
 			processInitialPieceOfRequest(socket, payload, msg);
 		} else if(payload instanceof HttpChunk) {
-			
-		} else if(payload instanceof HttpLastChunk) {
+			processChunk(socket, (HttpChunk)payload, (DataFrame) msg);
 			
 		} else {
 			throw new IllegalArgumentException("payload not supported="+payload);
 		}
+	}
+
+	private void processChunk(FrontendSocketImpl socket, HttpChunk payload, DataFrame data) {
+		StreamWriter writer = socket.getWriter();
+		writer.send(data);
 	}
 
 	private void processInitialPieceOfRequest(FrontendSocketImpl socket, HttpPayload payload, Http2Msg msg) {
