@@ -10,6 +10,7 @@ import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.nio.api.channels.Channel;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
@@ -27,28 +28,41 @@ public class Http1_1StreamImpl implements FrontendStream {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headers) {
-		HttpResponse response = Http2Translations.translateResponse(headers);
-		
-		ByteBuffer buf = http11Parser.marshalToByteBuffer(response);
-		socket.write(buf);
-		return CompletableFuture.completedFuture(new StreamImpl());
+	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headers) {		
+		maybeRemove(headers);
+		HttpResponse response = Http2Translations.translateResponse(headers);		
+		return write(response).thenApply(c -> new StreamImpl());
 	}
 
 	private class StreamImpl implements StreamWriter {
 		@Override
 		public CompletableFuture<StreamWriter> send(PartialStream data) {
+			maybeRemove(data);
 			List<HttpPayload> responses = Http2Translations.translate(data);
 			
-			CompletableFuture<FrontendSocket> future = CompletableFuture.completedFuture(null);
+			CompletableFuture<Channel> future = CompletableFuture.completedFuture(null);
 			for(HttpPayload p : responses) {
-				ByteBuffer buf = http11Parser.marshalToByteBuffer(p);
-				future = future.thenCompose( (s) ->  
-					socket.write(buf)
-				);
+				future = future.thenCompose( (s) -> write(p));
 			}
 			return future.thenApply((s) -> this);
 		}
+	}
+	
+	private void maybeRemove(PartialStream data) {
+		Http1_1StreamImpl current = socket.getCurrentStream();
+		if(current != this)
+			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
+					+ "responses in order and this is not the current response that needs responding to");
+
+		if(!data.isEndOfStream())
+			return;
+		
+		socket.removeStream(this);
+	}
+	
+	private CompletableFuture<Channel> write(HttpPayload payload) {
+		ByteBuffer buf = http11Parser.marshalToByteBuffer(payload);
+		return socket.getChannel().write(buf);
 	}
 	
 	@Override

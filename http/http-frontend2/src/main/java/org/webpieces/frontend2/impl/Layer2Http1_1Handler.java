@@ -114,21 +114,17 @@ public class Layer2Http1_1Handler {
 		Http2Headers headers = (Http2Headers) msg;
 		
 		Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
-		//socket.setActiveHttp11Stream(stream);
-					
+		socket.setAddStream(stream);
+
 		Http2Header lengthHeader = headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH);
 		if(lengthHeader != null) {
 			DataFrame frame = Http2Translations.translateBody(payload.getBody());
-			socket.setSendRequestState(RequestState.SENT_REQUEST);
-			
 			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
 			writer.send(frame);
-			
 		} else if(http1Req.isHasChunkedTransferHeader()) {
 			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
 			socket.addWriter(writer);
 		} else {
-			socket.setSendRequestState(RequestState.SENT_REQUEST);
 			httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
 		}
 	}
