@@ -18,14 +18,14 @@ import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2engine.impl.shared.Level2Synchro;
 import com.webpieces.http2engine.impl.shared.Level3ParsingAndRemoteSettings;
 
-public class Level1BClientSynchro extends Level2Synchro {
-	private static final Logger log = LoggerFactory.getLogger(Level1BClientSynchro.class);
+public class Level2ClientSynchro extends Level2Synchro {
+	private static final Logger log = LoggerFactory.getLogger(Level2ClientSynchro.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
 	private Level8NotifyListeners finalLayer;
 	private Level4ClientStreams streamInit;
 
-	public Level1BClientSynchro(Level4ClientStreams level3, Level3ParsingAndRemoteSettings parsing, Level8NotifyListeners finalLayer, SessionExecutor executor) {
+	public Level2ClientSynchro(Level4ClientStreams level3, Level3ParsingAndRemoteSettings parsing, Level8NotifyListeners finalLayer, SessionExecutor executor) {
 		super(level3, parsing, executor);
 		streamInit = level3;
 		this.finalLayer = finalLayer;
@@ -45,7 +45,7 @@ public class Level1BClientSynchro extends Level2Synchro {
 		});
 	}
 
-	public CompletableFuture<StreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
+	public CompletableFuture<StreamWriter> sendRequestToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
 		//important, this forces the engine to a virtual single thread(each engine/socket has one virtual thread)
 		//this makes it very easy not to have bugs AND very easy to test AND for better throughput, you can
 		//just connect more sockets

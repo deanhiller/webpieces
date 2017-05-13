@@ -16,8 +16,10 @@ public class PermitQueue<RESP> {
 	private final ConcurrentLinkedQueue<QueuedRequest<RESP>> queue = new ConcurrentLinkedQueue<>();
 	private final Semaphore permits;
 	private final AtomicInteger toBeRemoved = new AtomicInteger(0);
+	private int permitCount;
 	
 	public PermitQueue(int numPermits) {
+		permitCount = numPermits;
 		permits = new Semaphore(numPermits);
 	}
 	
@@ -74,6 +76,9 @@ public class PermitQueue<RESP> {
 		return null;
 	}
 
+	public int totalPermits() {
+		return permitCount;
+	}
 	public int availablePermits() {
 		return permits.availablePermits();
 	}
@@ -86,6 +91,7 @@ public class PermitQueue<RESP> {
 	}
 	
 	public void modifyPermitPoolSize(int permitCnt) {
+		permitCount += permitCnt;
 		if(permitCnt > 0) {
 			log.info("increasing permits in pool by "+permitCnt);
 			//apply the release now that the function is RUN WHEN the client resolves the release future
@@ -96,7 +102,18 @@ public class PermitQueue<RESP> {
 			}
 		} else {
 			log.info("decreasing permits in pool by "+permitCnt);
-			toBeRemoved.addAndGet(-permitCnt);
+			int positiveToRemove = -permitCnt;
+			//first try to remove them all immediately
+			int countOfRemoved = 0;
+			while(permits.tryAcquire()) {
+				countOfRemoved++;
+				if(countOfRemoved >= positiveToRemove)
+					break;
+			}
+			
+			int toRemoveStill = positiveToRemove - countOfRemoved;
+			//then cache the rest that will get removed on release(ie. when someone is done)
+			toBeRemoved.addAndGet(toRemoveStill);
 		}
 	}
 

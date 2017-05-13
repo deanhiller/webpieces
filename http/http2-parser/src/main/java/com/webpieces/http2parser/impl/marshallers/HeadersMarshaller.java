@@ -27,7 +27,7 @@ public class HeadersMarshaller extends AbstractFrameMarshaller implements FrameM
 	public DataWrapper marshal(Http2Frame frame) {
         HeadersFrame castFrame = (HeadersFrame) frame;
         if(frame.getStreamId() == 0)
-        	throw new IllegalArgumentException("Headers frame cannot be streamId 0");
+        	throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), "Headers frame cannot be streamId 0");
         
         int paddingSize = castFrame.getPadding().getReadableSize();
 

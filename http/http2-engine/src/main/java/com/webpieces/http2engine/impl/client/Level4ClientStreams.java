@@ -32,7 +32,6 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 	private Level5ClientStateMachine clientSm;
 
 	private HeaderSettings localSettings;
-	private int permitCount;
 	private PermitQueue<Stream> permitQueue;
 
 	//purely for logging!!!  do not use for something else
@@ -52,7 +51,6 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 		this.clientSm = clientSm;
 		this.localSettings = config.getLocalSettings();
 		this.remoteSettings = remoteSettings;
-		this.permitCount = config.getInitialRemoteMaxConcurrent();
 		afterResetExpireSeconds = config.getAfterResetExpireSeconds();
 		permitQueue = new PermitQueue<>(config.getInitialRemoteMaxConcurrent());
 	}
@@ -147,6 +145,7 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 
 	@Override
 	protected void modifyMaxConcurrentStreams(long value) {
+		int permitCount = permitQueue.totalPermits();
 		if(value == permitCount)
 			return;
 		else if (value > Integer.MAX_VALUE)
@@ -157,11 +156,11 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 	}
 
 	@Override
-	protected void release(PartialStream cause) {
+	protected void release(Stream stream, PartialStream cause) {
 		//request stream, so increase permits
 		permitQueue.releasePermit();
 		int val = releasedCnt.decrementAndGet();
-		log.info("release permit(cause="+cause+").  size="+permitQueue.availablePermits()+" releasedCnt="+val);
+		log.info("release permit(cause="+cause+").  size="+permitQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
 	}
 
 }

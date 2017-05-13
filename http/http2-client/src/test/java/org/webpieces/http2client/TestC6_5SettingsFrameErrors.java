@@ -14,6 +14,7 @@ import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
+import org.webpieces.http2client.util.Requests;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 

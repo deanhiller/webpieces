@@ -45,7 +45,7 @@ public class MockHttpRequestListener extends MockSuperclass implements HttpReque
 	}
 
 	@Override
-	public void cancel(FrontendStream stream, RstStreamFrame c) {
+	public void cancelRequest(FrontendStream stream, RstStreamFrame c) {
 		// TODO Auto-generated method stub
 		
 	}

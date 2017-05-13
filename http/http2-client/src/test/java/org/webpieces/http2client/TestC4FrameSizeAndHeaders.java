@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.TestAssert;
+import org.webpieces.http2client.util.Requests;
 
 import com.twitter.hpack.Encoder;
 import com.webpieces.hpack.api.dto.Http2Headers;

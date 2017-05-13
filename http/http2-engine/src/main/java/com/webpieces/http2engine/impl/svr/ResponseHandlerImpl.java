@@ -1,9 +1,6 @@
 package com.webpieces.http2engine.impl.svr;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -11,7 +8,6 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.ResponseHandler;
 import com.webpieces.http2engine.impl.shared.Stream;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class ResponseHandlerImpl implements ResponseHandler {
 
@@ -33,7 +29,14 @@ public class ResponseHandlerImpl implements ResponseHandler {
 
 	@Override
 	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
-		return null;
+		if(push.getStreamId() != stream.getStreamId())
+			throw new IllegalArgumentException("push has incorrect stream id as you are sending it on stream="+stream.getStreamId()+" push="+push);
+		else if(push.getPromisedStreamId() != 0)
+			throw new IllegalArgumentException("WE WILL SET the Http2Push.promisedStreamId so you should leave it as 0.   push="+push);
+
+		int promisedId = pushIdGenerator.getAndAdd(2);
+		push.setPromisedStreamId(promisedId);
+		return level1ServerEngine.sendPush(push);
 	}
 
 	@Override

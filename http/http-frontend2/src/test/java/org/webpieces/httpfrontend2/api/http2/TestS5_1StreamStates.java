@@ -15,7 +15,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
  * Test this section of rfc..
  * http://httpwg.org/specs/rfc7540.html#SETTINGS
  */
-public class Test5_1StreamStates extends AbstractHttp2Test {
+public class TestS5_1StreamStates extends AbstractHttp2Test {
 	
 	/**
 	 * Receiving any frame other than HEADERS or PRIORITY on a stream in this state

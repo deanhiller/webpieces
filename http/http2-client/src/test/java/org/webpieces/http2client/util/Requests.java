@@ -1,4 +1,4 @@
-package org.webpieces.http2client;
+package org.webpieces.http2client.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,11 @@ public class Requests {
 		return settings;
 	}
 
-	static Http2Headers createRequest() {
+	public static Http2Headers createRequest() {
+		return createRequest(true);
+	}
+	
+	static Http2Headers createRequest(boolean eos) {
 		List<Http2Header> headers = new ArrayList<>();
 		
 	    headers.add(new Http2Header(Http2HeaderName.METHOD, "GET"));
@@ -44,11 +48,11 @@ public class Requests {
 	    headers.add(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/1.15.0"));
 	    
 	    Http2Headers request = new Http2Headers(headers);
-	    request.setEndOfStream(true);
+	    request.setEndOfStream(eos);
 		return request;
 	}
 
-	static Http2Headers createResponse(int streamId) {
+	public static Http2Headers createResponse(int streamId) {
 		List<Http2Header> headers = new ArrayList<>();
 	    headers.add(new Http2Header(Http2HeaderName.SERVER, "me"));
 	    
@@ -60,7 +64,7 @@ public class Requests {
 		return response;
 	}
 
-	static Http2Headers createEosResponse(int streamId) {
+	public static Http2Headers createEosResponse(int streamId) {
 		List<Http2Header> headers = new ArrayList<>();
 	    headers.add(new Http2Header(Http2HeaderName.SERVER, "me"));
 	    

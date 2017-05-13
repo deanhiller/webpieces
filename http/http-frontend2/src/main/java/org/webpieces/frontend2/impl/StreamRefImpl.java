@@ -28,7 +28,7 @@ public class StreamRefImpl implements StreamReference {
 
 	@Override
 	public CompletableFuture<Void> cancel(ConnectionReset c) {
-		httpListener.cancel(stream, c);
+		httpListener.cancelRequest(stream, c);
 		return CompletableFuture.completedFuture(null);
 	}
 

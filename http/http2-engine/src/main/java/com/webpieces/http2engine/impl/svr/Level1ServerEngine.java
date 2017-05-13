@@ -7,6 +7,7 @@ import org.webpieces.util.threading.SessionExecutor;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
@@ -74,5 +75,9 @@ public class Level1ServerEngine implements Http2ServerEngine {
 
 	public CompletableFuture<StreamWriter> sendResponseHeaders(Stream stream, Http2Headers data) {
 		return synchronization.sendResponseHeaders(stream, data);
+	}
+
+	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
+		return synchronization.sendPush(push);
 	}
 }

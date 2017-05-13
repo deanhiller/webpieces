@@ -17,7 +17,7 @@ import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.Protocol;
-import org.webpieces.httpfrontend2.api.http.Requests;
+import org.webpieces.httpfrontend2.api.http1.Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -68,7 +68,7 @@ class ServerFactory {
 		}
 
 		@Override
-		public void cancel(FrontendStream stream, RstStreamFrame c) {
+		public void cancelRequest(FrontendStream stream, RstStreamFrame c) {
 			// TODO Auto-generated method stub
 			
 		}

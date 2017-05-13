@@ -53,7 +53,7 @@ public class AbstractHttp2Test {
         mockStreamWriter.setDefaultRetValToThis();
 
         Http2Config config = new Http2Config();
-        config.setLocalSettings(localSettings);        
+        config.setLocalSettings(localSettings);
 		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
 
 		FrontendConfig frontendConfig = new FrontendConfig("http", new InetSocketAddress("me", 8080));

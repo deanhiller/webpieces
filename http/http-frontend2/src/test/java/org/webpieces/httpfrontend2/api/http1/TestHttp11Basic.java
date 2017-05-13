@@ -1,4 +1,4 @@
-package org.webpieces.httpfrontend2.api.http;
+package org.webpieces.httpfrontend2.api.http1;
 
 import java.net.InetSocketAddress;
 import java.util.List;

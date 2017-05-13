@@ -93,7 +93,7 @@ public abstract class MockSuperclass {
 		returnValues = new HashMap<>();
 	}
 
-	public void setDefaultReturnValue(MethodEnum method, Object retVal) {
+	protected void setDefaultReturnValue(MethodEnum method, Object retVal) {
 		defaultReturnValues.put(method, new ValueToReturn(() -> retVal));
 	}
 }

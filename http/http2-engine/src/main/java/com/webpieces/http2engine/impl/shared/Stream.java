@@ -19,6 +19,7 @@ public class Stream {
 	private long remoteInitialWindowSize;
 	private volatile boolean isClosed = false;
 	private StreamReference streamWriter;
+	private boolean headersSent;
 
 	public Stream(
 			int streamId, 
@@ -99,6 +100,18 @@ public class Stream {
 
 	public StreamReference getStreamWriter() {
 		return streamWriter;
+	}
+
+	public boolean isPushStream() {
+		return streamId % 2 == 0;
+	}
+
+	public boolean isHeadersSent() {
+		return headersSent;
+	}
+
+	public void setHeadersSent(boolean b) {
+		headersSent = b;
 	}
 	
 }

@@ -50,19 +50,19 @@ public abstract class Level5AbstractStateMachine {
 				);
 	}
 	
-	public CompletableFuture<State> fireToClient(Stream stream, PartialStream payload, Runnable possiblyModifyState) {
+	public CompletableFuture<State> fireToClient(Stream stream, PartialStream payload, Runnable possiblyClose) {
 		Memento currentState = stream.getCurrentState();
 		Http2Event event = translate(Http2SendRecieve.RECEIVE, payload);
 		
 		CompletableFuture<State> result = stateMachine.fireEvent(currentState, event);
 		return result.thenApply( s -> {
-			//modifying the stream state should be done BEFORE firing to client as if the stream is closed
+			//closing the stream should be done BEFORE firing to client as if the stream is closed
 			//then this will prevent windowUpdateFrame with increment being sent to a closed stream
-			if(possiblyModifyState != null)
-				possiblyModifyState.run();
-			
+			if(possiblyClose != null)
+				possiblyClose.run();
+
 			localFlowControl.fireToClient(stream, payload);
-			
+
 			return s;
 		}).exceptionally(t -> {
 			if(t instanceof NoTransitionException) {

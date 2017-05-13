@@ -11,17 +11,17 @@ import org.webpieces.httpfrontend2.api.mock2.MockRequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class TestBasicRequestResponse extends AbstractHttp2Test {
+public class TestSBasicRequestResponse extends AbstractHttp2Test {
 
 	@Test
 	public void testWithNoData() throws InterruptedException, ExecutionException, TimeoutException {
 		Http2Headers request1 = Http2Requests.createRequest(1, true);
-		mockChannel.write(request1);
-		
+		mockChannel.write(request1);		
 		PassedIn incoming = mockListener.getSingleRequest();
 		Assert.assertEquals(request1, incoming.request);
 		
@@ -109,5 +109,33 @@ public class TestBasicRequestResponse extends AbstractHttp2Test {
 		
 		Http2Headers trailers = (Http2Headers) mockChannel.getFrameAndClear();
 		Assert.assertEquals(trailingResp, trailers);
+	}
+	
+	
+	@Test
+	public void testPushPromise() throws InterruptedException, ExecutionException, TimeoutException {
+		Http2Headers request1 = Http2Requests.createRequest(1, true);
+		mockChannel.write(request1);		
+		PassedIn incoming = mockListener.getSingleRequest();
+		Assert.assertEquals(request1, incoming.request);
+		
+		Http2Push push = Http2Requests.createPush(request1.getStreamId());
+		CompletableFuture<StreamWriter> future = incoming.stream.sendPush(push);
+		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
+		
+		Http2Push pushRecv = (Http2Push) mockChannel.getFrameAndClear();
+		Assert.assertEquals(push, pushRecv);
+		
+		Http2Headers preEmptive = Http2Requests.createResponse(push.getPromisedStreamId());
+		writer.send(preEmptive);
+
+		Http2Headers preEmptRecv = (Http2Headers) mockChannel.getFrameAndClear();
+		Assert.assertEquals(preEmptive, preEmptRecv);
+		
+		Http2Headers response = Http2Requests.createResponse(request1.getStreamId());
+		incoming.stream.sendResponse(response);
+		
+		Http2Headers responseRecv = (Http2Headers) mockChannel.getFrameAndClear();
+		Assert.assertEquals(response, responseRecv);
 	}
 }

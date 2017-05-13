@@ -23,7 +23,7 @@ import com.webpieces.http2engine.impl.shared.StreamState;
 public class Level1ClientEngine implements Http2ClientEngine {
 	
 	private Level7MarshalAndPing marshalLayer;
-	private Level1BClientSynchro synchronization;
+	private Level2ClientSynchro synchronization;
 
 	public Level1ClientEngine(ClientEngineListener clientEngineListener, InjectionConfig injectionConfig) {
 		SessionExecutor executor = injectionConfig.getExecutor();
@@ -43,7 +43,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 		Level5ClientStateMachine clientSm = new Level5ClientStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
 		Level4ClientStreams streamInit = new Level4ClientStreams(streamState, clientSm, localFlowCtrl, remoteFlowCtrl, config, remoteSettings);
 		Level3ParsingAndRemoteSettings parsing = new Level3ParsingAndRemoteSettings(streamInit, remoteFlowCtrl, marshalLayer, parser, config, remoteSettings);
-		synchronization = new Level1BClientSynchro(streamInit, parsing, finalLayer, executor);
+		synchronization = new Level2ClientSynchro(streamInit, parsing, finalLayer, executor);
 
 	}
 
@@ -59,7 +59,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	
 	@Override
 	public CompletableFuture<StreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener) {
-		return synchronization.sendFrameToSocket(headers, responseListener);
+		return synchronization.sendRequestToSocket(headers, responseListener);
 	}
 
 	@Override

@@ -31,7 +31,8 @@ public class Http2StreamImpl implements FrontendStream {
 	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
 		if(sentResponseHeaders)
 			throw new IllegalStateException("You must call sendPush before sendResponse, but after "
-					+ "that can send both datastreams back at the same time(see http2 spec for why)");
+					+ "that can send both datastreams back at the "
+					+ "same time(see http2 spec for why).  it also helps memory pressure this way");
 		return responseHandler.sendPush(push);
 	}
 

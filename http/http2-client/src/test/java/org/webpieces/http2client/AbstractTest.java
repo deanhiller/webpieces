@@ -13,11 +13,14 @@ import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
+import org.webpieces.http2client.mock.MockPushListener;
 import org.webpieces.http2client.mock.MockResponseListener;
+import org.webpieces.http2client.util.Requests;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
@@ -62,6 +65,24 @@ public class AbstractTest {
 		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
 		SettingsFrame ack = (SettingsFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(true, ack.isAck());
+	}
+	
+	protected void sendPushPromise(MockResponseListener listener1, MockPushListener pushListener, int streamId, boolean eos) {
+		pushListener.setDefaultResponse(CompletableFuture.completedFuture(null));
+		listener1.addReturnValuePush(pushListener);
+		Http2Push push = Requests.createPush(streamId);
+		mockChannel.write(push); //endOfStream=false
+		Assert.assertEquals(2, listener1.getSinglePushStreamId());
+		
+		Http2Push frame = (Http2Push) pushListener.getSingleParam();
+		Assert.assertEquals(push, frame);
+		
+		Http2Headers preemptiveResponse = Requests.createEosResponse(2);
+		mockChannel.write(preemptiveResponse);
+		
+		Http2Headers frame2 = (Http2Headers) pushListener.getSingleParam();
+		Assert.assertEquals(preemptiveResponse, frame2);
+		
 	}
 	
 	protected void sendResponseFromServer(MockResponseListener listener1, Http2Headers request) {

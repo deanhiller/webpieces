@@ -31,7 +31,7 @@ public class Level5ServerStateMachine extends Level5AbstractStateMachine {
 		Http2Event recvHeadersNoEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS);
 		Http2Event recvHeadersEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS_WITH_EOS);
 
-		Http2Event recvPushPromise = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.PUSH_PROMISE);
+		Http2Event sentPushPromise = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.PUSH_PROMISE);
 		Http2Event sentResetStream = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.RESET_STREAM);		
 		Http2Event recvResetStream = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.RESET_STREAM);
 		
@@ -43,7 +43,7 @@ public class Level5ServerStateMachine extends Level5AbstractStateMachine {
 
 		stateMachine.createTransition(idleState, openState, recvHeadersNoEos);
 		stateMachine.createTransition(idleState, halfClosedLocal, recvHeadersEos); //jump to half closed as is send H AND send ES
-		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
+		stateMachine.createTransition(idleState, reservedState, sentPushPromise);
 		
 		stateMachine.createTransition(openState, openState, dataRecvNoEos);
 		stateMachine.createTransition(openState, halfClosedLocal, dataRecvEos, recvHeadersEos);

@@ -1,4 +1,4 @@
-package org.webpieces.http2client;
+package org.webpieces.http2client.util;
 
 import java.util.concurrent.CompletableFuture;
 

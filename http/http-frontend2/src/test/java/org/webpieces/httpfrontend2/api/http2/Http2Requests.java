@@ -7,6 +7,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -79,5 +80,13 @@ public class Http2Requests {
 	    trailers.setEndOfStream(true);
 	    trailers.setStreamId(streamId);
 		return trailers;
+	}
+	
+	public static Http2Push createPush(int streamId) {
+		Http2Push push = new Http2Push();
+		push.setStreamId(streamId);
+	    push.addHeader(new Http2Header(Http2HeaderName.SERVER, "me"));
+
+		return push;
 	}
 }

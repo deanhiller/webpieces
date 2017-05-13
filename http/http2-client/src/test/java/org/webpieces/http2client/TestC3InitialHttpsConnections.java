@@ -17,6 +17,7 @@ import org.webpieces.http2client.integ.ForTestSslClientEngineFactory;
 import org.webpieces.http2client.mock.MockChanMgr;
 import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.Preface;
+import org.webpieces.http2client.util.Requests;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.util.threading.DirectExecutor;
 
@@ -31,17 +32,14 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
  */
 public class TestC3InitialHttpsConnections {
 
-	private MockChanMgr mockChanMgr;
-	private MockHttp2Channel mockChannel;
+	private MockChanMgr mockChanMgr = new MockChanMgr();
+	private MockHttp2Channel mockChannel = new MockHttp2Channel();
 	private Http2Socket socket;
 	private HeaderSettings localSettings = Requests.createSomeSettings();
 	private MockTime mockTime = new MockTime(true);
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException {
-		
-        mockChanMgr = new MockChanMgr();
-        mockChannel = new MockHttp2Channel();
         mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
 
         Http2Config config = new Http2Config();

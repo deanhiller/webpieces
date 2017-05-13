@@ -38,7 +38,7 @@ public class MockResponseListener extends MockSuperclass implements Http2Respons
 		super.addValueToReturn(Method.INCOMING_PUSH, retVal);
 	}
 
-	public Integer getSinglePushStreamId() {
+	public int getSinglePushStreamId() {
 		List<Integer> list = getIncomingPushStreamIds();
 		if(list.size() != 1)
 			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+list.size());

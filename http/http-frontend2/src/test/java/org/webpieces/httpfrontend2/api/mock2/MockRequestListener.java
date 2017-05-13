@@ -62,7 +62,7 @@ public class MockRequestListener extends MockSuperclass implements HttpRequestLi
 	}
 
 	@Override
-	public void cancel(FrontendStream stream, RstStreamFrame c) {
+	public void cancelRequest(FrontendStream stream, RstStreamFrame c) {
 		super.calledVoidMethod(Method.CANCEL, new Cancel(stream, c));
 	}
 

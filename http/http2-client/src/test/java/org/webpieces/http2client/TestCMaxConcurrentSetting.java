@@ -1,68 +1,28 @@
 package org.webpieces.http2client;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.http2client.api.Http2Client;
-import org.webpieces.http2client.api.Http2ClientFactory;
-import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.mock.MockChanMgr;
-import org.webpieces.http2client.mock.MockHttp2Channel;
 import org.webpieces.http2client.mock.MockResponseListener;
-import org.webpieces.mock.time.MockTime;
-import org.webpieces.util.threading.DirectExecutor;
+import org.webpieces.http2client.util.RequestHolder;
+import org.webpieces.http2client.util.Requests;
+import org.webpieces.http2client.util.RequestsSent;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.client.Http2Config;
-import com.webpieces.http2engine.api.client.InjectionConfig;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class TestMaxConcurrentSetting {
-
-	private MockChanMgr mockChanMgr;
-	private MockHttp2Channel mockChannel;
-	private Http2Socket socket;
-	private HeaderSettings localSettings = Requests.createSomeSettings();
-	private MockTime mockTime = new MockTime(true);
-
-	@Before
-	public void setUp() throws InterruptedException, ExecutionException {
-		
-        mockChanMgr = new MockChanMgr();
-        mockChannel = new MockHttp2Channel();
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
-        
-        Http2Config config = new Http2Config();
-        config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
-        config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
-        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
-        
-        mockChanMgr.addTCPChannelToReturn(mockChannel);
-		socket = client.createHttpSocket("simple");
-		
-		CompletableFuture<Http2Socket> connect = socket.connect(new InetSocketAddress(555));
-		Assert.assertTrue(connect.isDone());
-		Assert.assertEquals(socket, connect.get());
-
-		//clear expected preface and settings
-		mockChannel.getFramesAndClear();
-	}
+public class TestCMaxConcurrentSetting extends AbstractTest {
 	
 	@Test
 	public void testSend2ndRequestOnlyOnCompletionOfFirst() throws InterruptedException, ExecutionException {
 		RequestsSent sent = sendTwoRequests();
-
-		sendAndAckSettingsFrame(1L);
 
 		int streamId1 = sent.getRequest1().getRequest().getStreamId();
 		CompletableFuture<StreamWriter> future2 = sent.getRequest2().getFuture();
@@ -121,8 +81,8 @@ public class TestMaxConcurrentSetting {
 		MockResponseListener listener2 = new MockResponseListener();
 
 		listener1.setIncomingRespDefault(CompletableFuture.completedFuture(null));
-		CompletableFuture<StreamWriter> future = socket.send(request1, listener1);
-		CompletableFuture<StreamWriter> future2 = socket.send(request2, listener2);
+		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		CompletableFuture<StreamWriter> future2 = httpSocket.send(request2, listener2);
 		
 		RequestHolder r1 = new RequestHolder(request1, listener1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, future2);		

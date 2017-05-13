@@ -11,6 +11,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.mock.MockPushListener;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.mock.TestAssert;
+import org.webpieces.http2client.util.Requests;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;

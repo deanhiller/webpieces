@@ -38,4 +38,8 @@ public class MockPushListener extends MockSuperclass implements PushPromiseListe
 		Stream<PartialStream> map = super.getCalledMethods(Method.INCOMING_PUSH).map(s -> (PartialStream)s.getArgs()[0]);
 		return map.collect(Collectors.toList());
 	}
+
+	public void setDefaultResponse(CompletableFuture<Void> completableFuture) {
+		super.setDefaultReturnValue(Method.INCOMING_PUSH, completableFuture);
+	}
 }

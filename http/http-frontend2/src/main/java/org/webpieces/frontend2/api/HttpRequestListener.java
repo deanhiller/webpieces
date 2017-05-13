@@ -8,6 +8,6 @@ public interface HttpRequestListener {
 
 	StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type);
 
-	void cancel(FrontendStream stream, RstStreamFrame c);
+	void cancelRequest(FrontendStream stream, RstStreamFrame c);
 
 }

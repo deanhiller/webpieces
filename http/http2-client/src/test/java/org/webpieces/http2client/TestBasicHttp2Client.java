@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.webpieces.http2client.api.dto.Http2Request;
 import org.webpieces.http2client.api.dto.Http2Response;
 import org.webpieces.http2client.mock.MockResponseListener;
+import org.webpieces.http2client.util.Requests;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -68,22 +69,6 @@ public class TestBasicHttp2Client extends AbstractTest {
 		CompletableFuture<Http2Response> future = httpSocket.send(request1);
 		
 		Assert.assertFalse(future.isDone());
-		
-	}
-	
-	
-	@Test
-	public void testBasicUpload() {
-		
-	}
-	
-	@Test
-	public void testBasicDownload() {
-		
-	}
-	
-	@Test
-	public void testBasicPushResponse() {
 		
 	}
 	

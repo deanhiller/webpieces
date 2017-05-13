@@ -140,12 +140,12 @@ public abstract class Level4AbstractStreamMgr {
 			throw new UnsupportedOperationException("not supported");
 		}
 		
-		release(cause);
+		release(stream, cause);
 
 		return; //we closed the stream
 	}
 	
-	protected abstract void release(PartialStream cause);
+	protected abstract void release(Stream stream, PartialStream cause);
 
 	public void setMaxConcurrentStreams(long value) {
 		remoteSettings.setMaxConcurrentStreams(value);

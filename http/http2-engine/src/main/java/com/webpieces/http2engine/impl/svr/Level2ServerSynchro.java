@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.util.threading.SessionExecutor;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.impl.RequestWriterImpl;
 import com.webpieces.http2engine.impl.shared.Level2Synchro;
@@ -29,6 +30,22 @@ public class Level2ServerSynchro extends Level2Synchro {
 				throw new IllegalArgumentException("Server cannot send response frames with even stream ids to client per http/2 spec");
 			
 			return streamInit.sendResponseHeaderToSocket(stream, data)
+					.thenApply((s) -> new RequestWriterImpl(s, this));
+		});
+	}
+
+	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
+		return executor.executeCall(this, () -> {
+			int streamId = push.getStreamId();
+			int promisedId = push.getPromisedStreamId();
+			if(streamId <= 0 || promisedId <= 0)
+				throw new IllegalArgumentException("push frames for requests must have a streamId and promisedStreamId > 0");
+			else if(streamId % 2 == 0)
+				throw new IllegalArgumentException("Server cannot send push frames with even stream ids to client per http/2 spec");
+			else if(promisedId % 2 == 1)
+				throw new IllegalArgumentException("Server cannot send push frames with odd promisedStreamId to client per http/2 spec");				
+
+			return streamInit.sendPush(push)
 					.thenApply((s) -> new RequestWriterImpl(s, this));
 		});
 	}
