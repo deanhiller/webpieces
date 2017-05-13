@@ -206,7 +206,7 @@ public class HttpParserImpl implements HttpParser {
 
 		MementoImpl memento = (MementoImpl) state;
 		//initialize state to need more data
-		memento.getParsedMessages().clear();
+		memento.setParsedMessages(new ArrayList<>());
 		
 		DataWrapper leftOverData = memento.getLeftOverData();
 		DataWrapper	allData = dataGen.chainDataWrappers(leftOverData, moreData);
@@ -308,10 +308,10 @@ public class HttpParserImpl implements HttpParser {
 		memento.setLeftOverData(tuple.get(1));
 		HttpMessage message = parseHttpMessage(memento, toBeParsed, markedPositions);
 		if(memento.isHttp2()) {
-			memento.getParsedMessages().add(message);
+			memento.addMessage(message);
 			return;
 		}
-		
+
 		Header header = message.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		Header transferHeader = message.getHeaderLookupStruct().getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
 		if(header != null) {
@@ -322,14 +322,14 @@ public class HttpParserImpl implements HttpParser {
 			readInBody(memento, false);
 			return;
 		} else if(transferHeader != null && "chunked".equals(transferHeader.getValue())) {
-			memento.getParsedMessages().add(message);
+			memento.addMessage(message);
 			memento.setInChunkParsingMode(true);
 			processChunks(memento);
 			return;
 		}
 		
 		//no body in the bytestream so add the message to list of parsed messages
-		memento.getParsedMessages().add(message);
+		memento.addMessage(message);
 	}
 
 	private void processChunks(MementoImpl memento) {
@@ -441,7 +441,7 @@ public class HttpParserImpl implements HttpParser {
 			message.setBody(data);
 			memento.setLeftOverData(split.get(1));
 			memento.setNumBytesLeftToRead(0);
-			memento.getParsedMessages().add(message);
+			memento.addMessage(message);
 			
 			//clear any cached message we were waiting for more data for
 			memento.setHalfParsedMessage(null);

@@ -76,17 +76,17 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, payloads);
 	}
 
-	public HttpMessage getFrameAndClear() {
-		List<HttpMessage> msgs = getFramesAndClear();
+	public HttpPayload getFrameAndClear() {
+		List<HttpPayload> msgs = getFramesAndClear();
 		if(msgs.size() != 1)
 			throw new IllegalStateException("not correct number of responses.  number="+msgs.size()+" but expected 1.  list="+msgs);
 		return msgs.get(0);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<HttpMessage> getFramesAndClear() {
+	public List<HttpPayload> getFramesAndClear() {
 		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.INCOMING_FRAME);
-		Stream<HttpMessage> retVal = calledMethodList.map(p -> (List<HttpMessage>)p.getArgs()[0])
+		Stream<HttpPayload> retVal = calledMethodList.map(p -> (List<HttpPayload>)p.getArgs()[0])
 														.flatMap(Collection::stream);
 
 		//clear out read values

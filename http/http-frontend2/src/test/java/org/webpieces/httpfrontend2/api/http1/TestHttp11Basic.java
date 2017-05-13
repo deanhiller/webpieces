@@ -1,7 +1,11 @@
 package org.webpieces.httpfrontend2.api.http1;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,11 +16,13 @@ import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 
 
@@ -25,6 +31,42 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 	@Test
 	public void testFileUploadWithMultipartFormData() {
 		
+	}
+
+	@Test
+	public void testFileDownloadWithChunking() throws InterruptedException, ExecutionException, TimeoutException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+
+		mockChannel.write(req);		
+		PassedIn in1 = mockListener.getSingleRequest();
+		HttpRequest req1 = Http2Translations.translateRequest(in1.request);
+		Assert.assertEquals(req, req1);
+		
+		HttpResponse resp = Requests.createResponse();
+		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		Http2Headers headers = (Http2Headers) Http2Translations.translate(resp, false);
+		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers);
+		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
+		Assert.assertEquals(resp, respToClient);
+		
+		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
+		
+		DataFrame dataFrame = new DataFrame();
+		dataFrame.setEndOfStream(true);
+		String bodyStr = "hi here and there";
+		DataWrapper data = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
+		dataFrame.setData(data);
+		writer.send(dataFrame);
+		
+		List<HttpPayload> frames = mockChannel.getFramesAndClear();
+		Assert.assertEquals(2, frames.size());
+		HttpChunk chunk = (HttpChunk) frames.get(0);
+		DataWrapper body = chunk.getBodyNonNull();
+		String result = body.createStringFromUtf8(0, body.getReadableSize());
+		Assert.assertEquals(bodyStr, result);
+
+		HttpLastChunk last = (HttpLastChunk) frames.get(1);
+		Assert.assertEquals(0, last.getBodyNonNull().getReadableSize());
 	}
 	
 	@Test

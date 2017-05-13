@@ -1,6 +1,7 @@
 package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
@@ -37,10 +38,16 @@ public class Http1_1StreamImpl implements FrontendStream {
 	private class StreamImpl implements StreamWriter {
 		@Override
 		public CompletableFuture<StreamWriter> send(PartialStream data) {
-			HttpPayload response = Http2Translations.translate(data);
+			List<HttpPayload> responses = Http2Translations.translate(data);
 			
-			ByteBuffer buf = http11Parser.marshalToByteBuffer(response);
-			return socket.write(buf).thenApply(s -> this);
+			CompletableFuture<FrontendSocket> future = CompletableFuture.completedFuture(null);
+			for(HttpPayload p : responses) {
+				ByteBuffer buf = http11Parser.marshalToByteBuffer(p);
+				future = future.thenCompose( (s) ->  
+					socket.write(buf)
+				);
+			}
+			return future.thenApply((s) -> this);
 		}
 	}
 	

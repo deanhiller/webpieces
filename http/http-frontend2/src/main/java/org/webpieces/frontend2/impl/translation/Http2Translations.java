@@ -59,7 +59,6 @@ public class Http2Translations {
 		return frame;
 	}
 
-
 	private static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
         List<Http2Header> headers = new ArrayList<>();
         headers.add(new Http2Header(Http2HeaderName.STATUS, response.getStatusLine().getStatus().getCode().toString()));
@@ -123,9 +122,30 @@ public class Http2Translations {
 
 
 
-	public static HttpPayload translate(PartialStream data) {
-		throw new UnsupportedOperationException("not done yet");
+	public static List<HttpPayload> translate(PartialStream data) {
+		if(data instanceof DataFrame) {
+			return translateData((DataFrame)data);
+		} else if(data instanceof Http2Headers) {
+			//trailing headers
+			throw new UnsupportedOperationException("not done yet");
+		}
+		
+		throw new UnsupportedOperationException("This frame type is not supported in http1.1="+data);
 	}
+
+	private static List<HttpPayload> translateData(DataFrame data) {
+		List<HttpPayload> chunks = new ArrayList<>();
+		
+		HttpChunk chunk = new HttpChunk();
+		chunk.setBody(data.getData());
+		
+		chunks.add(chunk);
+		
+		if(data.isEndOfStream())
+			chunks.add(new HttpLastChunk());
+		return chunks;
+	}
+
 
 	public static HttpResponse translateResponse(Http2Headers headers) {
 
