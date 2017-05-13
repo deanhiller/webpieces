@@ -46,7 +46,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		
 		HttpResponse resp = Requests.createResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
-		Http2Headers headers = (Http2Headers) Http2Translations.translate(resp, false);
+		Http2Headers headers = (Http2Headers) Http2Translations.responseToHeaders(resp, false);
 		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers);
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, respToClient);
@@ -119,7 +119,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		Assert.assertTrue(frame.isEndOfStream());
 		
 		HttpResponse resp = Requests.createResponse();
-		Http2Headers http2Resp = (Http2Headers) Http2Translations.translate(resp, false);
+		Http2Headers http2Resp = (Http2Headers) Http2Translations.responseToHeaders(resp, false);
 		in1.stream.sendResponse(http2Resp);
 		
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();

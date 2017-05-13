@@ -3,6 +3,7 @@ package org.webpieces.frontend2.impl;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
@@ -21,6 +22,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 
 	private FrontendSocketImpl socket;
 	private HttpParser http11Parser;
+	private AtomicReference<PartialStream> endingFrame = new AtomicReference<>();
 
 	public Http1_1StreamImpl(FrontendSocketImpl socket, HttpParser http11Parser) {
 		this.socket = socket;
@@ -49,6 +51,10 @@ public class Http1_1StreamImpl implements FrontendStream {
 	}
 	
 	private void maybeRemove(PartialStream data) {
+		if(endingFrame.get() != null)
+			throw new IllegalStateException("You had already sent a frame with endOfStream "
+					+ "set and can't send more.  ending frame was="+endingFrame+" but you just sent="+data);
+		
 		Http1_1StreamImpl current = socket.getCurrentStream();
 		if(current != this)
 			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
@@ -57,6 +63,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 		if(!data.isEndOfStream())
 			return;
 		
+		endingFrame.set(data);
 		socket.removeStream(this);
 	}
 	

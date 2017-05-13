@@ -39,11 +39,20 @@ public class Http2Translations {
 		headersToSkip.add(Http2HeaderName.SCHEME.getHeaderName());
 	}
 	
+	public static List<HttpPayload> translate(PartialStream data) {
+		if(data instanceof DataFrame) {
+			return translateData((DataFrame)data);
+		} else if(data instanceof Http2Headers) {
+			//trailing headers
+			throw new UnsupportedOperationException("not done yet");
+		}
+		
+		throw new UnsupportedOperationException("This frame type is not supported in http1.1="+data);
+	}
+	
 	public static Http2Msg translate(HttpPayload payload, boolean isHttps) {
 		if(payload instanceof HttpRequest)
 			return requestToHeaders((HttpRequest) payload, isHttps);
-		else if(payload instanceof HttpResponse)
-			return responseToHeaders((HttpResponse)payload, isHttps);
 		else if(payload instanceof HttpLastChunk)
 			return translateChunk((HttpChunk)payload, true);
 		else if(payload instanceof HttpChunk)
@@ -59,7 +68,7 @@ public class Http2Translations {
 		return frame;
 	}
 
-	private static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
+	public static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
         List<Http2Header> headers = new ArrayList<>();
         headers.add(new Http2Header(Http2HeaderName.STATUS, response.getStatusLine().getStatus().getCode().toString()));
         String scheme = "http";
@@ -71,8 +80,9 @@ public class Http2Translations {
             headers.add(new Http2Header(header.getName(), header.getValue()));
         }
         
-    	Http2Headers req = new Http2Headers(headers);
-        return req;
+    	Http2Headers resp = new Http2Headers(headers);
+    	resp.setEndOfStream(false);
+        return resp;
 	}
 
 	private static Http2Headers requestToHeaders(HttpRequest request, boolean fromSslChannel) {
@@ -119,19 +129,6 @@ public class Http2Translations {
 
         return headers;
     }
-
-
-
-	public static List<HttpPayload> translate(PartialStream data) {
-		if(data instanceof DataFrame) {
-			return translateData((DataFrame)data);
-		} else if(data instanceof Http2Headers) {
-			//trailing headers
-			throw new UnsupportedOperationException("not done yet");
-		}
-		
-		throw new UnsupportedOperationException("This frame type is not supported in http1.1="+data);
-	}
 
 	private static List<HttpPayload> translateData(DataFrame data) {
 		List<HttpPayload> chunks = new ArrayList<>();

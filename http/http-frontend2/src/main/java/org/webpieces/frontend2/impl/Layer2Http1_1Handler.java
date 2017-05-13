@@ -12,7 +12,6 @@ import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
