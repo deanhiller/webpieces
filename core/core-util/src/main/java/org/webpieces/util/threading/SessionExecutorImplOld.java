@@ -1,26 +1,27 @@
 package org.webpieces.util.threading;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public class SessionExecutorImpl implements SessionExecutor {
+public class SessionExecutorImplOld implements SessionExecutor {
 
 	private static final Logger log = LoggerFactory.getLogger(SessionExecutorImpl.class);
 	private Executor executor;
-	private ConcurrentMap<Object, List<Runnable>> cachedRunnables = new ConcurrentHashMap<>();
+	private Map<Object, List<Runnable>> cachedRunnables = new HashMap<>();
 	private int counter;
-	//using as a set for concurrency that is compare and set type
-	private ConcurrentMap<Object, Boolean> currentlyRunning = new ConcurrentHashMap<>();
+	private Set<Object> currentlyRunning = new HashSet<>();
 
-	public SessionExecutorImpl(Executor executor) {
+	public SessionExecutorImplOld(Executor executor) {
 		this.executor = executor;
 	}
 	
@@ -62,12 +63,12 @@ public class SessionExecutorImpl implements SessionExecutor {
 	
 	@Override
 	public void execute(Object key, Runnable r) {
-		synchronized(translate(key)) {
-			if(currentlyRunning.containsKey(key)) {
+		synchronized(this) {
+			if(currentlyRunning.contains(key)) {
 				cacheRunnable(key, new RunnableWithKey(key, r));
 				return;
 			} else {
-				currentlyRunning.put(key, Boolean.TRUE);
+				currentlyRunning.add(key);
 			}
 			
 			if(counter >= 10000)
@@ -79,7 +80,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 
 	private void executeNext(Object key) {
 		Runnable nextRunnable = null;
-		synchronized (translate(key)) {
+		synchronized (this) {
 			List<Runnable> list = cachedRunnables.get(key);
 			if(list == null) {
 				currentlyRunning.remove(key);
@@ -95,15 +96,6 @@ public class SessionExecutorImpl implements SessionExecutor {
 		executor.execute(nextRunnable);
 	}
 	
-	private Object translate(Object key) {
-		if(key instanceof String) {
-			//strings are not the same when they are the same(ironic) but this makes them
-			//the same object and same lock "hello" != "hel"+"lo"
-			return ((String)key).intern();
-		}
-		return key;
-	}
-
 	private class RunnableWithKey implements Runnable {
 		private Runnable runnable;
 		private Object key;
