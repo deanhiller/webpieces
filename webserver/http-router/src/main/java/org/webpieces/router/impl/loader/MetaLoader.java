@@ -106,6 +106,9 @@ public class MetaLoader {
 			recordParameterMatches(lastMatch, binderMatches, binder, annotations, null);
 		}
 
+		Class<?> returnType = controllerMethod.getReturnType();
+		if(Action.class.isAssignableFrom(returnType))
+			throw new IllegalArgumentException("The method for content route="+meta.getRoute().getFullPath()+" is returning Action and this is not allowed.  method="+controllerMethod);
 		if(binderMatches.size() == 0)
 			throw new IllegalArgumentException("there was not a single method parameter annotated with a Plugin"
 					+ " annotation on method="+controllerMethod+".  looking at your\n"
@@ -118,6 +121,8 @@ public class MetaLoader {
 					+ "are the ones we found(please delete one)="+binderMatches+"\n"		
 					+ "Also make sure one parameter OR the method has the annotation, not both");
 
+		
+		
 		return lastMatch.get();
 	}
 

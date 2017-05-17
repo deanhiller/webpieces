@@ -146,6 +146,20 @@ public class TestDevSynchronousErrors {
 		response.assertContains("The webpieces platform saved them");	
 	}
 
+	@Test
+	public void testNotFoundJsonInDevMode() {
+		mockNotFoundLib.throwRuntime();
+		mockInternalSvrErrorLib.throwRuntime();
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/json/notfound");
+		
+		server.incomingRequest(req, new RequestId(0), true, socket);
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
+		//perhaps we should just show json here.....
+		response.assertContains("You are in the WebPieces Development Server");	
+	}
+	
 	private class AppOverridesModule implements Module {
 		@Override
 		public void configure(Binder binder) {
