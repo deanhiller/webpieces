@@ -1,4 +1,4 @@
-package org.webpieces.httpfrontend2.api.mock2;
+package org.webpieces.mock.time;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;

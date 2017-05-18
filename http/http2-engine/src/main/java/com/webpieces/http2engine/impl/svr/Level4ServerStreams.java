@@ -9,7 +9,6 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.impl.shared.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.Level4AbstractStreamMgr;
 import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;

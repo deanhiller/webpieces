@@ -5,24 +5,37 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.StreamSession;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Http1_1StreamImpl implements FrontendStream {
+	private static final Logger log = LoggerFactory.getLogger(Http1_1StreamImpl.class);
+
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	private FrontendSocketImpl socket;
 	private HttpParser http11Parser;
 	private AtomicReference<PartialStream> endingFrame = new AtomicReference<>();
+	private StreamSession session = new StreamSessionImpl();
 
 	public Http1_1StreamImpl(FrontendSocketImpl socket, HttpParser http11Parser) {
 		this.socket = socket;
@@ -30,18 +43,52 @@ public class Http1_1StreamImpl implements FrontendStream {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headers) {		
+	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headers) {
 		maybeRemove(headers);
-		HttpResponse response = Http2Translations.translateResponse(headers);		
-		return write(response).thenApply(c -> new StreamImpl());
+		HttpResponse response = Http2Translations.translateResponse(headers);
+		Header contentLenHeader = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+		if(contentLenHeader != null) {
+			int len = Integer.parseInt(contentLenHeader.getValue());
+			if(len != 0) //for redirect firefox content len is 0
+				return CompletableFuture.<StreamWriter>completedFuture(new CachingResponseWriter(response, len));
+		}
+		return write(response).thenApply(c -> new Http11ResponseWriter());
 	}
 
-	private class StreamImpl implements StreamWriter {
+	private class CachingResponseWriter implements StreamWriter {
+		private HttpResponse response;
+		private int len;
+		private DataWrapper allData = dataGen.emptyWrapper();
+		
+		public CachingResponseWriter(HttpResponse response, int len) {
+			this.response = response;
+			this.len = len;
+		}
+		
 		@Override
 		public CompletableFuture<StreamWriter> send(PartialStream data) {
-			maybeRemove(data);
-			List<HttpPayload> responses = Http2Translations.translate(data);
+			if(!(data instanceof DataFrame))
+				throw new UnsupportedOperationException("not supported="+data);
 			
+			DataFrame frame = (DataFrame) data;
+			allData = dataGen.chainDataWrappers(allData, frame.getData());
+			if(allData.getReadableSize() > len)
+				throw new IllegalArgumentException("Content-Length Header="+len+" but you sent in data totaling="+allData.getReadableSize());
+			else if(allData.getReadableSize() < len)
+				return CompletableFuture.completedFuture(this);
+			
+			response.setBody(allData);
+			return write(response).thenApply((s) -> this);
+		}
+	}
+	
+	private class Http11ResponseWriter implements StreamWriter {
+
+		@Override
+		public CompletableFuture<StreamWriter> send(PartialStream data) {
+			maybeRemove(data);			
+			
+			List<HttpPayload> responses = Http2Translations.translate(data);
 			CompletableFuture<Channel> future = CompletableFuture.completedFuture(null);
 			for(HttpPayload p : responses) {
 				future = future.thenCompose( (s) -> write(p));
@@ -85,6 +132,11 @@ public class Http1_1StreamImpl implements FrontendStream {
 	@Override
 	public FrontendSocket getSocket() {
 		return socket;
+	}
+
+	@Override
+	public StreamSession getSession() {
+		return session;
 	}
 
 }

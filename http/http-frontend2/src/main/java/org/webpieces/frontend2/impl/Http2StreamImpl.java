@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.StreamSession;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
@@ -15,6 +16,7 @@ public class Http2StreamImpl implements FrontendStream {
 	private FrontendSocketImpl socket;
 	private boolean sentResponseHeaders;
 	private ResponseHandler responseHandler;
+	private StreamSession session = new StreamSessionImpl();
 
 	public Http2StreamImpl(FrontendSocketImpl socket, ResponseHandler responseHandler) {
 		this.socket = socket;
@@ -44,6 +46,11 @@ public class Http2StreamImpl implements FrontendStream {
 	@Override
 	public FrontendSocket getSocket() {
 		return socket;
+	}
+
+	@Override
+	public StreamSession getSession() {
+		return session;
 	}
 
 }

@@ -7,7 +7,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
@@ -93,8 +92,8 @@ public class WebserverForTest {
 		//channel.socket().setReceiveBufferSize(size);
 	}
 	
-	public RequestListener start() {
-		return webServer.start();	
+	public void start() {
+		webServer.start();
 	}
 
 	public void stop() {

@@ -1,5 +1,8 @@
 package org.webpieces.frontend2.api;
 
+import org.webpieces.frontend2.impl.ProtocolType;
+import org.webpieces.nio.api.channels.ChannelSession;
+
 public interface FrontendSocket {
 
 	/**
@@ -7,4 +10,8 @@ public interface FrontendSocket {
 	 */
 	void close(String reason);
 
+	ChannelSession getSession();
+	
+	public ProtocolType getProtocol();
+	
 }

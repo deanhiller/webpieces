@@ -6,8 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -15,28 +13,29 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
-public class TestSyncWebServer {
+public class TestSyncWebServer extends AbstractWebpiecesTest {
 
-	private MockResponseSender socket = new MockResponseSender();
-	private RequestListener server;
+	
+	private Http11Socket http11Socket;
 	
 	@Before
 	public void setUp() {
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, null);
-		server = webserver.start();		
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, null);
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();		
 	}
 	
 	@Test
 	public void testBasic() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 		response.assertContentType("text/html; charset=utf-8");
@@ -48,9 +47,9 @@ public class TestSyncWebServer {
 	public void testAbsoluteHtmlPath() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute2");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 		response.assertContentType("text/html; charset=utf-8");
@@ -62,9 +61,9 @@ public class TestSyncWebServer {
 	public void testRedirect() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
@@ -74,9 +73,9 @@ public class TestSyncWebServer {
 	public void testJsonFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("red");
 		response.assertContentType("application/json");
@@ -86,9 +85,9 @@ public class TestSyncWebServer {
 	public void testRedirectRawRelativeUrl() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawurlredirect");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
@@ -98,9 +97,9 @@ public class TestSyncWebServer {
 	public void testRedirectRawAbsoluteUrl() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawabsoluteurlredirect");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("https://something.com/hi", response.getRedirectUrl());
@@ -110,9 +109,9 @@ public class TestSyncWebServer {
 	public void testScopedRoot() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}	
@@ -121,9 +120,9 @@ public class TestSyncWebServer {
 	public void testScopedRootWithSlash() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped/");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}	

@@ -36,6 +36,9 @@ public class RouterRequest {
 	 */
 	public String domain;
 	
+	/**
+	 * The port to redirect to when doing a redirect
+	 */
 	public int port;
 
 	public HttpMethod method;

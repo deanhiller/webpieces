@@ -1,5 +1,6 @@
 package org.webpieces.frontend2.impl;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -15,7 +16,6 @@ public class Layer1ServerListener implements AsyncDataListener {
 	private Layer2Http1_1Handler http1_1Handler;
 	private Layer2Http2Handler http2Handler;
 
-	
 	public Layer1ServerListener(
 			Layer2Http1_1Handler http1_1Listener, 
 			Layer2Http2Handler http2Listener) {
@@ -105,6 +105,11 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	FrontendSocketImpl getSocket(Channel channel) {
 		return (FrontendSocketImpl) channel.getSession().get(FRONTEND_SOCKET);
+	}
+
+	public void setBoundAddr(InetSocketAddress localAddr) {
+		http1_1Handler.setBoundAddr(localAddr);
+		http2Handler.setBoundAddr(localAddr);
 	}
 	
 }

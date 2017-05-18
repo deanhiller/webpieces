@@ -70,7 +70,10 @@ public enum Http2HeaderName {
 	METHOD(":method", HeaderType.REQUEST),
 	SCHEME(":scheme", HeaderType.REQUEST),
 	PATH(":path", HeaderType.REQUEST), 
-	AUTHORITY(":authority", HeaderType.REQUEST)
+	AUTHORITY(":authority", HeaderType.REQUEST),
+	
+	X_REQUESTED_WITH("x-requested-with", HeaderType.REQUEST),
+
 	;
 
 	private static Map<String, Http2HeaderName> lookup = new HashMap<>();

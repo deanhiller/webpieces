@@ -7,13 +7,16 @@ import com.webpieces.http2engine.impl.shared.Level2Synchro;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class RequestWriterImpl implements StreamWriter {
+/**
+ * Request or Response StreamWriter
+ */
+public class EngineStreamWriter implements StreamWriter {
 
 	private Stream stream;
 	private Level2Synchro level1;
 	private boolean streamEnded;
 
-	public RequestWriterImpl(Stream stream, Level2Synchro level1) {
+	public EngineStreamWriter(Stream stream, Level2Synchro level1) {
 		this.stream = stream;
 		this.level1 = level1;
 	}

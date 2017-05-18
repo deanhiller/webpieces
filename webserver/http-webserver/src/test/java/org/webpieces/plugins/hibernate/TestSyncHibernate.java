@@ -12,8 +12,6 @@ import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -25,15 +23,15 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
-public class TestSyncHibernate {
-	private MockResponseSender socket = new MockResponseSender();
-	private RequestListener server;
+public class TestSyncHibernate extends AbstractWebpiecesTest {
+
 	
 	private ServiceToFailMock mock = new ServiceToFailMock();
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() {
@@ -43,19 +41,20 @@ public class TestSyncHibernate {
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		TestConfig config = new TestConfig();
-		config.setPlatformOverrides(new PlatformOverridesForTest());
+		config.setPlatformOverrides(platformOverrides);
 		config.setMetaFile(metaFile);
 		config.setAppOverrides(new TestModule(mock));
 		WebserverForTest webserver = new WebserverForTest(config);
-		server = webserver.start();
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 
 	private String saveBean(String path) {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		return response.getRedirectUrl();
@@ -64,9 +63,9 @@ public class TestSyncHibernate {
 	private void readBean(String redirectUrl, String email) {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name=SomeName email="+email);
 	}
@@ -90,9 +89,9 @@ public class TestSyncHibernate {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/dynamic/"+id);
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 
@@ -147,9 +146,9 @@ public class TestSyncHibernate {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/list");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<a href=`/user/new`>Add User</a>".replace("`", "\""));
 		response.assertContains("<a href=`/user/edit/1`>Edit</a>".replace("`", "\""));
@@ -159,9 +158,9 @@ public class TestSyncHibernate {
 	public void testRenderAddPage() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/new");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name='' email=''");
 	}
@@ -171,9 +170,9 @@ public class TestSyncHibernate {
 		int id = loadDataInDb().getId();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/edit/"+id);
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
@@ -186,9 +185,9 @@ public class TestSyncHibernate {
 				"user.name", "blah1",
 				"user.firstName", "blah2");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = load(user.getId());
@@ -207,9 +206,9 @@ public class TestSyncHibernate {
 				"user.firstName", "blah2",
 				"user.levelOfEducation", LevelEducation.COLLEGE.getDbCode()+"");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = loadByEmail(email);
@@ -226,9 +225,9 @@ public class TestSyncHibernate {
 				"user.name", "blah1",
 				"user.firstName", "blah2");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = loadByEmail(email);
@@ -241,9 +240,9 @@ public class TestSyncHibernate {
 
 		mock.addException(() -> {throw new RuntimeException("for test");});
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 
 		Assert.assertEquals(2, TransactionFilter.getState());

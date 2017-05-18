@@ -7,8 +7,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -20,10 +18,10 @@ import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -32,22 +30,23 @@ import com.google.inject.Module;
  * @author dhiller
  *
  */
-public class TestAsynchronousErrors {
+public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 
-	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockResponseSender socket = new MockResponseSender();
+	
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, metaFile);
-		server = webserver.start();
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	@Test
@@ -57,15 +56,15 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 
 		//now resolve the future (which would be done on another thread)
 		future.complete(22);
 
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");
 	}
@@ -78,19 +77,19 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future2);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 
 		future.completeExceptionally(new NotFoundException("some async NotFound"));
 
-		List<FullResponse> responses3 = socket.getResponses();
+		List<FullResponse> responses3 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses3.size());
 		
 		future2.complete(55);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");		
 	}
@@ -101,14 +100,14 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new NotFoundException("testing notfound from notfound route"));
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");
 	}
@@ -119,14 +118,14 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("testing notfound from notfound route"));
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");		
 	}
@@ -140,19 +139,19 @@ public class TestAsynchronousErrors {
 
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("fail notfound route"));
 		
-		List<FullResponse> responses3 = socket.getResponses();
+		List<FullResponse> responses3 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses3.size());
 		
 		future2.completeExceptionally(new RuntimeException("fail internal server error route"));
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");
 	}
@@ -167,14 +166,14 @@ public class TestAsynchronousErrors {
 		mockNotFoundLib.queueFuture(future);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("test async exception"));
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");	
 	}
@@ -187,19 +186,19 @@ public class TestAsynchronousErrors {
 		mockInternalSvrErrorLib.queueFuture(future2);
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses2 = socket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses2.size());
 		
 		future.completeExceptionally(new RuntimeException("fail notfound route"));
 		
-		List<FullResponse> responses3 = socket.getResponses();
+		List<FullResponse> responses3 = http11Socket.getResponses();
 		Assert.assertEquals(0, responses3.size());
 		
 		future2.completeExceptionally(new RuntimeException("fail internal server error route"));
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");	
 	}
@@ -211,12 +210,12 @@ public class TestAsynchronousErrors {
 		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
 		//now have the server complete processing
 		future.complete(5);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software");
 	}

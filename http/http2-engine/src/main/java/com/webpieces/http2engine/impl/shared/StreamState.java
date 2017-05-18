@@ -13,6 +13,8 @@ public class StreamState {
 	private ConcurrentMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
 	private long highestOddStream = 0;
 	private long highestEvenStream = 0;
+	
+	//we need to time out closing streams  BUT just reuse the threads!!! do not use a timer thread
 	private Time time;
 
 	public StreamState(Time time) {

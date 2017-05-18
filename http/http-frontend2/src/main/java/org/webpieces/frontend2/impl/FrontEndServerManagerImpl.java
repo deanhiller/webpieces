@@ -10,14 +10,11 @@ import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
 public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
-	private static final Logger log = LoggerFactory.getLogger(FrontEndServerManagerImpl.class);
 	private AsyncServerManager svrManager;
 	private ScheduledExecutorService timer;
 	private HttpParser httpParser;
@@ -37,7 +34,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 
 		Layer1ServerListener listener = buildDatalListener(httpListener, false);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener);
-		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
+		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 
 		return frontend;
 	}
@@ -65,7 +62,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		
 		Layer1ServerListener listener = buildDatalListener(httpListener, true);
 		AsyncServer tcpServer = svrManager.createTcpServer(config.asyncServerConfig, listener, factory);
-		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config);
+		HttpServerImpl frontend = new HttpServerImpl(tcpServer, config, listener);
 		
 		return frontend;
 	}

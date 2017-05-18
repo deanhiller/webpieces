@@ -1,8 +1,5 @@
 package org.webpieces.httpcommon;
 
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTP;
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
@@ -21,11 +18,11 @@ public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	public static HttpRequest createRequest(KnownHttpMethod method, String url, boolean isHttps) {
-		return createRequest(method, url, isHttps, null);
+	public static HttpRequest createRequest(KnownHttpMethod method, String url) {
+		return createRequest(method, url, null);
 	}
 	
-	public static HttpRequest createRequest(KnownHttpMethod method, String url, boolean isHttps, Integer port) {
+	public static HttpRequest createRequest(KnownHttpMethod method, String url, Integer port) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(method);
@@ -33,10 +30,6 @@ public class Requests {
 		
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine);
-		if(isHttps)
-			req.setHttpScheme(HTTPS);
-		else
-			req.setHttpScheme(HTTP);
 
 		if(port == null)
 			req.addHeader(new Header(KnownHeaderName.HOST, "myhost.com"));
@@ -46,7 +39,7 @@ public class Requests {
 		return req;
 	}
 
-	public static HttpRequest createGetRequest(String domain, String url, boolean isHttps) {
+	public static HttpRequest createGetRequest(String domain, String url) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(KnownHttpMethod.GET);
@@ -54,18 +47,10 @@ public class Requests {
 		
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine);
-		if(isHttps)
-			req.setHttpScheme(HTTPS);
-		else
-			req.setHttpScheme(HTTP);
 
 		req.addHeader(new Header(KnownHeaderName.HOST, domain));
 
 		return req;
-	}
-	
-	public static HttpRequest createRequest(KnownHttpMethod method, String url) {
-		return createRequest(method, url, false);
 	}
 
 	public static HttpRequest createPostRequest(String url, String ... argTuples) {
@@ -113,6 +98,7 @@ public class Requests {
 		String json = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
 		request.setBody(body);
+		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
 		return request;
 	}
 
@@ -121,6 +107,7 @@ public class Requests {
 		String json = "{ `query `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
 		request.setBody(body);
+		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
 		return request;
 	}
 	

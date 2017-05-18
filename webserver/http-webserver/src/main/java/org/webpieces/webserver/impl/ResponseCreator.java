@@ -12,27 +12,25 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterCookie;
-import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.common.ResponseCookie;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.httpparser.api.dto.HttpResponseStatus;
-import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
 import org.webpieces.router.api.exceptions.CookieTooLargeException;
 import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.compression.MimeTypes;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
+import com.webpieces.hpack.api.subparsers.ResponseCookie;
+import com.webpieces.http2parser.api.StatusCode;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 @Singleton
 public class ResponseCreator {
 
 	private static final Logger log = LoggerFactory.getLogger(ResponseCreator.class);
-	private static final HeaderPriorityParser httpSubParser = HttpParserFactory.createHeaderParser();
+	private static final HeaderPriorityParser httpSubParser = HpackParserFactory.createHeaderParser();
 	private static final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, dd MMM Y HH:mm:ss");
 
 	@Inject
@@ -40,56 +38,43 @@ public class ResponseCreator {
 	@Inject
 	private MimeTypes mimeTypes;
 	
-	public ResponseEncodingTuple createResponse(HttpRequest request, KnownStatusCode statusCode, 
+	public ResponseEncodingTuple createResponse(Http2Headers request, StatusCode statusCode, 
 			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
 		return createContentResponse(request, statusCode.getCode(), isDynamicPartOfWebsite, mimeType);
 	}
 
-	ResponseEncodingTuple createContentResponse(HttpRequest request, int statusCode,
+	ResponseEncodingTuple createContentResponse(Http2Headers request, int statusCode,
 			boolean isDynamicPartOfWebsite, MimeTypeResult mimeType) {
-		
-		KnownStatusCode code = KnownStatusCode.lookup(statusCode);
-		
-		HttpResponseStatus status = new HttpResponseStatus();
-		if(code != null) {
-			status.setKnownStatus(code);
-		} else {
-			status.setCode(statusCode);
-			status.setReason("");
-		}
-		
-		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
-		statusLine.setStatus(status);
-		HttpResponse response = new HttpResponse();
-		response.setStatusLine(statusLine);
-		
-		response.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, mimeType.mime));
 
-		addCommonHeaders(request, response, isDynamicPartOfWebsite);
+		Http2Headers response = new Http2Headers();
+
+		response.addHeader(new Http2Header(Http2HeaderName.STATUS, statusCode+""));
+		response.addHeader(new Http2Header(Http2HeaderName.CONTENT_TYPE, mimeType.mime));
+
+		addCommonHeaders(request, response, statusCode, isDynamicPartOfWebsite);
 		return new ResponseEncodingTuple(response, mimeType);
 	}
 	
 	public static class ResponseEncodingTuple {
-		public HttpResponse response;
+		public Http2Headers response;
 		public MimeTypeResult mimeType;
 
-		public ResponseEncodingTuple(HttpResponse response, MimeTypeResult mimeType) {
+		public ResponseEncodingTuple(Http2Headers response, MimeTypeResult mimeType) {
 			this.response = response;
 			this.mimeType = mimeType;
 		}	
 	}
 	
-	public void addCommonHeaders(HttpRequest request, HttpResponse response, boolean isDynamicPartOfWebsite) {
-		KnownStatusCode statusCode = response.getStatusLine().getStatus().getKnownStatus();
-		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
+	public void addCommonHeaders(Http2Headers request, Http2Headers response, int statusCode, boolean isDynamicPartOfWebsite) {
+		Http2Header connHeader = request.getHeaderLookupStruct().getHeader(Http2HeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
 		String dateStr = formatter.print(now)+" GMT";
 
 		//in general, nearly all these headers are desired..
-		Header date = new Header(KnownHeaderName.DATE, dateStr);
+		Http2Header date = new Http2Header(Http2HeaderName.DATE, dateStr);
 		response.addHeader(date);
 
 //		Header xFrame = new Header("X-Frame-Options", "SAMEORIGIN");
@@ -98,7 +83,7 @@ public class ResponseCreator {
 		if(isDynamicPartOfWebsite) {
 			List<RouterCookie> cookies = createCookies(statusCode);
 			for(RouterCookie c : cookies) {
-				Header cookieHeader = create(c);
+				Http2Header cookieHeader = create(c);
 				response.addHeader(cookieHeader);
 			}
 		}
@@ -119,7 +104,7 @@ public class ResponseCreator {
 		response.addHeader(connHeader);
 	}
 	
-	private List<RouterCookie> createCookies(KnownStatusCode statusCode) {
+	private List<RouterCookie> createCookies(int statusCode) {
 		if(!Current.isContextSet())
 			return new ArrayList<>(); //in some exceptional cases like incoming cookies failing to parse, there will be no cookies
 		
@@ -130,7 +115,7 @@ public class ResponseCreator {
 			cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
 			return cookies;
 		} catch(CookieTooLargeException e) {
-			if(statusCode != KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR)
+			if(statusCode != 500)
 				throw e;
 			//ELSE this is the second time we are rendering a response AND it was MOST likely caused by the same
 			//thing when we tried to marshal out cookies to strings and they were too big, sooooooooooo in this
@@ -142,7 +127,7 @@ public class ResponseCreator {
 		}
 	}
 	
-	private Header create(RouterCookie c) {
+	private Http2Header create(RouterCookie c) {
 		ResponseCookie cookie = new ResponseCookie();
 		cookie.setName(c.name);
 		cookie.setValue(c.value);
@@ -154,9 +139,9 @@ public class ResponseCreator {
 		return httpSubParser.createHeader(cookie);
 	}
 
-	public void addDeleteCookie(HttpResponse response, String badCookieName) {
+	public void addDeleteCookie(Http2Headers response, String badCookieName) {
 		RouterCookie cookie = cookieTranslator.createDeleteCookie(badCookieName);
-		Header cookieHeader = create(cookie);
+		Http2Header cookieHeader = create(cookie);
 		response.addHeader(cookieHeader);
 	}
 }

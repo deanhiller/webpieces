@@ -4,11 +4,9 @@ import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.devrouter.impl.DevClassForName;
 import org.webpieces.devrouter.impl.DevLoader;
 import org.webpieces.devrouter.impl.DevRoutingService;
-import org.webpieces.frontend.api.HttpFrontendManager;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
-import org.webpieces.webserver.test.MockHttpFrontendMgr;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -17,8 +15,6 @@ public class ForTestingStaticDevelopmentModeModule implements Module {
 
 	@Override
 	public void configure(Binder binder) {
-		binder.bind(HttpFrontendManager.class).toInstance(new MockHttpFrontendMgr());
-		
 		binder.bind(RouterService.class).to(DevRoutingService.class).asEagerSingleton();
         binder.bind(MetaLoaderProxy.class).to(DevLoader.class).asEagerSingleton();
 		binder.bind(ClassForName.class).to(DevClassForName.class).asEagerSingleton();

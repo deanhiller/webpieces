@@ -16,7 +16,7 @@ import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
-import org.webpieces.frontend2.api.Protocol;
+import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.httpfrontend2.api.http1.Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -62,7 +62,7 @@ class ServerFactory {
         }
 
 		@Override
-		public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+		public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, SocketInfo type) {
 			// TODO Auto-generated method stub
 			return null;
 		}

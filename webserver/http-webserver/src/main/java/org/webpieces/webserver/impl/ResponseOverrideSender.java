@@ -5,46 +5,41 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.OverwritePlatformResponse;
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.impl.ProtocolType;
+
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class ResponseOverrideSender {
 
-	private ResponseSender responseSender;
+	private FrontendStream stream;
 
-	public ResponseOverrideSender(ResponseSender responseSender) {
-		this.responseSender = responseSender;
+	public ResponseOverrideSender(FrontendStream stream) {
+		this.stream = stream;
 	}
 
 	@Override
 	public String toString() {
-		return "ResponseOverrideSender [responseSender=" + responseSender + "]";
+		return "ResponseOverrideSender [responseSender=" + stream + "]";
 	}
 
-	public CompletableFuture<ResponseId> sendResponse(HttpResponse response, HttpRequest request, RequestId requestId, boolean isComplete) {
+	public CompletableFuture<StreamWriter> sendResponse(Http2Headers response) {
 		//in some exceptional cases like incoming cookies failing to parse, there will be no context
-		HttpResponse finalResp = response;
+		Http2Headers finalResp = response;
 		if(Current.isContextSet()) {
 			List<OverwritePlatformResponse> callbacks = Current.getContext().getCallbacks();
 			for(OverwritePlatformResponse callback : callbacks) {
-				finalResp = (HttpResponse)callback.modifyOrReplace(finalResp);
+				finalResp = (Http2Headers)callback.modifyOrReplace(finalResp);
 			}
 		}
 		
-		return responseSender.sendResponse(finalResp, request, requestId, isComplete);
+		return stream.sendResponse(finalResp);
 	}
 
-	public CompletableFuture<Void> close() {
-		return responseSender.close();
+	public void close() {
+		if(stream.getSocket().getProtocol() == ProtocolType.HTTP1_1)
+			stream.getSocket().close("Connection KeepAlive not set");
 	}
-
-	public CompletableFuture<Void> sendData(DataWrapper data, ResponseId responseId, boolean isComplete) {
-		return responseSender.sendData(data, responseId, isComplete);
-	}
-
 
 }

@@ -12,10 +12,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.webpieces.frontend.api.FrontendConfig;
-import org.webpieces.frontend.api.HttpFrontendManager;
-import org.webpieces.frontend.api.HttpServer;
-import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.frontend2.api.FrontendConfig;
+import org.webpieces.frontend2.api.HttpFrontendManager;
+import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterService;
@@ -49,7 +49,7 @@ public class WebServerImpl implements WebServer {
 	private HttpServer httpsServer;
 
 	@Override
-	public RequestListener start() {
+	public HttpRequestListener start() {
 		log.info("starting server");
 		routingService.start();
 

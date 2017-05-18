@@ -10,7 +10,6 @@ import static org.webpieces.httpcommon.api.Http2Engine.HttpSide.SERVER;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.CLOSED;
 import static org.webpieces.httpcommon.impl.Stream.StreamStatus.HALF_CLOSED_REMOTE;
 import static org.webpieces.httpparser.api.common.KnownHeaderName.TRAILER;
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
@@ -736,10 +735,10 @@ public abstract class Http2EngineImpl implements Http2Engine {
                 specialHeaderMap.get(":scheme"))));
         switch(specialHeaderMap.get(":scheme").toLowerCase()) {
             case "http":
-                request.setHttpScheme(HttpRequest.HttpScheme.HTTP);
+                //request.setHttpScheme(HttpRequest.HttpScheme.HTTP);
                 break;
             case "https":
-                request.setHttpScheme(HTTPS);
+                //request.setHttpScheme(HTTPS);
                 break;
             default:
                 throw new RstStreamError(Http2ErrorCode.PROTOCOL_ERROR, stream.getStreamId());

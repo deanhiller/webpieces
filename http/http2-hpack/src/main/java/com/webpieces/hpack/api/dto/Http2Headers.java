@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
@@ -112,6 +113,11 @@ public class Http2Headers implements PartialStream {
 	public String toString() {
 		return "Http2Headers [streamId=" + streamId + ", endStream=" + endOfStream + ", headerList="
 				+ headers + ", priorityDetails=" + getPriorityDetails() + "]";
+	}
+	
+	@Deprecated
+	public String getStatus() {
+		return getHeaderLookupStruct().getHeader(Http2HeaderName.STATUS).getValue();
 	}
 
 }

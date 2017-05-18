@@ -11,8 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -20,31 +18,33 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
-public class TestStaticPaths {
+public class TestStaticPaths extends AbstractWebpiecesTest {
 
-	private RequestListener server;
-	private MockResponseSender socket = new MockResponseSender();
+	
+	
 	private File cacheDir;
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("staticMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		cacheDir = webserver.getCacheDir();
-		server = webserver.start();
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 
 	@Test
 	public void testStaticDir() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver.staticpath.app.StaticMeta");
 		response.assertContentType("text/plain; charset=utf-8");
@@ -54,9 +54,9 @@ public class TestStaticPaths {
 	public void testStaticDirWithHashGeneration() throws FileNotFoundException, IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
 		String hash = loadUrlEncodedHash();
 		
@@ -69,9 +69,9 @@ public class TestStaticPaths {
 		String hash = loadUrlEncodedHash();		
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("themes.googleusercontent.com");
 		response.assertContentType("text/css; charset=utf-8");
@@ -90,9 +90,9 @@ public class TestStaticPaths {
 	public void testStaticDirWithBadHashDoesNotLoadMismatchFileIntoBrowser() throws FileNotFoundException, IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
@@ -100,9 +100,9 @@ public class TestStaticPaths {
 	public void testStaticDirJpg() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContentType("image/jpeg");
 		int size = response.getBody().getReadableSize();
@@ -113,9 +113,9 @@ public class TestStaticPaths {
 	public void testStaticDirAndNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		//render html page when not found...
 		response.assertContentType("text/html; charset=utf-8");
@@ -125,9 +125,9 @@ public class TestStaticPaths {
 	public void testStaticFile() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("app.TagsMeta");
 	}

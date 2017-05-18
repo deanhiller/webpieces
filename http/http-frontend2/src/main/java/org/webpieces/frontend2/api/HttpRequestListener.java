@@ -6,7 +6,7 @@ import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
 public interface HttpRequestListener {
 
-	StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type);
+	StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, SocketInfo info);
 
 	void cancelRequest(FrontendStream stream, RstStreamFrame c);
 

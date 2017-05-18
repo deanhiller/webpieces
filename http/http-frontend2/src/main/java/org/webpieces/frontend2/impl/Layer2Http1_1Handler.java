@@ -1,5 +1,6 @@
 package org.webpieces.frontend2.impl;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.Protocol;
+import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
@@ -31,11 +32,13 @@ public class Layer2Http1_1Handler {
 	private HttpParser httpParser;
 	private HttpRequestListener httpListener;
 	private boolean isHttps;
+	private SocketInfo socketInfo;
 
 	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener, boolean isHttps) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
 		this.isHttps = isHttps;
+		this.socketInfo = new SocketInfo(ProtocolType.HTTP1_1, isHttps);
 	}
 
 	public InitiationResult initialData(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -118,13 +121,14 @@ public class Layer2Http1_1Handler {
 		Http2Header lengthHeader = headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH);
 		if(lengthHeader != null) {
 			DataFrame frame = Http2Translations.translateBody(payload.getBody());
-			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
+			StreamWriter writer = httpListener.incomingRequest(stream, headers, socketInfo);
 			writer.send(frame);
 		} else if(http1Req.isHasChunkedTransferHeader()) {
-			StreamWriter writer = httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
+			StreamWriter writer = httpListener.incomingRequest(stream, headers, socketInfo);
 			socket.addWriter(writer);
 		} else {
-			httpListener.incomingRequest(stream, headers, Protocol.HTTP11);
+			headers.setEndOfStream(true);
+			httpListener.incomingRequest(stream, headers, socketInfo);
 		}
 	}
 
@@ -136,6 +140,10 @@ public class Layer2Http1_1Handler {
 
 	public void farEndClosed(FrontendSocketImpl socket) {
 		socket.farEndClosed(httpListener);
+	}
+
+	public void setBoundAddr(InetSocketAddress localAddr) {
+		socketInfo.setBoundAddress(localAddr);
 	}
 
 }

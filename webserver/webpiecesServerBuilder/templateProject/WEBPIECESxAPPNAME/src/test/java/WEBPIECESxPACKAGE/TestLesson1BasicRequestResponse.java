@@ -9,8 +9,6 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -21,10 +19,10 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -39,18 +37,16 @@ import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
  * @author dhiller
  *
  */
-public class TestLesson1BasicRequestResponse {
+public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 
 	private final static Logger log = LoggerFactory.getLogger(TestLesson1BasicRequestResponse.class);
 	
-	private RequestListener server;
-	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
-	//any redirects in the application properly..
-	private MockResponseSender mockResponseSender = new MockResponseSender();
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+
+	private Http11Socket http11Socket;
 	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 	
 	@Before
@@ -64,9 +60,9 @@ public class TestLesson1BasicRequestResponse {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(
-				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(pUnit));
-		server = webserver.start();
+		Server webserver = new Server(platformOverrides, new AppOverridesModule(), new ServerConfig(pUnit));
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	/**
@@ -76,9 +72,9 @@ public class TestLesson1BasicRequestResponse {
 	public void testSynchronousController() {
 		HttpRequest req = createRequest("/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
+		List<FullResponse> responses = http11Socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);
@@ -100,9 +96,9 @@ public class TestLesson1BasicRequestResponse {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = createRequest("/async");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
+		List<FullResponse> responses = http11Socket.getResponses();
 		Assert.assertEquals(0, responses.size());
 
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
@@ -110,7 +106,7 @@ public class TestLesson1BasicRequestResponse {
 		int value = 85;
 		future.complete(value);
 
-		List<FullResponse> responses2 = mockResponseSender.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(1, responses2.size());
 		
 		FullResponse httpPayload = responses2.get(0);
@@ -126,9 +122,9 @@ public class TestLesson1BasicRequestResponse {
 		HttpRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSender);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses = mockResponseSender.getResponses();
+		List<FullResponse> responses = http11Socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);

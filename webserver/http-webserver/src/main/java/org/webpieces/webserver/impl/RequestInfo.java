@@ -2,32 +2,28 @@ package org.webpieces.webserver.impl;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.ResponseId;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+
+import com.webpieces.hpack.api.dto.Http2Headers;
 
 class RequestInfo {
 
 	private RouterRequest routerRequest;
-	private HttpRequest request;
+	private Http2Headers request;
 	private BufferPool pool;
 	private ResponseOverrideSender responseSender;
-	private ResponseId responseId;
-	private RequestId requestId;
 
-	RequestInfo(RouterRequest routerRequest, HttpRequest request, RequestId requestId, BufferPool pool, ResponseOverrideSender responseSender) {
+	RequestInfo(RouterRequest routerRequest, Http2Headers request, BufferPool pool, ResponseOverrideSender responseSender) {
 		this.routerRequest = routerRequest;
 		this.request = request;
 		this.pool = pool;
 		this.responseSender = responseSender;
-		this.requestId = requestId;
 	}
 
 	RouterRequest getRouterRequest() {
 		return routerRequest;
 	}
 
-	public HttpRequest getRequest() {
+	public Http2Headers getRequest() {
 		return request;
 	}
 
@@ -39,15 +35,4 @@ class RequestInfo {
 		return responseSender;
 	}
 
-	ResponseId getResponseId() {
-		return responseId;
-	}
-
-	void setResponseId(ResponseId responseId) {
-		this.responseId = responseId;
-	}
-
-	public RequestId getRequestId() {
-		return requestId;
-	}
 }

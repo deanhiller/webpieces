@@ -9,15 +9,13 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -40,16 +38,13 @@ import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
  * @author dhiller
  *
  */
-public class TestLesson2Errors {
+public class TestLesson2Errors extends AbstractWebpiecesTest {
 
-	private RequestListener server;
-	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
-	//any redirects in the application properly..
-	private MockResponseSender mockResponseSocket = new MockResponseSender();
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
 	private MockSomeLibrary mockLibrary = new MockSomeLibrary();
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
+	private Http11Socket http11Socket;
 	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
 	@Before
@@ -62,9 +57,9 @@ public class TestLesson2Errors {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(
-				new PlatformOverridesForTest(), new AppOverridesModule(), new ServerConfig(pUnit));
-		server = webserver.start();
+		Server webserver = new Server(platformOverrides, new AppOverridesModule(), new ServerConfig(pUnit));
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	/**
@@ -78,9 +73,9 @@ public class TestLesson2Errors {
 		});
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = http11Socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);
@@ -95,9 +90,9 @@ public class TestLesson2Errors {
 	public void testNotFound() {
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = http11Socket.getResponses();
 		Assert.assertEquals(1, responses.size());
 
 		FullResponse httpPayload = responses.get(0);
@@ -114,16 +109,16 @@ public class TestLesson2Errors {
 		mockRemote.addValueToReturn(future);
 		HttpRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
 		
-		server.incomingRequest(req, new RequestId(0), true, mockResponseSocket);
+		http11Socket.send(req);
 		
-		List<FullResponse> responses = mockResponseSocket.getResponses();
+		List<FullResponse> responses = http11Socket.getResponses();
 		Assert.assertEquals(0, responses.size());
 
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
 		//next, simulate remote system returning a value..
 		future.completeExceptionally(new RuntimeException("complete future with exception"));
 
-		List<FullResponse> responses2 = mockResponseSocket.getResponses();
+		List<FullResponse> responses2 = http11Socket.getResponses();
 		Assert.assertEquals(1, responses2.size());
 		
 		FullResponse httpPayload = responses2.get(0);

@@ -8,15 +8,16 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.ctx.api.Session;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.util.filters.Service;
+
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class LoginFilter extends RouteFilter<LoginInfo> {
 
@@ -69,14 +70,14 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	}
 
 	private Object addCacheHeaders(Object response) {
-		HttpResponse resp = (HttpResponse) response;
+		Http2Headers resp = (Http2Headers) response;
 		//http://stackoverflow.com/questions/49547/how-to-control-web-page-caching-across-all-browsers
 		//This forces the browser back button to re-request the page as it would never have the page
 		//and is good to use to hide banking information type pages
 		//resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
-		resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-cache, no-store, must-revalidate"));
-		resp.addHeader(new Header(KnownHeaderName.PRAGMA, "no-cache"));
-		resp.addHeader(new Header(KnownHeaderName.EXPIRES, "0"));
+		resp.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "no-cache, no-store, must-revalidate"));
+		resp.addHeader(new Http2Header(Http2HeaderName.PRAGMA, "no-cache"));
+		resp.addHeader(new Http2Header(Http2HeaderName.EXPIRES, "0"));
 		return resp;
 	}
 

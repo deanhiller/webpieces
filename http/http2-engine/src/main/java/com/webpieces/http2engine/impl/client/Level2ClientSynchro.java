@@ -14,7 +14,7 @@ import org.webpieces.util.threading.SessionExecutor;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ResponseListener;
-import com.webpieces.http2engine.impl.RequestWriterImpl;
+import com.webpieces.http2engine.impl.EngineStreamWriter;
 import com.webpieces.http2engine.impl.shared.Level2Synchro;
 import com.webpieces.http2engine.impl.shared.Level3ParsingAndRemoteSettings;
 
@@ -57,7 +57,7 @@ public class Level2ClientSynchro extends Level2Synchro {
 				throw new IllegalArgumentException("Client cannot send frames with even stream ids to server per http/2 spec");
 			
 			return streamInit.createStreamAndSend(headers, responseListener)
-					.thenApply((s) -> new RequestWriterImpl(s, this));
+					.thenApply((s) -> new EngineStreamWriter(s, this));
 		});
 	}
 

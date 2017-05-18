@@ -4,8 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -14,29 +12,31 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
-public class TestScopes {
+public class TestScopes extends AbstractWebpiecesTest {
 
-	private RequestListener server;
-	private MockResponseSender socket = new MockResponseSender();
+	
+	
+	private Http11Socket http11Socket;
 	
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), null, false, metaFile);
-		server = webserver.start();
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 
 	@Test
 	public void testSessionScope() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
@@ -48,9 +48,9 @@ public class TestScopes {
 	public void testSessionScopeModificationByClient() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
@@ -64,9 +64,9 @@ public class TestScopes {
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
 		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
 		
-		server.incomingRequest(req2, new RequestId(0), true, socket);
+		http11Socket.send(req2);
 		
-        response = ResponseExtract.assertSingleResponse(socket);
+        response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		Header cookie2 = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
@@ -80,9 +80,9 @@ public class TestScopes {
 	@Test
     public void testFlashMessage() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -92,18 +92,18 @@ public class TestScopes {
 	@Test
     public void testGetStaticFileDoesNotClearFlashMessage() {
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         
 		Header header = response.createCookieRequestHeader();
         HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css");
         req2.addHeader(header);
-        server.incomingRequest(req2, new RequestId(0), true, socket);
+        http11Socket.send(req2);
         
-        FullResponse response2 = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response2 = ResponseExtract.assertSingleResponse(http11Socket);
         response2.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         Header cookie = response2.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
         Assert.assertNull("static routes should not be clearing cookies or things go south", cookie);
@@ -132,9 +132,9 @@ public class TestScopes {
 				"user.address.street", "Coolness Dr.");		
 		req.addHeader(header);
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/user/list", response.getRedirectUrl());
@@ -148,9 +148,9 @@ public class TestScopes {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		return response;
 	}
@@ -161,9 +161,9 @@ public class TestScopes {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("First name must be more than 2 characters");

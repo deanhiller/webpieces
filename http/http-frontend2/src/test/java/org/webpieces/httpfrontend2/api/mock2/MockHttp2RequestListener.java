@@ -1,13 +1,12 @@
 package org.webpieces.httpfrontend2.api.mock2;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.Protocol;
+import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
@@ -35,8 +34,8 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	public static class PassedIn {
 		public FrontendStream stream;
 		public Http2Headers request;
-		public Protocol type;
-		public PassedIn(FrontendStream stream, Http2Headers headers, Protocol type) {
+		public SocketInfo type;
+		public PassedIn(FrontendStream stream, Http2Headers headers, SocketInfo type) {
 			super();
 			this.stream = stream;
 			this.request = headers;
@@ -45,7 +44,7 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	}
 	
 	@Override
-	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, Protocol type) {
+	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, SocketInfo type) {
 		return (StreamWriter) super.calledMethod(Method.INCOMING, new PassedIn(stream, headers, type));
 	}
 
@@ -69,7 +68,6 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 		super.calledVoidMethod(Method.CANCEL, new Cancel(stream, c));
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<Cancel> getCancels() {
 		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.CANCEL);
 		Stream<Cancel> retVal = calledMethodList.map(p -> (Cancel)p.getArgs()[0]);

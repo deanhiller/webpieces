@@ -1,13 +1,13 @@
 package org.webpieces.webserver.impl;
 
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class ChannelCloser {
 
-	public Void closeIfNeeded(HttpRequest request, ResponseOverrideSender channel) {
-		Header connHeader = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONNECTION);
+	public Void closeIfNeeded(Http2Headers request, ResponseOverrideSender channel) {
+		Http2Header connHeader = request.getHeaderLookupStruct().getHeader(Http2HeaderName.CONNECTION);
 		boolean close = false;
 		if(connHeader != null) {
 			String value = connHeader.getValue();

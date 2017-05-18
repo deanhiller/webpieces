@@ -15,16 +15,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.ResponseSender;
-import org.webpieces.httpcommon.api.exceptions.HttpException;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.httpparser.api.dto.HttpResponseStatus;
-import org.webpieces.httpparser.api.dto.HttpResponseStatusLine;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderContentResponse;
@@ -41,6 +32,12 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
+
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2parser.api.StatusCode;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 import groovy.lang.MissingPropertyException;
 
@@ -64,56 +61,52 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	private ChannelCloser channelCloser;
 	
-	private ResponseOverrideSender responseSender;
+	private ResponseOverrideSender stream;
 	//private HttpRequest request;
 	private BufferPool pool;
 	private RouterRequest routerRequest;
-	private HttpRequest request;
-	private RequestId requestId;
+	private Http2Headers request;
 
-	public void init(RouterRequest req, ResponseSender responseSender, BufferPool pool, RequestId requestId) {
+	public void init(RouterRequest req, Http2Headers requestHeaders, FrontendStream responseSender, BufferPool pool) {
 		this.routerRequest = req;
-		this.request = (HttpRequest) req.orginalRequest;
-		this.responseSender = new ResponseOverrideSender(responseSender);
+		this.request = requestHeaders;
+		this.stream = new ResponseOverrideSender(responseSender);
 		this.pool = pool;
-		this.requestId = requestId;
 	}
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
 		RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
-		HttpResponse response = createRedirect(httpResponse);
+		Http2Headers response = createRedirect(httpResponse);
 		
 		responseCreator.addDeleteCookie(response, badCookieName);
 		
-		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ responseSender);
-		responseSender.sendResponse(response, request, requestId, true);
+		log.info("sending REDIRECT(due to bad cookie) response responseSender="+ stream);
+		stream.sendResponse(response);
 
-		channelCloser.closeIfNeeded(request, responseSender);
+		channelCloser.closeIfNeeded(request, stream);
 	}
 	
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
 		log.debug(() -> "Sending redirect response. req="+request);
-		HttpResponse response = createRedirect(httpResponse);
+		Http2Headers response = createRedirect(httpResponse);
 
-		log.info("sending REDIRECT response responseSender="+ responseSender);
-		responseSender.sendResponse(response, request, requestId, true);
+		log.info("sending REDIRECT response responseSender="+ stream);
+		stream.sendResponse(response);
 
-		channelCloser.closeIfNeeded(request, responseSender);
+		channelCloser.closeIfNeeded(request, stream);
 	}
 
-	private HttpResponse createRedirect(RedirectResponse httpResponse) {
-		HttpResponseStatus status = new HttpResponseStatus();
+	private Http2Headers createRedirect(RedirectResponse httpResponse) {
+		Http2Headers response = new Http2Headers();
+
+		int code;
 		if(httpResponse.isAjaxRedirect) {
-			status.setCode(BootstrapModalTag.AJAX_REDIRECT_CODE);
-			status.setReason("Ajax redirect");
+			code = BootstrapModalTag.AJAX_REDIRECT_CODE;
 		} else
-			status.setKnownStatus(KnownStatusCode.HTTP_303_SEEOTHER);
-		
-		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
-		statusLine.setStatus(status);
-		HttpResponse response = new HttpResponse();
-		response.setStatusLine(statusLine);
+			code = StatusCode.HTTP_303_SEEOTHER.getCode();
+				
+		response.addHeader(new Http2Header(Http2HeaderName.STATUS, code+""));
 		
 		String url = httpResponse.redirectToPath;
 		if(url.startsWith("http")) {
@@ -136,19 +129,19 @@ public class ProxyResponse implements ResponseStreamer {
 					+ "no domain set so we can't form the full redirect.  Either drop setting isHttps or set the domain");
 		}
 		
-		Header location = new Header(KnownHeaderName.LOCATION, url);
+		Http2Header location = new Http2Header(Http2HeaderName.LOCATION, url);
 		response.addHeader(location );
 		
-		responseCreator.addCommonHeaders(request, response, true);
+		responseCreator.addCommonHeaders(request, response, code, true);
 
 		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
-		response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, 0+""));
+		response.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, 0+""));
 		return response;
 	}
 
 	@Override
 	public void sendRenderHtml(RenderResponse resp) {
-		log.debug(() -> "Sending render html response. req="+request);
+		log.info(() -> "Sending render html response. req="+request);
 		View view = resp.view;
 		String packageStr = view.getPackageName();
 		//For this type of View, the template is the name of the method..
@@ -184,16 +177,16 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		String content = out.toString();
 		
-		KnownStatusCode statusCode = KnownStatusCode.HTTP_200_OK;
+		StatusCode statusCode = StatusCode.HTTP_200_OK;
 		switch(resp.routeType) {
 		case HTML:
-			statusCode = KnownStatusCode.HTTP_200_OK;
+			statusCode = StatusCode.HTTP_200_OK;
 			break;
 		case NOT_FOUND:
-			statusCode = KnownStatusCode.HTTP_404_NOTFOUND;
+			statusCode = StatusCode.HTTP_404_NOTFOUND;
 			break;
 		case INTERNAL_SERVER_ERROR:
-			statusCode = KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR;
+			statusCode = StatusCode.HTTP_500_INTERNAL_SVR_ERROR;
 			break;
 		default:
 			throw new IllegalStateException("did add case for state="+resp.routeType);
@@ -209,8 +202,8 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
-		log.debug(() -> "Sending render static html response. req="+request);
-		RequestInfo requestInfo = new RequestInfo(routerRequest, request, requestId, pool, responseSender);
+		log.info(() -> "Sending render static html response. req="+request);
+		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
 		return reader.sendRenderStatic(requestInfo, renderStatic);
 	}
 	
@@ -230,7 +223,7 @@ public class ProxyResponse implements ResponseStreamer {
 		maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
 	
-	private void createResponseAndSend(KnownStatusCode statusCode, String content, String extension, String defaultMime) {
+	private void createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 		
@@ -247,7 +240,7 @@ public class ProxyResponse implements ResponseStreamer {
 	private void maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
 		
-		HttpResponse resp = tuple.response;
+		Http2Headers resp = tuple.response;
 
 		//This is a cheat sort of since compression can go from 28235 to 4,785 and we are looking at the
 		//non-compressed size so stuff like 16k may be sent chunked even though it is only 3k on the outbound path
@@ -257,17 +250,15 @@ public class ProxyResponse implements ResponseStreamer {
 			return;
 		}
 
+		resp.setEndOfStream(false);
 		sendChunkedResponse(resp, bytes, compression);
 	}
 
-	private void sendChunkedResponse(HttpResponse resp, byte[] bytes, final Compression compression) {
-		
-		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ responseSender);
-
+	private void sendChunkedResponse(Http2Headers resp, byte[] bytes, final Compression compression) {
 		// we shouldn't have to add chunked because the responseSender will add chunked for us
 		// if isComplete is false
 
-		// resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		resp.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked"));
 
 		boolean compressed = false;
 		Compression usingCompression;
@@ -276,15 +267,17 @@ public class ProxyResponse implements ResponseStreamer {
 		} else {
 			usingCompression = compression;
 			compressed = true;
-			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
+			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
 		}
+
+		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
 
 		boolean isCompressed = compressed;
 
 		// Send the headers and get the responseid.
-		responseSender.sendResponse(resp, request, requestId, false).thenAccept(responseId -> {
+		stream.sendResponse(resp).thenAccept(writer -> {
 
-			OutputStream chunkedStream = new ChunkedStream(responseSender, config.getMaxBodySize(), isCompressed, responseId);
+			OutputStream chunkedStream = new ChunkedStream(writer, config.getMaxBodySize(), isCompressed);
 
 			try(OutputStream chainStream = usingCompression.createCompressionStream(chunkedStream)) {
 				//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
@@ -297,22 +290,23 @@ public class ProxyResponse implements ResponseStreamer {
 		});
 	}
 
-	private void sendFullResponse(HttpResponse resp, byte[] bytes, Compression compression) {
+	private void sendFullResponse(Http2Headers resp, byte[] bytes, Compression compression) {
 		if(compression != null) {
-			resp.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compression.getCompressionType()));
+			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compression.getCompressionType()));
 			bytes = synchronousCompress(compression, bytes);
 		}
 
-		resp.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, bytes.length+""));
+		resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, bytes.length+""));
 
+		log.info("sending FULL RENDERHTML response. code="+resp.getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" stream="+ stream);
+
+		DataFrame dataFrame = new DataFrame();
 		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
-		resp.setBody(data);
+		dataFrame.setData(data);
 
-		log.info("sending FULL RENDERHTML response. code="+resp.getStatusLine().getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" responseSender="+ responseSender);
-		
-		responseSender.sendResponse(resp, request, requestId, true);
-		
-		channelCloser.closeIfNeeded(request, responseSender);
+		stream.sendResponse(resp)
+			.thenCompose((s) -> s.send(dataFrame))
+			.thenApply((w) -> channelCloser.closeIfNeeded(request, stream));
 	}
 	
 	private byte[] synchronousCompress(Compression compression, byte[] bytes) {
@@ -341,13 +335,14 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
 		
-		createResponseAndSend(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
+		createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
 	}
 
-	public void sendFailure(HttpException exc) {
-		log.debug(() -> "Sending failure response. req="+request);
-
-		createResponseAndSend(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", "txt", "text/plain");
-	}
+//	public void sendFailure(HttpException exc) {
+//		log.debug(() -> "Sending failure response. req="+request);
+//
+//		createResponseAndSend(exc.getStatusCode(), "Something went wrong(are you hacking the system?)", "txt", "text/plain");
+//	}
 
 }
+

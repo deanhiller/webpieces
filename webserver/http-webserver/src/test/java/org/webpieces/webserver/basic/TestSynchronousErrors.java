@@ -3,8 +3,6 @@ package org.webpieces.webserver.basic;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -14,10 +12,10 @@ import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -26,14 +24,14 @@ import com.google.inject.Module;
  * @author dhiller
  *
  */
-public class TestSynchronousErrors {
+public class TestSynchronousErrors extends AbstractWebpiecesTest {
 
-	private RequestListener server;
 	//In the future, we may develop a FrontendSimulator that can be used instead of MockResponseSender that would follow
 	//any redirects in the application properly..
-	private MockResponseSender socket = new MockResponseSender();
+	
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException {
@@ -42,17 +40,18 @@ public class TestSynchronousErrors {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, null);
-		server = webserver.start();
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, null);
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	@Test
 	public void testNotFoundRoute() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");
 	}
@@ -63,9 +62,9 @@ public class TestSynchronousErrors {
 		//no int doesn't really exist so it's a NotFound
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");		
 	}
@@ -74,9 +73,9 @@ public class TestSynchronousErrors {
 	public void testWebappThrowsNotFound() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");		
 	}
@@ -86,9 +85,9 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");
 	}
@@ -98,9 +97,9 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");		
 	}
@@ -111,9 +110,9 @@ public class TestSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");
 	}
@@ -125,9 +124,9 @@ public class TestSynchronousErrors {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");
 	}
@@ -141,9 +140,9 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");	
 	}
@@ -154,9 +153,9 @@ public class TestSynchronousErrors {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");	
 	}
@@ -167,9 +166,9 @@ public class TestSynchronousErrors {
 	public void testTemplateHasBug() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/badtemplate");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertContains("There was a bug in our software...sorry about that");	
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 
@@ -180,9 +179,9 @@ public class TestSynchronousErrors {
 		mockNotFoundLib.throwRuntime();
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/null");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");		
 	}

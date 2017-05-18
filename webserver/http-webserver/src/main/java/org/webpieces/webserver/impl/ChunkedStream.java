@@ -7,9 +7,11 @@ import java.io.OutputStream;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpcommon.api.ResponseId;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class ChunkedStream extends OutputStream {
 
@@ -18,16 +20,14 @@ public class ChunkedStream extends OutputStream {
 
 	private ByteArrayOutputStream str = new ByteArrayOutputStream();
 
-	private ResponseOverrideSender responseSender;
+	private StreamWriter responseWriter;
 	private int size;
 	private String type;
-	private ResponseId responseId;
 
-	public ChunkedStream(ResponseOverrideSender responseSender, int size, boolean compressed, ResponseId responseId) {
-		this.responseSender = responseSender;
+	public ChunkedStream(StreamWriter responseWriter, int size, boolean compressed) {
+		this.responseWriter = responseWriter;
 		this.size = size;
 		this.str = new ByteArrayOutputStream(size);
-		this.responseId = responseId;
 		if(compressed)
 			this.type = "compressed";
 		else
@@ -56,15 +56,20 @@ public class ChunkedStream extends OutputStream {
 			writeDataOut();
 		}
 		
-		responseSender.sendData(wrapperFactory.emptyWrapper(), responseId, true);
+		DataFrame frame = new DataFrame();
+		responseWriter.send(frame);
 	}
 	
 	private void writeDataOut() {
 		byte[] data = str.toByteArray();
 		str = new ByteArrayOutputStream();
 		DataWrapper body = wrapperFactory.wrapByteArray(data);
-		log.info("writing "+type+" data="+body.getReadableSize()+" to socket="+responseSender);
-		responseSender.sendData(body, responseId, false);
+		log.info("writing "+type+" data="+body.getReadableSize()+" to socket="+responseWriter);
+		
+		DataFrame frame = new DataFrame();
+		frame.setEndOfStream(false);
+		frame.setData(body);
+		responseWriter.send(frame);
 	}
 
 }

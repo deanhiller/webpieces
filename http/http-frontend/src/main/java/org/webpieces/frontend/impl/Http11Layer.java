@@ -1,7 +1,5 @@
 package org.webpieces.frontend.impl;
 
-import static org.webpieces.httpparser.api.dto.HttpRequest.HttpScheme.HTTPS;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,8 +126,8 @@ public class Http11Layer {
 			if(msg.getMessageType() != HttpMessageType.REQUEST)
 				throw new ParseException("Wrong message type="+msg.getMessageType()+" should be="+HttpMessageType.REQUEST);
 			HttpRequest req = msg.getHttpRequest();
-			if(channel.isSslChannel())
-				req.setHttpScheme(HTTPS);
+			//if(channel.isSslChannel())
+				//req.setHttpScheme(HTTPS);
 
 			parsedRequests.add(msg.getHttpRequest());
 		}

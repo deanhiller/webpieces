@@ -12,14 +12,14 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
 public abstract class WebServerFactory {
-	
+
     protected WebServerFactory() {}
-    
+
 	public static WebServer create(WebServerConfig config, RouterConfig routerConfig, TemplateConfig templateConfig) {
 		Module allModules = getModules(config, routerConfig, templateConfig);
-		
+
 		Module platformOverrides = config.getPlatformOverrides();
-		if(platformOverrides != null) 
+		if(platformOverrides != null)
 			allModules = Modules.override(allModules).with(platformOverrides);
 
 		Injector injector = Guice.createInjector(allModules);

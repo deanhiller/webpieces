@@ -9,7 +9,6 @@ import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
 import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.Http2Exception;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;

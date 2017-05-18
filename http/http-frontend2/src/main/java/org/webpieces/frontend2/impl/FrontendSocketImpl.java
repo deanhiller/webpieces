@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.httpparser.api.Memento;
+import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -12,7 +13,6 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class FrontendSocketImpl implements FrontendSocket {
@@ -123,6 +123,11 @@ public class FrontendSocketImpl implements FrontendSocket {
 		} catch(Throwable e) {
 			log.warn("exception from stream trying to cancel.  swallowing and continuing", e);
 		}
+	}
+
+	@Override
+	public ChannelSession getSession() {
+		return channel.getSession();
 	}
 
 }

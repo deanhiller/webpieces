@@ -6,8 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -16,32 +14,33 @@ import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.filters.app.Remote;
 import org.webpieces.webserver.https.MockRemote;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.AbstractModule;
 
-public class TestFilters {
-
-	private RequestListener server;
-	private MockResponseSender socket = new MockResponseSender();
+public class TestFilters extends AbstractWebpiecesTest {
+	
+	
 	private MockRemote mockRemote = new MockRemote();
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("filtersMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverrides(), false, metaFile);
-		server = webserver.start();
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverrides(), false, metaFile);
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	@Test
 	public void testFilterOrderAndUniqueInit() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/test/something");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		
 		List<Integer> recorded = mockRemote.getRecorded();

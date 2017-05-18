@@ -133,11 +133,12 @@ public class Http2Translations {
 	private static List<HttpPayload> translateData(DataFrame data) {
 		List<HttpPayload> chunks = new ArrayList<>();
 		
-		HttpChunk chunk = new HttpChunk();
-		chunk.setBody(data.getData());
-		
-		chunks.add(chunk);
-		
+		if(data.getData().getReadableSize() > 0) {
+			HttpChunk chunk = new HttpChunk();
+			chunk.setBody(data.getData());
+			
+			chunks.add(chunk);
+		}
 		if(data.isEndOfStream())
 			chunks.add(new HttpLastChunk());
 		return chunks;

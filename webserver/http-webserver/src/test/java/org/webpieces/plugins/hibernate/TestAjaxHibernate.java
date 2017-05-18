@@ -12,8 +12,6 @@ import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -24,13 +22,14 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
-public class TestAjaxHibernate {
-	private MockResponseSender socket = new MockResponseSender();
-	private RequestListener server;
+public class TestAjaxHibernate extends AbstractWebpiecesTest {
+
+	
+	private Http11Socket http11Socket;
 	
 	@Before
 	public void setUp() {
@@ -40,20 +39,21 @@ public class TestAjaxHibernate {
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		TestConfig config = new TestConfig();
-		config.setPlatformOverrides(new PlatformOverridesForTest());
+		config.setPlatformOverrides(platformOverrides);
 		config.setAppOverrides(new TestModule());
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
-		server = webserver.start();
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	@Test
 	public void testNotFoundInSubRoute() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/ajax/notfound");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		response.assertContains("Your page was not found");
@@ -67,9 +67,9 @@ public class TestAjaxHibernate {
 				"entity.firstName", "blah2",
 				"password", "asddd");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/ajax/user/list", response.getRedirectUrl());
 		

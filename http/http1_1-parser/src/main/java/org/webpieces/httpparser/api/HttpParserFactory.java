@@ -23,8 +23,8 @@ public class HttpParserFactory {
 		return new HttpParserImpl(pool);
 	}
 	
-	public static HttpStatefulParser createStatefulParser(HttpParser statelessParser) {
-		return new HttpStatefulParserImpl(statelessParser);
+	public static HttpStatefulParser createStatefulParser(BufferPool pool) {
+		return new HttpStatefulParserImpl(createParser(pool));
 	}
 	
 	public static HeaderPriorityParser createHeaderParser() {

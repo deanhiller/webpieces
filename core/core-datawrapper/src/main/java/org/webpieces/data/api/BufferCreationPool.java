@@ -36,7 +36,7 @@ public class BufferCreationPool implements BufferPool {
 	private int poolSize;
 	
 	public BufferCreationPool() {
-		this(false, DEFAULT_MAX_BUFFER_SIZE, 1000);
+		this(false, DEFAULT_MAX_BUFFER_SIZE, 4000);
 	}
 	
 	public BufferCreationPool(boolean isDirect, int bufferSize, int poolSize) {

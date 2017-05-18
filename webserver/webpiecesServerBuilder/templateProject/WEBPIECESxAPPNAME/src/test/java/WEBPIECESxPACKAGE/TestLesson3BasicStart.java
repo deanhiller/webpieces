@@ -8,9 +8,6 @@ import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.webserver.test.Asserts;
 
-import WEBPIECESxPACKAGE.ServerConfig;
-import WEBPIECESxPACKAGE.Server;
-
 public class TestLesson3BasicStart {
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);

@@ -10,6 +10,7 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 
 import com.google.inject.Module;
+import com.webpieces.http2engine.api.client.Http2Config;
 
 public class WebServerConfig {
 
@@ -19,6 +20,8 @@ public class WebServerConfig {
 	private boolean validateRouteIdsOnStartup = false;
 	
 	private int numFrontendServerThreads = 20;
+	private int http2EngineThreadCount = 20;
+
 	/**
 	 * Generally not needed by clients but we use this to overide certain objects for a development
 	 * server that is optimized for development but would run slower in production such that users
@@ -42,8 +45,10 @@ public class WebServerConfig {
 	//On startup, we protect developers from breaking clients.  In http, all files that change
 	//must also change the hash url param automatically and the %%{ }%% tag generates those hashes so the
     //files loaded are always the latest
-	//what gets put in the cache header for static files...
+	//this is what gets put in the cache header for static files...and should be set to the max
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(255, TimeUnit.DAYS);
+	
+	private Http2Config http2Config = new Http2Config();
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -134,5 +139,22 @@ public class WebServerConfig {
 		this.staticFileCacheTimeSeconds = staticFileCacheTimeSeconds;
 		return this;
 	}
-	
+
+	public int getHttp2EngineThreadCount() {
+		return http2EngineThreadCount;
+	}
+
+	public WebServerConfig setHttp2EngineThreadCount(int http2EngineThreadCount) {
+		this.http2EngineThreadCount = http2EngineThreadCount;
+		return this;
+	}
+
+	public Http2Config getHttp2Config() {
+		return http2Config ;
+	}
+
+	public WebServerConfig setHttp2Config(Http2Config http2Config) {
+		this.http2Config = http2Config;
+		return this;
+	}
 }

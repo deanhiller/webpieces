@@ -19,13 +19,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -35,6 +33,13 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
+
+import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.StatusCode;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 @Singleton
 public class StaticFileReader {
@@ -51,7 +56,7 @@ public class StaticFileReader {
 	@Inject
 	private WebServerConfig config;
 	@Inject
-	@Named(WebServerModule.FILE_READ_EXECUTOR)
+	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
 	private ExecutorService fileExecutor;
 	@Inject
 	private CompressionLookup compressionLookup;
@@ -93,13 +98,14 @@ public class StaticFileReader {
 	    }
 	    	    
 	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(), 
-	    		KnownStatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
-	    HttpResponse response = tuple.response;
+	    		StatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
+	    Http2Headers response = tuple.response;
+	    response.setEndOfStream(false);
 
 		// we shouldn't have to add chunked because the responseSender will add chunked for us
 		// if isComplete is false
 
-		// response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+		response.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked"));
 
 		//On startup, we protect developers from breaking clients.  In http, all files that change
 		//must also change the hash automatically and the %%{ }%% tag generates those hashes so the
@@ -107,14 +113,14 @@ public class StaticFileReader {
 	    
 		Long timeMs = config.getStaticFileCacheTimeSeconds();
 		if(timeMs != null)
-			response.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "max-age="+timeMs));
+			response.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "max-age="+timeMs));
 		
 		Path file;
 		Compression compr = compressionLookup.createCompressionStream(info.getRouterRequest().encodings, extension, tuple.mimeType);
 		//since we do compression of all text files on server startup, we only support the compression that was used
 		//during startup as I don't feel like paying a cpu penalty for compressing while live
 	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {
-	    	response.addHeader(new Header(KnownHeaderName.CONTENT_ENCODING, compr.getCompressionType()));
+	    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
 	    	File routesCache = renderStatic.getTargetCache();
 	    	
 	    	File fileReference;
@@ -133,18 +139,19 @@ public class StaticFileReader {
 
 		AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
 
+		CompletableFuture<StreamWriter> future;
 		try {
-			log.debug(()->"sending chunked file via async read="+file);
-			return info.getResponseSender().sendResponse(response, info.getRequest(), info.getRequestId(), false)
-					.thenAccept(responseId -> info.setResponseId(responseId))
-					.thenCompose(v -> readLoop(info, file, asyncFile, 0))
-					.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures
-					.thenAccept(s -> empty());
+			log.info(()->"sending chunked file via async read="+file);
+			
+			future = info.getResponseSender().sendResponse(response)
+					.thenCompose(s -> readLoop(s, info.getPool(), file, asyncFile, 0));
 		} catch(Throwable e) {
-			//cannot do this on success since it is completing on another thread...
-			handleClose(info, true, null);
-			throw new RuntimeException(e);
+			future = new CompletableFuture<StreamWriter>();
+			future.completeExceptionally(e);
 		}
+		
+		return future.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures
+					.thenAccept(s -> empty());
 	}
 
 	private void empty() {}
@@ -157,7 +164,7 @@ public class StaticFileReader {
 		return file;
 	}
 
-	private Boolean handleClose(RequestInfo info, Boolean s, Throwable exc) {
+	private StreamWriter handleClose(RequestInfo info, StreamWriter s, Throwable exc) {
 
 		//now we close if needed
 		try {
@@ -177,39 +184,39 @@ public class StaticFileReader {
 		}		
 	}
 	
-	private CompletableFuture<Boolean> readLoop(RequestInfo info, Path file, AsynchronousFileChannel asyncFile, int position) {
+	private CompletableFuture<StreamWriter> readLoop(StreamWriter writer, BufferPool pool, Path file, AsynchronousFileChannel asyncFile, int position) {
 		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
 		//to use future.thenApplyAsync to avoid a stackoverflow
-		CompletableFuture<ByteBuffer> future = asyncRead(info, file, asyncFile, position);
+		
 		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
 		//this method ONLY calls itself below as it continues to read and send chunks
-		return future.thenApply(buf -> {
+		return asyncRead(pool, file, asyncFile, position)
+				.thenCompose(buf -> {
 							buf.flip();
 							int read = buf.remaining();
 							if(read == 0) {
-								sendLastChunk(info, buf);
-								return null;
+								return sendLastChunk(writer, pool, buf);
 							}
 
-							sendHttpChunk(info, buf);
+							return sendHttpChunk(writer, buf, file).thenCompose( (w) -> {
+								int newPosition = position + read;
+								//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
+								return readLoop(writer, pool, file, asyncFile, newPosition);								
+							});
 
-							int newPosition = position + read;
-							//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
-							readLoop(info, file, asyncFile, newPosition);
-							return null;
-					})
-					.thenApply(s -> true);
+					});
 	}
 
-	private void sendLastChunk(RequestInfo info, ByteBuffer buf) {
-		info.getPool().releaseBuffer(buf);
-		info.getResponseSender().sendData(wrapperFactory.emptyWrapper(), info.getResponseId(), true);
+	private CompletableFuture<StreamWriter> sendLastChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf) {
+		pool.releaseBuffer(buf);
+		DataFrame frame = new DataFrame();
+		return writer.send(frame);
 	}
 
-	private CompletableFuture<ByteBuffer> asyncRead(RequestInfo info, Path file, AsynchronousFileChannel asyncFile, long position) {
+	private CompletableFuture<ByteBuffer> asyncRead(BufferPool pool, Path file, AsynchronousFileChannel asyncFile, long position) {
 		CompletableFuture<ByteBuffer> future = new CompletableFuture<ByteBuffer>();
     
-		ByteBuffer buf = info.getPool().nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
+		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
 
 		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
 			@Override
@@ -228,10 +235,12 @@ public class StaticFileReader {
 		return future;
 	}
 	
-	private void sendHttpChunk(RequestInfo info, ByteBuffer buf) {
+	private CompletableFuture<StreamWriter> sendHttpChunk(StreamWriter writer, ByteBuffer buf, Path file) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		
-		log.trace(()->"sending chunk with body size="+data.getReadableSize());
-		info.getResponseSender().sendData(data, info.getResponseId(), false);
+		DataFrame frame = new DataFrame();
+		frame.setEndOfStream(false);
+		frame.setData(data);
+		return writer.send(frame);
 	}
 }

@@ -24,6 +24,9 @@ import com.webpieces.util.time.TimeImpl;
 
 public abstract class HttpFrontendFactory {
 	
+	public static final String HTTP2_ENGINE_THREAD_POOL = "http2EngineThreadPool";
+	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
+	
 	/**
 	 * 
 	 * @param id Use for logging and also file recording names
@@ -58,7 +61,7 @@ public abstract class HttpFrontendFactory {
 		return createFrontEnd(chanMgr, timer, injConfig, httpParser);
 	}
 	
-	private static HttpFrontendManager createFrontEnd(
+	public static HttpFrontendManager createFrontEnd(
 			ChannelManager chanMgr, ScheduledExecutorService timer, InjectionConfig injConfig, HttpParser parsing) {
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );

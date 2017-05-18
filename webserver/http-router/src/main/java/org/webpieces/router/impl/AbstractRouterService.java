@@ -43,7 +43,7 @@ public abstract class AbstractRouterService implements RouterService {
 	}
 
 	@Override
-	public final void incomingCompleteRequest(RouterRequest routerRequest, ResponseStreamer responseCb) {
+	public final CompletableFuture<Void> incomingCompleteRequest(RouterRequest routerRequest, ResponseStreamer responseCb) {
 		try {
 			if(!started)
 				throw new IllegalStateException("Either start was not called by client or start threw an exception that client ignored and must be fixed");;
@@ -53,17 +53,18 @@ public abstract class AbstractRouterService implements RouterService {
 			Validation validation = (Validation) cookieTranslator.translateCookieToScope(routerRequest, new ValidationImpl(translator));
 			RequestContext requestCtx = new RequestContext(validation, flash, session, routerRequest);
 			
-			processRequest(requestCtx, responseCb);
+			return processRequest(requestCtx, responseCb);
 			
 		} catch(BadCookieException e) {
 			throw e;
 		} catch (Throwable e) {
 			log.warn("uncaught exception", e);
 			responseCb.failureRenderingInternalServerErrorPage(e);
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 
-	private void processRequest(RequestContext requestCtx, ResponseStreamer responseCb) {
+	private CompletableFuture<Void> processRequest(RequestContext requestCtx, ResponseStreamer responseCb) {
 		CompletableFuture<Void> future;
 		try {
 			future = incomingRequestImpl(requestCtx, responseCb);
@@ -72,6 +73,7 @@ public abstract class AbstractRouterService implements RouterService {
 			future.completeExceptionally(e);			
 		}
 		future.exceptionally(e -> processException(responseCb, requestCtx, e));
+		return future;
 	}
 
 	private Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e) {

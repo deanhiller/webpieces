@@ -19,7 +19,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.dto.HttpMessage;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;

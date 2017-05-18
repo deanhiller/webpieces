@@ -1,5 +1,6 @@
 package org.webpieces.webserver.impl;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,11 +11,15 @@ import javax.inject.Singleton;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.frontend.api.HttpFrontendFactory;
-import org.webpieces.frontend.api.HttpFrontendManager;
+import org.webpieces.frontend2.api.HttpFrontendFactory;
+import org.webpieces.frontend2.api.HttpFrontendManager;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
+import org.webpieces.nio.api.ChannelManager;
+import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.SSLEngineFactory;
-import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.templating.api.ConverterLookup;
+import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.threading.NamedThreadFactory;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -23,10 +28,14 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.util.Providers;
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.http2engine.api.client.InjectionConfig;
+import com.webpieces.util.time.Time;
+import com.webpieces.util.time.TimeImpl;
 
 public class WebServerModule implements Module {
 
-	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	private WebServerConfig config;
 
 	public WebServerModule(WebServerConfig config) {
@@ -47,11 +56,15 @@ public class WebServerModule implements Module {
 		binder.bind(RouterLookup.class).to(RouterLookupProxy.class).asEagerSingleton();
 		
 		binder.bind(ConverterLookup.class).to(ConverterLookupProxy.class).asEagerSingleton();
+		
+		binder.bind(BufferPool.class).to(BufferCreationPool.class).asEagerSingleton();
+		
+		binder.bind(Time.class).to(TimeImpl.class).asEagerSingleton();
 	}
 
 	@Provides
 	@Singleton
-	@Named(FILE_READ_EXECUTOR)
+	@Named(HttpFrontendFactory.FILE_READ_EXECUTOR)
 	public ExecutorService provideExecutor() {
 		return Executors.newFixedThreadPool(10, new NamedThreadFactory("fileReadCallbacks"));
 	}
@@ -64,15 +77,38 @@ public class WebServerModule implements Module {
 	
 	@Provides
 	@Singleton
-	public BufferPool createBufferPool() {
-		BufferCreationPool pool = new BufferCreationPool();
-		return pool; 
+	@Named(HttpFrontendFactory.HTTP2_ENGINE_THREAD_POOL)
+	public Executor providesEngineThreadPool(WebServerConfig config) {
+		return Executors.newFixedThreadPool(config.getHttp2EngineThreadCount(), new NamedThreadFactory("http2Engine"));
 	}
 	
 	@Provides
 	@Singleton
-	public HttpFrontendManager providesAsyncServerMgr(WebServerConfig config, BufferPool pool, ScheduledExecutorService timer) {
-		return HttpFrontendFactory.createFrontEnd("httpFrontEnd", config.getNumFrontendServerThreads(), timer, pool);
+	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool) {
+		String id = "webpieces";
+		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
+		
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, executor);
+		
+		return chanMgr;
+	}
+	
+	@Provides
+	@Singleton
+	public HttpFrontendManager providesAsyncServerMgr(
+			ChannelManager chanMgr, 
+			ScheduledExecutorService timer, 
+			@Named(HttpFrontendFactory.HTTP2_ENGINE_THREAD_POOL) Executor executor1, 
+			BufferPool pool,
+			Time time, 
+			WebServerConfig config) {
+		
+		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
+		InjectionConfig injConfig = new InjectionConfig(executor1, http2Parser, time, config.getHttp2Config());
+
+		return HttpFrontendFactory.createFrontEnd(chanMgr, timer, injConfig, httpParser);
 	}
 	
 }

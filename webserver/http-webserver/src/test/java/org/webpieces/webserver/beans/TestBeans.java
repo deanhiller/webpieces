@@ -1,17 +1,19 @@
 package org.webpieces.webserver.beans;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
+import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -24,35 +26,36 @@ import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.basic.app.biz.UserDto;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class TestBeans {
-
-	private RequestListener server;
-	private MockResponseSender socket = new MockResponseSender();
+public class TestBeans extends AbstractWebpiecesTest {
+	
+	
 	private MockSomeLib mockSomeLib = new MockSomeLib();
 	private MockSomeOtherLib mockSomeOtherLib = new MockSomeOtherLib();
 	private MockExecutor mockExecutor = new MockExecutor();
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new PlatformOverridesForTest(), new AppOverridesModule(), false, metaFile);
-		server = webserver.start();
+		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 
 	@Test
     public void testPageParam() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Hi Dean Hiller, this is testing");
 		response.assertContains("Or we can try to get a flash: testflashvalue");
@@ -62,12 +65,12 @@ public class TestBeans {
     public void testPageParamAsync() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam_async");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
 		Runnable runnable = mockExecutor.getRunnablesScheduled().get(0);
 		runnable.run();
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Hi Dean Hiller, this is testing");
 		response.assertContains("Or we can try to get a flash: testflashvalue");
@@ -82,9 +85,9 @@ public class TestBeans {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		//We should change this to a 400 bad request
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
@@ -98,9 +101,9 @@ public class TestBeans {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserDto user = mockSomeOtherLib.getUser();
@@ -119,9 +122,9 @@ public class TestBeans {
 				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		//should not have any errors and should redirect back to list of users page..
 		Assert.assertEquals("http://myhost.com/listusers", response.getRedirectUrl());
@@ -137,9 +140,9 @@ public class TestBeans {
 				"user.address.street", "Coolness Dr.",
 				"password", "should be hidden from flash");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserDto savedUser = mockSomeOtherLib.getUser();
@@ -155,9 +158,9 @@ public class TestBeans {
 	public void testArrayForm() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("value=`FirstAccName`".replace('`', '"'));
 		response.assertContains("value=`SecondAccName`".replace('`', '"'));
@@ -170,7 +173,7 @@ public class TestBeans {
 	}
 
 	@Test
-	public void testIncomingRequestAndDataSeperate() {
+	public void testIncomingDataAndDataSeperate() {
 		HttpRequest req = Requests.createPostRequest("/postArray2",
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
@@ -180,19 +183,18 @@ public class TestBeans {
 				"user.fullName", "Dean Hiller"
 		);
 
-		DataWrapper data = req.getBody();
 		DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-
+		HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+		ByteBuffer buffer = parser.marshalToByteBuffer(req);
+		DataWrapper data = dataGen.wrapByteBuffer(buffer);
+		
 		// Split the body in half
-		List<? extends DataWrapper> split = dataGen.split(data, data.getReadableSize() / 2);
-		req.setBody(dataGen.emptyWrapper());
-		RequestId id = new RequestId(0);
+		List<? extends DataWrapper> split = dataGen.split(data, data.getReadableSize() - 20);
 
-		server.incomingRequest(req, id, false, socket);
-		server.incomingData(split.get(0), id, false, socket);
-		server.incomingData(split.get(1), id, true, socket);
-
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		http11Socket.sendBytes(split.get(0));
+		http11Socket.sendBytes(split.get(1));
+		
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 
 		UserDto user = mockSomeLib.getUser();
@@ -212,9 +214,9 @@ public class TestBeans {
 				"user.fullName", "Dean Hiller"
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserDto user = mockSomeLib.getUser();
@@ -248,9 +250,9 @@ public class TestBeans {
 				"password", "hi"
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 	
@@ -263,9 +265,9 @@ public class TestBeans {
 				"password", "hi"
 				);
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
 	
@@ -273,9 +275,9 @@ public class TestBeans {
 	public void testQueryParamsToUserBean() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
@@ -283,9 +285,9 @@ public class TestBeans {
 	public void testBeanMissingForGetSoNotFoundResults() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser?user.firstName=jeff&password=as");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
 	

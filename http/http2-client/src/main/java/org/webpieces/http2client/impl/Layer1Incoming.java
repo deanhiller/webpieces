@@ -49,16 +49,16 @@ public class Layer1Incoming implements DataListener {
 	}
 
 	private StreamWriter createWriter(Http2Headers request, StreamWriter requestWriter) {
-		StreamWriter writer = new Writer(request.getStreamId(), request.isEndOfStream(), requestWriter);
+		StreamWriter writer = new ClientRequestStreamWriter(request.getStreamId(), request.isEndOfStream(), requestWriter);
 		return writer;
 	}
 	
-	private class Writer implements StreamWriter {
+	private class ClientRequestStreamWriter implements StreamWriter {
 		private StreamWriter requestWriter;
 		private int streamId;
 		private boolean isEndOfStream;
 
-		public Writer(int streamId, boolean isEndOfStream, StreamWriter requestWriter) {
+		public ClientRequestStreamWriter(int streamId, boolean isEndOfStream, StreamWriter requestWriter) {
 			this.streamId = streamId;
 			this.isEndOfStream = isEndOfStream;
 			this.requestWriter = requestWriter;

@@ -1,5 +1,6 @@
 package org.webpieces.frontend2.impl;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
@@ -15,10 +16,12 @@ public class HttpServerImpl implements HttpServer {
 	private static final Logger log = LoggerFactory.getLogger(HttpServerImpl.class);
 	private AsyncServer server;
 	private FrontendConfig config;
+	private Layer1ServerListener listener;
 
-	public HttpServerImpl(AsyncServer server, FrontendConfig config) {
+	public HttpServerImpl(AsyncServer server, FrontendConfig config, Layer1ServerListener listener) {
 		this.server = server;
 		this.config = config;
+		this.listener = listener;
 	}
 	
 	@Override
@@ -26,7 +29,9 @@ public class HttpServerImpl implements HttpServer {
 		// TODO Auto-generated method stub
 		log.info("starting to listen to port="+config.bindAddress);
 		server.start(config.bindAddress);
-		log.info("now listening for incoming requests");
+		InetSocketAddress localAddr = server.getUnderlyingChannel().getLocalAddress();
+		listener.setBoundAddr(localAddr);
+		log.info("now listening for incoming requests on "+localAddr);
 	}
 	
 	@Override

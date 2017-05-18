@@ -2,6 +2,8 @@ package com.webpieces.http2engine.api;
 
 public class ConnectionClosedException extends RuntimeException {
 
+	private static final long serialVersionUID = 1L;
+
 	public ConnectionClosedException() {
 		// TODO Auto-generated constructor stub
 	}

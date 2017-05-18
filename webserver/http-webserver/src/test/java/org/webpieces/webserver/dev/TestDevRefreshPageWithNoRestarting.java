@@ -13,12 +13,9 @@ import org.junit.Test;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.templatingdev.api.DevTemplateModule;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
@@ -26,21 +23,25 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
+import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
-public class TestDevRefreshPageWithNoRestarting {
+public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 
 	private static final Logger log = LoggerFactory.getLogger(TestDevSynchronousErrors.class);
-	private RequestListener server;
-	private MockResponseSender socket = new MockResponseSender();
+	
+	
 	private File stashedExistingCodeDir;
 	private File existingCodeLoc;
 	private String userDir;
+
+	private Http11Socket http11Socket;
 	
 	@Before
 	public void setUp() throws ClassNotFoundException, IOException {
@@ -75,11 +76,11 @@ public class TestDevRefreshPageWithNoRestarting {
 		
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
-										new DevTemplateModule(templateConfig),
-										new MockFrontEndModule());
+										new PlatformOverridesForTest(mgr, time, mockTimer, templateConfig));
 		
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
-		server = webserver.start();
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 	
 	@After
@@ -92,12 +93,12 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testGuiceModuleAddAndControllerChange() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verifyPageContents("user=Dean Hiller");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/guiceModule");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verifyPageContents("newuser=Joseph");
 	}
 
@@ -105,43 +106,43 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testJustControllerChanged() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verifyPageContents("user=Dean Hiller");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/controllerChange");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verifyPageContents("user=CoolJeff");
 	}
 
 	@Test
 	public void testRouteAdditionWithNewControllerPath() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/routeChange");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verifyPageContents("Existing Route Page");
 	}
 	
 	@Test
 	public void testFilterChanged() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
-		response = ResponseExtract.assertSingleResponse(socket);
+		response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/causeError", response.getRedirectUrl());
 	}
@@ -149,9 +150,9 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testNotFoundDisplaysWithIframeANDSpecialUrl() {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		//platform should convert request into a development not found page which has an iframe
@@ -163,10 +164,10 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotFound?webpiecesShowPage");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verify404PageContents("value1=something1");
 
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
 		verify404PageContents("value1=something1");
 	}
@@ -174,31 +175,31 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotfound?webpiecesShowPage=true");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verify404PageContents("value1=something1");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verify404PageContents("value2=something2");
 	}
 
 	@Test
 	public void testNotFoundFilterModified() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 
 		verify303("http://myhost.com/home");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		
 		verify303("http://myhost.com/filter");
 	}
 
 	private void verify303(String url) {
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(url, response.getRedirectUrl());
 	}
@@ -206,12 +207,12 @@ public class TestDevRefreshPageWithNoRestarting {
 	@Test
 	public void testInternalErrorModifiedAndControllerModified() throws IOException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verify500PageContents("InternalError1=error1");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/internalError");
 		
-		server.incomingRequest(req, new RequestId(0), true, socket);
+		http11Socket.send(req);
 		verify500PageContents("InternalError2=error2");		
 	}
 	
@@ -221,19 +222,19 @@ public class TestDevRefreshPageWithNoRestarting {
 	}
 
 	private void verifyPageContents(String contents) {
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains(contents);
 	}
 	
 	private void verify404PageContents(String contents) {
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains(contents);
 	}
 	
 	private void verify500PageContents(String contents) {
-		FullResponse response = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains(contents);
 	}

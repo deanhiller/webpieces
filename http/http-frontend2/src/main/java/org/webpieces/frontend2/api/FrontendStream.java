@@ -15,4 +15,7 @@ public interface FrontendStream {
 	void cancelStream();
 
 	FrontendSocket getSocket();
+	
+    StreamSession getSession();
+
 }

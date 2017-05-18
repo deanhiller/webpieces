@@ -12,8 +12,6 @@ import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpcommon.Requests;
-import org.webpieces.httpcommon.api.RequestId;
-import org.webpieces.httpcommon.api.RequestListener;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -28,16 +26,16 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.MockResponseSender;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.Http11Socket;
 
-public class TestFlashAndSelect {
-	private MockResponseSender socket = new MockResponseSender();
-	private RequestListener server;
+public class TestFlashAndSelect extends AbstractWebpiecesTest {
+
 	
 	private ServiceToFailMock mock = new ServiceToFailMock();
 	private UserTestDbo user;
+	private Http11Socket http11Socket;
 
 	@Before
 	public void setUp() {
@@ -48,11 +46,12 @@ public class TestFlashAndSelect {
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		TestConfig config = new TestConfig();
-		config.setPlatformOverrides(new PlatformOverridesForTest());
+		config.setPlatformOverrides(platformOverrides);
 		config.setMetaFile(metaFile);
 		config.setAppOverrides(new TestModule(mock));
 		WebserverForTest webserver = new WebserverForTest(config);
-		server = webserver.start();
+		webserver.start();
+		http11Socket = http11Simulator.openHttp();
 	}
 
 	@Test
@@ -60,9 +59,9 @@ public class TestFlashAndSelect {
 		String urlPath = "/user/edit/"+user.getId();
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         //assert the nulls came through
@@ -82,9 +81,9 @@ public class TestFlashAndSelect {
 				"entity.levelOfEducation", ""
 				);
 		
-		server.incomingRequest(req1, new RequestId(0), true, socket);
+		http11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response1 = ResponseExtract.assertSingleResponse(http11Socket);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		String urlPath = "/user/edit/"+user.getId();
@@ -93,9 +92,9 @@ public class TestFlashAndSelect {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         //assert the nulls came through
@@ -109,9 +108,9 @@ public class TestFlashAndSelect {
 		String urlPath = "/multiselect/"+user.getId();
         HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         //assert the nulls came through
@@ -133,9 +132,9 @@ public class TestFlashAndSelect {
 				"selectedRoles", "d"
 				);
 		
-		server.incomingRequest(req1, new RequestId(0), true, socket);
+		http11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response1 = ResponseExtract.assertSingleResponse(http11Socket);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		String urlPath = "/multiselect/"+user.getId();
@@ -144,9 +143,9 @@ public class TestFlashAndSelect {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("<option value=`b` >Badass</script>".replace('`', '\"'));
@@ -166,9 +165,9 @@ public class TestFlashAndSelect {
 				"selectedRoles", "j"
 				);
 		
-		server.incomingRequest(req1, new RequestId(0), true, socket);
+		http11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.assertSingleResponse(socket);
+		FullResponse response1 = ResponseExtract.assertSingleResponse(http11Socket);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		String urlPath = "/multiselect/"+user.getId();
@@ -177,9 +176,9 @@ public class TestFlashAndSelect {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        server.incomingRequest(req, new RequestId(0), true, socket);
+        http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(socket);
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("<option value=`b` >Badass</script>".replace('`', '\"'));
