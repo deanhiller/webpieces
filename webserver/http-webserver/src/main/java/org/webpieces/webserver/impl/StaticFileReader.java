@@ -96,8 +96,8 @@ public class StaticFileReader {
 	    if(lastDot > lastDirIndex) {
 	    	extension = fullFilePath.substring(lastDot+1);
 	    }
-	    	    
-	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(), 
+
+	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(),
 	    		StatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
 	    Http2Headers response = tuple.response;
 	    response.setEndOfStream(false);

@@ -102,11 +102,14 @@ public class ProxyResponse implements ResponseStreamer {
 
 		int code;
 		if(httpResponse.isAjaxRedirect) {
+			response.addHeader(new Http2Header(Http2HeaderName.STATUS, BootstrapModalTag.AJAX_REDIRECT_CODE+""));
+			response.addHeader(new Http2Header("reason", "Ajax Redirect"));
 			code = BootstrapModalTag.AJAX_REDIRECT_CODE;
-		} else
+		} else {
+			response.addHeader(new Http2Header(Http2HeaderName.STATUS, StatusCode.HTTP_303_SEEOTHER.getCodeString()));
+			response.addHeader(new Http2Header("reason", StatusCode.HTTP_303_SEEOTHER.getReason()));
 			code = StatusCode.HTTP_303_SEEOTHER.getCode();
-				
-		response.addHeader(new Http2Header(Http2HeaderName.STATUS, code+""));
+		}
 		
 		String url = httpResponse.redirectToPath;
 		if(url.startsWith("http")) {
@@ -219,7 +222,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 	@Override
 	public void sendRenterContent(RenderContentResponse resp) {
-		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), false, resp.getMimeType());		
+		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), false, resp.getMimeType());
 		maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
 	

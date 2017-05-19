@@ -7,10 +7,12 @@ public class RenderContent implements Action {
 	private byte[] content;
 	private int statusCode;
 	private MimeTypeResult mimeType;
+	private String reason;
 
-	public RenderContent(byte[] payload, int statusCode, MimeTypeResult mimeType) {
+	public RenderContent(byte[] payload, int statusCode, String reason, MimeTypeResult mimeType) {
 		this.content = payload;
 		this.statusCode = statusCode;
+		this.reason = reason;
 		this.mimeType = mimeType;
 	}
 	
@@ -29,5 +31,9 @@ public class RenderContent implements Action {
 	public MimeTypeResult getMimeType() {
 		return mimeType;
 	}
-	
+
+	public String getReason() {
+		return reason;
+	}
+
 }

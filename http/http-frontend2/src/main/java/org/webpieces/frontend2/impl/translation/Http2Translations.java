@@ -156,6 +156,8 @@ public class Http2Translations {
 		for(Http2Header header : headers.getHeaders()) {
 			if(header.getKnownName() == Http2HeaderName.STATUS) {
 				fillStatus(header, status);
+			} else if("reason".equals(header.getName())) {
+				fillReason(header, status);
 			} else if(header.getKnownName() == Http2HeaderName.SCHEME) {
 				//do nothing and drop it
 			} else {
@@ -174,6 +176,10 @@ public class Http2Translations {
 		return new Header(header.getName(), header.getValue());
 	}
 
+	private static void fillReason(Http2Header header, HttpResponseStatus status) {
+		status.setReason(header.getValue());
+	}
+	
 	private static void fillStatus(Http2Header statusHeader, HttpResponseStatus status) {
         int code = Integer.parseInt(statusHeader.getValue());
         KnownStatusCode knownStatusCode = KnownStatusCode.lookup(code);

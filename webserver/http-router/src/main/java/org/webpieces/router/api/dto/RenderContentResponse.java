@@ -6,12 +6,14 @@ public class RenderContentResponse {
 
 	private byte[] payload;
 	private int statusCode;
+	private String reason;
 	private MimeTypeResult mimeType;
 
-	public RenderContentResponse(byte[] payload, int statusCode, MimeTypeResult mimeType) {
+	public RenderContentResponse(byte[] payload, int statusCode, String reason, MimeTypeResult mimeType) {
 		this.payload = payload;
 		this.statusCode = statusCode;
 		this.mimeType = mimeType;
+		this.reason = reason;
 	}
 	
 	public byte[] getPayload() {
@@ -29,5 +31,9 @@ public class RenderContentResponse {
 	public MimeTypeResult getMimeType() {
 		return mimeType;
 	}
-	
+
+	public String getReason() {
+		return reason;
+	}
+
 }

@@ -38,7 +38,7 @@ public class ResponseCreator {
 	@Inject
 	private MimeTypes mimeTypes;
 	
-	public ResponseEncodingTuple createResponse(Http2Headers request, StatusCode statusCode, 
+	public ResponseEncodingTuple createResponse(Http2Headers request, StatusCode statusCode,
 			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
@@ -144,4 +144,5 @@ public class ResponseCreator {
 		Http2Header cookieHeader = create(cookie);
 		response.addHeader(cookieHeader);
 	}
+
 }

@@ -55,12 +55,12 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private RenderContent translateError(Throwable t) {
 		byte[] content = translateServerError(t);
-		return new RenderContent(content, KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR.getCode(), MIME_TYPE);
+		return new RenderContent(content, KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR.getCode(), KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR.getReason(), MIME_TYPE);
 	}
 
 	private RenderContent translate(ClientDataError t) {
 		byte[] content = translateClientError(t);
-		return new RenderContent(content, KnownStatusCode.HTTP_400_BADREQUEST.getCode(), MIME_TYPE);
+		return new RenderContent(content, KnownStatusCode.HTTP_400_BADREQUEST.getCode(), KnownStatusCode.HTTP_400_BADREQUEST.getReason(), MIME_TYPE);
 	}
 
 	private CompletableFuture<Action> createNotFoundResponse(Service<MethodMeta, Action> nextFilter, MethodMeta meta) {
@@ -75,7 +75,7 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 
 	private Action createNotFound() {
 		byte[] content = createNotFoundJsonResponse();		
-		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), MIME_TYPE);
+		return new RenderContent(content, KnownStatusCode.HTTP_404_NOTFOUND.getCode(), KnownStatusCode.HTTP_404_NOTFOUND.getReason(), MIME_TYPE);
 	}
 
 	protected abstract byte[] translateServerError(Throwable t);
