@@ -7,17 +7,22 @@ import org.webpieces.javasm.api.NoTransitionListener;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.impl.shared.Http2Event.Http2SendRecieve;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public abstract class Level5AbstractStateMachine {
+
+	private static final Logger log = LoggerFactory.getLogger(Level5AbstractStateMachine.class);
 
 	private Level6RemoteFlowControl remoteFlowControl;
 	private Level6LocalFlowControl localFlowControl;
@@ -43,19 +48,23 @@ public abstract class Level5AbstractStateMachine {
 		Memento state = stream.getCurrentState();
 		Http2Event event = translate(Http2SendRecieve.SEND, payload);
 
+		log.info("state before event="+state.getCurrentState()+" event="+event);
 		CompletableFuture<State> result = stateMachine.fireEvent(state, event);
-		return result.thenCompose( s -> 
+		return result.thenCompose( s -> {
+					log.info("state after="+s);
 					//if no exceptions occurred, send it on to flow control layer
-					remoteFlowControl.sendPayloadToSocket(stream, payload)
-				);
+					return remoteFlowControl.sendPayloadToSocket(stream, payload);
+		});
 	}
 	
 	public CompletableFuture<State> fireToClient(Stream stream, PartialStream payload, Runnable possiblyClose) {
 		Memento currentState = stream.getCurrentState();
 		Http2Event event = translate(Http2SendRecieve.RECEIVE, payload);
 		
+		log.info("firing event to new statemachine="+event+" state="+currentState.getCurrentState());
 		CompletableFuture<State> result = stateMachine.fireEvent(currentState, event);
 		return result.thenApply( s -> {
+			log.info("done firing.  new state="+s);
 			//closing the stream should be done BEFORE firing to client as if the stream is closed
 			//then this will prevent windowUpdateFrame with increment being sent to a closed stream
 			if(possiblyClose != null)
@@ -65,8 +74,10 @@ public abstract class Level5AbstractStateMachine {
 
 			return s;
 		}).exceptionally(t -> {
-			if(t instanceof NoTransitionException) {
+			if(t instanceof NoTransitionConnectionError) {
 				throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, stream.getStreamId(), t.getMessage(), t);
+			} else if(t instanceof NoTransitionStreamError) {
+				throw new StreamException(ParseFailReason.CLOSED_STREAM, stream.getStreamId(), t.getMessage(), t);				
 			}
 			throw new RuntimeException(t);
 		});
@@ -109,12 +120,18 @@ public abstract class Level5AbstractStateMachine {
 	
 
 	protected static class NoTransitionImpl implements NoTransitionListener {
-		public NoTransitionImpl() {
+		private boolean isConnectionError;
+
+		public NoTransitionImpl(boolean isConnectionError) {
+			this.isConnectionError = isConnectionError;
 		}
 
 		@Override
 		public void noTransitionFromEvent(State state, Object event) {
-			throw new NoTransitionException("No transition defined on statemachine for event="+event+" when in state="+state);
+			if(isConnectionError)
+				throw new NoTransitionConnectionError("No transition defined on statemachine for event="+event+" when in state="+state);
+			else
+				throw new NoTransitionStreamError("No transition defined on statemachine for event="+event+" when in state="+state);
 		}
 	}
 }

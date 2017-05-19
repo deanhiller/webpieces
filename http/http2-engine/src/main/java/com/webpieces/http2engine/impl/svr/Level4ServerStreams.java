@@ -122,8 +122,7 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 
 	@Override
 	protected CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
-		// TODO Auto-generated method stub
-		return null;
+		return fireToSocket(stream, frame, false);
 	}
 
 	@Override

@@ -23,9 +23,9 @@ public class TestHttp2Errors extends AbstractHttp2Test {
 		Http2Headers request1 = Http2Requests.createRequest(1, true);
 		Http2Headers request2 = Http2Requests.createRequest(3, true);
 
-		mockChannel.write(request1);
+		mockChannel.send(request1);
 		PassedIn in1 = mockListener.getSingleRequest();
-		mockChannel.write(request2);
+		mockChannel.send(request2);
 		PassedIn in2 = mockListener.getSingleRequest();
 		
 		mockChannel.simulateClose();

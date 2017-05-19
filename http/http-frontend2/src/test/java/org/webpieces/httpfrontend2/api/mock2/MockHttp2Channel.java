@@ -64,6 +64,10 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
+	public void send(ByteBuffer buffer) {
+		listener.incomingData(this, buffer);
+	}
+	
 	public void sendPreface() {
 		String preface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
 		byte[] bytes = preface.getBytes(StandardCharsets.UTF_8);
@@ -81,13 +85,13 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		listener.incomingData(this, buf);
 	}
 	
-	public void writeHexBack(String hex) {
+	public void sendHexBack(String hex) {
 		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
 		listener.incomingData(this, buf);		
 	}
 	
-	public void write(Http2Msg msg) {
+	public void send(Http2Msg msg) {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
 		DataWrapper data = parser.marshal(marshalState, msg);
@@ -98,7 +102,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		listener.incomingData(this, buf);
 	}
 	
-	public void writeFrame(Http2Frame frame) {
+	public void sendFrame(Http2Frame frame) {
 		DataWrapper data = frameParser.marshal(frame);
 		byte[] bytes = data.createByteArray();
 		if(bytes.length == 0)
@@ -277,4 +281,5 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	public void simulateClose() {
 		listener.farEndClosed(this);
 	}
+
 }

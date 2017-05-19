@@ -21,7 +21,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 	@Test
 	public void testWithNoData() throws InterruptedException, ExecutionException, TimeoutException {
 		Http2Headers request1 = Http2Requests.createRequest(1, true);
-		mockChannel.write(request1);		
+		mockChannel.send(request1);		
 		PassedIn incoming = mockListener.getSingleRequest();
 		Assert.assertEquals(request1, incoming.request);
 		
@@ -42,11 +42,11 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		Http2Headers request1 = Http2Requests.createRequest(1, false);
 		DataFrame data = Http2Requests.createData1(request1.getStreamId(), true);
 
-		mockChannel.write(request1);
+		mockChannel.send(request1);
 		PassedIn incoming1 = mockListener.getSingleRequest();
 		Assert.assertEquals(request1, incoming1.request);
 
-		mockChannel.write(data);
+		mockChannel.send(data);
 		DataFrame incoming = (DataFrame) mockSw.getSingleFrame();
 		Assert.assertEquals(3, incoming.getData().getReadableSize());
 
@@ -77,18 +77,18 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		DataFrame data1 = Http2Requests.createData1(request1.getStreamId(), false);
 		Http2Headers trailing = Http2Requests.createTrailers(request1.getStreamId());
 
-		mockChannel.write(request1);
+		mockChannel.send(request1);
 		PassedIn incoming1 = mockListener.getSingleRequest();
 		Assert.assertEquals(request1, incoming1.request);
 
-		mockChannel.write(data1);
+		mockChannel.send(data1);
 		DataFrame incoming2 = (DataFrame) mockSw.getSingleFrame();
 		Assert.assertEquals(3, incoming2.getData().getReadableSize());
 		
 		//clear window update frames
 		Assert.assertEquals(2, mockChannel.getFramesAndClear().size());
 		
-		mockChannel.write(trailing);
+		mockChannel.send(trailing);
 		Http2Headers incoming = (Http2Headers) mockSw.getSingleFrame();
 		Assert.assertEquals(trailing, incoming);		
 		
@@ -115,7 +115,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 	@Test
 	public void testPushPromise() throws InterruptedException, ExecutionException, TimeoutException {
 		Http2Headers request1 = Http2Requests.createRequest(1, true);
-		mockChannel.write(request1);		
+		mockChannel.send(request1);		
 		PassedIn incoming = mockListener.getSingleRequest();
 		Assert.assertEquals(request1, incoming.request);
 		

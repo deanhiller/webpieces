@@ -51,7 +51,7 @@ public class TestSMaxConcurrentSetting extends AbstractHttp2Test {
 		//client increases max concurrent
 		HeaderSettings settings = new HeaderSettings();
 		settings.setMaxConcurrentStreams(2L);
-		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
+		mockChannel.send(HeaderSettings.createSettingsFrame(settings));
 		List<Http2Msg> frames = mockChannel.getFramesAndClear();
 		
 		Assert.assertEquals(2, frames.size());

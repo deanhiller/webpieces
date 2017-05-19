@@ -17,13 +17,13 @@ public class Level5ClientStateMachine extends Level5AbstractStateMachine {
 	) {
 		super(id, remoteFlowControl, localFlowControl);
 		
-		State reservedState = stateMachine.createState("Reserved(remote)");
+		State reservedRemote = stateMachine.createState("Reserved(remote)");
 		State halfClosedLocal = stateMachine.createState("Half Closed(local)");
 	
-		NoTransitionImpl failIfNoTransition = new NoTransitionImpl();
+		NoTransitionImpl failIfNoTransition = new NoTransitionImpl(true);
 		idleState.addNoTransitionListener(failIfNoTransition);
 		openState.addNoTransitionListener(failIfNoTransition);
-		reservedState.addNoTransitionListener(failIfNoTransition);
+		reservedRemote.addNoTransitionListener(failIfNoTransition);
 		halfClosedLocal.addNoTransitionListener(failIfNoTransition);
 		closed.addNoTransitionListener(failIfNoTransition);
 		
@@ -45,14 +45,14 @@ public class Level5ClientStateMachine extends Level5AbstractStateMachine {
 
 		stateMachine.createTransition(idleState, openState, sentHeadersNoEos);
 		stateMachine.createTransition(idleState, halfClosedLocal, sentHeadersEos); //jump to half closed as is send H AND send ES
-		stateMachine.createTransition(idleState, reservedState, recvPushPromise);
+		stateMachine.createTransition(idleState, reservedRemote, recvPushPromise);
 		
 		stateMachine.createTransition(openState, openState, dataSendNoEos);
 		stateMachine.createTransition(openState, halfClosedLocal, dataSendEos, sentHeadersEos); //headers here is trailing headers
 		stateMachine.createTransition(openState, closed, sentResetStream, recvResetStream);
 		
-		stateMachine.createTransition(reservedState, halfClosedLocal, recvHeadersNoEos);
-		stateMachine.createTransition(reservedState, closed, recvHeadersEos, sentResetStream, recvResetStream);
+		stateMachine.createTransition(reservedRemote, halfClosedLocal, recvHeadersNoEos);
+		stateMachine.createTransition(reservedRemote, closed, recvHeadersEos, sentResetStream, recvResetStream);
 		
 		stateMachine.createTransition(halfClosedLocal, closed, recvHeadersEos, dataRecvEos, recvResetStream, sentResetStream);
 		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, recvHeadersNoEos, dataRecvNoEos);

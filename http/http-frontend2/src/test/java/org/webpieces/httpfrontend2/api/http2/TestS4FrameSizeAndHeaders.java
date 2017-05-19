@@ -58,7 +58,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
 		byte[] buf = new byte[localSettings.getMaxFrameSize()+4];
 		dataFrame.setData(dataGen.wrapByteArray(buf));
-		mockChannel.write(dataFrame); //endOfStream=false
+		mockChannel.send(dataFrame); //endOfStream=false
 
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -93,7 +93,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 	            "05" + // flags (ack)
 	            "00 00 00 01" + // R + streamid
 	            "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"; //payload 
-		mockChannel.writeHexBack(badHeaderFrame); //endOfStream=false
+		mockChannel.sendHexBack(badHeaderFrame); //endOfStream=false
 
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
@@ -130,8 +130,8 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		List<Http2Frame> frames = createInterleavedFrames();
 		Assert.assertTrue(frames.size() >= 3); //for this test, need interleaved
 
-		mockChannel.writeFrame(frames.get(0));
-		mockChannel.writeFrame(frames.get(1));
+		mockChannel.sendFrame(frames.get(0));
+		mockChannel.sendFrame(frames.get(1));
 		
 		//no request comes in
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());

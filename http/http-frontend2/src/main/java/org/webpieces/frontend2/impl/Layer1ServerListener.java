@@ -3,14 +3,15 @@ package org.webpieces.frontend2.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.AsyncDataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class Layer1ServerListener implements AsyncDataListener {
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private static final Logger log = LoggerFactory.getLogger(Layer1ServerListener.class);
 
 	private static final String FRONTEND_SOCKET = "__frontendSocket";
 	private Layer2Http1_1Handler http1_1Handler;
@@ -42,7 +43,15 @@ public class Layer1ServerListener implements AsyncDataListener {
 	}
 
 	private void initialData(ByteBuffer b, FrontendSocketImpl socket) {
-		InitiationResult initialData = http1_1Handler.initialData(socket, b);
+		InitiationResult initialData;
+		try {
+			initialData = http1_1Handler.initialData(socket, b);
+		} catch(ParseException e) {
+			log.info("Parse exception on initial connection", e);
+			socket.close("reason not needed");
+			return;
+		}
+		
 		if(initialData == null)
 			return; //nothing to do, we don't know protocol yet
 		else if(initialData.getInitialStatus() == InitiationStatus.HTTP1_1) {

@@ -12,6 +12,7 @@ import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
+import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -42,6 +43,11 @@ public class Layer2Http1_1Handler {
 	}
 
 	public InitiationResult initialData(FrontendSocketImpl socket, ByteBuffer buf) {
+			return initialDataImpl(socket, buf);
+
+	}
+	
+	public InitiationResult initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
 		Memento state = parse(socket, buf);
 		
 		//IF we are receiving a preface, there will ONLY be ONE message AND leftover data

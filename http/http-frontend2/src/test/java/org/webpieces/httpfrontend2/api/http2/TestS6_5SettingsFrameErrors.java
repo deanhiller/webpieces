@@ -37,7 +37,7 @@ public class TestS6_5SettingsFrameErrors extends AbstractHttp2Test {
 	            "01" + // flags (ack)
 	            "00 00 00 00" + // R + streamid
 	            "00"; //payload 
-		mockChannel.writeHexBack(badAckFrame); //ack client frame
+		mockChannel.sendHexBack(badAckFrame); //ack client frame
 
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
@@ -58,7 +58,7 @@ public class TestS6_5SettingsFrameErrors extends AbstractHttp2Test {
 	            "00 02 00 00 00 01" + //setting 1 (enable push)
 	            "00 03 00 00 01 00"; //setting 2 (max streams)
 	    
-		mockChannel.writeHexBack(badStreamIdSettings);
+		mockChannel.sendHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
@@ -76,7 +76,7 @@ public class TestS6_5SettingsFrameErrors extends AbstractHttp2Test {
 	            "00 02 00 00 00 01" + //setting 1 (enable push)
 	            "00 03 00 00 01"; //setting 2 (max streams)
 	    
-		mockChannel.writeHexBack(badStreamIdSettings);
+		mockChannel.sendHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
@@ -95,7 +95,7 @@ public class TestS6_5SettingsFrameErrors extends AbstractHttp2Test {
 	            "00 02 00 00 00 01" + //setting 1 (enable push)
 	            "00 04 FF FF FF FF"; //setting 2 (initial window size)
 	    
-		mockChannel.writeHexBack(badStreamIdSettings);
+		mockChannel.sendHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(Http2ErrorCode.FLOW_CONTROL_ERROR, goAway.getKnownErrorCode());
@@ -114,7 +114,7 @@ public class TestS6_5SettingsFrameErrors extends AbstractHttp2Test {
 	            "00 02 00 00 00 01" + //setting 1 (enable push)
 	            "00 05 00 00 00 00"; //setting 2 (initial window size)
 	    
-		mockChannel.writeHexBack(badStreamIdSettings);
+		mockChannel.sendHexBack(badStreamIdSettings);
 		//remote receives goAway
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
