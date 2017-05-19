@@ -185,7 +185,7 @@ public class ResponseProcessor {
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		wrapFunctionInContext(s -> responseCb.sendRenterContent(resp));
+		wrapFunctionInContext(s -> responseCb.sendRenderContent(resp));
 	}
 	
 }

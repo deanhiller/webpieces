@@ -42,18 +42,33 @@ public class ResponseCreator {
 			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
-		return createContentResponse(request, statusCode.getCode(), isDynamicPartOfWebsite, mimeType);
+		return createContentResponseImpl(request, statusCode.getCode(), statusCode.getReason(), isDynamicPartOfWebsite, mimeType);
 	}
 
-	ResponseEncodingTuple createContentResponse(Http2Headers request, int statusCode,
-			boolean isDynamicPartOfWebsite, MimeTypeResult mimeType) {
+	public ResponseEncodingTuple createContentResponse(
+			Http2Headers request, int statusCode,
+			String reason, MimeTypeResult mimeType) {
+		return createContentResponseImpl(request, statusCode, reason, false, mimeType);
+	}
+	
+	private ResponseEncodingTuple createContentResponseImpl(
+			Http2Headers request, 
+			int statusCode,
+			String reason,
+			boolean isDynamicPartOfWebsite, 
+			MimeTypeResult mimeType) {
 
 		Http2Headers response = new Http2Headers();
 
 		response.addHeader(new Http2Header(Http2HeaderName.STATUS, statusCode+""));
+		response.addHeader(new Http2Header("reason", reason));
 		response.addHeader(new Http2Header(Http2HeaderName.CONTENT_TYPE, mimeType.mime));
 
-		addCommonHeaders(request, response, statusCode, isDynamicPartOfWebsite);
+		boolean isInternalError = false;
+		if(statusCode == 500)
+			isInternalError = true;
+		
+		addCommonHeaders(request, response, isInternalError, isDynamicPartOfWebsite);
 		return new ResponseEncodingTuple(response, mimeType);
 	}
 	
@@ -67,7 +82,7 @@ public class ResponseCreator {
 		}	
 	}
 	
-	public void addCommonHeaders(Http2Headers request, Http2Headers response, int statusCode, boolean isDynamicPartOfWebsite) {
+	public void addCommonHeaders(Http2Headers request, Http2Headers response, boolean isInternalError, boolean isDynamicPartOfWebsite) {
 		Http2Header connHeader = request.getHeaderLookupStruct().getHeader(Http2HeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
@@ -81,7 +96,7 @@ public class ResponseCreator {
 //		response.addHeader(xFrame);
 		
 		if(isDynamicPartOfWebsite) {
-			List<RouterCookie> cookies = createCookies(statusCode);
+			List<RouterCookie> cookies = createCookies(isInternalError);
 			for(RouterCookie c : cookies) {
 				Http2Header cookieHeader = create(c);
 				response.addHeader(cookieHeader);
@@ -104,7 +119,7 @@ public class ResponseCreator {
 		response.addHeader(connHeader);
 	}
 	
-	private List<RouterCookie> createCookies(int statusCode) {
+	private List<RouterCookie> createCookies(boolean isInternalError) {
 		if(!Current.isContextSet())
 			return new ArrayList<>(); //in some exceptional cases like incoming cookies failing to parse, there will be no cookies
 		
@@ -115,7 +130,7 @@ public class ResponseCreator {
 			cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
 			return cookies;
 		} catch(CookieTooLargeException e) {
-			if(statusCode != 500)
+			if(isInternalError)
 				throw e;
 			//ELSE this is the second time we are rendering a response AND it was MOST likely caused by the same
 			//thing when we tried to marshal out cookies to strings and they were too big, sooooooooooo in this

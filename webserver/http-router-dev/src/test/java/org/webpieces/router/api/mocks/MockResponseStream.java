@@ -65,7 +65,7 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	}
 
 	@Override
-	public void sendRenterContent(RenderContentResponse resp) {
+	public void sendRenderContent(RenderContentResponse resp) {
 		throw new UnsupportedOperationException("not implemented yet");
 		
 	}

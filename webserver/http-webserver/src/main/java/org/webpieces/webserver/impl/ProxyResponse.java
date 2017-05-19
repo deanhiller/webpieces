@@ -135,7 +135,7 @@ public class ProxyResponse implements ResponseStreamer {
 		Http2Header location = new Http2Header(Http2HeaderName.LOCATION, url);
 		response.addHeader(location );
 		
-		responseCreator.addCommonHeaders(request, response, code, true);
+		responseCreator.addCommonHeaders(request, response, false, true);
 
 		//Firefox requires a content length of 0 on redirect(chrome doesn't)!!!...
 		response.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, 0+""));
@@ -221,8 +221,8 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	@Override
-	public void sendRenterContent(RenderContentResponse resp) {
-		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), false, resp.getMimeType());
+	public void sendRenderContent(RenderContentResponse resp) {
+		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
 		maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
 	

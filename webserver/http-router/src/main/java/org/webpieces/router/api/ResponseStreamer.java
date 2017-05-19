@@ -13,7 +13,7 @@ public interface ResponseStreamer {
 	
 	void sendRenderHtml(RenderResponse resp);
 	
-	void sendRenterContent(RenderContentResponse resp);
+	void sendRenderContent(RenderContentResponse resp);
 	
 	CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic);
 
