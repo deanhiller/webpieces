@@ -20,7 +20,6 @@ compileJava.doLast { tasks.processResources.execute() }
 
 dependencies {
     compile deps['guice']
-    compile project(':http:http-frontend')
 	compile project(':http:http-frontend2')
     compile project(':webserver:http-templating'), project(':webserver:http-router')
 

@@ -1,7 +1,6 @@
 dependencies {
     compile deps['guice']
 	compile project(':core:core-mock')
-    compile project(':http:http-frontend')
 	compile project(':http:http-frontend2')
 	
     //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
