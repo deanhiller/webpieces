@@ -92,7 +92,7 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 		
 		Stream stream;
 		try {
-			stream = streamState.getStream(frame);
+			stream = streamState.getStream(frame, true);
 		} catch(ConnectionException e) {
 			//per spec, priority frames can be received on closed stream but ignore it
 			return CompletableFuture.completedFuture(null);
@@ -114,7 +114,7 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 			return sendPushPromiseToClient((Http2Push) frame);
 		}
 		
-		Stream stream = streamState.getStream(frame);
+		Stream stream = streamState.getStream(frame, true);
 		
 		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
 					.thenApply(s -> null);
@@ -130,7 +130,7 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr {
 			throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, newStreamId, 
 					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number");
 
-		Stream causalStream = streamState.getStream(fullPromise);
+		Stream causalStream = streamState.getStream(fullPromise, true);
 		
 		Http2ResponseListener listener = causalStream.getResponseListener();
 		PushPromiseListener pushListener = listener.newIncomingPush(newStreamId);

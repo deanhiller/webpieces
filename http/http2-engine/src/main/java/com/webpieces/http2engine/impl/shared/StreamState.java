@@ -3,11 +3,18 @@ package com.webpieces.http2engine.impl.shared;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.util.time.Time;
 
+/**
+ * WAY TOOO MANY IF statements in here...need a ClientStreamState AND a ServerStreamState so we can get rid of the if statements
+ * @author dhiller
+ *
+ */
 public class StreamState {
 
 	private ConcurrentMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
@@ -24,6 +31,18 @@ public class StreamState {
 	//chanmgr thread only
 	public ConcurrentMap<Integer, Stream> closeEngine() {
 		return streamIdToStream;
+	}
+	
+	public boolean isLargeEnough(Http2Headers frame) {
+		int id = frame.getStreamId();
+		if(id % 1 == 0) {
+			if(id > highestOddStream)
+				return true;
+		} else {
+			if(id > highestEvenStream)
+				return true;
+		}
+		return false;
 	}
 	
 	//client threads
@@ -50,23 +69,26 @@ public class StreamState {
 		return stream != null;
 	}
 	
-	public Stream getStream(Http2Msg frame) {
+	public Stream getStream(Http2Msg frame, boolean isConnectionError) {
 		Stream stream = streamIdToStream.get(frame.getStreamId());
 		if (stream == null) {
 			int id = frame.getStreamId();
 			if(id % 2 == 0) {
-				check(frame, id, highestEvenStream);
+				check(frame, id, highestEvenStream, isConnectionError);
 			} else {
-				check(frame, id, highestOddStream);
+				check(frame, id, highestOddStream, isConnectionError);
 			}			
 		}
 		return stream;
 	}
 
-	private void check(Http2Msg frame, int id, long highestOpen) {
+	private void check(Http2Msg frame, int id, long highestOpen, boolean isConnectionError) {
 		if(id > highestOpen)
-			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, id, "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame); 
-		throw new ConnectionException(ParseFailReason.CLOSED_STREAM, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
+			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, id, "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame);
+		else if(isConnectionError)
+			throw new ConnectionException(ParseFailReason.CLOSED_STREAM, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
+		
+		throw new StreamException(ParseFailReason.CLOSED_STREAM, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
 	}
 
 	//this method and create happen on a virtual single thread from channelmgr
@@ -81,6 +103,7 @@ public class StreamState {
 		stream.setIsClosed(true);
 		return streamIdToStream.remove(stream.getStreamId());
 	}
+
 
 	
 }

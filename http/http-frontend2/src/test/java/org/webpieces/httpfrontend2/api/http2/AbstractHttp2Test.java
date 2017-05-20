@@ -16,9 +16,10 @@ import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.httpfrontend2.api.mock2.MockChanMgr;
-import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
+import org.webpieces.httpfrontend2.api.mock2.Http2ChannelCache;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.MockTcpServerChannel;
 import org.webpieces.mock.time.MockTime;
@@ -37,7 +38,8 @@ public class AbstractHttp2Test {
 	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
 	protected MockChanMgr mockChanMgr = new MockChanMgr();
-	protected MockHttp2Channel mockChannel = new MockHttp2Channel();
+	protected Http2ChannelCache mockTcpChannel = new Http2ChannelCache();
+	protected MockHttp2Channel mockChannel = new MockHttp2Channel(mockTcpChannel);
 	protected HeaderSettings localSettings = Http2Requests.createSomeSettings();
 	protected MockTime mockTime = new MockTime(true);
 	protected MockTimer mockTimer = new MockTimer();
@@ -48,7 +50,7 @@ public class AbstractHttp2Test {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		MockTcpServerChannel svrChannel = new MockTcpServerChannel();
 		mockChanMgr.addTCPSvrChannelToReturn(svrChannel);
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
+		mockTcpChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockTcpChannel));
         mockListener.setDefaultRetVal(mockStreamWriter);
         mockStreamWriter.setDefaultRetValToThis();
 
@@ -68,7 +70,7 @@ public class AbstractHttp2Test {
 
 	private void simulateClientConnecting() throws InterruptedException, ExecutionException, TimeoutException {
 		ConnectionListener listener = mockChanMgr.getSingleConnectionListener();
-		CompletableFuture<DataListener> futureList = listener.connected(mockChannel, true);
+		CompletableFuture<DataListener> futureList = listener.connected(mockTcpChannel, true);
 		DataListener dataListener = futureList.get(3, TimeUnit.SECONDS);
 		mockChannel.setDataListener(dataListener);
 	}

@@ -28,7 +28,7 @@ public class TestHttp2Errors extends AbstractHttp2Test {
 		mockChannel.send(request2);
 		PassedIn in2 = mockListener.getSingleRequest();
 		
-		mockChannel.simulateClose();
+		mockChannel.close();
 		
 		List<Cancel> cancels = mockListener.getCancels();
 		Assert.assertEquals(in1.stream, cancels.get(0).stream);

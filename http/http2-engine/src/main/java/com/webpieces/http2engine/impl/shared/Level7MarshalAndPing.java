@@ -45,6 +45,7 @@ public class Level7MarshalAndPing {
 	
 	public CompletableFuture<Void> sendPing() {
 		PingFrame ping = new PingFrame();
+		ping.setOpaqueData(8L);
 
 		CompletableFuture<Void> newFuture = new CompletableFuture<>();
 		boolean wasSet = pingFutureRef.compareAndSet(null, newFuture);
@@ -60,6 +61,7 @@ public class Level7MarshalAndPing {
 		if(!ping.isPingResponse()) {
 			PingFrame pingAck = new PingFrame();
 			pingAck.setIsPingResponse(true);
+			pingAck.setOpaqueData(ping.getOpaqueData());
 			return sendFrameToSocket(pingAck);
 		}
 

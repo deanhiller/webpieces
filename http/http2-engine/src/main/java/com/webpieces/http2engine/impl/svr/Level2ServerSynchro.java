@@ -4,13 +4,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.util.threading.SessionExecutor;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.impl.EngineStreamWriter;
 import com.webpieces.http2engine.impl.shared.Level2Synchro;
 import com.webpieces.http2engine.impl.shared.Level3ParsingAndRemoteSettings;
 import com.webpieces.http2engine.impl.shared.Stream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Level2ServerSynchro extends Level2Synchro {
 
@@ -21,7 +22,7 @@ public class Level2ServerSynchro extends Level2Synchro {
 		streamInit = level3;
 	}
 
-	public CompletableFuture<StreamWriter> sendResponseHeaders(Stream stream, Http2Headers data) {
+	public CompletableFuture<StreamWriter> sendResponseHeaders(Stream stream, PartialStream data) {
 		return executor.executeCall(this, () -> {
 			int streamId = data.getStreamId();
 			if(streamId <= 0)
@@ -29,7 +30,7 @@ public class Level2ServerSynchro extends Level2Synchro {
 			else if(streamId % 2 == 0)
 				throw new IllegalArgumentException("Server cannot send response frames with even stream ids to client per http/2 spec");
 			
-			return streamInit.sendResponseHeaderToSocket(stream, data)
+			return streamInit.sendToSocket(stream, data)
 					.thenApply((s) -> new EngineStreamWriter(s, this));
 		});
 	}
@@ -49,4 +50,18 @@ public class Level2ServerSynchro extends Level2Synchro {
 					.thenApply((s) -> new EngineStreamWriter(s, this));
 		});
 	}
+
+	public CompletableFuture<Void> sendCancel(Stream stream, RstStreamFrame frame) {
+		return executor.executeCall(this, () -> {
+			int streamId = frame.getStreamId();
+			if(streamId <= 0)
+				throw new IllegalArgumentException("frames for requests must have a streamId > 0");
+			else if(streamId % 2 == 0)
+				throw new IllegalArgumentException("Server cannot send response frames with even stream ids to client per http/2 spec");
+			
+			return streamInit.fireRstToSocket(stream, frame)
+					.thenApply((s) -> null);
+		});
+	}
+
 }

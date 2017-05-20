@@ -5,6 +5,8 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
@@ -29,7 +31,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public class HpackParserImpl implements HpackParser {
 
-	//private static final Logger log = LoggerFactory.getLogger(HpackParserImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(HpackParserImpl.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HeaderEncoding encoding = new HeaderEncoding();
 	private HeaderDecoding decoding = new HeaderDecoding();
@@ -56,6 +58,7 @@ public class HpackParserImpl implements HpackParser {
 		Http2Memento result = parser.parse(state.getLowLevelState(), newData);
 		
 		List<Http2Frame> parsedFrames = result.getParsedFrames();
+		log.info("frames="+parsedFrames);
 		for(Http2Frame frame: parsedFrames) {
 			processFrame(state, frame);
 		}

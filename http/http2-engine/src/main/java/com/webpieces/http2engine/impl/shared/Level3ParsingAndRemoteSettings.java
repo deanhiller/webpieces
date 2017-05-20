@@ -77,6 +77,7 @@ public class Level3ParsingAndRemoteSettings {
 			return null;
 		else if(e instanceof ConnectionClosedException) {
 			log.trace(() -> "Normal exception since we are closing and they do not know yet", e);
+			
 		} else if(e instanceof StreamException) {
 			log.error("shutting the stream down due to error", e);
 			level3StreamInit.sendRstToServerAndClient((StreamException) e).exceptionally( t -> logExc("stream", t));

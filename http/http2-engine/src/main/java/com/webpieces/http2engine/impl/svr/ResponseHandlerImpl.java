@@ -8,6 +8,8 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.server.ResponseHandler;
 import com.webpieces.http2engine.impl.shared.Stream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class ResponseHandlerImpl implements ResponseHandler {
 
@@ -23,14 +25,16 @@ public class ResponseHandlerImpl implements ResponseHandler {
 
 	@Override
 	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headerPiece) {
+		if(headerPiece.getStreamId() != 0 && headerPiece.getStreamId() != stream.getStreamId())
+			throw new IllegalArgumentException("WE WILL SET the Http2Headers.streamID so you should leave it as 0 or the right id.  stream="+stream.getStreamId()+" frame="+headerPiece);
 		headerPiece.setStreamId(stream.getStreamId());
 		return level1ServerEngine.sendResponseHeaders(stream, headerPiece);
 	}
 
 	@Override
 	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
-		if(push.getStreamId() != stream.getStreamId())
-			throw new IllegalArgumentException("push has incorrect stream id as you are sending it on stream="+stream.getStreamId()+" push="+push);
+		if(push.getStreamId() != 0 && push.getStreamId() != stream.getStreamId())
+			throw new IllegalArgumentException("WE WILL SET the Http2Push.streamID so you should leave it as 0.   push="+push);
 		else if(push.getPromisedStreamId() != 0)
 			throw new IllegalArgumentException("WE WILL SET the Http2Push.promisedStreamId so you should leave it as 0.   push="+push);
 
@@ -41,6 +45,10 @@ public class ResponseHandlerImpl implements ResponseHandler {
 
 	@Override
 	public void cancelStream() {
+		RstStreamFrame frame = new RstStreamFrame();
+		frame.setStreamId(stream.getStreamId());
+		frame.setKnownErrorCode(Http2ErrorCode.CANCEL);
+		level1ServerEngine.sendCancel(stream, frame);
 	}
 
 }

@@ -53,9 +53,15 @@ public abstract class Level4AbstractStreamMgr {
 		frame.setKnownErrorCode(e.getReason().getErrorCode());
 		frame.setStreamId(e.getStreamId());
 		
-		Stream stream = streamState.getStream(frame);
-		return fireRstToSocket(stream, frame)
-			.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
+		boolean streamExist = streamState.isStreamExist(frame);
+		if(streamExist) {
+			Stream stream = streamState.getStream(frame, true);
+			return fireRstToSocket(stream, frame)
+					.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
+		} else {
+			//no stream means idle or closed...
+			return remoteFlowControl.fireResetToSocket(frame);
+		}
 	}
 
 	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionException reset) {
@@ -104,7 +110,7 @@ public abstract class Level4AbstractStreamMgr {
 		} else if(msg.getStreamId() == 0) {
 			return remoteFlowControl.updateConnectionWindowSize(msg);
 		} else {
-			Stream stream = streamState.getStream(msg);
+			Stream stream = streamState.getStream(msg, true);
 			if(stream != null)
 				return remoteFlowControl.updateStreamWindowSize(stream, msg);
 			return CompletableFuture.completedFuture(null);

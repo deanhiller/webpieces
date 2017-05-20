@@ -15,6 +15,7 @@ import com.webpieces.http2engine.impl.DataTry;
 import com.webpieces.http2parser.api.ConnectionException;
 import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -206,6 +207,10 @@ public class Level6RemoteFlowControl {
 
 	public CompletableFuture<Void> goAway(ConnectionException e) {
 		return layer6NotifyListener.goAway(e);
+	}
+
+	public CompletableFuture<Void> fireResetToSocket(RstStreamFrame frame) {
+		return layer6NotifyListener.sendFrameToSocket(frame);
 	}
 
 }

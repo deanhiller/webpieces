@@ -35,13 +35,17 @@ public class HeaderDecoding {
         List<Http2Header> headers = new ArrayList<>();
         byte[] bytes = data.createByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-
+        	
         //keep this synchronized very very small...
 		synchronized(decoder) {
 	        decoder.decode(in, (n, v, s) -> addToHeaders(headers, n, v, s, streamId));
 	        decoder.endHeaderBlock();
-	        return headers;
 		}
+	
+        if(data.getReadableSize() > 0 && headers.size() == 0)
+        	throw new ConnectionException(ParseFailReason.COMPRESSION_ERROR, streamId, "Header data came in, but no headers came out");
+
+        return headers;
     }
 
 	private Object addToHeaders(List<Http2Header> headers, byte[] name, byte[] value, boolean sensitive, int streamId) {

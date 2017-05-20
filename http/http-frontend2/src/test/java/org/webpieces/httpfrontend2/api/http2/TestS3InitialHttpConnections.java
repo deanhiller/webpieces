@@ -15,8 +15,9 @@ import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.httpfrontend2.api.mock2.MockChanMgr;
-import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
+import org.webpieces.httpfrontend2.api.mock2.Http2ChannelCache;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.MockTcpServerChannel;
 import org.webpieces.mock.time.MockTime;
@@ -38,7 +39,8 @@ import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 public class TestS3InitialHttpConnections {
 
 	private MockChanMgr mockChanMgr = new MockChanMgr();
-	private MockHttp2Channel mockChannel = new MockHttp2Channel();
+	private Http2ChannelCache mockTcpChannel = new Http2ChannelCache();
+	private MockHttp2Channel mockChannel = new MockHttp2Channel(mockTcpChannel);
 	private HeaderSettings localSettings = Http2Requests.createSomeSettings();
 	private MockTime mockTime = new MockTime(true);
 	private MockTimer mockTimer = new MockTimer();
@@ -49,7 +51,7 @@ public class TestS3InitialHttpConnections {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		MockTcpServerChannel svrChannel = new MockTcpServerChannel();
 		mockChanMgr.addTCPSvrChannelToReturn(svrChannel);
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
+        mockTcpChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockTcpChannel));
         mockListener.setDefaultRetVal(mockStreamWriter);
         mockStreamWriter.setDefaultRetValToThis();
 
@@ -63,7 +65,7 @@ public class TestS3InitialHttpConnections {
 		httpServer.start();
         
 		ConnectionListener listener = mockChanMgr.getSingleConnectionListener();
-		CompletableFuture<DataListener> futureList = listener.connected(mockChannel, true);
+		CompletableFuture<DataListener> futureList = listener.connected(mockTcpChannel, true);
 		DataListener dataListener = futureList.get(3, TimeUnit.SECONDS);
 		mockChannel.setDataListener(dataListener);
 	}

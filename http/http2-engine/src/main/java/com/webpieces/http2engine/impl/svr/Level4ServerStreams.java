@@ -15,6 +15,9 @@ import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
+import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.StreamException;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -43,6 +46,11 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 	@Override
 	public CompletableFuture<Void> sendPayloadToApp(PartialStream frame) {
 		if(frame instanceof Http2Headers && !streamState.isStreamExist(frame)) {
+			if(frame.getStreamId() % 2 == 0)
+				throw new ConnectionException(ParseFailReason.BAD_STREAM_ID, frame.getStreamId(), "Bad stream id.  Event stream ids not allowed in requests to a server frame="+frame);
+			if(!streamState.isLargeEnough((Http2Headers) frame))
+				throw new StreamException(ParseFailReason.CLOSED_STREAM, frame.getStreamId(), "Stream id too low and stream not exist(ie. stream was closed) frame="+frame);
+			
 			return incomingHeadersToApp((Http2Headers) frame);
 		} else {
 			//this copied from client but for server this should not occur and if does is a connection error?
@@ -50,8 +58,8 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 //				log.info("ignoring incoming frame="+frame+" since socket is shutting down");
 //				return CompletableFuture.completedFuture(null);
 //			}
-			
-			Stream stream = streamState.getStream(frame);
+
+			Stream stream = streamState.getStream(frame, false);
 			
 			return serverSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
 						.thenApply(s -> null);
@@ -85,14 +93,17 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 		return streamState.create(stream);
 	}
 
-	public CompletableFuture<Stream> sendResponseHeaderToSocket(Stream origStream, Http2Headers frame) {
+	public CompletableFuture<Stream> sendToSocket(Stream origStream, PartialStream frame) {
 		if(closedReason != null) {
 			return createExcepted("sending response headers").thenApply((s) -> null);
 		}
-		Stream stream = streamState.getStream(frame);
+		Stream stream = streamState.getStream(frame, true);
 		
 		return serverSm.fireToSocket(stream, frame)
-				.thenApply(s -> stream);
+				.thenApply(s -> {
+					checkForClosedState(stream, frame, false);
+					return stream;
+				});
 	}
 	
 	public CompletableFuture<Stream> sendPush(Http2Push push) {
@@ -117,7 +128,8 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 
 	@Override
 	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg) {
-		throw new UnsupportedOperationException("not supported yet");
+		//not supported yet
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

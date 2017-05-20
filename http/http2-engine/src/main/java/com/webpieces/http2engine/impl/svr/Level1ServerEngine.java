@@ -20,6 +20,7 @@ import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
 public class Level1ServerEngine implements Http2ServerEngine {
 
@@ -79,5 +80,9 @@ public class Level1ServerEngine implements Http2ServerEngine {
 
 	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
 		return synchronization.sendPush(push);
+	}
+
+	public void sendCancel(Stream stream, RstStreamFrame frame) {
+		synchronization.sendCancel(stream, frame);
 	}
 }
