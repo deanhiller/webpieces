@@ -49,39 +49,38 @@ public abstract class Level5AbstractStateMachine {
 		Http2Event event = translate(Http2SendRecieve.SEND, payload);
 
 		log.info("state before event="+state.getCurrentState()+" event="+event);
-		CompletableFuture<State> result = stateMachine.fireEvent(state, event);
-		return result.thenCompose( s -> {
-					log.info("state after="+s);
-					//if no exceptions occurred, send it on to flow control layer
-					return remoteFlowControl.sendPayloadToSocket(stream, payload);
-		});
+		State result = stateMachine.fireEvent(state, event);
+		
+		log.info("state after="+result);
+		//if no exceptions occurred, send it on to flow control layer
+		return remoteFlowControl.sendPayloadToSocket(stream, payload);
 	}
 	
 	public CompletableFuture<State> fireToClient(Stream stream, PartialStream payload, Runnable possiblyClose) {
 		Memento currentState = stream.getCurrentState();
 		Http2Event event = translate(Http2SendRecieve.RECEIVE, payload);
 		
+		try {
+			return fireToClientImpl(stream, payload, possiblyClose, currentState, event);
+		} catch(NoTransitionConnectionError t) {
+			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, stream.getStreamId(), t.getMessage(), t);
+		} catch(NoTransitionStreamError t) {
+			throw new StreamException(ParseFailReason.CLOSED_STREAM, stream.getStreamId(), t.getMessage(), t);				
+		}
+	}
+
+	private CompletableFuture<State> fireToClientImpl(Stream stream, PartialStream payload, Runnable possiblyClose,
+			Memento currentState, Http2Event event) {
 		log.info("firing event to new statemachine="+event+" state="+currentState.getCurrentState());
-		CompletableFuture<State> result = stateMachine.fireEvent(currentState, event);
-		return result.thenApply( s -> {
-			log.info("done firing.  new state="+s);
-			//closing the stream should be done BEFORE firing to client as if the stream is closed
-			//then this will prevent windowUpdateFrame with increment being sent to a closed stream
-			if(possiblyClose != null)
-				possiblyClose.run();
+		State result = stateMachine.fireEvent(currentState, event);
+		log.info("done firing.  new state="+result);
+		//closing the stream should be done BEFORE firing to client as if the stream is closed
+		//then this will prevent windowUpdateFrame with increment being sent to a closed stream
+		if(possiblyClose != null)
+			possiblyClose.run();
 
-			localFlowControl.fireToClient(stream, payload);
-
-			return s;
-		}).exceptionally(t -> {
-			if(t instanceof NoTransitionConnectionError) {
-				throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, stream.getStreamId(), t.getMessage(), t);
-			} else if(t instanceof NoTransitionStreamError) {
-				throw new StreamException(ParseFailReason.CLOSED_STREAM, stream.getStreamId(), t.getMessage(), t);				
-			}
-			throw new RuntimeException(t);
-		});
-
+		return localFlowControl.fireToClient(stream, payload)
+			.thenApply( v -> result);
 	}
 	
 	public boolean isInClosedState(Stream stream) {

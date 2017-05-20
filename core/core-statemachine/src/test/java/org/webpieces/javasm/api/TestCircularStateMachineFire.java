@@ -62,7 +62,7 @@ public class TestCircularStateMachineFire extends TestCase {
 	public void testBasic() throws InterruptedException, ExecutionException {
 		memento = sm.createMementoFromState("id", on);
 
-		CompletableFuture<State> future = sm.fireEvent(memento, flipOff);
+		CompletableFuture<State> future = sm.fireEvent2(memento, flipOff);
 		State state = future.get();
 		Assert.assertEquals(off, state);
 		
@@ -72,7 +72,7 @@ public class TestCircularStateMachineFire extends TestCase {
 
 	private class FireIntoStateMachine implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			secondFuture = sm.fireEvent(memento, flipOn);
+			secondFuture = sm.fireEvent2(memento, flipOn);
 		}
 	}
 }

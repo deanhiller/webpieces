@@ -4,6 +4,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.event.EventListenerList;
 
@@ -100,7 +101,22 @@ public class StateMachineImpl implements StateMachine
     }
 
     @Override
-    public CompletableFuture<State> fireEvent(Memento memento, Object evt)
+    public State fireEvent(Memento memento, Object evt)
+    {
+    	CompletableFuture<State> future = fireEvent2(memento, evt);
+    	try {
+			return future.get();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			//FUCKING checked exceptions!!! DAMNIT!!!! FUCKING KILL THEM ALL
+			RuntimeException cause = (RuntimeException) e.getCause();
+			throw cause;
+		}
+    }
+    
+    @Override
+    public CompletableFuture<State> fireEvent2(Memento memento, Object evt)
     {
         if(memento == null)
             throw new IllegalArgumentException(this + "memento cannot be null");

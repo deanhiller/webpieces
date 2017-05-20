@@ -2,10 +2,10 @@ package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
 
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.handlers.AsyncDataListener;
 import org.webpieces.nio.api.handlers.DataListener;
 
 public class ProxyDataListener implements DataListener {
