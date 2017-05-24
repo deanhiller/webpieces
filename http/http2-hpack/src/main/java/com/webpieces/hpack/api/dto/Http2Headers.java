@@ -6,11 +6,10 @@ import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
 
-public class Http2Headers implements PartialStream {
+public abstract class Http2Headers implements Http2Msg {
 
 	private int streamId;
 	private boolean endOfStream = true;
@@ -61,6 +60,14 @@ public class Http2Headers implements PartialStream {
 	public Http2HeaderStruct getHeaderLookupStruct() {
 		return headersStruct;
 	}
+	
+	public String getSingleHeaderValue(Http2HeaderName name) {
+		Http2Header header = getHeaderLookupStruct().getHeader(name);
+		if(header == null || header.getValue() == null) 
+			return null;
+		return header.getValue().trim();		
+	}
+	
 	public boolean isEndOfStream() {
 		return endOfStream;
 	}
@@ -105,19 +112,10 @@ public class Http2Headers implements PartialStream {
 	}
 	
 	@Override
-	public Http2MsgType getMessageType() {
-		return Http2MsgType.HEADERS;
-	}
-	
-	@Override
 	public String toString() {
 		return "Http2Headers [streamId=" + streamId + ", endStream=" + endOfStream + ", headerList="
 				+ headers + ", priorityDetails=" + getPriorityDetails() + "]";
 	}
-	
-	@Deprecated
-	public String getStatus() {
-		return getHeaderLookupStruct().getHeader(Http2HeaderName.STATUS).getValue();
-	}
+
 
 }

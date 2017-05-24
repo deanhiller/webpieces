@@ -4,8 +4,8 @@ import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpclient.api.HttpResponseListener;
+import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;

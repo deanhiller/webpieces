@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -114,6 +115,7 @@ public class TestH2OnNewLib {
         }
     }
 
+    @Ignore
     @Test
     public void testH2Spec() {
     	Assert.assertTrue(passH2SpecTest(testName));

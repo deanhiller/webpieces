@@ -8,13 +8,13 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.DatagramChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DatagramListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 
 /**

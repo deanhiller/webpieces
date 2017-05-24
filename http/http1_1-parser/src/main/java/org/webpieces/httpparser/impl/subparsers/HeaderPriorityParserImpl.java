@@ -8,8 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.common.ResponseCookie;
@@ -17,6 +15,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.subparsers.AcceptType;
 import org.webpieces.httpparser.api.subparsers.HeaderItem;
 import org.webpieces.httpparser.api.subparsers.HeaderPriorityParser;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 	

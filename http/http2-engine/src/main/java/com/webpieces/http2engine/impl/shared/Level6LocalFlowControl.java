@@ -5,14 +5,19 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.ParseFailReason;
-import com.webpieces.http2parser.api.StreamException;
+import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.PriorityFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Level6LocalFlowControl {
+public abstract class Level6LocalFlowControl {
 
 	private static final Logger log = LoggerFactory.getLogger(Level6LocalFlowControl.class);
 	private Level7MarshalAndPing marshalLayer;
@@ -30,12 +35,23 @@ public class Level6LocalFlowControl {
 		this.notifyListener = notifyListener;
 		this.connectionLocalWindowSize = localSettings.getInitialWindowSize();
 	}
+	
+	public CompletableFuture<Void> fireHeadersToClient(Stream stream, Http2Trailers payload) {
+		return notifyListener.sendPieceToApp(stream, payload);
+	}
 
-	public CompletableFuture<Void> fireToClient(Stream stream, PartialStream payload) {
-		if(!(payload instanceof DataFrame)) {
+	public CompletableFuture<Void> firePriorityToClient(Stream stream, PriorityFrame payload) {
+		return notifyListener.sendPieceToApp(stream, payload);		
+	}
+	
+	public CompletableFuture<Void> fireRstToClient(Stream stream, RstStreamFrame payload) {
+		return notifyListener.sendRstToApp(stream, payload);		
+	}	
+	
+	public CompletableFuture<Void> fireDataToClient(Stream stream, PartialStream payload) {
+		if(!(payload instanceof DataFrame))
 			return notifyListener.sendPieceToApp(stream, payload);
-		}
-		
+
 		DataFrame f = (DataFrame) payload;
 		long frameLength = f.getTransmitFrameLength();
 

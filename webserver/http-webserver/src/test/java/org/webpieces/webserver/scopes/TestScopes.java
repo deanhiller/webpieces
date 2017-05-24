@@ -18,8 +18,6 @@ import org.webpieces.webserver.test.Http11Socket;
 
 public class TestScopes extends AbstractWebpiecesTest {
 
-	
-	
 	private Http11Socket http11Socket;
 	
 	@Before

@@ -106,7 +106,7 @@ public class WebServerModule implements Module {
 		
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
-		InjectionConfig injConfig = new InjectionConfig(executor1, http2Parser, time, config.getHttp2Config());
+		InjectionConfig injConfig = new InjectionConfig(http2Parser, time, config.getHttp2Config());
 
 		return HttpFrontendFactory.createFrontEnd(chanMgr, timer, injConfig, httpParser);
 	}

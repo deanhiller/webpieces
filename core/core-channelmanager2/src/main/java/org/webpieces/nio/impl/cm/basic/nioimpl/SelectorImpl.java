@@ -9,13 +9,13 @@ import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
 import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 
 

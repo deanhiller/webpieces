@@ -9,12 +9,15 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.util.threading.NamedThreadFactory;
 
+import com.webpieces.util.locking.FuturePermitQueue;
 import com.webpieces.util.locking.PermitQueue;
 
 public class TestPermitQueue {
 
 	private Executor executor = Executors.newFixedThreadPool(5, new NamedThreadFactory("deansThr"));
-	private PermitQueue<Long> queue1 = new PermitQueue<>(1);
+	private PermitQueue queue1 = new PermitQueue(1);
+	private FuturePermitQueue queue2 = new FuturePermitQueue(1);
+
 	private MockService svc = new MockService();
 	
 	@Test
@@ -41,7 +44,7 @@ public class TestPermitQueue {
 	
 	@Test
 	public void testReducePermits() throws InterruptedException {
-		PermitQueue<Long> queue = new PermitQueue<>(2);
+		PermitQueue queue = new PermitQueue(2);
 		
 		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
 		svc.addToReturn(future1);
@@ -79,7 +82,7 @@ public class TestPermitQueue {
 	
 	@Test
 	public void testAddPermits() throws InterruptedException {
-		PermitQueue<Long> queue = new PermitQueue<>(1);
+		PermitQueue queue = new PermitQueue(1);
 		
 		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
 		svc.addToReturn(future1);
@@ -140,6 +143,30 @@ public class TestPermitQueue {
 		});
 		
 		return future;
+	}
+	
+	@Test
+	public void testFuturePermitQueue() throws InterruptedException {
+		CompletableFuture<Long> future1 = new CompletableFuture<Long>();
+		svc.addToReturn(future1);
+		CompletableFuture<Long> future2 = new CompletableFuture<Long>();
+		svc.addToReturn(future2);
+		CompletableFuture<Long> future3 = new CompletableFuture<Long>();
+		svc.addToReturn(future3);
+		
+		queue2.runRequest(() -> svc.runFunction(1));
+		queue2.runRequest(() -> svc.runFunction(2));
+		queue2.runRequest(() -> svc.runFunction(3));
+
+		List<Integer> results = svc.getAndClear();
+		Assert.assertEquals(1,results.size()); 
+		Assert.assertEquals(1, results.get(0).intValue());
+		
+		future1.complete(3L);
+		
+		List<Integer> results2 = svc.getAndClear();
+		Assert.assertEquals(1,results2.size());
+		Assert.assertEquals(2, results2.get(0).intValue());
 	}
 	
 	private class MyRunnable implements Runnable {

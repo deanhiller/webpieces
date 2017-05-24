@@ -23,7 +23,7 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> send(PartialStream data) {
+	public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
 		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.SEND_MORE, data);
 	}
 

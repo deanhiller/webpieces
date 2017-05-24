@@ -101,7 +101,7 @@ public class TestStateMachine extends TestCase
         	throw new IllegalMonitorStateException();
         });
 
-        CompletableFuture<State> future = sm.fireEvent2(memento, flipOff);
+        CompletableFuture<State> future = sm.fireAsyncEvent(memento, flipOff);
         try {
             //fire turn off
             future.get();

@@ -7,7 +7,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParsingState;
 import org.webpieces.httpparser.api.UnparsedState;
-import org.webpieces.httpparser.api.dto.HttpMessage;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public class MementoImpl implements Memento {

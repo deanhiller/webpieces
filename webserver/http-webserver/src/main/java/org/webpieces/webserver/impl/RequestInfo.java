@@ -3,16 +3,16 @@ package org.webpieces.webserver.impl;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 
 class RequestInfo {
 
 	private RouterRequest routerRequest;
-	private Http2Headers request;
+	private Http2Request request;
 	private BufferPool pool;
 	private ResponseOverrideSender responseSender;
 
-	RequestInfo(RouterRequest routerRequest, Http2Headers request, BufferPool pool, ResponseOverrideSender responseSender) {
+	RequestInfo(RouterRequest routerRequest, Http2Request request, BufferPool pool, ResponseOverrideSender responseSender) {
 		this.routerRequest = routerRequest;
 		this.request = request;
 		this.pool = pool;
@@ -23,7 +23,7 @@ class RequestInfo {
 		return routerRequest;
 	}
 
-	public Http2Headers getRequest() {
+	public Http2Request getRequest() {
 		return request;
 	}
 

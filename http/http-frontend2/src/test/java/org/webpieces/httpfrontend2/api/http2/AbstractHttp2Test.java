@@ -15,23 +15,22 @@ import org.webpieces.frontend2.api.FrontendConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
-import org.webpieces.httpfrontend2.api.mock2.MockChanMgr;
 import org.webpieces.httpfrontend2.api.mock2.Http2ChannelCache;
+import org.webpieces.httpfrontend2.api.mock2.MockChanMgr;
+import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
-import org.webpieces.httpfrontend2.api.mock2.MockHttp2Channel;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 import org.webpieces.httpfrontend2.api.mock2.MockTcpServerChannel;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.threading.DirectExecutor;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class AbstractHttp2Test {
@@ -56,7 +55,7 @@ public class AbstractHttp2Test {
 
         Http2Config config = new Http2Config();
         config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
+		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
 
 		FrontendConfig frontendConfig = new FrontendConfig("http", new InetSocketAddress("me", 8080));
 		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig);
@@ -84,7 +83,7 @@ public class AbstractHttp2Test {
 	}
 	
 	protected PassedIn sendRequestToServer(int streamId, boolean eos) {
-		Http2Headers request1 = Http2Requests.createRequest(streamId, eos);
+		Http2Request request1 = Http2Requests.createRequest(streamId, eos);
 
 		mockChannel.send(request1);
 		

@@ -17,16 +17,15 @@ import org.webpieces.http2client.mock.MockPushListener;
 import org.webpieces.http2client.mock.MockResponseListener;
 import org.webpieces.http2client.util.Requests;
 import org.webpieces.mock.time.MockTime;
-import org.webpieces.util.threading.DirectExecutor;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class AbstractTest {
 	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -46,7 +45,7 @@ public class AbstractTest {
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         localSettings.setInitialWindowSize(localSettings.getMaxFrameSize()*4);
         config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
+		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
         Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
@@ -60,42 +59,47 @@ public class AbstractTest {
 		mockChannel.getFramesAndClear();
 		
 		//server's settings frame is finally coming in as well with maxConcurrent=1
+		sendAndAckSettingsFrame(1);
+	}
+	
+	private void sendAndAckSettingsFrame(long max) throws InterruptedException, ExecutionException {
+		//server's settings frame is finally coming in as well with maxConcurrent=1
 		HeaderSettings settings = new HeaderSettings();
-		settings.setMaxConcurrentStreams(1L);
+		settings.setMaxConcurrentStreams(max);
 		mockChannel.write(HeaderSettings.createSettingsFrame(settings));
+		mockChannel.write(new SettingsFrame(true)); //ack client frame
 		SettingsFrame ack = (SettingsFrame) mockChannel.getFrameAndClear();
 		Assert.assertEquals(true, ack.isAck());
 	}
 	
-	protected void sendPushPromise(MockResponseListener listener1, MockPushListener pushListener, int streamId, boolean eos) {
+	protected void sendPushPromise(MockResponseListener listener1, int streamId, boolean eos) {
+		MockPushListener pushListener = new MockPushListener();
+		
 		pushListener.setDefaultResponse(CompletableFuture.completedFuture(null));
 		listener1.addReturnValuePush(pushListener);
 		Http2Push push = Requests.createPush(streamId);
 		mockChannel.write(push); //endOfStream=false
-		Assert.assertEquals(2, listener1.getSinglePushStreamId());
+		Assert.assertEquals(push, listener1.getSinglePush());
 		
-		Http2Push frame = (Http2Push) pushListener.getSingleParam();
-		Assert.assertEquals(push, frame);
-		
-		Http2Headers preemptiveResponse = Requests.createEosResponse(2);
+		Http2Response preemptiveResponse = Requests.createEosResponse(2);
 		mockChannel.write(preemptiveResponse);
 		
-		Http2Headers frame2 = (Http2Headers) pushListener.getSingleParam();
+		Http2Response frame2 = (Http2Response) pushListener.getSingleParam();
 		Assert.assertEquals(preemptiveResponse, frame2);
 		
 	}
 	
-	protected void sendResponseFromServer(MockResponseListener listener1, Http2Headers request) {
-		Http2Headers resp1 = Requests.createResponse(request.getStreamId());
+	protected void sendResponseFromServer(MockResponseListener listener1, Http2Request request) {
+		Http2Response resp1 = Requests.createResponse(request.getStreamId());
 		mockChannel.write(resp1); //endOfStream=false
-		PartialStream response1 = listener1.getSingleReturnValueIncomingResponse();
+		Http2Response response1 = listener1.getSingleReturnValueIncomingResponse();
 		Assert.assertEquals(resp1, response1);
 	}
 
-	protected Http2Headers sendRequestToServer(MockResponseListener listener1) {
-		Http2Headers request1 = Requests.createRequest();
+	protected Http2Request sendRequestToServer(MockResponseListener listener1) {
+		Http2Request request1 = Requests.createRequest();
 
-		httpSocket.send(request1, listener1);
+		httpSocket.openStream(listener1).process(request1);
 		
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);

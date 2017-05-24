@@ -3,6 +3,7 @@ package org.webpieces.frontend2.impl;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -12,7 +13,6 @@ import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -20,7 +20,8 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -104,7 +105,7 @@ public class Layer2Http1_1Handler {
 		//TODO: close socket on violation of pipelining like previous request did not end
 
 		if(payload instanceof HttpRequest) {
-			processInitialPieceOfRequest(socket, payload, msg);
+			processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
 		} else if(payload instanceof HttpChunk) {
 			processChunk(socket, (HttpChunk)payload, (DataFrame) msg);
 		} else {
@@ -114,27 +115,30 @@ public class Layer2Http1_1Handler {
 
 	private void processChunk(FrontendSocketImpl socket, HttpChunk payload, DataFrame data) {
 		StreamWriter writer = socket.getWriter();
-		writer.send(data);
+		writer.processPiece(data);
 	}
 
-	private void processInitialPieceOfRequest(FrontendSocketImpl socket, HttpPayload payload, Http2Msg msg) {
-		HttpRequest http1Req = (HttpRequest) payload;
-		Http2Headers headers = (Http2Headers) msg;
-		
+	private CompletableFuture<StreamWriter> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
 		Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
 		socket.setAddStream(stream);
 
-		Http2Header lengthHeader = headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH);
+		StreamHandle streamHandle = httpListener.openStream(stream, socketInfo);
+		stream.setStreamHandle(streamHandle);
+		
+		String lengthHeader = headers.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
 		if(lengthHeader != null) {
-			DataFrame frame = Http2Translations.translateBody(payload.getBody());
-			StreamWriter writer = httpListener.incomingRequest(stream, headers, socketInfo);
-			writer.send(frame);
+			DataFrame frame = Http2Translations.translateBody(http1Req.getBody());
+			CompletableFuture<StreamWriter> writer = streamHandle.process(headers);
+			return writer.thenCompose( w -> w.processPiece(frame) );
 		} else if(http1Req.isHasChunkedTransferHeader()) {
-			StreamWriter writer = httpListener.incomingRequest(stream, headers, socketInfo);
-			socket.addWriter(writer);
+			CompletableFuture<StreamWriter> writer = streamHandle.process(headers);
+			return writer.thenApply( w -> {
+				socket.addWriter(w);
+				return w;
+			});
 		} else {
 			headers.setEndOfStream(true);
-			httpListener.incomingRequest(stream, headers, socketInfo);
+			return streamHandle.process(headers);
 		}
 	}
 

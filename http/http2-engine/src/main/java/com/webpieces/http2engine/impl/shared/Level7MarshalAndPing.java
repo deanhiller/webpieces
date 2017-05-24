@@ -13,10 +13,11 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
-import com.webpieces.http2parser.api.Http2Exception;
-import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
+import com.webpieces.http2parser.api.dto.error.Http2Exception;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level7MarshalAndPing {
@@ -39,9 +40,9 @@ public class Level7MarshalAndPing {
         marshalState = parser.prepareToMarshal(remoteSettings.getHeaderTableSize(), remoteSettings.getMaxFrameSize());
 	}
 	
-	public CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg) {
-		return finalLayer.sendControlFrameToClient(msg);
-	}
+//	public CompletableFuture<Void> sendControlFrameToClient(Http2Msg msg) {
+//		return finalLayer.sendControlFrameToClient(msg);
+//	}
 	
 	public CompletableFuture<Void> sendPing() {
 		PingFrame ping = new PingFrame();
@@ -112,5 +113,6 @@ public class Level7MarshalAndPing {
 	public CompletableFuture<Void> sendToSocket(ByteBuffer buffer) {
 		return finalLayer.sendToSocket(buffer);
 	}
+
 
 }

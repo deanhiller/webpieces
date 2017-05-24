@@ -21,10 +21,12 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Http1_1StreamImpl implements FrontendStream {
@@ -34,17 +36,19 @@ public class Http1_1StreamImpl implements FrontendStream {
 
 	private FrontendSocketImpl socket;
 	private HttpParser http11Parser;
-	private AtomicReference<PartialStream> endingFrame = new AtomicReference<>();
+	private AtomicReference<Http2Msg> endingFrame = new AtomicReference<>();
 	private StreamSession session = new StreamSessionImpl();
+
+	private StreamHandle streamHandle;
 
 	public Http1_1StreamImpl(FrontendSocketImpl socket, HttpParser http11Parser) {
 		this.socket = socket;
 		this.http11Parser = http11Parser;
 	}
-	
+
 	@Override
-	public CompletableFuture<StreamWriter> sendResponse(Http2Headers headers) {
-		maybeRemove(headers);
+	public CompletableFuture<StreamWriter> sendResponse(Http2Response headers) {
+		maybeRemove(headers, headers.isEndOfStream());
 		HttpResponse response = Http2Translations.translateResponse(headers);
 		Header contentLenHeader = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
 		if(contentLenHeader != null) {
@@ -66,7 +70,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> send(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported="+data);
 			
@@ -85,8 +89,8 @@ public class Http1_1StreamImpl implements FrontendStream {
 	private class Http11ResponseWriter implements StreamWriter {
 
 		@Override
-		public CompletableFuture<StreamWriter> send(PartialStream data) {
-			maybeRemove(data);			
+		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+			maybeRemove(data, data.isEndOfStream());			
 			
 			List<HttpPayload> responses = Http2Translations.translate(data);
 			CompletableFuture<Channel> future = CompletableFuture.completedFuture(null);
@@ -97,7 +101,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 		}
 	}
 	
-	private void maybeRemove(PartialStream data) {
+	private void maybeRemove(Http2Msg data, boolean isEnd) {
 		if(endingFrame.get() != null)
 			throw new IllegalStateException("You had already sent a frame with endOfStream "
 					+ "set and can't send more.  ending frame was="+endingFrame+" but you just sent="+data);
@@ -107,7 +111,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
 					+ "responses in order and this is not the current response that needs responding to");
 
-		if(!data.isEndOfStream())
+		if(!isEnd)
 			return;
 		
 		endingFrame.set(data);
@@ -120,12 +124,12 @@ public class Http1_1StreamImpl implements FrontendStream {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> sendPush(Http2Push push) {
+	public PushStreamHandle openPushStream() {
 		throw new UnsupportedOperationException("not supported for http1.1 requests");
 	}
 
 	@Override
-	public void cancelStream() {
+	public CompletableFuture<Void> cancelStream() {
 		throw new UnsupportedOperationException("not supported for http1.1 requests.  you can use getSocket().close() instead if you like");
 	}
 
@@ -137,6 +141,14 @@ public class Http1_1StreamImpl implements FrontendStream {
 	@Override
 	public StreamSession getSession() {
 		return session;
+	}
+
+	public void setStreamHandle(StreamHandle streamHandle) {
+		this.streamHandle = streamHandle;
+	}
+
+	public StreamHandle getStreamHandle() {
+		return streamHandle;
 	}
 
 }

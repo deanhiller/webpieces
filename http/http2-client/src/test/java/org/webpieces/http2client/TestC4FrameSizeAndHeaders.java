@@ -8,23 +8,25 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.mock.MockResponseListener;
+import org.webpieces.http2client.mock.MockStreamWriter;
 import org.webpieces.http2client.mock.TestAssert;
 import org.webpieces.http2client.util.Requests;
 
 import com.twitter.hpack.Encoder;
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 /**
  * Test this section of rfc..
@@ -44,9 +46,10 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	 */
 	@Test
 	public void testSection4_2FrameTooLarge() {		
+		MockStreamWriter mockStreamWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockStreamWriter));
+		Http2Request request = sendRequestToServer(listener1);
 		sendResponseFromServer(listener1, request);
 		
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
@@ -62,12 +65,12 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertEquals("Frame size=16389 was greater than max="+localSettings.getMaxFrameSize()+" reason=EXCEEDED_MAX_FRAME_SIZE stream=1", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		ConnectionReset failResp = (ConnectionReset) listener1.getSingleReturnValueIncomingResponse();
+		ConnectionReset failResp = (ConnectionReset) listener1.getSingleRstStream();
 		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, failResp.getCause().getReason());
 
 		//send new request on closed connection
-		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		Http2Request request1 = Requests.createRequest();
+		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -79,9 +82,10 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	 */
 	@Test
 	public void testSection4_2CanSendLargestFrame() {
+		MockStreamWriter mockStreamWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockStreamWriter));
+		Http2Request request = sendRequestToServer(listener1);
 		sendResponseFromServer(listener1, request);
 		
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
@@ -89,7 +93,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		dataFrame.setData(dataGen.wrapByteArray(buf));
 		mockChannel.write(dataFrame); //endOfStream=false
 
-		DataFrame fr = (DataFrame) listener1.getSingleReturnValueIncomingResponse();
+		DataFrame fr = (DataFrame) mockStreamWriter.getSingleFrame();
 		Assert.assertEquals(localSettings.getMaxFrameSize(), fr.getData().getReadableSize());
 	}
 
@@ -100,8 +104,8 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	@Test
 	public void testSection4_3BadDecompression() {		
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		Http2Request request = sendRequestToServer(listener1);
 		
 		Assert.assertEquals(1, request.getStreamId()); //has to be 1 since we use 1 in the response
 		
@@ -121,7 +125,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertEquals("Error from hpack library reason=HEADER_DECODE stream=1", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
+		List<RstStreamFrame> results = listener1.getRstStreams();
 		Assert.assertEquals(1, results.size());
 		ConnectionReset failResp = (ConnectionReset) results.get(0);
 		Assert.assertEquals(ParseFailReason.HEADER_DECODE, failResp.getCause().getReason());
@@ -145,9 +149,10 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	 */
 	@Test
 	public void testSection4_3InterleavedFrames() {
+		MockStreamWriter mockStreamWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockStreamWriter));
+		Http2Request request = sendRequestToServer(listener1);
 		
 		Assert.assertEquals(1, request.getStreamId()); //has to be 1 since we use 1 in the response
 	
@@ -158,9 +163,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
 
 		mockChannel.writeFrame(frames.get(1));
-		List<PartialStream> results = listener1.getReturnValuesIncomingResponse();
-		Assert.assertEquals(1, results.size());
-		ConnectionReset reset = (ConnectionReset) results.get(0);
+		ConnectionReset reset = (ConnectionReset) listener1.getSingleRstStream();
 		Assert.assertEquals(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, reset.getCause().getReason());
 		
 		//remote receives goAway
@@ -173,7 +176,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 	}
 
 	private List<Http2Frame> createInterleavedFrames() {
-		Http2Headers response1 = new Http2Headers();
+		Http2Response response1 = new Http2Response();
 		response1.setStreamId(1);
 		response1.setEndOfStream(true);
 		fillHeaders(response1);
@@ -181,7 +184,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		HeaderEncoding encoding = new HeaderEncoding();
 		List<Http2Frame> frames1 = encoding.translateToFrames(localSettings.getMaxFrameSize(), new Encoder(localSettings.getHeaderTableSize()), response1);
 		
-		Http2Headers response2 = new Http2Headers();
+		Http2Response response2 = new Http2Response();
 		response2.setStreamId(3);
 		response1.setEndOfStream(true);
 		response2.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "value"));
@@ -193,7 +196,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		return frames;
 	}
 
-	private void fillHeaders(Http2Headers response1) {
+	private void fillHeaders(Http2Response response1) {
 		String value = "heaheaheaheaheaheahahoz.zhxheh,h,he,he,heaheaeaheaheahoahoahozzoqorqzro.zo.zrszaroatroathoathoathoathoatoh";
 		for(int i = 0; i < 10; i++) {
 			value = value + value;

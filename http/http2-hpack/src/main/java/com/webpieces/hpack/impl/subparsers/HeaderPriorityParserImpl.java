@@ -25,21 +25,21 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 
 	@Override
 	public List<String> parseAcceptEncoding(Http2Headers req) {
-		Http2Header langHeader = req.getHeaderLookupStruct().getHeader(Http2HeaderName.ACCEPT_ENCODING);
-		if(langHeader == null)
+		String encoding = req.getSingleHeaderValue(Http2HeaderName.ACCEPT_ENCODING);
+		if(encoding == null)
 			return new ArrayList<>();
 		
-		List<String> headerItems = parsePriorityItems(langHeader.getValue(), s -> s);
+		List<String> headerItems = parsePriorityItems(encoding, s -> s);
 		return headerItems;
 	}
 	
 	@Override
 	public List<Locale> parseAcceptLangFromRequest(Http2Headers req) {
-		Http2Header langHeader = req.getHeaderLookupStruct().getHeader(Http2HeaderName.ACCEPT_LANGUAGE);
+		String langHeader = req.getSingleHeaderValue(Http2HeaderName.ACCEPT_LANGUAGE);
 		if(langHeader == null)
 			return new ArrayList<>();
 		
-		List<Locale> headerItems = parsePriorityItems(langHeader.getValue(), s -> parseItem(s));
+		List<Locale> headerItems = parsePriorityItems(langHeader, s -> parseItem(s));
 		return headerItems;
 	}
 	
@@ -91,12 +91,11 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 
 	@Override
     public Map<String, String> parseCookiesFromRequest(Http2Headers req) {
-		Http2Header cookieHeader = req.getHeaderLookupStruct().getHeader(Http2HeaderName.COOKIE);
+		String cookieHeader = req.getSingleHeaderValue(Http2HeaderName.COOKIE);
 		if(cookieHeader == null)
 			return new HashMap<>();
 		
-    	String value = cookieHeader.getValue();
-    	String[] split = value.trim().split(";");
+    	String[] split = cookieHeader.split(";");
     	Map<String, String> map = new HashMap<>();
     	for(String keyValPair : split) {
 	    	//there are many = signs but the first one is the cookie name...the other are embedded key=value pairs
@@ -154,12 +153,11 @@ public class HeaderPriorityParserImpl implements HeaderPriorityParser {
 	@Override
 	public List<AcceptType> parseAcceptFromRequest(Http2Headers req) {
 		List<AcceptType> list = new ArrayList<>();
-		Http2Header header = req.getHeaderLookupStruct().getHeader(Http2HeaderName.ACCEPT);
-		if(header == null)
+		String acceptVal = req.getSingleHeaderValue(Http2HeaderName.ACCEPT);
+		if(acceptVal == null)
 			return list;
 		
-		String value = header.getValue();
-		return parsePriorityItems(value, s -> parseAcceptSubitem(s));
+		return parsePriorityItems(acceptVal, s -> parseAcceptSubitem(s));
 	}
 	
 	private AcceptType parseAcceptSubitem(String subItem) {

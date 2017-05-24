@@ -12,12 +12,14 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.impl.DataTry;
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level6RemoteFlowControl {
 
@@ -46,14 +48,15 @@ public class Level6RemoteFlowControl {
 		remoteWindowSize = remoteSettings.getInitialWindowSize();
 	}
 
-	public CompletableFuture<Void> sendPayloadToSocket(Stream stream, PartialStream payload) {
+	public CompletableFuture<Void> sendPayloadToSocket(Stream stream, Http2Msg payload) {
 		log.info("sending payload to socket="+payload);
-		if(!(payload instanceof DataFrame))
-			return layer6NotifyListener.sendFrameToSocket(payload);
-		
-		DataFrame f = (DataFrame) payload;
+		return layer6NotifyListener.sendFrameToSocket(payload);
+	}
+	
+	public CompletableFuture<Void> sendDataToSocket(Stream stream, DataFrame dataFrame) {
+		log.info("sending payload to socket="+dataFrame);
 		CompletableFuture<Void> future = new CompletableFuture<>();
-		DataTry data = new DataTry(stream, f, future, false);
+		DataTry data = new DataTry(stream, dataFrame, future, false);
 		trySendPayload(data);
 		return future;
 	}

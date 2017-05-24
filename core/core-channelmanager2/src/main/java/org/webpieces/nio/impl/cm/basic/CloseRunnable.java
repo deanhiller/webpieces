@@ -2,9 +2,9 @@ package org.webpieces.nio.impl.cm.basic;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.nio.api.channels.Channel;
 
 
 public class CloseRunnable {

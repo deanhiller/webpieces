@@ -34,10 +34,10 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.StatusCode;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
@@ -99,7 +99,7 @@ public class StaticFileReader {
 
 	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(),
 	    		StatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
-	    Http2Headers response = tuple.response;
+	    Http2Response response = tuple.response;
 	    response.setEndOfStream(false);
 
 		// we shouldn't have to add chunked because the responseSender will add chunked for us
@@ -210,7 +210,7 @@ public class StaticFileReader {
 	private CompletableFuture<StreamWriter> sendLastChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf) {
 		pool.releaseBuffer(buf);
 		DataFrame frame = new DataFrame();
-		return writer.send(frame);
+		return writer.processPiece(frame);
 	}
 
 	private CompletableFuture<ByteBuffer> asyncRead(BufferPool pool, Path file, AsynchronousFileChannel asyncFile, long position) {
@@ -241,6 +241,6 @@ public class StaticFileReader {
 		DataFrame frame = new DataFrame();
 		frame.setEndOfStream(false);
 		frame.setData(data);
-		return writer.send(frame);
+		return writer.processPiece(frame);
 	}
 }

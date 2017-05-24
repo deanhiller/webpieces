@@ -1,6 +1,7 @@
 package org.webpieces.httpfrontend2.api.mock2;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,14 +12,15 @@ import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
 public class MockHttp2RequestListener extends MockSuperclass implements HttpRequestListener {
 
 	private enum Method implements MethodEnum {
-		INCOMING, CANCEL
+		PROCESS, CANCEL, CANCEL_PUSH
 	}
 	
 	public static class Cancel {
@@ -33,39 +35,70 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	
 	public static class PassedIn {
 		public FrontendStream stream;
-		public Http2Headers request;
+		public Http2Request request;
 		public SocketInfo type;
-		public PassedIn(FrontendStream stream, Http2Headers headers, SocketInfo type) {
+		public PassedIn(FrontendStream stream, Http2Request request, SocketInfo type) {
 			super();
 			this.stream = stream;
-			this.request = headers;
+			this.request = request;
 			this.type = type;
 		}
 	}
 	
+	public MockHttp2RequestListener() {
+		setDefaultReturnValue(Method.CANCEL, CompletableFuture.completedFuture(null));
+	}
+	
 	@Override
-	public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, SocketInfo type) {
-		return (StreamWriter) super.calledMethod(Method.INCOMING, new PassedIn(stream, headers, type));
+	public StreamHandle openStream(FrontendStream stream, SocketInfo info) {
+		return new StreamHandleProxy(stream, info);
 	}
 
+	private class StreamHandleProxy implements StreamHandle {
+
+		private FrontendStream stream;
+		private SocketInfo info;
+
+		public StreamHandleProxy(FrontendStream stream, SocketInfo info) {
+			this.stream = stream;
+			this.info = info;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public CompletableFuture<StreamWriter> process(Http2Request request) {
+			return (CompletableFuture<StreamWriter>) 
+					MockHttp2RequestListener.super.calledMethod(Method.PROCESS, new PassedIn(stream, request, info));
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public CompletableFuture<Void> cancel(RstStreamFrame reset) {
+			return (CompletableFuture<Void>) 
+					MockHttp2RequestListener.super.calledMethod(Method.CANCEL, new Cancel(stream, reset));
+		}
+		
+	}
+	
 	public void setDefaultRetVal(StreamWriter writer) {
-		super.setDefaultReturnValue(Method.INCOMING, writer);
+		CompletableFuture<StreamWriter> writerFuture = CompletableFuture.completedFuture(writer);
+		super.setDefaultReturnValue(Method.PROCESS, writerFuture);
+	}
+	
+	public void addMockStreamToReturn(StreamWriter writer) {
+		CompletableFuture<StreamWriter> writerFuture = CompletableFuture.completedFuture(writer);
+		super.addValueToReturn(Method.PROCESS, writerFuture);
 	}
 	
 	public int getNumRequestsThatCameIn() {
-		return super.getCalledMethodList(Method.INCOMING).size();
+		return super.getCalledMethodList(Method.PROCESS).size();
 	}
 	
 	public PassedIn getSingleRequest() {
-		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.PROCESS);
 		if(list.size() != 1)
 			throw new IllegalArgumentException("method was not called exactly once. numTimes="+list.size());
 		return (PassedIn) list.get(0).getArgs()[0];
-	}
-
-	@Override
-	public void cancelRequest(FrontendStream stream, RstStreamFrame c) {
-		super.calledVoidMethod(Method.CANCEL, new Cancel(stream, c));
 	}
 
 	public List<Cancel> getCancels() {
@@ -84,10 +117,6 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 
 	public int getNumCancelsThatCameIn() {
 		return super.getCalledMethodList(Method.CANCEL).size();
-	}
-
-	public void addMockStreamToReturn(StreamWriter writer) {
-		super.addValueToReturn(Method.INCOMING, writer);
 	}
 
 }

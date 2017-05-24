@@ -99,7 +99,7 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	public void farEndClosed(HttpRequestListener httpListener) {
 		isClosed = true;
-		ConnectionReset f = new ConnectionReset("The far end closed the socket", true);
+		ConnectionReset f = new ConnectionReset("The far end closed the socket", null, true);
 		f.setKnownErrorCode(Http2ErrorCode.CONNECT_ERROR);
 		if(protocol == ProtocolType.HTTP1_1) {
 			cancelAllStreams(httpListener, f);
@@ -113,13 +113,13 @@ public class FrontendSocketImpl implements FrontendSocket {
 			if(poll == null)
 				break;
 			
-			fireCancel(httpListener, f, poll);
+			fireCancel(f, poll);
 		}
 	}
 
-	private void fireCancel(HttpRequestListener httpListener, ConnectionReset f, Http1_1StreamImpl poll) {
+	private void fireCancel(ConnectionReset f, Http1_1StreamImpl stream) {
 		try {
-			httpListener.cancelRequest(poll, f);
+			stream.getStreamHandle().cancel(f);
 		} catch(Throwable e) {
 			log.warn("exception from stream trying to cancel.  swallowing and continuing", e);
 		}

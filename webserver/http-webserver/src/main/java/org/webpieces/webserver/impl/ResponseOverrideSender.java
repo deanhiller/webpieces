@@ -8,7 +8,7 @@ import org.webpieces.ctx.api.OverwritePlatformResponse;
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class ResponseOverrideSender {
@@ -24,13 +24,13 @@ public class ResponseOverrideSender {
 		return "ResponseOverrideSender [responseSender=" + stream + "]";
 	}
 
-	public CompletableFuture<StreamWriter> sendResponse(Http2Headers response) {
+	public CompletableFuture<StreamWriter> sendResponse(Http2Response response) {
 		//in some exceptional cases like incoming cookies failing to parse, there will be no context
-		Http2Headers finalResp = response;
+		Http2Response finalResp = response;
 		if(Current.isContextSet()) {
 			List<OverwritePlatformResponse> callbacks = Current.getContext().getCallbacks();
 			for(OverwritePlatformResponse callback : callbacks) {
-				finalResp = (Http2Headers)callback.modifyOrReplace(finalResp);
+				finalResp = (Http2Response)callback.modifyOrReplace(finalResp);
 			}
 		}
 		

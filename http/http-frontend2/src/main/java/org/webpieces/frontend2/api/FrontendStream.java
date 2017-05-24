@@ -2,17 +2,20 @@ package org.webpieces.frontend2.api;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public interface FrontendStream {
 
-	CompletableFuture<StreamWriter> sendResponse(Http2Headers headers);
+	CompletableFuture<StreamWriter> sendResponse(Http2Response headers);
 	
-	CompletableFuture<StreamWriter> sendPush(Http2Push push);
+	PushStreamHandle openPushStream();
 	
-	void cancelStream();
+	/**
+	 * Cancel the request stream and all push streams as well.  
+	 */
+	CompletableFuture<Void> cancelStream();
 
 	FrontendSocket getSocket();
 	

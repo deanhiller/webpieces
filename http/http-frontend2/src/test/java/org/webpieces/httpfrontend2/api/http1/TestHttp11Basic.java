@@ -22,7 +22,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 
@@ -55,7 +55,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		
 		HttpResponse resp = Requests.createResponse();
 		resp.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
-		Http2Headers headers = (Http2Headers) Http2Translations.responseToHeaders(resp, false);
+		Http2Response headers = Http2Translations.responseToHeaders(resp);
 		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers);
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, respToClient);
@@ -67,7 +67,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		String bodyStr = "hi here and there";
 		DataWrapper data = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		dataFrame.setData(data);
-		writer.send(dataFrame);
+		writer.processPiece(dataFrame);
 		
 		List<HttpPayload> frames = mockChannel.getFramesAndClear();
 		Assert.assertEquals(2, frames.size());
@@ -128,7 +128,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		Assert.assertTrue(frame.isEndOfStream());
 		
 		HttpResponse resp = Requests.createResponse();
-		Http2Headers http2Resp = (Http2Headers) Http2Translations.responseToHeaders(resp, false);
+		Http2Response http2Resp = Http2Translations.responseToHeaders(resp);
 		in1.stream.sendResponse(http2Resp);
 		
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();

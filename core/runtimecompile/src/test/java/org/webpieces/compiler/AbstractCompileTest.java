@@ -10,13 +10,13 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.compiler.impl.CompileOnDemandImpl;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public abstract class AbstractCompileTest {
 

@@ -11,7 +11,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.client.ClientEngineListener;
-import com.webpieces.http2parser.api.Http2Exception;
+import com.webpieces.http2parser.api.dto.error.Http2Exception;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public class Layer3Outgoing implements ClientEngineListener {

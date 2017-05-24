@@ -1,9 +1,9 @@
 package org.webpieces.compiler.impl;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class CompileOnDemandImpl implements CompileOnDemand {
 

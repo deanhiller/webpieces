@@ -2,24 +2,23 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
-import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2engine.api.server.StreamReference;
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.StreamException;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.StreamException;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public abstract class Level4AbstractStreamMgr {
+public abstract class Level4AbstractStreamMgr<T> {
 
 	private final static Logger log = LoggerFactory.getLogger(Level4AbstractStreamMgr.class);
 	protected StreamState streamState;
@@ -42,9 +41,13 @@ public abstract class Level4AbstractStreamMgr {
 	}
 
 	public abstract CompletableFuture<Void> sendPayloadToApp(PartialStream msg);
-	protected abstract CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame);
 
-	public CompletableFuture<Void> sendRstToServerAndClient(StreamException e) {
+	public CompletableFuture<Void> sendRstToApp(RstStreamFrame frame) {
+		Stream stream = streamState.getStream(frame, true);
+		return sendResetToApp(stream, frame, false);
+	}
+	
+	public CompletableFuture<Void> sendRstToServerAndApp(StreamException e) {
 		if(closedReason != null) {
 			log.info("ignoring incoming reset since socket is shutting down");
 			return CompletableFuture.completedFuture(null);
@@ -56,49 +59,41 @@ public abstract class Level4AbstractStreamMgr {
 		boolean streamExist = streamState.isStreamExist(frame);
 		if(streamExist) {
 			Stream stream = streamState.getStream(frame, true);
+			
 			return fireRstToSocket(stream, frame)
-					.thenCompose(t -> localFlowControl.fireToClient(stream, frame));
+					.thenCompose( v -> sendResetToApp(stream, frame, false));
 		} else {
 			//no stream means idle or closed...
 			return remoteFlowControl.fireResetToSocket(frame);
 		}
 	}
 
-	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionException reset) {
-		return sendClientResetsAndSvrGoAway(new ConnectionReset(reset));
+	public CompletableFuture<Void> sendGoAwayToApp(ConnectionReset reset) {		
+		resetAllClientStreams(reset);
+		return CompletableFuture.completedFuture(null);
 	}
 	
-	public CompletableFuture<Void> sendClientResetsAndSvrGoAway(ConnectionReset reset) {
+	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ConnectionReset reset) {
 		closedReason = reset;
-		ConcurrentMap<Integer, Stream> streams = streamState.closeEngine();
-		for(Stream stream : streams.values()) {
-			Http2ResponseListener responseListener = stream.getResponseListener();
-			if(responseListener != null)
-				fireReset((c) -> responseListener.incomingPartialResponse(c));
-			PushPromiseListener pushListener = stream.getPushListener();
-			if(pushListener != null)
-				fireReset((c) -> pushListener.incomingPushPromise(c));
-			StreamReference writer = stream.getStreamWriter();
-			if(writer != null)
-				fireReset((c) -> writer.cancel(c).thenApply((w) -> null));
-		}
 		
-		if(!reset.isFarEndClosed())
-			return remoteFlowControl.goAway(reset.getCause());
+		remoteFlowControl.goAway(reset.getCause());
 		
+		resetAllClientStreams(reset);
+		
+		//since we are closing...mark closed so app can start failing immediately (rather than wait for it to write to nic)
 		return CompletableFuture.completedFuture(null);
 	}
 
-	private void fireReset(Function<ConnectionReset, CompletableFuture<Void>> clientFunction) {
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
-		try {
-			future = clientFunction.apply(closedReason);
-		} catch(Throwable t) {
-			future.completeExceptionally(t);
-		}
-		
-		future.exceptionally((t) -> {
-			log.error("when trying inform client of connection error, client had an exception", t);
+	private void resetAllClientStreams(ConnectionReset reset) {
+		ConcurrentMap<Integer, Stream> streams = streamState.closeEngine();
+		for(Stream stream : streams.values()) {
+			sendResetToApp(stream, reset, false);
+		}		
+	}
+
+	protected CompletableFuture<Void> sendResetToApp(Stream stream, RstStreamFrame payload, boolean keepDelayedState) {
+		return stateMachine.fireToClient(stream, payload).thenApply(v -> {
+			checkForClosedState(stream, payload, keepDelayedState);
 			return null;
 		});
 	}
@@ -117,17 +112,16 @@ public abstract class Level4AbstractStreamMgr {
 		}
 	}
 
-	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
+	public CompletableFuture<Void> sendData(Stream stream, PartialStream data) {
 		if(closedReason != null) {
-			return createExcepted("sending "+data.getClass().getSimpleName());
+			return createExcepted(data, "sending data");
 		}
 		
 		return fireToSocket(stream, data, false);
 	}
 	
-	
-	public CompletableFuture<Void> createExcepted(String extra) {
-		log.info("returning CompletableFuture.exception since this socket is closed(while doing '"+extra+"'):"+closedReason.getReason());
+	public CompletableFuture<Void> createExcepted(Http2Msg payload, String extra) {
+		log.info("returning CompletableFuture.exception since this socket is closed('"+extra+"' frame="+payload+"):"+closedReason.getReason());
 		CompletableFuture<Void> future = new CompletableFuture<>();
 
 		ConnectionClosedException exception = new ConnectionClosedException("Connection closed or closing:"+closedReason.getReason());
@@ -137,6 +131,9 @@ public abstract class Level4AbstractStreamMgr {
 		return future;
 	}
 	
+	public CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
+		return fireToSocket(stream, frame, true);
+	}
 	
 	protected CompletableFuture<Void> fireToSocket(Stream stream, PartialStream frame, boolean keepDelayedState) {
 		return stateMachine.fireToSocket(stream, frame).thenApply(v -> {
@@ -145,7 +142,10 @@ public abstract class Level4AbstractStreamMgr {
 		});
 	}
 	
-	protected void checkForClosedState(Stream stream, PartialStream cause, boolean keepDelayedState) {
+	/**
+	 * Returns if calling this resulted in closing the stream and cleaning up state
+	 */
+	protected void checkForClosedState(Stream stream, Http2Msg cause, boolean keepDelayedState) {
 		//If a stream ends up in closed state, for request type streams, we must release a permit on
 		//max concurrent streams
 		boolean isClosed = stateMachine.isInClosedState(stream);
@@ -155,7 +155,7 @@ public abstract class Level4AbstractStreamMgr {
 		log.info("stream closed="+stream.getStreamId());
 		
 		if(!keepDelayedState) {
-			Stream removedStream = streamState.remove(stream);
+			Stream removedStream = streamState.remove(stream, cause);
 			if(removedStream == null)
 				return; //someone else closed the stream. they beat us to it so just return
 		} else {
@@ -163,21 +163,26 @@ public abstract class Level4AbstractStreamMgr {
 			throw new UnsupportedOperationException("not supported");
 		}
 		
-		release(stream, cause);
-
-		return; //we closed the stream
 	}
 	
-	protected abstract void release(Stream stream, PartialStream cause);
 
-	public void setMaxConcurrentStreams(long value) {
-		remoteSettings.setMaxConcurrentStreams(value);
+	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame frame) {
+		if(closedReason != null) {
+			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
+			return CompletableFuture.completedFuture(null);
+		}
 		
-		modifyMaxConcurrentStreams(value);
+		Stream stream;
+		try {
+			stream = streamState.getStream(frame, true);
+		} catch(ConnectionException e) {
+			//per spec, priority frames can be received on closed stream but ignore it
+			return CompletableFuture.completedFuture(null);
+		}			
+		
+		return stateMachine.firePriorityToClient(stream, frame)
+						.thenApply(s -> null);
+
 	}
-
-	protected abstract void modifyMaxConcurrentStreams(long value);
-
-	public abstract CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg);
 
 }

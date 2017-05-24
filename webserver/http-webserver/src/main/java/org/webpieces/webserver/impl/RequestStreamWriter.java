@@ -26,10 +26,12 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2HeaderStruct;
 import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -71,14 +73,14 @@ public class RequestStreamWriter implements StreamWriter {
 
 	private RequestHelpFacade facade;
 	private FrontendStream stream;
-	private Http2Headers requestHeaders;
+	private Http2Request requestHeaders;
 
 	private CompletableFuture<Void> outstandingRequest;
 	private DataWrapper data = dataGen.emptyWrapper();
 	private boolean cancelled;
 	private SocketInfo socketInfo;
 
-	public RequestStreamWriter(RequestHelpFacade facade, FrontendStream stream, Http2Headers headers, SocketInfo socketInfo) {
+	public RequestStreamWriter(RequestHelpFacade facade, FrontendStream stream, Http2Request headers, SocketInfo socketInfo) {
 		this.facade = facade;
 		this.stream = stream;
 		this.requestHeaders = headers;
@@ -86,7 +88,7 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> send(PartialStream frame) {
+	public CompletableFuture<StreamWriter> processPiece(PartialStream frame) {
 		if(cancelled)
 			return CompletableFuture.completedFuture(this);
 		else if(frame instanceof DataFrame) {
@@ -118,11 +120,10 @@ public class RequestStreamWriter implements StreamWriter {
 		//or the secure routes will not show up
 		routerRequest.isHttps = socketInfo.isHttps();
 
-		Http2Header header = requestHeaders.getHeaderLookupStruct().getHeader(Http2HeaderName.AUTHORITY);
-		if(header == null) {
-			throw new IllegalArgumentException("Must contain Host header");
+		String domain = requestHeaders.getAuthority();
+		if(domain == null) {
+			throw new IllegalArgumentException("Must contain Host(http1.1) or :authority(http2) header");
 		}
-		String domain = header.getValue();
 
 		int port = 80;
         if(routerRequest.isHttps)
@@ -138,34 +139,32 @@ public class RequestStreamWriter implements StreamWriter {
 			domain = domain.substring(0, index2);
 		}
 		
-
-		Http2Header methodHeader = requestHeaders.getHeaderLookupStruct().getHeader(Http2HeaderName.METHOD);
-		
-		HttpMethod method = HttpMethod.lookup(methodHeader.getValue());
+		String methodString = requestHeaders.getMethodString();
+		HttpMethod method = HttpMethod.lookup(methodString);
 		if(method == null)
-			throw new UnsupportedOperationException("method not supported="+methodHeader);
+			throw new UnsupportedOperationException("method not supported="+methodString);
 
 		parseCookies(requestHeaders, routerRequest);
 		parseAcceptLang(requestHeaders, routerRequest);
 		parseAccept(requestHeaders, routerRequest);
 		routerRequest.encodings = headerParser.parseAcceptEncoding(requestHeaders);
 
-		Http2Header referHeader = requestHeaders.getHeaderLookupStruct().getHeader(Http2HeaderName.REFERER);
+		String referHeader = requestHeaders.getSingleHeaderValue(Http2HeaderName.REFERER);
 		if(referHeader != null)
-			routerRequest.referrer = referHeader.getValue().trim();
+			routerRequest.referrer = referHeader;
 
-		Http2Header xRequestedWithHeader = requestHeaders.getHeaderLookupStruct().getHeader(Http2HeaderName.X_REQUESTED_WITH);
-		if(xRequestedWithHeader != null && "XMLHttpRequest".equals(xRequestedWithHeader.getValue().trim()))
+		String xRequestedWithHeader = requestHeaders.getSingleHeaderValue(Http2HeaderName.X_REQUESTED_WITH);
+		if("XMLHttpRequest".equals(xRequestedWithHeader))
 			routerRequest.isAjaxRequest = true;
 		
-		Http2Header pathHeader = requestHeaders.getHeaderLookupStruct().getHeader(Http2HeaderName.PATH);
-
+		String fullPath = requestHeaders.getPath();
+		if(fullPath == null)
+			throw new IllegalArgumentException(":path header(http2) or path in request line(http1.1) is required");
 		
 		parseBody(requestHeaders, routerRequest);
 		routerRequest.method = method;
 		routerRequest.domain = domain;
 		routerRequest.port = port;
-		String fullPath = pathHeader.getValue();
 		int index = fullPath.indexOf("?");
 		if(index > 0) {
 			routerRequest.relativePath = fullPath.substring(0, index);
@@ -244,20 +243,19 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 
 	private void parseBody(Http2Headers req, RouterRequest routerRequest) {
-		Http2HeaderStruct headers = req.getHeaderLookupStruct();
-		Http2Header lengthHeader = headers.getHeader(Http2HeaderName.CONTENT_LENGTH);
-		Http2Header typeHeader = headers.getHeader(Http2HeaderName.CONTENT_TYPE);
+		String lengthHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
+		String typeHeader = req.getSingleHeaderValue(Http2HeaderName.CONTENT_TYPE);
 
 		routerRequest.body = data;
 
 		if(lengthHeader != null) {
 			//Integer.parseInt(lengthHeader.getValue()); should not fail as it would have failed earlier in the parser when
 			//reading in the body
-			routerRequest.contentLengthHeaderValue = Integer.parseInt(lengthHeader.getValue());
+			routerRequest.contentLengthHeaderValue = Integer.parseInt(lengthHeader);
 		} 
 		
 		if(typeHeader != null) {
-			routerRequest.contentTypeHeaderValue = typeHeader.getValue();
+			routerRequest.contentTypeHeaderValue = typeHeader;
 		}
 	}
 
@@ -267,8 +265,8 @@ public class RequestStreamWriter implements StreamWriter {
 
 	public void cancelOutstandingRequest() {
 		cancelled = true;
-//		if(outstandingRequest != null)
-//			outstandingRequest.cancel(true);
+		if(outstandingRequest != null)
+			outstandingRequest.cancel(true);
 	}
 
 }

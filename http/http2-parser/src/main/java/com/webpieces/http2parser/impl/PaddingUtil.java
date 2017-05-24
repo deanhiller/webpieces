@@ -6,8 +6,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 
 public class PaddingUtil {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();

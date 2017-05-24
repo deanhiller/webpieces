@@ -1,60 +1,65 @@
 package com.webpieces.http2engine.impl.svr;
 
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.RECV_DATA;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.RECV_DATA_EOS;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.RECV_HEADERS;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.RECV_HEADERS_EOS;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.RECV_RST;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_DATA;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_DATA_EOS;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_HEADERS;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_HEADERS_EOS;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_PUSH;
+import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
+
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.javasm.api.State;
 
-import com.webpieces.http2engine.impl.shared.Http2Event;
-import com.webpieces.http2engine.impl.shared.Http2Event.Http2SendRecieve;
-import com.webpieces.http2engine.impl.shared.Http2PayloadType;
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.impl.shared.Level5AbstractStateMachine;
-import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 
 public class Level5ServerStateMachine extends Level5AbstractStateMachine {
 
+	private Level6SvrLocalFlowControl local;
+
 	public Level5ServerStateMachine(String id, Level6RemoteFlowControl remoteFlowControl,
-			Level6LocalFlowControl localFlowControl) {
+			Level6SvrLocalFlowControl localFlowControl) {
 		super(id, remoteFlowControl, localFlowControl);
+		local = localFlowControl;
 		
 		State reservedLocal = stateMachine.createState("Reserved(local)");
-		State halfClosedRemote = stateMachine.createState("Half Closed(remote)");
 	
 		NoTransitionImpl failIfNoTransition = new NoTransitionImpl(true);
 		NoTransitionImpl streamErrorNoTransition = new NoTransitionImpl(false);
 		idleState.addNoTransitionListener(failIfNoTransition);
 		openState.addNoTransitionListener(failIfNoTransition);
-		closed.addNoTransitionListener(failIfNoTransition);
+		closed.addNoTransitionListener(streamErrorNoTransition);
 		reservedLocal.addNoTransitionListener(failIfNoTransition);
 		halfClosedRemote.addNoTransitionListener(streamErrorNoTransition);
 		
-		Http2Event sentHeadersNoEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS);
-		Http2Event sentHeadersEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.HEADERS_WITH_EOS);
+		stateMachine.createTransition(idleState, openState, RECV_HEADERS);
+		stateMachine.createTransition(idleState, halfClosedRemote, RECV_HEADERS_EOS); //jump to half closed as is send H AND send ES
+		stateMachine.createTransition(idleState, reservedLocal, SENT_PUSH);
 		
-		Http2Event recvHeadersNoEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS);
-		Http2Event recvHeadersEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.HEADERS_WITH_EOS);
+		stateMachine.createTransition(openState, openState, RECV_DATA, SENT_DATA, SENT_HEADERS);
+		stateMachine.createTransition(openState, halfClosedRemote, RECV_DATA_EOS, RECV_HEADERS_EOS);
+		stateMachine.createTransition(openState, halfClosedLocal, SENT_DATA_EOS, SENT_HEADERS_EOS);
+		stateMachine.createTransition(openState, closed, SENT_RST, RECV_RST);
+		
+		stateMachine.createTransition(reservedLocal, halfClosedRemote, SENT_HEADERS);
+		stateMachine.createTransition(reservedLocal, closed, SENT_HEADERS_EOS, SENT_RST, RECV_RST);
+		
+		stateMachine.createTransition(halfClosedRemote, halfClosedRemote, SENT_HEADERS, SENT_DATA);
 
-		Http2Event sentPushPromise = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.PUSH_PROMISE);
-		Http2Event sentResetStream = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.RESET_STREAM);		
-		Http2Event recvResetStream = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.RESET_STREAM);
-		
-		Http2Event dataSendNoEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA);
-		Http2Event dataSendEos = new Http2Event(Http2SendRecieve.SEND, Http2PayloadType.DATA_WITH_EOS);
-		
-		Http2Event dataRecvNoEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA);
-		Http2Event dataRecvEos = new Http2Event(Http2SendRecieve.RECEIVE, Http2PayloadType.DATA_WITH_EOS);
+		stateMachine.createTransition(halfClosedLocal, halfClosedLocal, RECV_DATA); //only trailing headers allowed (ie. must have EOS)
 
-		stateMachine.createTransition(idleState, openState, recvHeadersNoEos);
-		stateMachine.createTransition(idleState, halfClosedRemote, recvHeadersEos); //jump to half closed as is send H AND send ES
-		stateMachine.createTransition(idleState, reservedLocal, sentPushPromise);
-		
-		stateMachine.createTransition(openState, openState, dataRecvNoEos);
-		stateMachine.createTransition(openState, halfClosedRemote, dataRecvEos, recvHeadersEos);
-		stateMachine.createTransition(openState, closed, sentResetStream, recvResetStream);
-		
-		stateMachine.createTransition(reservedLocal, halfClosedRemote, sentHeadersNoEos);
-		stateMachine.createTransition(reservedLocal, closed, sentHeadersEos, sentResetStream, recvResetStream);
-		
-		stateMachine.createTransition(halfClosedRemote, closed, sentHeadersEos, dataSendEos, recvResetStream, sentResetStream);
-		stateMachine.createTransition(halfClosedRemote, halfClosedRemote, sentHeadersNoEos, dataSendNoEos);
 	}
 
+	public CompletableFuture<State> fireToClient(ServerStream stream, Http2Request payload) {
+		State result = fireToClientImpl(stream, payload);
+		return local.fireHeadersToClient(stream, payload)
+				.thenApply( v -> result);
+	}
 }

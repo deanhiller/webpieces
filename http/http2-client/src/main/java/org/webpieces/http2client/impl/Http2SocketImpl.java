@@ -5,17 +5,18 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2client.api.dto.Http2Request;
-import org.webpieces.http2client.api.dto.Http2Response;
+import org.webpieces.http2client.api.dto.FullRequest;
+import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
 import com.webpieces.http2parser.api.dto.DataFrame;
 
 public class Http2SocketImpl implements Http2Socket {
@@ -51,34 +52,53 @@ public class Http2SocketImpl implements Http2Socket {
 		return outgoing.close().thenApply(channel -> this);
 	}
 
+	/**
+	 * Can't specifically backpressure with this method(ie. On the other method, if you do not ack, eventually
+	 * with too many bytes, the channelmanager disregisters and stops reading from the socket placing backpressure
+	 * on the socket)
+	 */
 	@Override
-	public CompletableFuture<Http2Response> send(Http2Request request) {
+	public CompletableFuture<FullResponse> send(FullRequest request) {
 		SingleResponseListener responseListener = new SingleResponseListener();
+		
+		StreamHandle streamHandle = openStream(responseListener);
+		
+		Http2Request req = request.getHeaders();
 		
 		if(request.getPayload() == null) {
 			request.getHeaders().setEndOfStream(true);
-			send(request.getHeaders(), responseListener);
+			streamHandle.process(req);
 			return responseListener.fetchResponseFuture();
 		} else if(request.getTrailingHeaders() == null) {
 			request.getHeaders().setEndOfStream(false);
 			DataFrame data = createData(request, true);
 			
-			return send(request.getHeaders(), responseListener)
-						.thenCompose(writer -> writer.send(data))
+			return streamHandle.process(request.getHeaders())
+						.thenCompose(writer -> {
+							data.setStreamId(req.getStreamId());
+							return writer.processPiece(data);
+						})
 						.thenCompose(writer -> responseListener.fetchResponseFuture());
 		}
 		
 		request.getHeaders().setEndOfStream(false);
 		DataFrame data = createData(request, false);
-		request.getTrailingHeaders().setEndOfStream(true);
+		Http2Trailers trailers = request.getTrailingHeaders();
+		trailers.setEndOfStream(true);
 		
-		return send(request.getHeaders(), responseListener)
-			.thenCompose(writer -> writer.send(data))
-			.thenCompose(writer -> writer.send(request.getTrailingHeaders()))
+		return streamHandle.process(request.getHeaders())
+				.thenCompose(writer -> {
+					data.setStreamId(req.getStreamId());
+					return writer.processPiece(data);
+				})
+			.thenCompose(writer -> {
+				trailers.setStreamId(req.getStreamId());
+				return writer.processPiece(trailers);
+			})
 			.thenCompose(writer -> responseListener.fetchResponseFuture());
 	}
 
-	private DataFrame createData(Http2Request request, boolean isEndOfStream) {
+	private DataFrame createData(FullRequest request, boolean isEndOfStream) {
 		DataWrapper payload = request.getPayload();
 		DataFrame data = new DataFrame();
 		data.setEndOfStream(isEndOfStream);
@@ -87,8 +107,8 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> send(Http2Headers request, Http2ResponseListener listener) {
-		return incoming.sendRequest(request, listener);
+	public StreamHandle openStream(ResponseHandler2 listener) {
+		return incoming.openStream(listener);
 	}
 
 	@Override

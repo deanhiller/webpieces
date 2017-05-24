@@ -1,0 +1,38 @@
+package com.webpieces.http2engine.impl.client;
+
+import java.util.concurrent.CompletableFuture;
+
+import com.webpieces.hpack.api.HpackParser;
+import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
+import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+
+public class Level2ClientParsing extends Level2ParsingAndRemoteSettings {
+
+	private Level3ClntIncomingSynchro clientSyncro;
+
+	public Level2ClientParsing(
+			Level3ClntIncomingSynchro syncro,
+			Level3ClntOutgoingSyncro outSyncro,
+			Level7MarshalAndPing notifyListener, 
+			HpackParser lowLevelParser, 
+			Http2Config config
+	) {
+		super(syncro, outSyncro, notifyListener, lowLevelParser, config);
+		clientSyncro = syncro;
+	}
+	
+	@Override
+	protected CompletableFuture<Void> processSpecific(Http2Msg msg) {
+		if(msg instanceof Http2Response) {
+			return clientSyncro.processResponse((Http2Response) msg);
+		} else if(msg instanceof Http2Push) {
+			return clientSyncro.processPush((Http2Push) msg);			
+		} else
+			throw new IllegalArgumentException("Unknown HttpMsg type.  msg="+msg+" type="+msg.getClass());
+	}
+
+}

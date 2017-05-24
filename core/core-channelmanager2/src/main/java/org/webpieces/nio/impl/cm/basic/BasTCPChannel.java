@@ -10,14 +10,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
 import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 
 

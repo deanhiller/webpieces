@@ -15,14 +15,15 @@ import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.TestAssert;
 
 import com.twitter.hpack.Encoder;
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -52,7 +53,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		int streamId = 1;
 		PassedIn info = sendRequestToServer(streamId, false);
 		FrontendStream stream = info.stream;
-		Http2Headers request = info.request;
+		Http2Request request = info.request;
 
 		//send data that goes with request
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
@@ -73,7 +74,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReason());
 
 		//send response with request not complete but failed as well anyways
-		Http2Headers response = Http2Requests.createResponse(request.getStreamId());
+		Http2Response response = Http2Requests.createResponse(request.getStreamId());
 		CompletableFuture<StreamWriter> future = stream.sendResponse(response);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
@@ -149,7 +150,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 	}
 
 	private List<Http2Frame> createInterleavedFrames() {
-		Http2Headers response1 = new Http2Headers();
+		Http2Response response1 = new Http2Response();
 		response1.setStreamId(1);
 		response1.setEndOfStream(true);
 		fillHeaders(response1);
@@ -157,7 +158,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		HeaderEncoding encoding = new HeaderEncoding();
 		List<Http2Frame> frames1 = encoding.translateToFrames(localSettings.getMaxFrameSize(), new Encoder(localSettings.getHeaderTableSize()), response1);
 		
-		Http2Headers response2 = new Http2Headers();
+		Http2Response response2 = new Http2Response();
 		response2.setStreamId(3);
 		response1.setEndOfStream(true);
 		response2.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "value"));
@@ -169,7 +170,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		return frames;
 	}
 
-	private void fillHeaders(Http2Headers response1) {
+	private void fillHeaders(Http2Response response1) {
 		String value = "heaheaheaheaheaheahahoz.zhxheh,h,he,he,heaheaeaheaheahoahoahozzoqorqzro.zo.zrszaroatroathoathoathoathoatoh";
 		for(int i = 0; i < 10; i++) {
 			value = value + value;

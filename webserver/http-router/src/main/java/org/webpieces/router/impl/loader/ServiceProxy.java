@@ -71,10 +71,6 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
-		RouterRequest req = meta.getCtx().getRequest();
-		
-		log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
-
 		parseBodyFromContentType(meta.getRoute(), meta.getCtx(), meta.getBodyContentBinder());
 
 		Method m = meta.getMethod();

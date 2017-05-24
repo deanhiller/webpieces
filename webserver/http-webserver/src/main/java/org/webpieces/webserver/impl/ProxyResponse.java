@@ -33,9 +33,10 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2parser.api.StatusCode;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
@@ -65,9 +66,9 @@ public class ProxyResponse implements ResponseStreamer {
 	//private HttpRequest request;
 	private BufferPool pool;
 	private RouterRequest routerRequest;
-	private Http2Headers request;
+	private Http2Request request;
 
-	public void init(RouterRequest req, Http2Headers requestHeaders, FrontendStream responseSender, BufferPool pool) {
+	public void init(RouterRequest req, Http2Request requestHeaders, FrontendStream responseSender, BufferPool pool) {
 		this.routerRequest = req;
 		this.request = requestHeaders;
 		this.stream = new ResponseOverrideSender(responseSender);
@@ -76,7 +77,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
 		RedirectResponse httpResponse = new RedirectResponse(false, req.isHttps, req.domain, req.port, req.relativePath);
-		Http2Headers response = createRedirect(httpResponse);
+		Http2Response response = createRedirect(httpResponse);
 		
 		responseCreator.addDeleteCookie(response, badCookieName);
 		
@@ -89,7 +90,7 @@ public class ProxyResponse implements ResponseStreamer {
 	@Override
 	public void sendRedirect(RedirectResponse httpResponse) {
 		log.debug(() -> "Sending redirect response. req="+request);
-		Http2Headers response = createRedirect(httpResponse);
+		Http2Response response = createRedirect(httpResponse);
 
 		log.info("sending REDIRECT response responseSender="+ stream);
 		stream.sendResponse(response);
@@ -97,18 +98,15 @@ public class ProxyResponse implements ResponseStreamer {
 		channelCloser.closeIfNeeded(request, stream);
 	}
 
-	private Http2Headers createRedirect(RedirectResponse httpResponse) {
-		Http2Headers response = new Http2Headers();
+	private Http2Response createRedirect(RedirectResponse httpResponse) {
+		Http2Response response = new Http2Response();
 
-		int code;
 		if(httpResponse.isAjaxRedirect) {
 			response.addHeader(new Http2Header(Http2HeaderName.STATUS, BootstrapModalTag.AJAX_REDIRECT_CODE+""));
 			response.addHeader(new Http2Header("reason", "Ajax Redirect"));
-			code = BootstrapModalTag.AJAX_REDIRECT_CODE;
 		} else {
 			response.addHeader(new Http2Header(Http2HeaderName.STATUS, StatusCode.HTTP_303_SEEOTHER.getCodeString()));
 			response.addHeader(new Http2Header("reason", StatusCode.HTTP_303_SEEOTHER.getReason()));
-			code = StatusCode.HTTP_303_SEEOTHER.getCode();
 		}
 		
 		String url = httpResponse.redirectToPath;
@@ -243,7 +241,7 @@ public class ProxyResponse implements ResponseStreamer {
 	private void maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
 		
-		Http2Headers resp = tuple.response;
+		Http2Response resp = tuple.response;
 
 		//This is a cheat sort of since compression can go from 28235 to 4,785 and we are looking at the
 		//non-compressed size so stuff like 16k may be sent chunked even though it is only 3k on the outbound path
@@ -257,7 +255,7 @@ public class ProxyResponse implements ResponseStreamer {
 		sendChunkedResponse(resp, bytes, compression);
 	}
 
-	private void sendChunkedResponse(Http2Headers resp, byte[] bytes, final Compression compression) {
+	private void sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
 		// we shouldn't have to add chunked because the responseSender will add chunked for us
 		// if isComplete is false
 
@@ -293,7 +291,7 @@ public class ProxyResponse implements ResponseStreamer {
 		});
 	}
 
-	private void sendFullResponse(Http2Headers resp, byte[] bytes, Compression compression) {
+	private void sendFullResponse(Http2Response resp, byte[] bytes, Compression compression) {
 		if(compression != null) {
 			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compression.getCompressionType()));
 			bytes = synchronousCompress(compression, bytes);
@@ -308,7 +306,7 @@ public class ProxyResponse implements ResponseStreamer {
 		dataFrame.setData(data);
 
 		stream.sendResponse(resp)
-			.thenCompose((s) -> s.send(dataFrame))
+			.thenCompose((s) -> s.processPiece(dataFrame))
 			.thenApply((w) -> channelCloser.closeIfNeeded(request, stream));
 	}
 	

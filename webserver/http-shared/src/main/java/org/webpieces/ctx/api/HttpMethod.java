@@ -36,6 +36,8 @@ public enum HttpMethod {
 	}
 
 	public static HttpMethod lookup(String method) {
+		if(method == null)
+			return null;
 		return codeToKnownStatus.get(method);
 	}
 	

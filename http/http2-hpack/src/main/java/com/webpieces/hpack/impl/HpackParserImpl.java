@@ -1,12 +1,14 @@
 package com.webpieces.hpack.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 import com.twitter.hpack.Decoder;
 import com.twitter.hpack.Encoder;
@@ -15,29 +17,44 @@ import com.webpieces.hpack.api.MarshalState;
 import com.webpieces.hpack.api.UnmarshalState;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2parser.api.ConnectionException;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
-import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.ContinuationFrame;
 import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public class HpackParserImpl implements HpackParser {
 
-	private static final Logger log = LoggerFactory.getLogger(HpackParserImpl.class);
+	//private static final Logger log = LoggerFactory.getLogger(HpackParserImpl.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HeaderEncoding encoding = new HeaderEncoding();
 	private HeaderDecoding decoding = new HeaderDecoding();
 	private Http2Parser parser;
 	private boolean ignoreUnkownFrames;
 
+	private static Set<Http2HeaderName> requiredRequestHeaders = new HashSet<>();
+	
+	static {
+		requiredRequestHeaders.add(Http2HeaderName.METHOD);
+		requiredRequestHeaders.add(Http2HeaderName.SCHEME);
+		requiredRequestHeaders.add(Http2HeaderName.AUTHORITY);
+		requiredRequestHeaders.add(Http2HeaderName.PATH);
+	}
+	
+	
 	public HpackParserImpl(Http2Parser parser, boolean ignoreUnkownFrames) {
 		this.parser = parser;
 		this.ignoreUnkownFrames = ignoreUnkownFrames;
@@ -58,7 +75,6 @@ public class HpackParserImpl implements HpackParser {
 		Http2Memento result = parser.parse(state.getLowLevelState(), newData);
 		
 		List<Http2Frame> parsedFrames = result.getParsedFrames();
-		log.info("frames="+parsedFrames);
 		for(Http2Frame frame: parsedFrames) {
 			processFrame(state, frame);
 		}
@@ -123,11 +139,13 @@ public class HpackParserImpl implements HpackParser {
 		    allSerializedHeaders = dataGen.chainDataWrappers(allSerializedHeaders, iterFrame.getHeaderFragment());
 		}
 		
-		List<Http2Header> headers = decoding.decode(state.getDecoder(), allSerializedHeaders, firstFrame.getStreamId());
+		Map<Http2HeaderName, Http2Header> knownHeaders = new HashMap<>();
+		List<Http2Header> headers = decoding.decode(state.getDecoder(), allSerializedHeaders, firstFrame.getStreamId(),
+													header -> knownHeaders.put(header.getKnownName(), header));
 
 		if(firstFrame instanceof HeadersFrame) {
 			HeadersFrame f = (HeadersFrame) firstFrame;
-			Http2Headers fullHeaders = new Http2Headers(headers);
+			Http2Headers fullHeaders = createCorrectType(knownHeaders, headers, f.getStreamId());
 			fullHeaders.setStreamId(f.getStreamId());
 			fullHeaders.setPriorityDetails(f.getPriorityDetails());
 			fullHeaders.setEndOfStream(f.isEndOfStream());
@@ -141,6 +159,36 @@ public class HpackParserImpl implements HpackParser {
 		}
 
 		hasHeaderFragmentList.clear();
+	}
+
+	/**
+	 * From spec, we know that trailers canNOT contain psuedo header fields, and requests
+	 * must contain :method header and response must include :status header
+	 * @param knownHeaders 
+	 * @param streamId 
+	 */
+	private Http2Headers createCorrectType(Map<Http2HeaderName, Http2Header> knownHeaders, List<Http2Header> headers, int streamId) {
+		if(knownHeaders.containsKey(Http2HeaderName.METHOD)) {
+			if(knownHeaders.containsKey(Http2HeaderName.STATUS))
+				throw new StreamException(ParseFailReason.MALFORMED_REQUEST, streamId, "Request or Response has :method and :status headers and this is not allowed");
+			else if(!knownHeaders.keySet().containsAll(requiredRequestHeaders))
+				throw new StreamException(ParseFailReason.MALFORMED_REQUEST, streamId, "Request is missing required headers.");
+			
+			return new Http2Request(headers);
+		} else if(knownHeaders.containsKey(Http2HeaderName.STATUS)) {
+			checkBadHeaders(knownHeaders, streamId);
+			return new Http2Response(headers);
+		}
+		
+		checkBadHeaders(knownHeaders, streamId);
+		return new Http2Trailers(headers);
+	}
+
+	private void checkBadHeaders(Map<Http2HeaderName, Http2Header> knownHeaders, int streamId) {
+		for(Http2HeaderName name : requiredRequestHeaders) {
+			if(knownHeaders.containsKey(name))
+				throw new StreamException(ParseFailReason.MALFORMED_REQUEST, streamId, "Response contains a header that is reserved only for requests="+name);
+		}
 	}
 
 	@Override

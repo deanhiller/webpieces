@@ -23,7 +23,9 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.httpparser.api.dto.UrlInfo;
 
 import com.webpieces.hpack.api.dto.Http2HeaderStruct;
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -42,7 +44,7 @@ public class Http2Translations {
 	public static List<HttpPayload> translate(PartialStream data) {
 		if(data instanceof DataFrame) {
 			return translateData((DataFrame)data);
-		} else if(data instanceof Http2Headers) {
+		} else if(data instanceof Http2Trailers) {
 			//trailing headers
 			throw new UnsupportedOperationException("not done yet");
 		}
@@ -68,24 +70,20 @@ public class Http2Translations {
 		return frame;
 	}
 
-	public static Http2Msg responseToHeaders(HttpResponse response, boolean isHttps) {
+	public static Http2Response responseToHeaders(HttpResponse response) {
         List<Http2Header> headers = new ArrayList<>();
         headers.add(new Http2Header(Http2HeaderName.STATUS, response.getStatusLine().getStatus().getCode().toString()));
-        String scheme = "http";
-        if(isHttps)
-        	scheme = "https";
-        headers.add(new Http2Header(Http2HeaderName.SCHEME, scheme));
 
         for(Header header: response.getHeaders()) {
             headers.add(new Http2Header(header.getName(), header.getValue()));
         }
         
-    	Http2Headers resp = new Http2Headers(headers);
+        Http2Response resp = new Http2Response(headers);
     	resp.setEndOfStream(false);
         return resp;
 	}
 
-	private static Http2Headers requestToHeaders(HttpRequest request, boolean fromSslChannel) {
+	private static Http2Request requestToHeaders(HttpRequest request, boolean fromSslChannel) {
         HttpRequestLine requestLine = request.getRequestLine();
         List<Header> requestHeaders = request.getHeaders();
 
@@ -124,7 +122,7 @@ public class Http2Translations {
             headerList.add(new Http2Header(header.getName().toLowerCase(), header.getValue()));
         }
 
-    	Http2Headers headers = new Http2Headers(headerList);
+        Http2Request headers = new Http2Request(headerList);
     	headers.setEndOfStream(false);
 
         return headers;
@@ -145,7 +143,7 @@ public class Http2Translations {
 	}
 
 
-	public static HttpResponse translateResponse(Http2Headers headers) {
+	public static HttpResponse translateResponse(Http2Response headers) {
 
         HttpResponseStatus status = new HttpResponseStatus();
         HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
@@ -190,7 +188,7 @@ public class Http2Translations {
         }		
 	}
 
-	public static HttpRequest translateRequest(Http2Headers headers) {
+	public static HttpRequest translateRequest(Http2Request headers) {
 		
 		HttpRequestLine requestLine = new HttpRequestLine();
 		

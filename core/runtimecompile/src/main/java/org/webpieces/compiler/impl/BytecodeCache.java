@@ -4,10 +4,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 /**
  * Used to speed up compilation time

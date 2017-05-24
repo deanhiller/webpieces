@@ -7,10 +7,14 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
-import com.webpieces.http2engine.api.client.PushPromiseListener;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
 public class IntegColoradoEdu {
 
@@ -24,7 +28,7 @@ public class IntegColoradoEdu {
 		if(isHttp)
 			port = 80;
 		
-		Http2Headers req = createRequest(host);
+		Http2Request req = createRequest(host);
 
 		log.info("starting socket");
 		ChunkedResponseListener listener = new ChunkedResponseListener();
@@ -34,7 +38,7 @@ public class IntegColoradoEdu {
 		
 		socket
 			.connect(addr)
-			.thenAccept(socet -> socket.send(req, listener))
+			.thenAccept(socet -> socket.openStream(listener).process(req))
 			.exceptionally(e -> reportException(socket, e));
 
 		Thread.sleep(100000);
@@ -45,29 +49,40 @@ public class IntegColoradoEdu {
 		return null;
 	}
 	
-	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
-
+	private static class ChunkedResponseListener implements ResponseHandler2, PushPromiseListener, PushStreamHandle {
 		@Override
-		public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
+		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
 			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
-		public PushPromiseListener newIncomingPush(int streamId) {
+		public PushStreamHandle openPushStream() {
 			return this;
 		}
 		
-
 		@Override
-		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
-			log.info("incoming push promise");
+		public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
+			log.info("incoming push promise. response="+response);
 			return CompletableFuture.completedFuture(null);
 		}
 
+		@Override
+		public CompletableFuture<Void> cancel(RstStreamFrame frame) {
+			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancelPush(RstStreamFrame payload) {
+			return CompletableFuture.completedFuture(null);
+		}
+		@Override
+		public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
+			return CompletableFuture.completedFuture(this);
+		}
 	}
 	
-	private static Http2Headers createRequest(String host) {
+	private static Http2Request createRequest(String host) {
 //		GET / HTTP/1.1
 //		Host: www.colorado.edu
 //		User-Agent: curl/7.43.0

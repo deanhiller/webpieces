@@ -20,10 +20,11 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.hpack.api.subparsers.ResponseCookie;
-import com.webpieces.http2parser.api.StatusCode;
+import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 @Singleton
@@ -38,7 +39,7 @@ public class ResponseCreator {
 	@Inject
 	private MimeTypes mimeTypes;
 	
-	public ResponseEncodingTuple createResponse(Http2Headers request, StatusCode statusCode,
+	public ResponseEncodingTuple createResponse(Http2Request request, StatusCode statusCode,
 			String extension, String defaultMime, boolean isDynamicPartOfWebsite) {
 		MimeTypeResult mimeType = mimeTypes.extensionToContentType(extension, defaultMime);
 		
@@ -46,19 +47,19 @@ public class ResponseCreator {
 	}
 
 	public ResponseEncodingTuple createContentResponse(
-			Http2Headers request, int statusCode,
+			Http2Request request, int statusCode,
 			String reason, MimeTypeResult mimeType) {
 		return createContentResponseImpl(request, statusCode, reason, false, mimeType);
 	}
 	
 	private ResponseEncodingTuple createContentResponseImpl(
-			Http2Headers request, 
+			Http2Request request, 
 			int statusCode,
 			String reason,
 			boolean isDynamicPartOfWebsite, 
 			MimeTypeResult mimeType) {
 
-		Http2Headers response = new Http2Headers();
+		Http2Response response = new Http2Response();
 
 		response.addHeader(new Http2Header(Http2HeaderName.STATUS, statusCode+""));
 		response.addHeader(new Http2Header("reason", reason));
@@ -73,17 +74,17 @@ public class ResponseCreator {
 	}
 	
 	public static class ResponseEncodingTuple {
-		public Http2Headers response;
+		public Http2Response response;
 		public MimeTypeResult mimeType;
 
-		public ResponseEncodingTuple(Http2Headers response, MimeTypeResult mimeType) {
+		public ResponseEncodingTuple(Http2Response response, MimeTypeResult mimeType) {
 			this.response = response;
 			this.mimeType = mimeType;
 		}	
 	}
 	
-	public void addCommonHeaders(Http2Headers request, Http2Headers response, boolean isInternalError, boolean isDynamicPartOfWebsite) {
-		Http2Header connHeader = request.getHeaderLookupStruct().getHeader(Http2HeaderName.CONNECTION);
+	public void addCommonHeaders(Http2Request request, Http2Response response, boolean isInternalError, boolean isDynamicPartOfWebsite) {
+		String connHeader = request.getSingleHeaderValue(Http2HeaderName.CONNECTION);
 		
 		DateTime now = DateTime.now().toDateTime(DateTimeZone.UTC);
 		String dateStr = formatter.print(now)+" GMT";
@@ -112,11 +113,11 @@ public class ResponseCreator {
 		
 		if(connHeader == null)
 			return;
-		else if(!"keep-alive".equals(connHeader.getValue()))
+		else if(!"keep-alive".equals(connHeader))
 			return;
 
 		//just re-use the connHeader from the request...
-		response.addHeader(connHeader);
+		response.addHeader(request.getHeaderLookupStruct().getHeader(Http2HeaderName.CONNECTION));
 	}
 	
 	private List<RouterCookie> createCookies(boolean isInternalError) {
@@ -154,7 +155,7 @@ public class ResponseCreator {
 		return httpSubParser.createHeader(cookie);
 	}
 
-	public void addDeleteCookie(Http2Headers response, String badCookieName) {
+	public void addDeleteCookie(Http2Response response, String badCookieName) {
 		RouterCookie cookie = cookieTranslator.createDeleteCookie(badCookieName);
 		Http2Header cookieHeader = create(cookie);
 		response.addHeader(cookieHeader);

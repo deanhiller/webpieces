@@ -1,40 +1,32 @@
 package com.webpieces.http2engine.impl.svr;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.impl.shared.Level4AbstractStreamMgr;
 import com.webpieces.http2engine.impl.shared.Level6LocalFlowControl;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
-import com.webpieces.http2engine.impl.shared.Stream;
 import com.webpieces.http2engine.impl.shared.StreamState;
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.ParseFailReason;
-import com.webpieces.http2parser.api.StreamException;
-import com.webpieces.http2parser.api.dto.PriorityFrame;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
-import com.webpieces.util.locking.PermitQueue;
 
-public class Level4ServerStreams extends Level4AbstractStreamMgr {
+public class Level4ServerStreams extends Level4AbstractStreamMgr<ServerStream> {
 
 	private final static Logger log = LoggerFactory.getLogger(Level4ServerStreams.class);
 
 	private Level5ServerStateMachine serverSm;
 	private HeaderSettings localSettings;
 	private volatile int streamsInProcess = 0;
-
-	private PermitQueue<Void> permitQueue = new PermitQueue<>(100);
-	//purely for logging!!!  do not use for something else
-	private AtomicInteger acquiredCnt = new AtomicInteger(0);
-	private AtomicInteger releasedCnt = new AtomicInteger(0);
 	
 	public Level4ServerStreams(StreamState streamState, Level5ServerStateMachine serverSm, Level6LocalFlowControl localFlowControl,
 			Level6RemoteFlowControl remoteFlowCtrl, HeaderSettings localSettings, HeaderSettings remoteSettings) {
@@ -43,107 +35,64 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr {
 		this.localSettings = localSettings;
 	}
 
-	@Override
-	public CompletableFuture<Void> sendPayloadToApp(PartialStream frame) {
-		if(frame instanceof Http2Headers && !streamState.isStreamExist(frame)) {
-			if(frame.getStreamId() % 2 == 0)
-				throw new ConnectionException(ParseFailReason.BAD_STREAM_ID, frame.getStreamId(), "Bad stream id.  Event stream ids not allowed in requests to a server frame="+frame);
-			if(!streamState.isLargeEnough((Http2Headers) frame))
-				throw new StreamException(ParseFailReason.CLOSED_STREAM, frame.getStreamId(), "Stream id too low and stream not exist(ie. stream was closed) frame="+frame);
-			
-			return incomingHeadersToApp((Http2Headers) frame);
-		} else {
-			//this copied from client but for server this should not occur and if does is a connection error?
-//			if(closedReason != null) {
-//				log.info("ignoring incoming frame="+frame+" since socket is shutting down");
-//				return CompletableFuture.completedFuture(null);
-//			}
-
-			Stream stream = streamState.getStream(frame, false);
-			
-			return serverSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
-						.thenApply(s -> null);
-		}
-	}
-
-	@Override
-	public CompletableFuture<Void> sendMoreStreamData(Stream stream, PartialStream data) {
-		if(stream.isPushStream() && data instanceof Http2Headers && !stream.isHeadersSent()) {
-			stream.setHeadersSent(true);
-			return permitQueue.runRequest(() -> {
-				int val = acquiredCnt.incrementAndGet();
-				log.info("got permit(cause="+data+").  size="+permitQueue.availablePermits()+" acquired="+val);
-				return super.fireToSocket(stream, data, false);
-			});
-		}
+	public CompletableFuture<Void> sendRequestToApp(Http2Request request) {
+		if(request.getStreamId() % 2 == 0)
+			throw new ConnectionException(ParseFailReason.BAD_STREAM_ID, request.getStreamId(), "Bad stream id.  Even stream ids not allowed in requests to a server request="+request);
+		if(!streamState.isLargeEnough(request))
+			throw new StreamException(ParseFailReason.CLOSED_STREAM, request.getStreamId(), "Stream id too low and stream not exist(ie. stream was closed) request="+request);
 		
-		return super.sendMoreStreamData(stream, data);
+		ServerStream stream = createStream(request.getStreamId());
+		return serverSm.fireToClient(stream, request).thenApply(s -> null);
 	}
 	
-	private CompletableFuture<Void> incomingHeadersToApp(Http2Headers msg) {
-		Stream stream = createStream(msg.getStreamId());
-		return serverSm.fireToClient(stream, msg, null).thenApply(s -> null);
-	}
-	
-	private Stream createStream(int streamId) {
+	private ServerStream createStream(int streamId) {
 		Memento initialState = serverSm.createStateMachine("stream" + streamId);
 		long localWindowSize = localSettings.getInitialWindowSize();
 		long remoteWindowSize = remoteSettings.getInitialWindowSize();
-		Stream stream = new Stream(streamId, initialState, null, null, localWindowSize, remoteWindowSize);
-		return streamState.create(stream);
+		ServerStream stream = new ServerStream(streamId, initialState, localWindowSize, remoteWindowSize);
+		streamState.create(stream);
+		return stream;
 	}
 
-	public CompletableFuture<Stream> sendToSocket(Stream origStream, PartialStream frame) {
-		if(closedReason != null) {
-			return createExcepted("sending response headers").thenApply((s) -> null);
-		}
-		Stream stream = streamState.getStream(frame, true);
+	private ServerPushStream createPushStream(PushStreamHandleImpl handle, int streamId) {
+		Memento initialState = serverSm.createStateMachine("stream" + streamId);
+		long localWindowSize = localSettings.getInitialWindowSize();
+		long remoteWindowSize = remoteSettings.getInitialWindowSize();
+		ServerPushStream stream = new ServerPushStream(handle, streamId, initialState, localWindowSize, remoteWindowSize);
+		streamState.create(stream);
+		return stream;
+	}
+	
+	@Override
+	public CompletableFuture<Void> sendPayloadToApp(PartialStream frame) {
+		Stream stream = streamState.getStream(frame, false);
 		
-		return serverSm.fireToSocket(stream, frame)
-				.thenApply(s -> {
+		return serverSm.fireToClient(stream, frame)
+				.thenApply( s -> {
 					checkForClosedState(stream, frame, false);
-					return stream;
+					return null;
 				});
 	}
 	
-	public CompletableFuture<Stream> sendPush(Http2Push push) {
+	public CompletableFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
 		int newStreamId = push.getPromisedStreamId();
-		Stream stream = createStream(newStreamId);
+		ServerPushStream stream = createPushStream(handle, newStreamId);
 
 		return serverSm.fireToSocket(stream, push)
 				.thenApply(s -> stream);
 	}
-	
-	@Override
-	protected void modifyMaxConcurrentStreams(long value) {
-		int permitCount = permitQueue.totalPermits();
-		if(value == permitCount)
-			return;
-		else if (value > Integer.MAX_VALUE)
-			throw new IllegalArgumentException("remote setting too large");
 
-		int modifyPermitsCnt = (int) (value - permitCount);
-		permitQueue.modifyPermitPoolSize(modifyPermitsCnt);
-	}
-
-	@Override
-	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg) {
-		//not supported yet
-		return CompletableFuture.completedFuture(null);
-	}
-
-	@Override
-	protected CompletableFuture<Void> fireRstToSocket(Stream stream, RstStreamFrame frame) {
-		return fireToSocket(stream, frame, false);
-	}
-
-	@Override
-	protected void release(Stream stream, PartialStream cause) {
-		if(stream.isPushStream()) {
-			permitQueue.releasePermit();
-			int val = releasedCnt.decrementAndGet();
-			log.info("release permit(cause="+cause+").  size="+permitQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
+	public CompletableFuture<Void> sendResponseHeaders(Stream stream, Http2Response response) {
+		if(closedReason != null) {
+			return createExcepted(response, "sending response");
 		}
+
+		return serverSm.fireToSocket(stream, response).thenApply(v -> {
+			checkForClosedState(stream, response, false);
+			return null;
+		});
 	}
+
+
 
 }

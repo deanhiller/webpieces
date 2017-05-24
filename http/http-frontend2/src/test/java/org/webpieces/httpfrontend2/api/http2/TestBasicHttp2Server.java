@@ -8,7 +8,8 @@ import org.junit.Test;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 
 public class TestBasicHttp2Server extends AbstractHttp2Test {
@@ -20,8 +21,8 @@ public class TestBasicHttp2Server extends AbstractHttp2Test {
         MockStreamWriter mockSw2 = new MockStreamWriter();
 		mockListener.addMockStreamToReturn(mockSw2 );
 		
-		Http2Headers request1 = Http2Requests.createRequest(1, true);
-		Http2Headers request2 = Http2Requests.createRequest(3, true);
+		Http2Request request1 = Http2Requests.createRequest(1, true);
+		Http2Request request2 = Http2Requests.createRequest(3, true);
 
 		mockChannel.send(request1);
 		PassedIn requestAndStream1 = mockListener.getSingleRequest();
@@ -36,18 +37,18 @@ public class TestBasicHttp2Server extends AbstractHttp2Test {
 		Assert.assertEquals(1, request1.getStreamId());
 		Assert.assertEquals(3, request2.getStreamId());
 		
-		Http2Headers resp2 = Http2Requests.createResponse(request2.getStreamId());
+		Http2Response resp2 = Http2Requests.createResponse(request2.getStreamId());
 		CompletableFuture<StreamWriter> future = requestAndStream2.stream.sendResponse(resp2);
 		Assert.assertTrue(future.isDone());
 
-		Http2Headers frame2 = (Http2Headers) mockChannel.getFrameAndClear();
+		Http2Response frame2 = (Http2Response) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp2, frame2);
 
-		Http2Headers resp1 = Http2Requests.createResponse(request1.getStreamId());
+		Http2Response resp1 = Http2Requests.createResponse(request1.getStreamId());
 		CompletableFuture<StreamWriter> future1 = requestAndStream1.stream.sendResponse(resp1);
 		Assert.assertTrue(future1.isDone());
 
-		Http2Headers frame1 = (Http2Headers) mockChannel.getFrameAndClear();
+		Http2Response frame1 = (Http2Response) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp1, frame1);		
 	}
 	

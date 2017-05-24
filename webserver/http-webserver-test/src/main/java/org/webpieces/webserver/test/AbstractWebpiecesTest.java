@@ -1,6 +1,5 @@
 package org.webpieces.webserver.test;
 
-import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 

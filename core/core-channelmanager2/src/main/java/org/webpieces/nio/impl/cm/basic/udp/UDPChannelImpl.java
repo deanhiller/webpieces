@@ -11,8 +11,6 @@ import java.nio.channels.SelectableChannel;
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
@@ -21,6 +19,8 @@ import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 
 public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {

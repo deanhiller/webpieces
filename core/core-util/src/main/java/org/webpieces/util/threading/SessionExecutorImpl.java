@@ -20,6 +20,7 @@ public class SessionExecutorImpl implements SessionExecutor {
 	private Map<Object, List<Runnable>> cachedRunnables = new HashMap<>();
 	private int counter;
 	private Set<Object> currentlyRunning = new HashSet<>();
+	private ThreadLocal<Boolean> isFromThisPool = new ThreadLocal<>();
 
 	public SessionExecutorImpl(Executor executor) {
 		this.executor = executor;
@@ -63,6 +64,14 @@ public class SessionExecutorImpl implements SessionExecutor {
 	
 	@Override
 	public void execute(Object key, Runnable r) {
+		if(isFromThisPool.get() != null) {
+			//if this threadpool is dumping into this threadpool, continue to drive it through so
+			//the whole chain can gc faster(better to complete requests/responses all the way through than
+			//parallelize too many
+			r.run();
+			return;
+		}
+		
 		synchronized(this) {
 			if(currentlyRunning.contains(key)) {
 				cacheRunnable(key, new RunnableWithKey(key, r));
@@ -108,10 +117,12 @@ public class SessionExecutorImpl implements SessionExecutor {
 		@Override
 		public void run() {
 			try {
+				isFromThisPool.set(true);
 				runnable.run();
 			} catch(Throwable e) {
 				log.error("Uncaught Exception", e);
 			} finally {
+				isFromThisPool.set(null);
 				executeNext(key);
 			}
 		}

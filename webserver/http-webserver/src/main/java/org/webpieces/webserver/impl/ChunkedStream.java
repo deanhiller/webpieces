@@ -57,7 +57,7 @@ public class ChunkedStream extends OutputStream {
 		}
 		
 		DataFrame frame = new DataFrame();
-		responseWriter.send(frame);
+		responseWriter.processPiece(frame);
 	}
 	
 	private void writeDataOut() {
@@ -69,7 +69,7 @@ public class ChunkedStream extends OutputStream {
 		DataFrame frame = new DataFrame();
 		frame.setEndOfStream(false);
 		frame.setData(body);
-		responseWriter.send(frame);
+		responseWriter.processPiece(frame);
 	}
 
 }

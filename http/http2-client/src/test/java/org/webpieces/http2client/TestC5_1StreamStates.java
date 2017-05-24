@@ -10,19 +10,21 @@ import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.http2client.mock.MockPushListener;
 import org.webpieces.http2client.mock.MockResponseListener;
+import org.webpieces.http2client.mock.MockStreamWriter;
 import org.webpieces.http2client.mock.TestAssert;
 import org.webpieces.http2client.util.Requests;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.ParseFailReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
@@ -53,8 +55,8 @@ public class TestC5_1StreamStates extends AbstractTest {
 		
 		//send new request on closed connection
 		MockResponseListener listener1 = new MockResponseListener();
-		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		Http2Request request1 = Requests.createRequest();
+		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -71,14 +73,11 @@ public class TestC5_1StreamStates extends AbstractTest {
 		MockPushListener pushListener = new MockPushListener();
 		pushListener.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
 		listener1.addReturnValuePush(pushListener);
 		
-		Http2Headers request = sendRequestToServer(listener1);
-		Http2Push svrPush = sendPushFromServer(listener1, request);
-		
-		Http2Push push = (Http2Push) pushListener.getSingleParam();
-		Assert.assertEquals(svrPush, push);
+		Http2Request request = sendRequestToServer(listener1);
+		Http2Push push = sendPushFromServer(listener1, request);
 		
 		DataFrame dataFrame = new DataFrame(push.getPromisedStreamId(), false);
 		mockChannel.write(dataFrame);
@@ -88,15 +87,13 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("No transition defined on statemachine for event=Http2Event "
-				+ "[sendReceive=RECEIVE, payloadType=DATA] when in state=Reserved(remote) "
-				+ "reason=BAD_FRAME_RECEIVED_FOR_THIS_STATE stream=2", msg);
+		Assert.assertTrue(msg.contains("reason=BAD_FRAME_RECEIVED_FOR_THIS_STATE stream=2"));
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		ConnectionReset failResp1 = (ConnectionReset) listener1.getSingleReturnValueIncomingResponse();
+		ConnectionReset failResp1 = (ConnectionReset) listener1.getSingleRstStream();
 		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp1.getCause().getReason());
 		
-		ConnectionReset failResp2 = (ConnectionReset) pushListener.getSingleParam();
+		ConnectionReset failResp2 = (ConnectionReset) listener1.getSingleCancelPush();
 		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp2.getCause().getReason());
 	}
 
@@ -111,9 +108,10 @@ public class TestC5_1StreamStates extends AbstractTest {
 	 */
 	@Test
 	public void testSection5_1ReceiveBadFrameAfterReceiveRstStreamFrame() {	
+		MockStreamWriter mockWriter = new MockStreamWriter();
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(mockWriter));
+		Http2Request request = sendRequestToServer(listener1);
 		sendResetFromServer(listener1, request);
 
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
@@ -131,8 +129,8 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
 		
 		//send new request on closed connection
-		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		Http2Request request1 = Requests.createRequest();
+		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -150,8 +148,8 @@ public class TestC5_1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1ReceiveBadFrameAfterReceiveEndStream() {	
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		Http2Request request = sendRequestToServer(listener1);
 		sendEosResponseFromServer(listener1, request);
 
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);
@@ -169,8 +167,8 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
 		
 		//send new request on closed connection
-		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		Http2Request request1 = Requests.createRequest();
+		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -188,8 +186,8 @@ public class TestC5_1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1ReceivePriorityAfterReceiveRstStreamFrame() {	
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
-		Http2Headers request = sendRequestToServer(listener1);
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
+		Http2Request request = sendRequestToServer(listener1);
 		sendResetFromServer(listener1, request);
 
 		PriorityDetails details = new PriorityDetails();
@@ -217,22 +215,22 @@ public class TestC5_1StreamStates extends AbstractTest {
 	@Test
 	public void testSection5_1ReceiveValidFramesAfterSendRstStreamFrame() throws InterruptedException, ExecutionException, TimeoutException {	
 		MockResponseListener listener1 = new MockResponseListener();
-		listener1.setIncomingRespDefault(CompletableFuture.<Void>completedFuture(null));
+		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
 
-		Http2Headers request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.send(request1, listener1);
+		Http2Request request1 = Requests.createRequest();
+		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);
 		
 		RstStreamFrame rst = new RstStreamFrame(request1.getStreamId(), Http2ErrorCode.CANCEL);
-		writer.send(rst);
+		writer.processPiece(rst);
 		
 		Http2Msg svrRst = mockChannel.getFrameAndClear();
 		Assert.assertEquals(rst, svrRst);
 		
 		//simulate server responding before receiving the cancel
-		Http2Headers resp1 = Requests.createEosResponse(request1.getStreamId());
+		Http2Response resp1 = Requests.createEosResponse(request1.getStreamId());
 		mockChannel.write(resp1); //endOfStream=true
 
 //		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -254,25 +252,25 @@ public class TestC5_1StreamStates extends AbstractTest {
 		
 	}
 	
-	private Http2Push sendPushFromServer(MockResponseListener listener1, Http2Headers request) {
+	private Http2Push sendPushFromServer(MockResponseListener listener1, Http2Request request) {
 		Http2Push resp1 = Requests.createPush(request.getStreamId());
 		mockChannel.write(resp1); 
-		int response1 = listener1.getSinglePushStreamId();
-		Assert.assertEquals(resp1.getPromisedStreamId(), response1);
+		Http2Push response1 = listener1.getSinglePush();
+		Assert.assertEquals(resp1, response1);
 		return resp1;
 	}
 
-	private void sendResetFromServer(MockResponseListener listener1, Http2Headers request) {
+	private void sendResetFromServer(MockResponseListener listener1, Http2Request request) {
 		RstStreamFrame resp1 = Requests.createReset(request.getStreamId());
 		mockChannel.write(resp1); //endOfStream=true
-		RstStreamFrame response1 = (RstStreamFrame) listener1.getSingleReturnValueIncomingResponse();
+		RstStreamFrame response1 = (RstStreamFrame) listener1.getSingleRstStream();
 		Assert.assertEquals(resp1, response1);
 	}
 	
-	private void sendEosResponseFromServer(MockResponseListener listener1, Http2Headers request) {
-		Http2Headers resp1 = Requests.createEosResponse(request.getStreamId());
+	private void sendEosResponseFromServer(MockResponseListener listener1, Http2Request request) {
+		Http2Response resp1 = Requests.createEosResponse(request.getStreamId());
 		mockChannel.write(resp1); //endOfStream=true
-		Http2Headers response1 = (Http2Headers) listener1.getSingleReturnValueIncomingResponse();
+		Http2Response response1 = (Http2Response) listener1.getSingleReturnValueIncomingResponse();
 		Assert.assertEquals(resp1, response1);
 	}
 

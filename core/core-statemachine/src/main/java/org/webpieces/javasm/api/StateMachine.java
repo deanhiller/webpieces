@@ -20,12 +20,11 @@ public interface StateMachine
     public State fireEvent(Memento memento, Object event);
     
     /**
-     * @param currentState The current state of the StateMachine(The statemachine is stateless, so you need
-     * to tell it the state of the StateMachine)
-     * @param event
-     * @return 
+     * The fireEvent has to be either synchronized or virtually single threaded.  This method
+     * will stack up the calls and ONLY execute them one after the other such that transitions
+     * in the statemachine are atomic
      */
-    public CompletableFuture<State> fireEvent2(Memento currentState, Object event);
+    public CompletableFuture<State> fireAsyncEvent(Memento currentState, Object event);
 
     /**
      * Creates a State with the given name.

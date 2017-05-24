@@ -9,11 +9,14 @@ import java.util.function.Supplier;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-
-public class PermitQueue<RESP> {
+/**
+ * 
+ */
+public class PermitQueue {
 
 	private static final Logger log = LoggerFactory.getLogger(PermitQueue.class);
-	private final ConcurrentLinkedQueue<QueuedRequest<RESP>> queue = new ConcurrentLinkedQueue<>();
+	@SuppressWarnings("rawtypes")
+	private final ConcurrentLinkedQueue queue = new ConcurrentLinkedQueue<>();
 	private final Semaphore permits;
 	private final AtomicInteger toBeRemoved = new AtomicInteger(0);
 	private int permitCount;
@@ -23,33 +26,34 @@ public class PermitQueue<RESP> {
 		permits = new Semaphore(numPermits);
 	}
 	
-	public CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
+	@SuppressWarnings("unchecked")
+	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
 		CompletableFuture<RESP> future = new CompletableFuture<RESP>();
-		queue.add(new QueuedRequest<>(future, processor));
+		queue.add(new QueuedRequest<RESP>(future, processor));
 
 		processItemFromQueue();
 		
 		return future;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void processItemFromQueue() {
 		boolean acquired = permits.tryAcquire();
 		if(!acquired) 
 			return;
 		
-		QueuedRequest<RESP> req = queue.poll();
+		QueuedRequest req = (QueuedRequest) queue.poll();
 		if(req == null) {
 			releaseSinglePermit(); //release acquired permit
 			return;
 		}
 
-		CompletableFuture<RESP> future = req.getFuture();
+		CompletableFuture<Object> future = req.getFuture();
 		
 		try {
-			CompletableFuture<RESP> resp = req.getProcessor().get();
+			CompletableFuture<Object> resp = (CompletableFuture<Object>) req.getProcessor().get();
 			resp.handle((r, t) -> handle(r, t, future));
 		} catch(Throwable e) {
-			log.warn("Exception", e);
 			handle(null, e, future);
 		}
 	}
@@ -67,7 +71,7 @@ public class PermitQueue<RESP> {
 		permits.release(); 
 	}
 
-	private Void handle(RESP resp, Throwable t, CompletableFuture<RESP> future) {
+	private Void handle(Object resp, Throwable t, CompletableFuture<Object> future) {
 		if(t != null)
 			future.completeExceptionally(t);
 		else

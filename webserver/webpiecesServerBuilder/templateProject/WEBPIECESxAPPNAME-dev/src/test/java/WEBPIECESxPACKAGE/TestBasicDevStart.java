@@ -6,8 +6,6 @@ import java.lang.reflect.Parameter;
 import org.junit.Assert;
 import org.junit.Test;
 
-import WEBPIECESxPACKAGE.DevelopmentServer;
-
 public class TestBasicDevStart {
 
 	//We normally don't need to test the development server, but we at least make sure developers are 

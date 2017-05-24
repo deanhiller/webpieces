@@ -2,7 +2,6 @@ package org.webpieces.http2client.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -12,19 +11,15 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class Layer1Incoming implements DataListener {
 
 	private static final Logger log = LoggerFactory.getLogger(Layer1Incoming.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ClientEngine layer2;
-	private AtomicInteger nextAvailableStreamId = new AtomicInteger(1);
 
 	public Layer1Incoming(Http2ClientEngine layer2) {
 		this.layer2 = layer2;
@@ -38,49 +33,8 @@ public class Layer1Incoming implements DataListener {
 		return layer2.sendPing();
 	}
 	
-	public CompletableFuture<StreamWriter> sendRequest(Http2Headers request, Http2ResponseListener listener) {
-		if(request.getStreamId() != 0)
-			throw new IllegalStateException("Client MUST NOT set Http2Headers.streamId.  that is filled in by library");
-		int streamId = getNextAvailableStreamId();
-		request.setStreamId(streamId);
-
-		return layer2.sendFrameToSocket(request, listener)
-						.thenApply(c -> createWriter(request, c));
-	}
-
-	private StreamWriter createWriter(Http2Headers request, StreamWriter requestWriter) {
-		StreamWriter writer = new ClientRequestStreamWriter(request.getStreamId(), request.isEndOfStream(), requestWriter);
-		return writer;
-	}
-	
-	private class ClientRequestStreamWriter implements StreamWriter {
-		private StreamWriter requestWriter;
-		private int streamId;
-		private boolean isEndOfStream;
-
-		public ClientRequestStreamWriter(int streamId, boolean isEndOfStream, StreamWriter requestWriter) {
-			this.streamId = streamId;
-			this.isEndOfStream = isEndOfStream;
-			this.requestWriter = requestWriter;
-		}
-
-		@Override
-		public CompletableFuture<StreamWriter> send(PartialStream data) {
-			if(isEndOfStream && !(data instanceof RstStreamFrame))
-				throw new IllegalStateException("Client has already sent a PartialStream"
-						+ " object with endOfStream=true so no more data can be sent");
-			
-			if(data.isEndOfStream())
-				isEndOfStream = true;
-			
-			data.setStreamId(streamId);
-
-			return requestWriter.send(data).thenApply(c -> this);
-		}
-	}
-	
-	private int getNextAvailableStreamId() {
-		return nextAvailableStreamId.getAndAdd(2);
+	public StreamHandle openStream(ResponseHandler2 listener) {
+		return layer2.openStream(listener);
 	}
 
 	@Override

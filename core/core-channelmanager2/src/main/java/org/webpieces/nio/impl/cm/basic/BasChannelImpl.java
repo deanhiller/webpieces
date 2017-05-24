@@ -14,8 +14,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
@@ -24,6 +22,8 @@ import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 /**
  * @author Dean Hiller

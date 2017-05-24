@@ -3,12 +3,11 @@ package org.webpieces.http2client.api;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.http2client.api.dto.Http2Request;
-import org.webpieces.http2client.api.dto.Http2Response;
+import org.webpieces.http2client.api.dto.FullRequest;
+import org.webpieces.http2client.api.dto.FullResponse;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamHandle;
 
 public interface Http2Socket {
 	
@@ -26,7 +25,7 @@ public interface Http2Socket {
      * @param request
      */
     //TODO: Implement timeout for clients so that requests will timeout
-    CompletableFuture<Http2Response> send(Http2Request request);
+    CompletableFuture<FullResponse> send(FullRequest request);
 
     /**
      * You should have a pretty good understanding the http/2 spec to use this method.  This method supports EVERY use-case
@@ -45,7 +44,7 @@ public interface Http2Socket {
      *  
      *  @param isComplete true if you are only sending request headers with content-length = 0
      */
-    CompletableFuture<StreamWriter> send(Http2Headers request, Http2ResponseListener listener);
+    StreamHandle openStream(ResponseHandler2 listener);
     
     CompletableFuture<Http2Socket> close();
 

@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Http2Push implements PartialStream {
+public class Http2Push implements Http2Msg {
 
 	private int streamId;
 	private int promisedStreamId;
@@ -57,10 +57,6 @@ public class Http2Push implements PartialStream {
 	 */
 	public Http2HeaderStruct getHeaderLookupStruct() {
 		return headersStruct;
-	}
-	@Override
-	public boolean isEndOfStream() {
-		return false;
 	}
 	
 	@Override

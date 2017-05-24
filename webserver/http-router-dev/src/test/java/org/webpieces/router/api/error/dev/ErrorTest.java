@@ -5,8 +5,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.RouterService;
@@ -15,6 +13,8 @@ import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.error.ErrorCommonTest;
 import org.webpieces.router.api.error.RequestCreation;
 import org.webpieces.router.api.mocks.MockResponseStream;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class ErrorTest {
 	

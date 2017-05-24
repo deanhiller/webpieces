@@ -22,13 +22,17 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
+import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.http2engine.api.client.PushPromiseListener;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class IntegSingleRequest {
 
@@ -59,7 +63,7 @@ public class IntegSingleRequest {
 		}
 		
 		List<Http2Header> req = createRequest(host, isHttp);
-    	Http2Headers request = new Http2Headers(req);
+		Http2Request request = new Http2Request(req);
         request.setEndOfStream(true);
         
 		InetSocketAddress addr = new InetSocketAddress(host, port);
@@ -67,7 +71,7 @@ public class IntegSingleRequest {
 		
 		socket
 			.connect(addr)
-			.thenAccept(s -> s.send(request, new ChunkedResponseListener()))
+			.thenAccept(s -> s.openStream(new ChunkedResponseListener()).process(request))
 			.exceptionally(e -> reportException(socket, e));
 		
 		Thread.sleep(10000000);
@@ -81,7 +85,7 @@ public class IntegSingleRequest {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
 		
-		InjectionConfig injConfig = new InjectionConfig(executor2, hpackParser);
+		InjectionConfig injConfig = new InjectionConfig(hpackParser);
 		
 		String host = addr.getHostName();
 		int port = addr.getPort();
@@ -105,21 +109,37 @@ public class IntegSingleRequest {
 		return null;
 	}
 	
-	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
+	private static class ChunkedResponseListener implements ResponseHandler2, PushPromiseListener, PushStreamHandle {
 		@Override
-		public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
+		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
 			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
-		public PushPromiseListener newIncomingPush(int streamId) {
+		public PushStreamHandle openPushStream() {
 			return this;
 		}
+		
 		@Override
-		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
+		public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
 			log.info("incoming push promise. response="+response);
 			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(RstStreamFrame frame) {
+			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancelPush(RstStreamFrame payload) {
+			return CompletableFuture.completedFuture(null);
+		}
+		
+		@Override
+		public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
+			return CompletableFuture.completedFuture(this);
 		}
 	}
 	

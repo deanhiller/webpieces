@@ -46,9 +46,7 @@ public abstract class HttpFrontendFactory {
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		
-		Executor executor1 = Executors.newFixedThreadPool(10, new NamedThreadFactory("http2Engine"));
-		
-		InjectionConfig injConfig = new InjectionConfig(executor1, http2Parser, new TimeImpl(), new Http2Config());
+		InjectionConfig injConfig = new InjectionConfig(http2Parser, new TimeImpl(), new Http2Config());
 		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );
 		
 		return new FrontEndServerManagerImpl(svrMgr, timer, svrEngineFactory, httpParser);

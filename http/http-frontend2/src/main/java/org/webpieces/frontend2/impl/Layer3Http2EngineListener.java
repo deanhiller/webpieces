@@ -5,19 +5,15 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.SocketInfo;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.server.ResponseHandler;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
-import com.webpieces.http2engine.api.server.StreamReference;
-import com.webpieces.http2parser.api.Http2Exception;
+import com.webpieces.http2parser.api.dto.error.Http2Exception;
 
 public class Layer3Http2EngineListener implements ServerEngineListener {
 
-	private static final Logger log = LoggerFactory.getLogger(Layer3Http2EngineListener.class);
+	//private static final Logger log = LoggerFactory.getLogger(Layer3Http2EngineListener.class);
 	
 	private FrontendSocketImpl socket;
 	private HttpRequestListener httpListener;
@@ -30,13 +26,11 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	}
 
 	@Override
-	public StreamReference sendRequestToServer(Http2Headers request, ResponseHandler responseHandler) {
-		//every request received is a new stream
-		Http2StreamImpl stream = new Http2StreamImpl(socket, responseHandler);
-		StreamWriter writer = httpListener.incomingRequest(stream, request, socketInfo);
-		return new StreamRefImpl(stream, httpListener, writer);
+	public StreamHandle openStream(int streamId, ResponseHandler2 responseHandler) {
+		Http2StreamImpl stream = new Http2StreamImpl(socket, responseHandler, streamId);
+		return httpListener.openStream(stream, socketInfo);
 	}
-
+	
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer newData) {
 		return socket.getChannel().write(newData).thenApply(c -> null);

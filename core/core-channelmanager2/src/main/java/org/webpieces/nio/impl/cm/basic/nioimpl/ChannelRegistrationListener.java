@@ -3,9 +3,9 @@ package org.webpieces.nio.impl.cm.basic.nioimpl;
 import java.util.EventListener;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.nio.impl.cm.basic.Helper;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.nio.impl.cm.basic.Helper;
 
 
 public abstract class ChannelRegistrationListener implements EventListener {

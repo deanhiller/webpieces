@@ -2,10 +2,10 @@ package org.webpieces.nio.impl.ssl;
 
 import java.nio.ByteBuffer;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 /**
  * A class purely for catching exceptions the client forgets to catch

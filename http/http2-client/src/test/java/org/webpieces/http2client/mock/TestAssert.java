@@ -11,7 +11,7 @@ public class TestAssert {
 
 	public static <T> Throwable intercept(CompletableFuture<T> future) {
 		try {
-			future.get(10, TimeUnit.SECONDS);
+			future.get(2, TimeUnit.SECONDS);
 			Assert.fail("Should have thrown an exception and did not");
 			throw new RuntimeException("should be impossible1");
 		} catch (InterruptedException e) {

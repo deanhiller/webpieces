@@ -12,8 +12,6 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.exceptions.NioException;
@@ -21,6 +19,8 @@ import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 
 

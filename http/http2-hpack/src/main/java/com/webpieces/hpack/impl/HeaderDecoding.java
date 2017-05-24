@@ -4,14 +4,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.webpieces.data.api.DataWrapper;
 
 import com.twitter.hpack.Decoder;
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.ParseFailReason;
-import com.webpieces.http2parser.api.StreamException;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class HeaderDecoding {
 
@@ -21,9 +23,9 @@ public class HeaderDecoding {
 		}
 	}
 
-	public List<Http2Header> decode(Decoder decoder, DataWrapper data, int streamId) {
+	public List<Http2Header> decode(Decoder decoder, DataWrapper data, int streamId, Consumer<Http2Header> knownHeaders) {
 		try {
-			return decodeImpl(decoder, data, streamId);
+			return decodeImpl(decoder, data, streamId, knownHeaders);
         } catch (IOException e) {
             // TODO: this doesn't catch the h2spec -s 4.3 invalid header block fragment
             throw new ConnectionException(ParseFailReason.HEADER_DECODE, streamId, "Error from hpack library", e);
@@ -31,14 +33,14 @@ public class HeaderDecoding {
         }
 	}
 	
-	private List<Http2Header> decodeImpl(Decoder decoder, DataWrapper data, int streamId) throws IOException {
+	private List<Http2Header> decodeImpl(Decoder decoder, DataWrapper data, int streamId, Consumer<Http2Header> knownHeaders) throws IOException {
         List<Http2Header> headers = new ArrayList<>();
         byte[] bytes = data.createByteArray();
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         	
         //keep this synchronized very very small...
 		synchronized(decoder) {
-	        decoder.decode(in, (n, v, s) -> addToHeaders(headers, n, v, s, streamId));
+	        decoder.decode(in, (n, v, s) -> addToHeaders(headers, knownHeaders, n, v, s, streamId));
 	        decoder.endHeaderBlock();
 		}
 	
@@ -48,14 +50,22 @@ public class HeaderDecoding {
         return headers;
     }
 
-	private Object addToHeaders(List<Http2Header> headers, byte[] name, byte[] value, boolean sensitive, int streamId) {
+	private Object addToHeaders(
+			List<Http2Header> headers, Consumer<Http2Header> knownHeaders, 
+			byte[] name, byte[] value, boolean sensitive, int streamId) {
         String h = new String(name);
         String v = new String(value);
         if(!h.equals(h.toLowerCase()))
             throw new StreamException(ParseFailReason.HEADER_NOT_LOWER_CASE, streamId, "header="+h+" was not lower case in stream="+streamId);
         
-        headers.add(new Http2Header(h, v));
-
+        Http2Header header = new Http2Header(h, v);
+        headers.add(header);
+        
+        if(knownHeaders != null) {
+        	Http2HeaderName knownName = Http2HeaderName.lookup(h);
+        	if(knownName != null)
+        		knownHeaders.accept(header);
+        }
 		return null;
 	}
 

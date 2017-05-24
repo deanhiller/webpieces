@@ -1,6 +1,18 @@
 package org.webpieces.templatingdev.impl.source;
 
-import static org.webpieces.templatingdev.impl.source.TemplateToken.*;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.ABSOLUTE_ACTION;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.ACTION;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.COMMENT;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.END_TAG;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.EOF;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.ESCAPE;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.EXPR;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.FILE_VERIFY;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.MESSAGE;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.PLAIN;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.SCRIPT;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.START_END_TAG;
+import static org.webpieces.templatingdev.impl.source.TemplateToken.START_TAG;
 
 import java.util.ArrayList;
 import java.util.List;

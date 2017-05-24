@@ -1,6 +1,6 @@
 package com.webpieces.http2engine.api.client;
 
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 
 public class Http2Config {
 	//will be logged.  only useful if you create many http2 clients which is not needed as one client can

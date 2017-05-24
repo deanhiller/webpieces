@@ -12,13 +12,13 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SslListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 

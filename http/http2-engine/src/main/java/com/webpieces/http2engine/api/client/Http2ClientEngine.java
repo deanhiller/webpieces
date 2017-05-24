@@ -4,21 +4,22 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamHandle;
 
 public interface Http2ClientEngine {
 
 	CompletableFuture<Void> sendInitializationToSocket();
 
 	/**
-	 * Future completes one the data is SENT! not when there is a response
+	 * Future completes one the data is SENT! not when there is a response which allows to backpressure the socket and
+	 * deregister from reading if clients do not keep up
 	 */
-	CompletableFuture<StreamWriter> sendFrameToSocket(Http2Headers headers, Http2ResponseListener responseListener);
+	StreamHandle openStream(ResponseHandler2 responseListener);
 
 	CompletableFuture<Void> sendPing();
 	
-	void parse(DataWrapper newData);
+	CompletableFuture<Void> parse(DataWrapper newData);
 
 	/**
 	 * completely tear down engine
@@ -26,4 +27,5 @@ public interface Http2ClientEngine {
 	void farEndClosed();
 
 	void initiateClose(String reason);
+
 }

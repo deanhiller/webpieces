@@ -5,7 +5,7 @@ import org.webpieces.javasm.api.State;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.util.locking.PermitQueue;
+import com.webpieces.util.locking.FuturePermitQueue;
 
 /**
  */
@@ -17,7 +17,7 @@ public class StateMachineState implements Memento
     private String id;
     private State state;
     private StateMachineImpl stateMachine;
-    private PermitQueue<State> permitQueue;
+    private FuturePermitQueue permitQueue;
 
     public StateMachineState(String rawMapId, String stateMachineId, State state, StateMachineImpl sm)
     {
@@ -26,7 +26,7 @@ public class StateMachineState implements Memento
         this.stateMachine = sm;
         String name = Memento.class.getPackage().getName();
         log = LoggerFactory.getLogger(name+"."+rawMapId+"."+stateMachineId);
-        permitQueue = new PermitQueue<>(1);
+        permitQueue = new FuturePermitQueue(1);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class StateMachineState implements Memento
         return log;
     }
 
-	public PermitQueue<State> getPermitQueue() {
+	public FuturePermitQueue getPermitQueue() {
 		return permitQueue;
 	}
 

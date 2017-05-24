@@ -23,11 +23,10 @@ import org.webpieces.mock.time.MockTime;
 import org.webpieces.mock.time.MockTimer;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.threading.DirectExecutor;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.http2engine.impl.shared.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 
 public class AbstractHttp1Test {
 	protected static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -50,7 +49,7 @@ public class AbstractHttp1Test {
 
         Http2Config config = new Http2Config();
         config.setLocalSettings(localSettings);
-		InjectionConfig injConfig = new InjectionConfig(new DirectExecutor(), mockTime, config);
+		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
 
 		FrontendConfig frontendConfig = new FrontendConfig("http", new InetSocketAddress("me", 8080));
 		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig);

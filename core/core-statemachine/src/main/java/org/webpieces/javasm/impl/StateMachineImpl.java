@@ -13,7 +13,7 @@ import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.Transition;
 
-import com.webpieces.util.locking.PermitQueue;
+import com.webpieces.util.locking.FuturePermitQueue;
 
 /**
  */
@@ -103,7 +103,7 @@ public class StateMachineImpl implements StateMachine
     @Override
     public State fireEvent(Memento memento, Object evt)
     {
-    	CompletableFuture<State> future = fireEvent2(memento, evt);
+    	CompletableFuture<State> future = fireAsyncEvent(memento, evt);
     	try {
 			return future.get();
 		} catch (InterruptedException e) {
@@ -116,7 +116,7 @@ public class StateMachineImpl implements StateMachine
     }
     
     @Override
-    public CompletableFuture<State> fireEvent2(Memento memento, Object evt)
+    public CompletableFuture<State> fireAsyncEvent(Memento memento, Object evt)
     {
         if(memento == null)
             throw new IllegalArgumentException(this + "memento cannot be null");
@@ -129,24 +129,10 @@ public class StateMachineImpl implements StateMachine
                     "you got your statemachines mixed up with the mementos");
 
         StateMachineState smState = (StateMachineState)memento;
-        PermitQueue<State> queue = smState.getPermitQueue();
+        FuturePermitQueue queue = smState.getPermitQueue();
         
-        CompletableFuture<State> f = new CompletableFuture<State>();
-        queue.runRequest(() -> fire(evt, smState)).handle((s, t) -> release(s, t, f, queue));
-        
-        return f;
+        return queue.runRequest(() -> fire(evt, smState));
     }
-
-	private Void release(State s, Throwable t, CompletableFuture<State> f, PermitQueue<State> queue) {
-		queue.releasePermit(); //release the next event to the statemachine
-		
-		if(t != null)
-			f.completeExceptionally(t);
-		else
-			f.complete(s);
-		
-		return null;
-	}
 
 	private CompletableFuture<State> fire(Object evt, StateMachineState smState) {
 		CompletableFuture<State> future = new CompletableFuture<>();

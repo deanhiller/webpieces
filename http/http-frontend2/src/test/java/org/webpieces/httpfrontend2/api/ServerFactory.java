@@ -24,8 +24,9 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.util.threading.NamedThreadFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.Http2Response;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -66,21 +67,33 @@ class ServerFactory {
         }
 
 		@Override
-		public StreamWriter incomingRequest(FrontendStream stream, Http2Headers headers, SocketInfo type) {
-			Http2Headers response = Http2Requests.createResponse(headers.getStreamId());
-			stream.sendResponse(response);
-			
-			return this;
+		public 	StreamHandle openStream(FrontendStream stream, SocketInfo info) {
+			return new StreamHandleImpl(stream);
 		}
-
+		
 		@Override
-		public void cancelRequest(FrontendStream stream, RstStreamFrame c) {
-		}
-
-		@Override
-		public CompletableFuture<StreamWriter> send(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
 			return CompletableFuture.completedFuture(this);
 		}
 
+    }
+    
+    private static class StreamHandleImpl implements StreamHandle {
+		private FrontendStream stream;
+
+		public StreamHandleImpl(FrontendStream stream) {
+			this.stream = stream;
+		}
+
+		@Override
+		public CompletableFuture<StreamWriter> process(Http2Request headers) {
+			Http2Response response = Http2Requests.createResponse(headers.getStreamId());
+			return stream.sendResponse(response);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(RstStreamFrame reset) {
+			return null;
+		}
     }
 }

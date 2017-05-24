@@ -9,7 +9,7 @@ import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.MockStreamWriter;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
+import com.webpieces.hpack.api.dto.Http2Request;
 
 public class TestHttp2Errors extends AbstractHttp2Test {
 	
@@ -20,8 +20,8 @@ public class TestHttp2Errors extends AbstractHttp2Test {
         MockStreamWriter mockSw2 = new MockStreamWriter();
 		mockListener.addMockStreamToReturn(mockSw2 );
 		
-		Http2Headers request1 = Http2Requests.createRequest(1, true);
-		Http2Headers request2 = Http2Requests.createRequest(3, true);
+		Http2Request request1 = Http2Requests.createRequest(1, true);
+		Http2Request request2 = Http2Requests.createRequest(3, true);
 
 		mockChannel.send(request1);
 		PassedIn in1 = mockListener.getSingleRequest();

@@ -2,11 +2,11 @@ package org.webpieces.devrouter.impl;
 
 import java.util.List;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.FileMeta;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class DevCompressionCacheSetup implements CompressionCacheSetup {
 

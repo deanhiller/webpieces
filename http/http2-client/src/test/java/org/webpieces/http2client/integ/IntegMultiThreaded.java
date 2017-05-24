@@ -14,12 +14,16 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
-import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2engine.api.client.Http2ResponseListener;
-import com.webpieces.http2engine.api.client.PushPromiseListener;
+import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.PushPromiseListener;
+import com.webpieces.http2engine.api.PushStreamHandle;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public class IntegMultiThreaded {
 
@@ -42,7 +46,7 @@ public class IntegMultiThreaded {
 			this.req = req2;
 			this.id = id;
 			this.originalId = originalId;
-			listener = new ChunkedResponseListener(id);
+			listener = new ChunkedResponseListener();
     	}
     	
     	public void run() {
@@ -57,10 +61,10 @@ public class IntegMultiThreaded {
             	sent.add(id);
             }
     		
-        	Http2Headers request = new Http2Headers(req);
+            Http2Request request = new Http2Request(req);
             request.setEndOfStream(true);
-            
-    		socket.send(request, listener)
+
+            socket.openStream(listener).process(request)
     				.exceptionally(e -> {
     					reportException(socket, e);
     					return null;
@@ -126,21 +130,15 @@ public class IntegMultiThreaded {
         return null;
     }
 	
-	private static class ChunkedResponseListener implements Http2ResponseListener, PushPromiseListener {
-
-		private int id;
-
-		public ChunkedResponseListener(int id) {
-			this.id = id;
-		}
+	private static class ChunkedResponseListener implements ResponseHandler2, PushPromiseListener, PushStreamHandle {
 
 		@Override
-		public CompletableFuture<Void> incomingPartialResponse(PartialStream response) {
+		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);
 			
 			if(response.isEndOfStream()) {
 				synchronized (completed) {
-					completed.add(id);
+					completed.add(response.getStreamId());
 				}
 				log.info("completed="+completed.size()+" completedPus="+completedPush.size()+" sent="+sent.size()+" list="+completed);
 			}
@@ -149,20 +147,33 @@ public class IntegMultiThreaded {
 		}
 
 		@Override
-		public PushPromiseListener newIncomingPush(int streamId) {
+		public PushStreamHandle openPushStream() {
 			return this;
 		}
 		
 		@Override
-		public CompletableFuture<Void> incomingPushPromise(PartialStream response) {
+		public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
 			log.info("incoming push promise="+response);
 			if(response.isEndOfStream()) {
 				synchronized(this) {
-					completedPush.add(id);
+					completedPush.add(response.getStreamId());
 					log.info("completedPush="+completedPush+" sent="+sent.size());
 				}
 			}
 			return CompletableFuture.completedFuture(null);
+		}
+
+		@Override
+		public CompletableFuture<Void> cancel(RstStreamFrame frame) {
+			return CompletableFuture.completedFuture(null);
+		}
+		@Override
+		public CompletableFuture<Void> cancelPush(RstStreamFrame payload) {
+			return CompletableFuture.completedFuture(null);
+		}
+		@Override
+		public CompletableFuture<PushPromiseListener> process(Http2Push headers) {
+			return CompletableFuture.completedFuture(this);
 		}
 	}
 

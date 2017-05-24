@@ -2,12 +2,18 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
-import com.webpieces.http2parser.api.ConnectionException;
-import com.webpieces.http2parser.api.ParseFailReason;
-import com.webpieces.http2parser.api.StreamException;
+import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.util.locking.PermitQueue;
 import com.webpieces.util.time.Time;
 
 /**
@@ -17,15 +23,21 @@ import com.webpieces.util.time.Time;
  */
 public class StreamState {
 
+	private final static Logger log = LoggerFactory.getLogger(StreamState.class);
+
 	private ConcurrentMap<Integer, Stream> streamIdToStream = new ConcurrentHashMap<>();
 	private long highestOddStream = 0;
 	private long highestEvenStream = 0;
 	
 	//we need to time out closing streams  BUT just reuse the threads!!! do not use a timer thread
 	private Time time;
+	private PermitQueue maxConcurrentQueue;
+	//purely for logging!!!  do not use for something else
+	private AtomicInteger releasedCnt = new AtomicInteger(0);
 
-	public StreamState(Time time) {
+	public StreamState(Time time, PermitQueue maxConcurrentQueue) {
 		this.time = time;
+		this.maxConcurrentQueue = maxConcurrentQueue;
 	}
 
 	//chanmgr thread only
@@ -99,11 +111,17 @@ public class StreamState {
 		}
 	}
 
-	public Stream remove(Stream stream) {
+	public Stream remove(Stream stream, Object cause) {
 		stream.setIsClosed(true);
+		release(stream, cause);
 		return streamIdToStream.remove(stream.getStreamId());
 	}
 
+	public void release(Stream stream, Object cause) {
+		maxConcurrentQueue.releasePermit();
+		int val = releasedCnt.incrementAndGet();
+		log.info("release permit(cause="+cause+").  size="+maxConcurrentQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
+	}
 
 	
 }
