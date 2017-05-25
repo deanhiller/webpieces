@@ -3,6 +3,7 @@ package com.webpieces.http2engine.impl.client;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
+import org.webpieces.javasm.api.State;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -84,17 +85,10 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr<ClientStream> {
 		
 		Stream stream = streamState.getStream(frame, true);
 		
-		return clientSm.fireToClient(stream, frame)
-						.thenApply( s -> {
-							checkForClosedState(stream, frame, false);
-							return null;
-						});
-//		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
-//					.thenApply(t -> {
-//						if(t == StreamTransition.STREAM_JUST_CLOSED)
-//							return stream;
-//						return null;
-//					});
+		CompletableFuture<Void> future = clientSm.fireToClient(stream, frame);
+		checkForClosedState(stream, frame, false);
+		return future;
+		
 	}
 		
 	public CompletableFuture<Void> sendPushToApp(Http2Push fullPromise) {		
@@ -123,17 +117,10 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr<ClientStream> {
 
 		Stream stream = streamState.getStream(frame, true);
 
-		return clientSm.fireToClient(stream, frame)
-				.thenApply( s -> {
-					checkForClosedState(stream, frame, false);
-					return null;
-				});
-//		return clientSm.fireToClient(stream, frame, () -> checkForClosedState(stream, frame, false))
-//					.thenApply( t -> {
-//						if(t == StreamTransition.STREAM_JUST_CLOSED)
-//							return stream;
-//						return null;
-//					});
+		CompletableFuture<Void> future = clientSm.fireToClient(stream, frame);
+		checkForClosedState(stream, frame, false);
+		
+		return future;
 	}
 
 

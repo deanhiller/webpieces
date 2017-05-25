@@ -67,11 +67,9 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr<ServerStream> {
 	public CompletableFuture<Void> sendPayloadToApp(PartialStream frame) {
 		Stream stream = streamState.getStream(frame, false);
 		
-		return serverSm.fireToClient(stream, frame)
-				.thenApply( s -> {
-					checkForClosedState(stream, frame, false);
-					return null;
-				});
+		CompletableFuture<Void> future = serverSm.fireToClient(stream, frame);
+		checkForClosedState(stream, frame, false);
+		return future;
 	}
 	
 	public CompletableFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
@@ -87,10 +85,9 @@ public class Level4ServerStreams extends Level4AbstractStreamMgr<ServerStream> {
 			return createExcepted(response, "sending response");
 		}
 
-		return serverSm.fireToSocket(stream, response).thenApply(v -> {
-			checkForClosedState(stream, response, false);
-			return null;
-		});
+		CompletableFuture<Void> future = serverSm.fireToSocket(stream, response);
+		checkForClosedState(stream, response, false);
+		return future;
 	}
 
 

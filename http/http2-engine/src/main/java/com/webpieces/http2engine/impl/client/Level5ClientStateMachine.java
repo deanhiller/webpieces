@@ -58,11 +58,9 @@ public class Level5ClientStateMachine extends Level5AbstractStateMachine {
 
 	}
 
-	public CompletableFuture<State> fireToClient(Stream stream, Http2Response payload) { //, Supplier<StreamTransition> possiblyClose 
-		State state = fireToClientImpl(stream, payload);
-		//StreamTransition streamTransition = possiblyClose.get();
-		return local.fireResponseToApp(stream, payload)
-				.thenApply( v -> state);
+	public CompletableFuture<Void> fireToClient(Stream stream, Http2Response payload) { //, Supplier<StreamTransition> possiblyClose 
+		fireToClientImpl(stream, payload);
+		return local.fireResponseToApp(stream, payload);
 	}
 	
 	public CompletableFuture<Void> firePushToClient(ClientPushStream stream, Http2Push fullPromise) {

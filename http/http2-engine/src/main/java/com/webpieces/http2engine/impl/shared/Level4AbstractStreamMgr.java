@@ -92,10 +92,9 @@ public abstract class Level4AbstractStreamMgr<T> {
 	}
 
 	protected CompletableFuture<Void> sendResetToApp(Stream stream, RstStreamFrame payload, boolean keepDelayedState) {
-		return stateMachine.fireToClient(stream, payload).thenApply(v -> {
-			checkForClosedState(stream, payload, keepDelayedState);
-			return null;
-		});
+		CompletableFuture<Void> future = stateMachine.fireToClient(stream, payload);
+		checkForClosedState(stream, payload, keepDelayedState);
+		return future;
 	}
 	
 	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
@@ -136,10 +135,9 @@ public abstract class Level4AbstractStreamMgr<T> {
 	}
 	
 	protected CompletableFuture<Void> fireToSocket(Stream stream, PartialStream frame, boolean keepDelayedState) {
-		return stateMachine.fireToSocket(stream, frame).thenApply(v -> {
-			checkForClosedState(stream, frame, keepDelayedState);
-			return null;
-		});
+		CompletableFuture<Void> future = stateMachine.fireToSocket(stream, frame);
+		checkForClosedState(stream, frame, keepDelayedState);
+		return future;
 	}
 	
 	/**

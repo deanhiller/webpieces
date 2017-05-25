@@ -109,18 +109,14 @@ public abstract class Level5AbstractStateMachine {
 				.thenApply( v -> state);
 	}
 
-	public CompletableFuture<State> fireToClient(Stream stream, RstStreamFrame payload) { //, Supplier<StreamTransition> possiblyClose
-		State state = fireToClientImpl(stream, payload);
-		//StreamTransition streamTransition = possiblyClose.get();
-		return localFlowControl.fireRstToClient(stream, payload)
-				.thenApply( v -> state);
+	public CompletableFuture<Void> fireToClient(Stream stream, RstStreamFrame payload) { //, Supplier<StreamTransition> possiblyClose
+		fireToClientImpl(stream, payload);
+		return localFlowControl.fireRstToClient(stream, payload);
 	}
 	
-	public CompletableFuture<State> fireToClient(Stream stream, PartialStream payload) { //, Supplier<StreamTransition> possiblyClose
-		State state = fireToClientImpl(stream, payload);
-		//StreamTransition streamTransition = possiblyClose.get();
-		return localFlowControl.fireDataToClient(stream, payload)
-				.thenApply( v -> state);
+	public CompletableFuture<Void> fireToClient(Stream stream, PartialStream payload) { //, Supplier<StreamTransition> possiblyClose
+		fireToClientImpl(stream, payload);
+		return localFlowControl.fireDataToClient(stream, payload);
 	}
 
 	protected State fireToClientImpl(Stream stream, Http2Msg payload) {
