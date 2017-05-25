@@ -36,7 +36,7 @@ public abstract class Level3IncomingSynchro {
 
 //	//We allow processing serially of each method call.  All futures below only mean the request was comletely
 //	//consumed by client or by the socket(ie. Future.complete(...) is when the next request can be processed
-	protected FuturePermitQueue serializer;
+	protected FuturePermitQueue singleThreadSerializer;
 
 	public Level3IncomingSynchro(
 			FuturePermitQueue serializer,
@@ -44,14 +44,14 @@ public abstract class Level3IncomingSynchro {
 			Level7MarshalAndPing notifyListener,
 			RemoteSettingsManagement remoteSettings
 			) {
-		this.serializer = serializer;
+		this.singleThreadSerializer = serializer;
 		this.streamsLayer = streamsLayer;
 		this.notifyListener = notifyListener;
 		this.remoteSettings = remoteSettings;
 	}
 
 	public CompletableFuture<Void> applyRemoteSettingsAndAck(SettingsFrame settings) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 		
 			remoteSettings.applyRemoteSettings(settings);
 			
@@ -64,44 +64,44 @@ public abstract class Level3IncomingSynchro {
 	}
 
 	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streamsLayer.sendPriorityFrame(msg);			
 		});
 	}
 
 	public CompletableFuture<Void> sendPayloadToApp(PartialStream msg) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streamsLayer.sendPayloadToApp(msg);
 		});
 	}
 
 	public CompletableFuture<Void> sendRstToApp(RstStreamFrame frame) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streamsLayer.sendRstToApp(frame);
 		});
 	}
 	
 	public CompletableFuture<Void> sendRstToServerAndApp(StreamException e) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streamsLayer.sendRstToServerAndApp(e);
 		});
 	}
 
 	public CompletableFuture<Void> sendGoAwayToApp(ConnectionReset reset) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streamsLayer.sendGoAwayToApp(reset);
 		});
 	}
 	
 	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ConnectionReset reset) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			CompletableFuture<Void> future = streamsLayer.sendGoAwayToSvrAndResetAllToApp(reset);
 			return future;
 		});
 	}
 	
 	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streamsLayer.updateWindowSize(msg);
 		});
 	}

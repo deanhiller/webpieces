@@ -13,7 +13,7 @@ public class Level3ClntIncomingSynchro extends Level3IncomingSynchro {
 
 	private Level4ClientStreams streams;
 
-	public Level3ClntIncomingSynchro(			
+	public Level3ClntIncomingSynchro(
 			FuturePermitQueue serializer,
 			Level4ClientStreams streamsLayer, 
 			Level7MarshalAndPing notifyListener,
@@ -25,13 +25,13 @@ public class Level3ClntIncomingSynchro extends Level3IncomingSynchro {
 	}
 
 	public CompletableFuture<Void> processResponse(Http2Response msg) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streams.sendResponseToApp(msg);
 		});
 	}
 
 	public CompletableFuture<Void> processPush(Http2Push msg) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streams.sendPushToApp(msg);
 		});
 	}

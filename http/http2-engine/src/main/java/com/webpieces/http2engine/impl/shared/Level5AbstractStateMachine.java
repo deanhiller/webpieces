@@ -151,7 +151,7 @@ public abstract class Level5AbstractStateMachine {
 	}
 	
 	public Memento createStateMachine(String streamId) {
-		return stateMachine.createMementoFromState("stream"+streamId, idleState);
+		return stateMachine.createMementoFromState("SM"+streamId, idleState);
 	}
 	
 	

@@ -120,9 +120,9 @@ public class Level4ClientStreams extends Level4AbstractStreamMgr<ClientStream> {
 			log.info("ignoring incoming frame="+frame+" since socket is shutting down");
 			return CompletableFuture.completedFuture(null);
 		}
-		
+
 		Stream stream = streamState.getStream(frame, true);
-		
+
 		return clientSm.fireToClient(stream, frame)
 				.thenApply( s -> {
 					checkForClosedState(stream, frame, false);

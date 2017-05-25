@@ -16,7 +16,7 @@ public class TestPermitQueue {
 
 	private Executor executor = Executors.newFixedThreadPool(5, new NamedThreadFactory("deansThr"));
 	private PermitQueue queue1 = new PermitQueue(1);
-	private FuturePermitQueue queue2 = new FuturePermitQueue(1);
+	private FuturePermitQueue queue2 = new FuturePermitQueue("mytest", 1);
 
 	private MockService svc = new MockService();
 	

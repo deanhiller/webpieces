@@ -12,8 +12,8 @@ public class Http2ServerEngineFactory {
 		this.injectionConfig = injectionConfig;
 	}
 	
-	public Http2ServerEngine createEngine(ServerEngineListener listener) {
-		return new Level1ServerEngine(listener, injectionConfig);
+	public Http2ServerEngine createEngine(String logKey, ServerEngineListener listener) {
+		return new Level1ServerEngine(logKey, listener, injectionConfig);
 	}
 
 }

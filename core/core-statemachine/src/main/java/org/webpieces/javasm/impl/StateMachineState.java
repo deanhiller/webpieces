@@ -26,7 +26,7 @@ public class StateMachineState implements Memento
         this.stateMachine = sm;
         String name = Memento.class.getPackage().getName();
         log = LoggerFactory.getLogger(name+"."+rawMapId+"."+stateMachineId);
-        permitQueue = new FuturePermitQueue(1);
+        permitQueue = new FuturePermitQueue(stateMachineId, 1);
     }
 
     @Override

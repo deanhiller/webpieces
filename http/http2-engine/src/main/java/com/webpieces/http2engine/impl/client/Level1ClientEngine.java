@@ -34,13 +34,13 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	private Level2ParsingAndRemoteSettings parsing;
 	private AtomicInteger nextAvailableStreamId = new AtomicInteger(1);
 
-	public Level1ClientEngine(ClientEngineListener clientEngineListener, InjectionConfig injectionConfig) {
+	public Level1ClientEngine(String key, ClientEngineListener clientEngineListener, InjectionConfig injectionConfig) {
 		Http2Config config = injectionConfig.getConfig();
 		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = config.getLocalSettings();
 
-		FuturePermitQueue serializer = new FuturePermitQueue(1);
+		FuturePermitQueue serializer = new FuturePermitQueue(key, 1);
 		PermitQueue permitQueue = new PermitQueue(config.getInitialRemoteMaxConcurrent());
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,

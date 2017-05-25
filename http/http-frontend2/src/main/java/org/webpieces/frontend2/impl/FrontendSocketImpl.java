@@ -130,4 +130,8 @@ public class FrontendSocketImpl implements FrontendSocket {
 		return channel.getSession();
 	}
 
+	@Override
+	public String toString() {
+		return "HttpSocket" + channel;
+	}
 }

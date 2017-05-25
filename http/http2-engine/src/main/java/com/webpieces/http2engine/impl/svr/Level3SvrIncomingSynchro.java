@@ -24,7 +24,7 @@ public class Level3SvrIncomingSynchro extends Level3IncomingSynchro {
 	}
 
 	public CompletableFuture<Void> processRequest(Http2Request msg) {
-		return serializer.runRequest( () -> {
+		return singleThreadSerializer.runRequest( () -> {
 			return streams.sendRequestToApp(msg);
 		});
 	}

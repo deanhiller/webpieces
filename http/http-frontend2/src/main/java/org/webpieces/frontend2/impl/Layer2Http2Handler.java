@@ -30,7 +30,7 @@ public class Layer2Http2Handler {
 
 	public void initialize(FrontendSocketImpl socket) {
 		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener, socketInfo);
-		Http2ServerEngine engine = svrEngineFactory.createEngine(listener);
+		Http2ServerEngine engine = svrEngineFactory.createEngine(socket+"", listener);
 		socket.setHttp2Engine(engine);
 		
 		engine.intialize();

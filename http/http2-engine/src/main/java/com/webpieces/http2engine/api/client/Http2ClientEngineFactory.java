@@ -19,8 +19,8 @@ public class Http2ClientEngineFactory {
 		//localSettings.setInitialWindowSize(1000);
 		localSettings.setInitialWindowSize(initialWindowSize);
 	 */
-	public Http2ClientEngine createClientParser(ClientEngineListener resultListener) {
-		return new Level1ClientEngine(resultListener, injectionConfig);
+	public Http2ClientEngine createClientParser(String logKey, ClientEngineListener resultListener) {
+		return new Level1ClientEngine(logKey, resultListener, injectionConfig);
 	}
 	
 }

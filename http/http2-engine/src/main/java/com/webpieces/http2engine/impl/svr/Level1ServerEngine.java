@@ -37,13 +37,13 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	private Level3SvrIncomingSynchro incomingSync;
 	private Level3SvrOutgoingSynchro outgoingSync;
 
-	public Level1ServerEngine(ServerEngineListener listener, InjectionConfig injectionConfig) {
+	public Level1ServerEngine(String key, ServerEngineListener listener, InjectionConfig injectionConfig) {
 		Http2Config config = injectionConfig.getConfig();
 		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = config.getLocalSettings();
 
-		FuturePermitQueue serializer = new FuturePermitQueue(1);
+		FuturePermitQueue serializer = new FuturePermitQueue(key, 1);
 		PermitQueue maxConcurrent = new PermitQueue(100);
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,

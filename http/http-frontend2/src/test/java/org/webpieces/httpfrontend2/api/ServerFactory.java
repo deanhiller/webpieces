@@ -40,8 +40,6 @@ class ServerFactory {
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
         FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(0));
-        // Set this to true to test with h2spec
-        config.alwaysHttp2 = alwaysHttp2;
         HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
         server.start();
         return server.getUnderlyingChannel().getLocalAddress().getPort();

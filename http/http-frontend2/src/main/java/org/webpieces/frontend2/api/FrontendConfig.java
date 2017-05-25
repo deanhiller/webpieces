@@ -34,12 +34,6 @@ public class FrontendConfig {
 	
 	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 
-	/**
-	 * This turns on HTTP/2 by default, so HTTP/1.1 won't work. Only needed for testing with
-	 * 'h2spec' over cleartext. Will be made obsolete once we have ALPN.
-	 */
-	public boolean alwaysHttp2 = false;
-
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;
 		this.bindAddress = bindAddr;
