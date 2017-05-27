@@ -11,7 +11,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.FrontendConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -45,7 +45,7 @@ class ServerFactory {
         return server.getUnderlyingChannel().getLocalAddress().getPort();
     }
 
-    private static class OurListener implements HttpRequestListener, StreamWriter {
+    private static class OurListener implements StreamListener, StreamWriter {
         private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
         private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 

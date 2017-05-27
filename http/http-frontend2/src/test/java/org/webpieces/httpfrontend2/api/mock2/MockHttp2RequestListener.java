@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.mock.MethodEnum;
@@ -16,7 +16,7 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class MockHttp2RequestListener extends MockSuperclass implements HttpRequestListener {
+public class MockHttp2RequestListener extends MockSuperclass implements StreamListener {
 
 	private enum Method implements MethodEnum {
 		PROCESS, CANCEL, CANCEL_PUSH

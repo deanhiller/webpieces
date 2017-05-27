@@ -1,11 +1,11 @@
 package org.webpieces.webserver.api;
 
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface WebServer {
 
-	HttpRequestListener start();
+	StreamListener start();
 
 	void stop();
 

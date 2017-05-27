@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
@@ -30,10 +30,10 @@ public class Layer2Http1_1Handler {
 	private static final Logger log = LoggerFactory.getLogger(Layer2Http1_1Handler.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser httpParser;
-	private HttpRequestListener httpListener;
+	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
 
-	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener) {
+	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
 	}

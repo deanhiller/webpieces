@@ -6,7 +6,7 @@ import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.frontend2.api.FrontendConfig;
 import org.webpieces.frontend2.api.HttpFrontendManager;
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -29,7 +29,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpServer createHttpServer(FrontendConfig config, HttpRequestListener httpListener) {
+	public HttpServer createHttpServer(FrontendConfig config, StreamListener httpListener) {
 		preconditionCheck(config);
 
 		Layer1ServerListener listener = buildDatalListener(httpListener, false);
@@ -39,7 +39,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		return frontend;
 	}
 
-	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener, boolean isHttps) {
+	private Layer1ServerListener buildDatalListener(StreamListener httpListener, boolean isHttps) {
 		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(httpParser, httpListener);
 		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener);
 		Layer1ServerListener listener = new Layer1ServerListener(http1_1, http2, isHttps);
@@ -56,7 +56,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpServer createHttpsServer(FrontendConfig config, HttpRequestListener httpListener,
+	public HttpServer createHttpsServer(FrontendConfig config, StreamListener httpListener,
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		

@@ -1,6 +1,6 @@
 package org.webpieces.frontend2.api;
 
-public interface HttpRequestListener {
+public interface StreamListener {
 
 	HttpStream openStream();
 	

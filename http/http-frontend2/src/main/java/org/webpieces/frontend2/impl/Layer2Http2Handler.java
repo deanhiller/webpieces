@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -17,11 +17,11 @@ public class Layer2Http2Handler {
 	private static final Logger log = LoggerFactory.getLogger(Layer2Http2Handler.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ServerEngineFactory svrEngineFactory;
-	private HttpRequestListener httpListener;
+	private StreamListener httpListener;
 
 	public Layer2Http2Handler(
 			Http2ServerEngineFactory svrEngineFactory, 
-			HttpRequestListener httpListener
+			StreamListener httpListener
 	) {
 		this.svrEngineFactory = svrEngineFactory;
 		this.httpListener = httpListener;

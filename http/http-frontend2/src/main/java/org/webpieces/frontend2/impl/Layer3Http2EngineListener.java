@@ -3,7 +3,7 @@ package org.webpieces.frontend2.impl;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 
@@ -20,9 +20,9 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	//private static final Logger log = LoggerFactory.getLogger(Layer3Http2EngineListener.class);
 	
 	private FrontendSocketImpl socket;
-	private HttpRequestListener httpListener;
+	private StreamListener httpListener;
 
-	public Layer3Http2EngineListener(FrontendSocketImpl socket, HttpRequestListener httpListener) {
+	public Layer3Http2EngineListener(FrontendSocketImpl socket, StreamListener httpListener) {
 		this.socket = socket;
 		this.httpListener = httpListener;
 	}

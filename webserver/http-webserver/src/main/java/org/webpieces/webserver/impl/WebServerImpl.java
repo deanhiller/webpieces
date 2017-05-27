@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 import org.webpieces.frontend2.api.FrontendConfig;
 import org.webpieces.frontend2.api.HttpFrontendManager;
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
@@ -49,7 +49,7 @@ public class WebServerImpl implements WebServer {
 	private HttpServer httpsServer;
 
 	@Override
-	public HttpRequestListener start() {
+	public StreamListener start() {
 		log.info("starting server");
 		routingService.start();
 

@@ -3,7 +3,7 @@ package org.webpieces.frontend2.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
-import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 
@@ -12,9 +12,9 @@ import com.webpieces.http2engine.api.StreamWriter;
 
 public class TimeoutHandler {
 
-	private HttpRequestListener httpListener;
+	private StreamListener httpListener;
 
-	public TimeoutHandler(HttpRequestListener httpListener) {
+	public TimeoutHandler(StreamListener httpListener) {
 		this.httpListener = httpListener;
 	}
 
