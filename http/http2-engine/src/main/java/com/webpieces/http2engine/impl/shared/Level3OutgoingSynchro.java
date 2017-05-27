@@ -8,9 +8,9 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
-import com.webpieces.util.locking.FuturePermitQueue;
 import com.webpieces.util.locking.PermitQueue;
 
 /**
@@ -28,8 +28,7 @@ public abstract class Level3OutgoingSynchro {
 
 	private static final Logger log = LoggerFactory.getLogger(Level3OutgoingSynchro.class);
 
-	protected FuturePermitQueue singleThreadSerializer;
-	private Level4AbstractStreamMgr<?> streamsLayer;
+	private Level4PreconditionChecks<?> streamsLayer;
 	private HeaderSettings localSettings;
 
 	private Level7MarshalAndPing notifyListener;
@@ -39,32 +38,28 @@ public abstract class Level3OutgoingSynchro {
 	protected AtomicInteger acquiredCnt = new AtomicInteger(0);
 	
 	public Level3OutgoingSynchro(
-			FuturePermitQueue serializer, 
 			PermitQueue maxConcurrentQueue,
-			Level4AbstractStreamMgr<?> streams,
+			Level4PreconditionChecks<?> streams,
 			Level7MarshalAndPing notifyListener,
 			HeaderSettings localSettings
 	) {
-		this.singleThreadSerializer = serializer;
 		this.maxConcurrentQueue = maxConcurrentQueue;
 		this.streamsLayer = streams;
 		this.notifyListener = notifyListener;
 		this.localSettings = localSettings;
 	}
 
-	public CompletableFuture<Void> sendSettings() {
+	public CompletableFuture<Void> sendSettingsToSocket() {
 		SettingsFrame settings = HeaderSettings.createSettingsFrame(localSettings);
 		return notifyListener.sendFrameToSocket(settings);
 	}
 	
-	public void initiateClose(String reason) {
-		
+	public CompletableFuture<Void> sendDataToSocket(Stream stream, PartialStream data) {		
+		return streamsLayer.sendDataToSocket(stream, data);
 	}
-	
-	public CompletableFuture<Void> sendData(Stream stream, PartialStream data) {		
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.sendData(stream, data);
-		});
+
+	public CompletableFuture<Void> sendRstToSocket(Stream stream, RstStreamFrame data) {		
+		return streamsLayer.sendRstToSocket(stream, data);
 	}
 	
 	public void modifyMaxConcurrentStreams(long value) {

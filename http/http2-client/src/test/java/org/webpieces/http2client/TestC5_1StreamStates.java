@@ -18,13 +18,14 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.ConnectionClosedException;
-import com.webpieces.http2engine.api.ConnectionReset;
+import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.error.ShudownStream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PriorityDetails;
@@ -49,8 +50,9 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("Stream in idle state and received this frame which should not happen in idle state.  "
-				+ "frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}  reason=BAD_FRAME_RECEIVED_FOR_THIS_STATE stream=1", msg);
+		Assert.assertEquals("ConnectionException: MockHttp2Channel1:stream1:(BAD_FRAME_RECEIVED_FOR_THIS_STATE) "
+				+ "Stream in idle state and received this frame which should not happen in "
+				+ "idle state.  frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		//send new request on closed connection
@@ -87,14 +89,15 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertTrue(msg.contains("reason=BAD_FRAME_RECEIVED_FOR_THIS_STATE stream=2"));
+		Assert.assertEquals("ConnectionException: MockHttp2Channel1:stream2:(BAD_FRAME_RECEIVED_FOR_THIS_STATE) "
+				+ "No transition defined on statemachine for event=RECV_DATA when in state=Reserved(remote)", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		ConnectionReset failResp1 = (ConnectionReset) listener1.getSingleRstStream();
-		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp1.getCause().getReason());
+		ShudownStream failResp1 = (ShudownStream) listener1.getSingleRstStream();
+		Assert.assertEquals(CancelReasonCode.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp1.getCause().getReasonCode());
 		
-		ConnectionReset failResp2 = (ConnectionReset) listener1.getSingleCancelPush();
-		Assert.assertEquals(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp2.getCause().getReason());
+		ShudownStream failResp2 = (ShudownStream) listener1.getSingleCancelPush();
+		Assert.assertEquals(CancelReasonCode.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp2.getCause().getReasonCode());
 	}
 
 	/**
@@ -122,8 +125,9 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(Http2ErrorCode.STREAM_CLOSED, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("Stream must have been closed as it no longer exists.  high mark=1  "
-				+ "your frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}  reason=CLOSED_STREAM stream=1", msg);
+		Assert.assertEquals("ConnectionException: MockHttp2Channel1:stream1:(CLOSED_STREAM) "
+				+ "Stream must have been closed as it no longer exists.  high mark=1  "
+				+ "your frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
@@ -160,8 +164,9 @@ public class TestC5_1StreamStates extends AbstractTest {
 		Assert.assertEquals(Http2ErrorCode.STREAM_CLOSED, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("Stream must have been closed as it no longer exists.  high mark=1  "
-				+ "your frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}  reason=CLOSED_STREAM stream=1", msg);
+		Assert.assertEquals("ConnectionException: MockHttp2Channel1:stream1:"
+				+ "(CLOSED_STREAM) Stream must have been closed as it no longer exists.  "
+				+ "high mark=1  your frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
@@ -218,13 +223,16 @@ public class TestC5_1StreamStates extends AbstractTest {
 		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
 
 		Http2Request request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
+		StreamHandle stream = httpSocket.openStream(listener1);
+		CompletableFuture<StreamWriter> future = stream.process(request1);
+		@SuppressWarnings("unused")
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);
 		
 		RstStreamFrame rst = new RstStreamFrame(request1.getStreamId(), Http2ErrorCode.CANCEL);
-		writer.processPiece(rst);
+		CompletableFuture<Void> cancel = stream.cancel(rst);
+		cancel.get(2, TimeUnit.SECONDS);
 		
 		Http2Msg svrRst = mockChannel.getFrameAndClear();
 		Assert.assertEquals(rst, svrRst);

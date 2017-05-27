@@ -33,7 +33,7 @@ public class EngineStreamWriter implements StreamWriter {
 		if(data.isEndOfStream())
 			streamEnded = true;
 		
-		return synchroLayer.sendData(stream, data).thenApply(c -> this);
+		return synchroLayer.sendDataToSocket(stream, data).thenApply(c -> this);
 	}
 
 }

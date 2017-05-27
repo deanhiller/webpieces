@@ -18,8 +18,10 @@ public class UnmarshalStateImpl implements UnmarshalState {
 	
     private List<HasHeaderFragment> headersToCombine = new LinkedList<>();
 	private List<Http2Msg> parsedFrames = new ArrayList<>();
+	private String logId;
 	
-	public UnmarshalStateImpl(Http2Memento lowLevelState, HeaderDecoding decoding, Decoder decoder) {
+	public UnmarshalStateImpl(String logId, Http2Memento lowLevelState, HeaderDecoding decoding, Decoder decoder) {
+		this.logId = logId;
 		this.lowLevelState = lowLevelState;
 		this.decoding = decoding;
 		this.decoder = decoder;
@@ -59,6 +61,10 @@ public class UnmarshalStateImpl implements UnmarshalState {
 
 	public void clearParsedFrames() {
 		parsedFrames = new ArrayList<>();
+	}
+
+	public String getLogId() {
+		return logId;
 	}
 
 

@@ -110,7 +110,12 @@ public class CrudUserController {
 	}
 	
 	public Redirect postDeleteUser(int id) {
-		UserDbo ref = Em.get().getReference(UserDbo.class, id);
+		UserDbo ref = Em.get().find(UserDbo.class, id);
+		List<UserRole> roles = ref.getRoles();
+		for(UserRole r : roles) {
+			Em.get().remove(r);
+		}
+		
 		Em.get().remove(ref);
 		Em.get().flush();
 		Current.flash().setMessage("User deleted");

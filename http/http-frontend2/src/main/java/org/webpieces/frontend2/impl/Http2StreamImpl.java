@@ -56,4 +56,8 @@ public class Http2StreamImpl implements FrontendStream {
 		return session;
 	}
 
+	@Override
+	public String toString() {
+		return "Http2Stream["+ socket + ", sId=" + streamId + "]";
+	}
 }

@@ -5,14 +5,16 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.ConnectionReset;
+import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2engine.api.error.ConnReset2;
+import com.webpieces.http2engine.api.error.ShutdownConnection;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.error.StreamException;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
-import com.webpieces.util.locking.FuturePermitQueue;
 
 /**
  * We want events to run to completion so statemachine changes are final!!  This means advanced things
@@ -29,81 +31,64 @@ public abstract class Level3IncomingSynchro {
 
 	private static final Logger log = LoggerFactory.getLogger(Level3IncomingSynchro.class);
 
-	protected Level4AbstractStreamMgr<?> streamsLayer;
+	protected Level4PreconditionChecks<?> streamsLayer;
 	private Level7MarshalAndPing notifyListener;
 	private RemoteSettingsManagement remoteSettings;
 
-
-//	//We allow processing serially of each method call.  All futures below only mean the request was comletely
-//	//consumed by client or by the socket(ie. Future.complete(...) is when the next request can be processed
-	protected FuturePermitQueue singleThreadSerializer;
-
 	public Level3IncomingSynchro(
-			FuturePermitQueue serializer,
-			Level4AbstractStreamMgr<?> streamsLayer, 
+			Level4PreconditionChecks<?> streamsLayer, 
 			Level7MarshalAndPing notifyListener,
 			RemoteSettingsManagement remoteSettings
 			) {
-		this.singleThreadSerializer = serializer;
 		this.streamsLayer = streamsLayer;
 		this.notifyListener = notifyListener;
 		this.remoteSettings = remoteSettings;
 	}
 
 	public CompletableFuture<Void> applyRemoteSettingsAndAck(SettingsFrame settings) {
-		return singleThreadSerializer.runRequest( () -> {
+		remoteSettings.applyRemoteSettings(settings);
 		
-			remoteSettings.applyRemoteSettings(settings);
-			
-			//now that settings is applied, ack the settings
-			SettingsFrame settingsAck = new SettingsFrame(true);
-			
-			log.info("sending remote settings ack frame");
-			return notifyListener.sendControlDataToSocket(settingsAck);
-		});
+		//now that settings is applied, ack the settings
+		SettingsFrame settingsAck = new SettingsFrame(true);
+		
+		log.info("sending remote settings ack frame");
+		return notifyListener.sendControlDataToSocket(settingsAck);
 	}
 
-	public CompletableFuture<Void> sendPriorityFrame(PriorityFrame msg) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.sendPriorityFrame(msg);			
-		});
+	public CompletableFuture<Void> sendPriorityFrameToApp(PriorityFrame msg) {
+		return streamsLayer.sendPriorityFrameToApp(msg);			
 	}
 
-	public CompletableFuture<Void> sendPayloadToApp(PartialStream msg) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.sendPayloadToApp(msg);
-		});
+	public CompletableFuture<Void> sendDataToApp(DataFrame msg) {
+		return streamsLayer.sendDataToApp(msg);
 	}
 
+	public CompletableFuture<Void> sendTrailersToApp(Http2Trailers msg) {
+		return streamsLayer.sendTrailersToApp(msg);
+	}
+	
 	public CompletableFuture<Void> sendRstToApp(RstStreamFrame frame) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.sendRstToApp(frame);
-		});
+		return streamsLayer.sendRstToApp(frame);
 	}
 	
 	public CompletableFuture<Void> sendRstToServerAndApp(StreamException e) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.sendRstToServerAndApp(e);
-		});
+		return streamsLayer.sendRstToServerAndApp(e);
 	}
 
-	public CompletableFuture<Void> sendGoAwayToApp(ConnectionReset reset) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.sendGoAwayToApp(reset);
-		});
+	public CompletableFuture<Void> sendGoAwayToApp(ConnReset2 reset) {
+		return streamsLayer.sendGoAwayToApp(reset);
 	}
 	
-	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ConnectionReset reset) {
-		return singleThreadSerializer.runRequest( () -> {
-			CompletableFuture<Void> future = streamsLayer.sendGoAwayToSvrAndResetAllToApp(reset);
-			return future;
-		});
+	public CompletableFuture<Void> sendGoAwayToSvrAndResetAllToApp(ShutdownConnection reset) {
+		return streamsLayer.sendGoAwayToSvrAndResetAllToApp(reset);
 	}
 	
 	public CompletableFuture<Void> updateWindowSize(WindowUpdateFrame msg) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streamsLayer.updateWindowSize(msg);
-		});
+		return streamsLayer.updateWindowSize(msg);
+	}
+
+	public CompletableFuture<Void> sendUnkownFrameToApp(UnknownFrame msg) {
+		return streamsLayer.sendUnknownFrame(msg);
 	}
 
 }

@@ -5,11 +5,12 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.SocketInfo;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 
 import com.webpieces.http2engine.api.ResponseHandler2;
 import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
-import com.webpieces.http2parser.api.dto.error.Http2Exception;
 
 public class Layer3Http2EngineListener implements ServerEngineListener {
 
@@ -33,10 +34,16 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer newData) {
-		return socket.getChannel().write(newData).thenApply(c -> null);
+		try {
+			return socket.getChannel().write(newData).thenApply(c -> null);
+		} catch(NioClosedChannelException e) {
+			CompletableFuture<Void> f = new CompletableFuture<Void>();
+			f.completeExceptionally(e);
+			return f;
+		}
 	}
 
-	public void closeSocket(Http2Exception reason) {
+	public void closeSocket(ShutdownConnection reason) {
 		socket.internalClose();
 	}
 

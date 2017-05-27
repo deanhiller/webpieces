@@ -15,9 +15,9 @@ public class ClientPushStream extends Stream {
 	private PushPromiseListener pushPromiseListener;
 	private PushStreamHandle pushStreamHandle;
 
-	public ClientPushStream(int streamId, Memento currentState, ResponseHandler2 responseListener,
+	public ClientPushStream(String logId, int streamId, Memento currentState, ResponseHandler2 responseListener,
 			long localInitialWindowSize, long remoteInitialWindowSize) {
-		super(streamId, currentState, localInitialWindowSize, remoteInitialWindowSize);
+		super(logId, streamId, currentState, localInitialWindowSize, remoteInitialWindowSize, false);
 		this.originalResponseListener = responseListener;
 	}
 

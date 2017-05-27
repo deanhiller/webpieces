@@ -148,7 +148,7 @@ public class ParamToObjectTranslatorImpl {
 			throw new UnsupportedOperationException("You need to install a "+ObjectStringConverter.class.getSimpleName()+" for this enum "+fieldMeta);
 		} else if(List.class.isAssignableFrom(fieldClass)) {
 			if(valuesToUse == null)
-				return null;
+				return new ArrayList<>();
 			else if(valuesToUse instanceof ArrayNode) {
 				List<ParamNode> paramNodes = ((ArrayNode) valuesToUse).getList();
 				return createList(req, method, fieldMeta, validator, paramNodes);

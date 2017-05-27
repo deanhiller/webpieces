@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.Http2MementoImpl;
@@ -54,7 +54,7 @@ public class GoAwayMarshaller extends AbstractFrameMarshaller implements FrameMa
         super.unmarshalFrame(state, frame);
         int streamId = state.getFrameHeaderData().getStreamId();
         if(streamId != 0)
-            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, streamId, 
+            throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, streamId, 
             		"goaway frame had stream id="+streamId);
         
         List<? extends DataWrapper> split = dataGen.split(framePayloadData, 8);

@@ -14,7 +14,7 @@ import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler2;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class IntegColoradoEdu {
 
@@ -68,12 +68,12 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(RstStreamFrame frame) {
+		public CompletableFuture<Void> cancel(CancelReason frame) {
 			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
-		public CompletableFuture<Void> cancelPush(RstStreamFrame payload) {
+		public CompletableFuture<Void> cancelPush(CancelReason payload) {
 			return CompletableFuture.completedFuture(null);
 		}
 		@Override

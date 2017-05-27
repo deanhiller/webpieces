@@ -31,9 +31,9 @@ public class TestSMaxConcurrentSetting extends AbstractHttp2Test {
 		
 		List<Http2Msg> frames = mockChannel.getFramesAndClear();
 		Assert.assertEquals(2, frames.size());
-		DataFrame dataRecv1 = (DataFrame) frames.get(0);
+		Assert.assertEquals(sent.getResp2(), frames.get(0));
+		DataFrame dataRecv1 = (DataFrame) frames.get(1);
 		Assert.assertEquals(sent.getResp1().getStreamId(), dataRecv1.getStreamId());
-		Assert.assertEquals(sent.getResp2(), frames.get(1));
 		
 		StreamWriter writer2 = sent.getFuture2().get(2, TimeUnit.SECONDS);
 		
@@ -56,9 +56,9 @@ public class TestSMaxConcurrentSetting extends AbstractHttp2Test {
 		List<Http2Msg> frames = mockChannel.getFramesAndClear();
 		
 		Assert.assertEquals(2, frames.size());
-		SettingsFrame dataRecv1 = (SettingsFrame) frames.get(0);
+		Assert.assertEquals(sent.getResp2(), frames.get(0));
+		SettingsFrame dataRecv1 = (SettingsFrame) frames.get(1);
 		Assert.assertTrue(dataRecv1.isAck());
-		Assert.assertEquals(sent.getResp2(), frames.get(1));
 		
 		StreamWriter writer2 = sent.getFuture2().get(2, TimeUnit.SECONDS);
 		

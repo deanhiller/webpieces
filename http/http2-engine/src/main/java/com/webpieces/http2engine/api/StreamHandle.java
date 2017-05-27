@@ -3,7 +3,7 @@ package com.webpieces.http2engine.api;
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public interface StreamHandle {
 
@@ -21,5 +21,5 @@ public interface StreamHandle {
 	 * @param frame
 	 * @return 
 	 */
-	CompletableFuture<Void> cancel(RstStreamFrame reset); 
+	CompletableFuture<Void> cancel(CancelReason payload); 
 }

@@ -25,14 +25,14 @@ public class FuturePermitQueue {
 	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
 		Supplier<CompletableFuture<RESP>> proxy = new Supplier<CompletableFuture<RESP>>() {
 			public CompletableFuture<RESP> get() {
-				log.info("key:"+key+" start virtual single thread. ");
+				log.debug(() -> "key:"+key+" start virtual single thread. ");
 				CompletableFuture<RESP> fut = processor.get();
-				log.info("key:"+key+" halfway there.  future needs to be acked to finish work and release virtual thread");
+				log.debug(() -> "key:"+key+" halfway there.  future needs to be acked to finish work and release virtual thread");
 				return fut;
 			}
 		};
 		
-		log.info("key:"+key+" get virtual thread or wait");
+		log.debug(() -> "key:"+key+" get virtual thread or wait");
 		return queue.runRequest(proxy)
 				.handle((v, e) -> {
 					return release(v, e);
@@ -41,7 +41,7 @@ public class FuturePermitQueue {
 	}
 
 	private <RESP> CompletableFuture<RESP> release(RESP v, Throwable e) {
-		log.info("key:"+key+" end virtual single thread");
+		log.debug(() -> "key:"+key+" end virtual single thread");
 		//immediately release when future is complete
 		queue.releasePermit();
 

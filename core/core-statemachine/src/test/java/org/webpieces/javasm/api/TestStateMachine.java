@@ -2,8 +2,6 @@ package org.webpieces.javasm.api;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import junit.framework.TestCase;
@@ -101,14 +99,10 @@ public class TestStateMachine extends TestCase
         	throw new IllegalMonitorStateException();
         });
 
-        CompletableFuture<State> future = sm.fireAsyncEvent(memento, flipOff);
         try {
-            //fire turn off
-            future.get();
+            sm.fireEvent(memento, flipOff);
             fail("Should have thrown exception");
-        } catch (InterruptedException e) {
-        	fail("what");
-		} catch (ExecutionException e) {
+		} catch (IllegalMonitorStateException e) {
         	log.info("This exception is expected");
 		}
 

@@ -2,18 +2,16 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.util.locking.PermitQueue;
 import com.webpieces.util.time.Time;
 
 /**
@@ -31,13 +29,11 @@ public class StreamState {
 	
 	//we need to time out closing streams  BUT just reuse the threads!!! do not use a timer thread
 	private Time time;
-	private PermitQueue maxConcurrentQueue;
-	//purely for logging!!!  do not use for something else
-	private AtomicInteger releasedCnt = new AtomicInteger(0);
+	private String logId;
 
-	public StreamState(Time time, PermitQueue maxConcurrentQueue) {
+	public StreamState(Time time, String logId) {
 		this.time = time;
-		this.maxConcurrentQueue = maxConcurrentQueue;
+		this.logId = logId;
 	}
 
 	//chanmgr thread only
@@ -96,11 +92,11 @@ public class StreamState {
 
 	private void check(Http2Msg frame, int id, long highestOpen, boolean isConnectionError) {
 		if(id > highestOpen)
-			throw new ConnectionException(ParseFailReason.BAD_FRAME_RECEIVED_FOR_THIS_STATE, id, "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame);
+			throw new ConnectionException(CancelReasonCode.BAD_FRAME_RECEIVED_FOR_THIS_STATE, logId, id, "Stream in idle state and received this frame which should not happen in idle state.  frame="+frame);
 		else if(isConnectionError)
-			throw new ConnectionException(ParseFailReason.CLOSED_STREAM, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
+			throw new ConnectionException(CancelReasonCode.CLOSED_STREAM, logId, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
 		
-		throw new StreamException(ParseFailReason.CLOSED_STREAM, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
+		throw new StreamException(CancelReasonCode.CLOSED_STREAM, logId, id, "Stream must have been closed as it no longer exists.  high mark="+highestOpen+"  your frame="+frame);
 	}
 
 	//this method and create happen on a virtual single thread from channelmgr
@@ -113,15 +109,7 @@ public class StreamState {
 
 	public Stream remove(Stream stream, Object cause) {
 		stream.setIsClosed(true);
-		release(stream, cause);
 		return streamIdToStream.remove(stream.getStreamId());
 	}
 
-	public void release(Stream stream, Object cause) {
-		maxConcurrentQueue.releasePermit();
-		int val = releasedCnt.incrementAndGet();
-		log.info("release permit(cause="+cause+").  size="+maxConcurrentQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
-	}
-
-	
 }

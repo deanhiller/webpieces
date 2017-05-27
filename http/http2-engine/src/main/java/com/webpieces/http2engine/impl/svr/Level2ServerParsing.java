@@ -14,13 +14,14 @@ public class Level2ServerParsing extends Level2ParsingAndRemoteSettings {
 	private Level3SvrIncomingSynchro serverSyncro;
 
 	public Level2ServerParsing(
+			String key,
 			Level3SvrIncomingSynchro syncro,
 			Level3SvrOutgoingSynchro outSyncro,
 			Level7MarshalAndPing notifyListener, 
 			HpackParser lowLevelParser, 
 			Http2Config config
 	) {
-		super(syncro, outSyncro, notifyListener, lowLevelParser, config);
+		super(key, syncro, outSyncro, notifyListener, lowLevelParser, config);
 		serverSyncro = syncro;
 	}
 	@Override

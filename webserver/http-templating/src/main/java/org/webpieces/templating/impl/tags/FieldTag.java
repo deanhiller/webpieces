@@ -71,7 +71,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 		for(Map.Entry<Object, Object> entry : tagArgs.entrySet()) {
 			String key = entry.getKey().toString();
 			copyOfTagArgs.put(key, entry.getValue());
-			body.setProperty(key, entry.getValue());
+			if(body != null)
+				body.setProperty(key, entry.getValue());
 			closureProps.put(key, entry.getValue());
 		}
 		

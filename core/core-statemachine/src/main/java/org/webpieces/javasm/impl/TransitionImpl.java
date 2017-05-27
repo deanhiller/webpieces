@@ -62,4 +62,9 @@ public class TransitionImpl implements Transition
         }
     }
 
+	@Override
+	public String toString() {
+		return "TransitionImpl [endState=" + endState + "]";
+	}
+
 }

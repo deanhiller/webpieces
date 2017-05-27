@@ -14,20 +14,45 @@ import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.impl.shared.Level5AbstractStateMachine;
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2engine.impl.shared.Level5CStateMachine;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.StreamState;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
+import com.webpieces.http2parser.api.dto.error.StreamException;
+import com.webpieces.util.locking.PermitQueue;
 
-public class Level5ServerStateMachine extends Level5AbstractStateMachine {
+public class Level5ServerStateMachine extends Level5CStateMachine {
 
+	private static final Logger log = LoggerFactory.getLogger(Level5ServerStateMachine.class);
 	private Level6SvrLocalFlowControl local;
+	private HeaderSettings localSettings;
+	private HeaderSettings remoteSettings;
 
-	public Level5ServerStateMachine(String id, Level6RemoteFlowControl remoteFlowControl,
-			Level6SvrLocalFlowControl localFlowControl) {
-		super(id, remoteFlowControl, localFlowControl);
+	public Level5ServerStateMachine(
+			String id, 
+			StreamState streamState, 
+			Level6RemoteFlowControl remoteFlowControl,
+			Level6SvrLocalFlowControl localFlowControl,
+			HeaderSettings localSettings,
+			HeaderSettings remoteSettings, 
+			PermitQueue maxConcurrentQueue
+	) {
+		super(id, streamState, remoteFlowControl, localFlowControl, maxConcurrentQueue);
 		local = localFlowControl;
+		this.localSettings = localSettings;
+		this.remoteSettings = remoteSettings;
 		
 		State reservedLocal = stateMachine.createState("Reserved(local)");
 	
@@ -57,9 +82,59 @@ public class Level5ServerStateMachine extends Level5AbstractStateMachine {
 
 	}
 
-	public CompletableFuture<State> fireToClient(ServerStream stream, Http2Request payload) {
-		State result = fireToClientImpl(stream, payload);
-		return local.fireHeadersToClient(stream, payload)
-				.thenApply( v -> result);
+	public CompletableFuture<Void> fireToClient(ServerStream stream, Http2Request payload) {
+		return fireRecvToSM(stream, payload)
+				.thenCompose(v-> {
+					return local.fireHeadersToClient(stream, payload);
+				});
 	}
+
+	public CompletableFuture<Void> sendRequestToApp(Http2Request request) {
+		if(!streamState.isLargeEnough(request))
+			throw new StreamException(CancelReasonCode.CLOSED_STREAM, logId, request.getStreamId(), "Stream id too low and stream not exist(ie. stream was closed) request="+request);
+		
+		ServerStream stream = createStream(request.getStreamId());
+		return fireToClient(stream, request).thenApply(s -> null);
+	}
+	
+	private ServerStream createStream(int streamId) {
+		Memento initialState = createStateMachine("stream" + streamId);
+		long localWindowSize = localSettings.getInitialWindowSize();
+		long remoteWindowSize = remoteSettings.getInitialWindowSize();
+		ServerStream stream = new ServerStream(logId, streamId, initialState, localWindowSize, remoteWindowSize);
+		streamState.create(stream);
+		return stream;
+	}
+	
+	private ServerPushStream createPushStream(PushStreamHandleImpl handle, int streamId) {
+		Memento initialState = createStateMachine("stream" + streamId);
+		long localWindowSize = localSettings.getInitialWindowSize();
+		long remoteWindowSize = remoteSettings.getInitialWindowSize();
+		ServerPushStream stream = new ServerPushStream(logId, handle, streamId, initialState, localWindowSize, remoteWindowSize);
+		streamState.create(stream);
+		return stream;
+	}
+	
+	@Override
+	public CompletableFuture<Void> sendDataToApp(DataFrame frame) {
+		return sendDataToAppImpl(frame, false);
+	}
+
+	@Override
+	protected CompletableFuture<Void> sendTrailersToApp(Http2Trailers frame) {
+		return sendTrailersToAppImpl(frame, false);
+	}
+	
+	public CompletableFuture<ServerPushStream> sendPush(PushStreamHandleImpl handle, Http2Push push) {
+		int newStreamId = push.getPromisedStreamId();
+		ServerPushStream stream = createPushStream(handle, newStreamId);
+
+		return fireToSocket(stream, push)
+				.thenApply(s -> stream);
+	}
+
+	public CompletableFuture<Void> sendResponseHeaders(Stream stream, Http2Response response) {
+		return fireToSocket(stream, response);
+	}
+
 }

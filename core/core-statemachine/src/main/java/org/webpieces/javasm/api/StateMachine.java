@@ -1,7 +1,6 @@
 package org.webpieces.javasm.api;
 
 import java.awt.event.ActionListener;
-import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -19,13 +18,6 @@ public interface StateMachine
 
     public State fireEvent(Memento memento, Object event);
     
-    /**
-     * The fireEvent has to be either synchronized or virtually single threaded.  This method
-     * will stack up the calls and ONLY execute them one after the other such that transitions
-     * in the statemachine are atomic
-     */
-    public CompletableFuture<State> fireAsyncEvent(Memento currentState, Object event);
-
     /**
      * Creates a State with the given name.
      * @param name the name of the state.

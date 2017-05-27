@@ -1,32 +1,13 @@
 package com.webpieces.http2engine.api;
 
+import com.webpieces.http2engine.api.error.ConnectionCancelled;
+
 public class ConnectionClosedException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ConnectionClosedException() {
-		// TODO Auto-generated constructor stub
-	}
-
-	public ConnectionClosedException(String message) {
+	public ConnectionClosedException(ConnectionCancelled closedReason, String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
-	}
-
-	public ConnectionClosedException(Throwable cause) {
-		super(cause);
-		// TODO Auto-generated constructor stub
-	}
-
-	public ConnectionClosedException(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
-
-	public ConnectionClosedException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-		// TODO Auto-generated constructor stub
 	}
 
 }

@@ -13,11 +13,11 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.MarshalState;
+import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
-import com.webpieces.http2parser.api.dto.error.Http2Exception;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level7MarshalAndPing {
@@ -30,8 +30,10 @@ public class Level7MarshalAndPing {
 	private HeaderSettings remoteSettings;
 	private MarshalState marshalState;
 	private AtomicReference<CompletableFuture<Void>> pingFutureRef;
+	private String key;
 	
-	public Level7MarshalAndPing(HpackParser parser, HeaderSettings remoteSettings, EngineResultListener finalLayer) {
+	public Level7MarshalAndPing(String key, HpackParser parser, HeaderSettings remoteSettings, EngineResultListener finalLayer) {
+		this.key = key;
 		this.parser = parser;
 		this.remoteSettings = remoteSettings;
 		this.finalLayer = finalLayer;
@@ -51,7 +53,7 @@ public class Level7MarshalAndPing {
 		CompletableFuture<Void> newFuture = new CompletableFuture<>();
 		boolean wasSet = pingFutureRef.compareAndSet(null, newFuture);
 		if(!wasSet) {
-			throw new IllegalStateException("You must wait until the first ping you sent is complete.  2nd ping="+ping);
+			throw new IllegalStateException(key+"You must wait until the first ping you sent is complete.  2nd ping="+ping);
 		}
 
 		return sendFrameToSocket(ping)
@@ -68,7 +70,7 @@ public class Level7MarshalAndPing {
 
 		CompletableFuture<Void> future = pingFutureRef.get();
 		if(future == null)
-			throw new IllegalStateException("bug, this should not be possible");
+			throw new IllegalStateException(key+"bug, this should not be possible");
 
 		pingFutureRef.compareAndSet(future, null); //clear the value
 		future.complete(null);
@@ -81,17 +83,17 @@ public class Level7MarshalAndPing {
 		marshalState.setOutgoingMaxTableSize(value);
 	}
 	
-	public CompletableFuture<Void> goAway(Http2Exception e) {
-		ParseFailReason reason = e.getReason();
-		byte[] bytes = e.getMessage().getBytes(StandardCharsets.UTF_8);
+	public CompletableFuture<Void> goAway(ShutdownConnection shutdown) {
+		CancelReasonCode reason = shutdown.getReasonCode();
+		byte[] bytes = shutdown.getReason().getBytes(StandardCharsets.UTF_8);
 		DataWrapper debug = dataGen.wrapByteArray(bytes);
 
 		GoAwayFrame frame = new GoAwayFrame();
 		frame.setDebugData(debug);
 		frame.setKnownErrorCode(reason.getErrorCode());
-		
+
 		CompletableFuture<Void> future1 = sendControlDataToSocket(frame);
-		finalLayer.closeSocket(e);
+		finalLayer.closeSocket(shutdown);
 		return future1;
 	}
 	
@@ -104,7 +106,7 @@ public class Level7MarshalAndPing {
 	}
 
 	public CompletableFuture<Void> sendFrameToSocket(Http2Msg msg) {
-		log.info("sending frame down to socket(from client)=\n"+msg);
+		log.info(key+"sending frame down to socket(from client)=\n"+msg);
 		DataWrapper data = parser.marshal(marshalState, msg);
 		ByteBuffer buffer = ByteBuffer.wrap(data.createByteArray());
 		return sendToSocket(buffer);

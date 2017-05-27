@@ -6,7 +6,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.DataSplit;
@@ -15,7 +15,7 @@ import com.webpieces.http2parser.impl.PaddingUtil;
 
 public class DataMarshaller extends AbstractFrameMarshaller implements FrameMarshaller  {
 
-    public DataMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
+	public DataMarshaller(BufferPool bufferPool, DataWrapperGenerator dataGen) {
         super(bufferPool);
     }
 
@@ -25,7 +25,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
         int paddingSize = castFrame.getPadding().getReadableSize();
 
         if(frame.getStreamId() == 0)
-            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
+            throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, frame.getStreamId(), 
             		"data frame had invalid stream id="+frame.getStreamId());     
         
         byte value = (byte) 0x0;
@@ -50,7 +50,7 @@ public class DataMarshaller extends AbstractFrameMarshaller implements FrameMars
         frame.setPadding(split.getPadding());
         
         if(frame.getStreamId() == 0)
-            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
+            throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, frame.getStreamId(), 
             		"headers frame had invalid stream id="+frame.getStreamId());     
         
 		return frame;

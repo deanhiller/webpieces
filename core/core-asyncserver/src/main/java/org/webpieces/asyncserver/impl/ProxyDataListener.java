@@ -7,9 +7,12 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class ProxyDataListener implements DataListener {
 
+	private static final Logger log = LoggerFactory.getLogger(ProxyDataListener.class);
 	private static final String EXISTING_PROXY_CHANNEL = "_existingProxyChannel";
 	private ConnectedChannels connectedChannels;
 	private AsyncDataListener dataListener;
@@ -27,6 +30,7 @@ public class ProxyDataListener implements DataListener {
 
 	@Override
 	public void farEndClosed(Channel channel) {
+		log.error(channel+"far end closed");
 		connectedChannels.removeChannel((TCPChannel) channel);
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
 		dataListener.farEndClosed(proxy);

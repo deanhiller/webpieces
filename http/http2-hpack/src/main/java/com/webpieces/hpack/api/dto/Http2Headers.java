@@ -113,9 +113,9 @@ public abstract class Http2Headers implements Http2Msg {
 	
 	@Override
 	public String toString() {
-		return "Http2Headers [streamId=" + streamId + ", endStream=" + endOfStream + ", headerList="
+		String type = getClass().getSimpleName();
+		return type+"[streamId=" + streamId + ", endStream=" + endOfStream + ", headerList="
 				+ headers + ", priorityDetails=" + getPriorityDetails() + "]";
 	}
-
 
 }

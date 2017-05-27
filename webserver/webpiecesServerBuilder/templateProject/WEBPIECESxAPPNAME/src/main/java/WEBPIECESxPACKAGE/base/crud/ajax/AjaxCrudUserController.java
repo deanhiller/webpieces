@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.Flash;
 import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
@@ -17,7 +18,8 @@ import org.webpieces.router.api.actions.Render;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import WEBPIECESxPACKAGE.base.libs.UserDbo; 
+import WEBPIECESxPACKAGE.base.libs.UserDbo;
+import WEBPIECESxPACKAGE.base.libs.UserRole; 
 
 @Singleton
 public class AjaxCrudUserController {
@@ -35,7 +37,7 @@ public class AjaxCrudUserController {
 				"showPopup", showEditPopup);
 	}
 	
-	public Action userAddEdit(Integer id) {
+	public Action userAddEdit(Integer id) {		
 		if(id == null) {
 			return Actions.renderThis("entity", new UserDbo());
 		}
@@ -82,9 +84,14 @@ public class AjaxCrudUserController {
 		UserDbo user = Em.get().find(UserDbo.class, id);
 		return Actions.renderThis("entity", user);
 	}
-	
+
 	public Redirect postDeleteUser(int id) {
-		UserDbo ref = Em.get().getReference(UserDbo.class, id);
+		UserDbo ref = Em.get().find(UserDbo.class, id);
+		List<UserRole> roles = ref.getRoles();
+		for(UserRole r : roles) {
+			Em.get().remove(r);
+		}
+		
 		Em.get().remove(ref);
 		Em.get().flush();
 		Current.flash().setMessage("User deleted");

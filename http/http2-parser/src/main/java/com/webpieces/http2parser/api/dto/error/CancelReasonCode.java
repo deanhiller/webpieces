@@ -2,7 +2,7 @@ package com.webpieces.http2parser.api.dto.error;
 
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
-public enum ParseFailReason {
+public enum CancelReasonCode {
 	HEADERS_MIXED_WITH_FRAMES(Http2ErrorCode.PROTOCOL_ERROR),
 	HEADER_DECODE(Http2ErrorCode.COMPRESSION_ERROR),
 	HEADER_NOT_LOWER_CASE(Http2ErrorCode.PROTOCOL_ERROR),
@@ -26,11 +26,15 @@ public enum ParseFailReason {
 	BAD_STREAM_ID(Http2ErrorCode.PROTOCOL_ERROR), 
 	COMPRESSION_ERROR(Http2ErrorCode.COMPRESSION_ERROR), 
 	MALFORMED_REQUEST(Http2ErrorCode.PROTOCOL_ERROR),
+	
+	APPLICATION_INITIATED_CLOSE(Http2ErrorCode.CANCEL),
+	REMOTE_CLOSED_SOCKET(Http2ErrorCode.CANCEL), 
+	RECEIVED_GO_AWAY_FROM_REMOTE_END(Http2ErrorCode.CANCEL),
 	;
 
 	private Http2ErrorCode errorCode;
 
-	private ParseFailReason(Http2ErrorCode errorCode) {
+	private CancelReasonCode(Http2ErrorCode errorCode) {
 		this.errorCode = errorCode;
 	}
 	

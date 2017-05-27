@@ -177,7 +177,7 @@ public class SelectorImpl implements Select
         try {
 			return s.register(selector, allOps, struct);
 		} catch (ClosedChannelException e) {
-			throw new NioClosedChannelException(e);
+			throw new NioClosedChannelException("On registering, we received closedChannel(did remote end or local end close the socket", e);
 		}
     }
     

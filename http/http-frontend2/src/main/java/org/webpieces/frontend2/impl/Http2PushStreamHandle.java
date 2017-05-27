@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class Http2PushStreamHandle implements PushStreamHandle {
 
@@ -34,7 +34,7 @@ public class Http2PushStreamHandle implements PushStreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancelPush(RstStreamFrame reset) {
+	public CompletableFuture<Void> cancelPush(CancelReason reset) {
 		return pushStream.cancelPush(reset);
 	}
 

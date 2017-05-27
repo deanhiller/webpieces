@@ -41,7 +41,10 @@ public class Http1_1StreamImpl implements FrontendStream {
 
 	private StreamHandle streamHandle;
 
-	public Http1_1StreamImpl(FrontendSocketImpl socket, HttpParser http11Parser) {
+	private int streamId;
+
+	public Http1_1StreamImpl(int streamId, FrontendSocketImpl socket, HttpParser http11Parser) {
+		this.streamId = streamId;
 		this.socket = socket;
 		this.http11Parser = http11Parser;
 	}
@@ -149,6 +152,10 @@ public class Http1_1StreamImpl implements FrontendStream {
 
 	public StreamHandle getStreamHandle() {
 		return streamHandle;
+	}
+
+	public int getStreamId() {
+		return streamId;
 	}
 
 }

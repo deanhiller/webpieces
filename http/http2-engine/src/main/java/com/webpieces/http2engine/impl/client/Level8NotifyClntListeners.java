@@ -13,11 +13,11 @@ import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler2;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
+import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.error.Http2Exception;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -63,12 +63,12 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	}
 
 	@Override
-	public void closeSocket(Http2Exception reason) {
+	public void closeSocket(ShutdownConnection reason) {
 		listener.closeSocket(reason);
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendRstToApp(Stream stream, RstStreamFrame payload) {
+	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ClientStream) {
 			ClientStream str = (ClientStream) stream;
 			ResponseHandler2 handler = str.getResponseListener();

@@ -11,9 +11,9 @@ public class ServerStream extends Stream {
 	private StreamWriter streamWriter;
 	private StreamHandle streamHandle;
 
-	public ServerStream(int streamId, Memento currentState,
+	public ServerStream(String logId, int streamId, Memento currentState,
 			long localInitialWindowSize, long remoteInitialWindowSize) {
-		super(streamId, currentState, localInitialWindowSize, remoteInitialWindowSize);
+		super(logId, streamId, currentState, localInitialWindowSize, remoteInitialWindowSize, false);
 	}
 
 	public void setStreamWriter(StreamWriter w) {

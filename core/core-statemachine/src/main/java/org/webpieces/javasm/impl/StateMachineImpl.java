@@ -3,8 +3,6 @@ package org.webpieces.javasm.impl;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.event.EventListenerList;
 
@@ -12,8 +10,6 @@ import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.Transition;
-
-import com.webpieces.util.locking.FuturePermitQueue;
 
 /**
  */
@@ -99,24 +95,9 @@ public class StateMachineImpl implements StateMachine
         return createTransition(startStates, endState, events);
 
     }
-
-    @Override
-    public State fireEvent(Memento memento, Object evt)
-    {
-    	CompletableFuture<State> future = fireAsyncEvent(memento, evt);
-    	try {
-			return future.get();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		} catch (ExecutionException e) {
-			//FUCKING checked exceptions!!! DAMNIT!!!! FUCKING KILL THEM ALL
-			RuntimeException cause = (RuntimeException) e.getCause();
-			throw cause;
-		}
-    }
     
     @Override
-    public CompletableFuture<State> fireAsyncEvent(Memento memento, Object evt)
+    public State fireEvent(Memento memento, Object evt)
     {
         if(memento == null)
             throw new IllegalArgumentException(this + "memento cannot be null");
@@ -129,27 +110,22 @@ public class StateMachineImpl implements StateMachine
                     "you got your statemachines mixed up with the mementos");
 
         StateMachineState smState = (StateMachineState)memento;
-        FuturePermitQueue queue = smState.getPermitQueue();
         
-        return queue.runRequest(() -> fire(evt, smState));
+        return fire(evt, smState);
     }
 
-	private CompletableFuture<State> fire(Object evt, StateMachineState smState) {
-		CompletableFuture<State> future = new CompletableFuture<>();
+	private State fire(Object evt, StateMachineState smState) {
 		try {
             //get the current state
             StateImpl state = nameToState.get(smState.getCurrentState().getName());
-
             state.fireEvent(smState, evt);
-            
-            future.complete(smState.getCurrentState());
+            return smState.getCurrentState();
         } catch(RuntimeException e) {
             //NOTE: Stack trace is not logged here.  That is the responsibility of the javasm client
             //so exceptions don't get logged multiple times.
             smState.getLogger().warn(this+"Exception occurred going out of state="+smState.getCurrentState()+", event="+evt);
-            future.completeExceptionally(e);
+            throw e;
         }
-		return future;
 	}
 
     /**

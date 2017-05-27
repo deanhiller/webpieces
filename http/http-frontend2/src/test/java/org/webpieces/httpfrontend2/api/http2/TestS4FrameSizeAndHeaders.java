@@ -19,11 +19,11 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2engine.api.ConnectionClosedException;
-import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.error.ShudownStream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -66,12 +66,12 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("Frame size=16389 was greater than max="+localSettings.getMaxFrameSize()+" reason=EXCEEDED_MAX_FRAME_SIZE stream=1", msg);
+		Assert.assertEquals("ConnectionException: stream1:(EXCEEDED_MAX_FRAME_SIZE) Frame size=16389 was greater than max=16385", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		Cancel failResp = mockListener.getCancelInfo();
-		ConnectionReset reset = (ConnectionReset) failResp.reset;
-		Assert.assertEquals(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReason());
+		ShudownStream reset = (ShudownStream) failResp.reset;
+		Assert.assertEquals(CancelReasonCode.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReasonCode());
 
 		//send response with request not complete but failed as well anyways
 		Http2Response response = Http2Requests.createResponse(request.getStreamId());
@@ -106,7 +106,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertEquals(Http2ErrorCode.COMPRESSION_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("Error from hpack library reason=HEADER_DECODE stream=1", msg);
+		Assert.assertEquals("ConnectionException: HttpSocket[Http2ChannelCache1]:stream1:(HEADER_DECODE) Error from hpack library", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	

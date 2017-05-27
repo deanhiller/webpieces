@@ -64,9 +64,7 @@ public class StateImpl implements State
             transition = evtToTransition.get(StateMachineFactory.ANY_EVENT);
         }
         if(transition == null) {
-//            log.fine(smState+"CurrentState="+name+" evt="+evt+" no transition found");
             smState.getLogger().debug(() -> smState+"No Transition: "+getName()+" -> <no transition found>, event="+evt);
-            
             this.fireNoTransition(smState, evt);
             return;
         }

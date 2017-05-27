@@ -66,7 +66,7 @@ public class DataFrame extends AbstractHttp2Frame implements PartialStream {
                 ", endStream=" + endOfStream +
                 ", data.len=" + data.getReadableSize() +
                 ", padding=" + padding.getReadableSize() +
-                "} ";
+                "}";
     }
 
 	public long getTransmitFrameLength() {

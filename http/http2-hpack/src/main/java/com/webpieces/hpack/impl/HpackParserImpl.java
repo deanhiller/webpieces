@@ -27,7 +27,7 @@ import com.webpieces.http2parser.api.dto.HeadersFrame;
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.HasHeaderFragment;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
@@ -61,10 +61,10 @@ public class HpackParserImpl implements HpackParser {
 	}
 
 	@Override
-	public UnmarshalState prepareToUnmarshal(int maxHeaderSize, int maxHeaderTableSize, long localMaxFrameSize) {
+	public UnmarshalState prepareToUnmarshal(String logId, int maxHeaderSize, int maxHeaderTableSize, long localMaxFrameSize) {
 		Decoder decoder = new Decoder(maxHeaderSize, maxHeaderTableSize);
 		Http2Memento result = parser.prepareToParse(localMaxFrameSize);
-		return new UnmarshalStateImpl(result, decoding, decoder);
+		return new UnmarshalStateImpl(logId, result, decoding, decoder);
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class HpackParserImpl implements HpackParser {
 				combineAndSendHeadersToClient(state);
 			return;
 		} else if(headerFragList.size() > 0) {			
-			throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, frame.getStreamId(), 
+			throw new ConnectionException(CancelReasonCode.HEADERS_MIXED_WITH_FRAMES, state.getLogId(), frame.getStreamId(), 
 					"Parser in the middle of accepting headers(spec "
 					+ "doesn't allow frames between header fragments).  frame="+frame+" list="+headerFragList);
 		}
@@ -115,17 +115,18 @@ public class HpackParserImpl implements HpackParser {
 			streamId = f.getPromisedStreamId();
 		}
 		
+		String logId = state.getLogId();
 		
 		if(list.size() == 1) {
 			if(!(first instanceof HeadersFrame) && !(first instanceof PushPromiseFrame))
-				throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+				throw new ConnectionException(CancelReasonCode.HEADERS_MIXED_WITH_FRAMES, logId, lowLevelFrame.getStreamId(), 
 						"First has header frame must be HeadersFrame or PushPromiseFrame first frame="+first);				
 		} else if(streamId != lowLevelFrame.getStreamId()) {
-			throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+			throw new ConnectionException(CancelReasonCode.HEADERS_MIXED_WITH_FRAMES, logId, lowLevelFrame.getStreamId(), 
 					"Headers/continuations from two different streams per spec cannot be"
 					+ " interleaved.  frames="+list);
 		} else if(!(lowLevelFrame instanceof ContinuationFrame)) {
-			throw new ConnectionException(ParseFailReason.HEADERS_MIXED_WITH_FRAMES, lowLevelFrame.getStreamId(), 
+			throw new ConnectionException(CancelReasonCode.HEADERS_MIXED_WITH_FRAMES, logId, lowLevelFrame.getStreamId(), 
 					"Must be continuation frame and wasn't.  frames="+list);			
 		}
 	}
@@ -140,12 +141,12 @@ public class HpackParserImpl implements HpackParser {
 		}
 		
 		Map<Http2HeaderName, Http2Header> knownHeaders = new HashMap<>();
-		List<Http2Header> headers = decoding.decode(state.getDecoder(), allSerializedHeaders, firstFrame.getStreamId(),
+		List<Http2Header> headers = decoding.decode(state, allSerializedHeaders, firstFrame.getStreamId(),
 													header -> knownHeaders.put(header.getKnownName(), header));
 
 		if(firstFrame instanceof HeadersFrame) {
 			HeadersFrame f = (HeadersFrame) firstFrame;
-			Http2Headers fullHeaders = createCorrectType(knownHeaders, headers, f.getStreamId());
+			Http2Headers fullHeaders = createCorrectType(knownHeaders, headers, state.getLogId(), f.getStreamId());
 			fullHeaders.setStreamId(f.getStreamId());
 			fullHeaders.setPriorityDetails(f.getPriorityDetails());
 			fullHeaders.setEndOfStream(f.isEndOfStream());
@@ -165,29 +166,30 @@ public class HpackParserImpl implements HpackParser {
 	 * From spec, we know that trailers canNOT contain psuedo header fields, and requests
 	 * must contain :method header and response must include :status header
 	 * @param knownHeaders 
+	 * @param logId 
 	 * @param streamId 
 	 */
-	private Http2Headers createCorrectType(Map<Http2HeaderName, Http2Header> knownHeaders, List<Http2Header> headers, int streamId) {
+	private Http2Headers createCorrectType(Map<Http2HeaderName, Http2Header> knownHeaders, List<Http2Header> headers, String logId, int streamId) {
 		if(knownHeaders.containsKey(Http2HeaderName.METHOD)) {
 			if(knownHeaders.containsKey(Http2HeaderName.STATUS))
-				throw new StreamException(ParseFailReason.MALFORMED_REQUEST, streamId, "Request or Response has :method and :status headers and this is not allowed");
+				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Request or Response has :method and :status headers and this is not allowed");
 			else if(!knownHeaders.keySet().containsAll(requiredRequestHeaders))
-				throw new StreamException(ParseFailReason.MALFORMED_REQUEST, streamId, "Request is missing required headers.");
+				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Request is missing required headers.");
 			
 			return new Http2Request(headers);
 		} else if(knownHeaders.containsKey(Http2HeaderName.STATUS)) {
-			checkBadHeaders(knownHeaders, streamId);
+			checkBadHeaders(knownHeaders, logId, streamId);
 			return new Http2Response(headers);
 		}
 		
-		checkBadHeaders(knownHeaders, streamId);
+		checkBadHeaders(knownHeaders, logId, streamId);
 		return new Http2Trailers(headers);
 	}
 
-	private void checkBadHeaders(Map<Http2HeaderName, Http2Header> knownHeaders, int streamId) {
+	private void checkBadHeaders(Map<Http2HeaderName, Http2Header> knownHeaders, String logId, int streamId) {
 		for(Http2HeaderName name : requiredRequestHeaders) {
 			if(knownHeaders.containsKey(name))
-				throw new StreamException(ParseFailReason.MALFORMED_REQUEST, streamId, "Response contains a header that is reserved only for requests="+name);
+				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Response contains a header that is reserved only for requests="+name);
 		}
 	}
 

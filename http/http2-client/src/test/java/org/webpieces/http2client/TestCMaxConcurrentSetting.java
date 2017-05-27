@@ -73,11 +73,11 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		mockChannel.write(new SettingsFrame(true)); //ack client frame
 		List<Http2Msg> msgs = mockChannel.getFramesAndClear();
 
-		SettingsFrame ack = (SettingsFrame) msgs.get(0);
-		Assert.assertEquals(true, ack.isAck());
-		
-		Assert.assertEquals(sent.getRequest2().getRequest(), msgs.get(1));
+		Assert.assertEquals(sent.getRequest2().getRequest(), msgs.get(0));
 		Assert.assertTrue(sent.getRequest2().getFuture().isDone());
+		
+		SettingsFrame ack = (SettingsFrame) msgs.get(1);
+		Assert.assertEquals(true, ack.isAck());
 	}
 	
 	private RequestsSent sendTwoRequests() {

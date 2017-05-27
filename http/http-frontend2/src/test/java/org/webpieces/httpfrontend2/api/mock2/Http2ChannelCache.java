@@ -43,7 +43,7 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 	public Http2ChannelCache() {
 		BufferPool bufferPool = new BufferCreationPool();
 		parser = HpackParserFactory.createParser(bufferPool, false);
-		unmarshalState = parser.prepareToUnmarshal(4096, 4096, 4096);
+		unmarshalState = parser.prepareToUnmarshal("mockChannel", 4096, 4096, 4096);
 	}
 	
 	@Override
@@ -214,5 +214,9 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 			throw new IllegalStateException("expected no method calls but method was called "+list.size()+" times.  list="+list);
 	}
 
+	@Override
+	public String toString() {
+		return "Http2ChannelCache1";
+	}
 
 }

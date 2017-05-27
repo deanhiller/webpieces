@@ -10,10 +10,10 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.error.FarEndClosedConnection;
+import com.webpieces.http2engine.api.error.ShudownStream;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
-import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
 public class FrontendSocketImpl implements FrontendSocket {
 
@@ -99,25 +99,25 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	public void farEndClosed(HttpRequestListener httpListener) {
 		isClosed = true;
-		ConnectionReset f = new ConnectionReset("The far end closed the socket", null, true);
-		f.setKnownErrorCode(Http2ErrorCode.CONNECT_ERROR);
+		FarEndClosedConnection conn = new FarEndClosedConnection(this+" The far end closed the socket");
 		if(protocol == ProtocolType.HTTP1_1) {
-			cancelAllStreams(httpListener, f);
+			cancelAllStreams(httpListener, conn);
 		}
 		
 	}
 
-	private void cancelAllStreams(HttpRequestListener httpListener, ConnectionReset f) {
+	private void cancelAllStreams(HttpRequestListener httpListener, FarEndClosedConnection f) {
 		while(true) {
 			Http1_1StreamImpl poll = http11Queue.poll();
 			if(poll == null)
 				break;
 			
-			fireCancel(f, poll);
+			ShudownStream shutdown = new ShudownStream(poll.getStreamId(), f);
+			fireCancel(shutdown, poll);
 		}
 	}
 
-	private void fireCancel(ConnectionReset f, Http1_1StreamImpl stream) {
+	private void fireCancel(ShudownStream f, Http1_1StreamImpl stream) {
 		try {
 			stream.getStreamHandle().cancel(f);
 		} catch(Throwable e) {
@@ -132,6 +132,6 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	@Override
 	public String toString() {
-		return "HttpSocket" + channel;
+		return "HttpSocket[" + channel+"]";
 	}
 }

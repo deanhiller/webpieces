@@ -3,7 +3,7 @@ package com.webpieces.http2engine.api.client;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import com.webpieces.http2parser.api.dto.error.Http2Exception;
+import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 
 public interface ClientEngineListener {
@@ -14,6 +14,6 @@ public interface ClientEngineListener {
 
 	void engineClosedByFarEnd();
 
-	void closeSocket(Http2Exception reason);
+	void closeSocket(ShutdownConnection reason);
 
 }

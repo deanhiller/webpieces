@@ -7,15 +7,16 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler2;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
-public class ResponseHandlerImpl implements ResponseHandler2 {
+public class SvrSideResponseHandler implements ResponseHandler2 {
 
 	private Level1ServerEngine level1ServerEngine;
 	private ServerStream stream;
 	private AtomicInteger pushIdGenerator;
 
-	public ResponseHandlerImpl(Level1ServerEngine level1ServerEngine, ServerStream stream, AtomicInteger idGenerator) {
+	public SvrSideResponseHandler(Level1ServerEngine level1ServerEngine, ServerStream stream, AtomicInteger idGenerator) {
 		this.level1ServerEngine = level1ServerEngine;
 		this.stream = stream;
 		this.pushIdGenerator = idGenerator;
@@ -38,8 +39,10 @@ public class ResponseHandlerImpl implements ResponseHandler2 {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(RstStreamFrame frame) {
-		return level1ServerEngine.sendCancel(stream, frame);
+	public CompletableFuture<Void> cancel(CancelReason frame) {
+		if(!(frame instanceof RstStreamFrame))
+			throw new IllegalArgumentException("App can only pass in RstStreamFrame object here to be sent to clients.  The api is for consistency and shared with client");
+		return level1ServerEngine.sendCancel(stream, (RstStreamFrame)frame);
 	}
 
 }

@@ -11,9 +11,9 @@ public class Level6SvrLocalFlowControl extends Level6LocalFlowControl {
 
 	private Level8NotifySvrListeners notify;
 
-	public Level6SvrLocalFlowControl(Level7MarshalAndPing marshalLayer, Level8NotifySvrListeners notifyListener,
+	public Level6SvrLocalFlowControl(String logId, Level7MarshalAndPing marshalLayer, Level8NotifySvrListeners notifyListener,
 			HeaderSettings localSettings) {
-		super(marshalLayer, notifyListener, localSettings);
+		super(logId, marshalLayer, notifyListener, localSettings);
 		notify = notifyListener;
 	}
 

@@ -15,22 +15,23 @@ public class Level2ClientParsing extends Level2ParsingAndRemoteSettings {
 	private Level3ClntIncomingSynchro clientSyncro;
 
 	public Level2ClientParsing(
+			String key,
 			Level3ClntIncomingSynchro syncro,
 			Level3ClntOutgoingSyncro outSyncro,
 			Level7MarshalAndPing notifyListener, 
 			HpackParser lowLevelParser, 
 			Http2Config config
 	) {
-		super(syncro, outSyncro, notifyListener, lowLevelParser, config);
+		super(key, syncro, outSyncro, notifyListener, lowLevelParser, config);
 		clientSyncro = syncro;
 	}
 	
 	@Override
 	protected CompletableFuture<Void> processSpecific(Http2Msg msg) {
 		if(msg instanceof Http2Response) {
-			return clientSyncro.processResponse((Http2Response) msg);
+			return clientSyncro.sendResponseToApp((Http2Response) msg);
 		} else if(msg instanceof Http2Push) {
-			return clientSyncro.processPush((Http2Push) msg);			
+			return clientSyncro.sendPushToApp((Http2Push) msg);			
 		} else
 			throw new IllegalArgumentException("Unknown HttpMsg type.  msg="+msg+" type="+msg.getClass());
 	}

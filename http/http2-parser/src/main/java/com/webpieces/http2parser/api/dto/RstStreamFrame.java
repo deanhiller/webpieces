@@ -4,9 +4,8 @@ import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class RstStreamFrame extends AbstractHttp2Frame implements PartialStream {
+public class RstStreamFrame extends AbstractHttp2Frame implements CancelReason {
 
     /* flags */
 
@@ -35,20 +34,16 @@ public class RstStreamFrame extends AbstractHttp2Frame implements PartialStream 
     public void setKnownErrorCode(Http2ErrorCode errorCode) {
         this.errorCode = errorCode.getCode();
     }
-
+	
 	@Override
-	public boolean isEndOfStream() {
-		return true;
+	public Http2MsgType getMessageType() {
+		return Http2MsgType.RST_STREAM;
 	}
 	
     @Override
     public Http2FrameType getFrameType() {
         return Http2FrameType.RST_STREAM;
     }
-    @Override
-	public Http2MsgType getMessageType() {
-		return Http2MsgType.RST_STREAM;
-	}
 	
     @Override
 	public int hashCode() {

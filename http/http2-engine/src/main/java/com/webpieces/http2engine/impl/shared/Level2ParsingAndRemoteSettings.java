@@ -9,21 +9,24 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.ConnectionClosedException;
-import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.api.error.ConnectionFailure;
+import com.webpieces.http2engine.api.error.ReceivedGoAway;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
+import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public abstract class Level2ParsingAndRemoteSettings {
 
@@ -32,13 +35,14 @@ public abstract class Level2ParsingAndRemoteSettings {
 	private HpackParser lowLevelParser;
 	private UnmarshalState parsingState;
 	private Level7MarshalAndPing marshalLayer;
-	private String id;
+	private String logId;
 	protected Level3IncomingSynchro syncro;
 	private HeaderSettings localSettings;
 
 	protected Level3OutgoingSynchro outSyncro;
 
 	public Level2ParsingAndRemoteSettings(
+			String logId,
 			Level3IncomingSynchro syncro,
 			Level3OutgoingSynchro outSyncro,
 			Level7MarshalAndPing notifyListener, 
@@ -47,12 +51,12 @@ public abstract class Level2ParsingAndRemoteSettings {
 	) {
 		this.outSyncro = outSyncro;
 		this.localSettings = config.getLocalSettings();
-		this.id = config.getId();
+		this.logId = logId;
 		
 		this.syncro = syncro;
 		this.marshalLayer = notifyListener;
 		this.lowLevelParser = lowLevelParser;
-		parsingState = lowLevelParser.prepareToUnmarshal(4096, localSettings.getHeaderTableSize(), localSettings.getMaxFrameSize());
+		parsingState = lowLevelParser.prepareToUnmarshal(logId, 4096, localSettings.getHeaderTableSize(), localSettings.getMaxFrameSize());
 	}
 
 	/**
@@ -76,19 +80,18 @@ public abstract class Level2ParsingAndRemoteSettings {
 		if(e == null) 
 			return null;
 		else if(e instanceof ConnectionClosedException) {
-			log.trace(() -> "Normal exception since we are closing and they do not know yet", e);
-			
+			log.error("Normal exception since we are closing and they do not know yet", e);
 		} else if(e instanceof StreamException) {
 			log.error("shutting the stream down due to error", e);
 			syncro.sendRstToServerAndApp((StreamException) e).exceptionally( t -> logExc("stream", t));
 		} else if(e instanceof ConnectionException) {
 			log.error("shutting the connection down due to error", e);
-			ConnectionReset reset = new ConnectionReset((ConnectionException) e);
+			ConnectionFailure reset = new ConnectionFailure((ConnectionException)e);
 			syncro.sendGoAwayToSvrAndResetAllToApp(reset).exceptionally( t -> logExc("connection", t)); //send GoAway
 		} else {
-			log.error("shutting the connection down due to error", e);
-			ConnectionException exc = new ConnectionException(ParseFailReason.BUG, 0, e.getMessage(), e);
-			ConnectionReset reset = new ConnectionReset(exc);
+			log.error("shutting the connection down due to error(MAKE sure your clients try..catch, exceptions)", e);
+			ConnectionException exc = new ConnectionException(CancelReasonCode.BUG, logId, 0, e.getMessage(), e);
+			ConnectionFailure reset = new ConnectionFailure((ConnectionException)exc);
 			syncro.sendGoAwayToSvrAndResetAllToApp(reset).exceptionally( t -> logExc("connection", t)); //send GoAwa
 		}
 		return null;
@@ -105,20 +108,28 @@ public abstract class Level2ParsingAndRemoteSettings {
 		
 		CompletableFuture<Void> future = CompletableFuture.completedFuture((Void)null);
 		for(Http2Msg lowLevelFrame : parsedMessages) {
-			CompletableFuture<Void> f = process(lowLevelFrame);
-			future = future.thenCompose(s -> f);
+			future = future.thenCompose(v -> {
+				return process(lowLevelFrame);
+			});
 		}
 		return future;
 	}
 
 	public CompletableFuture<Void> process(Http2Msg msg) {
-		log.info(id+"frame from socket="+msg);
-		if(msg instanceof PartialStream) {
-			//we may be sending to client app or server app depending on if this is serverside or clientside
-			return sendPayloadToApp((PartialStream) msg);
+		log.info(logId+"frame from socket="+msg);
+		if(msg instanceof DataFrame) {
+			return syncro.sendDataToApp((DataFrame) msg);
+		} else if(msg instanceof Http2Trailers) {
+			return syncro.sendTrailersToApp((Http2Trailers)msg);
+		} else if(msg instanceof PriorityFrame) {
+			return syncro.sendPriorityFrameToApp((PriorityFrame) msg);
+		} else if(msg instanceof RstStreamFrame) {
+			return syncro.sendRstToApp((RstStreamFrame) msg);
+		} else if(msg instanceof UnknownFrame) {
+			return syncro.sendUnkownFrameToApp((UnknownFrame)msg);
 		} else if(msg instanceof GoAwayFrame) {
-			ConnectionReset reset = new ConnectionReset("Far end sent goaway to us", (GoAwayFrame)msg, true);
-			return syncro.sendGoAwayToApp(reset).exceptionally( t -> logExc("connection", t)); //send GoAwa
+			ReceivedGoAway goAway = new ReceivedGoAway(logId+" Far end sent goaway to us", (GoAwayFrame)msg);
+			return syncro.sendGoAwayToApp(goAway).exceptionally( t -> logExc("connection", t)); //send GoAwa
 		} else if(msg instanceof PingFrame) {
 			return marshalLayer.processPing((PingFrame)msg);
 		} else if(msg instanceof SettingsFrame) {
@@ -128,20 +139,6 @@ public abstract class Level2ParsingAndRemoteSettings {
 		} 
 		
 		return processSpecific(msg);
-	}
-
-	private CompletableFuture<Void> sendPayloadToApp(PartialStream msg) {
-		if(msg instanceof PriorityFrame) {
-			return syncro.sendPriorityFrame((PriorityFrame)msg);
-		} else if(msg instanceof RstStreamFrame) {
-			return syncro.sendRstToApp((RstStreamFrame) msg);
-		}
-		return syncro.sendPayloadToApp((PartialStream) msg);
-//				.thenApply( s -> {
-//					if(s != null)
-//						outSyncro.release(s, msg);
-//					return null;
-//				});
 	}
 
 	protected abstract CompletableFuture<Void> processSpecific(Http2Msg msg);

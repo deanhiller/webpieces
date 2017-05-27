@@ -8,7 +8,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.PingFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.FrameHeaderData;
@@ -43,10 +43,10 @@ public class PingMarshaller extends AbstractFrameMarshaller implements FrameMars
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 8)
-            throw new ConnectionException(ParseFailReason.FRAME_SIZE_INCORRECT, streamId, 
+            throw new ConnectionException(CancelReasonCode.FRAME_SIZE_INCORRECT, streamId, 
             		"ping size not 8 and instead is="+state.getFrameHeaderData().getPayloadLength());
 		else if(streamId != 0)
-			throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, streamId, 
+			throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, streamId, 
 					"streamId on ping needs to be 0 but was="+streamId);
 
 		//TODO: Verify this, previous code looks like connectionlevel = false but shouldn't this be true

@@ -8,12 +8,15 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.SocketInfo;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
 import com.webpieces.http2engine.api.server.Http2ServerEngineFactory;
 
 public class Layer2Http2Handler {
 
+	private static final Logger log = LoggerFactory.getLogger(Layer2Http2Handler.class);
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ServerEngineFactory svrEngineFactory;
 	private HttpRequestListener httpListener;
@@ -47,6 +50,7 @@ public class Layer2Http2Handler {
 	}
 
 	public void farEndClosed(FrontendSocketImpl socket) {
+		log.error("far end closed="+socket);
 		Http2ServerEngine engine = socket.getHttp2Engine();
 		engine.farEndClosed();
 	}

@@ -7,6 +7,6 @@ import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
 public interface Synchro {
 
-	CompletableFuture<Void> sendData(Stream stream, PartialStream data);
+	CompletableFuture<Void> sendDataToSocket(Stream stream, PartialStream data);
 
 }

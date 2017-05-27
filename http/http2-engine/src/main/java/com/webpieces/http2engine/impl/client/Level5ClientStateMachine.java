@@ -13,24 +13,46 @@ import static com.webpieces.http2engine.impl.shared.data.Http2Event.SENT_RST;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
 
 import com.webpieces.hpack.api.dto.Http2Push;
+import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.impl.shared.Level5AbstractStateMachine;
+import com.webpieces.hpack.api.dto.Http2Trailers;
+import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.client.Http2Config;
+import com.webpieces.http2engine.impl.shared.Level5CStateMachine;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
+import com.webpieces.http2engine.impl.shared.StreamState;
+import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
+import com.webpieces.util.locking.PermitQueue;
 
-public class Level5ClientStateMachine extends Level5AbstractStateMachine {
+public class Level5ClientStateMachine extends Level5CStateMachine {
 
 	private Level6ClntLocalFlowControl local;
+	private HeaderSettings localSettings;
+	private HeaderSettings remoteSettings;
+	private int afterResetExpireSeconds;
 
-	public Level5ClientStateMachine(String id,
+	public Level5ClientStateMachine(
+			String key,
+			StreamState streamState,
 			Level6RemoteFlowControl remoteFlowControl, 
-			Level6ClntLocalFlowControl localFlowControl
+			Level6ClntLocalFlowControl localFlowControl,
+			Http2Config config,
+			HeaderSettings remoteSettings, 
+			PermitQueue maxConcurrentQueue
 	) {
-		super(id, remoteFlowControl, localFlowControl);
-		local = localFlowControl;
+		super(key, streamState, remoteFlowControl, localFlowControl, maxConcurrentQueue);
+		this.local = localFlowControl;
+		this.localSettings = config.getLocalSettings();
+		this.remoteSettings = remoteSettings;
+		afterResetExpireSeconds = config.getAfterResetExpireSeconds();
 		
 		State reservedRemote = stateMachine.createState("Reserved(remote)");
 	
@@ -58,15 +80,71 @@ public class Level5ClientStateMachine extends Level5AbstractStateMachine {
 
 	}
 
+	public CompletableFuture<Void> sendResponse(Http2Response frame) {
+		Stream stream = streamState.getStream(frame, true);
+		
+		CompletableFuture<Void> future = fireToClient(stream, frame);
+		return future;
+	}
+	
 	public CompletableFuture<Void> fireToClient(Stream stream, Http2Response payload) { //, Supplier<StreamTransition> possiblyClose 
-		fireToClientImpl(stream, payload);
-		return local.fireResponseToApp(stream, payload);
+		return fireRecvToSM(stream, payload)
+				.thenCompose(v -> {
+					return local.fireResponseToApp(stream, payload);
+				});
 	}
 	
 	public CompletableFuture<Void> firePushToClient(ClientPushStream stream, Http2Push fullPromise) {
-		fireToClientImpl(stream, fullPromise);
-		return local.firePushToApp(stream, fullPromise)
-				.thenApply( v -> null);
+		return fireRecvToSM(stream, fullPromise)
+			.thenCompose(v -> {
+				return local.firePushToApp(stream, fullPromise);
+			});
 	}
+
+	public CompletableFuture<Stream> createStreamAndSend(Http2Request frame, ResponseHandler2 responseListener) {
+		Stream stream = createStream(frame.getStreamId(), responseListener);
+		return fireToSocket(stream, frame).thenApply(v -> stream);
+	}
+	
+	private ClientStream createStream(int streamId, ResponseHandler2 responseListener) {
+		Memento initialState = createStateMachine("stream" + streamId);
+		long localWindowSize = localSettings.getInitialWindowSize();
+		long remoteWindowSize = remoteSettings.getInitialWindowSize();
+		ClientStream stream = new ClientStream(logId, streamId, initialState, responseListener, localWindowSize, remoteWindowSize);
+		streamState.create(stream);
+		return stream;
+	}
+
+	public CompletableFuture<Void> sendPushToApp(Http2Push fullPromise) {
+		int newStreamId = fullPromise.getPromisedStreamId();
+		if(newStreamId % 2 == 1)
+			throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, logId, newStreamId, 
+					"Server sent bad push promise="+fullPromise+" as new stream id is incorrect and is an odd number");
+
+		ClientStream causalStream = (ClientStream) streamState.getStream(fullPromise, true);
+		
+		ClientPushStream stream = createPushStream(newStreamId, causalStream.getResponseListener());
+		
+		return firePushToClient(stream, fullPromise);
+	}
+
+	private ClientPushStream createPushStream(int streamId, ResponseHandler2 responseListener) {
+		Memento initialState = createStateMachine("stream" + streamId);
+		long localWindowSize = localSettings.getInitialWindowSize();
+		long remoteWindowSize = remoteSettings.getInitialWindowSize();
+		ClientPushStream stream = new ClientPushStream(logId, streamId, initialState, responseListener, localWindowSize, remoteWindowSize);
+		streamState.create(stream);
+		return stream;
+	}
+
+	public CompletableFuture<Void> sendDataToApp(DataFrame frame) {
+		return sendDataToAppImpl(frame, true);
+	}
+
+	@Override
+	protected CompletableFuture<Void> sendTrailersToApp(Http2Trailers frame) {
+		return sendTrailersToAppImpl(frame, true);
+	}
+
 
 }

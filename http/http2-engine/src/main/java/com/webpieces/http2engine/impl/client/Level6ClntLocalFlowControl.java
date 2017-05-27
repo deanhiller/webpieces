@@ -13,9 +13,9 @@ public class Level6ClntLocalFlowControl extends Level6LocalFlowControl {
 
 	private Level8NotifyClntListeners notify;
 
-	public Level6ClntLocalFlowControl(Level7MarshalAndPing marshalLayer, Level8NotifyClntListeners notifyListener,
+	public Level6ClntLocalFlowControl(String logId, Level7MarshalAndPing marshalLayer, Level8NotifyClntListeners notifyListener,
 			HeaderSettings localSettings) {
-		super(marshalLayer, notifyListener, localSettings);
+		super(logId, marshalLayer, notifyListener, localSettings);
 		notify = notifyListener;
 	}
 

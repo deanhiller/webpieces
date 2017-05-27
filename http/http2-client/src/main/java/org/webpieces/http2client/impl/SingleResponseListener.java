@@ -13,6 +13,7 @@ import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler2;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -80,7 +81,7 @@ public class SingleResponseListener implements ResponseHandler2, StreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(RstStreamFrame frame) {
+	public CompletableFuture<Void> cancel(CancelReason frame) {
 		responseFuture.completeExceptionally(new ServerRstStreamException("The remote end reset this stream"));
 		return CompletableFuture.completedFuture(null);
 	}

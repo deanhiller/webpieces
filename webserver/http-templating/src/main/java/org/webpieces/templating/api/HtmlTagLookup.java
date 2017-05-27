@@ -18,8 +18,11 @@ import org.webpieces.templating.impl.tags.RenderTagArgsTag;
 import org.webpieces.templating.impl.tags.ScriptTag;
 import org.webpieces.templating.impl.tags.StyleSheetTag;
 import org.webpieces.templating.impl.tags.TemplateLoaderTag;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class HtmlTagLookup {
+	private static final Logger log = LoggerFactory.getLogger(HtmlTagLookup.class);
 	
 	private Map<String, HtmlTag> tags = new HashMap<>();
 	protected ConverterLookup converter;
@@ -49,6 +52,7 @@ public class HtmlTagLookup {
 		HtmlTag htmlTag = tags.get(tag.getName());
 		if(htmlTag != null)
 			throw new IllegalArgumentException("Tag="+tag.getName()+" was already added to the tag map by class="+htmlTag.getClass()+" Your class="+tag.getClass());
+		log.info("adding tag="+tag.getName());
 		tags.put(tag.getName(), tag);
 	}
 

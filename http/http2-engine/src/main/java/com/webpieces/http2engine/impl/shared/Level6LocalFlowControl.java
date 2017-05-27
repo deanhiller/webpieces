@@ -5,15 +5,14 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -25,8 +24,10 @@ public abstract class Level6LocalFlowControl {
 	private long totalSent = 0;
 	private long totalRecovered = 0;
 	private EngineResultListener notifyListener;
+	private String logId;
 
 	public Level6LocalFlowControl(
+			String logId,
 			Level7MarshalAndPing marshalLayer,
 			EngineResultListener notifyListener,
 			HeaderSettings localSettings
@@ -36,15 +37,15 @@ public abstract class Level6LocalFlowControl {
 		this.connectionLocalWindowSize = localSettings.getInitialWindowSize();
 	}
 	
-	public CompletableFuture<Void> fireHeadersToClient(Stream stream, Http2Trailers payload) {
-		return notifyListener.sendPieceToApp(stream, payload);
-	}
+//	public CompletableFuture<Void> fireHeadersToClient(Stream stream, Http2Trailers payload) {
+//		return notifyListener.sendPieceToApp(stream, payload);
+//	}
 
 	public CompletableFuture<Void> firePriorityToClient(Stream stream, PriorityFrame payload) {
 		return notifyListener.sendPieceToApp(stream, payload);		
 	}
 	
-	public CompletableFuture<Void> fireRstToClient(Stream stream, RstStreamFrame payload) {
+	public CompletableFuture<Void> fireRstToClient(Stream stream, CancelReason payload) {
 		return notifyListener.sendRstToApp(stream, payload);		
 	}	
 	
@@ -56,11 +57,11 @@ public abstract class Level6LocalFlowControl {
 		long frameLength = f.getTransmitFrameLength();
 
 		if(frameLength > connectionLocalWindowSize) {
-			throw new ConnectionException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
+			throw new ConnectionException(CancelReasonCode.FLOW_CONTROL_ERROR, logId, f.getStreamId(), 
 					"connectionLocalWindowSize too small="+connectionLocalWindowSize
 					+" frame len="+frameLength+" for frame="+f);
 		} else if(frameLength > stream.getLocalWindowSize()) {
-			throw new StreamException(ParseFailReason.FLOW_CONTROL_ERROR, f.getStreamId(), 
+			throw new StreamException(CancelReasonCode.FLOW_CONTROL_ERROR, logId, f.getStreamId(), 
 					"connectionLocalWindowSize too small="+connectionLocalWindowSize
 					+" frame len="+frameLength+" for frame="+f);
 		}

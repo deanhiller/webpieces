@@ -9,7 +9,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Setting;
 
 public interface HpackParser {
 
-	UnmarshalState prepareToUnmarshal(int maxHeaderSize, int maxHeaderTableSize, long localMaxFrameSize);
+	UnmarshalState prepareToUnmarshal(String logId, int maxHeaderSize, int maxHeaderTableSize, long localMaxFrameSize);
     UnmarshalState unmarshal(UnmarshalState state, DataWrapper newData);
 
 	MarshalState prepareToMarshal(int maxHeaderTableSize, long remoteMaxFrameSize);

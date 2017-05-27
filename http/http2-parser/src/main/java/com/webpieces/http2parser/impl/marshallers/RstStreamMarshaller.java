@@ -8,7 +8,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.FrameHeaderData;
@@ -37,10 +37,10 @@ public class RstStreamMarshaller extends AbstractFrameMarshaller implements Fram
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 4)
-            throw new ConnectionException(ParseFailReason.FRAME_SIZE_INCORRECT, streamId, 
+            throw new ConnectionException(CancelReasonCode.FRAME_SIZE_INCORRECT, streamId, 
             		"rststream size not 4 and instead is="+state.getFrameHeaderData().getPayloadLength());
 		else if(frameHeaderData.getStreamId() == 0)
-            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, frameHeaderData.getStreamId(), 
+            throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, frameHeaderData.getStreamId(), 
             		"rst stream cannot be streamid 0 and was="+frameHeaderData.getStreamId());
             
 		RstStreamFrame frame = new RstStreamFrame();

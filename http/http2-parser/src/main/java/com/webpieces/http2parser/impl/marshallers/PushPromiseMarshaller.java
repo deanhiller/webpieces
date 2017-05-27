@@ -9,7 +9,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.PushPromiseFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.impl.DataSplit;
@@ -56,7 +56,7 @@ public class PushPromiseMarshaller extends AbstractFrameMarshaller implements Fr
 		super.unmarshalFrame(state, frame);
 
         if(frame.getStreamId() == 0)
-            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, frame.getStreamId(), 
+            throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, frame.getStreamId(), 
             		"pushpromise frame had invalid stream id="+frame.getStreamId());  
         
 		byte flags = state.getFrameHeaderData().getFlagsByte();

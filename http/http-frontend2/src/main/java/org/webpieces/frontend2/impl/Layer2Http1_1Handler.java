@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -24,7 +25,6 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
@@ -35,6 +35,7 @@ public class Layer2Http1_1Handler {
 	private HttpRequestListener httpListener;
 	private boolean isHttps;
 	private SocketInfo socketInfo;
+	private AtomicInteger counter = new AtomicInteger(1);
 
 	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener, boolean isHttps) {
 		this.httpParser = httpParser;
@@ -119,7 +120,8 @@ public class Layer2Http1_1Handler {
 	}
 
 	private CompletableFuture<StreamWriter> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
-		Http1_1StreamImpl stream = new Http1_1StreamImpl(socket, httpParser);
+		int id = counter.getAndAdd(2);
+		Http1_1StreamImpl stream = new Http1_1StreamImpl(id, socket, httpParser);
 		socket.setAddStream(stream);
 
 		StreamHandle streamHandle = httpListener.openStream(stream, socketInfo);

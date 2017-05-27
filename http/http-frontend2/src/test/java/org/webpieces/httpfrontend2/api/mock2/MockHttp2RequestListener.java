@@ -15,7 +15,7 @@ import org.webpieces.mock.ParametersPassedIn;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class MockHttp2RequestListener extends MockSuperclass implements HttpRequestListener {
 
@@ -25,8 +25,8 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	
 	public static class Cancel {
 		public FrontendStream stream;
-		public RstStreamFrame reset;
-		public Cancel(FrontendStream stream, RstStreamFrame reset) {
+		public CancelReason reset;
+		public Cancel(FrontendStream stream, CancelReason reset) {
 			super();
 			this.stream = stream;
 			this.reset = reset;
@@ -73,7 +73,7 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<Void> cancel(RstStreamFrame reset) {
+		public CompletableFuture<Void> cancel(CancelReason reset) {
 			return (CompletableFuture<Void>) 
 					MockHttp2RequestListener.super.calledMethod(Method.CANCEL, new Cancel(stream, reset));
 		}

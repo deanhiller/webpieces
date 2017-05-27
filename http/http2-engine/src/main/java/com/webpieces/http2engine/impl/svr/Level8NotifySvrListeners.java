@@ -8,11 +8,11 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.error.Http2Exception;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
@@ -41,7 +41,7 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	}
 
 	@Override
-	public void closeSocket(Http2Exception reason) {
+	public void closeSocket(ShutdownConnection reason) {
 		listener.closeSocket(reason);
 	}
 	
@@ -51,7 +51,7 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	}
 
 	@Override
-	public CompletableFuture<Void> sendRstToApp(Stream stream, RstStreamFrame payload) {
+	public CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload) {
 		if(stream instanceof ServerStream) {
 			ServerStream str = (ServerStream) stream;
 			StreamHandle handle = str.getStreamHandle();
@@ -77,7 +77,7 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	}
 
 	public CompletableFuture<Void> fireRequestToApp(ServerStream stream, Http2Request payload) {
-		ResponseHandlerImpl handler = new ResponseHandlerImpl(level1ServerEngine, stream, pushIdGenerator);
+		SvrSideResponseHandler handler = new SvrSideResponseHandler(level1ServerEngine, stream, pushIdGenerator);
 		StreamHandle streamHandle = listener.openStream(payload.getStreamId(), handler);
 		stream.setStreamHandle(streamHandle);
 		return streamHandle.process(payload)

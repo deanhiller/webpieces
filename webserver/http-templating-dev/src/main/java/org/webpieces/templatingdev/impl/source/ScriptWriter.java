@@ -204,9 +204,11 @@ public class ScriptWriter {
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
 			generator.generateStartAndEnd(sourceCode, token, id);
-		} else if(htmltag == null) {
-			throw new IllegalArgumentException("Unknown tag="+tagName+" location="+token.getSourceLocation(true));
 		} else {
+			if(htmltag == null && !config.getCustomTagsFromPlugin().contains(tagName))
+					throw new IllegalArgumentException("Unknown tag=#{"+tagName+"}# OR you didn't add '"
+								+tagName+"' to list of customTags in build.gradle file. "+token.getSourceLocation(true));
+
 			new TagGen(tagName, token, translator).generateStartAndEnd(sourceCode, token, id);
 		}
 	}

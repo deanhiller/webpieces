@@ -15,7 +15,7 @@ import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
@@ -146,7 +146,7 @@ public class Http2ParserImpl implements Http2Parser {
         
         long maxFrameSize = state.getIncomingMaxFrameSize();
         if(payloadLength > maxFrameSize) 
-            throw new ConnectionException(ParseFailReason.EXCEEDED_MAX_FRAME_SIZE, streamId, 
+            throw new ConnectionException(CancelReasonCode.EXCEEDED_MAX_FRAME_SIZE, streamId, 
             		"Frame size="+payloadLength+" was greater than max="+maxFrameSize);
         
         state.setFrameHeaderData(new FrameHeaderData(payloadLength, streamId, frameTypeId, flagsByte));

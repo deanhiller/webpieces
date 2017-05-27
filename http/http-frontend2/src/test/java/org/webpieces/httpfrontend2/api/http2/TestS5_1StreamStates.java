@@ -43,8 +43,9 @@ public class TestS5_1StreamStates extends AbstractHttp2Test {
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("Stream in idle state and received this frame which should not happen in idle state.  "
-				+ "frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}  reason=BAD_FRAME_RECEIVED_FOR_THIS_STATE stream=1", msg);
+		Assert.assertEquals("ConnectionException: HttpSocket[Http2ChannelCache1]:stream1:(BAD_FRAME_RECEIVED_FOR_THIS_STATE) "
+				+ "Stream in idle state and received this frame which should not happen in idle state.  "
+				+ "frame=DataFrame{streamId=1, endStream=false, data.len=0, padding=0}", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
@@ -81,9 +82,8 @@ public class TestS5_1StreamStates extends AbstractHttp2Test {
 		Assert.assertEquals(Http2ErrorCode.PROTOCOL_ERROR, goAway.getKnownErrorCode());
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("No transition defined on statemachine for event="
-				+ "RECV_DATA when in state=Reserved(local) "
-				+ "reason=BAD_FRAME_RECEIVED_FOR_THIS_STATE stream=2", msg);
+		Assert.assertEquals("ConnectionException: HttpSocket[Http2ChannelCache1]:stream2:(BAD_FRAME_RECEIVED_FOR_THIS_STATE) "
+				+ "No transition defined on statemachine for event=RECV_DATA when in state=Reserved(local)", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 

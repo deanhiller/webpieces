@@ -8,6 +8,7 @@ import org.webpieces.frontend2.api.SocketInfo;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
 public class WebpiecesStreamHandle implements StreamHandle {
@@ -38,7 +39,7 @@ public class WebpiecesStreamHandle implements StreamHandle {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(RstStreamFrame c) {
+	public CompletableFuture<Void> cancel(CancelReason c) {
 		writer.cancelOutstandingRequest();
 		return CompletableFuture.completedFuture(null);
 	}

@@ -13,7 +13,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Setting;
@@ -71,13 +71,13 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 
 		if(frame.isAck()) {
 	        if(payloadLength != 0) {
-	            throw new ConnectionException(ParseFailReason.FRAME_SIZE_INCORRECT, streamId, 
+	            throw new ConnectionException(CancelReasonCode.FRAME_SIZE_INCORRECT, streamId, 
 	            		"size of payload of a settings frame ack must be 0 but was="+payloadLength);	        }
 		} else if(payloadLength % 6 != 0) {
-            throw new ConnectionException(ParseFailReason.FRAME_SIZE_INCORRECT, streamId, 
+            throw new ConnectionException(CancelReasonCode.FRAME_SIZE_INCORRECT, streamId, 
             		"payload size must be a multiple of 6 but was="+state.getFrameHeaderData().getPayloadLength());
         } else if(streamId != 0)
-            throw new ConnectionException(ParseFailReason.INVALID_STREAM_ID, streamId, 
+            throw new ConnectionException(CancelReasonCode.INVALID_STREAM_ID, streamId, 
             		"settings frame had stream id="+streamId);
         
 		ByteBuffer payloadByteBuffer = bufferPool.createWithDataWrapper(payload);
@@ -111,7 +111,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		switch(key) {
 			case SETTINGS_ENABLE_PUSH:
 				if(value != 0 && value != 1)
-		            throw new ConnectionException(ParseFailReason.INVALID_SETTING, 0, 
+		            throw new ConnectionException(CancelReasonCode.INVALID_SETTING, 0, 
 		            		"push setting must be 0 or 1 but was="+value);
 				break;
 			case SETTINGS_INITIAL_WINDOW_SIZE:
@@ -135,7 +135,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		int max = 2147483647;
 		
 		if(value < min || value > max)
-            throw new ConnectionException(ParseFailReason.SETTINGS_WINDOW_SIZE_INVALID, 0, 
+            throw new ConnectionException(CancelReasonCode.SETTINGS_WINDOW_SIZE_INVALID, 0, 
             		"window size must be between "+min+" and "+max+" but was="+value);
 	}
 	
@@ -145,7 +145,7 @@ public class SettingsMarshaller extends AbstractFrameMarshaller implements Frame
 		int max = 1677215;
 		
 		if(value < min || value > max)
-            throw new ConnectionException(ParseFailReason.INVALID_SETTING, 0, 
+            throw new ConnectionException(CancelReasonCode.INVALID_SETTING, 0, 
             		"window size must be between "+min+" and "+max+" but was="+value);
 	}
 

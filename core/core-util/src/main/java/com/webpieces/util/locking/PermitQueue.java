@@ -4,13 +4,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 /**
- * 
+ * An asynchronous queue that concurrently runs the number of operations allowed(#permits operations) and adds any others into a 
+ * queue until the previous finish returning to the caller to do other operations
  */
 public class PermitQueue {
 
@@ -20,16 +22,40 @@ public class PermitQueue {
 	private final Semaphore permits;
 	private final AtomicInteger toBeRemoved = new AtomicInteger(0);
 	private int permitCount;
-	
+	private int timeMsWarning;
+	private int queuedBackupWarnThreshold;
+	private AtomicLong counter = new AtomicLong(0);
+	private String logId;
+
 	public PermitQueue(int numPermits) {
-		permitCount = numPermits;
+		this("(noId)", numPermits, 3000, 1000);
+	}
+	
+	public PermitQueue(String logId, int numPermits, int timeMsWarning, int queuedBackupWarnThreshold) {
+		this.logId = logId;
+		this.permitCount = numPermits;
+		this.timeMsWarning = timeMsWarning;
+		this.queuedBackupWarnThreshold = queuedBackupWarnThreshold;
 		permits = new Semaphore(numPermits);
 	}
 	
+	
 	@SuppressWarnings("unchecked")
 	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
+		String key = logId+counter.getAndIncrement();
+
+		long time = System.currentTimeMillis();
 		CompletableFuture<RESP> future = new CompletableFuture<RESP>();
-		queue.add(new QueuedRequest<RESP>(future, processor));
+		queue.add(new QueuedRequest<RESP>(future, processor, time));
+
+		//take a peek at the first item in queue and see when it was queued
+		QueuedRequest<RESP> item = (QueuedRequest<RESP>) queue.peek();
+		long timeQueued = item.getTimeQueued();
+		long timeDelayed = time - timeQueued;
+		if(timeDelayed > timeMsWarning)
+			log.warn("id:"+key+" Your PermitQueue/Lock has the first item in the queue waiting "+timeDelayed+"ms so you may have deadlock or just a very contentious lock(you probably should look into this)");		
+		if(backupSize() > queuedBackupWarnThreshold)
+			log.warn("id:"+key+" Your lock is backing up with requests.  either too much contention or deadlock occurred(either way, you should fix this)");
 
 		processItemFromQueue();
 		
@@ -97,7 +123,7 @@ public class PermitQueue {
 	public void modifyPermitPoolSize(int permitCnt) {
 		permitCount += permitCnt;
 		if(permitCnt > 0) {
-			log.info("increasing permits in pool by "+permitCnt);
+			log.info(logId+"increasing permits in pool by "+permitCnt);
 			//apply the release now that the function is RUN WHEN the client resolves the release future
 			permits.release(permitCnt);
 			
@@ -105,7 +131,7 @@ public class PermitQueue {
 				processItemFromQueue();
 			}
 		} else {
-			log.info("decreasing permits in pool by "+permitCnt);
+			log.info(logId+"decreasing permits in pool by "+permitCnt);
 			int positiveToRemove = -permitCnt;
 			//first try to remove them all immediately
 			int countOfRemoved = 0;
@@ -119,6 +145,10 @@ public class PermitQueue {
 			//then cache the rest that will get removed on release(ie. when someone is done)
 			toBeRemoved.addAndGet(toRemoveStill);
 		}
+	}
+
+	public int backupSize() {
+		return queue.size();
 	}
 
 }

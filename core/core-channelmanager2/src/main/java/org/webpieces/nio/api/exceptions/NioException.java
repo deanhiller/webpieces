@@ -1,10 +1,9 @@
 package org.webpieces.nio.api.exceptions;
 
-public class NioException extends RuntimeException {
+import java.util.concurrent.CompletionException;
 
-	/**
-	 * 
-	 */
+public class NioException extends CompletionException {
+
 	private static final long serialVersionUID = 1L;
 
 	public NioException() {

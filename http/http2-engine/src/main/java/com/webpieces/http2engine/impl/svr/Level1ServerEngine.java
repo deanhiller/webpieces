@@ -9,11 +9,12 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.ConnectionReset;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2engine.api.client.InjectionConfig;
+import com.webpieces.http2engine.api.error.FarEndClosedConnection;
+import com.webpieces.http2engine.api.error.UserInitiatedConnectionClose;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
 import com.webpieces.http2engine.api.server.ServerEngineListener;
 import com.webpieces.http2engine.impl.shared.Level2ParsingAndRemoteSettings;
@@ -23,9 +24,9 @@ import com.webpieces.http2engine.impl.shared.RemoteSettingsManagement;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
+import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
-import com.webpieces.util.locking.FuturePermitQueue;
 import com.webpieces.util.locking.PermitQueue;
 
 public class Level1ServerEngine implements Http2ServerEngine {
@@ -36,38 +37,39 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	private Level2ParsingAndRemoteSettings parsing;
 	private Level3SvrIncomingSynchro incomingSync;
 	private Level3SvrOutgoingSynchro outgoingSync;
+	private String logId;
 
-	public Level1ServerEngine(String key, ServerEngineListener listener, InjectionConfig injectionConfig) {
+	public Level1ServerEngine(String logId, ServerEngineListener listener, InjectionConfig injectionConfig) {
+		this.logId = logId;
 		Http2Config config = injectionConfig.getConfig();
 		HpackParser parser = injectionConfig.getLowLevelParser();
 		HeaderSettings remoteSettings = new HeaderSettings();
 		HeaderSettings localSettings = config.getLocalSettings();
 
-		FuturePermitQueue serializer = new FuturePermitQueue(key, 1);
 		PermitQueue maxConcurrent = new PermitQueue(100);
 
 		//all state(memory) we need to clean up is in here or is the engine itself.  To release RAM,
 		//we have to release items in the map inside this or release the engine
-		StreamState streamState = new StreamState(injectionConfig.getTime(), maxConcurrent);
+		StreamState streamState = new StreamState(injectionConfig.getTime(), logId);
 
 
 		Level8NotifySvrListeners finalLayer = new Level8NotifySvrListeners(listener, this);
-		marshalLayer = new Level7MarshalAndPing(parser, remoteSettings, finalLayer);
-		Level6RemoteFlowControl remoteFlowCtrl = new Level6RemoteFlowControl(streamState, marshalLayer, remoteSettings);
-		Level6SvrLocalFlowControl localFlowCtrl = new Level6SvrLocalFlowControl(marshalLayer, finalLayer, localSettings);
-		Level5ServerStateMachine clientSm = new Level5ServerStateMachine(config.getId(), remoteFlowCtrl, localFlowCtrl);
-		Level4ServerStreams streamInit = new Level4ServerStreams(streamState, clientSm, localFlowCtrl, remoteFlowCtrl, localSettings, remoteSettings);
+		marshalLayer = new Level7MarshalAndPing(logId, parser, remoteSettings, finalLayer);
+		Level6RemoteFlowControl remoteFlowCtrl = new Level6RemoteFlowControl(logId, streamState, marshalLayer, remoteSettings);
+		Level6SvrLocalFlowControl localFlowCtrl = new Level6SvrLocalFlowControl(logId, marshalLayer, finalLayer, localSettings);
+		Level5ServerStateMachine clientSm = new Level5ServerStateMachine(logId, streamState, remoteFlowCtrl, localFlowCtrl, localSettings, remoteSettings, maxConcurrent);
+		Level4ServerPreconditions streamInit = new Level4ServerPreconditions(logId, clientSm);
 
-		outgoingSync = new Level3SvrOutgoingSynchro(serializer, maxConcurrent, streamInit, marshalLayer, localSettings);
+		outgoingSync = new Level3SvrOutgoingSynchro(maxConcurrent, streamInit, marshalLayer, localSettings);
 		RemoteSettingsManagement mgmt = new RemoteSettingsManagement(outgoingSync, remoteFlowCtrl, marshalLayer, remoteSettings);
-		incomingSync = new Level3SvrIncomingSynchro(serializer, streamInit, marshalLayer, mgmt);
+		incomingSync = new Level3SvrIncomingSynchro(streamInit, marshalLayer, mgmt);
 		
-		parsing = new Level2ServerParsing(incomingSync, outgoingSync, marshalLayer, parser, config);
+		parsing = new Level2ServerParsing(logId, incomingSync, outgoingSync, marshalLayer, parser, config);
 	}
 
 	@Override
 	public CompletableFuture<Void> intialize() {
-		return outgoingSync.sendSettings();
+		return outgoingSync.sendSettingsToSocket();
 	}
 	
 	@Override
@@ -82,26 +84,28 @@ public class Level1ServerEngine implements Http2ServerEngine {
 
 	@Override
 	public void farEndClosed() {
-		ConnectionReset reset = new ConnectionReset("Far end sent goaway to us", null, true);
+		log.error(logId+"Far end closing");
+		FarEndClosedConnection reset = new FarEndClosedConnection(logId+"Far end sent goaway to us");
 		incomingSync.sendGoAwayToApp(reset).exceptionally( t -> {
-			log.error("Exception after remote socket closed resetting streams.", t);
+			log.error(logId+"Exception after remote socket closed resetting streams.", t);
 			return null;
 		});
 	}
 
 	@Override
 	public void initiateClose(String reason) {
-		outgoingSync.initiateClose(reason);
+		UserInitiatedConnectionClose close = new UserInitiatedConnectionClose(reason);
+		incomingSync.sendGoAwayToSvrAndResetAllToApp(close);
 	}
 
 	public CompletableFuture<StreamWriter> sendResponseHeaders(Stream stream, Http2Response data) {
 		int streamId = data.getStreamId();
 		if(streamId <= 0)
-			throw new IllegalArgumentException("frames for requests must have a streamId > 0");
+			throw new IllegalArgumentException(logId+"frames for requests must have a streamId > 0");
 		else if(streamId % 2 == 0)
-			throw new IllegalArgumentException("Server cannot send response frames with even stream ids to client per http/2 spec");
+			throw new IllegalArgumentException(logId+"Server cannot send response frames with even stream ids to client per http/2 spec");
 		
-		return outgoingSync.sendResponseHeaders(stream, data);
+		return outgoingSync.sendResponseToSocket(stream, data);
 	}
 
 	public CompletableFuture<PushPromiseListener> sendPush(PushStreamHandleImpl handle, Http2Push push) {
@@ -114,7 +118,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		else if(promisedId % 2 == 1)
 			throw new IllegalArgumentException("Server cannot send push frames with odd promisedStreamId to client per http/2 spec");				
 
-		return outgoingSync.sendPush(handle, push).thenApply(s -> new PushPromiseEngineListener(s) );
+		return outgoingSync.sendPushToSocket(handle, push).thenApply(s -> new PushPromiseEngineListener(s) );
 	}
 
 	private class PushPromiseEngineListener implements PushPromiseListener {
@@ -129,7 +133,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+response);
 
-			return outgoingSync.sendPushResponse(stream, response).thenApply(v -> {
+			return outgoingSync.sendPushResponseToSocket(stream, response).thenApply(v -> {
 				return new PushEngineWriter(stream); 
 			});
 		}
@@ -147,7 +151,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+data);
 
-			return outgoingSync.sendData(stream, data).thenApply(v -> this);
+			return outgoingSync.sendDataToSocket(stream, data).thenApply(v -> this);
 		}
 	}
 	
@@ -158,16 +162,16 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		else if(streamId % 2 == 0)
 			throw new IllegalArgumentException("Server cannot send response frames with even stream ids to client per http/2 spec");
 		
-		return outgoingSync.sendCancel(stream, frame);
+		return outgoingSync.sendRstToSocket(stream, frame);
 	}
 	
-	public CompletableFuture<Void> cancelPush(RstStreamFrame frame) {
-		int streamId = frame.getStreamId();
+	public CompletableFuture<Void> cancelPush(CancelReason reset) {
+		int streamId = reset.getStreamId();
 		if(streamId <= 0)
 			throw new IllegalArgumentException("frames for requests must have a streamId > 0");
 		else if(streamId % 2 == 1)
 			throw new IllegalArgumentException("Server cannot send reset frame with odd stream ids to client per http/2 spec");
 		
-		return outgoingSync.cancelPush(frame);
+		return outgoingSync.sendPushRstToSocket(reset);
 	}
 }

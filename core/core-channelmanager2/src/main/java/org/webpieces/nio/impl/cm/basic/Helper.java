@@ -270,7 +270,7 @@ public final class Helper {
         
 		if(bytes < 0) {
 			apiLog.trace(()->channel+"far end closed, cancel key, close socket");
-			channel.closeOnSelectorThread();
+			channel.serverClosed();
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
 			apiLog.trace(()->channel+"READ bytes="+bytes);

@@ -11,14 +11,15 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.DataTry;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 public class Level6RemoteFlowControl {
@@ -36,12 +37,15 @@ public class Level6RemoteFlowControl {
 	private LinkedList<DataTry> dataQueue = new LinkedList<>();
 
 	private StreamState streamState;
+	private String logId;
 
 	public Level6RemoteFlowControl(
+			String logId,
 			StreamState streamState,
 			Level7MarshalAndPing layer6NotifyListener, 
 			HeaderSettings remoteSettings
 	) {
+		this.logId = logId;
 		this.streamState = streamState;
 		this.layer6NotifyListener = layer6NotifyListener;
 		this.remoteSettings = remoteSettings;
@@ -129,7 +133,7 @@ public class Level6RemoteFlowControl {
 			return null; //nothing to do as this was only first piece of data
 		
 		if(t != null) {
-			future.completeExceptionally(new RuntimeException(t));
+			future.completeExceptionally(t);
 		} else
 			future.complete(null);
 		return null;
@@ -137,10 +141,11 @@ public class Level6RemoteFlowControl {
 
 	public void resetInitialWindowSize(long initialWindow) {
 		long difference = initialWindow - remoteSettings.getInitialWindowSize();
-		
-		log.info("modify window size="+initialWindow);
-		
+				
 		remoteWindowSize += difference;
+		
+		log.info("modify window size initial="+initialWindow+" diff="+difference+" newSize="+remoteWindowSize);
+
 		//next line MUST be set before updating all streams or some streams could be created
 		//just after updating all streams and before updating initial window size(ie. they are created with old size).  instead
 		//make sure all new streams are using this initialWindow first
@@ -149,21 +154,19 @@ public class Level6RemoteFlowControl {
 		streamState.updateAllStreams(initialWindow);
 	}
 
-	//NOTE: this method virtually single threaded when used with channelmanager
-	//synchronized is to synchronize with other client threads
 	public CompletableFuture<Void> updateConnectionWindowSize(WindowUpdateFrame msg) {
 		int increment = msg.getWindowSizeIncrement();
 		if(increment == 0) {
-			throw new ConnectionException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
+			throw new ConnectionException(CancelReasonCode.WINDOW_SIZE_INVALID, logId, msg.getStreamId(), 
 					"Received windowUpdate size increment=0");
 		}
 		
 		DataTry dataTry = null;
 		DataTry temp = dataQueue.peek();
-		synchronized(remoteLock) {
+		synchronized(remoteLock) {// we should delete this synchronized as we are virtually single threaded now!!!
 			remoteWindowSize += increment;
 			if(remoteWindowSize > Integer.MAX_VALUE)
-				throw new ConnectionException(ParseFailReason.FLOW_CONTROL_ERROR, 0, 
+				throw new ConnectionException(CancelReasonCode.FLOW_CONTROL_ERROR, logId, 0, 
 						"(remote end bad)global remoteWindowSize too large="+remoteWindowSize+" from windows increment="+increment);
 			
 			if(temp != null && remoteWindowSize > temp.getDataFrame().getTransmitFrameLength())
@@ -182,7 +185,7 @@ public class Level6RemoteFlowControl {
 
 	public CompletableFuture<Void> updateStreamWindowSize(Stream stream, WindowUpdateFrame msg) {
 		if(msg.getWindowSizeIncrement() == 0) {
-			throw new ConnectionException(ParseFailReason.WINDOW_SIZE_INVALID, msg.getStreamId(), 
+			throw new ConnectionException(CancelReasonCode.WINDOW_SIZE_INVALID, logId, msg.getStreamId(), 
 					"Received windowUpdate size increment=0");
 		}
 		
@@ -208,7 +211,7 @@ public class Level6RemoteFlowControl {
 		return CompletableFuture.completedFuture(null);
 	}
 
-	public CompletableFuture<Void> goAway(ConnectionException e) {
+	public CompletableFuture<Void> goAway(ShutdownConnection e) {
 		return layer6NotifyListener.goAway(e);
 	}
 

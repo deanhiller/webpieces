@@ -16,6 +16,7 @@ public class MyHtmlTagLookup extends HtmlTagLookup {
 		super(config, lookup, converter);
 		//add any custom tags you like here...
 		put(new CustomTag("/WEBPIECESxPACKAGE/base/tags/mytag.tag"));
+		put(new IdTag(converter, "/WEBPIECESxPACKAGE/base/tags/id.tag"));
 	}
 
 	/**

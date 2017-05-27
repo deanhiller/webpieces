@@ -15,7 +15,7 @@ import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler2;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
+import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class MockResponseListener extends MockSuperclass implements ResponseHandler2 {
 
@@ -38,7 +38,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 	}
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Void> cancel(RstStreamFrame frame) {
+	public CompletableFuture<Void> cancel(CancelReason frame) {
 		return (CompletableFuture<Void>) super.calledMethod(Method.CANCEL, frame);
 	}
 	@Override
@@ -67,14 +67,14 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 		super.setDefaultReturnValue(Method.INCOMING_RESPONSE, retVal);
 	}
 
-	public List<RstStreamFrame> getRstStreams() {
+	public List<CancelReason> getRstStreams() {
 		Stream<ParametersPassedIn> calledMethodList = super.getCalledMethods(Method.CANCEL);
-		Stream<RstStreamFrame> retVal = calledMethodList.map(p -> (RstStreamFrame)p.getArgs()[0]);
+		Stream<CancelReason> retVal = calledMethodList.map(p -> (CancelReason)p.getArgs()[0]);
 		return retVal.collect(Collectors.toList());
 	}
 
-	public RstStreamFrame getSingleRstStream() {
-		List<RstStreamFrame> rstStreams = getRstStreams();
+	public CancelReason getSingleRstStream() {
+		List<CancelReason> rstStreams = getRstStreams();
 		if(rstStreams.size() != 1)
 			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+rstStreams.size());
 		return rstStreams.get(0);
@@ -92,7 +92,7 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<Void> cancelPush(RstStreamFrame reset) {
+		public CompletableFuture<Void> cancelPush(CancelReason reset) {
 			return (CompletableFuture<Void>) 
 					MockResponseListener.super.calledMethod(Method.CANCEL_PUSH, reset);
 		}
@@ -118,14 +118,14 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 		return map.collect(Collectors.toList());
 	}
 
-	public RstStreamFrame getSingleCancelPush() {
-		List<RstStreamFrame> list = getPushCancels();
+	public CancelReason getSingleCancelPush() {
+		List<CancelReason> list = getPushCancels();
 		if(list.size() != 1)
 			throw new IllegalStateException("There is not exactly one return value like expected.  num times method called="+list.size());
 		return list.get(0);
 	}
-	public List<RstStreamFrame> getPushCancels() {
-		Stream<RstStreamFrame> map = super.getCalledMethods(Method.CANCEL_PUSH).map(s -> (RstStreamFrame)s.getArgs()[0]);
+	public List<CancelReason> getPushCancels() {
+		Stream<CancelReason> map = super.getCalledMethods(Method.CANCEL_PUSH).map(s -> (CancelReason)s.getArgs()[0]);
 		return map.collect(Collectors.toList());
 	}
 }

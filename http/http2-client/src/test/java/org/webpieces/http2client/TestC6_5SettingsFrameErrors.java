@@ -82,7 +82,7 @@ public class TestC6_5SettingsFrameErrors {
 		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
 		DataWrapper debugData = goAway.getDebugData();
 		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
-		Assert.assertEquals("size of payload of a settings frame ack must be 0 but was=1 reason=FRAME_SIZE_INCORRECT stream=0", msg);
+		Assert.assertEquals("ConnectionException: stream0:(FRAME_SIZE_INCORRECT) size of payload of a settings frame ack must be 0 but was=1", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 

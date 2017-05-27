@@ -2,8 +2,9 @@ package com.webpieces.http2engine.impl.shared.data;
 
 import org.webpieces.javasm.api.Memento;
 
-import com.webpieces.http2parser.api.dto.error.ParseFailReason;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.StreamException;
+import com.webpieces.util.locking.AsyncLock;
 
 public abstract class Stream {
 
@@ -14,19 +15,27 @@ public abstract class Stream {
 	private long remoteInitialWindowSize;
 	private volatile boolean isClosed = false;
 	private boolean headersSent;
+	protected boolean hasPermit;
+	private AsyncLock asyncLock;
+	private String logId;
 
 	public Stream(
+			String logId,
 			int streamId, 
 			Memento currentState, 
 			long localInitialWindowSize,
-			long remoteInitialWindowSize
+			long remoteInitialWindowSize,
+			boolean hasPermit
 	) {
+		this.logId = logId;
 		this.streamId = streamId;
+		this.asyncLock = new AsyncLock(logId);
 		this.currentState = currentState;
 		localWindowSize = localInitialWindowSize;
 		remoteWindowSize = remoteInitialWindowSize;
 		
 		this.remoteInitialWindowSize = remoteInitialWindowSize;
+		this.hasPermit = hasPermit;
 	}
 
 	public int getStreamId() {
@@ -40,7 +49,7 @@ public abstract class Stream {
 	public long incrementRemoteWindow(long windowSizeIncrement) {
 		remoteWindowSize+= windowSizeIncrement;
 		if(remoteWindowSize > Integer.MAX_VALUE) {
-			throw new StreamException(ParseFailReason.FLOW_CONTROL_ERROR, streamId, 
+			throw new StreamException(CancelReasonCode.FLOW_CONTROL_ERROR, logId, streamId, 
 					"(remote end bad)remoteWindowSize too large="+remoteWindowSize+" from windows increment="+windowSizeIncrement+" streamId="+streamId);
 		}
 		return remoteWindowSize;
@@ -86,6 +95,14 @@ public abstract class Stream {
 
 	public void setHeadersSent(boolean b) {
 		headersSent = b;
+	}
+
+	public boolean isHasPermit() {
+		return hasPermit;
+	}
+
+	public AsyncLock getLock() {
+		return asyncLock;
 	}
 	
 }

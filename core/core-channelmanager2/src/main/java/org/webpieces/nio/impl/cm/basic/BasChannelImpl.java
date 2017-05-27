@@ -49,6 +49,7 @@ public abstract class BasChannelImpl
 	private boolean inDelayedWriteMode;
 	private boolean isRecording;
 	protected SocketAddress isConnectingTo;
+	private boolean isRemoteEndInitiateClose;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr);
@@ -116,8 +117,12 @@ public abstract class BasChannelImpl
 			throw new IllegalArgumentException("buffer has no data");
 		else if(!getSelectorManager().isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
-		else if(isClosed)
-			throw new NioClosedChannelException(this+"Client cannot write after the client closed the socket");
+		else if(isClosed) {
+			if(isRemoteEndInitiateClose)
+				throw new NioClosedChannelException(this+"Client cannot write after the remote end closed the socket");
+			else
+				throw new NioClosedChannelException(this+"Your Application cannot write after YOUR Application closed the socket");
+		}
 		else if(doNotAllowWrites)
 			throw new IllegalStateException("This channel is in a failed state.  "
 					+ "failure functions were called so look for exceptions from them");
@@ -353,8 +358,9 @@ public abstract class BasChannelImpl
 		return this.isConnectingTo != null;
 	}
 
-	protected void setClosed(boolean b) {
+	protected void setClosed(boolean b, boolean isServerClosing) {
 		isClosed = b;
+		isRemoteEndInitiateClose = isServerClosing;
 	}
     
     @Override
@@ -371,7 +377,7 @@ public abstract class BasChannelImpl
 	        	return future;
 	        }
 	        
-	        setClosed(true);
+	        setClosed(true, false);
 	        CloseRunnable runnable = new CloseRunnable(this, future);
 	        unqueueAndFailWritesThenClose(runnable);
         } catch(Exception e) {
@@ -381,8 +387,8 @@ public abstract class BasChannelImpl
     	return future;
     }
     
-    public void closeOnSelectorThread() throws IOException {
-    	setClosed(true);
+    public void serverClosed() throws IOException {
+    	setClosed(true, true);
     	closeImpl();
     }
     protected abstract void closeImpl() throws IOException;

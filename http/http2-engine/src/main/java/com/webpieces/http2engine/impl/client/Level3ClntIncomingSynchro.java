@@ -7,38 +7,27 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.impl.shared.Level3IncomingSynchro;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.RemoteSettingsManagement;
-import com.webpieces.util.locking.FuturePermitQueue;
 
 public class Level3ClntIncomingSynchro extends Level3IncomingSynchro {
 
-	private Level4ClientStreams streams;
+	private Level4ClientPreconditions streams;
 
 	public Level3ClntIncomingSynchro(
-			FuturePermitQueue serializer,
-			Level4ClientStreams streamsLayer, 
+			Level4ClientPreconditions streamsLayer, 
 			Level7MarshalAndPing notifyListener,
 			RemoteSettingsManagement remoteSettings,
 			Level8NotifyClntListeners finalLayer
 	) {
-		super(serializer, streamsLayer, notifyListener, remoteSettings);
+		super(streamsLayer, notifyListener, remoteSettings);
 		streams = streamsLayer;
 	}
 
-	public CompletableFuture<Void> processResponse(Http2Response msg) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streams.sendResponseToApp(msg);
-		});
+	public CompletableFuture<Void> sendResponseToApp(Http2Response msg) {
+		return streams.sendResponseToApp(msg);
 	}
 
-	public CompletableFuture<Void> processPush(Http2Push msg) {
-		return singleThreadSerializer.runRequest( () -> {
-			return streams.sendPushToApp(msg);
-		});
+	public CompletableFuture<Void> sendPushToApp(Http2Push msg) {
+		return streams.sendPushToApp(msg);
 	}
-
-
-
-
-
 
 }

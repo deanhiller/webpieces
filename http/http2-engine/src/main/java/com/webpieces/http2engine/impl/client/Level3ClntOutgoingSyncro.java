@@ -12,14 +12,12 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.ResponseHandler2;
-import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.impl.EngineStreamWriter;
 import com.webpieces.http2engine.impl.shared.Level3OutgoingSynchro;
 import com.webpieces.http2engine.impl.shared.Level6RemoteFlowControl;
 import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.Synchro;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.util.locking.FuturePermitQueue;
+import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.util.locking.PermitQueue;
 
 public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements Synchro {
@@ -29,18 +27,17 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 	private static final byte[] preface = DatatypeConverter.parseHexBinary("505249202a20485454502f322e300d0a0d0a534d0d0a0d0a");
 
 	private Level8NotifyClntListeners finalLayer;
-	private Level4ClientStreams streamInit;
+	private Level4ClientPreconditions streamInit;
 	
 	public Level3ClntOutgoingSyncro(
-			FuturePermitQueue serializer,
 			PermitQueue maxConcurrentQueue,
-			Level4ClientStreams streamsLayer, 
+			Level4ClientPreconditions streamsLayer, 
 			Level6RemoteFlowControl remoteFlow,
 			Level7MarshalAndPing notifyListener,
 			HeaderSettings localSettings,
 			Level8NotifyClntListeners finalLayer
 	) {
-		super(serializer, maxConcurrentQueue, streamsLayer, notifyListener, localSettings);
+		super(maxConcurrentQueue, streamsLayer, notifyListener, localSettings);
 		this.streamInit = streamsLayer;
 		this.finalLayer = finalLayer;
 	}
@@ -52,22 +49,18 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 		log.info("sending preface");
 		DataWrapper prefaceData = dataGen.wrapByteArray(preface);
 		
-		return singleThreadSerializer.runRequest(() -> {
-			return finalLayer.sendPreface(prefaceData)
-				.thenCompose( v -> super.sendSettings());
-		});
+		return finalLayer.sendPreface(prefaceData)
+				.thenCompose( v -> super.sendSettingsToSocket());
 	}
 	
-	public CompletableFuture<StreamWriter> sendRequestToSocket(Http2Request headers, ResponseHandler2 responseListener) {
+	public CompletableFuture<Stream> sendRequestToSocket(Http2Request headers, ResponseHandler2 responseListener) {
 		//This gets tricky, BUT must use the maxConcurrent permit queue first, THEN the serializer permit queue
 		return maxConcurrentQueue.runRequest( () -> {
 			int val = acquiredCnt.incrementAndGet();
 			log.info("got permit(cause="+headers+").  size="+maxConcurrentQueue.availablePermits()+" acquired="+val);
 			
-			return singleThreadSerializer.runRequest(() -> {
-				return streamInit.createStreamAndSend(headers, responseListener);
-			});
-		}).thenApply( s -> new EngineStreamWriter(s, Level3ClntOutgoingSyncro.this));
+			return streamInit.createStreamAndSend(headers, responseListener);
+		});
 	}
 	
 
