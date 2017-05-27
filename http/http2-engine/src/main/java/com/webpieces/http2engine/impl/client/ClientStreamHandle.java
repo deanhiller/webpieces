@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.impl.EngineStreamWriter;
@@ -16,12 +16,12 @@ public class ClientStreamHandle implements StreamHandle {
 
 	private AtomicInteger nextAvailableStreamId;
 	private Level3ClntOutgoingSyncro outgoingSyncro;
-	private ResponseHandler2 responseListener;
+	private ResponseHandler responseListener;
 	private boolean requestSent;
 	private Stream stream;
 
 	public ClientStreamHandle(AtomicInteger nextAvailableStreamId, Level3ClntOutgoingSyncro outgoingSyncro,
-			ResponseHandler2 responseListener) {
+			ResponseHandler responseListener) {
 				this.nextAvailableStreamId = nextAvailableStreamId;
 				this.outgoingSyncro = outgoingSyncro;
 				this.responseListener = responseListener;

@@ -8,7 +8,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.error.ConnReset2;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
-import com.webpieces.http2engine.api.error.ShudownStream;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
@@ -72,7 +72,7 @@ public abstract class Level5BResets extends Level5AStates {
 	private void resetAllClientStreams(ConnectionCancelled reset) {
 		ConcurrentMap<Integer, Stream> streams = streamState.closeEngine();
 		for(Stream stream : streams.values()) {
-			ShudownStream str = new ShudownStream(stream.getStreamId(), reset);
+			ShutdownStream str = new ShutdownStream(stream.getStreamId(), reset);
 			fireRstToClient(stream, str);
 		}		
 	}

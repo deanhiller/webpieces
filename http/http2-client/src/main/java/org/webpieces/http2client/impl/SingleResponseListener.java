@@ -11,14 +11,14 @@ import org.webpieces.http2client.api.exception.ServerRstStreamException;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class SingleResponseListener implements ResponseHandler2, StreamWriter {
+public class SingleResponseListener implements ResponseHandler, StreamWriter {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private CompletableFuture<FullResponse> responseFuture = new CompletableFuture<FullResponse>();

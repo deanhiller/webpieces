@@ -12,7 +12,7 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
@@ -49,7 +49,7 @@ public class IntegColoradoEdu {
 		return null;
 	}
 	
-	private static class ChunkedResponseListener implements ResponseHandler2, PushPromiseListener, PushStreamHandle {
+	private static class ChunkedResponseListener implements ResponseHandler, PushPromiseListener, PushStreamHandle {
 		@Override
 		public CompletableFuture<StreamWriter> process(Http2Response response) {
 			log.info("incoming part of response="+response);

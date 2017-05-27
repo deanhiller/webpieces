@@ -20,7 +20,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.error.ShudownStream;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.PriorityFrame;
@@ -93,10 +93,10 @@ public class TestC5_1StreamStates extends AbstractTest {
 				+ "No transition defined on statemachine for event=RECV_DATA when in state=Reserved(remote)", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		ShudownStream failResp1 = (ShudownStream) listener1.getSingleRstStream();
+		ShutdownStream failResp1 = (ShutdownStream) listener1.getSingleRstStream();
 		Assert.assertEquals(CancelReasonCode.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp1.getCause().getReasonCode());
 		
-		ShudownStream failResp2 = (ShudownStream) listener1.getSingleCancelPush();
+		ShutdownStream failResp2 = (ShutdownStream) listener1.getSingleCancelPush();
 		Assert.assertEquals(CancelReasonCode.BAD_FRAME_RECEIVED_FOR_THIS_STATE, failResp2.getCause().getReasonCode());
 	}
 

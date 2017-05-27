@@ -4,24 +4,24 @@ import org.webpieces.javasm.api.Memento;
 
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 
 public class ClientPushStream extends Stream {
 
-	private ResponseHandler2 originalResponseListener;
+	private ResponseHandler originalResponseListener;
 	private StreamWriter pushResponseWriter;
 	private PushPromiseListener pushPromiseListener;
 	private PushStreamHandle pushStreamHandle;
 
-	public ClientPushStream(String logId, int streamId, Memento currentState, ResponseHandler2 responseListener,
+	public ClientPushStream(String logId, int streamId, Memento currentState, ResponseHandler responseListener,
 			long localInitialWindowSize, long remoteInitialWindowSize) {
 		super(logId, streamId, currentState, localInitialWindowSize, remoteInitialWindowSize, false);
 		this.originalResponseListener = responseListener;
 	}
 
-	public ResponseHandler2 getOriginalResponseListener() {
+	public ResponseHandler getOriginalResponseListener() {
 		return originalResponseListener;
 	}
 	

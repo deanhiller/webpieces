@@ -14,7 +14,7 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
-import com.webpieces.http2engine.api.error.ShudownStream;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
 
 public class FrontendSocketImpl implements FrontendSocket {
@@ -116,12 +116,12 @@ public class FrontendSocketImpl implements FrontendSocket {
 			if(poll == null)
 				break;
 			
-			ShudownStream shutdown = new ShudownStream(poll.getStreamId(), f);
+			ShutdownStream shutdown = new ShutdownStream(poll.getStreamId(), f);
 			fireCancel(shutdown, poll);
 		}
 	}
 
-	private void fireCancel(ShudownStream f, Http1_1StreamImpl stream) {
+	private void fireCancel(ShutdownStream f, Http1_1StreamImpl stream) {
 		try {
 			stream.getStreamHandle().cancel(f);
 		} catch(Throwable e) {

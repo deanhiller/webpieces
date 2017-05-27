@@ -13,11 +13,11 @@ import com.webpieces.hpack.api.dto.Http2Push;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushPromiseListener;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public class MockResponseListener extends MockSuperclass implements ResponseHandler2 {
+public class MockResponseListener extends MockSuperclass implements ResponseHandler {
 
 	enum Method implements MethodEnum {
 		INCOMING_RESPONSE,

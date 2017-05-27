@@ -8,7 +8,7 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParser;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.client.ClientEngineListener;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
@@ -75,7 +75,7 @@ public class Level1ClientEngine implements Http2ClientEngine {
 	}
 	
 	@Override
-	public StreamHandle openStream(ResponseHandler2 responseListener) {
+	public StreamHandle openStream(ResponseHandler responseListener) {
 		return new ClientStreamHandle(nextAvailableStreamId, outgoingSyncro, responseListener);
 	}
 

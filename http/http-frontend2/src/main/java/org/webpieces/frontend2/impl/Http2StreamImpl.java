@@ -9,7 +9,7 @@ import org.webpieces.frontend2.api.StreamSession;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
-import com.webpieces.http2engine.api.ResponseHandler2;
+import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
@@ -18,11 +18,11 @@ public class Http2StreamImpl implements FrontendStream {
 
 	private FrontendSocketImpl socket;
 	private AtomicBoolean sentResponseHeaders = new AtomicBoolean(false);
-	private ResponseHandler2 responseHandler;
+	private ResponseHandler responseHandler;
 	private StreamSession session = new StreamSessionImpl();
 	private int streamId;
 
-	public Http2StreamImpl(FrontendSocketImpl socket, ResponseHandler2 responseHandler, int streamId) {
+	public Http2StreamImpl(FrontendSocketImpl socket, ResponseHandler responseHandler, int streamId) {
 		this.socket = socket;
 		this.responseHandler = responseHandler;
 		this.streamId = streamId;

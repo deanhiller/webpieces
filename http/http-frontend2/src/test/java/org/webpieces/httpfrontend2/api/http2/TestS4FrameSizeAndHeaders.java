@@ -20,7 +20,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.error.ShudownStream;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
@@ -70,7 +70,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertTrue(mockChannel.isClosed());
 		
 		Cancel failResp = mockListener.getCancelInfo();
-		ShudownStream reset = (ShudownStream) failResp.reset;
+		ShutdownStream reset = (ShutdownStream) failResp.reset;
 		Assert.assertEquals(CancelReasonCode.EXCEEDED_MAX_FRAME_SIZE, reset.getCause().getReasonCode());
 
 		//send response with request not complete but failed as well anyways

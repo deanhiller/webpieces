@@ -18,7 +18,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.hpack.impl.HeaderEncoding;
 import com.webpieces.http2engine.api.ConnectionClosedException;
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2engine.api.error.ShudownStream;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
@@ -65,7 +65,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertEquals("ConnectionException: stream1:(EXCEEDED_MAX_FRAME_SIZE) Frame size=16389 was greater than max=16385", msg);
 		Assert.assertTrue(mockChannel.isClosed());
 		
-		ShudownStream failResp = (ShudownStream) listener1.getSingleRstStream();
+		ShutdownStream failResp = (ShutdownStream) listener1.getSingleRstStream();
 		Assert.assertEquals(CancelReasonCode.EXCEEDED_MAX_FRAME_SIZE, failResp.getCause().getReasonCode());
 
 		//send new request on closed connection
@@ -127,7 +127,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		
 		List<CancelReason> results = listener1.getRstStreams();
 		Assert.assertEquals(1, results.size());
-		ShudownStream failResp = (ShudownStream) results.get(0);
+		ShutdownStream failResp = (ShutdownStream) results.get(0);
 		Assert.assertEquals(CancelReasonCode.HEADER_DECODE, failResp.getCause().getReasonCode());
 	}
 	
@@ -163,7 +163,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 		Assert.assertEquals(0, listener1.getReturnValuesIncomingResponse().size());
 
 		mockChannel.writeFrame(frames.get(1));
-		ShudownStream reset = (ShudownStream) listener1.getSingleRstStream();
+		ShutdownStream reset = (ShutdownStream) listener1.getSingleRstStream();
 		Assert.assertEquals(CancelReasonCode.HEADERS_MIXED_WITH_FRAMES, reset.getCause().getReasonCode());
 		
 		//remote receives goAway

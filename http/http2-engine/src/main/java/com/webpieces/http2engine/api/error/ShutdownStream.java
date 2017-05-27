@@ -3,12 +3,12 @@ package com.webpieces.http2engine.api.error;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
 
-public class ShudownStream implements CancelReason {
+public class ShutdownStream implements CancelReason {
 
 	private int streamId;
 	private ConnectionCancelled cause;
 
-	public ShudownStream(int streamId, ConnectionCancelled reset2) {
+	public ShutdownStream(int streamId, ConnectionCancelled reset2) {
 		this.streamId = streamId;
 		this.cause = reset2;
 	}

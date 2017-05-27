@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public interface ResponseHandler2 {
+public interface ResponseHandler {
 
 	/**
 	 * For Http2ClientEngine, this receives the Http2 Response and for Http2ServerEngine, you call this method
