@@ -9,7 +9,8 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.FrontendSocket;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
+import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamSession;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
@@ -29,7 +30,7 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
 
-public class Http1_1StreamImpl implements FrontendStream {
+public class Http1_1StreamImpl implements ResponseStream {
 	private static final Logger log = LoggerFactory.getLogger(Http1_1StreamImpl.class);
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -39,7 +40,7 @@ public class Http1_1StreamImpl implements FrontendStream {
 	private AtomicReference<Http2Msg> endingFrame = new AtomicReference<>();
 	private StreamSession session = new StreamSessionImpl();
 
-	private StreamHandle streamHandle;
+	private HttpStream streamHandle;
 
 	private int streamId;
 
@@ -146,11 +147,11 @@ public class Http1_1StreamImpl implements FrontendStream {
 		return session;
 	}
 
-	public void setStreamHandle(StreamHandle streamHandle) {
-		this.streamHandle = streamHandle;
+	public void setStreamHandle(HttpStream streamHandle2) {
+		this.streamHandle = streamHandle2;
 	}
 
-	public StreamHandle getStreamHandle() {
+	public HttpStream getStreamHandle() {
 		return streamHandle;
 	}
 

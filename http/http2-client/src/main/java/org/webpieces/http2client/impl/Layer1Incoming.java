@@ -11,7 +11,6 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 
@@ -33,8 +32,8 @@ public class Layer1Incoming implements DataListener {
 		return layer2.sendPing();
 	}
 	
-	public StreamHandle openStream(ResponseHandler listener) {
-		return layer2.openStream(listener);
+	public StreamHandle openStream() {
+		return layer2.openStream();
 	}
 
 	@Override

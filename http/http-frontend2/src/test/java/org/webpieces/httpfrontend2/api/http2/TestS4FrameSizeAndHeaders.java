@@ -9,7 +9,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpfrontend2.api.mock2.TestAssert;
@@ -52,7 +52,7 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 	public void testSection4_2FrameTooLarge() throws InterruptedException, ExecutionException, TimeoutException {
 		int streamId = 1;
 		PassedIn info = sendRequestToServer(streamId, false);
-		FrontendStream stream = info.stream;
+		ResponseStream stream = info.stream;
 		Http2Request request = info.request;
 
 		//send data that goes with request

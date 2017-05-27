@@ -78,9 +78,9 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 
 	public CompletableFuture<Void> fireRequestToApp(ServerStream stream, Http2Request payload) {
 		SvrSideResponseHandler handler = new SvrSideResponseHandler(level1ServerEngine, stream, pushIdGenerator);
-		StreamHandle streamHandle = listener.openStream(payload.getStreamId(), handler);
+		StreamHandle streamHandle = listener.openStream();
 		stream.setStreamHandle(streamHandle);
-		return streamHandle.process(payload)
+		return streamHandle.process(payload, handler)
 				.thenApply( w -> {
 					stream.setStreamWriter(w);				
 					return null;

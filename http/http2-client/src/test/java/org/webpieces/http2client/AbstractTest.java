@@ -99,7 +99,7 @@ public class AbstractTest {
 	protected Http2Request sendRequestToServer(MockResponseListener listener1) {
 		Http2Request request1 = Requests.createRequest();
 
-		httpSocket.openStream(listener1).process(request1);
+		httpSocket.openStream().process(request1, listener1);
 		
 		Http2Msg req = mockChannel.getFrameAndClear();
 		Assert.assertEquals(request1, req);

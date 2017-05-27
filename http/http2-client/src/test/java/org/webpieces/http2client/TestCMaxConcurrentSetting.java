@@ -91,8 +91,8 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		//do not set default incoming response as we want to delay the resolution of the future
 		MockResponseListener listener2 = new MockResponseListener();
 
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
-		CompletableFuture<StreamWriter> future2 = httpSocket.openStream(listener2).process(request2);
+		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
+		CompletableFuture<StreamWriter> future2 = httpSocket.openStream().process(request2, listener2);
 		
 		RequestHolder r1 = new RequestHolder(request1, listener1, writer1, future);
 		RequestHolder r2 = new RequestHolder(request2, listener2, writer2, future2);		

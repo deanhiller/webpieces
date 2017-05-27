@@ -1,13 +1,14 @@
-package com.webpieces.http2engine.api;
+package org.webpieces.frontend2.api;
 
 import java.util.concurrent.CompletableFuture;
 
 import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
-public interface StreamHandle {
+public interface HttpStream {
 
-	CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener);
+	CompletableFuture<StreamWriter> process(Http2Request request, ResponseStream stream);
 	
 	/**
 	 * Because the app may return a completed future from process, we must have a cancel that the

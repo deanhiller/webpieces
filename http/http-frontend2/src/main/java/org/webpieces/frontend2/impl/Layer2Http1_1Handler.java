@@ -9,6 +9,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
@@ -118,23 +119,23 @@ public class Layer2Http1_1Handler {
 		Http1_1StreamImpl stream = new Http1_1StreamImpl(id, socket, httpParser);
 		socket.setAddStream(stream);
 
-		StreamHandle streamHandle = httpListener.openStream(stream);
+		HttpStream streamHandle = httpListener.openStream();
 		stream.setStreamHandle(streamHandle);
 		
 		String lengthHeader = headers.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
 		if(lengthHeader != null) {
 			DataFrame frame = Http2Translations.translateBody(http1Req.getBody());
-			CompletableFuture<StreamWriter> writer = streamHandle.process(headers);
+			CompletableFuture<StreamWriter> writer = streamHandle.process(headers, stream);
 			return writer.thenCompose( w -> w.processPiece(frame) );
 		} else if(http1Req.isHasChunkedTransferHeader()) {
-			CompletableFuture<StreamWriter> writer = streamHandle.process(headers);
+			CompletableFuture<StreamWriter> writer = streamHandle.process(headers, stream);
 			return writer.thenApply( w -> {
 				socket.addWriter(w);
 				return w;
 			});
 		} else {
 			headers.setEndOfStream(true);
-			return streamHandle.process(headers);
+			return streamHandle.process(headers, stream);
 		}
 	}
 

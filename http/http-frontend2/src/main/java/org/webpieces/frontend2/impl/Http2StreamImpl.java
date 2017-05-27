@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.webpieces.frontend2.api.FrontendSocket;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamSession;
 
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -14,7 +14,7 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2ErrorCode;
 
-public class Http2StreamImpl implements FrontendStream {
+public class Http2StreamImpl implements ResponseStream {
 
 	private FrontendSocketImpl socket;
 	private AtomicBoolean sentResponseHeaders = new AtomicBoolean(false);

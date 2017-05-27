@@ -17,7 +17,7 @@ import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
@@ -70,14 +70,14 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 
 	private RequestHelpFacade facade;
-	private FrontendStream stream;
+	private ResponseStream stream;
 	private Http2Request requestHeaders;
 
 	private CompletableFuture<Void> outstandingRequest;
 	private DataWrapper data = dataGen.emptyWrapper();
 	private boolean cancelled;
 
-	public RequestStreamWriter(RequestHelpFacade facade, FrontendStream stream, Http2Request headers) {
+	public RequestStreamWriter(RequestHelpFacade facade, ResponseStream stream, Http2Request headers) {
 		this.facade = facade;
 		this.stream = stream;
 		this.requestHeaders = headers;

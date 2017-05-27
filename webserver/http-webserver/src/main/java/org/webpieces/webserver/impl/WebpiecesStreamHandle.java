@@ -2,29 +2,25 @@ package org.webpieces.webserver.impl;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.frontend2.api.FrontendStream;
-import org.webpieces.frontend2.api.ServerSocketInfo;
+import org.webpieces.frontend2.api.HttpStream;
+import org.webpieces.frontend2.api.ResponseStream;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.http2parser.api.dto.RstStreamFrame;
 
-public class WebpiecesStreamHandle implements StreamHandle {
+public class WebpiecesStreamHandle implements HttpStream {
 
 	private RequestHelpFacade facade;
-	private FrontendStream stream;
 	private RequestStreamWriter writer;
 
-	public WebpiecesStreamHandle(RequestHelpFacade facade, FrontendStream stream) {
+	public WebpiecesStreamHandle(RequestHelpFacade facade) {
 		this.facade = facade;
-		this.stream = stream;
 		
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Request headers) {
+	public CompletableFuture<StreamWriter> process(Http2Request headers, ResponseStream stream) {
 		writer = new RequestStreamWriter(facade, stream, headers);
 		
 		if(headers.isEndOfStream()) {

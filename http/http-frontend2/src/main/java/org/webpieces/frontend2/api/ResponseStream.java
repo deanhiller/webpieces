@@ -6,7 +6,7 @@ import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 
-public interface FrontendStream {
+public interface ResponseStream {
 
 	CompletableFuture<StreamWriter> sendResponse(Http2Response headers);
 	

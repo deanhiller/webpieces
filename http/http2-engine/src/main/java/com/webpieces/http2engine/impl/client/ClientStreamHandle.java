@@ -16,15 +16,12 @@ public class ClientStreamHandle implements StreamHandle {
 
 	private AtomicInteger nextAvailableStreamId;
 	private Level3ClntOutgoingSyncro outgoingSyncro;
-	private ResponseHandler responseListener;
 	private boolean requestSent;
 	private Stream stream;
 
-	public ClientStreamHandle(AtomicInteger nextAvailableStreamId, Level3ClntOutgoingSyncro outgoingSyncro,
-			ResponseHandler responseListener) {
+	public ClientStreamHandle(AtomicInteger nextAvailableStreamId, Level3ClntOutgoingSyncro outgoingSyncro) {
 				this.nextAvailableStreamId = nextAvailableStreamId;
 				this.outgoingSyncro = outgoingSyncro;
-				this.responseListener = responseListener;
 		
 	}
 
@@ -33,7 +30,7 @@ public class ClientStreamHandle implements StreamHandle {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Request request) {
+	public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
 		if(request.getStreamId() != 0)
 			throw new IllegalStateException("Client MUST NOT set Http2Headers.streamId.  that is filled in by library");
 		else if(requestSent)

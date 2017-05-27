@@ -9,11 +9,12 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.FrontendConfig;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
+import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.httpfrontend2.api.http1.Requests;
 import org.webpieces.httpfrontend2.api.http2.Http2Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -50,8 +51,8 @@ class ServerFactory {
         private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 
 		@Override
-		public 	StreamHandle openStream(FrontendStream stream) {
-			return new StreamHandleImpl(stream);
+		public 	HttpStream openStream() {
+			return new StreamHandleImpl();
 		}
 		
 		@Override
@@ -61,15 +62,10 @@ class ServerFactory {
 
     }
     
-    private static class StreamHandleImpl implements StreamHandle {
-		private FrontendStream stream;
-
-		public StreamHandleImpl(FrontendStream stream) {
-			this.stream = stream;
-		}
+    private static class StreamHandleImpl implements HttpStream {
 
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request headers) {
+		public CompletableFuture<StreamWriter> process(Http2Request headers, ResponseStream stream) {
 			log.info(stream+"request="+headers);
 			Http2Response response = Http2Requests.createResponse(headers.getStreamId());
 			if(headers.getKnownMethod() == Http2Method.HEAD) {
@@ -90,15 +86,15 @@ class ServerFactory {
 
 		@Override
 		public CompletableFuture<Void> cancel(CancelReason reset) {
-			return null;
+			return CompletableFuture.completedFuture(null);
 		}
     }
 
     private static class NullStreamWriter implements StreamWriter {
 
-		private FrontendStream stream;
+		private ResponseStream stream;
 
-		public NullStreamWriter(FrontendStream stream) {
+		public NullStreamWriter(ResponseStream stream) {
 			this.stream = stream;
 		}
 
@@ -112,10 +108,10 @@ class ServerFactory {
     private static class AppStreamWriter implements StreamWriter {
 
 
-		private FrontendStream stream;
+		private ResponseStream stream;
 		private StreamWriter writer;
 
-		public AppStreamWriter(FrontendStream stream, StreamWriter writer) {
+		public AppStreamWriter(ResponseStream stream, StreamWriter writer) {
 			this.stream = stream;
 			this.writer = writer;
 		}
@@ -130,10 +126,10 @@ class ServerFactory {
     
     private static class CachedResponseWriter implements StreamWriter {
 
-		private FrontendStream stream;
+		private ResponseStream stream;
 		private Http2Response response;
 
-		public CachedResponseWriter(FrontendStream stream, Http2Response response) {
+		public CachedResponseWriter(ResponseStream stream, Http2Response response) {
 			this.stream = stream;
 			this.response = response;
 		}

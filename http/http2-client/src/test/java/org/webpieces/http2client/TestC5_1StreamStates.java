@@ -58,7 +58,7 @@ public class TestC5_1StreamStates extends AbstractTest {
 		//send new request on closed connection
 		MockResponseListener listener1 = new MockResponseListener();
 		Http2Request request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
+		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
@@ -134,7 +134,7 @@ public class TestC5_1StreamStates extends AbstractTest {
 		
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
+		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -173,7 +173,7 @@ public class TestC5_1StreamStates extends AbstractTest {
 		
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
+		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));
 		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
@@ -223,8 +223,8 @@ public class TestC5_1StreamStates extends AbstractTest {
 		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
 
 		Http2Request request1 = Requests.createRequest();
-		StreamHandle stream = httpSocket.openStream(listener1);
-		CompletableFuture<StreamWriter> future = stream.process(request1);
+		StreamHandle stream = httpSocket.openStream();
+		CompletableFuture<StreamWriter> future = stream.process(request1, listener1);
 		@SuppressWarnings("unused")
 		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
 		Http2Msg req = mockChannel.getFrameAndClear();

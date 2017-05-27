@@ -13,7 +13,6 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Trailers;
-import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
@@ -60,19 +59,19 @@ public class Http2SocketImpl implements Http2Socket {
 	public CompletableFuture<FullResponse> send(FullRequest request) {
 		SingleResponseListener responseListener = new SingleResponseListener();
 		
-		StreamHandle streamHandle = openStream(responseListener);
+		StreamHandle streamHandle = openStream();
 		
 		Http2Request req = request.getHeaders();
 		
 		if(request.getPayload() == null) {
 			request.getHeaders().setEndOfStream(true);
-			streamHandle.process(req);
+			streamHandle.process(req, responseListener);
 			return responseListener.fetchResponseFuture();
 		} else if(request.getTrailingHeaders() == null) {
 			request.getHeaders().setEndOfStream(false);
 			DataFrame data = createData(request, true);
 			
-			return streamHandle.process(request.getHeaders())
+			return streamHandle.process(request.getHeaders(), responseListener)
 						.thenCompose(writer -> {
 							data.setStreamId(req.getStreamId());
 							return writer.processPiece(data);
@@ -85,7 +84,7 @@ public class Http2SocketImpl implements Http2Socket {
 		Http2Trailers trailers = request.getTrailingHeaders();
 		trailers.setEndOfStream(true);
 		
-		return streamHandle.process(request.getHeaders())
+		return streamHandle.process(request.getHeaders(), responseListener)
 				.thenCompose(writer -> {
 					data.setStreamId(req.getStreamId());
 					return writer.processPiece(data);
@@ -106,8 +105,8 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public StreamHandle openStream(ResponseHandler listener) {
-		return incoming.openStream(listener);
+	public StreamHandle openStream() {
+		return incoming.openStream();
 	}
 
 	@Override

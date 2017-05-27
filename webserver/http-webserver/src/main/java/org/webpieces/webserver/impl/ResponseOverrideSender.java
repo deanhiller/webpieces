@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.OverwritePlatformResponse;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.impl.ProtocolType;
 
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -13,9 +13,9 @@ import com.webpieces.http2engine.api.StreamWriter;
 
 public class ResponseOverrideSender {
 
-	private FrontendStream stream;
+	private ResponseStream stream;
 
-	public ResponseOverrideSender(FrontendStream stream) {
+	public ResponseOverrideSender(ResponseStream stream) {
 		this.stream = stream;
 	}
 

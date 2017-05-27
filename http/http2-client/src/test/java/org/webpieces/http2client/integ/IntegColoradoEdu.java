@@ -38,7 +38,7 @@ public class IntegColoradoEdu {
 		
 		socket
 			.connect(addr)
-			.thenAccept(socet -> socket.openStream(listener).process(req))
+			.thenAccept(socet -> socket.openStream().process(req, listener))
 			.exceptionally(e -> reportException(socket, e));
 
 		Thread.sleep(100000);

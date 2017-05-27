@@ -64,7 +64,7 @@ public class IntegMultiThreaded {
             Http2Request request = new Http2Request(req);
             request.setEndOfStream(true);
 
-            socket.openStream(listener).process(request)
+            socket.openStream().process(request, listener)
     				.exceptionally(e -> {
     					reportException(socket, e);
     					return null;

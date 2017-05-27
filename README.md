@@ -107,6 +107,7 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* rename PartialStream to StreamMsg
 * need to keep delayed state in http2 which is very annoying!! for the case where we reset and other end is still sending
 * Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine
 * remove this line response.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked")); AND add fail fast for that in http2 parser since it is NOT supported and must NOT be used at all in headers

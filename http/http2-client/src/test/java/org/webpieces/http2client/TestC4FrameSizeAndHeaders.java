@@ -70,7 +70,7 @@ public class TestC4FrameSizeAndHeaders extends AbstractTest {
 
 		//send new request on closed connection
 		Http2Request request1 = Requests.createRequest();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(listener1).process(request1);
+		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, listener1);
 		
 		ConnectionClosedException intercept = (ConnectionClosedException) TestAssert.intercept(future);
 		Assert.assertTrue(intercept.getMessage().contains("Connection closed or closing"));

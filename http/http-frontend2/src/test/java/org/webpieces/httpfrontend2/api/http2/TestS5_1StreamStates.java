@@ -6,7 +6,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.Cancel;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 
@@ -62,7 +62,7 @@ public class TestS5_1StreamStates extends AbstractHttp2Test {
 		mockChannel.send(request);
 		
 		PassedIn in = mockListener.getSingleRequest();
-		FrontendStream stream = in.stream;
+		ResponseStream stream = in.stream;
 		
 		Http2Push push = Http2Requests.createPush(request.getStreamId());
 		stream.openPushStream().process(push);

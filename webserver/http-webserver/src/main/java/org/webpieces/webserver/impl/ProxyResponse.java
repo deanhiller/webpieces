@@ -15,7 +15,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.dto.RenderContentResponse;
@@ -68,7 +68,7 @@ public class ProxyResponse implements ResponseStreamer {
 	private RouterRequest routerRequest;
 	private Http2Request request;
 
-	public void init(RouterRequest req, Http2Request requestHeaders, FrontendStream responseSender, BufferPool pool) {
+	public void init(RouterRequest req, Http2Request requestHeaders, ResponseStream responseSender, BufferPool pool) {
 		this.routerRequest = req;
 		this.request = requestHeaders;
 		this.stream = new ResponseOverrideSender(responseSender);

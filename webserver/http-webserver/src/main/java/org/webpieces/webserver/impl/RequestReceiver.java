@@ -2,8 +2,9 @@ package org.webpieces.webserver.impl;
 
 import javax.inject.Inject;
 
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ServerSocketInfo;
 
 import com.webpieces.http2engine.api.StreamHandle;
@@ -16,8 +17,8 @@ public class RequestReceiver implements HttpRequestListener {
 	private RequestHelpFacade facade;
 	
 	@Override
-	public StreamHandle openStream(FrontendStream stream) {
-		return new WebpiecesStreamHandle(facade, stream);
+	public HttpStream openStream() {
+		return new WebpiecesStreamHandle(facade);
 	}
 
 }

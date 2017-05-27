@@ -71,7 +71,7 @@ public class IntegSingleRequest {
 		
 		socket
 			.connect(addr)
-			.thenAccept(s -> s.openStream(new ChunkedResponseListener()).process(request))
+			.thenAccept(s -> s.openStream().process(request, new ChunkedResponseListener()))
 			.exceptionally(e -> reportException(socket, e));
 		
 		Thread.sleep(10000000);

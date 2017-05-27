@@ -27,8 +27,8 @@ public class TestBasicHttp2Client extends AbstractTest {
 		MockResponseListener respListener1 = new MockResponseListener();
 		respListener1.setIncomingRespDefault(CompletableFuture.completedFuture(writer1));
 		MockResponseListener respListener2 = new MockResponseListener();
-		CompletableFuture<StreamWriter> future = httpSocket.openStream(respListener1).process(request1);
-		CompletableFuture<StreamWriter> future2 = httpSocket.openStream(respListener2).process(request2);
+		CompletableFuture<StreamWriter> future = httpSocket.openStream().process(request1, respListener1);
+		CompletableFuture<StreamWriter> future2 = httpSocket.openStream().process(request2, respListener2);
 		
 		//max concurrent only 1 so only get 1
 		Http2Request req = (Http2Request) mockChannel.getFrameAndClear();

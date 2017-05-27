@@ -5,14 +5,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.webpieces.frontend2.api.FrontendStream;
+import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 
@@ -23,9 +23,9 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	}
 	
 	public static class Cancel {
-		public FrontendStream stream;
+		public ResponseStream stream;
 		public CancelReason reset;
-		public Cancel(FrontendStream stream, CancelReason reset) {
+		public Cancel(ResponseStream stream, CancelReason reset) {
 			super();
 			this.stream = stream;
 			this.reset = reset;
@@ -33,9 +33,9 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	}
 	
 	public static class PassedIn {
-		public FrontendStream stream;
+		public ResponseStream stream;
 		public Http2Request request;
-		public PassedIn(FrontendStream stream, Http2Request request) {
+		public PassedIn(ResponseStream stream, Http2Request request) {
 			super();
 			this.stream = stream;
 			this.request = request;
@@ -47,21 +47,18 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	}
 	
 	@Override
-	public StreamHandle openStream(FrontendStream stream) {
-		return new StreamHandleProxy(stream);
+	public HttpStream openStream() {
+		return new StreamHandleProxy();
 	}
 
-	private class StreamHandleProxy implements StreamHandle {
+	private class StreamHandleProxy implements HttpStream {
 
-		private FrontendStream stream;
-
-		public StreamHandleProxy(FrontendStream stream) {
-			this.stream = stream;
-		}
+		private ResponseStream stream;
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request request) {
+		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseStream stream) {
+			this.stream = stream;
 			return (CompletableFuture<StreamWriter>) 
 					MockHttp2RequestListener.super.calledMethod(Method.PROCESS, new PassedIn(stream, request));
 		}
