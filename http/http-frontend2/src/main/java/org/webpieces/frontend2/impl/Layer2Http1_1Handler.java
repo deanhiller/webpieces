@@ -124,17 +124,17 @@ public class Layer2Http1_1Handler {
 		String lengthHeader = headers.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
 		if(lengthHeader != null) {
 			DataFrame frame = Http2Translations.translateBody(http1Req.getBody());
-			CompletableFuture<StreamWriter> writer = streamHandle.process(headers, stream);
+			CompletableFuture<StreamWriter> writer = streamHandle.incomingRequest(headers, stream);
 			return writer.thenCompose( w -> w.processPiece(frame) );
 		} else if(http1Req.isHasChunkedTransferHeader()) {
-			CompletableFuture<StreamWriter> writer = streamHandle.process(headers, stream);
+			CompletableFuture<StreamWriter> writer = streamHandle.incomingRequest(headers, stream);
 			return writer.thenApply( w -> {
 				socket.addWriter(w);
 				return w;
 			});
 		} else {
 			headers.setEndOfStream(true);
-			return streamHandle.process(headers, stream);
+			return streamHandle.incomingRequest(headers, stream);
 		}
 	}
 

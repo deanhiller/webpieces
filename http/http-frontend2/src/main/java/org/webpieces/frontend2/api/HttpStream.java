@@ -8,7 +8,7 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 
 public interface HttpStream {
 
-	CompletableFuture<StreamWriter> process(Http2Request request, ResponseStream stream);
+	CompletableFuture<StreamWriter> incomingRequest(Http2Request request, ResponseStream stream);
 	
 	/**
 	 * Because the app may return a completed future from process, we must have a cancel that the
@@ -22,5 +22,5 @@ public interface HttpStream {
 	 * @param frame
 	 * @return 
 	 */
-	CompletableFuture<Void> cancel(CancelReason payload); 
+	CompletableFuture<Void> incomingCancel(CancelReason payload); 
 }

@@ -14,6 +14,6 @@ public interface PushPromiseListener {
 	 * @param resp
 	 * @return Future that completes when we should free up more space to read in more data
 	 */
-	CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response);
+	CompletableFuture<StreamWriter> processPushResponse(Http2Response response);
 
 }

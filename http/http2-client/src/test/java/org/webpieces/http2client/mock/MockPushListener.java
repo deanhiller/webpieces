@@ -23,7 +23,7 @@ public class MockPushListener extends MockSuperclass implements PushPromiseListe
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
+	public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
 		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.INCOMING_PUSH, response);
 	}
 

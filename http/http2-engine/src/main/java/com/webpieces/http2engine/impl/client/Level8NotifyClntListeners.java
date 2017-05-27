@@ -109,7 +109,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 		
 		ClientPushStream str = (ClientPushStream) stream;
 		PushPromiseListener pushListener = str.getPushPromiseListener();
-		return pushListener.incomingPushResponse(response)
+		return pushListener.processPushResponse(response)
 					.thenApply( w -> {
 						str.setPushResponseWriter(w);
 						return null;

@@ -128,7 +128,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
+		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
 			int streamId = response.getStreamId();
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+response);

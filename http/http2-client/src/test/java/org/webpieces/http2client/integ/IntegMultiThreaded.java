@@ -152,7 +152,7 @@ public class IntegMultiThreaded {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
+		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
 			log.info("incoming push promise="+response);
 			if(response.isEndOfStream()) {
 				synchronized(this) {

@@ -57,7 +57,7 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseStream stream) {
+		public CompletableFuture<StreamWriter> incomingRequest(Http2Request request, ResponseStream stream) {
 			this.stream = stream;
 			return (CompletableFuture<StreamWriter>) 
 					MockHttp2RequestListener.super.calledMethod(Method.PROCESS, new PassedIn(stream, request));
@@ -65,7 +65,7 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reset) {
+		public CompletableFuture<Void> incomingCancel(CancelReason reset) {
 			return (CompletableFuture<Void>) 
 					MockHttp2RequestListener.super.calledMethod(Method.CANCEL, new Cancel(stream, reset));
 		}

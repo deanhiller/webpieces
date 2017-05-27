@@ -44,12 +44,12 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 		@Override
 		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
 			Http2StreamImpl stream = new Http2StreamImpl(socket, responseListener, request.getStreamId());
-			return handle2.process(request, stream);
+			return handle2.incomingRequest(request, stream);
 		}
 
 		@Override
 		public CompletableFuture<Void> cancel(CancelReason payload) {
-			return handle2.cancel(payload);
+			return handle2.incomingCancel(payload);
 		}
 	}
 	

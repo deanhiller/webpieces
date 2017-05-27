@@ -91,11 +91,11 @@ public class TestSMaxConcurrentSetting extends AbstractHttp2Test {
 		
 		//send the two responses following the pushes
 		Http2Response resp1 = Http2Requests.createResponse(push1.getPromisedStreamId(), false);
-		CompletableFuture<StreamWriter> fut1 = pushWriter1.incomingPushResponse(resp1);
+		CompletableFuture<StreamWriter> fut1 = pushWriter1.processPushResponse(resp1);
 		StreamWriter writer1 = fut1.get(2, TimeUnit.SECONDS);
 		
 		Http2Response resp2 = Http2Requests.createResponse(push2.getPromisedStreamId(), false);
-		CompletableFuture<StreamWriter> fut2 = writer2.incomingPushResponse(resp2);
+		CompletableFuture<StreamWriter> fut2 = writer2.processPushResponse(resp2);
 		Assert.assertTrue(!fut2.isDone());
 		
 		Http2Response clientRecvResp = (Http2Response) mockChannel.getFrameAndClear();

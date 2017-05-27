@@ -64,7 +64,7 @@ class ServerFactory {
     private static class StreamHandleImpl implements HttpStream {
 
 		@Override
-		public CompletableFuture<StreamWriter> process(Http2Request headers, ResponseStream stream) {
+		public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
 			log.info(stream+"request="+headers);
 			Http2Response response = Http2Requests.createResponse(headers.getStreamId());
 			if(headers.getKnownMethod() == Http2Method.HEAD) {
@@ -84,7 +84,7 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<Void> cancel(CancelReason reset) {
+		public CompletableFuture<Void> incomingCancel(CancelReason reset) {
 			return CompletableFuture.completedFuture(null);
 		}
     }

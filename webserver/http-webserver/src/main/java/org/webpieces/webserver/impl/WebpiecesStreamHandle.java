@@ -20,7 +20,7 @@ public class WebpiecesStreamHandle implements HttpStream {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> process(Http2Request headers, ResponseStream stream) {
+	public CompletableFuture<StreamWriter> incomingRequest(Http2Request headers, ResponseStream stream) {
 		writer = new RequestStreamWriter(facade, stream, headers);
 		
 		if(headers.isEndOfStream()) {
@@ -33,7 +33,7 @@ public class WebpiecesStreamHandle implements HttpStream {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancel(CancelReason c) {
+	public CompletableFuture<Void> incomingCancel(CancelReason c) {
 		writer.cancelOutstandingRequest();
 		return CompletableFuture.completedFuture(null);
 	}

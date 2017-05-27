@@ -123,7 +123,7 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	private void fireCancel(ShutdownStream f, Http1_1StreamImpl stream) {
 		try {
-			stream.getStreamHandle().cancel(f);
+			stream.getStreamHandle().incomingCancel(f);
 		} catch(Throwable e) {
 			log.warn("exception from stream trying to cancel.  swallowing and continuing", e);
 		}

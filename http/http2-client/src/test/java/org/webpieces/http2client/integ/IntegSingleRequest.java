@@ -122,7 +122,7 @@ public class IntegSingleRequest {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> incomingPushResponse(Http2Response response) {
+		public CompletableFuture<StreamWriter> processPushResponse(Http2Response response) {
 			log.info("incoming push promise. response="+response);
 			return CompletableFuture.completedFuture(null);
 		}

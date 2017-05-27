@@ -131,7 +131,7 @@ public class TestSBasicRequestResponse extends AbstractHttp2Test {
 		Assert.assertEquals(push, pushRecv);
 		
 		Http2Response preEmptive = Http2Requests.createResponse(push.getPromisedStreamId());
-		pushWriter.incomingPushResponse(preEmptive);
+		pushWriter.processPushResponse(preEmptive);
 
 		Http2Headers preEmptRecv = (Http2Headers) mockChannel.getFrameAndClear();
 		Assert.assertEquals(preEmptive, preEmptRecv);
