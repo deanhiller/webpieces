@@ -3,7 +3,7 @@ package org.webpieces.webserver.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.FrontendStream;
-import org.webpieces.frontend2.api.SocketInfo;
+import org.webpieces.frontend2.api.ServerSocketInfo;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamHandle;
@@ -15,19 +15,17 @@ public class WebpiecesStreamHandle implements StreamHandle {
 
 	private RequestHelpFacade facade;
 	private FrontendStream stream;
-	private SocketInfo info;
 	private RequestStreamWriter writer;
 
-	public WebpiecesStreamHandle(RequestHelpFacade facade, FrontendStream stream, SocketInfo info) {
+	public WebpiecesStreamHandle(RequestHelpFacade facade, FrontendStream stream) {
 		this.facade = facade;
 		this.stream = stream;
-		this.info = info;
 		
 	}
 
 	@Override
 	public CompletableFuture<StreamWriter> process(Http2Request headers) {
-		writer = new RequestStreamWriter(facade, stream, headers, info);
+		writer = new RequestStreamWriter(facade, stream, headers);
 		
 		if(headers.isEndOfStream()) {
 			CompletableFuture<Void> future = writer.handleCompleteRequest();

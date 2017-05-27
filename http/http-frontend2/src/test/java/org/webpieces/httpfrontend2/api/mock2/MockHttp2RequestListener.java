@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
@@ -36,12 +35,10 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	public static class PassedIn {
 		public FrontendStream stream;
 		public Http2Request request;
-		public SocketInfo type;
-		public PassedIn(FrontendStream stream, Http2Request request, SocketInfo type) {
+		public PassedIn(FrontendStream stream, Http2Request request) {
 			super();
 			this.stream = stream;
 			this.request = request;
-			this.type = type;
 		}
 	}
 	
@@ -50,25 +47,23 @@ public class MockHttp2RequestListener extends MockSuperclass implements HttpRequ
 	}
 	
 	@Override
-	public StreamHandle openStream(FrontendStream stream, SocketInfo info) {
-		return new StreamHandleProxy(stream, info);
+	public StreamHandle openStream(FrontendStream stream) {
+		return new StreamHandleProxy(stream);
 	}
 
 	private class StreamHandleProxy implements StreamHandle {
 
 		private FrontendStream stream;
-		private SocketInfo info;
 
-		public StreamHandleProxy(FrontendStream stream, SocketInfo info) {
+		public StreamHandleProxy(FrontendStream stream) {
 			this.stream = stream;
-			this.info = info;
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public CompletableFuture<StreamWriter> process(Http2Request request) {
 			return (CompletableFuture<StreamWriter>) 
-					MockHttp2RequestListener.super.calledMethod(Method.PROCESS, new PassedIn(stream, request, info));
+					MockHttp2RequestListener.super.calledMethod(Method.PROCESS, new PassedIn(stream, request));
 		}
 
 		@SuppressWarnings("unchecked")

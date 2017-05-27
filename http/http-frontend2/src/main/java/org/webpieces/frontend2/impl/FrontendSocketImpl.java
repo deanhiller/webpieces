@@ -1,9 +1,11 @@
 package org.webpieces.frontend2.impl;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpRequestListener;
+import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -26,10 +28,12 @@ public class FrontendSocketImpl implements FrontendSocket {
 	private StreamWriter writer;
 	private ConcurrentLinkedQueue<Http1_1StreamImpl> http11Queue = new ConcurrentLinkedQueue<>();
 	private boolean isClosed;
+	private ServerSocketInfo svrSocketInfo;
 
-	public FrontendSocketImpl(TCPChannel channel, ProtocolType protocol) {
+	public FrontendSocketImpl(TCPChannel channel, ProtocolType protocol, ServerSocketInfo svrSocketInfo) {
 		this.channel = channel;
 		this.protocol = protocol;
+		this.svrSocketInfo = svrSocketInfo;
 	}
 
 	public ProtocolType getProtocol() {
@@ -133,5 +137,25 @@ public class FrontendSocketImpl implements FrontendSocket {
 	@Override
 	public String toString() {
 		return "HttpSocket[" + channel+"]";
+	}
+
+	@Override
+	public boolean isHttps() {
+		return svrSocketInfo.isHttps();
+	}
+
+	@Override
+	public InetSocketAddress getServerLocalBoundAddress() {
+		return svrSocketInfo.getLocalBoundAddress();
+	}
+
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return channel.getLocalAddress();
+	}
+
+	@Override
+	public InetSocketAddress getRemoteAddress() {
+		return channel.getRemoteAddress();
 	}
 }

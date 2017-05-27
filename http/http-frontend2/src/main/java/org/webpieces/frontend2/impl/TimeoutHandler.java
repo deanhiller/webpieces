@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.FrontendStream;
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.SocketInfo;
+import org.webpieces.frontend2.api.ServerSocketInfo;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
@@ -18,7 +18,7 @@ public class TimeoutHandler {
 		this.httpListener = httpListener;
 	}
 
-	public CompletableFuture<StreamWriter> incomingRequest(FrontendStream stream, Http2Request headers, SocketInfo type) {
+	public CompletableFuture<StreamWriter> incomingRequest(FrontendStream stream, Http2Request headers, ServerSocketInfo type) {
 		FrontendSocket socket = stream.getSocket();
 		
 		//record last incoming data timestamp

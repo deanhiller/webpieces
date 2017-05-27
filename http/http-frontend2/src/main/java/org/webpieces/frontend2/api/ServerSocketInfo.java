@@ -2,25 +2,17 @@ package org.webpieces.frontend2.api;
 
 import java.net.InetSocketAddress;
 
-import org.webpieces.frontend2.impl.ProtocolType;
+public class ServerSocketInfo {
 
-public class SocketInfo {
-
-	private ProtocolType protocolType;
 	private boolean isHttps;
 	private InetSocketAddress localBoundAddress;
 
-	public SocketInfo(ProtocolType protocolType, boolean isHttps) {
-		this.protocolType = protocolType;
+	public ServerSocketInfo(boolean isHttps) {
 		this.isHttps = isHttps;
 	}
 
-	public void setBoundAddress(InetSocketAddress localAddr) {
+	public void setServerSocketAddress(InetSocketAddress localAddr) {
 		this.localBoundAddress = localAddr;
-	}
-
-	public ProtocolType getProtocolType() {
-		return protocolType;
 	}
 
 	public boolean isHttps() {

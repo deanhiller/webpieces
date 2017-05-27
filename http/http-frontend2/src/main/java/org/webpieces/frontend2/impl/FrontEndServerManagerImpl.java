@@ -40,9 +40,9 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	private Layer1ServerListener buildDatalListener(HttpRequestListener httpListener, boolean isHttps) {
-		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(httpParser, httpListener, isHttps);
-		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener, isHttps);
-		Layer1ServerListener listener = new Layer1ServerListener(http1_1, http2);
+		Layer2Http1_1Handler http1_1 = new Layer2Http1_1Handler(httpParser, httpListener);
+		Layer2Http2Handler http2 = new Layer2Http2Handler(http2EngineFactory, httpListener);
+		Layer1ServerListener listener = new Layer1ServerListener(http1_1, http2, isHttps);
 		return listener;
 	}
 

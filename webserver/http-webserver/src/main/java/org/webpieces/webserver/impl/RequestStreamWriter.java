@@ -18,20 +18,18 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.FrontendStream;
-import org.webpieces.frontend2.api.SocketInfo;
+import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.hpack.api.dto.Http2HeaderStruct;
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.subparsers.AcceptType;
 import com.webpieces.hpack.api.subparsers.HeaderPriorityParser;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.PartialStream;
@@ -78,13 +76,11 @@ public class RequestStreamWriter implements StreamWriter {
 	private CompletableFuture<Void> outstandingRequest;
 	private DataWrapper data = dataGen.emptyWrapper();
 	private boolean cancelled;
-	private SocketInfo socketInfo;
 
-	public RequestStreamWriter(RequestHelpFacade facade, FrontendStream stream, Http2Request headers, SocketInfo socketInfo) {
+	public RequestStreamWriter(RequestHelpFacade facade, FrontendStream stream, Http2Request headers) {
 		this.facade = facade;
 		this.stream = stream;
 		this.requestHeaders = headers;
-		this.socketInfo = socketInfo;
 	}
 	
 	@Override
@@ -118,7 +114,9 @@ public class RequestStreamWriter implements StreamWriter {
 		
 		//TODO(dhiller): figure out the firewall way to config when firewall terminates the ssl and we receive http
 		//or the secure routes will not show up
-		routerRequest.isHttps = socketInfo.isHttps();
+		//We could add configuration to checking the terminating server socket locally as the firewall could
+		//be defined to terminate ssl and drive to a specific port then.  the info is in stream.getSocket.getSvrSocketAddress
+		routerRequest.isHttps = stream.getSocket().isHttps();
 
 		String domain = requestHeaders.getAuthority();
 		if(domain == null) {

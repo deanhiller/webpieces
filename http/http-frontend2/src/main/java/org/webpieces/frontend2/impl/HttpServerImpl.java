@@ -30,7 +30,7 @@ public class HttpServerImpl implements HttpServer {
 		log.info("starting to listen to port="+config.bindAddress);
 		server.start(config.bindAddress);
 		InetSocketAddress localAddr = server.getUnderlyingChannel().getLocalAddress();
-		listener.setBoundAddr(localAddr);
+		listener.setSvrSocketAddr(localAddr);
 		log.info("now listening for incoming requests on "+localAddr);
 	}
 	

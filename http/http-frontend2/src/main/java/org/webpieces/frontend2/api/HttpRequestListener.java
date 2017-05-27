@@ -4,6 +4,6 @@ import com.webpieces.http2engine.api.StreamHandle;
 
 public interface HttpRequestListener {
 
-	StreamHandle openStream(FrontendStream stream, SocketInfo info);
+	StreamHandle openStream(FrontendStream stream);
 	
 }

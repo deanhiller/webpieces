@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
+import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.httpparser.api.ParseException;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
@@ -17,11 +18,15 @@ public class Layer1ServerListener implements AsyncDataListener {
 	private Layer2Http1_1Handler http1_1Handler;
 	private Layer2Http2Handler http2Handler;
 
+	private ServerSocketInfo svrSocketInfo;
+
 	public Layer1ServerListener(
 			Layer2Http1_1Handler http1_1Listener, 
-			Layer2Http2Handler http2Listener) {
+			Layer2Http2Handler http2Listener,
+			boolean isHttps) {
 		this.http1_1Handler = http1_1Listener;
 		this.http2Handler = http2Listener;
+		svrSocketInfo = new ServerSocketInfo(isHttps);
 	}
 
 	@Override
@@ -107,7 +112,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 		//when a channel is SSL, we can tell right away IF ALPN is installed
 		//boolean isHttp2 = channel.getAlpnDetails().isHttp2();
 
-		FrontendSocketImpl socket = new FrontendSocketImpl(channel, ProtocolType.UNKNOWN);
+		FrontendSocketImpl socket = new FrontendSocketImpl(channel, ProtocolType.UNKNOWN, svrSocketInfo);
 		channel.getSession().put(FRONTEND_SOCKET, socket);
 
 		http1_1Handler.socketOpened(socket, isReadyForWrites);
@@ -117,9 +122,8 @@ public class Layer1ServerListener implements AsyncDataListener {
 		return (FrontendSocketImpl) channel.getSession().get(FRONTEND_SOCKET);
 	}
 
-	public void setBoundAddr(InetSocketAddress localAddr) {
-		http1_1Handler.setBoundAddr(localAddr);
-		http2Handler.setBoundAddr(localAddr);
+	public void setSvrSocketAddr(InetSocketAddress localAddr) {
+		svrSocketInfo.setServerSocketAddress(localAddr);
 	}
 	
 }

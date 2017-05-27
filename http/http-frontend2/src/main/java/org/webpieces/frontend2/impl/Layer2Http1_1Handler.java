@@ -1,6 +1,5 @@
 package org.webpieces.frontend2.impl;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -10,7 +9,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
@@ -33,15 +31,11 @@ public class Layer2Http1_1Handler {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpParser httpParser;
 	private HttpRequestListener httpListener;
-	private boolean isHttps;
-	private SocketInfo socketInfo;
 	private AtomicInteger counter = new AtomicInteger(1);
 
-	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener, boolean isHttps) {
+	public Layer2Http1_1Handler(HttpParser httpParser, HttpRequestListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
-		this.isHttps = isHttps;
-		this.socketInfo = new SocketInfo(ProtocolType.HTTP1_1, isHttps);
 	}
 
 	public InitiationResult initialData(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -102,7 +96,7 @@ public class Layer2Http1_1Handler {
 	}
 
 	private void processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
-		Http2Msg msg = Http2Translations.translate(payload, isHttps);
+		Http2Msg msg = Http2Translations.translate(payload, socket.isHttps());
 		//TODO: close socket on violation of pipelining like previous request did not end
 
 		if(payload instanceof HttpRequest) {
@@ -124,7 +118,7 @@ public class Layer2Http1_1Handler {
 		Http1_1StreamImpl stream = new Http1_1StreamImpl(id, socket, httpParser);
 		socket.setAddStream(stream);
 
-		StreamHandle streamHandle = httpListener.openStream(stream, socketInfo);
+		StreamHandle streamHandle = httpListener.openStream(stream);
 		stream.setStreamHandle(streamHandle);
 		
 		String lengthHeader = headers.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
@@ -152,10 +146,6 @@ public class Layer2Http1_1Handler {
 
 	public void farEndClosed(FrontendSocketImpl socket) {
 		socket.farEndClosed(httpListener);
-	}
-
-	public void setBoundAddr(InetSocketAddress localAddr) {
-		socketInfo.setBoundAddress(localAddr);
 	}
 
 }

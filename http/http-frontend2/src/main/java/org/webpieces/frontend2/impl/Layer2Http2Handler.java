@@ -1,13 +1,11 @@
 package org.webpieces.frontend2.impl;
 
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -20,19 +18,17 @@ public class Layer2Http2Handler {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private Http2ServerEngineFactory svrEngineFactory;
 	private HttpRequestListener httpListener;
-	private SocketInfo socketInfo;
 
 	public Layer2Http2Handler(
 			Http2ServerEngineFactory svrEngineFactory, 
-			HttpRequestListener httpListener, boolean isHttps
+			HttpRequestListener httpListener
 	) {
 		this.svrEngineFactory = svrEngineFactory;
 		this.httpListener = httpListener;
-		this.socketInfo = new SocketInfo(ProtocolType.HTTP2, isHttps);
 	}
 
 	public void initialize(FrontendSocketImpl socket) {
-		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener, socketInfo);
+		Layer3Http2EngineListener listener = new Layer3Http2EngineListener(socket, httpListener);
 		Http2ServerEngine engine = svrEngineFactory.createEngine(socket+"", listener);
 		socket.setHttp2Engine(engine);
 		
@@ -53,10 +49,6 @@ public class Layer2Http2Handler {
 		log.error("far end closed="+socket);
 		Http2ServerEngine engine = socket.getHttp2Engine();
 		engine.farEndClosed();
-	}
-
-	public void setBoundAddr(InetSocketAddress localAddr) {
-		socketInfo.setBoundAddress(localAddr);
 	}
 
 }

@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.HttpRequestListener;
-import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 
 import com.webpieces.http2engine.api.ResponseHandler2;
@@ -18,18 +17,16 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	
 	private FrontendSocketImpl socket;
 	private HttpRequestListener httpListener;
-	private SocketInfo socketInfo;
 
-	public Layer3Http2EngineListener(FrontendSocketImpl socket, HttpRequestListener httpListener, SocketInfo socketInfo) {
+	public Layer3Http2EngineListener(FrontendSocketImpl socket, HttpRequestListener httpListener) {
 		this.socket = socket;
 		this.httpListener = httpListener;
-		this.socketInfo = socketInfo;
 	}
 
 	@Override
 	public StreamHandle openStream(int streamId, ResponseHandler2 responseHandler) {
 		Http2StreamImpl stream = new Http2StreamImpl(socket, responseHandler, streamId);
-		return httpListener.openStream(stream, socketInfo);
+		return httpListener.openStream(stream);
 	}
 	
 	@Override

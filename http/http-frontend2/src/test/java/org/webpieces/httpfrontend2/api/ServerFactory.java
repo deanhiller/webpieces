@@ -14,7 +14,6 @@ import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpRequestListener;
 import org.webpieces.frontend2.api.HttpServer;
-import org.webpieces.frontend2.api.SocketInfo;
 import org.webpieces.httpfrontend2.api.http1.Requests;
 import org.webpieces.httpfrontend2.api.http2.Http2Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -51,7 +50,7 @@ class ServerFactory {
         private HttpRequest pushedRequest = Requests.createRequest(KnownHttpMethod.GET, "/file.css");
 
 		@Override
-		public 	StreamHandle openStream(FrontendStream stream, SocketInfo info) {
+		public 	StreamHandle openStream(FrontendStream stream) {
 			return new StreamHandleImpl(stream);
 		}
 		

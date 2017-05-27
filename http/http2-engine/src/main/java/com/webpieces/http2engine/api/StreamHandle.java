@@ -7,7 +7,7 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 
 public interface StreamHandle {
 
-	CompletableFuture<StreamWriter> process(Http2Request headers);
+	CompletableFuture<StreamWriter> process(Http2Request request);
 	
 	/**
 	 * Because the app may return a completed future from process, we must have a cancel that the
