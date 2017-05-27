@@ -28,7 +28,7 @@ import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Http1_1StreamImpl implements ResponseStream {
 	private static final Logger log = LoggerFactory.getLogger(Http1_1StreamImpl.class);
@@ -74,7 +74,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported="+data);
 			
@@ -93,7 +93,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 	private class Http11ResponseWriter implements StreamWriter {
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			maybeRemove(data, data.isEndOfStream());			
 			
 			List<HttpPayload> responses = Http2Translations.translate(data);

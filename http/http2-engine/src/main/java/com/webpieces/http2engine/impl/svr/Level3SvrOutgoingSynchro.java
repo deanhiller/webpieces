@@ -15,7 +15,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 import com.webpieces.util.locking.PermitQueue;
 
 public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
@@ -47,7 +47,7 @@ public class Level3SvrOutgoingSynchro extends Level3OutgoingSynchro {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			return streams.sendDataToSocket(stream, data).thenApply(v->this);
 		}
 	}

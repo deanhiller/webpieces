@@ -19,7 +19,7 @@ import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public abstract class Level4PreconditionChecks<T> {
 
@@ -83,7 +83,7 @@ public abstract class Level4PreconditionChecks<T> {
 		}
 	}
 
-	public CompletableFuture<Void> sendDataToSocket(Stream stream, PartialStream data) {
+	public CompletableFuture<Void> sendDataToSocket(Stream stream, StreamMsg data) {
 		ConnectionCancelled closedReason = stateMachine.getClosedReason();
 		if(closedReason != null) {
 			return createExcepted(data, "sending data", closedReason);
@@ -111,7 +111,7 @@ public abstract class Level4PreconditionChecks<T> {
 		return stateMachine.fireRstToSocket(stream, frame);
 	}
 	
-	protected CompletableFuture<Void> fireToSocket(Stream stream, PartialStream frame, boolean keepDelayedState) {
+	protected CompletableFuture<Void> fireToSocket(Stream stream, StreamMsg frame, boolean keepDelayedState) {
 		return stateMachine.fireToSocket(stream, frame, keepDelayedState);
 	}
 	

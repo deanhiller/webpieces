@@ -20,7 +20,7 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.GoAwayFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Level8NotifyClntListeners implements EngineResultListener {
 
@@ -81,7 +81,7 @@ public class Level8NotifyClntListeners implements EngineResultListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPieceToApp(Stream stream, PartialStream payload) {
+	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ClientStream str = (ClientStream) stream;
 		StreamWriter writer = str.getResponseWriter();
 		return writer.processPiece(payload)

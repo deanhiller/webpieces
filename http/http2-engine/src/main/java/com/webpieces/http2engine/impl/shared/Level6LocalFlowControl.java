@@ -14,7 +14,7 @@ import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.error.StreamException;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public abstract class Level6LocalFlowControl {
 
@@ -49,7 +49,7 @@ public abstract class Level6LocalFlowControl {
 		return notifyListener.sendRstToApp(stream, payload);		
 	}	
 	
-	public CompletableFuture<Void> fireDataToClient(Stream stream, PartialStream payload) {
+	public CompletableFuture<Void> fireDataToClient(Stream stream, StreamMsg payload) {
 		if(!(payload instanceof DataFrame))
 			return notifyListener.sendPieceToApp(stream, payload);
 

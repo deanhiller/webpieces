@@ -14,7 +14,7 @@ import com.webpieces.http2engine.impl.shared.EngineResultListener;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Level8NotifySvrListeners implements EngineResultListener {
 
@@ -63,7 +63,7 @@ public class Level8NotifySvrListeners implements EngineResultListener {
 	}
 	
 	@Override
-	public CompletableFuture<Void> sendPieceToApp(Stream stream, PartialStream payload) {
+	public CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload) {
 		ServerStream s = (ServerStream) stream;
 		StreamWriter writer = s.getStreamWriter();
 		return writer.processPiece(payload).thenApply(v -> null);

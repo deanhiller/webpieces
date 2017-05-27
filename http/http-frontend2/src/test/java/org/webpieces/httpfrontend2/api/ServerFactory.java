@@ -29,7 +29,7 @@ import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.Http2Method;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 class ServerFactory {
 	private static final Logger log = LoggerFactory.getLogger(ServerFactory.class);
@@ -56,7 +56,7 @@ class ServerFactory {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			return CompletableFuture.completedFuture(this);
 		}
 
@@ -99,7 +99,7 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			log.error(stream+"receiving data="+data);
 			return CompletableFuture.completedFuture(this);
 		}
@@ -117,7 +117,7 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			log.info(stream+"echoing back piece of data");
 			return writer.processPiece(data);
 		}
@@ -135,7 +135,7 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			if(!data.isEndOfStream()) {
 				log.info(stream+"consuming data");
 				return CompletableFuture.completedFuture(this);

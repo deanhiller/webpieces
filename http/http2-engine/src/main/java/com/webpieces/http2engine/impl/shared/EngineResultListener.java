@@ -8,7 +8,7 @@ import com.webpieces.http2engine.api.error.ShutdownConnection;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public interface EngineResultListener {
 
@@ -21,7 +21,7 @@ public interface EngineResultListener {
 
 	CompletableFuture<Void> sendRstToApp(Stream stream, CancelReason payload);
 
-	CompletableFuture<Void> sendPieceToApp(Stream stream, PartialStream payload);
+	CompletableFuture<Void> sendPieceToApp(Stream stream, StreamMsg payload);
 	
 	CompletableFuture<Void> sendPieceToApp(Stream stream, Http2Trailers payload);
 	

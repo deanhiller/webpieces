@@ -5,9 +5,9 @@ import org.webpieces.data.api.DataWrapper;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
-public class DataFrame extends AbstractHttp2Frame implements PartialStream {
+public class DataFrame extends AbstractHttp2Frame implements StreamMsg {
 
     /* flags */
 	//defaulted to true as it is easier 

@@ -30,7 +30,7 @@ import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Http2Translations {
 
@@ -41,7 +41,7 @@ public class Http2Translations {
 		headersToSkip.add(Http2HeaderName.SCHEME.getHeaderName());
 	}
 	
-	public static List<HttpPayload> translate(PartialStream data) {
+	public static List<HttpPayload> translate(StreamMsg data) {
 		if(data instanceof DataFrame) {
 			return translateData((DataFrame)data);
 		} else if(data instanceof Http2Trailers) {

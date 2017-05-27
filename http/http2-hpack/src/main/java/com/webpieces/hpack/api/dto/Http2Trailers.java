@@ -4,9 +4,9 @@ import java.util.List;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2MsgType;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
-public class Http2Trailers extends Http2Headers implements PartialStream {
+public class Http2Trailers extends Http2Headers implements StreamMsg {
 
 	public Http2Trailers() {
 	}

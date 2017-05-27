@@ -16,7 +16,7 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class SingleResponseListener implements ResponseHandler, StreamWriter {
 
@@ -37,7 +37,7 @@ public class SingleResponseListener implements ResponseHandler, StreamWriter {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(PartialStream frame) {
+	public CompletableFuture<StreamWriter> processPiece(StreamMsg frame) {
 		if(frame instanceof DataFrame) {
 			incomingData((DataFrame) frame);
 		} else if(frame instanceof RstStreamFrame) {

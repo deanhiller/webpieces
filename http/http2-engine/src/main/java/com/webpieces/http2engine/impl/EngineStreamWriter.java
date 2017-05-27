@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.impl.shared.Synchro;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 /**
  * Request or Response StreamWriter
@@ -22,7 +22,7 @@ public class EngineStreamWriter implements StreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(PartialStream data) {		
+	public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {		
 		if(data.getStreamId() != stream.getStreamId())
 			throw new IllegalArgumentException("PartialStream has incorrect stream id="+data
 					+" it should be="+stream.getStreamId()+" since initial request piece had that id");

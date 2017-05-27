@@ -26,7 +26,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 import com.webpieces.util.locking.PermitQueue;
 
 public class Level1ServerEngine implements Http2ServerEngine {
@@ -146,7 +146,7 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			int streamId = data.getStreamId();
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+data);

@@ -32,7 +32,7 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class RequestStreamWriter implements StreamWriter {
 
@@ -84,7 +84,7 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(PartialStream frame) {
+	public CompletableFuture<StreamWriter> processPiece(StreamMsg frame) {
 		if(cancelled)
 			return CompletableFuture.completedFuture(this);
 		else if(frame instanceof DataFrame) {

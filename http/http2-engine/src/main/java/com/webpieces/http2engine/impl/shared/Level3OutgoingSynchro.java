@@ -10,7 +10,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 import com.webpieces.util.locking.PermitQueue;
 
 /**
@@ -54,7 +54,7 @@ public abstract class Level3OutgoingSynchro {
 		return notifyListener.sendFrameToSocket(settings);
 	}
 	
-	public CompletableFuture<Void> sendDataToSocket(Stream stream, PartialStream data) {		
+	public CompletableFuture<Void> sendDataToSocket(Stream stream, StreamMsg data) {		
 		return streamsLayer.sendDataToSocket(stream, data);
 	}
 

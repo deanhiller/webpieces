@@ -8,7 +8,7 @@ import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 
 import com.webpieces.http2engine.api.StreamWriter;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 
@@ -23,14 +23,14 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(PartialStream data) {
+	public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.SEND_MORE, data);
 	}
 
-	public PartialStream getSingleFrame() {
+	public StreamMsg getSingleFrame() {
 		List<ParametersPassedIn> list = super.getCalledMethodList(Method.SEND_MORE);
 		if(list.size() != 1)
 			throw new IllegalArgumentException("method was not called exactly once. numTimes="+list.size());
-		return (PartialStream) list.get(0).getArgs()[0];
+		return (StreamMsg) list.get(0).getArgs()[0];
 	}
 }

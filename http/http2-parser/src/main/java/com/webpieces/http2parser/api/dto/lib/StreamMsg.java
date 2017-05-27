@@ -1,6 +1,6 @@
 package com.webpieces.http2parser.api.dto.lib;
 
-public interface PartialStream extends Http2Msg {
+public interface StreamMsg extends Http2Msg {
 
 	boolean isEndOfStream();
 	

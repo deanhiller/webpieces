@@ -13,7 +13,7 @@ import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 import com.webpieces.util.locking.PermitQueue;
 
 public abstract class Level5CStateMachine extends Level5BResets {
@@ -40,7 +40,7 @@ public abstract class Level5CStateMachine extends Level5BResets {
 				});
 	}
 	
-	public CompletableFuture<Void> fireToSocket(Stream stream, PartialStream payload, boolean keepDelayedState) {
+	public CompletableFuture<Void> fireToSocket(Stream stream, StreamMsg payload, boolean keepDelayedState) {
 		CompletableFuture<Void> future = fireSendToSM(stream, payload, keepDelayedState);
 				
 		return future.thenCompose(v -> {

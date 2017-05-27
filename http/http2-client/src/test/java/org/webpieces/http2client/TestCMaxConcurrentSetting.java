@@ -19,7 +19,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.PartialStream;
+import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class TestCMaxConcurrentSetting extends AbstractTest {
 	
@@ -52,7 +52,7 @@ public class TestCMaxConcurrentSetting extends AbstractTest {
 		DataFrame dataFrame = new DataFrame(streamId1, true);
 		mockChannel.write(dataFrame);//endOfStream = true
 		
-		PartialStream data = writer1.getSingleFrame();
+		StreamMsg data = writer1.getSingleFrame();
 		Assert.assertEquals(dataFrame.getStreamId(), data.getStreamId());
 		
 		Http2Headers frame = (Http2Headers) mockChannel.getFrameAndClear();
