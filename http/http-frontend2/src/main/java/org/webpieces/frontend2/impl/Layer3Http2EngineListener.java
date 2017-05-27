@@ -30,14 +30,14 @@ public class Layer3Http2EngineListener implements ServerEngineListener {
 	@Override
 	public StreamHandle openStream() {
 		HttpStream handle2 = httpListener.openStream();
-		return new StreamHandle2Impl(handle2);
+		return new FrontendStreamProxy(handle2);
 	}
 	
-	private class StreamHandle2Impl implements StreamHandle {
+	private class FrontendStreamProxy implements StreamHandle {
 
 		private HttpStream handle2;
 
-		public StreamHandle2Impl(HttpStream handle2) {
+		public FrontendStreamProxy(HttpStream handle2) {
 			this.handle2 = handle2;
 		}
 

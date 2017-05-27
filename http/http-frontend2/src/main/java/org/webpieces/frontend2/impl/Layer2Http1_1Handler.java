@@ -21,7 +21,6 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.hpack.api.dto.Http2Request;
-import com.webpieces.http2engine.api.StreamHandle;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
