@@ -1,6 +1,6 @@
 package org.webpieces.httpclient.api;
 
-import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpResponseListener {
@@ -34,7 +34,7 @@ public interface HttpResponseListener {
 	 * @param chunk
 	 * @param isLastChunk
 	 */
-	public void incomingChunk(HttpChunk chunk, boolean isLastChunk);
+	public void incomingChunk(HttpData chunk, boolean isLastChunk);
 	
 	public void failure(Throwable e);
 

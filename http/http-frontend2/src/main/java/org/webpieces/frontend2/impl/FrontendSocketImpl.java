@@ -4,15 +4,15 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.webpieces.frontend2.api.FrontendSocket;
-import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.ServerSocketInfo;
+import org.webpieces.frontend2.api.StreamListener;
+import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
 import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
@@ -25,10 +25,11 @@ public class FrontendSocketImpl implements FrontendSocket {
 	private ProtocolType protocol;
 	private Memento http1_1ParseState;
 	private Http2ServerEngine http2Engine;
-	private StreamWriter writer;
 	private ConcurrentLinkedQueue<Http1_1StreamImpl> http11Queue = new ConcurrentLinkedQueue<>();
 	private boolean isClosed;
 	private ServerSocketInfo svrSocketInfo;
+
+	private MarshalState http1_1MarshalState;
 
 	public FrontendSocketImpl(TCPChannel channel, ProtocolType protocol, ServerSocketInfo svrSocketInfo) {
 		this.channel = channel;
@@ -50,12 +51,16 @@ public class FrontendSocketImpl implements FrontendSocket {
 		channel.close();
 	}
 	
-	public void setHttp1_1ParseState(Memento parseState) {
+	public void setHttp1_1ParseState(Memento parseState, MarshalState marshalState) {
 		this.http1_1ParseState = parseState;
+		this.http1_1MarshalState = marshalState;
 	}
 
 	public Memento getHttp1_1ParseState() {
 		return http1_1ParseState;
+	}
+	public MarshalState getHttp1_1MarshalState() {
+		return http1_1MarshalState;
 	}
 
 	public void setProtocol(ProtocolType protocol) {
@@ -72,14 +77,6 @@ public class FrontendSocketImpl implements FrontendSocket {
 
 	public TCPChannel getChannel() {
 		return channel;
-	}
-
-	public void addWriter(StreamWriter writer) {
-		this.writer = writer;
-	}
-
-	public StreamWriter getWriter() {
-		return writer;
 	}
 
 	public void setAddStream(Http1_1StreamImpl stream) {

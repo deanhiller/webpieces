@@ -14,8 +14,8 @@ import javax.inject.Inject;
 
 import org.webpieces.frontend2.api.FrontendConfig;
 import org.webpieces.frontend2.api.HttpFrontendManager;
-import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpServer;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.RouterService;

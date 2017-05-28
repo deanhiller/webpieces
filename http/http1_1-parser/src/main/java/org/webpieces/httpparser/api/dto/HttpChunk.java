@@ -3,11 +3,17 @@ package org.webpieces.httpparser.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpChunk extends HttpPayload {
-
+public class HttpChunk extends HttpData {
+	
 	public static final String TRAILER_STR = "\r\n";
 	protected List<HttpChunkExtension> extensions = new ArrayList<>();
 	
+	
+	@Override
+	public boolean isEndOfData() {
+		return false;
+	}
+
 	@Override
 	public HttpMessageType getMessageType() {
 		return HttpMessageType.CHUNK;
@@ -20,7 +26,7 @@ public class HttpChunk extends HttpPayload {
 	public void addExtension(HttpChunkExtension extension) {
 		extensions.add(extension);
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

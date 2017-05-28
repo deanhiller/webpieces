@@ -15,6 +15,11 @@ public class HttpLastChunk extends HttpChunk {
 	//be looked up by key.
 	private transient Headers headersStruct = new Headers();
 	
+	@Override
+	public boolean isEndOfData() {
+		return true;
+	}
+	
 	/**
 	 * Order of HTTP Headers matters for Headers with the same key
 	 */

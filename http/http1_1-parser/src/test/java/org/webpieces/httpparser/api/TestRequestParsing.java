@@ -20,6 +20,8 @@ import org.webpieces.httpparser.impl.ConvertAscii;
 public class TestRequestParsing {
 	
 	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
+	private MarshalState state = parser.prepareToMarshal();
+
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private byte[] unwrap(ByteBuffer buffer) {
@@ -48,7 +50,7 @@ public class TestRequestParsing {
 	@Test
 	public void testAsciiConverter() {
 		HttpRequest request = createPostRequest();
-		byte[] payload = unwrap(parser.marshalToByteBuffer(request));
+		byte[] payload = unwrap(parser.marshalToByteBuffer(state, request));
 		ConvertAscii converter = new ConvertAscii();
 		String readableForm = converter.convertToReadableForm(payload);
 		
@@ -78,7 +80,7 @@ public class TestRequestParsing {
 	@Test
 	public void testPartialHttpMessage() {
 		HttpRequest request = createPostRequest();
-		byte[] payload = unwrap(parser.marshalToByteBuffer(request));
+		byte[] payload = unwrap(parser.marshalToByteBuffer(state, request));
 		
 		byte[] firstPart = new byte[10];
 		byte[] secondPart = new byte[payload.length-firstPart.length];
@@ -110,7 +112,7 @@ public class TestRequestParsing {
 	@Test
 	public void test2AndHalfHttpMessages() {
 		HttpRequest request = createPostRequest();
-		byte[] payload = unwrap(parser.marshalToByteBuffer(request));
+		byte[] payload = unwrap(parser.marshalToByteBuffer(state, request));
 		
 		byte[] first = new byte[2*payload.length + 20];
 		byte[] second = new byte[payload.length - 20];
@@ -141,7 +143,7 @@ public class TestRequestParsing {
 	@Test
 	public void testHalfThenTwoHalvesNext() {
 		HttpRequest request = createPostRequest();
-		byte[] payload = unwrap(parser.marshalToByteBuffer(request));
+		byte[] payload = unwrap(parser.marshalToByteBuffer(state, request));
 		
 		byte[] first = new byte[20];
 		byte[] second = new byte[payload.length];

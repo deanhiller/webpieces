@@ -13,6 +13,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
+import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -29,6 +30,7 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.HttpDummyRequest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -78,7 +80,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testPostFailDueToSecureTokenCheck() {
-		HttpRequest req = Requests.createPostRequest("/postuser", 
+		HttpDummyRequest req = Requests.createPostRequest("/postuser", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -94,7 +96,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testComplexBeanSaved() {
-		HttpRequest req = Requests.createPostRequest("/postuser2", 
+		HttpDummyRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -118,7 +120,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testNullIdFromForm() {
-		HttpRequest req = Requests.createPostRequest("/postuser2",
+		HttpDummyRequest req = Requests.createPostRequest("/postuser2",
 				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
 				);
 		
@@ -132,7 +134,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testInvalidComplexBean() {
-		HttpRequest req = Requests.createPostRequest("/postuser2", 
+		HttpDummyRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -174,7 +176,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testIncomingDataAndDataSeperate() {
-		HttpRequest req = Requests.createPostRequest("/postArray2",
+		HttpDummyRequest req = Requests.createPostRequest("/postArray2",
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",
@@ -185,8 +187,11 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 		DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 		HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
-		ByteBuffer buffer = parser.marshalToByteBuffer(req);
-		DataWrapper data = dataGen.wrapByteBuffer(buffer);
+		MarshalState state = parser.prepareToMarshal();
+		ByteBuffer buffer = parser.marshalToByteBuffer(state, req.getRequest());
+		DataWrapper d1 = dataGen.wrapByteBuffer(buffer);
+		ByteBuffer buf2 = parser.marshalToByteBuffer(state, req.getData());
+		DataWrapper data = dataGen.chainDataWrappers(d1, dataGen.wrapByteBuffer(buf2));
 		
 		// Split the body in half
 		List<? extends DataWrapper> split = dataGen.split(data, data.getReadableSize() - 20);
@@ -205,7 +210,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	}
 	@Test
 	public void testArraySaved() {
-		HttpRequest req = Requests.createPostRequest("/postArray2", 
+		HttpDummyRequest req = Requests.createPostRequest("/postArray2", 
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",
@@ -243,7 +248,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testDeveloperMistypesBeanNameVsFormNames() {
-		HttpRequest req = Requests.createPostRequest("/postuser", 
+		HttpDummyRequest req = Requests.createPostRequest("/postuser", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.fullName", "Dean Hiller",
@@ -258,7 +263,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testDeveloperMistypesBeanNameVsFormNamesButNullableIsUsed() {
-		HttpRequest req = Requests.createPostRequest("/postusernullable", 
+		HttpDummyRequest req = Requests.createPostRequest("/postusernullable", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.fullName", "Dean Hiller",

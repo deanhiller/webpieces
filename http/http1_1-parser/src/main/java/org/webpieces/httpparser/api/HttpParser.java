@@ -7,7 +7,9 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public interface HttpParser {
 
-	ByteBuffer marshalToByteBuffer(HttpPayload request);
+	MarshalState prepareToMarshal();
+	
+	ByteBuffer marshalToByteBuffer(MarshalState state, HttpPayload request);
 	String marshalToString(HttpPayload request);
 	
 	/**

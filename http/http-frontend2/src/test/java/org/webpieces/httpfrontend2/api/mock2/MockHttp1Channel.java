@@ -18,6 +18,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
+import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.mock.MethodEnum;
@@ -41,11 +42,13 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	private ChannelSession session = new ChannelSessionImpl();
 	private HttpParser parser;
 	private Memento memento;
+	private MarshalState marshalState;
 
 	public MockHttp1Channel() {
 		BufferPool pool = new BufferCreationPool();
 		parser = HttpParserFactory.createParser(pool);
 		memento = parser.prepareToParse();
+		marshalState = parser.prepareToMarshal();
 	}
 	
 	@Override
@@ -62,7 +65,7 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 	public void write(HttpPayload msg) {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
-		ByteBuffer buf = parser.marshalToByteBuffer(msg);
+		ByteBuffer buf = parser.marshalToByteBuffer(marshalState, msg);
 		listener.incomingData(this, buf);
 	}
 	

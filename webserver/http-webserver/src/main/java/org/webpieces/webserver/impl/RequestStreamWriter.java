@@ -18,7 +18,6 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.ResponseStream;
-import org.webpieces.frontend2.api.ServerSocketInfo;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;

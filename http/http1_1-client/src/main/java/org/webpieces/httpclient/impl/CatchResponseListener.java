@@ -3,7 +3,7 @@ package org.webpieces.httpclient.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.httpclient.api.HttpResponseListener;
-import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class CatchResponseListener implements HttpResponseListener {
@@ -26,7 +26,7 @@ public class CatchResponseListener implements HttpResponseListener {
 	}
 
 	@Override
-	public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
+	public void incomingChunk(HttpData chunk, boolean isLastChunk) {
 		try {
 			listener.incomingChunk(chunk, isLastChunk);
 		} catch(Throwable e) {

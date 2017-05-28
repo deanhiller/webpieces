@@ -25,6 +25,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.HttpDummyRequest;
 
 public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
@@ -61,7 +62,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
 	@Test
 	public void testAjaxAddUser() {
-		HttpRequest req = Requests.createPostRequest("/ajax/user/post",
+		HttpDummyRequest req = Requests.createPostRequest("/ajax/user/post",
 				"entity.id", "",
 				"entity.name", "blah1",
 				"entity.firstName", "blah2",

@@ -2,12 +2,8 @@ package org.webpieces.webserver.impl;
 
 import javax.inject.Inject;
 
-import org.webpieces.frontend2.api.ResponseStream;
-import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
-import org.webpieces.frontend2.api.ServerSocketInfo;
-
-import com.webpieces.http2engine.api.StreamHandle;
+import org.webpieces.frontend2.api.StreamListener;
 
 public class RequestReceiver implements StreamListener {
 	

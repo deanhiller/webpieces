@@ -15,6 +15,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.HttpDummyRequest;
 
 public class TestScopes extends AbstractWebpiecesTest {
 
@@ -121,7 +122,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 		FullResponse response2 = runGetUserFormWithErrors(response1);
 		
 		Header header = response2.createCookieRequestHeader();
-		HttpRequest req = Requests.createPostRequest("/user/post", 
+		HttpDummyRequest req = Requests.createPostRequest("/user/post", 
 				"user.id", "",
 				"user.firstName", "Dean", //valid firstname
 				"user.lastName", "Hiller",
@@ -139,7 +140,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 	}
 
 	private FullResponse runInvalidPost() {
-		HttpRequest req = Requests.createPostRequest("/user/post", 
+		HttpDummyRequest req = Requests.createPostRequest("/user/post", 
 				"user.firstName", "D", //invalid first name
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",

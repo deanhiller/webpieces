@@ -16,6 +16,7 @@ import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -114,10 +115,11 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		String bodyStr = "hi there, how are you";
 		DataWrapper dataWrapper = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
-		req.setBody(dataWrapper);
+		HttpData body = new HttpData(dataWrapper, true);
 		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, ""+dataWrapper.getReadableSize()));
 
-		mockChannel.write(req);		
+		mockChannel.write(req);
+		mockChannel.write(body);
 		PassedIn in1 = mockListener.getSingleRequest();
 		HttpRequest req1 = Http2Translations.translateRequest(in1.request);
 		Assert.assertEquals(req, req1);

@@ -1,56 +1,35 @@
 package org.webpieces.httpparser.api.dto;
 
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
-
 public abstract class HttpPayload {
-
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private static final DataWrapper EMPTY_WRAPPER = dataGen.emptyWrapper();
-	private DataWrapper body;
 
 	public abstract HttpMessageType getMessageType();
 	
 	public HttpRequest getHttpRequest() {
 		if(getMessageType() == HttpMessageType.REQUEST)
 			return (HttpRequest)this;
-		return null;
+		throw new ClassCastException("This is not a request and is="+this);
 	}
 	public HttpResponse getHttpResponse() {
 		if(getMessageType() == HttpMessageType.RESPONSE)
 			return (HttpResponse)this;
-		return null;
+		throw new ClassCastException("This is not a response and is="+this);
 	}
 	public HttpChunk getHttpChunk() {
 		if(getMessageType() == HttpMessageType.CHUNK)
 			return (HttpChunk)this;
-		return null;
+		throw new ClassCastException("This is not a HttpChunk and is="+this);
 	}	
+	
+	public HttpData getHttpData() {
+		if(getMessageType() == HttpMessageType.DATA)
+			return (HttpData)this;
+		throw new ClassCastException("This is not a HttpData and is="+this);
+	}	
+	
 	public HttpLastChunk getLastHttpChunk() {
 		if(getMessageType() == HttpMessageType.LAST_CHUNK)
 			return (HttpLastChunk)this;
 		return null;
-	}
-	
-	/**
-	 * 
-	 * @param data
-	 */
-	public void setBody(DataWrapper data) {
-		this.body = data;
-	}
-	
-	/**
-	 * @return
-	 */
-	public DataWrapper getBody() { return body; }
-
-	/**
-	 *
-	 */
-	public void appendBody(DataWrapper data) {
-		this.body = dataGen.chainDataWrappers(this.body, data);
 	}
 
 	/**
@@ -61,13 +40,5 @@ public abstract class HttpPayload {
 	 */
 	public abstract boolean isHasChunkedTransferHeader();
 	
-	/**
-	 * convenience method for non-null body that will be 0 bytes if it was null
-	 * @return
-	 */
-	public DataWrapper getBodyNonNull() {
-		if(body == null)
-			return EMPTY_WRAPPER;
-		return body;
-	}
+
 }

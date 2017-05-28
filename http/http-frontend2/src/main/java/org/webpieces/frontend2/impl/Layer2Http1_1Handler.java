@@ -12,6 +12,7 @@ import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
@@ -32,6 +33,7 @@ public class Layer2Http1_1Handler {
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
+	private StreamWriter currentWriter;
 
 	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
@@ -56,13 +58,19 @@ public class Layer2Http1_1Handler {
 		
 		//if we get this far, we now know we are http1.1
 		if(state.getParsedMessages().size() >= 0) {
-			processHttp1Messages(socket, state);
+			processHttp1Messages(socket, state)
+				.exceptionally(t -> logException(t));
 			return new InitiationResult(InitiationStatus.HTTP1_1);
 		}
 		
 		return null; // we don't know yet(not enough data)
 	}
 	
+	private Void logException(Throwable t) {
+		log.error("exception", t);
+		return null;
+	}
+
 	private InitiationResult checkForPreface(FrontendSocketImpl socket, Memento state) {
 		if(state.getParsedMessages().size() != 1)
 			return null;
@@ -70,14 +78,15 @@ public class Layer2Http1_1Handler {
 			return null;
 
 		//release memory associated with 1.1 parser for this socket
-		socket.setHttp1_1ParseState(null);
+		socket.setHttp1_1ParseState(null, null);
 		
 		return new InitiationResult(state.getLeftOverData(), InitiationStatus.PREFACE);
 	}
 
 	public void incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
 		Memento state = parse(socket, buf);
-		processHttp1Messages(socket, state);
+		CompletableFuture<Void> future = processHttp1Messages(socket, state);
+		//return the future
 	}
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -87,30 +96,31 @@ public class Layer2Http1_1Handler {
 		return state;
 	}
 
-	private void processHttp1Messages(FrontendSocketImpl socket, Memento state) {
+	private CompletableFuture<Void> processHttp1Messages(FrontendSocketImpl socket, Memento state) {
 		List<HttpPayload> parsed = state.getParsedMessages();
+		CompletableFuture<StreamWriter> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {
-			log.info("msg received="+payload);
-			processCorrectly(socket, payload);
+			future = future.thenCompose(w -> {
+				log.info("msg received="+payload);
+				return processCorrectly(socket, payload);
+			}).thenApply(w -> {
+				currentWriter = w;
+				return w;
+			});
 		}
+		return future.thenApply(w -> null);
 	}
 
-	private void processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
+	private CompletableFuture<StreamWriter> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
 		Http2Msg msg = Http2Translations.translate(payload, socket.isHttps());
-		//TODO: close socket on violation of pipelining like previous request did not end
 
 		if(payload instanceof HttpRequest) {
-			processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
-		} else if(payload instanceof HttpChunk) {
-			processChunk(socket, (HttpChunk)payload, (DataFrame) msg);
+			return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
+		} else if(msg instanceof DataFrame) {
+			return currentWriter.processPiece((DataFrame)msg);
 		} else {
 			throw new IllegalArgumentException("payload not supported="+payload);
 		}
-	}
-
-	private void processChunk(FrontendSocketImpl socket, HttpChunk payload, DataFrame data) {
-		StreamWriter writer = socket.getWriter();
-		writer.processPiece(data);
 	}
 
 	private CompletableFuture<StreamWriter> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
@@ -122,16 +132,8 @@ public class Layer2Http1_1Handler {
 		stream.setStreamHandle(streamHandle);
 		
 		String lengthHeader = headers.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
-		if(lengthHeader != null) {
-			DataFrame frame = Http2Translations.translateBody(http1Req.getBody());
-			CompletableFuture<StreamWriter> writer = streamHandle.incomingRequest(headers, stream);
-			return writer.thenCompose( w -> w.processPiece(frame) );
-		} else if(http1Req.isHasChunkedTransferHeader()) {
-			CompletableFuture<StreamWriter> writer = streamHandle.incomingRequest(headers, stream);
-			return writer.thenApply( w -> {
-				socket.addWriter(w);
-				return w;
-			});
+		if(lengthHeader != null && !"0".equals(lengthHeader) || http1Req.isHasChunkedTransferHeader()) {
+			return streamHandle.incomingRequest(headers, stream);
 		} else {
 			headers.setEndOfStream(true);
 			return streamHandle.incomingRequest(headers, stream);
@@ -140,7 +142,8 @@ public class Layer2Http1_1Handler {
 
 	public void socketOpened(FrontendSocketImpl socket, boolean isReadyForWrites) {
 		Memento parseState = httpParser.prepareToParse();
-		socket.setHttp1_1ParseState(parseState);
+		MarshalState marshalState = httpParser.prepareToMarshal();
+		socket.setHttp1_1ParseState(parseState, marshalState);
 		//timeoutListener.connectionOpened(socket, isReadyForWrites);
 	}
 

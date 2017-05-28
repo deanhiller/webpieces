@@ -15,6 +15,7 @@ import org.webpieces.httpclient.api.HttpChunkWriter;
 import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
+import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
@@ -44,11 +45,13 @@ public class HttpSocketImpl implements HttpSocket {
 	private ConcurrentLinkedQueue<HttpResponseListener> responsesToComplete = new ConcurrentLinkedQueue<>();
 	private DataListener dataListener = new MyDataListener();
 	private boolean isRecording = false;
+	private MarshalState state;
 	
 	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
 		this.channel = channel;
 		this.parser = parser;
 		memento = parser.prepareToParse();
+		state = parser.prepareToMarshal();
 	}
 
 	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser2, Object object) {
@@ -106,7 +109,7 @@ public class HttpSocketImpl implements HttpSocket {
 
 	private void actuallySendRequest(CompletableFuture<HttpChunkWriter> future, HttpRequest request, HttpResponseListener listener) {
 		HttpResponseListener l = new CatchResponseListener(listener);
-		ByteBuffer wrap = parser.marshalToByteBuffer(request);
+		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
@@ -124,7 +127,7 @@ public class HttpSocketImpl implements HttpSocket {
 			return null;
 		}
 		
-		HttpChunkWriterImpl impl = new HttpChunkWriterImpl(channel, parser);
+		HttpChunkWriterImpl impl = new HttpChunkWriterImpl(channel, parser, state);
 		future.complete(impl);
 		
 		return null;

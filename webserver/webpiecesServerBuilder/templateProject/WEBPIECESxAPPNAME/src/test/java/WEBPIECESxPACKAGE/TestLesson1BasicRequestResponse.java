@@ -129,7 +129,6 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 
 		FullResponse httpPayload = responses.get(0);
 		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		Assert.assertTrue(httpPayload.getChunks().size() > 0);
 		httpPayload.uncompressBodyAndAssertContainsString("Webpieces");
 	}
 	

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.FrontendSocket;
@@ -16,6 +15,7 @@ import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
@@ -57,35 +57,33 @@ public class Http1_1StreamImpl implements ResponseStream {
 		if(contentLenHeader != null) {
 			int len = Integer.parseInt(contentLenHeader.getValue());
 			if(len != 0) //for redirect firefox content len is 0
-				return CompletableFuture.<StreamWriter>completedFuture(new CachingResponseWriter(response, len));
+				return write(response).thenApply(w -> new ContentLengthResponseWriter(len));
 		}
 		return write(response).thenApply(c -> new Http11ResponseWriter());
 	}
 
-	private class CachingResponseWriter implements StreamWriter {
-		private HttpResponse response;
+	private class ContentLengthResponseWriter implements StreamWriter {
 		private int len;
-		private DataWrapper allData = dataGen.emptyWrapper();
+		private int totalWritten;
 		
-		public CachingResponseWriter(HttpResponse response, int len) {
-			this.response = response;
+		public ContentLengthResponseWriter(int len) {
 			this.len = len;
 		}
 		
 		@Override
 		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
 			if(!(data instanceof DataFrame))
-				throw new UnsupportedOperationException("not supported="+data);
-			
+				throw new UnsupportedOperationException("not supported in http1.1="+data);
 			DataFrame frame = (DataFrame) data;
-			allData = dataGen.chainDataWrappers(allData, frame.getData());
-			if(allData.getReadableSize() > len)
-				throw new IllegalArgumentException("Content-Length Header="+len+" but you sent in data totaling="+allData.getReadableSize());
-			else if(allData.getReadableSize() < len)
-				return CompletableFuture.completedFuture(this);
 			
-			response.setBody(allData);
-			return write(response).thenApply((s) -> this);
+			totalWritten += frame.getData().getReadableSize();
+			if(totalWritten > len)
+				throw new IllegalArgumentException("You wrote more than the content length header="+len+" written size="+totalWritten);
+			else if(frame.isEndOfStream() && totalWritten != len)
+				throw new IllegalArgumentException("You did not write enough data.  written="+totalWritten+" content length header="+len);
+			
+			HttpData httpData = new HttpData(frame.getData(), frame.isEndOfStream());
+			return write(httpData).thenApply(c -> this);
 		}
 	}
 	
@@ -122,7 +120,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 	}
 	
 	private CompletableFuture<Channel> write(HttpPayload payload) {
-		ByteBuffer buf = http11Parser.marshalToByteBuffer(payload);
+		ByteBuffer buf = http11Parser.marshalToByteBuffer(socket.getHttp1_1MarshalState(), payload);
 		return socket.getChannel().write(buf);
 	}
 	

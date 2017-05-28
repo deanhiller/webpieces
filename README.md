@@ -107,10 +107,12 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* convert http11 parser to streaming for content length situations as it is more flexible and matches http2 better
+* frontend caching http11 request until response sent back
+* http11 client rework
 * Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine
 * remove this line response.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked")); AND add fail fast for that in http2 parser since it is NOT supported and must NOT be used at all in headers
 * finish up the statemachine tests and with closing stream delay!!
+* make the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
 * unignore the H2 test to get working again
 * add test on client cancelling request stream, cancelling push stream
 * add test on server cancelling request stream, cancelling push stream
@@ -120,6 +122,7 @@ This project is essentially pieces that can be used to build any http related so
   * cancel request cancels static file download(ie. stops reading from filesystem)
   * cancel request cancels file upload
 * backpressure
+* modify frontend to cache pipelined 1.1 requests and not serve to server until response finished each time
 * file upload
 * file download
 * range request?

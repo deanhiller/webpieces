@@ -3,7 +3,7 @@ package org.webpieces.httpclient.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpclient.api.HttpResponseListener;
-import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class CompletableListener implements HttpResponseListener {
@@ -25,7 +25,7 @@ public class CompletableListener implements HttpResponseListener {
 	}
 
 	@Override
-	public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
+	public void incomingChunk(HttpData chunk, boolean isLastChunk) {
 	}
 
 	@Override

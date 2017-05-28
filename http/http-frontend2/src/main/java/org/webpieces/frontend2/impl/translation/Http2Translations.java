@@ -10,6 +10,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -59,9 +60,18 @@ public class Http2Translations {
 			return translateChunk((HttpChunk)payload, true);
 		else if(payload instanceof HttpChunk)
 			return translateChunk((HttpChunk)payload, false);
-		throw new UnsupportedOperationException("not supported yet");
+		else if(payload instanceof HttpData)
+			return translateData((HttpData)payload);
+		throw new UnsupportedOperationException("not supported yet="+payload);
 	}
 	
+
+	private static DataFrame translateData(HttpData payload) {
+		DataFrame frame = new DataFrame();
+		frame.setEndOfStream(payload.isEndOfData());
+		frame.setData(payload.getBodyNonNull());
+		return frame;
+	}
 
 	private static Http2Msg translateChunk(HttpChunk payload, boolean eos) {
 		DataFrame frame = new DataFrame();

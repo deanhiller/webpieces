@@ -1,12 +1,16 @@
 package org.webpieces.httpfrontend2.api.http1;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpData;
+import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -38,7 +42,7 @@ public class Requests {
 		return createRequest(method, url, false);
 	}
 
-	public static HttpRequest createPostRequest(String url, String ... argTuples) {
+	public static List<HttpPayload> createPostRequest(String url, String ... argTuples) {
 		if(argTuples.length % 2 != 0)
 			throw new IllegalArgumentException("argTuples.length must be of even size (key/value)");
 		HttpUri httpUri = new HttpUri(url);
@@ -60,14 +64,21 @@ public class Requests {
 			encodedParams += key+"="+value;
 		}
 		
+		HttpData data = new HttpData();
+		data.setEndOfData(true);
+		
 		byte[] bytes = encodedParams.getBytes(StandardCharsets.UTF_8);
 		DataWrapper body = gen.wrapByteArray(bytes);
-		req.setBody(body);
+		data.setBody(body);
 
 		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, ""+body.getReadableSize()));
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
 		
-		return req;		
+		List<HttpPayload> payloads = new ArrayList<>();
+		payloads.add(req);
+		payloads.add(data);
+		
+		return payloads;
 	}
 
 	public static HttpResponse createResponse() {

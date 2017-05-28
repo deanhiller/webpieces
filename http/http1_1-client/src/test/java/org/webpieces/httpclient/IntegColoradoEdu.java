@@ -8,7 +8,7 @@ import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpResponse;
@@ -53,7 +53,7 @@ public class IntegColoradoEdu {
 		}
 
 		@Override
-		public void incomingChunk(HttpChunk chunk, boolean isLastChunk) {
+		public void incomingChunk(HttpData chunk, boolean isLastChunk) {
 			log.info("received resp="+chunk+" last="+isLastChunk);
 		}
 

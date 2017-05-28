@@ -26,6 +26,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.HttpDummyRequest;
 
 public class TestSyncHibernate extends AbstractWebpiecesTest {
 
@@ -180,7 +181,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	@Test
 	public void testHibernatePostPartialDataDoesntBlowDataAway() {
 		UserTestDbo user = loadDataInDb();
-		HttpRequest req = Requests.createPostRequest("/testmerge",
+		HttpDummyRequest req = Requests.createPostRequest("/testmerge",
 				"user.id", user.getId()+"",
 				"user.name", "blah1",
 				"user.firstName", "blah2");
@@ -199,7 +200,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	@Test
 	public void testHibernateNoUserIdWillSaveNewUser() {
 		String email = "test2";
-		HttpRequest req = Requests.createPostRequest("/testmerge",
+		HttpDummyRequest req = Requests.createPostRequest("/testmerge",
 				"user.id", "",
 				"user.email", email,
 				"user.name", "blah1",
@@ -220,7 +221,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	@Test
 	public void testHibernateNoUserIdParamWillSaveNewUser() {
 		String email = "test1";
-		HttpRequest req = Requests.createPostRequest("/testmerge",
+		HttpDummyRequest req = Requests.createPostRequest("/testmerge",
 				"user.email", email,
 				"user.name", "blah1",
 				"user.firstName", "blah2");

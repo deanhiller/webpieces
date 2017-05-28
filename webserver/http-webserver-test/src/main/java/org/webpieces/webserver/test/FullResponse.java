@@ -14,8 +14,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.ContentType;
-import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
@@ -28,42 +27,24 @@ public class FullResponse {
 	private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpResponse response;
-	private List<HttpChunk> chunks = new ArrayList<>();
-	private HttpLastChunk lastChunk;
+	private List<HttpData> datas = new ArrayList<>();
 	
 	public FullResponse(HttpResponse response) {
 		this.response = response;
 	}
 
-	public void addChunk(HttpChunk httpChunk) {
-		chunks.add(httpChunk);
+	public void addChunk(HttpData httpChunk) {
+		datas.add(httpChunk);
 	}
 
 	public HttpResponse getResponse() {
 		return response;
 	}
 
-	public List<HttpChunk> getChunks() {
-		return chunks;
-	}
-
-	public HttpLastChunk getLastChunk() {
-		return lastChunk;
-	}
-
-	public void setLastChunk(HttpLastChunk lastHttpChunk) {
-		lastChunk = lastHttpChunk;
-	}
-
 	public DataWrapper getBody() {
-		if(chunks.size() == 0)
-			return response.getBodyNonNull();
-
-		HttpChunk chunk = chunks.get(0);
-		DataWrapper data = chunk.getBodyNonNull();
-		for(int i = 1; i < chunks.size(); i++) {
-			HttpChunk next = chunks.get(i);
-			data = dataGen.chainDataWrappers(data, next.getBodyNonNull());
+		DataWrapper data = dataGen.emptyWrapper();
+		for(HttpData httpData : datas) {
+			data = dataGen.chainDataWrappers(data, httpData.getBodyNonNull());
 		}
 
 		return data;

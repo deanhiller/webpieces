@@ -8,11 +8,13 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.util.net.URLEncoder;
+import org.webpieces.webserver.test.HttpDummyRequest;
 
 public class Requests {
 
@@ -53,7 +55,7 @@ public class Requests {
 		return req;
 	}
 
-	public static HttpRequest createPostRequest(String url, String ... argTuples) {
+	public static HttpDummyRequest createPostRequest(String url, String ... argTuples) {
 		try {
 			return createPostRequestImpl(url, argTuples);
 		} catch (UnsupportedEncodingException e) {
@@ -61,7 +63,7 @@ public class Requests {
 		}
 	}
 	
-	private static HttpRequest createPostRequestImpl(String url, String ... argTuples) throws UnsupportedEncodingException {
+	private static HttpDummyRequest createPostRequestImpl(String url, String ... argTuples) throws UnsupportedEncodingException {
 		if(argTuples.length % 2 != 0)
 			throw new IllegalArgumentException("argTuples.length must be of even size (key/value)");
 		HttpUri httpUri = new HttpUri(url);
@@ -85,30 +87,34 @@ public class Requests {
 		
 		byte[] bytes = encodedParams.getBytes(StandardCharsets.UTF_8);
 		DataWrapper body = gen.wrapByteArray(bytes);
-		req.setBody(body);
-
+		HttpData data = new HttpData(body, true);
+		
 		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, ""+body.getReadableSize()));
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
 		
-		return req;		
+		return new HttpDummyRequest(req, data);
 	}
 
-	public static HttpRequest createJsonRequest(KnownHttpMethod method, String url) {
+	public static HttpDummyRequest createJsonRequest(KnownHttpMethod method, String url) {
 		HttpRequest request = createRequest(method, url);
 		String json = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
-		request.setBody(body);
+		HttpData data = new HttpData(body, true);
+
 		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
-		return request;
+		
+		return new HttpDummyRequest(request, data);
 	}
 
-	public static HttpRequest createBadJsonRequest(KnownHttpMethod method, String url) {
+	public static HttpDummyRequest createBadJsonRequest(KnownHttpMethod method, String url) {
 		HttpRequest request = createRequest(method, url);
 		String json = "{ `query `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
-		request.setBody(body);
+		HttpData data = new HttpData(body, true);
+
 		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
-		return request;
+		
+		return new HttpDummyRequest(request, data);
 	}
 	
 }

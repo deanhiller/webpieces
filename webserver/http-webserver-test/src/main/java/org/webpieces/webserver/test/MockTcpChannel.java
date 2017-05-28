@@ -12,9 +12,9 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.Memento;
+import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
@@ -35,6 +35,7 @@ public class MockTcpChannel implements TCPChannel {
 	private FullResponse chunkedResponse;
 	private HttpParser parser;
 	private Memento memento;
+	private boolean sendingBody;
 
 	public MockTcpChannel(HttpParser parser) {
 		this.parser = parser;
@@ -48,40 +49,68 @@ public class MockTcpChannel implements TCPChannel {
 		List<HttpPayload> parsedMessages = memento.getParsedMessages();
 		
 		for(HttpPayload payload : parsedMessages) {
-			if(payload instanceof HttpResponse)
+			if(payload instanceof HttpResponse) {
 				sendResponse((HttpResponse) payload);
-			else
-				sendData((HttpChunk) payload);
+			} else {
+				sendData((HttpData) payload);
+			}
 		}
 		
 		return CompletableFuture.completedFuture(this);
 	}
 
 	public void sendResponse(HttpResponse response) {
-		if(chunkedResponse == null) {
+		if(isParsingBody()) {
 			FullResponse nextResp = new FullResponse(response);
-			if (response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH) != null) {
+			if(!hasValidContentLength(response) && !hasChunkedEncoding(response)) {
 				payloads.add(nextResp);
 			} else
 				chunkedResponse = nextResp;
 		}
 		else {
 			log.error("expecting sendData but got Response instead=" + response);
+			throw new IllegalStateException("Sending the data never ended from last response and we are getting next response already?");
 		}
 
 	}
 	
-	public CompletableFuture<Void> sendData(HttpChunk chunkData) {
-		if(chunkData.isLastChunk()) {
+	private boolean hasChunkedEncoding(HttpResponse response) {
+		Header transferHeader = response.getHeaderLookupStruct().getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
+
+		if(transferHeader != null && "chunked".equals(transferHeader.getValue())) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean hasValidContentLength(HttpResponse response) {
+		Integer contentLen = null;
+		Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+		if(header != null) {
+			contentLen = Integer.parseInt(header.getValue());
+		}
+		if(contentLen != null && contentLen > 0)
+			return true;
+		return false;
+	}
+
+	private boolean isParsingBody() {
+		return chunkedResponse == null;
+	}
+
+	public CompletableFuture<Void> sendData(HttpData httpData) {
+		if(isParsingBody())
+			throw new IllegalStateException("We are not in a state of sending content length body nor chunked data.  there is a bug somewhere");
+		
+		chunkedResponse.addChunk(httpData);
+
+		if(httpData.isEndOfData()) {
 			log.info("last chunk");
-			chunkedResponse.setLastChunk((HttpLastChunk) chunkData);
 			payloads.add(chunkedResponse);
 			chunkedResponse = null;
-		} else {
-			chunkedResponse.addChunk(chunkData);
 		}
 
-		return null;
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.ParsingState;
 import org.webpieces.httpparser.api.UnparsedState;
+import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public class MementoImpl implements Memento {
@@ -14,17 +15,19 @@ public class MementoImpl implements Memento {
 	//State held to keep parsing messages
 	private List<Integer> leftOverMarkedPositions = new ArrayList<>();
 	private DataWrapper leftOverData;
-	private int numBytesLeftToRead;
-	//The parsed message that did not get the data for it's body just yet
-	//This is only for the case where a message has a body
-	private HttpPayload halfParsedMessage;
+
 	//If the stream is expecting chunks of data
 	private boolean inChunkParsingMode;
+	private HttpChunk halfParsedChunk;
+	private int numBytesLeftToReadOnChunk;
 	
 	//Return state for client to access
 	private List<HttpPayload> parsedMessages = new ArrayList<>();
 	private int indexBytePointer;
 	private boolean isHttp2;
+	
+	private Integer contentLengthLeftToRead;
+	private boolean hasHttpMarkerMsg;
 
 	@Override
 	public List<HttpPayload> getParsedMessages() {
@@ -60,21 +63,12 @@ public class MementoImpl implements Memento {
 		this.leftOverMarkedPositions = leftOverMarkedPositions;
 	}
 
-	public int getNumBytesLeftToRead() {
-		return numBytesLeftToRead;
+	public int getNumBytesLeftToReadOnChunk() {
+		return numBytesLeftToReadOnChunk;
 	}
 
-	public void setNumBytesLeftToRead(int length) {
-		numBytesLeftToRead = length;
-	}
-
-	public void setHalfParsedMessage(HttpPayload message) {
-		this.halfParsedMessage = message;
-	}
-
-	@Override
-    public HttpPayload getHalfParsedMessage() {
-		return halfParsedMessage;
+	public void setNumBytesLeftToReadOnChunk(int length) {
+		numBytesLeftToReadOnChunk = length;
 	}
 
 	public void setReadingHttpMessagePointer(int indexBytePointer) {
@@ -97,10 +91,10 @@ public class MementoImpl implements Memento {
 	public UnparsedState getUnParsedState() {
 		if(inChunkParsingMode) {
 			return new UnparsedState(ParsingState.CHUNK, leftOverData.getReadableSize());
-		} else if(halfParsedMessage != null) {
+		} else if(contentLengthLeftToRead != null) {
 			return new UnparsedState(ParsingState.BODY, leftOverData.getReadableSize());
 		}
-		
+
 		return new UnparsedState(ParsingState.HEADERS, leftOverData.getReadableSize());
 	}
 
@@ -111,5 +105,29 @@ public class MementoImpl implements Memento {
 	public void setHttp2(boolean isHttp2) {
 		this.isHttp2 = isHttp2;
 	}
-	
+
+	public void setHalfParsedChunk(HttpChunk chunk) {
+		this.halfParsedChunk = chunk;
+	}
+
+	public HttpChunk getHalfParsedChunk() {
+		return halfParsedChunk;
+	}
+
+	public Integer getContentLengthLeftToRead() {
+		return contentLengthLeftToRead;
+	}
+
+	public void setContentLengthLeftToRead(Integer contentLengthLeftToRead) {
+		this.contentLengthLeftToRead = contentLengthLeftToRead;
+	}
+
+	public boolean isHasHttpMarkerMsg() {
+		return hasHttpMarkerMsg;
+	}
+
+	public void setHasHttpMarkerMsg(boolean hasHttpMarkerMsg) {
+		this.hasHttpMarkerMsg = hasHttpMarkerMsg;
+	}
+
 }

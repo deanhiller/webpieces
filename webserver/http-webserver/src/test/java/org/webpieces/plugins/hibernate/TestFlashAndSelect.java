@@ -29,6 +29,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.HttpDummyRequest;
 
 public class TestFlashAndSelect extends AbstractWebpiecesTest {
 
@@ -72,7 +73,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNullWillFlashProperly() {
-		HttpRequest req1 = Requests.createPostRequest("/user/post", 
+		HttpDummyRequest req1 = Requests.createPostRequest("/user/post", 
 				"entity.id", user.getId()+"",
 				"entity.firstName", "NextName", //invalid first name
 				"entity.email", "dean@zz.com",
@@ -121,7 +122,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testMultiSelect() {
-		HttpRequest req1 = Requests.createPostRequest("/multiselect", 
+		HttpDummyRequest req1 = Requests.createPostRequest("/multiselect", 
 				"entity.id", user.getId()+"",
 				"entity.firstName", "NextName", //invalid first name
 				"entity.email", "dean@zz.com",
@@ -155,7 +156,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testMultiSelectSingleSelection() {
-		HttpRequest req1 = Requests.createPostRequest("/multiselect", 
+		HttpDummyRequest req1 = Requests.createPostRequest("/multiselect", 
 				"entity.id", user.getId()+"",
 				"entity.firstName", "NextName", //invalid first name
 				"entity.email", "dean@zz.com",
