@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
@@ -49,33 +49,32 @@ public class ResponseProcessor {
 		this.responseCb = responseCb;
 	}
 
-	public void createRawRedirect(RawRedirect controllerResponse) {
+	public CompletableFuture<Void> createRawRedirect(RawRedirect controllerResponse) {
 		String url = controllerResponse.getUrl();
 		if(url.startsWith("http")) {
-			wrapFunctionInContext(s -> responseCb.sendRedirect(new RedirectResponse(url)));
-			return;
+			return wrapFunctionInContext(() -> responseCb.sendRedirect(new RedirectResponse(url)));
 		}
 
 		RouterRequest request = ctx.getRequest();
 		RedirectResponse redirectResponse = new RedirectResponse(false, request.isHttps, request.domain, request.port, url);
-		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
+		return wrapFunctionInContext(() -> responseCb.sendRedirect(redirectResponse));
 	}
 	
 
 	
-	public void createAjaxRedirect(AjaxRedirectImpl action) {
+	public CompletableFuture<Void> createAjaxRedirect(AjaxRedirectImpl action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		createRedirect(id, args, true);		
+		return createRedirect(id, args, true);		
 	}
 	
-	public void createFullRedirect(RedirectImpl action) {
+	public CompletableFuture<Void> createFullRedirect(RedirectImpl action) {
 		RouteId id = action.getId();
 		Map<String, Object> args = action.getArgs();
-		createRedirect(id, args, false);
+		return createRedirect(id, args, false);
 	}
 	
-	private void createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
+	private CompletableFuture<Void> createRedirect(RouteId id, Map<String, Object> args, boolean isAjaxRedirect) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
@@ -109,10 +108,10 @@ public class ResponseProcessor {
 		
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, request.isHttps, request.domain, request.port, path);
 		
-		wrapFunctionInContext(s -> responseCb.sendRedirect(redirectResponse));
+		return wrapFunctionInContext(() -> responseCb.sendRedirect(redirectResponse));
 	}
 
-	public void createRenderResponse(RenderImpl controllerResponse) {
+	public CompletableFuture<Void> createRenderResponse(RenderImpl controllerResponse) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 		responseSent = true;
@@ -149,23 +148,24 @@ public class ResponseProcessor {
 		View view = new View(controllerName, methodName, relativeOrAbsolutePath);
 		RenderResponse resp = new RenderResponse(view, pageArgs, matchedMeta.getRoute().getRouteType());
 		
-		wrapFunctionInContext(s -> responseCb.sendRenderHtml(resp));
+		return wrapFunctionInContext(() -> responseCb.sendRenderHtml(resp));
 	}
 
-	private void wrapFunctionInContext(Consumer<Void> function) {
+	private CompletableFuture<Void> wrapFunctionInContext(Supplier<CompletableFuture<Void>> function) {
 		boolean wasSet = Current.isContextSet();
 		if(!wasSet)
 			Current.setContext(ctx); //Allow html tags to use the contexts
 		try {
-			function.accept(null);
+			CompletableFuture<Void> future = function.get();
+			return future;
 		} finally {
 			if(!wasSet) //then reset
 				Current.setContext(null);
 		}
 	}
 
-	public void failureRenderingInternalServerErrorPage(Throwable e) {
-		wrapFunctionInContext(s -> responseCb.failureRenderingInternalServerErrorPage(e));
+	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
+		return wrapFunctionInContext(() -> responseCb.failureRenderingInternalServerErrorPage(e));
 	}
 
 	public CompletableFuture<Void> renderStaticResponse(RenderStaticResponse renderStatic) {
@@ -180,12 +180,12 @@ public class ResponseProcessor {
 		}
 	}
 
-	public void createContentResponse(RenderContent r) {
+	public CompletableFuture<Void> createContentResponse(RenderContent r) {
 		if(responseSent)
 			throw new IllegalStateException("You already sent a response.  do not call Actions.redirect or Actions.render more than once");
 
 		RenderContentResponse resp = new RenderContentResponse(r.getContent(), r.getStatusCode(), r.getReason(), r.getMimeType());
-		wrapFunctionInContext(s -> responseCb.sendRenderContent(resp));
+		return wrapFunctionInContext(() -> responseCb.sendRenderContent(resp));
 	}
 	
 }

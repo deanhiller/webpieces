@@ -59,8 +59,7 @@ public abstract class AbstractRouterService implements RouterService {
 			throw e;
 		} catch (Throwable e) {
 			log.warn("uncaught exception", e);
-			responseCb.failureRenderingInternalServerErrorPage(e);
-			return CompletableFuture.completedFuture(null);
+			return responseCb.failureRenderingInternalServerErrorPage(e);
 		}
 	}
 

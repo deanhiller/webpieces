@@ -117,8 +117,9 @@ This project is essentially pieces that can be used to build any http related so
 			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
 					+ "responses in order and this is not the current response that needs responding to");
 * this needs to return future ..... void 	private void sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
+* move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
 * finish up the statemachine tests and with closing stream delay!!
-* make the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
+* mak the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
 * unignore the H2 test to get working again
 * add test on client cancelling request stream, cancelling push stream
 * add test on server cancelling request stream, cancelling push stream

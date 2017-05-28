@@ -191,25 +191,24 @@ public class RouteInvoker {
 			Current.setContext(null);
 		}
 		
-		CompletableFuture<Void> future = response.thenApply(resp -> continueProcessing(processor, resp, responseCb));
+		CompletableFuture<Void> future = response.thenCompose(resp -> continueProcessing(processor, resp, responseCb));
 		return future;
 	}
 
-	public Void continueProcessing(ResponseProcessor processor, Action controllerResponse, ResponseStreamer responseCb) {
+	public CompletableFuture<Void> continueProcessing(ResponseProcessor processor, Action controllerResponse, ResponseStreamer responseCb) {
 		if(controllerResponse instanceof RedirectImpl) {
-			processor.createFullRedirect((RedirectImpl)controllerResponse);
+			return processor.createFullRedirect((RedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof AjaxRedirectImpl) {
-			processor.createAjaxRedirect((AjaxRedirectImpl)controllerResponse);
+			return processor.createAjaxRedirect((AjaxRedirectImpl)controllerResponse);
 		} else if(controllerResponse instanceof RenderImpl) {
-			processor.createRenderResponse((RenderImpl)controllerResponse);
+			return processor.createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {
-			processor.createRawRedirect((RawRedirect)controllerResponse);
+			return processor.createRawRedirect((RawRedirect)controllerResponse);
 		} else if(controllerResponse instanceof RenderContent) {
-			processor.createContentResponse((RenderContent)controllerResponse);
+			return processor.createContentResponse((RenderContent)controllerResponse);
 		} else {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed some code to write");
 		}
-		return null;
 	}
 	
 	private CompletableFuture<Action> invokeMethod(Service<MethodMeta, Action> service, Object obj, Method m, RouteMeta meta) {

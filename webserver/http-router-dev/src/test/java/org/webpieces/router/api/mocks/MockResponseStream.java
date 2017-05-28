@@ -20,20 +20,35 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	private static enum MockMethod implements MethodEnum {
 		SEND_REDIRECT, FAILURE, SEND_RENDER_HTML, SEND_STATIC_HTML;
 	}
+	public MockResponseStream() {
+		super.setDefaultReturnValue(MockMethod.SEND_REDIRECT, CompletableFuture.completedFuture(null));
+		super.setDefaultReturnValue(MockMethod.FAILURE, CompletableFuture.completedFuture(null));
+		super.setDefaultReturnValue(MockMethod.SEND_RENDER_HTML, CompletableFuture.completedFuture(null));
+		super.setDefaultReturnValue(MockMethod.SEND_STATIC_HTML, CompletableFuture.completedFuture(null));
+
+	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void sendRedirect(RedirectResponse httpResponse) {
-		super.calledVoidMethod(MockMethod.SEND_REDIRECT, httpResponse);
+	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
+		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_REDIRECT, httpResponse);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void sendRenderHtml(RenderResponse resp) {
-		super.calledVoidMethod(MockMethod.SEND_RENDER_HTML, resp);
+	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
+		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_RENDER_HTML, resp);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
+		return (CompletableFuture<Void>) super.calledMethod(MockMethod.FAILURE, e);
 	}
 	
 	@Override
-	public void failureRenderingInternalServerErrorPage(Throwable e) {
-		super.calledVoidMethod(MockMethod.FAILURE, e);
+	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	public List<RedirectResponse> getSendRedirectCalledList() {
@@ -63,13 +78,5 @@ public class MockResponseStream extends MockSuperclass implements ResponseStream
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
 		return (CompletableFuture<Void>) super.calledMethod(MockMethod.SEND_STATIC_HTML, renderStatic);
 	}
-
-	@Override
-	public void sendRenderContent(RenderContentResponse resp) {
-		throw new UnsupportedOperationException("not implemented yet");
-		
-	}
-
-
 
 }

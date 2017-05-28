@@ -139,7 +139,7 @@ public class StaticFileReader {
 			log.info(()->"sending chunked file via async read="+file);
 			long length = file.toFile().length();
 			AtomicLong remaining = new AtomicLong(length);
-			
+
 			future = info.getResponseSender().sendResponse(response)
 					.thenCompose(s -> readLoop(s, info.getPool(), file, asyncFile, 0, remaining));
 		} catch(Throwable e) {
@@ -191,26 +191,25 @@ public class StaticFileReader {
 
 		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
 		//this method ONLY calls itself below as it continues to read and send chunks
-		
+
 		CompletableFuture<Integer> future = asyncRead(buf, file, asyncFile, position);
-		
+
 		return future.thenCompose(readCount -> {
-							buf.flip();
-							int read = buf.remaining();
-							long bytesLeft = remaining.addAndGet(-read);
-							if(read != readCount)
-								throw new IllegalStateException("read bytes into buf does not match readCount. read="+read+" cnt="+readCount);
-							else if(bytesLeft == 0) {
-								return sendHttpChunk(writer, pool, buf, file, true);
-							}
+					buf.flip();
+					int read = buf.remaining();
+					long bytesLeft = remaining.addAndGet(-read);
+					if(read != readCount)
+						throw new IllegalStateException("read bytes into buf does not match readCount. read="+read+" cnt="+readCount);
+					else if(bytesLeft == 0) {
+						return sendHttpChunk(writer, pool, buf, file, true);
+					}
 
-							return sendHttpChunk(writer, pool, buf, file, false).thenCompose( (w) -> {
-								int newPosition = position + read;
-								//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
-								return readLoop(writer, pool, file, asyncFile, newPosition, remaining);								
-							});
-
+					return sendHttpChunk(writer, pool, buf, file, false).thenCompose( (w) -> {
+						int newPosition = position + read;
+						//BIG NOTE: RECURSIVE READ HERE!!!!
+						return readLoop(writer, pool, file, asyncFile, newPosition, remaining);								
 					});
+			});
 	}
 
 	private CompletableFuture<Integer> asyncRead(ByteBuffer buf, Path file, AsynchronousFileChannel asyncFile, long position) {
@@ -229,7 +228,7 @@ public class StaticFileReader {
 			}
 		};
 		asyncFile.read(buf, position, "attachment", handler);
-		
+
 		return future;
 	}
 	

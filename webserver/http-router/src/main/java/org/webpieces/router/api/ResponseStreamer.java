@@ -9,14 +9,14 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 
 public interface ResponseStreamer {
 
-	void sendRedirect(RedirectResponse httpResponse);
+	CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse);
 	
-	void sendRenderHtml(RenderResponse resp);
+	CompletableFuture<Void> sendRenderHtml(RenderResponse resp);
 	
-	void sendRenderContent(RenderContentResponse resp);
+	CompletableFuture<Void> sendRenderContent(RenderContentResponse resp);
 	
 	CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic);
 
-	void failureRenderingInternalServerErrorPage(Throwable e);
+	CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e);
 
 }

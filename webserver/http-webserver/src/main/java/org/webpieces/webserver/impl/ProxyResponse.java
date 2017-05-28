@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,6 +35,8 @@ import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -86,14 +89,17 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 	
 	@Override
-	public void sendRedirect(RedirectResponse httpResponse) {
+	public CompletableFuture<Void> sendRedirect(RedirectResponse httpResponse) {
 		log.debug(() -> "Sending redirect response. req="+request);
 		Http2Response response = createRedirect(httpResponse);
 
 		log.info("sending REDIRECT response responseSender="+ stream);
-		stream.sendResponse(response);
-
-		channelCloser.closeIfNeeded(request, stream);
+		return stream.sendResponse(response).thenApply(w -> {
+			
+			
+			channelCloser.closeIfNeeded(request, stream);
+			return null;
+		});
 	}
 
 	private Http2Response createRedirect(RedirectResponse httpResponse) {
@@ -139,7 +145,7 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	@Override
-	public void sendRenderHtml(RenderResponse resp) {
+	public CompletableFuture<Void> sendRenderHtml(RenderResponse resp) {
 		log.info(() -> "Sending render html response. req="+request);
 		View view = resp.view;
 		String packageStr = view.getPackageName();
@@ -196,7 +202,7 @@ public class ProxyResponse implements ResponseStreamer {
 			extension = "txt";
 		}
 
-		createResponseAndSend(statusCode, content, extension, "text/plain");
+		return createResponseAndSend(statusCode, content, extension, "text/plain");
 	}
 	
 	@Override
@@ -217,12 +223,12 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	@Override
-	public void sendRenderContent(RenderContentResponse resp) {
+	public CompletableFuture<Void> sendRenderContent(RenderContentResponse resp) {
 		ResponseEncodingTuple tuple = responseCreator.createContentResponse(request, resp.getStatusCode(), resp.getReason(), resp.getMimeType());
-		maybeCompressAndSend(null, tuple, resp.getPayload()); 
+		return maybeCompressAndSend(null, tuple, resp.getPayload()); 
 	}
 	
-	private void createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
+	private CompletableFuture<Void> createResponseAndSend(StatusCode statusCode, String content, String extension, String defaultMime) {
 		if(content == null)
 			throw new IllegalArgumentException("content cannot be null");
 		
@@ -233,24 +239,23 @@ public class ProxyResponse implements ResponseStreamer {
 		Charset encoding = tuple.mimeType.htmlResponsePayloadEncoding;
 		byte[] bytes = content.getBytes(encoding);
 		
-		maybeCompressAndSend(extension, tuple, bytes);
+		return maybeCompressAndSend(extension, tuple, bytes);
 	}
 
-	private void maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
+	private CompletableFuture<Void> maybeCompressAndSend(String extension, ResponseEncodingTuple tuple, byte[] bytes) {
 		Compression compression = compressionLookup.createCompressionStream(routerRequest.encodings, extension, tuple.mimeType);
 		
 		Http2Response resp = tuple.response;
 
 		if(bytes.length == 0) {
 			resp.setEndOfStream(true);
-			stream.sendResponse(resp);
-			return;
+			return stream.sendResponse(resp).thenApply(w -> null);
 		}
-		
-		sendChunkedResponse(resp, bytes, compression);
+
+		return sendChunkedResponse(resp, bytes, compression);
 	}
 
-	private void sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
+	private CompletableFuture<Void> sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
 
 		boolean compressed = false;
 		Compression usingCompression;
@@ -267,54 +272,48 @@ public class ProxyResponse implements ResponseStreamer {
 		boolean isCompressed = compressed;
 
 		// Send the headers and get the responseid.
-		stream.sendResponse(resp).thenAccept(writer -> {
+		return stream.sendResponse(resp).thenCompose(writer -> {
 
-			OutputStream chunkedStream = new ChunkedStream(writer, config.getMaxBodySize(), isCompressed);
-
-			try(OutputStream chainStream = usingCompression.createCompressionStream(chunkedStream)) {
-				//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
-				//pieces that get sent out as it is being compressed
-				//and http chunks are sent under the covers(in ChunkedStream)
-				chainStream.write(bytes);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			List<DataFrame> frames = possiblyCompress(bytes, usingCompression, isCompressed);
+			
+			CompletableFuture<StreamWriter> future = CompletableFuture.completedFuture(writer);
+			
+			
+			for(int i = 0; i < frames.size(); i++) {
+				DataFrame f = frames.get(i);
+				if(i == frames.size()-1)
+					f.setEndOfStream(true);
+				
+				future = future.thenCompose(v -> {
+					return writer.processPiece(f);
+				});
 			}
-		});
+			
+			return future;
+			
+		}).thenApply(w -> null);
 	}
 
-//	private void sendFullResponse(Http2Response resp, byte[] bytes, Compression compression) {
-//		if(compression != null) {
-//			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compression.getCompressionType()));
-//			bytes = synchronousCompress(compression, bytes);
-//		}
-//
-//		resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, bytes.length+""));
-//
-//		log.info("sending FULL RENDERHTML response. code="+resp.getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" stream="+ stream);
-//
-//		DataFrame dataFrame = new DataFrame();
-//		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
-//		dataFrame.setData(data);
-//
-//		stream.sendResponse(resp)
-//			.thenCompose((s) -> s.processPiece(dataFrame))
-//			.thenApply((w) -> channelCloser.closeIfNeeded(request, stream));
-//	}
-	
-	private byte[] synchronousCompress(Compression compression, byte[] bytes) {
-		ByteArrayOutputStream str = new ByteArrayOutputStream(bytes.length);
-		
-		try(OutputStream stream = compression.createCompressionStream(str)) {
-			stream.write(bytes);
-		} catch(IOException e) {
+	private List<DataFrame> possiblyCompress(byte[] bytes, Compression usingCompression, boolean isCompressed) {
+		ChunkedStream chunkedStream = new ChunkedStream(config.getMaxBodySize(), isCompressed);
+
+		try(OutputStream chainStream = usingCompression.createCompressionStream(chunkedStream)) {
+			//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in
+			//pieces that get sent out as it is being compressed
+			//and http chunks are sent under the covers(in ChunkedStream)
+			chainStream.write(bytes);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		if(!chunkedStream.isClosed())
+			throw new IllegalStateException("ChunkedStream should have been closed");
 		
-		return str.toByteArray();
+		List<DataFrame> frames = chunkedStream.getFrames();
+		return frames;
 	}
 
 	@Override
-	public void failureRenderingInternalServerErrorPage(Throwable e) {
+	public CompletableFuture<Void> failureRenderingInternalServerErrorPage(Throwable e) {
 		log.debug(() -> "Sending failure html response. req="+request);
 
 		//TODO: IF instance of HttpException with a KnownStatusCode, we should actually send that status code
@@ -327,7 +326,7 @@ public class ProxyResponse implements ResponseStreamer {
 				+ "The webpieces platform saved them from sending back an ugly stack trace.  Contact website owner "
 				+ "with a screen shot of this page</body></html>";
 		
-		createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
+		return createResponseAndSend(StatusCode.HTTP_500_INTERNAL_SVR_ERROR, html, "html", "text/html");
 	}
 
 //	public void sendFailure(HttpException exc) {

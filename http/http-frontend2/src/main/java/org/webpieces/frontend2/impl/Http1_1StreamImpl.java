@@ -148,13 +148,11 @@ public class Http1_1StreamImpl implements ResponseStream {
 			
 			DataFrame frame = (DataFrame) data;
 			
-			log.error("sending chunk size="+frame.getData().getReadableSize());
 			CompletableFuture<Channel> future = write(new HttpChunk(frame.getData()));
 			
 			if(data.isEndOfStream()) {
 				future = future.thenCompose(w -> {
 					remove(data);	
-					log.error("sending last chunk");
 					return write(new HttpLastChunk());
 				});
 			}
