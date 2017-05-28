@@ -14,6 +14,8 @@ public class StaticRoutes extends AbstractRoutes {
 		
 		//absolute path...
 		addStaticFile("/public/myfile", property + "/src/test/resources/tagsMeta.txt", false);
+		addStaticFile("/public/mycss",  property + "/src/test/resources/fortest.css", false);
+
 		//relative path(to user.dir)
 		addStaticDir("/public/", "src/test/resources/staticRoutes/", false);
 		

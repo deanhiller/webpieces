@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -35,7 +34,6 @@ import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
@@ -243,23 +241,16 @@ public class ProxyResponse implements ResponseStreamer {
 		
 		Http2Response resp = tuple.response;
 
-		//This is a cheat sort of since compression can go from 28235 to 4,785 and we are looking at the
-		//non-compressed size so stuff like 16k may be sent chunked even though it is only 3k on the outbound path
-		//(not really a big deal though)
-		if(bytes.length < config.getMaxBodySize()) {
-			sendFullResponse(resp, bytes, compression);
+		if(bytes.length == 0) {
+			resp.setEndOfStream(true);
+			stream.sendResponse(resp);
 			return;
 		}
-
-		resp.setEndOfStream(false);
+		
 		sendChunkedResponse(resp, bytes, compression);
 	}
 
 	private void sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
-		// we shouldn't have to add chunked because the responseSender will add chunked for us
-		// if isComplete is false
-
-		resp.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked"));
 
 		boolean compressed = false;
 		Compression usingCompression;
@@ -271,7 +262,7 @@ public class ProxyResponse implements ResponseStreamer {
 			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, usingCompression.getCompressionType()));
 		}
 
-		log.info("sending CHUNKED RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
+		log.info("sending RENDERHTML response. size="+bytes.length+" code="+resp+" for domain="+routerRequest.domain+" path"+routerRequest.relativePath+" responseSender="+ stream);
 
 		boolean isCompressed = compressed;
 
@@ -291,24 +282,24 @@ public class ProxyResponse implements ResponseStreamer {
 		});
 	}
 
-	private void sendFullResponse(Http2Response resp, byte[] bytes, Compression compression) {
-		if(compression != null) {
-			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compression.getCompressionType()));
-			bytes = synchronousCompress(compression, bytes);
-		}
-
-		resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, bytes.length+""));
-
-		log.info("sending FULL RENDERHTML response. code="+resp.getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" stream="+ stream);
-
-		DataFrame dataFrame = new DataFrame();
-		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
-		dataFrame.setData(data);
-
-		stream.sendResponse(resp)
-			.thenCompose((s) -> s.processPiece(dataFrame))
-			.thenApply((w) -> channelCloser.closeIfNeeded(request, stream));
-	}
+//	private void sendFullResponse(Http2Response resp, byte[] bytes, Compression compression) {
+//		if(compression != null) {
+//			resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compression.getCompressionType()));
+//			bytes = synchronousCompress(compression, bytes);
+//		}
+//
+//		resp.addHeader(new Http2Header(Http2HeaderName.CONTENT_LENGTH, bytes.length+""));
+//
+//		log.info("sending FULL RENDERHTML response. code="+resp.getStatus()+" for domain="+routerRequest.domain+" path="+routerRequest.relativePath+" stream="+ stream);
+//
+//		DataFrame dataFrame = new DataFrame();
+//		DataWrapper data = wrapperFactory.wrapByteArray(bytes);
+//		dataFrame.setData(data);
+//
+//		stream.sendResponse(resp)
+//			.thenCompose((s) -> s.processPiece(dataFrame))
+//			.thenApply((w) -> channelCloser.closeIfNeeded(request, stream));
+//	}
 	
 	private byte[] synchronousCompress(Compression compression, byte[] bytes) {
 		ByteArrayOutputStream str = new ByteArrayOutputStream(bytes.length);

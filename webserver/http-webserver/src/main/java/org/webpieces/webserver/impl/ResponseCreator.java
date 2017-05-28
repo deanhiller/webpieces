@@ -60,6 +60,7 @@ public class ResponseCreator {
 			MimeTypeResult mimeType) {
 
 		Http2Response response = new Http2Response();
+		response.setEndOfStream(false);
 
 		response.addHeader(new Http2Header(Http2HeaderName.STATUS, statusCode+""));
 		response.addHeader(new Http2Header("reason", reason));

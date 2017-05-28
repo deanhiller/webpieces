@@ -39,7 +39,7 @@ public class TestGooglePlayback {
 		
 		Assert.assertEquals("chunked", resp.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING).getValue());
 		Assert.assertEquals(10349, chunk.getBody().getReadableSize());
-		Assert.assertTrue(lastChunk.isLastChunk());
+		Assert.assertTrue(lastChunk.isEndOfData());
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class TestGooglePlayback {
 		
 		Assert.assertEquals("chunked", resp.getHeaderLookupStruct().getHeader(KnownHeaderName.TRANSFER_ENCODING).getValue());
 		Assert.assertEquals(10396, chunk.getBody().getReadableSize());
-		Assert.assertTrue(lastChunk.isLastChunk());		
+		Assert.assertTrue(lastChunk.isEndOfData());		
 	}
 	
 	private List<HttpPayload> runPlayback(String name) {

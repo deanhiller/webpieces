@@ -35,7 +35,6 @@ public class MockTcpChannel implements TCPChannel {
 	private FullResponse chunkedResponse;
 	private HttpParser parser;
 	private Memento memento;
-	private boolean sendingBody;
 
 	public MockTcpChannel(HttpParser parser) {
 		this.parser = parser;

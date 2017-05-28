@@ -21,6 +21,10 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.net.URLEncoder;
 
+import com.webpieces.hpack.api.dto.Http2Response;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
+
 public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
@@ -95,5 +99,20 @@ public class Requests {
 		resp.addHeader(new Header(KnownHeaderName.AGE, "hh"));
 		return resp;
 	}
+	
+	public static HttpResponse createNobodyResponse() {
+		HttpResponseStatus status = new HttpResponseStatus();
+		status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
 
+		HttpResponseStatusLine statusLine = new HttpResponseStatusLine();
+		statusLine.setStatus(status);
+		
+		HttpResponse resp = new HttpResponse();
+		resp.setStatusLine(statusLine);
+		
+		resp.addHeader(new Header(KnownHeaderName.CONNECTION, "keep"));
+		resp.addHeader(new Header(KnownHeaderName.AGE, "hh"));
+		resp.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		return resp;
+	}
 }

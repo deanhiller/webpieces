@@ -3,12 +3,19 @@ package org.webpieces.httpparser.api.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.webpieces.data.api.DataWrapper;
+
 public class HttpChunk extends HttpData {
 	
 	public static final String TRAILER_STR = "\r\n";
 	protected List<HttpChunkExtension> extensions = new ArrayList<>();
 	
-	
+	public HttpChunk() {
+	}
+	public HttpChunk(DataWrapper data) {
+		super(data, false);
+	}
+
 	@Override
 	public boolean isEndOfData() {
 		return false;
@@ -19,10 +26,6 @@ public class HttpChunk extends HttpData {
 		return HttpMessageType.CHUNK;
 	}
 
-	public boolean isLastChunk() {
-        return getMessageType() == HttpMessageType.LAST_CHUNK;
-    }
-	
 	public void addExtension(HttpChunkExtension extension) {
 		extensions.add(extension);
 	}

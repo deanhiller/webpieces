@@ -179,12 +179,12 @@ public class HttpSocketImpl implements HttpSocket {
 				if(processingChunked) {
 					HttpChunk chunk = (HttpChunk) msg;
 					HttpResponseListener listener = responsesToComplete.peek();
-					if(chunk.isLastChunk()) {
+					if(chunk.isEndOfData()) {
 						processingChunked = false;
 						responsesToComplete.poll();
 					}
 					
-					listener.incomingChunk(chunk, chunk.isLastChunk());
+					listener.incomingChunk(chunk, chunk.isEndOfData());
 				} else if(!msg.isHasChunkedTransferHeader()) {
 					HttpResponse resp = (HttpResponse) msg;
 					HttpResponseListener listener = responsesToComplete.poll();

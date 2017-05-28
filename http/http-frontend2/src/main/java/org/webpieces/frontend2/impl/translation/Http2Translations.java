@@ -42,17 +42,6 @@ public class Http2Translations {
 		headersToSkip.add(Http2HeaderName.SCHEME.getHeaderName());
 	}
 	
-	public static List<HttpPayload> translate(StreamMsg data) {
-		if(data instanceof DataFrame) {
-			return translateData((DataFrame)data);
-		} else if(data instanceof Http2Trailers) {
-			//trailing headers
-			throw new UnsupportedOperationException("not done yet");
-		}
-		
-		throw new UnsupportedOperationException("This frame type is not supported in http1.1="+data);
-	}
-	
 	public static Http2Msg translate(HttpPayload payload, boolean isHttps) {
 		if(payload instanceof HttpRequest)
 			return requestToHeaders((HttpRequest) payload, isHttps);
@@ -85,11 +74,29 @@ public class Http2Translations {
         headers.add(new Http2Header(Http2HeaderName.STATUS, response.getStatusLine().getStatus().getCode().toString()));
 
         for(Header header: response.getHeaders()) {
-            headers.add(new Http2Header(header.getName(), header.getValue()));
+        	if(header.getKnownName() == KnownHeaderName.TRANSFER_ENCODING) {
+        		if("chunked".equals(header.getValue())) {
+        			continue; //skip as http2 does not allow this header
+        		}
+        	}
+        	
+        	headers.add(new Http2Header(header.getName(), header.getValue()));
+        }
+
+        Http2Response resp = new Http2Response(headers);
+
+        Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+        if(header != null) {
+        	int len = Integer.parseInt(header.getValue());
+        	if(len == 0) {
+        		resp.setEndOfStream(true);
+        	} else {
+        		resp.setEndOfStream(false);
+        	}
+        } else {
+        	resp.setEndOfStream(false);
         }
         
-        Http2Response resp = new Http2Response(headers);
-    	resp.setEndOfStream(false);
         return resp;
 	}
 
@@ -138,21 +145,6 @@ public class Http2Translations {
         return headers;
     }
 
-	private static List<HttpPayload> translateData(DataFrame data) {
-		List<HttpPayload> chunks = new ArrayList<>();
-		
-		if(data.getData().getReadableSize() > 0) {
-			HttpChunk chunk = new HttpChunk();
-			chunk.setBody(data.getData());
-			
-			chunks.add(chunk);
-		}
-		if(data.isEndOfStream())
-			chunks.add(new HttpLastChunk());
-		return chunks;
-	}
-
-
 	public static HttpResponse translateResponse(Http2Response headers) {
 
         HttpResponseStatus status = new HttpResponseStatus();
@@ -172,6 +164,11 @@ public class Http2Translations {
 				Header http1Header = convertHeader(header);
 				response.addHeader(http1Header);
 			}
+		}
+		
+		if(headers.isEndOfStream() && headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH) == null) {
+			//firefox really needs content length
+			response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
 		}
 		
 		if(status.getCode() == null)

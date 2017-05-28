@@ -109,8 +109,14 @@ This project is essentially pieces that can be used to build any http related so
 #### TODO:
 * frontend caching http11 request until response sent back
 * http11 client rework
+* move gzip to frontend
 * Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine
-* remove this line response.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked")); AND add fail fast for that in http2 parser since it is NOT supported and must NOT be used at all in headers
+* remove this
+		Http1_1StreamImpl current = socket.getCurrentStream();
+		if(current != this)
+			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
+					+ "responses in order and this is not the current response that needs responding to");
+* this needs to return future ..... void 	private void sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
 * finish up the statemachine tests and with closing stream delay!!
 * make the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
 * unignore the H2 test to get working again

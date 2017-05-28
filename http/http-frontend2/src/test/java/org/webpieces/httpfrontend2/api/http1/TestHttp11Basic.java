@@ -111,7 +111,7 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 	}
 	
 	@Test
-	public void testUploadWithBody() {
+	public void testUploadWithBody() throws InterruptedException, ExecutionException, TimeoutException {
 		String bodyStr = "hi there, how are you";
 		DataWrapper dataWrapper = dataGen.wrapByteArray(bodyStr.getBytes(StandardCharsets.UTF_8));
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
@@ -129,9 +129,10 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 		Assert.assertEquals(bodyStr, data.createStringFromUtf8(0, data.getReadableSize()));
 		Assert.assertTrue(frame.isEndOfStream());
 		
-		HttpResponse resp = Requests.createResponse();
+		HttpResponse resp = Requests.createNobodyResponse();
 		Http2Response http2Resp = Http2Translations.responseToHeaders(resp);
-		in1.stream.sendResponse(http2Resp);
+		CompletableFuture<StreamWriter> fut = in1.stream.sendResponse(http2Resp);
+		fut.get(2, TimeUnit.SECONDS);
 		
 		HttpResponse respToClient = (HttpResponse) mockChannel.getFrameAndClear();
 		Assert.assertEquals(resp, respToClient);

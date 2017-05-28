@@ -132,4 +132,15 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		response.assertContains("app.TagsMeta");
 	}
 	
+	//a general test for testing if chunking is working or broken in relation to static files
+	@Test
+	public void testStaticFileCssLarger() {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/mycss");
+		
+		http11Socket.send(req);
+		
+        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Open Sans");
+	}
 }

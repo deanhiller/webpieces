@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -100,12 +101,6 @@ public class StaticFileReader {
 	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(),
 	    		StatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
 	    Http2Response response = tuple.response;
-	    response.setEndOfStream(false);
-
-		// we shouldn't have to add chunked because the responseSender will add chunked for us
-		// if isComplete is false
-
-		response.addHeader(new Http2Header(Http2HeaderName.TRANSFER_ENCODING, "chunked"));
 
 		//On startup, we protect developers from breaking clients.  In http, all files that change
 		//must also change the hash automatically and the %%{ }%% tag generates those hashes so the
@@ -142,9 +137,11 @@ public class StaticFileReader {
 		CompletableFuture<StreamWriter> future;
 		try {
 			log.info(()->"sending chunked file via async read="+file);
+			long length = file.toFile().length();
+			AtomicLong remaining = new AtomicLong(length);
 			
 			future = info.getResponseSender().sendResponse(response)
-					.thenCompose(s -> readLoop(s, info.getPool(), file, asyncFile, 0));
+					.thenCompose(s -> readLoop(s, info.getPool(), file, asyncFile, 0, remaining));
 		} catch(Throwable e) {
 			future = new CompletableFuture<StreamWriter>();
 			future.completeExceptionally(e);
@@ -184,44 +181,45 @@ public class StaticFileReader {
 		}		
 	}
 	
-	private CompletableFuture<StreamWriter> readLoop(StreamWriter writer, BufferPool pool, Path file, AsynchronousFileChannel asyncFile, int position) {
+	private CompletableFuture<StreamWriter> readLoop(
+			StreamWriter writer, BufferPool pool, Path file, AsynchronousFileChannel asyncFile, int position,
+			AtomicLong remaining) {
 		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
 		//to use future.thenApplyAsync to avoid a stackoverflow
-		
+
+		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
+
 		//NOTE: I don't like inlining code BUT this is recursive and I HATE recursion between multiple methods so
 		//this method ONLY calls itself below as it continues to read and send chunks
-		return asyncRead(pool, file, asyncFile, position)
-				.thenCompose(buf -> {
+		
+		CompletableFuture<Integer> future = asyncRead(buf, file, asyncFile, position);
+		
+		return future.thenCompose(readCount -> {
 							buf.flip();
 							int read = buf.remaining();
-							if(read == 0) {
-								return sendLastChunk(writer, pool, buf);
+							long bytesLeft = remaining.addAndGet(-read);
+							if(read != readCount)
+								throw new IllegalStateException("read bytes into buf does not match readCount. read="+read+" cnt="+readCount);
+							else if(bytesLeft == 0) {
+								return sendHttpChunk(writer, pool, buf, file, true);
 							}
 
-							return sendHttpChunk(writer, buf, file).thenCompose( (w) -> {
+							return sendHttpChunk(writer, pool, buf, file, false).thenCompose( (w) -> {
 								int newPosition = position + read;
 								//BIG NOTE: RECURSIVE READ HERE!!!! but futures and thenApplyAsync prevent stackoverflow 100%
-								return readLoop(writer, pool, file, asyncFile, newPosition);								
+								return readLoop(writer, pool, file, asyncFile, newPosition, remaining);								
 							});
 
 					});
 	}
 
-	private CompletableFuture<StreamWriter> sendLastChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf) {
-		pool.releaseBuffer(buf);
-		DataFrame frame = new DataFrame();
-		return writer.processPiece(frame);
-	}
-
-	private CompletableFuture<ByteBuffer> asyncRead(BufferPool pool, Path file, AsynchronousFileChannel asyncFile, long position) {
-		CompletableFuture<ByteBuffer> future = new CompletableFuture<ByteBuffer>();
+	private CompletableFuture<Integer> asyncRead(ByteBuffer buf, Path file, AsynchronousFileChannel asyncFile, long position) {
+		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
     
-		ByteBuffer buf = pool.nextBuffer(BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE);
-
 		CompletionHandler<Integer, String> handler = new CompletionHandler<Integer, String>() {
 			@Override
 			public void completed(Integer result, String attachment) {
-				future.complete(buf);
+				future.complete(result);
 			}
 
 			@Override
@@ -235,12 +233,19 @@ public class StaticFileReader {
 		return future;
 	}
 	
-	private CompletableFuture<StreamWriter> sendHttpChunk(StreamWriter writer, ByteBuffer buf, Path file) {
+	private CompletableFuture<StreamWriter> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, Path file, boolean isEos) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		
 		DataFrame frame = new DataFrame();
-		frame.setEndOfStream(false);
+		frame.setEndOfStream(isEos);
 		frame.setData(data);
-		return writer.processPiece(frame);
+		return writer.processPiece(frame).thenApply( w -> {
+			//at this point, the buffer was consumed
+			//after process, release the buffer for re-use
+			buf.position(buf.limit());
+			
+			pool.releaseBuffer(buf);
+			return w;
+		});
 	}
 }
