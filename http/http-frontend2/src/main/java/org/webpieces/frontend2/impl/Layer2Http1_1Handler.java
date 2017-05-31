@@ -106,7 +106,7 @@ public class Layer2Http1_1Handler {
 		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {
 			future = future.thenCompose(w -> {
-				log.info("msg received="+payload);
+				log.info(socket+"msg received="+payload);
 				return processCorrectly(socket, payload);
 			});
 		}

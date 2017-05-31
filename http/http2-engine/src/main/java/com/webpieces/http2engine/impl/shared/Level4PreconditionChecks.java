@@ -17,6 +17,8 @@ import com.webpieces.http2parser.api.dto.PriorityFrame;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
 import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
+import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;

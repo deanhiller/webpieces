@@ -163,7 +163,7 @@ public class Level6RemoteFlowControl {
 		
 		DataTry dataTry = null;
 		DataTry temp = dataQueue.peek();
-		synchronized(remoteLock) {// we should delete this synchronized as we are virtually single threaded now!!!
+		synchronized(remoteLock) {// TODO: Use AsyncLock instead so we do not block threads!!!
 			remoteWindowSize += increment;
 			if(remoteWindowSize > Integer.MAX_VALUE)
 				throw new ConnectionException(CancelReasonCode.FLOW_CONTROL_ERROR, logId, 0, 

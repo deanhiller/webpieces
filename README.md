@@ -113,7 +113,6 @@ This project is essentially pieces that can be used to build any http related so
 * Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine which WILL close the socket down and should not!!
 * move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
 * finish up the statemachine tests and with closing stream delay!!
-* unignore the H2 test to get working again
 * add test on client cancelling request stream, cancelling push stream
 * add test on server cancelling request stream, cancelling push stream
 * tests on webserver to test out these cases

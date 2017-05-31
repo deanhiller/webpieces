@@ -63,6 +63,8 @@ public class Http1_1StreamImpl implements ResponseStream {
 		HttpResponse response = Http2Translations.translateResponse(headers);
 		
 		if(headers.isEndOfStream()) {
+			log.info(socket+" done sending response1");
+
 			validateHeader(response);
 			remove(headers);
 			return write(response).thenApply(w -> {
@@ -141,8 +143,10 @@ public class Http1_1StreamImpl implements ResponseStream {
 			else if(frame.isEndOfStream() && totalWritten != len)
 				throw new IllegalArgumentException("You did not write enough data.  written="+totalWritten+" content length header="+len);
 			
-			if(frame.isEndOfStream()) 
-				remove(data);			
+			if(frame.isEndOfStream()) {
+				log.info(socket+" done sending response2");
+				remove(data);
+			}
 
 			HttpData httpData = new HttpData(frame.getData(), frame.isEndOfStream());
 			return write(httpData).thenApply(c -> {
@@ -168,6 +172,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 			if(data.isEndOfStream()) {
 				remove(data);	
 
+				log.info(socket+" done sending response");
 				future = future.thenCompose(w -> {
 					return write(new HttpLastChunk());
 				}).thenApply(v -> {

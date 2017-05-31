@@ -44,7 +44,7 @@ public class TestH2OnNewLib {
                 "6.2", //10
                 "6.3", //11
                 "6.4", //12
-                //"6.5", //Only 1 fails as the hpack library does not support their table header size of 4 294 967 295 only MaxInt!!
+                //"6.5", //Only 1 fails as the hpack library does not support their table header size of 4 294 967 295 only MaxInt!! grrrrrr
                 "6.5.2", //13
                 "6.7", //14
                 "6.8", //15
@@ -115,7 +115,6 @@ public class TestH2OnNewLib {
         }
     }
 
-    @Ignore
     @Test
     public void testH2Spec() {
     	Assert.assertTrue(passH2SpecTest(testName));

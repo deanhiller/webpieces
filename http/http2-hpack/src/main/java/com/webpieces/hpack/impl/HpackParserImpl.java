@@ -146,7 +146,7 @@ public class HpackParserImpl implements HpackParser {
 
 		if(firstFrame instanceof HeadersFrame) {
 			HeadersFrame f = (HeadersFrame) firstFrame;
-			Http2Headers fullHeaders = createCorrectType(knownHeaders, headers, state.getLogId(), f.getStreamId());
+			Http2Headers fullHeaders = createCorrectType(knownHeaders, headers, state.getLogId(), f.getStreamId(), f.isEndOfStream());
 			fullHeaders.setStreamId(f.getStreamId());
 			fullHeaders.setPriorityDetails(f.getPriorityDetails());
 			fullHeaders.setEndOfStream(f.isEndOfStream());
@@ -168,8 +168,9 @@ public class HpackParserImpl implements HpackParser {
 	 * @param knownHeaders 
 	 * @param logId 
 	 * @param streamId 
+	 * @param b 
 	 */
-	private Http2Headers createCorrectType(Map<Http2HeaderName, Http2Header> knownHeaders, List<Http2Header> headers, String logId, int streamId) {
+	private Http2Headers createCorrectType(Map<Http2HeaderName, Http2Header> knownHeaders, List<Http2Header> headers, String logId, int streamId, boolean isEos) {
 		if(knownHeaders.containsKey(Http2HeaderName.METHOD)) {
 			if(knownHeaders.containsKey(Http2HeaderName.STATUS))
 				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Request or Response has :method and :status headers and this is not allowed");
@@ -183,6 +184,9 @@ public class HpackParserImpl implements HpackParser {
 		}
 		
 		checkBadHeaders(knownHeaders, logId, streamId);
+		if(!isEos) {
+			throw new ConnectionException(CancelReasonCode.TRAILERS_NOT_HAVE_EOS, streamId, "These headers have no :method nor :status header so must be trailing headers which MUST have end of stream=true and did not");
+		}
 		return new Http2Trailers(headers);
 	}
 
