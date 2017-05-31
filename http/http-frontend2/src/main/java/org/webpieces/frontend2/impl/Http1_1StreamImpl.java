@@ -29,6 +29,7 @@ import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
+import com.webpieces.util.locking.PermitQueue;
 
 public class Http1_1StreamImpl implements ResponseStream {
 	private static final Logger log = LoggerFactory.getLogger(Http1_1StreamImpl.class);
@@ -43,10 +44,17 @@ public class Http1_1StreamImpl implements ResponseStream {
 
 	private int streamId;
 
-	public Http1_1StreamImpl(int streamId, FrontendSocketImpl socket, HttpParser http11Parser) {
+	private StreamWriter requestWriter;
+
+	private PermitQueue permitQueue;
+
+	private boolean sentFullRequest;
+
+	public Http1_1StreamImpl(int streamId, FrontendSocketImpl socket, HttpParser http11Parser, PermitQueue permitQueue) {
 		this.streamId = streamId;
 		this.socket = socket;
 		this.http11Parser = http11Parser;
+		this.permitQueue = permitQueue;
 	}
 
 	@Override
@@ -57,7 +65,10 @@ public class Http1_1StreamImpl implements ResponseStream {
 		if(headers.isEndOfStream()) {
 			validateHeader(response);
 			remove(headers);
-			return write(response).thenApply(w -> new NoWritesWriter());
+			return write(response).thenApply(w -> {
+				permitQueue.releasePermit();
+				return new NoWritesWriter();
+			});
 		} else if(contentLengthGreaterThanZero(headers)) {
 			return write(response).thenApply(w -> new ContentLengthResponseWriter(headers));
 		}
@@ -134,7 +145,11 @@ public class Http1_1StreamImpl implements ResponseStream {
 				remove(data);			
 
 			HttpData httpData = new HttpData(frame.getData(), frame.isEndOfStream());
-			return write(httpData).thenApply(c -> this);
+			return write(httpData).thenApply(c -> {
+				if(frame.isEndOfStream())
+					permitQueue.releasePermit();
+				return this;
+			});
 		}
 	}
 	
@@ -151,9 +166,13 @@ public class Http1_1StreamImpl implements ResponseStream {
 			CompletableFuture<Channel> future = write(new HttpChunk(frame.getData()));
 			
 			if(data.isEndOfStream()) {
+				remove(data);	
+
 				future = future.thenCompose(w -> {
-					remove(data);	
 					return write(new HttpLastChunk());
+				}).thenApply(v -> {
+					permitQueue.releasePermit();
+					return null;
 				});
 			}
 			
@@ -162,18 +181,19 @@ public class Http1_1StreamImpl implements ResponseStream {
 	}
 
 	private void remove(Http2Msg data) {
-
-		if(endingFrame.get() != null)
+		Http1_1StreamImpl current = socket.getCurrentStream();
+		if(!sentFullRequest)
+			throw new IllegalStateException("Client Application cannot send endof stream message until the full request is sent(only in http1.1)");
+		else if(endingFrame.get() != null)
 			throw new IllegalStateException("You had already sent a frame with endOfStream "
 					+ "set and can't send more.  ending frame was="+endingFrame+" but you just sent="+data);
-		
-		Http1_1StreamImpl current = socket.getCurrentStream();
-		if(current != this)
+		else if(current != this)
 			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
 					+ "responses in order and this is not the current response that needs responding to");
 
 		endingFrame.set(data);
-		socket.removeStream(this);
+		socket.setCurrentStream(null);
+		
 	}
 	
 	private CompletableFuture<Channel> write(HttpPayload payload) {
@@ -211,6 +231,18 @@ public class Http1_1StreamImpl implements ResponseStream {
 
 	public int getStreamId() {
 		return streamId;
+	}
+
+	public StreamWriter getRequestWriter() {
+		return requestWriter;
+	}
+
+	public void setRequestWriter(StreamWriter requestWriter) {
+		this.requestWriter = requestWriter;
+	}
+
+	public void setSentFullRequest(boolean sent) {
+		this.sentFullRequest = sent;
 	}
 
 }

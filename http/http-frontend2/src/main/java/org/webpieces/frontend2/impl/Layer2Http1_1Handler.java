@@ -8,13 +8,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -26,6 +25,7 @@ import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.util.locking.PermitQueue;
 
 public class Layer2Http1_1Handler {
 	private static final Logger log = LoggerFactory.getLogger(Layer2Http1_1Handler.class);
@@ -33,8 +33,7 @@ public class Layer2Http1_1Handler {
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
-	private StreamWriter currentWriter;
-
+	
 	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
@@ -42,7 +41,6 @@ public class Layer2Http1_1Handler {
 
 	public InitiationResult initialData(FrontendSocketImpl socket, ByteBuffer buf) {
 			return initialDataImpl(socket, buf);
-
 	}
 	
 	public InitiationResult initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -95,49 +93,92 @@ public class Layer2Http1_1Handler {
 		state = httpParser.parse(state, moreData);
 		return state;
 	}
-
 	private CompletableFuture<Void> processHttp1Messages(FrontendSocketImpl socket, Memento state) {
+		return processHttp1MessagesImpl(socket, state).exceptionally(t -> {
+			log.error("Exception", t);
+			socket.close("Exception so closing http1.1 socket="+t.getMessage());
+			return null;
+		});
+	}
+
+	private CompletableFuture<Void> processHttp1MessagesImpl(FrontendSocketImpl socket, Memento state) {
 		List<HttpPayload> parsed = state.getParsedMessages();
-		CompletableFuture<StreamWriter> future = CompletableFuture.completedFuture(null);
+		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {
 			future = future.thenCompose(w -> {
 				log.info("msg received="+payload);
 				return processCorrectly(socket, payload);
-			}).thenApply(w -> {
-				currentWriter = w;
-				return w;
 			});
 		}
 		return future.thenApply(w -> null);
 	}
 
-	private CompletableFuture<StreamWriter> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
+	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
 		Http2Msg msg = Http2Translations.translate(payload, socket.isHttps());
 
 		if(payload instanceof HttpRequest) {
 			return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);
 		} else if(msg instanceof DataFrame) {
-			return currentWriter.processPiece((DataFrame)msg);
+			return processData(socket, (DataFrame)msg);
 		} else {
 			throw new IllegalArgumentException("payload not supported="+payload);
 		}
 	}
 
-	private CompletableFuture<StreamWriter> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
-		int id = counter.getAndAdd(2);
-		Http1_1StreamImpl stream = new Http1_1StreamImpl(id, socket, httpParser);
-		socket.setAddStream(stream);
+	private CompletableFuture<Void> processData(FrontendSocketImpl socket, DataFrame msg) {
+		PermitQueue permitQueue = socket.getPermitQueue();
+		return permitQueue.runRequest(() -> {
+			
+			Http1_1StreamImpl stream = socket.getCurrentStream();
+			StreamWriter requestWriter = stream.getRequestWriter();
+			if(msg.isEndOfStream())
+				stream.setSentFullRequest(true);
 
-		HttpStream streamHandle = httpListener.openStream();
-		stream.setStreamHandle(streamHandle);
+			return requestWriter.processPiece(msg).thenApply(w -> {
+				stream.setRequestWriter(w);
+				//since this is NOT end of stream, release permit for next data to come in
+				if(!msg.isEndOfStream())
+					permitQueue.releasePermit();
+				//else we need to wait for FULL response to be sent back and then release 
+				//the permit
+				
+				return null;
+			});
+		});
+
+	}
+
+	private CompletableFuture<Void> processInitialPieceOfRequest(FrontendSocketImpl socket, HttpRequest http1Req, Http2Request headers) {
+		int id = counter.getAndAdd(2);
 		
-		String lengthHeader = headers.getSingleHeaderValue(Http2HeaderName.CONTENT_LENGTH);
-		if(lengthHeader != null && !"0".equals(lengthHeader) || http1Req.isHasChunkedTransferHeader()) {
-			return streamHandle.incomingRequest(headers, stream);
-		} else {
-			headers.setEndOfStream(true);
-			return streamHandle.incomingRequest(headers, stream);
-		}
+		PermitQueue permitQueue = socket.getPermitQueue();
+		return permitQueue.runRequest(() -> {
+			Http1_1StreamImpl currentStream = new Http1_1StreamImpl(id, socket, httpParser, permitQueue);
+
+			HttpStream streamHandle = httpListener.openStream();
+			currentStream.setStreamHandle(streamHandle);
+			socket.setCurrentStream(currentStream);
+
+			if(!headers.isEndOfStream()) {
+				//in this case, we are NOT at the end of the request so we must let the next piece of
+				//data run right after the request
+				return streamHandle.incomingRequest(headers, currentStream).thenApply(w -> {
+					currentStream.setRequestWriter(w);
+					//must release the permit so the next data piece(which may be cached) can come in
+					permitQueue.releasePermit();
+					return null;
+				});
+			} else {
+				//in this case, since this is the END of the request, we cannot release the permit in the
+				//permit queue as we do not want to let the next request to start until the full response is
+				//sent back to the client
+				currentStream.setSentFullRequest(true);
+				return streamHandle.incomingRequest(headers, currentStream).thenApply(w -> {
+					currentStream.setRequestWriter(w);
+					return null;
+				});
+			}
+		});
 	}
 
 	public void socketOpened(FrontendSocketImpl socket, boolean isReadyForWrites) {

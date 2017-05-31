@@ -107,19 +107,12 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* frontend caching http11 request until response sent back
 * http11 client rework
+* mak the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
 * move gzip to frontend
-* Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine
-* remove this
-		Http1_1StreamImpl current = socket.getCurrentStream();
-		if(current != this)
-			throw new IllegalStateException("Due to http1.1 spec, YOU MUST return "
-					+ "responses in order and this is not the current response that needs responding to");
-* this needs to return future ..... void 	private void sendChunkedResponse(Http2Response resp, byte[] bytes, final Compression compression) {
+* Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine which WILL close the socket down and should not!!
 * move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
 * finish up the statemachine tests and with closing stream delay!!
-* mak the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
 * unignore the H2 test to get working again
 * add test on client cancelling request stream, cancelling push stream
 * add test on server cancelling request stream, cancelling push stream
@@ -128,6 +121,7 @@ This project is essentially pieces that can be used to build any http related so
   * cancel request cancets filedowload
   * cancel request cancels static file download(ie. stops reading from filesystem)
   * cancel request cancels file upload
+* (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
 * backpressure
 * modify frontend to cache pipelined 1.1 requests and not serve to server until response finished each time
 * file upload
@@ -150,7 +144,6 @@ This project is essentially pieces that can be used to build any http related so
 * max concurent streams is 50 right now for safety ...need to rework that 
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
-* more fully integrate the http2 stack. ie. finish and use http-frontend2 instead of http-frontend
 * add optimistic locking test case for hibernate plugin with example in webapp and feature tests as examples as well
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
@@ -168,8 +161,7 @@ This project is essentially pieces that can be used to build any http related so
 * codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
 * playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
-* turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 if you own the client and webserver like we do above)
-* (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
+* turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 especially if you own the client and webserver like we do above)
 
 #### Examples.....
 

@@ -86,6 +86,10 @@ public class Requests {
 	}
 
 	public static HttpResponse createResponse() {
+		return createResponse(1);
+	}
+	
+	public static HttpResponse createResponse(int id) {
 		HttpResponseStatus status = new HttpResponseStatus();
 		status.setKnownStatus(KnownStatusCode.HTTP_200_OK);
 
@@ -94,7 +98,8 @@ public class Requests {
 		
 		HttpResponse resp = new HttpResponse();
 		resp.setStatusLine(statusLine);
-		
+
+		resp.addHeader(new Header("Server", id+""));
 		resp.addHeader(new Header(KnownHeaderName.CONNECTION, "keep"));
 		resp.addHeader(new Header(KnownHeaderName.AGE, "hh"));
 		return resp;

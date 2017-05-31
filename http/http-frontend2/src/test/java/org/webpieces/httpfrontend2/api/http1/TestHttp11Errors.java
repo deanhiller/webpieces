@@ -25,12 +25,11 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 		PassedIn in1 = mockListener.getSingleRequest();
 		
 		mockChannel.write(req2);
-		PassedIn in2 = mockListener.getSingleRequest();
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		
 		mockChannel.simulateClose();
 		
 		List<Cancel> cancels = mockListener.getCancels();
 		Assert.assertEquals(in1.stream, cancels.get(0).stream);
-		Assert.assertEquals(in2.stream, cancels.get(1).stream);
 	}
 }

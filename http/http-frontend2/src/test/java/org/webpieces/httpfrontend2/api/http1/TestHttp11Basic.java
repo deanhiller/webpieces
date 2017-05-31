@@ -11,7 +11,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.frontend2.impl.translation.Http2Translations;
-import org.webpieces.httpfrontend2.api.Responses;
 import org.webpieces.httpfrontend2.api.mock2.MockHttp2RequestListener.PassedIn;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -26,6 +25,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
+import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
 
 public class TestHttp11Basic extends AbstractHttp1Test {
@@ -139,26 +139,155 @@ public class TestHttp11Basic extends AbstractHttp1Test {
 	}
 
 	@Test
-	public void testSendTwoRequestsAndMisorderedResponses() throws InterruptedException, ExecutionException {
+	public void testSendTwoRequests() throws InterruptedException, ExecutionException {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
-		
+
 		mockChannel.write(req);		
-		mockListener.getSingleRequest();
+		PassedIn in1 = mockListener.getSingleRequest();
 		
 		mockChannel.write(req2);
-		PassedIn in2 = mockListener.getSingleRequest();
-		
-		//send back request2's response first!!!! BUT verify it does not go to client per http11 pipelining rules
-		try {
-			in2.stream.sendResponse(Responses.createResponse(2));
-			Assert.fail("should have thrown exception and did not");
-		} catch(IllegalStateException e) {
-		}
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 
-		//assert NOT received
-		Assert.assertEquals(0, mockChannel.getFramesAndClear().size());
+		//send back request2's response first!!!! BUT verify it does not go to client per http11 pipelining rules
+		HttpResponse resp1 = Requests.createResponse(1);
+		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+
+		Http2Response headers1 = Http2Translations.responseToHeaders(resp1);
+		in1.stream.sendResponse(headers1);
+		HttpPayload payload = mockChannel.getFrameAndClear();
+		Assert.assertEquals(resp1, payload);
+
+		PassedIn in2 = mockListener.getSingleRequest();
+		HttpResponse resp2 = Requests.createResponse(2);
+		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		Http2Response headers2 = Http2Translations.responseToHeaders(resp2);
+		in2.stream.sendResponse(headers2);
+		
+		HttpPayload payload2 = mockChannel.getFrameAndClear();		
+		Assert.assertEquals(resp2, payload2);
 	}
 
+	@Test
+	public void testSendTwoRequestsStreamFirst() throws InterruptedException, ExecutionException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 
+		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "20"));
+
+		mockChannel.write(req);		
+		PassedIn in1 = mockListener.getSingleRequest();
+
+		byte[] buf = new byte[10];
+		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
+		HttpData data1 = new HttpData(dataWrapper, false);
+		mockChannel.write(data1);
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
+		
+		DataWrapper dataWrapper2 = dataGen.wrapByteArray(buf);
+		HttpData data2 = new HttpData(dataWrapper2, true);
+		mockChannel.write(data2);
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
+		
+		mockChannel.write(req2);
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
+
+		//send back request2's response first!!!! BUT verify it does not go to client per http11 pipelining rules
+		HttpResponse resp1 = Requests.createResponse(1);
+		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		Http2Response headers1 = Http2Translations.responseToHeaders(resp1);
+		in1.stream.sendResponse(headers1);
+		HttpPayload payload = mockChannel.getFrameAndClear();
+		Assert.assertEquals(resp1, payload);
+
+		PassedIn in2 = mockListener.getSingleRequest();
+		HttpResponse resp2 = Requests.createResponse(2);
+		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		Http2Response headers2 = Http2Translations.responseToHeaders(resp2);
+		in2.stream.sendResponse(headers2);
+		
+		HttpPayload payload2 = mockChannel.getFrameAndClear();		
+		Assert.assertEquals(resp2, payload2);
+	}
+	
+	@Test
+	public void testSendTwoRequestsStreamSecond() throws InterruptedException, ExecutionException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+
+		mockChannel.write(req);		
+		PassedIn in1 = mockListener.getSingleRequest();
+
+		req2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "20"));
+		mockChannel.write(req2);
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
+
+		byte[] buf = new byte[10];
+		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
+		HttpData data1 = new HttpData(dataWrapper, false);
+		mockChannel.write(data1);
+		
+		DataWrapper dataWrapper2 = dataGen.wrapByteArray(buf);
+		HttpData data2 = new HttpData(dataWrapper2, true);
+		mockChannel.write(data2);
+
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
+
+		//send back request2's response first!!!! BUT verify it does not go to client per http11 pipelining rules
+		HttpResponse resp1 = Requests.createResponse(1);
+		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		Http2Response headers1 = Http2Translations.responseToHeaders(resp1);
+		in1.stream.sendResponse(headers1);
+		HttpPayload payload = mockChannel.getFrameAndClear();
+		Assert.assertEquals(resp1, payload);
+
+		PassedIn in2 = mockListener.getSingleRequest();
+		HttpResponse resp2 = Requests.createResponse(2);
+		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		Http2Response headers2 = Http2Translations.responseToHeaders(resp2);
+		in2.stream.sendResponse(headers2);
+		
+		HttpPayload payload2 = mockChannel.getFrameAndClear();		
+		Assert.assertEquals(resp2, payload2);
+	}
+	
+	@Test
+	public void testSendTwoRequestsStreamFirstResponse() throws InterruptedException, ExecutionException, TimeoutException {
+		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
+
+		mockChannel.write(req);		
+		PassedIn in1 = mockListener.getSingleRequest();
+		
+		mockChannel.write(req2);
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
+
+		HttpResponse resp1 = Requests.createResponse(1);
+		resp1.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "10"));
+		Http2Response headers1 = Http2Translations.responseToHeaders(resp1);
+		CompletableFuture<StreamWriter> future = in1.stream.sendResponse(headers1);
+		HttpPayload payload = mockChannel.getFrameAndClear();
+		Assert.assertEquals(resp1, payload);
+		StreamWriter writer = future.get(2, TimeUnit.SECONDS);
+		
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());		
+
+		byte[] buf = new byte[10];
+		DataWrapper dataWrapper = dataGen.wrapByteArray(buf);
+		HttpData data1 = new HttpData(dataWrapper, true);
+		DataFrame data = (DataFrame) Http2Translations.translateData(data1);
+		writer.processPiece(data);
+		
+		HttpData d = (HttpData) mockChannel.getFrameAndClear();
+		Assert.assertEquals(10, d.getBody().getReadableSize());
+
+		PassedIn in2 = mockListener.getSingleRequest();
+		HttpResponse resp2 = Requests.createResponse(2);
+		resp2.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		Http2Response headers2 = Http2Translations.responseToHeaders(resp2);
+		in2.stream.sendResponse(headers2);
+		
+		HttpPayload payload2 = mockChannel.getFrameAndClear();		
+		Assert.assertEquals(resp2, payload2);
+	}
 }

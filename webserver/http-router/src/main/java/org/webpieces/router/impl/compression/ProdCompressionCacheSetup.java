@@ -59,28 +59,30 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		createDirectory(routeCache);
 		
 		File metaFile = new File(routeCache, "webpiecesMeta.properties");
-		Properties p = load(metaFile);
+		Properties properties = load(metaFile);
 		
+		boolean modified;
 		if(route.isFile()) {
 			File file = new File(route.getFileSystemPath());
 			log.info("setting up cache for file="+file);
 			File destination = new File(routeCache, file.getName()+".gz");
-			maybeAddFileToCache(p, file, destination, route.getFullPath());
+			modified = maybeAddFileToCache(properties, file, destination, route.getFullPath());
 		} else {
 			File directory = new File(route.getFileSystemPath());
 			log.info("setting up cache for directory="+directory);
 			String urlPrefix = route.getFullPath();
-			transferAndCompress(p, directory, routeCache, urlPrefix);
+			modified = transferAndCompress(properties, directory, routeCache, urlPrefix);
 		}
-		
-		route.setHashMeta(p);
-		store(metaFile, p);
+
+		route.setHashMeta(properties);
+		if(modified)
+			store(metaFile, properties);
 	}
 
 	private void store(File metaFile, Properties p) {
 		try {
 			FileOutputStream out = new FileOutputStream(metaFile);
-			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), dir(key:urlPath+relativeFilePath, value:hash)");
+			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), directory format(key:urlPath+relativeFilePath, value:hash)");
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -98,27 +100,33 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		}
 	}
 
-	private void transferAndCompress(Properties p, File directory, File destination, String urlPath) {
+	private boolean transferAndCompress(Properties p, File directory, File destination, String urlPath) {
 		File[] files = directory.listFiles();
+		boolean modified = false;
 		for(File f : files) {
 			if(f.isDirectory()) {
 				File newTarget = new File(destination, f.getName());
 				createDirectory(newTarget);
-				transferAndCompress(p, f, newTarget, urlPath+f.getName()+"/");
+				boolean changed = transferAndCompress(p, f, newTarget, urlPath+f.getName()+"/");
+				if(changed)
+					modified = true;
 			} else {
 				File newTarget = new File(destination, f.getName()+".gz");
 				String path = urlPath+f.getName();
-				maybeAddFileToCache(p, f, newTarget, path);
+				boolean changed = maybeAddFileToCache(p, f, newTarget, path);
+				if(changed)
+					modified = true;
 			}
 		}
+		return modified;
 	}
 
-	private void maybeAddFileToCache(Properties properties, File src, File destination, String urlPath) {
+	private boolean maybeAddFileToCache(Properties properties, File src, File destination, String urlPath) {
 		String name = src.getName();
 		int indexOf = name.lastIndexOf(".");
 		if(indexOf < 0) {
 			pathToFileMeta.put(urlPath, new FileMeta());
-			return; //do nothing
+			return false; //do nothing
 		}
 		String extension = name.substring(indexOf+1);
 		
@@ -126,7 +134,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		Compression compression = lookup.createCompressionStream(encodings, extension, mimeType);
 		if(compression == null) {
 			pathToFileMeta.put(urlPath, new FileMeta());
-			return;
+			return false;
 		}
 
 		//before we do the below, do a quick timestamp check to avoid reading in the files when not necessary
@@ -138,7 +146,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		if(lastModified > lastModifiedSrc && previousHash != null) {
 			log.info("timestamp later than src so skipping writing to="+destination);
 			pathToFileMeta.put(urlPath, new FileMeta(previousHash));
-			return; //no need to check anything as destination was written after this source file
+			return false; //no need to check anything as destination was written after this source file
 		}
 		
 		try {
@@ -153,7 +161,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 
 						log.info("Previous file is the same, no need to compress to="+destination+" hash="+hash);
 						pathToFileMeta.put(urlPath, new FileMeta(previousHash));
-						return;
+						return false;
 					}
 				}
 
@@ -170,7 +178,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 				pathToFileMeta.put(urlPath, new FileMeta(hash));
 				
 				log.info("compressed "+src.length()+" bytes to="+destination.length()+" to file="+destination+" hash="+hash);
-				
+				return true;
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {

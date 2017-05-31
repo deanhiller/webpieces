@@ -26,12 +26,10 @@ import org.webpieces.httpparser.api.dto.UrlInfo;
 import com.webpieces.hpack.api.dto.Http2HeaderStruct;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public class Http2Translations {
 
@@ -55,7 +53,7 @@ public class Http2Translations {
 	}
 	
 
-	private static DataFrame translateData(HttpData payload) {
+	public static DataFrame translateData(HttpData payload) {
 		DataFrame frame = new DataFrame();
 		frame.setEndOfStream(payload.isEndOfData());
 		frame.setData(payload.getBodyNonNull());
@@ -140,10 +138,28 @@ public class Http2Translations {
         }
 
         Http2Request headers = new Http2Request(headerList);
-    	headers.setEndOfStream(false);
+        
+        Header contentLen = request.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
+
+        if(request.isHasChunkedTransferHeader()) {
+        	headers.setEndOfStream(false);        	
+        } else if(contentLenGreaterThanZero(contentLen)) {
+        	headers.setEndOfStream(false);
+        } else
+        	headers.setEndOfStream(true);
 
         return headers;
     }
+
+	private static boolean contentLenGreaterThanZero(Header contentLen) {
+		if(contentLen == null)
+			return false;
+		int len = Integer.parseInt(contentLen.getValue());
+		if(len > 0)
+			return true;
+		return false;
+	}
+
 
 	public static HttpResponse translateResponse(Http2Response headers) {
 
