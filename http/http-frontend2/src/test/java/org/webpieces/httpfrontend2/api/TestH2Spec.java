@@ -17,8 +17,8 @@ import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 @RunWith(Parameterized.class)
-public class TestH2OnNewLib {
-	private static final Logger log = LoggerFactory.getLogger(TestH2OnNewLib.class);
+public class TestH2Spec {
+	private static final Logger log = LoggerFactory.getLogger(TestH2Spec.class);
 
     String h2SpecPath;
     int port;
@@ -69,7 +69,7 @@ public class TestH2OnNewLib {
 		return Arrays.asList(arrayOfArgs);
 	}
 	
-	public TestH2OnNewLib(int index, String testName) {
+	public TestH2Spec(int index, String testName) {
 		this.testName = testName;
 		log.info("constructing test suite for server prod="+testName+" index="+index);
 	}
