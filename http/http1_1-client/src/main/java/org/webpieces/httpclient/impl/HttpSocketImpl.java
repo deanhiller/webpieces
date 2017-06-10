@@ -11,22 +11,26 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.HttpChunkWriter;
+import org.webpieces.httpclient.api.DataWriter;
+import org.webpieces.httpclient.api.HttpDataWriter;
+import org.webpieces.httpclient.api.HttpFullRequest;
+import org.webpieces.httpclient.api.HttpFullResponse;
 import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.dto.HttpChunk;
+import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
+
+import com.webpieces.util.locking.PermitQueue;
 
 public class HttpSocketImpl implements HttpSocket {
 
@@ -47,14 +51,14 @@ public class HttpSocketImpl implements HttpSocket {
 	private boolean isRecording = false;
 	private MarshalState state;
 	
+	private PermitQueue queue;
+	
 	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
 		this.channel = channel;
 		this.parser = parser;
 		memento = parser.prepareToParse();
 		state = parser.prepareToMarshal();
-	}
-
-	public HttpSocketImpl(ChannelManager mgr, String idForLogging, HttpParser parser2, Object object) {
+		queue = new PermitQueue("channel", 1, 3000, 100);
 	}
 
 	@Override
@@ -68,10 +72,13 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponse> send(HttpRequest request) {
-		CompletableFuture<HttpResponse> future = new CompletableFuture<HttpResponse>();
+	public CompletableFuture<HttpFullResponse> send(HttpFullRequest request) {
+		CompletableFuture<HttpFullResponse> future = new CompletableFuture<HttpFullResponse>();
 		HttpResponseListener l = new CompletableListener(future);
-		send(request, l);
+		HttpData data = request.getData();
+		send(request.getRequest(), l).thenCompose(w -> {
+			return w.send(data);
+		});
 		return future;
 	}
 	
@@ -87,12 +94,12 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	@Override
-	public CompletableFuture<HttpChunkWriter> send(HttpRequest request, HttpResponseListener listener) {
-		if(connectFuture == null) 
+	public CompletableFuture<HttpDataWriter> send(HttpRequest request, HttpResponseListener listener) {
+		if(connectFuture == null)
 			throw new IllegalArgumentException("You must at least call httpSocket.connect first(it "
 					+ "doesn't have to complete...you just have to call it before caling send)");
 
-		CompletableFuture<HttpChunkWriter> future = new CompletableFuture<>();
+		CompletableFuture<HttpDataWriter> future = new CompletableFuture<>();
 		boolean wasConnected = false;
 		synchronized (this) {
 			if(!connected) {
@@ -107,7 +114,7 @@ public class HttpSocketImpl implements HttpSocket {
 		return future;
 	}
 
-	private void actuallySendRequest(CompletableFuture<HttpChunkWriter> future, HttpRequest request, HttpResponseListener listener) {
+	private void actuallySendRequest(CompletableFuture<HttpDataWriter> future, HttpRequest request, HttpResponseListener listener) {
 		HttpResponseListener l = new CatchResponseListener(listener);
 		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
@@ -121,7 +128,7 @@ public class HttpSocketImpl implements HttpSocket {
 		write.handle((c, t) -> chainToFuture(c, t, future));
 	}
 	
-	private Void chainToFuture(Channel c, Throwable t, CompletableFuture<HttpChunkWriter> future) {
+	private Void chainToFuture(Channel c, Throwable t, CompletableFuture<HttpDataWriter> future) {
 		if(t != null) {
 			future.completeExceptionally(new RuntimeException(t));
 			return null;
@@ -166,7 +173,8 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 	
 	private class MyDataListener implements DataListener {
-		private boolean processingChunked = false;
+
+		private CompletableFuture<DataWriter> future;
 
 		@Override
 		public void incomingData(Channel channel, ByteBuffer b) {
@@ -176,25 +184,31 @@ public class HttpSocketImpl implements HttpSocket {
 
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 			for(HttpPayload msg : parsedMessages) {
-				if(processingChunked) {
-					HttpChunk chunk = (HttpChunk) msg;
-					HttpResponseListener listener = responsesToComplete.peek();
-					if(chunk.isEndOfData()) {
-						processingChunked = false;
+				if(msg instanceof HttpData) {
+					HttpData data = (HttpData) msg;
+					if(data.isEndOfData())
 						responsesToComplete.poll();
-					}
 					
-					listener.incomingChunk(chunk, chunk.isEndOfData());
-				} else if(!msg.isHasChunkedTransferHeader()) {
-					HttpResponse resp = (HttpResponse) msg;
-					HttpResponseListener listener = responsesToComplete.poll();
-					listener.incomingResponse(resp, true);
-				} else {
-					processingChunked = true;
-					HttpResponse resp = (HttpResponse) msg;
-					HttpResponseListener listener = responsesToComplete.peek();
-					listener.incomingResponse(resp, false);
-				}
+					future = future.thenCompose(w -> {
+						return w.incomingData(data);
+					});
+					
+				} else if(msg instanceof HttpResponse) {
+					future = processResponse((HttpResponse)msg);
+				} else
+					throw new IllegalStateException("invalid payload received="+msg);
+			}
+		}
+
+		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {
+			if(msg.isHasChunkedTransferHeader() || msg.isHasNonZeroContentLength()) {					
+				HttpResponse resp = (HttpResponse) msg;
+				HttpResponseListener listener = responsesToComplete.peek();
+				return listener.incomingResponse(resp, false);
+			} else {
+				HttpResponse resp = (HttpResponse) msg;
+				HttpResponseListener listener = responsesToComplete.poll();
+				return listener.incomingResponse(resp, true);
 			}
 		}
 
@@ -224,6 +238,11 @@ public class HttpSocketImpl implements HttpSocket {
 		@Override
 		public void releaseBackPressure(Channel channel) {
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "HttpSocketImpl [channel=" + channel + "]";
 	}
 	
 }

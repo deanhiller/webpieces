@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':http:http2-client'), project(':http:http1_1-client')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='An http client'
+}

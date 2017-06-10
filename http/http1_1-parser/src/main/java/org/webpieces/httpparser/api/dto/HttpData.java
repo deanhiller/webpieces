@@ -63,8 +63,4 @@ public class HttpData extends HttpPayload {
 		return HttpMessageType.DATA;
 	}
 
-	@Override
-	public boolean isHasChunkedTransferHeader() {
-		return false;
-	}
 }

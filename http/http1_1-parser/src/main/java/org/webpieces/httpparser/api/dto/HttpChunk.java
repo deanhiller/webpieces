@@ -74,11 +74,6 @@ public class HttpChunk extends HttpData {
 	}
 
 	@Override
-	public boolean isHasChunkedTransferHeader() {
-		return false;
-	}
-
-	@Override
 	public String toString() {
 		String metaLine = createMetaLine();
 		String trailer = createTrailer();

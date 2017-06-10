@@ -2,32 +2,60 @@ package org.webpieces.httpclient.impl;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpclient.api.DataWriter;
+import org.webpieces.httpclient.api.HttpFullResponse;
 import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public class CompletableListener implements HttpResponseListener {
 
-	private CompletableFuture<HttpResponse> future;
+	private final static DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	private CompletableFuture<HttpFullResponse> future;
+	private HttpFullResponse response;
 
-	public CompletableListener(CompletableFuture<HttpResponse> future) {
+	public CompletableListener(CompletableFuture<HttpFullResponse> future) {
 		this.future = future;
 	}
 
 	@Override
-	public void incomingResponse(HttpResponse resp, boolean isComplete) {
-		if(!isComplete) {
-			future.completeExceptionally(new IllegalStateException("You need to call "
-					+ "sendRequest(HttpRequest req, ResponseListener l) because this is a "
-					+ "chunked download response and could potentially blow out your memory"));
+	public CompletableFuture<DataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
+		HttpFullResponse resp1 = new HttpFullResponse(resp, dataGen.emptyWrapper());
+
+		if(isComplete) {
+			future.complete(resp1);
+			return CompletableFuture.completedFuture(new NullWriter());
 		}
-		future.complete(resp);
+		
+		response = resp1;
+		return CompletableFuture.completedFuture(new DataWriterImpl());
 	}
 
-	@Override
-	public void incomingChunk(HttpData chunk, boolean isLastChunk) {
+	private class NullWriter implements DataWriter {
+		@Override
+		public CompletableFuture<DataWriter> incomingData(HttpData data) {
+			throw new UnsupportedOperationException("This should not happen");
+		}
 	}
-
+	
+	private class DataWriterImpl implements DataWriter {
+		@Override
+		public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+			DataWrapper allData = dataGen.chainDataWrappers(response.getData(), chunk.getBodyNonNull());
+			response.setData(allData);
+			
+			if(chunk.isEndOfData()) {
+				future.complete(response);
+				response = null;
+			}
+			
+			return CompletableFuture.completedFuture(this);
+		}
+	}
+	
 	@Override
 	public void failure(Throwable e) {
 		future.completeExceptionally(e);

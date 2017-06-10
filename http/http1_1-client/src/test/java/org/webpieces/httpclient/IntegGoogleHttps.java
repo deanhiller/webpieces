@@ -1,6 +1,7 @@
 package org.webpieces.httpclient;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpclient.api.DataWriter;
 import org.webpieces.httpclient.api.HttpClient;
 import org.webpieces.httpclient.api.HttpClientFactory;
 import org.webpieces.httpclient.api.HttpResponseListener;
@@ -99,16 +101,21 @@ public class IntegGoogleHttps {
 
 	private static class OurListener implements HttpResponseListener {
 		@Override
-		public void incomingResponse(HttpResponse resp, boolean isComplete) {
+		public CompletableFuture<DataWriter> incomingResponse(HttpResponse resp, boolean isComplete) {
 			log.info("resp="+resp+" complete="+isComplete);
+			return CompletableFuture.completedFuture(new Writer());
 		}
 
-		@Override
-		public void incomingChunk(HttpData chunk, boolean isLastChunk) {
-			DataWrapper wrapper = chunk.getBody();
-			String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
-			log.info("result=(lastChunk="+isLastChunk+"\n"+result+"/////");
+		private class Writer implements DataWriter {
+			@Override
+			public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+				DataWrapper wrapper = chunk.getBody();
+				String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
+				log.info("result=(lastChunk="+chunk.isEndOfData()+"\n"+result+"/////");
+				return CompletableFuture.completedFuture(this);
+			}
 		}
+
 
 		@Override
 		public void failure(Throwable e) {

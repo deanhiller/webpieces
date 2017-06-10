@@ -4,7 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.httpparser.api.dto.HttpData;
 
-public interface HttpChunkWriter {
+public interface HttpDataWriter {
 
-	CompletableFuture<HttpChunkWriter> send(HttpData chunk);
+	CompletableFuture<HttpDataWriter> send(HttpData chunk);
 }

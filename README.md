@@ -108,10 +108,10 @@ This project is essentially pieces that can be used to build any http related so
 
 #### TODO:
 * http11 client rework
-* mak the http 1.1 client match http2 with eos and no more HttpChunk and futures so we can run backpressure tests
 * move gzip to frontend
 * Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine which WILL close the socket down and should not!!
 * move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
+* remove synchronized from http2 engine remote and local flow controls
 * finish up the statemachine tests and with closing stream delay!!
 * add test on client cancelling request stream, cancelling push stream
 * add test on server cancelling request stream, cancelling push stream

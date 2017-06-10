@@ -2,7 +2,7 @@ package org.webpieces.httpclient.impl;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpclient.api.HttpChunkWriter;
+import org.webpieces.httpclient.api.HttpDataWriter;
 import org.webpieces.httpclient.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
@@ -10,9 +10,9 @@ public class PendingRequest {
 
 	private HttpRequest request;
 	private HttpResponseListener listener;
-	private CompletableFuture<HttpChunkWriter> future;
+	private CompletableFuture<HttpDataWriter> future;
 
-	public PendingRequest(CompletableFuture<HttpChunkWriter> future, HttpRequest request, HttpResponseListener listener) {
+	public PendingRequest(CompletableFuture<HttpDataWriter> future, HttpRequest request, HttpResponseListener listener) {
 		this.future = future;
 		this.request = request;
 		this.listener = listener;
@@ -26,7 +26,7 @@ public class PendingRequest {
 		return listener;
 	}
 
-	public CompletableFuture<HttpChunkWriter> getFuture() {
+	public CompletableFuture<HttpDataWriter> getFuture() {
 		return future;
 	}
 

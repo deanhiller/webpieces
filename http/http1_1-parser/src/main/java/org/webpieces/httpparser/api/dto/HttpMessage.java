@@ -34,10 +34,23 @@ public abstract class HttpMessage extends HttpPayload {
 		return headersStruct;
 	}
 	
-	@Override
     public boolean isHasChunkedTransferHeader() {
 		//need to account for a few Transfer Encoding headers
 		Header header = headersStruct.getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
         return header != null && "chunked".equals(header.getValue());
+    }
+    
+    public boolean isHasNonZeroContentLength() {
+		Header header = headersStruct.getLastInstanceOfHeader(KnownHeaderName.CONTENT_LENGTH);
+		if(header == null)
+			return false;
+		String value = header.getValue();
+		if(value == null)
+			return false;
+		
+		int len = Integer.parseInt(value);
+		if(len > 0)
+			return true;
+		return false;
     }
 }
