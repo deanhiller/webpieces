@@ -9,10 +9,10 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
-3. cd <projectDir>-all
+3. cd {projectDir}-all
 4. ./gradlew build # runs all the tests and verify everything is working.  If you want the selenium test to work install firefox 47.0.1
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
-6. cd <projectDir>-all/<projectDir>/output/distributions/
+6. cd {projectDir}-all/<projectDir>/output/distributions/
 7. unzip <projectDir> which is your whole webserver
 8. ./bin/<procect> to start the production webserver
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
