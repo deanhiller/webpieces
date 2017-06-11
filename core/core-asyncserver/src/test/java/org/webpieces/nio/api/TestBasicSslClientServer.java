@@ -30,7 +30,7 @@ public class TestBasicSslClientServer {
 	public void testBasic() throws InterruptedException {
 		pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool);
+		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
 		AsyncServerManager svrFactory = AsyncServerMgrFactory.createAsyncServer(mgr);
 		
 		SSLEngineFactoryForTest f = new SSLEngineFactoryForTest();

@@ -3,6 +3,7 @@ package org.webpieces.nio.impl.cm.basic;
 import java.util.concurrent.Executor;
 
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.jdk.JdkSelect;
@@ -23,14 +24,14 @@ public class BasChanSvcFactory extends ChannelManagerFactory {
 	}
 
 	@Override
-	public ChannelManager createSingleThreadedChanMgr(String threadName, BufferPool pool) {
-		BasChannelService mgr = new BasChannelService(threadName, select, pool);
+	public ChannelManager createSingleThreadedChanMgr(String threadName, BufferPool pool, BackpressureConfig config) {
+		BasChannelService mgr = new BasChannelService(threadName, select, pool, config);
 		return new SslChannelService(mgr, pool);
 	}
 
 	@Override
-	public ChannelManager createMultiThreadedChanMgr(String threadName, BufferPool pool, Executor executor) {
-		ChannelManager mgr = createSingleThreadedChanMgr(threadName, pool);
+	public ChannelManager createMultiThreadedChanMgr(String threadName, BufferPool pool, BackpressureConfig config, Executor executor) {
+		ChannelManager mgr = createSingleThreadedChanMgr(threadName, pool, config);
 		ThreadedChannelService mgr2 = new ThreadedChannelService(mgr, executor);
 		return new SslChannelService(mgr2, pool);
 	}

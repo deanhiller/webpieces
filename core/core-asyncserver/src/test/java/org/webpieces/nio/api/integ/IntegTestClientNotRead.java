@@ -13,6 +13,7 @@ import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
@@ -44,13 +45,13 @@ public class IntegTestClientNotRead {
 	
 	public void testSoTimeoutOnSocket() throws InterruptedException {
 		BufferCreationPool pool = new BufferCreationPool();
-		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer("server", pool);
+		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer("server", pool, new BackpressureConfig());
 		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new IntegTestClientNotReadListener());
 		server.start(new InetSocketAddress(8080));
 		
 		BufferCreationPool pool2 = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2);
+		ChannelManager mgr = factory.createSingleThreadedChanMgr("client", pool2, new BackpressureConfig());
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 
 		log.info("client");

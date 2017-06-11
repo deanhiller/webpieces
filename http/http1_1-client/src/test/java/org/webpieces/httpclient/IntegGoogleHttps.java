@@ -25,6 +25,7 @@ import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.HttpUri;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -82,7 +83,7 @@ public class IntegGoogleHttps {
 		BufferPool pool2 = new BufferCreationPool();
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor2);
 		
 		HttpParser parser = HttpParserFactory.createParser(pool2);
 		

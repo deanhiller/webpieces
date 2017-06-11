@@ -29,7 +29,7 @@ public class TestConnecting {
 	public void setup() {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		DirectExecutor exec = new DirectExecutor();
-		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), exec);
+		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), exec);
 	}
 
 	@Test

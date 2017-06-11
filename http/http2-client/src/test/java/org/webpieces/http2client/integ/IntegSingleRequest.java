@@ -14,6 +14,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.logging.Logger;
@@ -83,7 +84,7 @@ public class IntegSingleRequest {
 
 		Executor executor2 = Executors.newFixedThreadPool(10, new NamedThreadFactory("clientThread"));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor2);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor2);
 		
 		InjectionConfig injConfig = new InjectionConfig(hpackParser);
 		

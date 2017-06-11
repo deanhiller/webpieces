@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 
@@ -49,6 +50,7 @@ public class WebServerConfig {
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(255, TimeUnit.DAYS);
 	
 	private Http2Config http2Config = new Http2Config();
+	private BackpressureConfig backpressureConfig = new BackpressureConfig();
 	
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
@@ -155,6 +157,15 @@ public class WebServerConfig {
 
 	public WebServerConfig setHttp2Config(Http2Config http2Config) {
 		this.http2Config = http2Config;
+		return this;
+	}
+
+	public BackpressureConfig getBackpressureConfig() {
+		return backpressureConfig;
+	}
+
+	public WebServerConfig setBackpressureConfig(BackpressureConfig backpressureConfig) {
+		this.backpressureConfig = backpressureConfig;
 		return this;
 	}
 }

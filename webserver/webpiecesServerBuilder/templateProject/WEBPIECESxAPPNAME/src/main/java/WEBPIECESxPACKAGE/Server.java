@@ -95,6 +95,9 @@ public class Server {
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
 		//by a QA team.  We leave most of these properties right here.
+		
+		//A SECOND note is that some properties can be modified at runtime and so some config objects could be exposed
+		//through JMX or other means for dynamically changing things at runtime
 		RouterConfig routerConfig = new RouterConfig()
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)

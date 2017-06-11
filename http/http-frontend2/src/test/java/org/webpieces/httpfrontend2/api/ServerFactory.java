@@ -19,6 +19,7 @@ import org.webpieces.httpfrontend2.api.http1.Requests;
 import org.webpieces.httpfrontend2.api.http2.Http2Requests;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -38,7 +39,7 @@ class ServerFactory {
     static int createTestServer(boolean alwaysHttp2, Long maxConcurrentStreams) {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
-        HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool);
+        HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool, new BackpressureConfig());
         FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(0));
         HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
         server.start();

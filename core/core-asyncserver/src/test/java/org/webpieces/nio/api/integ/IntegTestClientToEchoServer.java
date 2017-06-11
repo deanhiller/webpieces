@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
@@ -73,7 +74,7 @@ public class IntegTestClientToEchoServer {
 	
 	private TCPChannel createClientChannel(BufferPool pool2, Executor executor) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;
 	}

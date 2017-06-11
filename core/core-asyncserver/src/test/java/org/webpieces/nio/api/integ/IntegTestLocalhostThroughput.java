@@ -12,6 +12,7 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
@@ -43,7 +44,7 @@ public class IntegTestLocalhostThroughput {
 		Executor executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("serverThread"));
 		BufferPool pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, executor);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, new BackpressureConfig(), executor);
 		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
 		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new IntegTestLocalhostServerListener());
 		server.start(new InetSocketAddress(8080));
@@ -66,7 +67,7 @@ public class IntegTestLocalhostThroughput {
 
 	private TCPChannel createClientChannel(BufferPool pool2, Executor executor) {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, executor);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("client", pool2, new BackpressureConfig(), executor);
 		TCPChannel channel = mgr.createTCPChannel("clientChan");
 		return channel;
 	}

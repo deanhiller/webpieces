@@ -60,7 +60,7 @@ public class TestBasicSsl {
 	private ChannelManager createSvrChanMgr(String name) {
 		ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory(name));
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), executor);
+		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), executor);
 		return svrMgr;
 	}
 }

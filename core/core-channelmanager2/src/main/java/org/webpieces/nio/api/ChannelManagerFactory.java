@@ -35,7 +35,7 @@ public abstract class ChannelManagerFactory {
 	 * @param pool
 	 * @return
 	 */
-	public abstract ChannelManager createSingleThreadedChanMgr(String id, BufferPool pool);
+	public abstract ChannelManager createSingleThreadedChanMgr(String id, BufferPool pool, BackpressureConfig config);
 	
 	/**
 	 * Creates a multi-threaded ChannelManager where data from any one channel will run IN-ORDER on the 
@@ -49,5 +49,5 @@ public abstract class ChannelManagerFactory {
 	 * @param executor
 	 * @return
 	 */
-	public abstract ChannelManager createMultiThreadedChanMgr(String id, BufferPool pool, Executor executor);
+	public abstract ChannelManager createMultiThreadedChanMgr(String id, BufferPool pool, BackpressureConfig config, Executor executor);
 }

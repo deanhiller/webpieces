@@ -89,7 +89,7 @@ public class WebServerModule implements Module {
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, executor);
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config.getBackpressureConfig(), executor);
 		
 		return chanMgr;
 	}

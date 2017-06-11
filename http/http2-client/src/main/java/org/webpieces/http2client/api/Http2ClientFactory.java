@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.http2client.impl.Http2ClientImpl;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -26,7 +27,7 @@ public abstract class Http2ClientFactory {
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, executor);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, new BackpressureConfig(), executor);
 
 		InjectionConfig injConfig = new InjectionConfig(hpackParser, new TimeImpl(), config);
 		return createHttpClient(mgr, injConfig);

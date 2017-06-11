@@ -28,7 +28,10 @@ public class TestReading {
 	public void setup() {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		DirectExecutor exec = new DirectExecutor();
-		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), exec);
+		BackpressureConfig config = new BackpressureConfig();
+		config.setMaxBytes(6);
+		config.setStartReadingThreshold(2);
+		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), config, exec);
 		
 		listener = new MockDataListener();
 		
@@ -53,4 +56,15 @@ public class TestReading {
 		Assert.assertEquals(data[1], 5);
 	}
 
+	@Test
+	public void testBackpressureRead() throws InterruptedException, ExecutionException, TimeoutException {
+//		mockChannel.addToRead(new byte[] { 4, 5 });
+//		mockChannel.setReadyToRead();
+//		
+//		mockJdk.fireSelector();
+//
+//		byte[] data = listener.getSingleData();
+//		Assert.assertEquals(data[0], 4);
+//		Assert.assertEquals(data[1], 5);
+	}
 }
