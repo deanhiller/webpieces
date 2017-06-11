@@ -54,6 +54,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
+		isConnected = true;
 		setConnecting(remoteAddr);
 	}
 	

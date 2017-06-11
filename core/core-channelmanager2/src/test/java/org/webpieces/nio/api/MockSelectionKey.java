@@ -51,4 +51,8 @@ public class MockSelectionKey extends SelectionKey {
 		readyOps = readyOps | OP_CONNECT;
 	}
 
+	public void setWriteReady() {
+		readyOps = readyOps | OP_WRITE;
+	}
+
 }

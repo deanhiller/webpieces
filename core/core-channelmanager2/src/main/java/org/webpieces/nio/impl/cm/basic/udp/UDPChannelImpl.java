@@ -31,7 +31,6 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	private static final Logger log = LoggerFactory.getLogger(UDPChannel.class);
 	private static final Logger apiLog = LoggerFactory.getLogger(UDPChannel.class);
 	protected org.webpieces.nio.api.jdk.JdkDatagramChannel channel;
-	private boolean isConnected = false;
     private Calendar expires;
     
 	public UDPChannelImpl(IdObject id, JdkSelect selector, SelectorManager2 selMgr, BufferPool pool) {
@@ -61,7 +60,6 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 			
 			channel.connect(addr);
 			
-	        isConnected = true;
 	        promise.complete(this);
 		} catch(Exception e) {
 			promise.completeExceptionally(e);

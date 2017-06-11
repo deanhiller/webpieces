@@ -6,9 +6,13 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
+import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.MockSelectionKey;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
 
@@ -22,6 +26,8 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 	}
 
 	private MockSelectionKey selectionKey;
+	private int numBytesToConsume;
+	private Queue<Byte> queue = new LinkedBlockingQueue<>();
 
 	public void addConnectReturnValue(boolean isConnected) {
 		super.addValueToReturn(Method.CONNECT, isConnected);
@@ -55,12 +61,25 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 		return false;
 	}
 
+	public void setNumBytesToConsume(int numBytes) {
+		this.numBytesToConsume = numBytes;
+	}
+	
 	@Override
-	public int write(ByteBuffer b) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+	public int write(ByteBuffer buf) throws IOException {
+		int min = Math.min(buf.remaining(), numBytesToConsume);
+		numBytesToConsume -= min;
+		byte[] data = new byte[min];
+		buf.get(data); //simulate consumption
+		for(byte b : data)
+			queue.add(b);
+		return min;
 	}
 
+	public byte nextByte() {
+		return queue.remove();
+	}
+	
 	@Override
 	public int read(ByteBuffer b) throws IOException {
 		// TODO Auto-generated method stub
@@ -164,6 +183,10 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 	public void setConnectReady() {
 		selectionKey.setConnectReady();
 	}
+	public void setWriteReady() {
+		selectionKey.setWriteReady();
+	}
+	
 	@Override
 	public void resetRegisteredOperations(int ops) {
 		selectionKey.interestOps(ops);
@@ -186,6 +209,17 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 			return true;
 		
 		return false;
+	}
+	public boolean isRegisteredForWrites() {
+		if(selectionKey == null)
+			return false;
+		if((selectionKey.interestOps() & SelectionKey.OP_WRITE) > 0)
+			return true;
+		
+		return false;
+	}
+	public int getNumBytesConsumed() {
+		return queue.size();
 	}
 
 }

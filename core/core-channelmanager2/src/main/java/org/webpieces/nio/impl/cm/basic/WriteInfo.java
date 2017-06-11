@@ -3,20 +3,18 @@ package org.webpieces.nio.impl.cm.basic;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.channels.Channel;
-
 
 public class WriteInfo {
 
 	private ByteBuffer buffer;
-	private CompletableFuture<Channel> handler;
+	private CompletableFuture<Void> handler;
 
-	public WriteInfo(ByteBuffer b, CompletableFuture<Channel> impl) {
+	public WriteInfo(ByteBuffer b, CompletableFuture<Void> impl) {
 		buffer = b;
 		handler = impl;
 	}
 
-	public CompletableFuture<Channel> getPromise() {
+	public CompletableFuture<Void> getPromise() {
 		return handler;
 	}
 

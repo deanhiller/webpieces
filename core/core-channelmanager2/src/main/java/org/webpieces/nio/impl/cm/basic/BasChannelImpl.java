@@ -47,6 +47,7 @@ public abstract class BasChannelImpl
 	private boolean isRecording;
 	protected SocketAddress isConnectingTo;
 	private boolean isRemoteEndInitiateClose;
+	protected boolean isConnected;
 	
 	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr);
@@ -76,6 +77,7 @@ public abstract class BasChannelImpl
 		
 		CompletableFuture<Channel> future = connectImpl(addr);
 		return future.thenCompose(c -> {
+			isConnected = true;
 			return registerForReads(dataListener);
 		});
 	}
@@ -83,7 +85,7 @@ public abstract class BasChannelImpl
     protected abstract CompletableFuture<Channel> connectImpl(SocketAddress addr);
 
 	private void unqueueAndFailWritesThenClose(CloseRunnable action) {
-    	List<CompletableFuture<Channel>> promises;
+    	List<CompletableFuture<Void>> promises;
     	synchronized(this) { //put here for emphasis that we are synchronizing here but not below
 			promises = failAllWritesInQueue();
     	}
@@ -96,7 +98,7 @@ public abstract class BasChannelImpl
     	//registerForWritesOrClose();
     	
     	//notify clients outside the synchronization block!!!
-		for(CompletableFuture<Channel> promise : promises) {
+		for(CompletableFuture<Void> promise : promises) {
     		log.info("WRITES outstanding while close was called, notifying client through his failure method of the exception");
     		//we only incur the cost of Throwable.fillInStackTrace() if we will use this exception
     		//(it's called in the Throwable constructor) so we don't do this on every close channel
@@ -118,39 +120,26 @@ public abstract class BasChannelImpl
 				throw new NioClosedChannelException(this+"Client cannot write after the remote end closed the socket");
 			else
 				throw new NioClosedChannelException(this+"Your Application cannot write after YOUR Application closed the socket");
-		}
-		else if(doNotAllowWrites)
+		} else if(!isConnected) {
+			throw new NioException("The Channel is not connected yet");
+		} else if(doNotAllowWrites)
 			throw new IllegalStateException("This channel is in a failed state.  "
 					+ "failure functions were called so look for exceptions from them");
 		
 		apiLog.trace(()->this+"Basic.write");
 		
-		CompletableFuture<Channel> future = new CompletableFuture<Channel>();
-		
-		boolean wroteAllData = writeSynchronized(b, future);
-
-		if(wroteAllData) {
-			//since we didn't switch and were not in this mode, complete the action outside sync block
-			pool.releaseBuffer(b);
-			future.complete(this);
-			log.trace(()->this+" wrote bytes on client thread");			
-		} else {
-			log.trace(()->this+"sent write to queue");
-		}
-		
-		return future;
+		return writeSynchronized(b)
+				.thenApply(v -> {
+					pool.releaseBuffer(b);
+					return this;
+				});
 	}
 	
-	private boolean writeSynchronized(ByteBuffer b, CompletableFuture<Channel> future) {
+	private CompletableFuture<Void> writeSynchronized(ByteBuffer b) {
 		
-		//I feel like there is a bit too much in this sync block BUT this is also an extremely complex problem and 
-		//VERY VERY VERY easy to get wrong.  The calls I don't really like in here are registerForWrites()
-		//and dataListener.applyBackPressure but both are pretty complex AND it is very important to not have
-		//race conditions between 
-		//1. turning on and off write registration with the selector
-		//2. turning on and off back pressure with the client
-		//These operations need to get to the selector or client IN ORDER and not have race conditions to work
-		//The corresponding code to worry about is writeAll method which reads from the waitingWriters
+		//I feel like there is a bit too much in this sync block BUT this is also a complex problem and
+		//easy to get wrong.
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		synchronized (writeLock ) {
 			if(!inDelayedWriteMode) {
 				int totalToWriteOut = b.remaining();
@@ -158,30 +147,33 @@ public abstract class BasChannelImpl
 				if(written != totalToWriteOut) {
 					if(b.remaining() + written != totalToWriteOut)
 						throw new IllegalStateException("Something went wrong.  b.remaining()="+b.remaining()+" written="+written+" total="+totalToWriteOut);
-					
+
 					registerForWrites();
 					inDelayedWriteMode = true;
-				} else
-					return true;
+				} else {
+					log.trace(()->this+" wrote bytes on client thread");
+					return CompletableFuture.completedFuture(null);
+				}
 			}
 
+			log.trace(()->this+"sent write to queue");
 			WriteInfo holder = new WriteInfo(b, future);
 			dataToBeWritten.add(holder);
-			
+
 			waitingBytesCounter += b.remaining();
 			if(waitingBytesCounter > maxBytesWaitingSize) {
 				log.warn("You have "+waitingBytesCounter+" bytes waiting to be written");
 			}
 		}
 
-        return false;
+        return future;
 	}
 
 	//synchronized with writeAll as both try to go through every element in the queue
 	//while most of the time there will be no contention(only on the close do we hit this)
-	private synchronized List<CompletableFuture<Channel>> failAllWritesInQueue() {
+	private synchronized List<CompletableFuture<Void>> failAllWritesInQueue() {
 		doNotAllowWrites = true;
-		List<CompletableFuture<Channel>> copy = new ArrayList<>();
+		List<CompletableFuture<Void>> copy = new ArrayList<>();
 		while(!dataToBeWritten.isEmpty()) {
 			WriteInfo runnable = dataToBeWritten.remove();
 			ByteBuffer buffer = runnable.getBuffer();
@@ -205,7 +197,7 @@ public abstract class BasChannelImpl
      *
      */
 	 void writeAll() {
-		List<CompletableFuture<Channel>> finishedPromises = new ArrayList<>();
+		List<CompletableFuture<Void>> finishedPromises = new ArrayList<>();
 		synchronized(writeLock) {
 	        if(dataToBeWritten.isEmpty())
 	        	throw new IllegalStateException("bug, I am not sure this is possible..it shouldn't be...look into");
@@ -229,8 +221,7 @@ public abstract class BasChannelImpl
 	            //if it finished, remove the item from the queue.  It
 	            //does not need to be run again.
 	            dataToBeWritten.poll();
-	            //release bytebuffer back to pool
-	            pool.releaseBuffer(writer.getBuffer());
+
 	            waitingBytesCounter -= initialSize;
 	            finishedPromises.add(writer.getPromise());
 	        }
@@ -244,8 +235,8 @@ public abstract class BasChannelImpl
 		}
 		
         //MAKE SURE to notify clients outside of synchronization block so no deadlocks with their locks
-        for(CompletableFuture<Channel> promise : finishedPromises) {
-        	promise.complete(this);
+        for(CompletableFuture<Void> promise : finishedPromises) {
+        	promise.complete(null);
         }
     }
 		
