@@ -12,9 +12,9 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 3. cd {projectDir}-all
 4. ./gradlew build # runs all the tests and verify everything is working.  If you want the selenium test to work install firefox 47.0.1
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
-6. cd {projectDir}-all/<projectDir>/output/distributions/
-7. unzip <projectDir> which is your whole webserver
-8. ./bin/<procect> to start the production webserver
+6. cd {projectDir}-all/{projectDir}/output/distributions/
+7. unzip {projectDir} which is your whole webserver
+8. ./bin/{project} to start the production webserver
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
     NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
   * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
@@ -120,7 +120,7 @@ This project is essentially pieces that can be used to build any http related so
   * cancel request cancets filedowload
   * cancel request cancels static file download(ie. stops reading from filesystem)
   * cancel request cancels file upload
-* (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture<...> is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
+* (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
 * backpressure
 * modify frontend to cache pipelined 1.1 requests and not serve to server until response finished each time
 * file upload
