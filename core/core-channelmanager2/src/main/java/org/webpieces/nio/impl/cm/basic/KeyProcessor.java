@@ -14,45 +14,34 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 
-public final class Helper {
+public final class KeyProcessor {
 
 	private static final Logger apiLog = LoggerFactory.getLogger(DataListener.class);
-	private static final Logger log = LoggerFactory.getLogger(Helper.class);
+	private static final Logger log = LoggerFactory.getLogger(KeyProcessor.class);
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
+	private JdkSelect selector;
 
-	private Helper() {}
-	
-	public static String opType(int ops) {
-		String retVal = "";
-		if((ops & SelectionKey.OP_ACCEPT) > 0)
-			retVal+="A";
-		if((ops & SelectionKey.OP_CONNECT) > 0)
-			retVal+="C";
-		if((ops & SelectionKey.OP_READ) > 0)
-			retVal+="R";
-		if((ops & SelectionKey.OP_WRITE) > 0)
-			retVal+="W";
-		
-		return retVal;
+	public KeyProcessor(JdkSelect selector) {
+		this.selector = selector;
 	}
 	
-	public static void processKeys(Set<SelectionKey> keySet, SelectorManager2 mgr, BufferPool pool) {
+	public void processKeys(Set<SelectionKey> keySet, BufferPool pool) {
 		Iterator<SelectionKey> iter = keySet.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
 			try {
 				key = iter.next();
 				final SelectionKey current = key;
-				log.trace(() -> current.attachment()+" ops="+Helper.opType(current.readyOps())
+				log.trace(() -> current.attachment()+" ops="+OpType.opType(current.readyOps())
 							+" acc="+current.isAcceptable()+" read="+current.isReadable()+" write"+current.isWritable());
-				processKey(key, mgr, pool);
-//			} catch(CancelledKeyException e) {
-//				log.log(Level.INFO, "Cancelled key may be normal", e);
+				processKey(key, pool);
+				
 			} catch(IOException e) {
 				log.error(key.attachment()+"Processing of key failed, closing channel", e);
 				try {
@@ -84,36 +73,36 @@ public final class Helper {
 		keySet.clear();
 	}
 	
-	private static void processKey(SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException, InterruptedException {
+	private void processKey(SelectionKey key, BufferPool pool) throws IOException, InterruptedException {
 		log.trace(() -> key.attachment()+"proccessing");
 
-		//This is code to try to avoid the CancelledKeyExceptions
-		if(!mgr.isChannelOpen(key) || !key.isValid())
+		//This is code to try to avoid the CancelledKeyExceptions as it makes the chances tighter
+		if(!selector.isChannelOpen(key) || !key.isValid())
 			return;
 		
 		//if isAcceptable, than is a ServerSocketChannel
 		if(key.isAcceptable()) {
-			Helper.acceptSocket(key);
+			acceptSocket(key);
 		} 
 		
 		if(key.isConnectable())
-			Helper.connect(key);
+			connect(key);
 		
 		if(key.isWritable()) {
-			Helper.write(key);
+			write(key);
 		}
             
 		//The read MUST be after the write as a call to key.isWriteable is invalid if the
 		//read resulted in the far end closing the socket.
 		if(key.isReadable()) {
-			Helper.read(key, mgr, pool);
+			read(key, pool);
 		}                   
 	}
 	
 	//each of these functions should be a handler for a new type that we set up
 	//on the outside of this thing.  The signature is the same thing every time
 	// and we pass key and the Channel.  We can cast to the proper one.
-	private static void acceptSocket(SelectionKey key) throws IOException {
+	private void acceptSocket(SelectionKey key) throws IOException {
 //		SelectableChannel s = key.channel();		
 		log.trace(() -> key.attachment()+"Incoming Connection="+key);
 		
@@ -122,20 +111,20 @@ public final class Helper {
 		channel.accept(channel.getChannelCount());
 	}
 	
-	private static void connect(SelectionKey key) throws IOException {
+	private void connect(SelectionKey key) throws IOException {
 		log.trace(() -> key.attachment()+"finishing connect process");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
 		CompletableFuture<Channel> callback = struct.getConnectCallback();
 		BasTCPChannel channel = (BasTCPChannel)struct.getChannel();
-		
-		//must change the interests to not interested in connect anymore
-		//since we are connected otherwise selector seems to keep firing over
-		//and over again with 0 keys wasting cpu like a while(true) loop
-		int interests = key.interestOps();
-		key.interestOps(interests & (~SelectionKey.OP_CONNECT));
-		
+
 		try {
+			//must change the interests to not interested in connect anymore
+			//since we are connected otherwise selector seems to keep firing over
+			//and over again with 0 keys wasting cpu like a while(true) loop
+			int interests = key.interestOps();
+			key.interestOps(interests & (~SelectionKey.OP_CONNECT));
+		
 			channel.finishConnect();
 			callback.complete(channel);
 		} catch(Exception e) {
@@ -144,7 +133,7 @@ public final class Helper {
 		}
 	}
 
-	private static void read(SelectionKey key, SelectorManager2 mgr, BufferPool pool) throws IOException {
+	private void read(SelectionKey key, BufferPool pool) throws IOException {
 		log.trace(() -> key.attachment()+"reading data");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
@@ -158,7 +147,7 @@ public final class Helper {
 			return; //do not process reads if we were unregistered
 		}
 		
-		ByteBuffer chunk = pool.nextBuffer(512);
+		ByteBuffer chunk = pool.nextBuffer(1024);
 		
 		try {
             if(logBufferNextRead)
@@ -169,7 +158,7 @@ public final class Helper {
             	log.info(channel+"buffer2="+chunk);                	
             }
 
-            processBytes(key, chunk, bytes, mgr);
+            processBytes(key, chunk, bytes);
             
 		} catch(PortUnreachableException e) {
             //this is a normal occurence when some writes out udp to a port that is not
@@ -225,18 +214,18 @@ public final class Helper {
             //throw an IOException: "An existing connection was forcibly closed by the remote host"
             //we also close UDPChannels as well on IOException.  Not sure if this is good or not.
 			
-			process(key, mgr, in, channel, chunk, e);
+			process(key, in, channel, chunk, e);
 		} catch(NioException e) {
 			Throwable cause = e.getCause();
 			if(cause instanceof IOException) {
 				IOException ioExc = (IOException) cause;
-				process(key, mgr, in, channel, chunk, ioExc);
+				process(key, in, channel, chunk, ioExc);
 			} else
 				throw e;
 		}
 	}
 
-	private static void process(SelectionKey key, SelectorManager2 mgr, DataListener in, BasChannelImpl channel,
+	private void process(SelectionKey key, DataListener in, BasChannelImpl channel,
 			ByteBuffer chunk, IOException e) throws IOException {
 		String msg = e.getMessage();
 		if(msg != null && 
@@ -244,7 +233,7 @@ public final class Helper {
 				|| msg.contains("Connection reset by peer")
 				|| msg.contains("An established connection was aborted by the software in your host machine"))) {
 		        log.trace(() -> "Exception 2", e);
-		        processBytes(key, chunk, -1, mgr);
+		        processBytes(key, chunk, -1);
 		} else {
 			log.error("IO Exception unexpected", e);
 			in.failure(channel, null, e);
@@ -258,7 +247,7 @@ public final class Helper {
      * @param mgr 
      * @throws IOException
      */
-    private static void processBytes(SelectionKey key, ByteBuffer data, int bytes, SelectorManager2 mgr) throws IOException
+    private void processBytes(SelectionKey key, ByteBuffer data, int bytes) throws IOException
     {
         WrapperAndListener struct = (WrapperAndListener)key.attachment();
         DataListener in = struct.getDataHandler();
@@ -277,7 +266,7 @@ public final class Helper {
 		}
     }
     
-	private static void write(SelectionKey key) throws IOException, InterruptedException {
+	private void write(SelectionKey key) throws IOException, InterruptedException {
 		log.trace(()->key.attachment()+"writing data");
 		
 		WrapperAndListener struct = (WrapperAndListener)key.attachment();
@@ -288,7 +277,7 @@ public final class Helper {
         channel.writeAll();  
 	}
 	
-	static void unregisterSelectableChannel(RegisterableChannelImpl channel, int ops) {
+	void unregisterSelectableChannel(RegisterableChannelImpl channel, int ops) {
 		SelectorManager2 mgr = channel.getSelectorManager();		
 		if(!Thread.currentThread().equals(mgr.getThread()))
 			throw new RuntimeException(channel+"Bug, changing selector keys can only be done " +

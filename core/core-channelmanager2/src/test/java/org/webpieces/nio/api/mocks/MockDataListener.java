@@ -1,10 +1,12 @@
 package org.webpieces.nio.api.mocks;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
+import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
@@ -25,8 +27,7 @@ public class MockDataListener extends MockSuperclass implements DataListener {
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		byte[] newData = new byte[b.remaining()];
 		b.get(newData);
-		ByteBuffer clonedData = ByteBuffer.wrap(newData);
-		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_DATA, channel, clonedData);
+		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_DATA, channel, newData);
 	}
 
 	@Override
@@ -40,6 +41,14 @@ public class MockDataListener extends MockSuperclass implements DataListener {
 		data.get(newData);
 		ByteBuffer clonedData = ByteBuffer.wrap(newData);
 		super.calledVoidMethod(Method.FAILURE, channel, clonedData, e);
+	}
+
+	public byte[] getSingleData() {
+		List<ParametersPassedIn> params = super.getCalledMethodList(Method.INCOMING_DATA);
+		if(params.size() != 1)
+			throw new IllegalArgumentException("method was called more than once");
+		ParametersPassedIn p = params.get(0);
+		return (byte[]) p.getArgs()[1];
 	}
 
 }

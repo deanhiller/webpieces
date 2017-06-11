@@ -28,6 +28,7 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 	private MockSelectionKey selectionKey;
 	private int numBytesToConsume;
 	private Queue<Byte> queue = new LinkedBlockingQueue<>();
+	private Queue<byte[]> toRead = new LinkedBlockingQueue<>();
 
 	public void addConnectReturnValue(boolean isConnected) {
 		super.addValueToReturn(Method.CONNECT, isConnected);
@@ -82,14 +83,16 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 	
 	@Override
 	public int read(ByteBuffer b) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
+		byte[] data = toRead.poll();
+		if(data == null)
+			return -1;
+
+		b.put(data);
+		return data.length;
 	}
 
 	@Override
 	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -180,11 +183,15 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 		return selectionKey;
 	}
 
-	public void setConnectReady() {
-		selectionKey.setConnectReady();
+	public void setReadyToConnect() {
+		selectionKey.setReadyToConnect();
 	}
-	public void setWriteReady() {
-		selectionKey.setWriteReady();
+	public void setReadyToWrite() {
+		selectionKey.setReadyToWrite();
+	}
+	
+	public void setReadyToRead() {
+		selectionKey.setReadyToRead();
 	}
 	
 	@Override
@@ -220,6 +227,9 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 	}
 	public int getNumBytesConsumed() {
 		return queue.size();
+	}
+	public void addToRead(byte[] buffer) {
+		toRead.add(buffer);
 	}
 
 }

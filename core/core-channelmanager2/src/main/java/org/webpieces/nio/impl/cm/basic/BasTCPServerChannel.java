@@ -37,10 +37,12 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	private final ConnectionListener connectionListener;
 	private BufferPool pool;	
 	private int channelCount = 0;
+	private KeyProcessor router;
 	
-	public BasTCPServerChannel(IdObject id, JdkSelect c, SelectorManager2 selMgr, 
+	public BasTCPServerChannel(IdObject id, JdkSelect c, SelectorManager2 selMgr, KeyProcessor router,
 			ConnectionListener listener, BufferPool pool) {
 		super(id, selMgr);
+		this.router = router;
 		this.connectionListener = listener;
         this.selector = c;
         this.pool = pool;
@@ -75,7 +77,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		
             SocketAddress remoteAddress = newChan.getRemoteAddress();
 			IdObject obj = new IdObject(getIdObject(), newSocketNum);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, remoteAddress, selMgr, pool);
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, remoteAddress, selMgr, router, pool);
 			log.trace(()->tcpChan+"Accepted new incoming connection");
 			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
 			future = connectFuture.thenCompose(l -> tcpChan.registerForReads(l)).thenApply(c -> null);

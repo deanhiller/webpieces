@@ -32,7 +32,7 @@ public abstract class ChannelRegistrationListener implements EventListener {
 
 	@Override
 	public String toString() {
-		return Helper.opType(validOps);
+		return OpType.opType(validOps);
 	}
 	
 }

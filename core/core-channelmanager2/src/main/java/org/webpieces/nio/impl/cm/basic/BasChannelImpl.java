@@ -48,11 +48,13 @@ public abstract class BasChannelImpl
 	protected SocketAddress isConnectingTo;
 	private boolean isRemoteEndInitiateClose;
 	protected boolean isConnected;
+	private KeyProcessor router;
 	
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
 		super(id, selMgr);
 		this.pool = pool;
 		this.isRecording = false;
+		this.router = router;
 	}
 	
 	/* (non-Javadoc)
@@ -230,7 +232,7 @@ public abstract class BasChannelImpl
 	        if(dataToBeWritten.isEmpty() && inDelayedWriteMode) {
 	        	inDelayedWriteMode = false;
 	        	log.trace(()->this+"unregister writes");
-	            Helper.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
+	            router.unregisterSelectableChannel(this, SelectionKey.OP_WRITE);
 	        }
 		}
 		

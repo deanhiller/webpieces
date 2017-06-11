@@ -77,7 +77,7 @@ public class TestConnecting {
 		Assert.assertEquals(0, mockChannel.getNumTimesFinishConnectCalled());
 
 		//NOW, fire the selector AND return ready for finishing connection so the connection future resolves
-		mockChannel.setConnectReady();
+		mockChannel.setReadyToConnect();
 		mockJdk.fireSelector();
 
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
@@ -106,7 +106,7 @@ public class TestConnecting {
 		Assert.assertFalse(mockChannel.isRegisteredForReads());
 
 		//NOW, fire the selector AND return ready for finishing connection so the connection future resolves
-		mockChannel.setConnectReady();
+		mockChannel.setReadyToConnect();
 		mockJdk.fireSelector();
 
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
@@ -142,7 +142,7 @@ public class TestConnecting {
 		}
 		
 		//NOW, fire the selector AND return ready for finishing connection so the connection future resolves
-		mockChannel.setConnectReady();
+		mockChannel.setReadyToConnect();
 		mockJdk.fireSelector();
 		
 		Assert.assertTrue(mockChannel.isRegisteredForReads());

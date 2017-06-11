@@ -32,8 +32,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	protected org.webpieces.nio.api.jdk.JdkSocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, JdkSelect selector, SelectorManager2 selMgr, BufferPool pool) {
-		super(id, selMgr, pool);
+	public BasTCPChannel(IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
+		super(id, selMgr, router, pool);
 		try {
 			channel = selector.open();
 			channel.configureBlocking(false);
@@ -49,8 +49,8 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param pool 
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, BufferPool pool) {
-		super(id, selMgr, pool);
+	public BasTCPChannel(IdObject id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
+		super(id, selMgr, router, pool);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;

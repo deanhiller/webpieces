@@ -20,6 +20,7 @@ import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
 import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
+import org.webpieces.nio.impl.cm.basic.KeyProcessor;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
 import org.webpieces.nio.impl.cm.basic.WrapperAndListener;
 import org.webpieces.util.logging.Logger;
@@ -33,8 +34,8 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	protected org.webpieces.nio.api.jdk.JdkDatagramChannel channel;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, JdkSelect selector, SelectorManager2 selMgr, BufferPool pool) {
-		super(id, selMgr, pool);
+	public UDPChannelImpl(IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
+		super(id, selMgr, router, pool);
 		try {
 			channel = selector.openDatagram();
 			channel.configureBlocking(false);

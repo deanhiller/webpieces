@@ -59,7 +59,7 @@ public class TestWriting {
 		Assert.assertFalse(future.isDone());		
 		Assert.assertTrue(mockChannel.isRegisteredForWrites());
 		
-		mockChannel.setWriteReady();
+		mockChannel.setReadyToWrite();
 		mockChannel.setNumBytesToConsume(2);
 		mockJdk.setThread(Thread.currentThread()); //simulate being on selector thread
 		//next simulate the selector waking up and firing
@@ -68,25 +68,25 @@ public class TestWriting {
 		Assert.assertEquals(2, mockChannel.nextByte());
 		Assert.assertEquals(5, mockChannel.nextByte());
 	}
-	
+
 	@Test
-	public void testSplitWrite() throws InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<Channel> future = channel.write(ByteBuffer.wrap(new byte[] { 9, 5 }));
-		Assert.assertFalse(future.isDone());		
-		Assert.assertTrue(mockChannel.isRegisteredForWrites());
-		
-		mockChannel.setWriteReady();
+	public void testDelayedSplitWrite() throws InterruptedException, ExecutionException, TimeoutException {
+		mockJdk.setThread(null); //simulate write not on selector thread
+
 		mockChannel.setNumBytesToConsume(1);
-		mockJdk.setThread(Thread.currentThread()); //simulate being on selector thread
-		//next simulate the selector waking up and firing
-		mockJdk.fireSelector();
-		
+
+		CompletableFuture<Channel> future = channel.write(ByteBuffer.wrap(new byte[] { 9, 5 }));
+		Assert.assertFalse(future.isDone());
 		Assert.assertEquals(1, mockChannel.getNumBytesConsumed());
 		Assert.assertEquals(9, mockChannel.nextByte());
 		
 		mockChannel.setNumBytesToConsume(1);
+		mockChannel.setReadyToWrite();
+		mockJdk.setThread(Thread.currentThread()); //simulate being on selector thread
+		//next simulate the selector waking up and firing
 		mockJdk.fireSelector();
-		
+
+		Assert.assertFalse(mockChannel.isRegisteredForWrites());
 		Assert.assertEquals(5, mockChannel.nextByte());
 	}
 }

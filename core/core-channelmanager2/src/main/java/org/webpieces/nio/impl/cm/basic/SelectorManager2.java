@@ -62,12 +62,15 @@ public class SelectorManager2 implements SelectorListener {
 
 	private String threadName;
 
+	private KeyProcessor helper;
+
 //--------------------------------------------------------------------
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(JdkSelect select, BufferPool pool, String threadName) {
+	public SelectorManager2(JdkSelect select, KeyProcessor helper, BufferPool pool, String threadName) {
         this.selector = select;
+		this.helper = helper;
         this.pool = pool;
         this.threadName = threadName;
 	}
@@ -122,7 +125,7 @@ public class SelectorManager2 implements SelectorListener {
 		else if(!isRunning())
 			throw new IllegalStateException("ChannelMgr is not running, call ChannelManager.start first");
 		else if(Thread.currentThread().equals(selector.getThread())) {
-			Helper.unregisterSelectableChannel(channel, ops);
+			helper.unregisterSelectableChannel(channel, ops);
 			return CompletableFuture.completedFuture(null);
 		} else
 			return asynchUnregister(channel, ops);			
@@ -156,7 +159,7 @@ public class SelectorManager2 implements SelectorListener {
 		WrapperAndListener struct;
 		
 		int previousOps = 0;
-		log.trace(()->channel+" registering ops="+Helper.opType(validOps));
+		log.trace(()->channel+" registering ops="+OpType.opType(validOps));
         
 		SelectionKey previous = channel.keyFor();
 		if(previous == null) {
@@ -175,7 +178,7 @@ public class SelectorManager2 implements SelectorListener {
 		
 		//log.info("registering="+Helper.opType(allOps)+" opsToAdd="+Helper.opType(validOps)+" previousOps="+Helper.opType(previousOps)+" type="+type);
 		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));	
-		log.trace(()->channel+"registered2 allOps="+Helper.opType(allOps));		
+		log.trace(()->channel+"registered2 allOps="+OpType.opType(allOps));		
 	}
 
 	private CompletableFuture<Void> asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
@@ -195,7 +198,7 @@ public class SelectorManager2 implements SelectorListener {
 		// the register can grab the lock.
 		ChannelRegistrationListener r = new ChannelRegistrationListener(future, validOps) {
 			public void run() {
-				Helper.unregisterSelectableChannel(s, validOps);
+				helper.unregisterSelectableChannel(s, validOps);
 			}
 		};
         
@@ -257,7 +260,7 @@ public class SelectorManager2 implements SelectorListener {
         
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
-        	Helper.processKeys(keySet, this, pool);
+        	helper.processKeys(keySet, pool);
         }
     }
 	
@@ -294,10 +297,6 @@ public class SelectorManager2 implements SelectorListener {
         if(selector == null)
             return false;
 		return selector.isRunning();
-	}
-	
-	public boolean isChannelOpen(SelectionKey key) {
-		return selector.isChannelOpen(key);
 	}
 	
 }
