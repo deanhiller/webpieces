@@ -36,8 +36,9 @@ public class MockSslListener implements SslListener {
 	}
 	
 	@Override
-	public void packetUnencrypted(ByteBuffer out) {
+	public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
 		unEncrypted.add(out);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 package org.webpieces.nio.impl.cm.basic;
 
 import java.io.IOException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -37,10 +36,9 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.testutil.nioapi.Select;
-import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
-import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
-import org.webpieces.nio.impl.cm.basic.nioimpl.ChannelRegistrationListener;
+import org.webpieces.nio.api.jdk.JdkSelect;
+import org.webpieces.nio.api.jdk.Keys;
+import org.webpieces.nio.api.jdk.SelectorListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -51,8 +49,7 @@ public class SelectorManager2 implements SelectorListener {
 //--------------------------------------------------------------------
 	private static final Logger log = LoggerFactory.getLogger(SelectorManager2.class);
 	
-    private Select selector;
-    private SelectorProviderFactory factory;
+    private JdkSelect selector;
 
 	private ConcurrentLinkedDeque<ChannelRegistrationListener> listenerList = new ConcurrentLinkedDeque<>();
     //flag for logs so we know that the selector was woken up to close a socket.
@@ -69,8 +66,8 @@ public class SelectorManager2 implements SelectorListener {
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(SelectorProviderFactory factory, BufferPool pool, String threadName) {
-        this.factory = factory;
+	public SelectorManager2(JdkSelect select, BufferPool pool, String threadName) {
+        this.selector = select;
         this.pool = pool;
         this.threadName = threadName;
 	}
@@ -78,11 +75,7 @@ public class SelectorManager2 implements SelectorListener {
 //	BUSINESS METHODS
 //--------------------------------------------------------------------
 	public synchronized void start() {        
-        selector = factory.provider();
-        
         selector.startPollingThread(this, threadName);
-
-        selector.setRunning(true);
 	}
 
 	/**
@@ -99,7 +92,7 @@ public class SelectorManager2 implements SelectorListener {
         }
 	}
 	
-	Select getSelector() {
+	JdkSelect getSelector() {
 		return selector;
 	}
 	
@@ -161,12 +154,11 @@ public class SelectorManager2 implements SelectorListener {
 			return; //do nothing if the selector is not running
 		
 		WrapperAndListener struct;
-		SelectableChannel s = channel.getRealChannel();
 		
 		int previousOps = 0;
-		log.trace(()->channel+"registering2="+s+" ops="+Helper.opType(validOps));
+		log.trace(()->channel+" registering ops="+Helper.opType(validOps));
         
-		SelectionKey previous = channel.keyFor(selector);
+		SelectionKey previous = channel.keyFor();
 		if(previous == null) {
 			struct = new WrapperAndListener(channel);
 		}else if(previous.attachment() == null) {
@@ -178,12 +170,12 @@ public class SelectorManager2 implements SelectorListener {
 		}
 		struct.addListener(listener, validOps);
 		int allOps = previousOps | validOps;
-		SelectionKey key = channel.register(selector, allOps, struct);
+		SelectionKey key = channel.register(allOps, struct);
 		channel.setKey(key);
 		
 		//log.info("registering="+Helper.opType(allOps)+" opsToAdd="+Helper.opType(validOps)+" previousOps="+Helper.opType(previousOps)+" type="+type);
 		//log.info(channel+"registered2="+s+" allOps="+Helper.opType(allOps)+" k="+Helper.opType(key.interestOps()));	
-		log.trace(()->channel+"registered2="+s+" allOps="+Helper.opType(allOps));		
+		log.trace(()->channel+"registered2 allOps="+Helper.opType(allOps));		
 	}
 
 	private CompletableFuture<Void> asynchUnregister(final RegisterableChannelImpl s, final int validOps) 
@@ -253,40 +245,22 @@ public class SelectorManager2 implements SelectorListener {
         //currently, this processes the registration requests.
         fireToListeners();
         
-        waitOnSelector();  
+		log.trace(()->"coming into select");
+		
+		final Keys keys = selector.select();
+		
+		log.trace(()->"coming out of select with newkeys="+keys.getKeyCount()+" setSize="+keys.getSelectedKeys().size()+
+					" regCnt="+listenerList.size()+" needCloseOrRegister="+needCloseOrRegister+
+					" wantShutdown="+selector.isWantShutdown());
         
-        //processKeys may will go through all keys and do some work, but 
-        //may not do all work it could on each key.  This is to keep from any
-        //client starving and from registrations starving in the case where one
-        //client just overloads the server and keeps sending a stream of data.
-        //he will be served with all the others in an equal priority round robin
-        //fashion.
-        Set<SelectionKey> keySet = selector.selectedKeys();
-        log.trace(()->"keySetCnt="+keySet.size()+" registerCnt="+listenerList.size()
-        			+" needCloseOrRegister="+needCloseOrRegister+" wantShutdown="+selector.isWantShutdown());
+        Set<SelectionKey> keySet = keys.getSelectedKeys();  
+        
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
         	Helper.processKeys(keySet, this, pool);
         }
     }
 	
-	protected int waitOnSelector() {
-		int numNewKeys = 0;
-		log.trace(()->"coming into select");
-		numNewKeys = selector.select();
-//should assert we are not stopping, have listeners, or have keys to process...
-
-		final int num = numNewKeys;
-		log.trace(()->"coming out of select with newkeys="+num+
-					" regCnt="+listenerList.size()+" needCloseOrRegister="+needCloseOrRegister+
-					" wantShutdown="+selector.isWantShutdown());
-
-//			assert numNewKeys > 0 || listenerList.getListenerCount() > 0 || selector.isWantShutdown() : 
-//				"Should only wakeup when we have stuff to do";
-			
-		return numNewKeys;
-	}
-
 	private void fireToListeners() {
 //		//ChannelRegistrationListener[] listeners = listenerList.getListeners(ChannelRegistrationListener.class);
 //		for(int i = 0; i < listeners.length; i++) {
@@ -320,6 +294,10 @@ public class SelectorManager2 implements SelectorListener {
         if(selector == null)
             return false;
 		return selector.isRunning();
+	}
+	
+	public boolean isChannelOpen(SelectionKey key) {
+		return selector.isChannelOpen(key);
 	}
 	
 }

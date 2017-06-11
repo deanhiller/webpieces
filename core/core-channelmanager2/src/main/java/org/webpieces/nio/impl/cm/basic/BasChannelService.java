@@ -11,8 +11,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DatagramListener;
-import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
-import org.webpieces.nio.api.testutil.nioapi.SelectorProviderFactory;
+import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.udp.DatagramChannelImpl;
 import org.webpieces.nio.impl.cm.basic.udp.UDPChannelImpl;
 
@@ -24,15 +23,14 @@ import org.webpieces.nio.impl.cm.basic.udp.UDPChannelImpl;
 class BasChannelService implements ChannelManager {
 
 	private SelectorManager2 selMgr;
-    private ChannelsFactory channelFactory;
+    private JdkSelect selector;
 	private boolean started;
 	private BufferPool pool;
-	
-	BasChannelService(String threadName, ChannelsFactory c, 
-			SelectorProviderFactory mgr, BufferPool pool) {
+
+	BasChannelService(String threadName, JdkSelect apis, BufferPool pool) {
 		this.pool = pool;
-		selMgr = new SelectorManager2(mgr, pool, threadName);
-        this.channelFactory = c;
+		selMgr = new SelectorManager2(apis, pool, threadName);
+        this.selector = apis;
         start();
 	}
 	
@@ -42,7 +40,7 @@ class BasChannelService implements ChannelManager {
         if(listener == null)
         	throw new IllegalArgumentException("connectionListener cannot be null");
         IdObject obj = new IdObject(id);
-        return new BasTCPServerChannel(obj, channelFactory, selMgr, listener, pool);
+        return new BasTCPServerChannel(obj, selector, selMgr, listener, pool);
 	}
 	
 	@Override
@@ -61,7 +59,7 @@ class BasChannelService implements ChannelManager {
     public TCPChannel createTCPChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(id);      
-        return new BasTCPChannel(obj, channelFactory, selMgr, pool);
+        return new BasTCPChannel(obj, selector, selMgr, pool);
 	}
 
 	@Override
@@ -73,7 +71,7 @@ class BasChannelService implements ChannelManager {
     public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(id);
-        return new UDPChannelImpl(obj, selMgr, pool);
+        return new UDPChannelImpl(obj, selector, selMgr, pool);
     }
     
 	@Override

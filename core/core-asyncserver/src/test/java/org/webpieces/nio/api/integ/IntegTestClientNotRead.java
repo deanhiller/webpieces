@@ -116,11 +116,12 @@ public class IntegTestClientNotRead {
 
 	private class ClientDataListener implements DataListener {
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
+		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			recordBytes(b.remaining());
 			
 			if(b.remaining() != 2000)
 				log.info("size of buffer="+b.remaining());	
+			return CompletableFuture.completedFuture(null);
 		}
 		
 		@Override
@@ -131,18 +132,6 @@ public class IntegTestClientNotRead {
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.info("failure", e);
-		}
-
-		@Override
-		public void applyBackPressure(Channel channel) {
-			log.info("client unregistering for reads");
-			channel.unregisterForReads();
-		}
-
-		@Override
-		public void releaseBackPressure(Channel channel) {
-			log.info("client registring for reads");
-			channel.registerForReads();
 		}
 	}
 }

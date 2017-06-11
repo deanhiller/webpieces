@@ -1,4 +1,4 @@
-package org.webpieces.nio.api;
+package org.webpieces.nio.api.mocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ public class MockConnectionListener implements ConnectionListener {
 	private List<Channel> channels = new ArrayList<>();
 	private DataListener dataListener;
 
-	public MockConnectionListener(MockDataListener serverListener) {
+	public MockConnectionListener(MockSslDataListener serverListener) {
 		this.dataListener = serverListener;
 	}
 

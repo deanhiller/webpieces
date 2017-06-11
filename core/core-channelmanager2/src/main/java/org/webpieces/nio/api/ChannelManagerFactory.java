@@ -1,9 +1,12 @@
 package org.webpieces.nio.api;
 
+import java.nio.channels.spi.SelectorProvider;
 import java.util.concurrent.Executor;
 
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.BasChanSvcFactory;
+import org.webpieces.nio.impl.jdk.JdkSelectorImpl;
 
 
 /**
@@ -16,7 +19,13 @@ public abstract class ChannelManagerFactory {
 	 * as the constants in ChannelManaagerFactory
 	 */
 	public static ChannelManagerFactory createFactory() {
-		return new BasChanSvcFactory();
+        SelectorProvider provider = SelectorProvider.provider();
+        JdkSelectorImpl selector = new JdkSelectorImpl(provider);
+		return createFactory(selector);
+	}
+	
+	public static ChannelManagerFactory createFactory(JdkSelect apis) {
+		return new BasChanSvcFactory(apis);
 	}
 	
 	/**

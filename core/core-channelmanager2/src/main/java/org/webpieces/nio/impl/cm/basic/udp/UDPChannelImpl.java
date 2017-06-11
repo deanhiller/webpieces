@@ -6,19 +6,22 @@ import java.net.InetSocketAddress;
 import java.net.PortUnreachableException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SelectableChannel;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
 import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.NioPortUnreachableException;
+import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
+import org.webpieces.nio.impl.cm.basic.WrapperAndListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -27,14 +30,14 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 
 	private static final Logger log = LoggerFactory.getLogger(UDPChannel.class);
 	private static final Logger apiLog = LoggerFactory.getLogger(UDPChannel.class);
-	private DatagramChannel channel;
+	protected org.webpieces.nio.api.jdk.JdkDatagramChannel channel;
 	private boolean isConnected = false;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, SelectorManager2 selMgr, BufferPool pool) {
+	public UDPChannelImpl(IdObject id, JdkSelect selector, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr, pool);
 		try {
-			channel = DatagramChannel.open();
+			channel = selector.openDatagram();
 			channel.configureBlocking(false);
 	        channel.socket().setReuseAddress(true);
 		} catch(IOException e) {
@@ -44,6 +47,10 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 
 	public void bindImpl2(SocketAddress addr) throws IOException {
         channel.socket().bind(addr);
+	}
+	
+	protected boolean isOpen() {
+		return channel.isOpen();
 	}
 	
 	protected synchronized CompletableFuture<Channel> connectImpl(SocketAddress addr) {
@@ -107,11 +114,6 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	public boolean isConnected() {
 		return channel.isConnected();
 	}
-
-	@Override
-	public SelectableChannel getRealChannel() {
-		return channel;
-	}
 	
 	@Override
 	public int readImpl(ByteBuffer b) {
@@ -150,6 +152,26 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	@Override
 	public boolean isSslChannel() {
 		return false;
+	}
+
+	@Override
+	protected SelectionKey keyFor() {
+		return channel.keyFor();
+	}
+
+	@Override
+	protected SelectionKey register(int allOps, WrapperAndListener struct) {
+		try {
+			return channel.register(allOps, struct);
+		} catch (ClosedChannelException e) {
+			throw new NioClosedChannelException("Closed Channel", e);
+		}
+	}
+
+	@Override
+	protected void resetRegisteredOperations(int ops) {
+		channel.resetRegisteredOperations(ops);
+		
 	}
 
 }

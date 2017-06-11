@@ -6,7 +6,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.nio.channels.SelectableChannel;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;
@@ -14,11 +15,12 @@ import java.util.concurrent.ExecutionException;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
+import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -30,20 +32,20 @@ import org.webpieces.util.logging.LoggerFactory;
 class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerChannel {
 
 	private static final Logger log = LoggerFactory.getLogger(BasTCPServerChannel.class);
-	private final ServerSocketChannel channel;
-    private final ChannelsFactory channelFactory;
+	protected org.webpieces.nio.api.jdk.JdkServerSocketChannel channel;
+    private final JdkSelect selector;
 	private final ConnectionListener connectionListener;
 	private BufferPool pool;	
 	private int channelCount = 0;
 	
-	public BasTCPServerChannel(IdObject id, ChannelsFactory c, SelectorManager2 selMgr, 
+	public BasTCPServerChannel(IdObject id, JdkSelect c, SelectorManager2 selMgr, 
 			ConnectionListener listener, BufferPool pool) {
 		super(id, selMgr);
 		this.connectionListener = listener;
-        this.channelFactory = c;
+        this.selector = c;
         this.pool = pool;
         try {
-        	channel = ServerSocketChannel.open();
+        	channel = c.openServerSocket();
         	channel.configureBlocking(false);
         } catch(IOException e) {
         	throw new NioException(e);
@@ -58,6 +60,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	 * @see api.biz.xsoftware.nio.TCPServerChannel#accept()
 	 */
 	public void accept(int newSocketNum) throws IOException {
+		CompletableFuture<Void> future;
 		try {
 			//special code...see information in close() method
 			if(isClosed())
@@ -68,19 +71,25 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 				return;
 			newChan.configureBlocking(false);
             
-            org.webpieces.nio.api.testutil.chanapi.SocketChannel proxyChan = channelFactory.open(newChan);
+            org.webpieces.nio.api.jdk.JdkSocketChannel proxyChan = selector.open(newChan);
 		
             SocketAddress remoteAddress = newChan.getRemoteAddress();
 			IdObject obj = new IdObject(getIdObject(), newSocketNum);
-			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, remoteAddress, getSelectorManager(), pool);
+			BasTCPChannel tcpChan = new BasTCPChannel(obj, proxyChan, remoteAddress, selMgr, pool);
 			log.trace(()->tcpChan+"Accepted new incoming connection");
 			CompletableFuture<DataListener> connectFuture = connectionListener.connected(tcpChan, true);
-			connectFuture.thenAccept(l -> tcpChan.registerForReads(l));
+			future = connectFuture.thenCompose(l -> tcpChan.registerForReads(l)).thenApply(c -> null);
 			
 		} catch(Throwable e) {
-			log.error(this+"Failed to connect", e);
-			connectionListener.failed(this, e);
+			future = new CompletableFuture<Void>();
+			future.completeExceptionally(e);
 		}
+		
+		future.exceptionally(t -> {
+			log.error(this+"Failed to connect", t);
+			connectionListener.failed(this, t);
+			return null;
+		});
 	}
 	
 	public void registerForReads(DataListener listener) throws IOException, InterruptedException {
@@ -92,7 +101,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			throw new IllegalArgumentException("Only bound sockets can be registered or selector doesn't work");
 
 		try {
-			CompletableFuture<Void> future = getSelectorManager().registerServerSocketChannel(this, cb);
+			CompletableFuture<Void> future = selMgr.registerServerSocketChannel(this, cb);
 			future.get();
 		} catch (IOException e) {
 			throw new NioException(e);
@@ -159,11 +168,6 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 		return channel.socket().isClosed();
 	}
 	
-	/**
-	 */
-	public SelectableChannel getRealChannel() {
-		return channel;
-	}
 	/* (non-Javadoc)
 	 * @see api.biz.xsoftware.nio.RegisterableChannel#isBlocking()
 	 */
@@ -197,7 +201,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	public void configure(ConsumerFunc<ServerSocketChannel> methodToConfigure) {
 		try {
 			if(methodToConfigure != null)
-				methodToConfigure.accept(channel);
+				methodToConfigure.accept(channel.getRealChannel());
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -205,6 +209,25 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 
 	@Override
 	public ServerSocketChannel getUnderlyingChannel() {
-		return channel;
+		return channel.getRealChannel();
+	}
+
+	@Override
+	protected SelectionKey keyFor() {
+		return channel.keyFor();
+	}
+
+	@Override
+	protected SelectionKey register(int allOps, WrapperAndListener struct) {
+		try {
+			return channel.register(allOps, struct);
+		} catch (ClosedChannelException e) {
+			throw new NioClosedChannelException("darn checked exceptions", e);
+		}
+	}
+
+	@Override
+	protected void resetRegisteredOperations(int ops) {
+		channel.resetRegisteredOperations(ops);
 	}	
 }

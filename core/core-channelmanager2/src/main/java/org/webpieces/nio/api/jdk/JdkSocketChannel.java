@@ -1,16 +1,17 @@
-package org.webpieces.nio.api.testutil.chanapi;
+package org.webpieces.nio.api.jdk;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
 
 
 /**
  */
-public interface SocketChannel
+public interface JdkSocketChannel
 {
 
     /**
@@ -60,6 +61,10 @@ public interface SocketChannel
      */
     boolean isClosed();
 
+    //oddly enough, it could be this is not the same as closed when peeking under the covers the answers come from different
+    //locations when you compare isClosed and isOpen
+    boolean isOpen();
+    
     /**
      * @return true if this channel is connected, and false otherwise.
      */
@@ -103,15 +108,21 @@ public interface SocketChannel
      */
     void finishConnect() throws IOException;
 
-    /**
-     * @return the SelectableChannel for this Channel
-     */
-    SelectableChannel getSelectableChannel();
+//    /**
+//     * @return the SelectableChannel for this Channel
+//     */
+//    SelectableChannel getSelectableChannel();
 
 	void setKeepAlive(boolean b) throws SocketException;
 
 	boolean getKeepAlive() throws SocketException;
 
 	int getSoTimeout() throws SocketException;
+
+	SelectionKey register(int allOps, Object struct) throws ClosedChannelException;
+
+	SelectionKey keyFor();
+
+	void resetRegisteredOperations(int ops);
 
 }

@@ -81,10 +81,9 @@ public class Layer2Http1_1Handler {
 		return new InitiationResult(state.getLeftOverData(), InitiationStatus.PREFACE);
 	}
 
-	public void incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
+	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
 		Memento state = parse(socket, buf);
-		CompletableFuture<Void> future = processHttp1Messages(socket, state);
-		//return the future
+		return processHttp1Messages(socket, state);
 	}
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {

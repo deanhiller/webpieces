@@ -2,6 +2,7 @@ package org.webpieces.frontend2.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.frontend2.api.ServerSocketInfo;
@@ -30,18 +31,16 @@ public class Layer1ServerListener implements AsyncDataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		FrontendSocketImpl socket = getSocket(channel);
 		switch (socket.getProtocol()) {
 		case HTTP2:
-			http2Handler.incomingData(socket, b);
-			break;
+			return http2Handler.incomingData(socket, b);
 		case HTTP1_1:
-			http1_1Handler.incomingData(socket, b);
-			break;
+			return http1_1Handler.incomingData(socket, b);
 		case UNKNOWN:
 			initialData(b, socket);
-			break;
+			return CompletableFuture.completedFuture(null);
 		default:
 			throw new IllegalStateException("Unknown protocol="+socket.getProtocol());
 		}
@@ -96,14 +95,6 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	@Override
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-	}
-
-	@Override
-	public void applyBackPressure(Channel channel) {
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
 	}
 
 	@Override

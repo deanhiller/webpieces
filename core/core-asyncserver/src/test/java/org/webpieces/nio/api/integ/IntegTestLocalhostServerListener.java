@@ -16,24 +16,14 @@ public class IntegTestLocalhostServerListener implements AsyncDataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
-		CompletableFuture<Channel> future = channel.write(b);
-		
-		future
-			.thenAccept(p -> finished("data written", b))
-			.whenComplete((r, e) -> fail(channel, b, r, e));
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		return channel.write(b)
+				.thenAccept(p -> finished("data written", b));
 	}
 
 	private void finished(String string, ByteBuffer buffer) {
 	}
 
-	private void fail(Channel channel, ByteBuffer b, Void r, Throwable e) {
-		if(e != null) {
-			log.info("finished exception="+e, e);
-			channel.close();
-		}
-	}
-	
 	@Override
 	public void connectionOpened(TCPChannel proxy, boolean isReadyForWrites) {
 		log.info("opened connection="+proxy);
@@ -49,24 +39,4 @@ public class IntegTestLocalhostServerListener implements AsyncDataListener {
 		log.info("failure on processing", e);
 	}
 
-	@Override
-	public void applyBackPressure(Channel channel) {
-		//log.info("server apply backpressure");
-		channel.unregisterForReads().thenAccept(c -> logIt());
-	}
-
-	private void logIt() {
-		//log.info("UNregistereD for reads");
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
-		//log.info("server releasing backpressure");
-		channel.registerForReads().thenAccept(c -> logMe());
-		
-	}
-
-	private void logMe() {
-		//log.info("registereD for reads");
-	}
 }

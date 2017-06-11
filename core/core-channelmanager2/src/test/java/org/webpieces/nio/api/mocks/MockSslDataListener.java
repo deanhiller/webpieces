@@ -1,4 +1,4 @@
-package org.webpieces.nio.api;
+package org.webpieces.nio.api.mocks;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -8,18 +8,20 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-public class MockDataListener implements DataListener {
+public class MockSslDataListener implements DataListener {
 
 	private List<ByteBuffer> buffers = new ArrayList<>();
 	private CompletableFuture<ByteBuffer> firstBufferFuture;
 	private boolean isClosed;
 
 	@Override
-	public synchronized void incomingData(Channel channel, ByteBuffer b) {
+	public synchronized CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		if(buffers.isEmpty() && firstBufferFuture != null) {
 			firstBufferFuture.complete(b);
 		}
 		this.buffers.add(b);
+		
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override
@@ -29,14 +31,6 @@ public class MockDataListener implements DataListener {
 
 	@Override
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
-	}
-
-	@Override
-	public void applyBackPressure(Channel channel) {
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
 	}
 
 	public synchronized CompletableFuture<ByteBuffer> getFirstBuffer() {

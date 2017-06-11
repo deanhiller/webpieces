@@ -14,7 +14,7 @@ public interface Http2ServerEngine {
 	 */
 	CompletableFuture<Void> sendPing();
 	
-	void parse(DataWrapper newData);
+	CompletableFuture<Void> parse(DataWrapper newData);
 	
 	/**
 	 * completely tear down engine

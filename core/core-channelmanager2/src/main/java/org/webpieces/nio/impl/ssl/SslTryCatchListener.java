@@ -1,6 +1,7 @@
 package org.webpieces.nio.impl.ssl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -19,11 +20,14 @@ public class SslTryCatchListener implements DataListener {
 		this.listener = listener;
 	}
 
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		try {
-			listener.incomingData(channel, b);
+			return listener.incomingData(channel, b);
 		} catch (Throwable e) {
 			log.error("Exception", e);
+			CompletableFuture<Void> future = new CompletableFuture<>();
+			future.completeExceptionally(e);
+			return future;
 		}
 	}
 
@@ -45,22 +49,6 @@ public class SslTryCatchListener implements DataListener {
 			listener.failure(channel, data, e);
 		} catch (Throwable ee) {
 			log.error("Exception processing other exception", ee);
-		}
-	}
-
-	public void applyBackPressure(Channel channel) {
-		try {
-			listener.applyBackPressure(channel);
-		} catch (Throwable e) {
-			log.error("Exception", e);
-		}
-	}
-
-	public void releaseBackPressure(Channel channel) {
-		try {
-			listener.releaseBackPressure(channel);
-		} catch (Throwable e) {
-			log.error("Exception", e);
 		}
 	}
 

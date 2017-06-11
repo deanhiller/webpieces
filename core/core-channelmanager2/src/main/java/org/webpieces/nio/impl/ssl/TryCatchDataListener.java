@@ -1,6 +1,7 @@
 package org.webpieces.nio.impl.ssl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -23,11 +24,14 @@ public class TryCatchDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		try {
-			dataListener.incomingData(channel, b);
+			return dataListener.incomingData(channel, b);
 		} catch(Throwable e) {
 			log.error("Exception", e);
+			CompletableFuture<Void> fut = new CompletableFuture<Void>();
+			fut.completeExceptionally(e);
+			return fut;
 		}
 	}
 
@@ -46,24 +50,6 @@ public class TryCatchDataListener implements DataListener {
 			dataListener.failure(channel, data, e);
 		} catch(Throwable ee) {
 			log.error("Exception caught trying to handle the other exception(the other exception IS more important)", ee);
-		}
-	}
-
-	@Override
-	public void applyBackPressure(Channel channel) {
-		try {
-			dataListener.applyBackPressure(channel);
-		} catch(Throwable e) {
-			log.error("Exception", e);
-		}
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
-		try {
-			dataListener.releaseBackPressure(channel);
-		} catch(Throwable e) {
-			log.error("Exception", e);
 		}
 	}
 

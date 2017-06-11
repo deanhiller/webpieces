@@ -1,34 +1,39 @@
-package org.webpieces.nio.impl.cm.basic.chanimpl;
+package org.webpieces.nio.impl.jdk;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 
 
 /**
  */
-public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi.SocketChannel{
+public class JdkSocketChannelImpl implements org.webpieces.nio.api.jdk.JdkSocketChannel{
 
     private SocketChannel channel;
+	private Selector selector;
 
-    public SocketChannelImpl(SocketChannel c) {
+    public JdkSocketChannelImpl(SocketChannel c, Selector selector) {
         channel = c;
+		this.selector = selector;
     }
     
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#configureBlocking(boolean)
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#configureBlocking(boolean)
      */
     public void configureBlocking(boolean b) throws IOException {
         channel.configureBlocking(b);
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#isBlocking()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#isBlocking()
      */
     public boolean isBlocking() {
         return channel.isBlocking();
@@ -36,14 +41,14 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#bind(java.net.SocketAddress)
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#bind(java.net.SocketAddress)
      */
     public void bind(SocketAddress addr) throws IOException {
         channel.socket().bind(addr);
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#isBound()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#isBound()
      */
     public boolean isBound() {
         return channel.socket().isBound();
@@ -51,7 +56,7 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#write(java.nio.ByteBuffer)
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#write(java.nio.ByteBuffer)
      */
     public int write(ByteBuffer b) throws IOException {
         return channel.write(b);
@@ -59,7 +64,7 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#read(java.nio.ByteBuffer)
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#read(java.nio.ByteBuffer)
      */
     public int read(ByteBuffer b) throws IOException {
         return channel.read(b);
@@ -67,7 +72,7 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#close()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#close()
      */
     public void close() throws IOException {
         channel.socket().close();
@@ -75,15 +80,20 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#isClosed()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#isClosed()
      */
     public boolean isClosed()
     {
         return channel.socket().isClosed();
     }
 
+	@Override
+	public boolean isOpen() {
+		return getSelectableChannel().isOpen();
+	}
+	
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#isConnected()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#isConnected()
      */
     public boolean isConnected()
     {
@@ -92,7 +102,7 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#connect(java.net.SocketAddress)
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#connect(java.net.SocketAddress)
      */
     public boolean connect(SocketAddress addr) throws IOException
     {
@@ -101,35 +111,35 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws SocketException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#setReuseAddress(boolean)
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#setReuseAddress(boolean)
      */
     public void setReuseAddress(boolean b) throws SocketException {
         channel.socket().setReuseAddress(b);
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#getInetAddress()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#getInetAddress()
      */
     public InetAddress getInetAddress() {
         return channel.socket().getInetAddress();
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#getPort()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#getPort()
      */
     public int getPort() {
         return channel.socket().getPort();
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#getLocalAddress()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#getLocalAddress()
      */
     public InetAddress getLocalAddress() {
         return channel.socket().getLocalAddress();
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#getLocalPort()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#getLocalPort()
      */
     public int getLocalPort() {
         return channel.socket().getLocalPort();
@@ -137,16 +147,16 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 
     /**
      * @throws IOException 
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#finishConnect()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#finishConnect()
      */
     public void finishConnect() throws IOException {
         channel.finishConnect();
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.chanapi.SocketChannel#getSelectableChannel()
+     * @see org.webpieces.nio.api.jdk.JdkSocketChannel#getSelectableChannel()
      */
-    public java.nio.channels.SelectableChannel getSelectableChannel()
+    private java.nio.channels.SelectableChannel getSelectableChannel()
     {
         return channel;
     }
@@ -162,6 +172,25 @@ public class SocketChannelImpl implements org.webpieces.nio.api.testutil.chanapi
 	@Override
 	public int getSoTimeout() throws SocketException {
 		return channel.socket().getSoTimeout();
+	}
+
+	@Override
+	public SelectionKey register(int allOps, Object struct) throws ClosedChannelException {
+    	if(struct == null)
+    		throw new IllegalArgumentException("struct cannot be null");
+    	
+		return getSelectableChannel().register(selector, allOps, struct);
+	}
+
+	@Override
+	public SelectionKey keyFor() {
+        return getSelectableChannel().keyFor(selector);
+	}
+
+	@Override
+	public void resetRegisteredOperations(int ops) {
+		SelectionKey key = keyFor();
+		key.interestOps(ops);
 	}
 
 }

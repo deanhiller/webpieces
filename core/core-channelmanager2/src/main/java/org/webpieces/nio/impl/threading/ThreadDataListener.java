@@ -1,6 +1,7 @@
 package org.webpieces.nio.impl.threading;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -17,13 +18,23 @@ public class ThreadDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		executor.execute(channel, new Runnable() {
 			@Override
 			public void run() {
-				dataListener.incomingData(channel, b);
+				CompletableFuture<Void> fut = dataListener.incomingData(channel, b);
+				fut.handle((v, t) -> {
+					if(t == null)
+						future.complete(null);
+					else
+						future.completeExceptionally(t);
+					return null;
+				});
 			}
 		});
+		
+		return future;
 	}
 
 	@Override
@@ -42,26 +53,6 @@ public class ThreadDataListener implements DataListener {
 			@Override
 			public void run() {
 				dataListener.failure(channel, data, e);
-			}
-		});
-	}
-
-	@Override
-	public void applyBackPressure(Channel channel) {
-		executor.execute(channel, new Runnable() {
-			@Override
-			public void run() {
-				dataListener.applyBackPressure(channel);
-			}
-		});
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
-		executor.execute(channel, new Runnable() {
-			@Override
-			public void run() {
-				dataListener.releaseBackPressure(channel);
 			}
 		});
 	}

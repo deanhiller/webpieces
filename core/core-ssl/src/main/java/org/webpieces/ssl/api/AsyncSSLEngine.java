@@ -32,7 +32,7 @@ public interface AsyncSSLEngine {
 	 * 
 	 * @param buffer The bytes
 	 */	
-	void feedEncryptedPacket(ByteBuffer buffer);
+	CompletableFuture<Void> feedEncryptedPacket(ByteBuffer buffer);
 
 	/**
 	 * To be called after running the Runnable from Action.RUN_RUNNABLE

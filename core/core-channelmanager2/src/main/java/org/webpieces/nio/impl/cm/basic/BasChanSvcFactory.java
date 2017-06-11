@@ -5,8 +5,7 @@ import java.util.concurrent.Executor;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.nio.impl.cm.basic.chanimpl.ChannelsFactoryImpl;
-import org.webpieces.nio.impl.cm.basic.nioimpl.SelectorProvFactoryImpl;
+import org.webpieces.nio.api.jdk.JdkSelect;
 import org.webpieces.nio.impl.ssl.SslChannelService;
 import org.webpieces.nio.impl.threading.ThreadedChannelService;
 
@@ -17,9 +16,15 @@ import org.webpieces.nio.impl.threading.ThreadedChannelService;
  */
 public class BasChanSvcFactory extends ChannelManagerFactory {
 	
+	private JdkSelect select;
+
+	public BasChanSvcFactory(JdkSelect apis) {
+		this.select = apis;
+	}
+
 	@Override
 	public ChannelManager createSingleThreadedChanMgr(String threadName, BufferPool pool) {
-		BasChannelService mgr = new BasChannelService(threadName, new ChannelsFactoryImpl(), new SelectorProvFactoryImpl(), pool);
+		BasChannelService mgr = new BasChannelService(threadName, select, pool);
 		return new SslChannelService(mgr, pool);
 	}
 

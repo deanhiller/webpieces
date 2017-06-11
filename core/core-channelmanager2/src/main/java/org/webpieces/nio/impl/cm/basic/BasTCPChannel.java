@@ -7,15 +7,17 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.testutil.chanapi.ChannelsFactory;
-import org.webpieces.nio.api.testutil.chanapi.SocketChannel;
+import org.webpieces.nio.api.jdk.JdkSelect;
+import org.webpieces.nio.api.jdk.JdkSocketChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -28,12 +30,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 
 	private static final Logger apiLog = LoggerFactory.getLogger(TCPChannel.class);
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
-	private org.webpieces.nio.api.testutil.chanapi.SocketChannel channel;
+	protected org.webpieces.nio.api.jdk.JdkSocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, ChannelsFactory factory, SelectorManager2 selMgr, BufferPool pool) {
+	public BasTCPChannel(IdObject id, JdkSelect selector, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr, pool);
 		try {
-			channel = factory.open();
+			channel = selector.open();
 			channel.configureBlocking(false);
 		} catch(IOException e) {
 			throw new NioException(e);
@@ -47,7 +49,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * @param pool 
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, SocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, BufferPool pool) {
+	public BasTCPChannel(IdObject id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, BufferPool pool) {
 		super(id, selMgr, pool);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
@@ -64,6 +66,10 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 */
 	public boolean isBound() {
 		return channel.isBound();
+	}
+	
+	protected boolean isOpen() {
+		return channel.isOpen();
 	}
 	
 	protected int writeImpl(ByteBuffer b) {
@@ -132,7 +138,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 					log.error(this+"Exception occurred", e);
 				}
 			} else {
-				return getSelectorManager().registerChannelForConnect(this);
+				return selMgr.registerChannelForConnect(this);
 			}
 		} catch(Throwable t) {
 			log.error("connecting failed");
@@ -143,13 +149,6 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	
 	public boolean isBlocking() {
 		return channel.isBlocking();
-	}
-
-	/* (non-Javadoc)
-	 * @see biz.xsoftware.nio.RegisterableChannelImpl#getRealChannel()
-	 */
-	public SelectableChannel getRealChannel() {
-		return channel.getSelectableChannel();
 	}
 	
 	/* (non-Javadoc)
@@ -223,6 +222,28 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	@Override
 	public boolean isSslChannel() {
 		return false;
+	}
+
+
+	@Override
+	protected SelectionKey keyFor() {
+		return channel.keyFor();
+	}
+
+
+	@Override
+	protected SelectionKey register(int allOps, WrapperAndListener struct) {
+		try {
+			return channel.register(allOps, struct);
+		} catch (ClosedChannelException e) {
+			throw new NioClosedChannelException("On registering, we received closedChannel(did remote end or local end close the socket", e);
+		}
+	}
+
+
+	@Override
+	protected void resetRegisteredOperations(int ops) {
+		channel.resetRegisteredOperations(ops);
 	}
 
 }

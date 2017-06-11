@@ -139,8 +139,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		}
 		
 		@Override
-		public void packetUnencrypted(ByteBuffer out) {
-			clientDataListener.incomingData(SslTCPChannel.this, out);
+		public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
+			return clientDataListener.incomingData(SslTCPChannel.this, out);
 		}
 
 		@Override
@@ -164,14 +164,14 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private class SocketDataListener implements DataListener {
 		
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
+		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			if(sslEngine == null) {
 				b = setupSSLEngine(channel, b);
 				if(b == null)
-					return; //not fully setup yet
+					return CompletableFuture.completedFuture(null); //not fully setup yet
 			}
 			
-			sslEngine.feedEncryptedPacket(b);
+			return sslEngine.feedEncryptedPacket(b);
 		}
 
 		private ByteBuffer setupSSLEngine(Channel channel, ByteBuffer b) {
@@ -214,16 +214,6 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			clientDataListener.failure(SslTCPChannel.this, data, e);
-		}
-	
-		@Override
-		public void applyBackPressure(Channel channel) {
-			clientDataListener.applyBackPressure(SslTCPChannel.this);
-		}
-	
-		@Override
-		public void releaseBackPressure(Channel channel) {
-			clientDataListener.releaseBackPressure(SslTCPChannel.this);
 		}
 	}
 	

@@ -1,9 +1,8 @@
-package org.webpieces.nio.impl.cm.basic.nioimpl;
+package org.webpieces.nio.impl.cm.basic;
 
 import java.util.EventListener;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.impl.cm.basic.Helper;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

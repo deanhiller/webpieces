@@ -13,13 +13,15 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
+import org.webpieces.nio.api.mocks.MockConnectionListener;
+import org.webpieces.nio.api.mocks.MockSslDataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 public class TestBasicSsl {
 
-	private MockDataListener mockSvrDataListener = new MockDataListener();
+	private MockSslDataListener mockSvrDataListener = new MockSslDataListener();
 	private MockConnectionListener mockConnListener = new MockConnectionListener(mockSvrDataListener);
-	private MockDataListener mockClientDataListener = new MockDataListener();
+	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
 	
 	@Test
 	public void testBasic() throws InterruptedException, ExecutionException {

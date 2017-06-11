@@ -1,11 +1,9 @@
 package org.webpieces.nio.impl.cm.basic;
 
 import java.io.IOException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 
 import org.webpieces.nio.api.channels.RegisterableChannel;
-import org.webpieces.nio.api.testutil.nioapi.Select;
 
 
 
@@ -15,7 +13,7 @@ import org.webpieces.nio.api.testutil.nioapi.Select;
 abstract class RegisterableChannelImpl implements RegisterableChannel {
 
 	protected IdObject id;
-	private SelectorManager2 selMgr;
+	protected SelectorManager2 selMgr;
 	private SelectionKey key;
 
 	public RegisterableChannelImpl(IdObject id, SelectorManager2 selMgr) {
@@ -54,13 +52,8 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
 		return id.toString();
 	}
 	
-	public abstract SelectableChannel getRealChannel();
+	//public abstract SelectableChannel getRealChannel();
 
-	/**
-	 */
-	public SelectorManager2 getSelectorManager() {
-		return selMgr;
-	}
 	/**
 	 */
 	public void setKey(SelectionKey k) {
@@ -81,18 +74,29 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
 		selMgr.wakeUpSelector();
 	}
 
-    /**
-     */
-    public SelectionKey keyFor(Select select) {
-        return select.getKeyFromChannel(getRealChannel());
-    }
+//    /**
+//     */
+//    public SelectionKey keyFor(Select select) {
+//        return select.getKeyFromChannel(getRealChannel());
+//    }
+//
+//    /**
+//     * @param allOps
+//     * @param struct
+//     */
+//    public SelectionKey register(Select select, int allOps, WrapperAndListener struct) {
+//        SelectableChannel s = getRealChannel();
+//        return select.register(s, allOps, struct);
+//    }
 
-    /**
-     * @param allOps
-     * @param struct
-     */
-    public SelectionKey register(Select select, int allOps, WrapperAndListener struct) {
-        SelectableChannel s = getRealChannel();
-        return select.register(s, allOps, struct);
-    }
+	protected abstract SelectionKey keyFor();
+
+	protected abstract SelectionKey register(int allOps, WrapperAndListener struct);
+
+	protected abstract void resetRegisteredOperations(int ops);
+
+	public SelectorManager2 getSelectorManager() {
+		return selMgr;
+	}
+	
 }

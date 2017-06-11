@@ -37,11 +37,11 @@ public class Layer1Incoming implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		log.info(channel+"incoming data. size="+b.remaining());
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		//log.info("data="+data.createStringFrom(0, data.getReadableSize(), StandardCharsets.UTF_8));
-		layer2.parse(data);
+		return layer2.parse(data);
 	}
 
 	@Override
@@ -52,16 +52,6 @@ public class Layer1Incoming implements DataListener {
 	@Override
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
 		log.warn("failure", e);
-	}
-
-	@Override
-	public void applyBackPressure(Channel channel) {
-		log.info("apply back pressure");
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
-		log.info("apply back pressure");
 	}
 
 }

@@ -14,7 +14,6 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.nio.api.testutil.nioapi.Select;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -89,7 +88,7 @@ public final class Helper {
 		log.trace(() -> key.attachment()+"proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions
-		if(!key.channel().isOpen() || !key.isValid())
+		if(!mgr.isChannelOpen(key) || !key.isValid())
 			return;
 		
 		//if isAcceptable, than is a ServerSocketChannel
@@ -298,15 +297,14 @@ public final class Helper {
 		//this could be dangerous and result in deadlock....may want
 		//to move this to the selector thread from jdk bugs!!!
 		//but alas, follow KISS, move on...
-        Select select = channel.getSelectorManager().getSelector();
-        SelectionKey key = channel.keyFor(select);
+        SelectionKey key = channel.keyFor();
         if(key == null || !key.isValid()) //no need to unregister, key is cancelled
             return;
 
 		int previous = key.interestOps();
 		int opsNow = previous & ~ops; //subtract out the operation
 		
-		key.interestOps(opsNow);
+		channel.resetRegisteredOperations(opsNow);
 		
 		//log.info("unregistering="+Helper.opType(opsNow)+" opToSubtract="+Helper.opType(ops)+" previous="+Helper.opType(previous)+" type="+type);
 		

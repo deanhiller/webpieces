@@ -1,6 +1,7 @@
 package org.webpieces.frontend2.impl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -35,14 +36,14 @@ public class Layer2Http2Handler {
 		engine.intialize();
 	}
 	
-	public void incomingData(FrontendSocketImpl socket, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer b) {
 		DataWrapper wrapper = dataGen.wrapByteBuffer(b);
-		incomingData(socket, wrapper);
+		return incomingData(socket, wrapper);
 	}
 	
-	public void incomingData(FrontendSocketImpl socket, DataWrapper data) {
+	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, DataWrapper data) {
 		Http2ServerEngine engine = socket.getHttp2Engine();
-		engine.parse(data);
+		return engine.parse(data);
 	}
 
 	public void farEndClosed(FrontendSocketImpl socket) {

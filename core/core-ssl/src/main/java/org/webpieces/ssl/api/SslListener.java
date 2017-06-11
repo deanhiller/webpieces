@@ -32,7 +32,7 @@ public interface SslListener {
 	 * 
 	 * @param out
 	 */
-	void packetUnencrypted(ByteBuffer out);
+	CompletableFuture<Void> packetUnencrypted(ByteBuffer out);
 	
 	/**
 	 * Java's SSL Engine gives us a Runnable so you can run it on a different thread.  In reality, most clients

@@ -1,6 +1,7 @@
 package org.webpieces.nio.api.integ;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
@@ -20,11 +21,12 @@ final class ClientDataListener implements DataListener {
 	}
 	
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		recorder.recordBytes(b.remaining());
 		
 		b.position(b.limit());
 		pool2.releaseBuffer(b);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override
@@ -37,15 +39,4 @@ final class ClientDataListener implements DataListener {
 		log.info("failure", e);
 	}
 	
-	@Override
-	public void applyBackPressure(Channel channel) {
-		log.info("client unregistering for reads");
-		channel.unregisterForReads();
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
-		log.info("client registring for reads");
-		channel.registerForReads();
-	}
 }

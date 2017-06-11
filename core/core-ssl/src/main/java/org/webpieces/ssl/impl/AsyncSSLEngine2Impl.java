@@ -153,19 +153,20 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	/**
 	 * This is synchronized as the socketToEngineData2 buffer is modified in this method
 	 * and modified in other methods that are called on other threads.(ie. the put is called)
+	 * @return 
 	 * 
 	 */
 	@Override
-	public void feedEncryptedPacket(ByteBuffer b) {
+	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer b) {
 		if(mem.getConnectionState() == ConnectionState.DISCONNECTED)
 			throw new IllegalStateException(mem+"SSLEngine is closed");
 		
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		
-		feedEncryptedPacketImpl(b);
+		return feedEncryptedPacketImpl(b);
 	}
 	
-	private void feedEncryptedPacketImpl(ByteBuffer encryptedInData) {	
+	private CompletableFuture<Void> feedEncryptedPacketImpl(ByteBuffer encryptedInData) {	
 		SSLEngine sslEngine = mem.getEngine();
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
@@ -181,6 +182,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			mem.setCachedEncryptedData(null);
 		}
 		
+		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		int i = 0;
 		//stay in loop while we 
 		//1. need unwrap or not_handshaking or need_task AND
@@ -199,7 +201,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			} finally {
 				if(outBuffer.position() != 0) {
 					outBuffer.flip();
-					listener.packetUnencrypted(outBuffer);
+					future = future.thenCompose(v -> listener.packetUnencrypted(outBuffer));
 					
 					//frequently the out buffer is not used so we only ask the pool for buffers AFTER it has been consumed/used
 					ByteBuffer newCachedOut = pool.nextBuffer(sslEngine.getSession().getApplicationBufferSize());
@@ -238,6 +240,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		log.trace(()->mem+"[sockToEngine] reset pos="+data2.position()+" lim="+data2.limit()+" status="+status2+" hs="+hsStatus3);
 
 		cleanAndFire(hsStatus, status, encryptedData);
+		
+		return future;
 	}
 
 	private void cleanAndFire(HandshakeStatus hsStatus, Status status, ByteBuffer encryptedData) {

@@ -67,7 +67,7 @@ public class TestBasicSslClientServer {
 	private class ClientListener implements DataListener {
 
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
+		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			int value = b.get();
 			log.info("incoming client data="+value);
 			pool.releaseBuffer(b);
@@ -78,6 +78,7 @@ public class TestBasicSslClientServer {
 					pool.notifyAll();
 				}
 			}
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
@@ -89,25 +90,15 @@ public class TestBasicSslClientServer {
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.error("client failed", e);
 		}
-
-		@Override
-		public void applyBackPressure(Channel channel) {
-			log.info("apply backpressure");
-		}
-
-		@Override
-		public void releaseBackPressure(Channel channel) {
-			log.info("releasebackpressure");
-		}
-		
 	}
 	
 	private class SvrDataListener implements AsyncDataListener {
 
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
+		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			log.info("server received data");
-			channel.write(b);
+			return channel.write(b)
+					.thenApply(c -> null);
 		}
 
 		@Override
@@ -123,16 +114,6 @@ public class TestBasicSslClientServer {
 		@Override
 		public void failure(Channel channel, ByteBuffer data, Exception e) {
 			log.info("failed", e);
-		}
-
-		@Override
-		public void applyBackPressure(Channel channel) {
-			log.info("svr apply backpressure");
-		}
-
-		@Override
-		public void releaseBackPressure(Channel channel) {
-			log.info("svr releasebackpressure");
 		}
 	}
 }

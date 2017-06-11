@@ -6,13 +6,11 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
@@ -40,8 +38,7 @@ public abstract class BasChannelImpl
 	private ConcurrentLinkedQueue<WriteInfo> dataToBeWritten = new ConcurrentLinkedQueue<WriteInfo>();
 	private boolean isClosed = false;
 	private boolean doNotAllowWrites;
-	private int maxBytesWaitingSize = 500_000; //0.5 megabyte before telling client to backpressure the channel
-	private AtomicBoolean applyingBackpressure = new AtomicBoolean(false);
+	private int maxBytesWaitingSize = 500_000; 
 	private boolean isRegisterdForReads;
 	private BufferPool pool;
 	private DataListener dataListener;
@@ -60,7 +57,7 @@ public abstract class BasChannelImpl
 	/* (non-Javadoc)
 	 * @see biz.xsoftware.nio.RegisterableChannelImpl#getRealChannel()
 	 */
-	public abstract SelectableChannel getRealChannel();
+	//public abstract SelectableChannel getRealChannel();
 
 	/* (non-Javadoc)
 	 * @see api.biz.xsoftware.nio.RegisterableChannel#isBlocking()
@@ -78,9 +75,8 @@ public abstract class BasChannelImpl
 			dataListener = new RecordingDataListener("singleThreaded-", listener);
 		
 		CompletableFuture<Channel> future = connectImpl(addr);
-		return future.thenApply(c -> {
-			registerForReads(dataListener);
-			return c;
+		return future.thenCompose(c -> {
+			return registerForReads(dataListener);
 		});
 	}
 	
@@ -115,7 +111,7 @@ public abstract class BasChannelImpl
 	public CompletableFuture<Channel> write(ByteBuffer b) {
 		if(b.remaining() == 0)
 			throw new IllegalArgumentException("buffer has no data");
-		else if(!getSelectorManager().isRunning())
+		else if(!selMgr.isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
 		else if(isClosed) {
 			if(isRemoteEndInitiateClose)
@@ -172,26 +168,12 @@ public abstract class BasChannelImpl
 			WriteInfo holder = new WriteInfo(b, future);
 			dataToBeWritten.add(holder);
 			
-			boolean needToApplyBackpressure = false;
 			waitingBytesCounter += b.remaining();
 			if(waitingBytesCounter > maxBytesWaitingSize) {
-				needToApplyBackpressure = true;
-			}
-			
-			boolean changedValue = applyingBackpressure.compareAndSet(false, needToApplyBackpressure);
-			if(needToApplyBackpressure && changedValue) {
-				//we only fire when the value of applyingBackpressure changes
-				//Also, this is a real PITA since we must do this in the sync block and I don't like calling
-				//customers in a sync block though thankfully most won't use the single threaded channelmanager.
-				//The reason is that if this is outside sync block, just before executor.execute({Runnable with call to
-				//applyBackPressure}) is called (run from the writer thread that is), the channelmanager thread
-				//can then call releaseBackPressure and that can beat applyBackPressure up the stack(and has)
-				//This results in the client permanently enabling pressure since it is the last call....when
-				//we need releaseBackPressure to always be after apply.
-				dataListener.applyBackPressure(this);
+				log.warn("You have "+waitingBytesCounter+" bytes waiting to be written");
 			}
 		}
-		
+
         return false;
 	}
 
@@ -214,7 +196,7 @@ public abstract class BasChannelImpl
 
 	private void registerForWrites() {
         log.trace(()->this+"registering channel for write msg. size="+dataToBeWritten.size());
-        getSelectorManager().registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
+        selMgr.registerSelectableChannel(this, SelectionKey.OP_WRITE, null);
 	}
        
     /**
@@ -251,14 +233,6 @@ public abstract class BasChannelImpl
 	            pool.releaseBuffer(writer.getBuffer());
 	            waitingBytesCounter -= initialSize;
 	            finishedPromises.add(writer.getPromise());
-	        }
-	        
-	        //we are only applying backpressure when queue is too large
-	        boolean applyPressure = !dataToBeWritten.isEmpty();
-	        boolean changedValue = applyingBackpressure.compareAndSet(true, applyPressure);
-	        if(!applyPressure && changedValue) {
-	        	//we only fire when the value of applyingBackpressure changes
-	        	dataListener.releaseBackPressure(this);
 	        }
 	        
 	        //we are registered for writes with ANY size queue
@@ -311,9 +285,9 @@ public abstract class BasChannelImpl
      */
     protected abstract void bindImpl2(SocketAddress addr) throws IOException;
     
-    void registerForReads(DataListener l) {
+    CompletableFuture<Channel> registerForReads(DataListener l) {
     	this.dataListener = l;
-    	registerForReads();
+    	return registerForReads();
     }
     
 	public CompletableFuture<Channel> registerForReads() {
@@ -327,7 +301,7 @@ public abstract class BasChannelImpl
 		apiLog.trace(()->this+"Basic.registerForReads called");
 		
         try {
-			return getSelectorManager().registerChannelForRead(this, dataListener).thenApply(v -> {
+			return selMgr.registerChannelForRead(this, dataListener).thenApply(v -> {
 				isRegisterdForReads = true;
 				return this;
 			});
@@ -342,7 +316,7 @@ public abstract class BasChannelImpl
 		apiLog.trace(()->this+"Basic.unregisterForReads called");		
 		try {
 			isRegisterdForReads = false;
-			return getSelectorManager().unregisterChannelForRead(this).thenApply(v -> this);
+			return selMgr.unregisterChannelForRead(this).thenApply(v -> this);
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -372,7 +346,7 @@ public abstract class BasChannelImpl
     	try {
     		apiLog.trace(()->this+"Basic.close called");
     		
-	        if(!getRealChannel().isOpen()) {
+    		if(!isOpen()) {
 	        	future.complete(this);
 	        	return future;
 	        }
@@ -386,6 +360,8 @@ public abstract class BasChannelImpl
         }
     	return future;
     }
+    
+    protected abstract boolean isOpen();
     
     public void serverClosed() throws IOException {
     	setClosed(true, true);

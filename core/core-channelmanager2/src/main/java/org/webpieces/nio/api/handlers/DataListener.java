@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 package org.webpieces.nio.api.handlers;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.Channel;
 
@@ -45,8 +46,10 @@ public interface DataListener {
 	 * 
 	 * @param channel
 	 * @param b
+	 * @return A future that you resolve once you have finished with the data.  Not resolving the futures from this
+	 * method will tell the Channels to start backpressuring the remote end
 	 */
-	public void incomingData(Channel channel, ByteBuffer b);
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b);
 	
 	public void farEndClosed(Channel channel);
 
@@ -60,20 +63,5 @@ public interface DataListener {
 	 * @param e
 	 */
 	public void failure(Channel channel, ByteBuffer data, Exception e);
-	
-	/**
-	 * There is limits on writing out asynchronously in any nio client.  You can only back
-	 * up so much before you blow your RAM.  Therefore, there is a setting 
-	 * TCPChannel.setMaxBytesWriteBackupSize which if reached will call applyBackPressure
-	 * 
-	 * Once 'all' backed up writes are written, releaseBackpressure will be called.  This
-	 * is to avoid 'jitter' which can be a big performance penalty where we apply/release
-	 * apply/release
-	 * 
-	 * @param channel
-	 */
-	public void applyBackPressure(Channel channel);
-	
-	public void releaseBackPressure(Channel channel);
 
 }

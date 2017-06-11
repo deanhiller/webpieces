@@ -1,6 +1,7 @@
 package org.webpieces.asyncserver.impl;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.nio.api.channels.Channel;
@@ -23,9 +24,9 @@ public class ProxyDataListener implements DataListener {
 	}
 
 	@Override
-	public void incomingData(Channel channel, ByteBuffer b) {
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
-		dataListener.incomingData(proxy, b);
+		return dataListener.incomingData(proxy, b);
 	}
 
 	@Override
@@ -64,18 +65,6 @@ public class ProxyDataListener implements DataListener {
 		}
 		
 		return existingProxy;
-	}
-
-	@Override
-	public void applyBackPressure(Channel channel) {
-		TCPChannel proxy = lookupExistingOrCreateNew(channel);
-		dataListener.applyBackPressure(proxy);
-	}
-
-	@Override
-	public void releaseBackPressure(Channel channel) {
-		TCPChannel proxy = lookupExistingOrCreateNew(channel);
-		dataListener.releaseBackPressure(proxy);
 	}
 
 	public void connectionOpened(Channel channel, boolean isReadyForWrites) {

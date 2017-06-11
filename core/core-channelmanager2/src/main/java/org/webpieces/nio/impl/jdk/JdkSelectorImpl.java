@@ -1,19 +1,20 @@
-package org.webpieces.nio.impl.cm.basic.nioimpl;
+package org.webpieces.nio.impl.jdk;
 
 import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.exceptions.RuntimeInterruptedException;
-import org.webpieces.nio.api.testutil.nioapi.Select;
-import org.webpieces.nio.api.testutil.nioapi.SelectorListener;
+import org.webpieces.nio.api.jdk.JdkDatagramChannel;
+import org.webpieces.nio.api.jdk.JdkSelect;
+import org.webpieces.nio.api.jdk.JdkServerSocketChannel;
+import org.webpieces.nio.api.jdk.JdkSocketChannel;
+import org.webpieces.nio.api.jdk.Keys;
+import org.webpieces.nio.api.jdk.SelectorListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -21,33 +22,59 @@ import org.webpieces.util.logging.LoggerFactory;
 
 /**
  */
-public class SelectorImpl implements Select
+public class JdkSelectorImpl implements JdkSelect
 {
-    private static final Logger log = LoggerFactory.getLogger(SelectorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(JdkSelectorImpl.class);
     private PollingThread thread;
     private AbstractSelector selector;
     private boolean running = false;
     private boolean wantToShutDown = false;
     private SelectorListener listener;
     private SelectorProvider provider;
-    
-    /**
-     * Creates an instance of SelectorImpl.
-     * @param selector
-     */
-    public SelectorImpl(AbstractSelector selector) {
-    }
 
     /**
      * Creates an instance of SelectorImpl.
      * @param provider
      */
-    public SelectorImpl(SelectorProvider provider) {
+    public JdkSelectorImpl(SelectorProvider provider) {
         this.provider = provider;
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#wakeup()
+     * @throws IOException 
+     * @see org.webpieces.nio.api.jdk.ChannelsFactory#open()
+     */
+    public JdkSocketChannel open() throws IOException {
+    	if(selector == null)
+    		throw new IllegalArgumentException("start must be called first to start the thread up");
+        java.nio.channels.SocketChannel channel = java.nio.channels.SocketChannel.open();
+        return new JdkSocketChannelImpl(channel, selector);
+    }
+
+    /**
+     * @see org.webpieces.nio.api.jdk.ChannelsFactory#open(java.nio.channels.SocketChannel)
+     */
+    public JdkSocketChannel open(java.nio.channels.SocketChannel newChan) {
+    	if(selector == null)
+    		throw new IllegalArgumentException("start must be called first to start the thread up");
+    	
+        return new JdkSocketChannelImpl(newChan, selector);
+    }
+    
+	@Override
+	public JdkServerSocketChannel openServerSocket() throws IOException {
+		java.nio.channels.ServerSocketChannel channel = java.nio.channels.ServerSocketChannel.open();
+		return new JdkServerSocketChannelImpl(channel, selector);
+	}
+	
+	@Override
+	public JdkDatagramChannel openDatagram() throws IOException {
+		java.nio.channels.DatagramChannel channel = java.nio.channels.DatagramChannel.open();
+		return new JdkDatagramChannelImpl(channel, selector);
+	}
+	
+    /**
+     * @see org.webpieces.nio.api.jdk.JdkSelect#wakeup()
      */
     public void wakeup() {
         if(selector != null)
@@ -59,6 +86,7 @@ public class SelectorImpl implements Select
     public Selector getSelector() {
         return selector;
     }
+    
     public void startPollingThread(SelectorListener l, String threadName) {
         if(running)
             throw new IllegalStateException("Already running, can't start again");        
@@ -110,9 +138,9 @@ public class SelectorImpl implements Select
                 selector = null;
                 thread = null;                
 
-                synchronized(SelectorImpl.this) {
+                synchronized(JdkSelectorImpl.this) {
                     running = false;
-                    SelectorImpl.this.notifyAll();
+                    JdkSelectorImpl.this.notifyAll();
                 }
             } catch (Exception e) {
                 log.error("Exception on ConnectionManager thread", e);
@@ -127,36 +155,31 @@ public class SelectorImpl implements Select
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#getThread()
+     * @see org.webpieces.nio.api.jdk.JdkSelect#getThread()
      */
-    public Object getThread() {
+    public Thread getThread() {
         return thread;
     }
 
-    /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#selectedKeys()
-     */
-    public Set<SelectionKey> selectedKeys() {
-        return selector.selectedKeys();
-    }
-
-    public int select() {
+    public Keys select() {
         try {
-			return selector.select();
+			int count = selector.select();
+			Set<SelectionKey> selectedKeys = selector.selectedKeys();
+			return new Keys(count, selectedKeys);
 		} catch (IOException e) {
 			throw new NioException(e);
 		}
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#isRunning()
+     * @see org.webpieces.nio.api.jdk.JdkSelect#isRunning()
      */
     public boolean isRunning() {
         return running;
     }
 
     /**
-     * @see org.webpieces.nio.api.testutil.nioapi.Select#isWantShutdown()
+     * @see org.webpieces.nio.api.jdk.JdkSelect#isWantShutdown()
      */
     public boolean isWantShutdown() {
         return wantToShutDown;
@@ -166,19 +189,9 @@ public class SelectorImpl implements Select
         running = b;
     }
 
-    public SelectionKey getKeyFromChannel(SelectableChannel realChannel) {
-        return realChannel.keyFor(selector);
-    }
-
-    public SelectionKey register(SelectableChannel s, int allOps, Object struct) {
-    	if(struct == null)
-    		throw new IllegalArgumentException("struct cannot be null");
-    	
-        try {
-			return s.register(selector, allOps, struct);
-		} catch (ClosedChannelException e) {
-			throw new NioClosedChannelException("On registering, we received closedChannel(did remote end or local end close the socket", e);
-		}
-    }
+	@Override
+	public boolean isChannelOpen(SelectionKey key) {
+		return key.channel().isOpen();
+	}
     
 }

@@ -177,7 +177,7 @@ public class HttpSocketImpl implements HttpSocket {
 		private CompletableFuture<DataWriter> future;
 
 		@Override
-		public void incomingData(Channel channel, ByteBuffer b) {
+		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			log.info("size="+b.remaining());
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 			memento = parser.parse(memento, wrapper);
@@ -198,6 +198,7 @@ public class HttpSocketImpl implements HttpSocket {
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}
+			return future.thenApply(w -> null);
 		}
 
 		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {
@@ -230,14 +231,6 @@ public class HttpSocketImpl implements HttpSocket {
 			}			
 		}
 
-		@Override
-		public void applyBackPressure(Channel channel) {
-			
-		}
-
-		@Override
-		public void releaseBackPressure(Channel channel) {
-		}
 	}
 
 	@Override

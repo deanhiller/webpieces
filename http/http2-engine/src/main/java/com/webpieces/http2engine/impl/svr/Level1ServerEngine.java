@@ -78,8 +78,8 @@ public class Level1ServerEngine implements Http2ServerEngine {
 	}
 
 	@Override
-	public void parse(DataWrapper newData) {
-		parsing.parse(newData);
+	public CompletableFuture<Void> parse(DataWrapper newData) {
+		return parsing.parse(newData);
 	}
 
 	@Override
