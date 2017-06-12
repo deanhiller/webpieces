@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -58,8 +57,6 @@ public class SelectorManager2 implements SelectorListener {
 
 	private boolean stopped;
 
-	private BufferPool pool;
-
 	private String threadName;
 
 	private KeyProcessor helper;
@@ -68,10 +65,9 @@ public class SelectorManager2 implements SelectorListener {
 //	CONSTRUCTORS
 //--------------------------------------------------------------------
 
-	public SelectorManager2(JdkSelect select, KeyProcessor helper, BufferPool pool, String threadName) {
+	public SelectorManager2(JdkSelect select, KeyProcessor helper, String threadName) {
         this.selector = select;
 		this.helper = helper;
-        this.pool = pool;
         this.threadName = threadName;
 	}
 //--------------------------------------------------------------------
@@ -156,19 +152,19 @@ public class SelectorManager2 implements SelectorListener {
 		else if(!selector.isRunning())
 			return; //do nothing if the selector is not running
 		
-		WrapperAndListener struct;
+		ChannelInfo struct;
 		
 		int previousOps = 0;
 		log.trace(()->channel+" registering ops="+OpType.opType(validOps));
         
 		SelectionKey previous = channel.keyFor();
 		if(previous == null) {
-			struct = new WrapperAndListener(channel);
+			struct = new ChannelInfo(channel);
 		}else if(previous.attachment() == null) {
-			struct = new WrapperAndListener(channel);
+			struct = new ChannelInfo(channel);
 			previousOps = previous.interestOps();
 		} else {
-			struct = (WrapperAndListener)previous.attachment();
+			struct = (ChannelInfo)previous.attachment();
 			previousOps = previous.interestOps();
 		}
 		struct.addListener(listener, validOps);
@@ -260,7 +256,7 @@ public class SelectorManager2 implements SelectorListener {
         
         needCloseOrRegister = false;
         if(keySet.size() > 0) {
-        	helper.processKeys(keySet, pool);
+        	helper.processKeys(keySet);
         }
     }
 	

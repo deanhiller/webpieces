@@ -19,8 +19,8 @@ public class AsyncServerImpl implements AsyncServer {
 	}
 
 	@Override
-	public void start(SocketAddress bindAddr) {
-		serverChannel.bind(bindAddr);
+	public CompletableFuture<Void> start(SocketAddress bindAddr) {
+		return serverChannel.bind(bindAddr);
 	}
 	
 	@Override

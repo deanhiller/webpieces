@@ -11,7 +11,7 @@ import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 
 
-public class WrapperAndListener {
+public class ChannelInfo {
 
 	//private static final Logger log = LoggerFactory.getLogger(WrapperAndListener.class);
 	private String channelName;
@@ -19,7 +19,7 @@ public class WrapperAndListener {
 	private DataListener dataHandler;
 	private CompletableFuture<Channel> connectCallback;
 	
-	public WrapperAndListener(RegisterableChannelImpl r) {
+	public ChannelInfo(RegisterableChannelImpl r) {
 		if(r == null)
 			throw new IllegalArgumentException("r cannot be null, bug");
 		channel = r;

@@ -123,6 +123,6 @@ public interface JdkSocketChannel
 
 	SelectionKey keyFor();
 
-	void resetRegisteredOperations(int ops);
+	SocketAddress getRemoteAddress() throws IOException;
 
 }

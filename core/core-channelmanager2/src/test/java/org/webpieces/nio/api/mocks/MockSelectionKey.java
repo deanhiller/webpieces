@@ -1,4 +1,4 @@
-package org.webpieces.nio.api;
+package org.webpieces.nio.api.mocks;
 
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;

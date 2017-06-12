@@ -8,21 +8,23 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.asyncserver.api.AsyncConfig;
+import org.webpieces.asyncserver.api.AsyncServer;
+import org.webpieces.asyncserver.api.AsyncServerManager;
+import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.nio.api.mocks.MockAsyncListener;
 import org.webpieces.nio.api.mocks.MockChannel;
-import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
+import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
-public class TestReading {
+public class TestSvrReading {
 
-	private ChannelManager mgr;
-	private MockChannel mockChannel = new MockChannel();
-	private MockJdk mockJdk = new MockJdk(mockChannel);
-	private TCPChannel channel;
-	private MockDataListener listener;
+	private MockChannel mockChannel = new MockChannel(); 
+	private MockSvrChannel mockSvrChannel = new MockSvrChannel();
+	private MockJdk mockJdk = new MockJdk(mockSvrChannel);
+	private MockAsyncListener listener;
 
 	@Before
 	public void setup() {
@@ -31,21 +33,26 @@ public class TestReading {
 		BackpressureConfig config = new BackpressureConfig();
 		config.setMaxBytes(6);
 		config.setStartReadingThreshold(2);
-		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), config, exec);
+		ChannelManager mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), config, exec);
+
+		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
 		
-		listener = new MockDataListener();
-		
-		channel = mgr.createTCPChannel("myid");
-		
-		mockChannel.addConnectReturnValue(true);
+		listener = new MockAsyncListener();
+
+		AsyncServer server = svrMgr.createTcpServer(new AsyncConfig(), listener);
+		CompletableFuture<Void> future = server.start(new InetSocketAddress(4444));
+		Assert.assertFalse(future.isDone());
+
+		mockSvrChannel.addNewChannel(mockChannel);
 		mockJdk.setThread(Thread.currentThread());
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
-		Assert.assertTrue(future.isDone());
-		Assert.assertTrue(mockChannel.isRegisteredForReads());
+		mockJdk.fireSelector();
+
+		Assert.assertEquals(1, listener.getNumTimesCalledConnectionOpen());
 	}
 
 	@Test
-	public void testRead() throws InterruptedException, ExecutionException, TimeoutException {
+	public void testBasicConnectingOnSelectorThread() {
+
 		mockChannel.addToRead(new byte[] { 4, 5 });
 		mockChannel.setReadyToRead();
 		
@@ -104,6 +111,6 @@ public class TestReading {
 		mockJdk.fireSelector();		
 		
 		Assert.assertEquals(4, listener.getSingleData().length);
-
 	}
+	
 }

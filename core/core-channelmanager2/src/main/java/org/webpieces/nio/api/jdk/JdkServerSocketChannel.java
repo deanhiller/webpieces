@@ -2,10 +2,11 @@ package org.webpieces.nio.api.jdk;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 
 public interface JdkServerSocketChannel {
 //	public SelectorProvider provider();
@@ -34,7 +35,7 @@ public interface JdkServerSocketChannel {
 //
 	public ServerSocket socket();
 
-	public SocketChannel accept() throws IOException;
+	public JdkSocketChannel accept() throws IOException;
 
 	public boolean isBlocking();
 //
@@ -49,5 +50,13 @@ public interface JdkServerSocketChannel {
 	public java.nio.channels.ServerSocketChannel getRealChannel();
 	
 	public void resetRegisteredOperations(int ops);
+	
+	public void setReuseAddress(boolean b) throws SocketException;
+	
+	public void bind(SocketAddress srvrAddr) throws IOException;
+	
+	public boolean isBound();
+	
+	public boolean isClosed();
 
 }

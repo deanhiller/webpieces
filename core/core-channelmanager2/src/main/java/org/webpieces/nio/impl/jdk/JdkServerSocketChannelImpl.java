@@ -2,6 +2,8 @@ package org.webpieces.nio.impl.jdk;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -10,6 +12,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import org.webpieces.nio.api.jdk.JdkServerSocketChannel;
+import org.webpieces.nio.api.jdk.JdkSocketChannel;
 
 public class JdkServerSocketChannelImpl implements JdkServerSocketChannel {
 
@@ -43,8 +46,9 @@ public class JdkServerSocketChannelImpl implements JdkServerSocketChannel {
 		return channel.socket();
 	}
 
-	public SocketChannel accept() throws IOException {
-		return channel.accept();
+	public JdkSocketChannel accept() throws IOException {
+		SocketChannel s = channel.accept();
+		return new JdkSocketChannelImpl(s, selector);
 	}
 
 	public final boolean isBlocking() {
@@ -58,6 +62,26 @@ public class JdkServerSocketChannelImpl implements JdkServerSocketChannel {
 	@Override
 	public ServerSocketChannel getRealChannel() {
 		return channel;
+	}
+
+	@Override
+	public void setReuseAddress(boolean b) throws SocketException {
+		channel.socket().setReuseAddress(b);
+	}
+
+	@Override
+	public void bind(SocketAddress srvrAddr) throws IOException {
+		channel.socket().bind(srvrAddr);
+	}
+
+	@Override
+	public boolean isBound() {
+		return channel.socket().isBound();
+	}
+
+	@Override
+	public boolean isClosed() {
+		return channel.socket().isClosed();
 	}
 	
 }

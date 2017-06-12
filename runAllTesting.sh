@@ -57,7 +57,7 @@ echo "sleep 5 seconds"
 sleep 5 
 echo "Grepping log"
 
-if grep -q ".main. o.w.w.i.WebServerImpl     server started" logs/server.log; then
+if grep -q "o.w.w.i.WebServerImpl     server started" logs/server.log; then
   kill -9 $server_pid
   echo "Server is located at `pwd`"
   echo "Server Startup Succeeded!!"

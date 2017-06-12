@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.DatagramChannel;
@@ -69,13 +70,15 @@ public class DatagramChannelImpl implements DatagramChannel
     }
 
     /**
+     * @return 
      * @see org.webpieces.nio.api.channels.RegisterableChannel#bind(java.net.SocketAddress)
      */
-    public void bind(SocketAddress addr) {
+    public CompletableFuture<Void> bind(SocketAddress addr) {
     	try {
     		socket = new DatagramSocket(addr);
     		readerThread = new ReaderThread();
     		readerThread.start();
+    		return CompletableFuture.completedFuture(null);
     	} catch(IOException e) {
     		throw new NioException(e);
     	}

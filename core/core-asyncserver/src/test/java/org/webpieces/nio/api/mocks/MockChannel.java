@@ -37,8 +37,6 @@ public class MockChannel extends MockSuperclass implements JdkSocketChannel {
 	
 	@Override
 	public void configureBlocking(boolean b) throws IOException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

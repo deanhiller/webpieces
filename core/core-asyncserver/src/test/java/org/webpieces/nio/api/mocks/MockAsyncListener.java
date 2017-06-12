@@ -4,21 +4,23 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.asyncserver.api.AsyncDataListener;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.nio.api.channels.TCPChannel;
 
-public class MockDataListener extends MockSuperclass implements DataListener {
+public class MockAsyncListener extends MockSuperclass implements AsyncDataListener {
 
 	enum Method implements MethodEnum {
 		INCOMING_DATA,
 		FAR_END_CLOSED,
 		FAILURE,
+		CONNECTION_OPENED
 	}
-
-	public MockDataListener() {
+	
+	public MockAsyncListener() {
 		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(null));
 	}
 	
@@ -43,10 +45,19 @@ public class MockDataListener extends MockSuperclass implements DataListener {
 		super.calledVoidMethod(Method.FAILURE, channel, clonedData, e);
 	}
 
+	@Override
+	public void connectionOpened(TCPChannel proxy, boolean isReadyForWrites) {
+		super.calledVoidMethod(Method.CONNECTION_OPENED, proxy, isReadyForWrites);
+	}
+
+	public int getNumTimesCalledConnectionOpen() {
+		return super.getCalledMethodList(Method.CONNECTION_OPENED).size();
+	}
+	
 	public byte[] getSingleData() {
 		List<ParametersPassedIn> params = super.getCalledMethodList(Method.INCOMING_DATA);
 		if(params.size() != 1)
-			throw new IllegalArgumentException("method was called more than once");
+			throw new IllegalArgumentException("method was not called exactly once");
 		ParametersPassedIn p = params.get(0);
 		return (byte[]) p.getArgs()[1];
 	}

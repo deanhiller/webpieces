@@ -64,8 +64,8 @@ public class ThreadChannel implements Channel {
 		return tcpChannel.getName();
 	}
 
-	public void bind(SocketAddress addr) {
-		tcpChannel.bind(addr);
+	public CompletableFuture<Void> bind(SocketAddress addr) {
+		return tcpChannel.bind(addr);
 	}
 
 	public boolean isBlocking() {
@@ -84,24 +84,6 @@ public class ThreadChannel implements Channel {
 		return tcpChannel.getLocalAddress();
 	}
 
-	public CompletableFuture<Channel> registerForReads() {
-		CompletableFuture<Channel> future = tcpChannel.registerForReads();
-		//transfer this to the SessionExecutor properly such that clients do
-		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> this, executor);
-	}
-
-	public CompletableFuture<Channel> unregisterForReads() {
-		CompletableFuture<Channel> future = tcpChannel.unregisterForReads();
-		//transfer this to the SessionExecutor properly such that clients do
-		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> this, executor);
-	}
-
-	public boolean isRegisteredForReads() {
-		return tcpChannel.isRegisteredForReads();
-	}
-
 	public InetSocketAddress getRemoteAddress() {
 		return tcpChannel.getRemoteAddress();
 	}
@@ -112,14 +94,6 @@ public class ThreadChannel implements Channel {
 
 	public ChannelSession getSession() {
 		return tcpChannel.getSession();
-	}
-
-	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		tcpChannel.setMaxBytesWriteBackupSize(maxBytesBackup);
-	}
-
-	public int getMaxBytesBackupSize() {
-		return tcpChannel.getMaxBytesBackupSize();
 	}
 
 	@Override

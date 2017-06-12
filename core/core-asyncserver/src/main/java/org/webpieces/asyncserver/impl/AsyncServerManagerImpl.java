@@ -28,6 +28,8 @@ public class AsyncServerManagerImpl implements AsyncServerManager {
 			AsyncDataListener listener, SSLEngineFactory sslFactory) {
 		String id = config.id;
 		ConnectedChannels connectedChannels = new ConnectedChannels();
+		if(id == null)
+			throw new IllegalArgumentException("config.id must not be null");
 		ProxyDataListener proxyListener = new ProxyDataListener(connectedChannels, listener);
 		DefaultConnectionListener connectionListener = new DefaultConnectionListener(connectedChannels, proxyListener); 
 

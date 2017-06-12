@@ -32,8 +32,8 @@ public abstract class SslChannel implements Channel {
 		return channel.getName();
 	}
 
-	public void bind(SocketAddress addr) {
-		channel.bind(addr);
+	public CompletableFuture<Void> bind(SocketAddress addr) {
+		return channel.bind(addr);
 	}
 
 	public boolean isBlocking() {
@@ -52,18 +52,6 @@ public abstract class SslChannel implements Channel {
 		return channel.getLocalAddress();
 	}
 
-	public CompletableFuture<Channel> registerForReads() {
-		return channel.registerForReads().thenApply(c -> this);
-	}
-
-	public CompletableFuture<Channel> unregisterForReads() {
-		return channel.unregisterForReads().thenApply(c -> this);
-	}
-
-	public boolean isRegisteredForReads() {
-		return channel.isRegisteredForReads();
-	}
-
 	public InetSocketAddress getRemoteAddress() {
 		return channel.getRemoteAddress();
 	}
@@ -74,14 +62,6 @@ public abstract class SslChannel implements Channel {
 
 	public ChannelSession getSession() {
 		return channel.getSession();
-	}
-
-	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		channel.setMaxBytesWriteBackupSize(maxBytesBackup);
-	}
-
-	public int getMaxBytesBackupSize() {
-		return channel.getMaxBytesBackupSize();
 	}
 
 	@Override

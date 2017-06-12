@@ -154,24 +154,6 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Channel> registerForReads() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<Channel> unregisterForReads() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isRegisteredForReads() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public InetSocketAddress getRemoteAddress() {
 		// TODO Auto-generated method stub
 		return null;
@@ -187,18 +169,6 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	public ChannelSession getSession() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getMaxBytesBackupSize() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -232,9 +202,8 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 
 	@Override
-	public void bind(SocketAddress addr) {
-		// TODO Auto-generated method stub
-		
+	public CompletableFuture<Void> bind(SocketAddress addr) {
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

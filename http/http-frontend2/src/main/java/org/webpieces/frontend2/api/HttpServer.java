@@ -7,7 +7,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface HttpServer {
 
-	void start();
+	CompletableFuture<Void> start();
 	
 	CompletableFuture<Void> close();
 

@@ -8,7 +8,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface AsyncServer {
 
-	public void start(SocketAddress bindAddr);
+	public CompletableFuture<Void> start(SocketAddress bindAddr);
 	
 	/**
 	 * Closes the server channel and then closes all existing channels that are open

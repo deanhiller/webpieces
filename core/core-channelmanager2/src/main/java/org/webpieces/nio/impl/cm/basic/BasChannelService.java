@@ -28,11 +28,13 @@ class BasChannelService implements ChannelManager {
 	private boolean started;
 	private BufferPool pool;
 	private KeyProcessor processor;
+	private BackpressureConfig config;
 
 	BasChannelService(String threadName, JdkSelect apis, BufferPool pool, BackpressureConfig config) {
 		this.pool = pool;
-		processor = new KeyProcessor(apis);
-		selMgr = new SelectorManager2(apis, processor, pool, threadName);
+		this.config = config;
+		processor = new KeyProcessor(apis, pool);
+		selMgr = new SelectorManager2(apis, processor, threadName);
         this.selector = apis;
         start();
 	}
@@ -43,7 +45,7 @@ class BasChannelService implements ChannelManager {
         if(listener == null)
         	throw new IllegalArgumentException("connectionListener cannot be null");
         IdObject obj = new IdObject(id);
-        return new BasTCPServerChannel(obj, selector, selMgr, processor, listener, pool);
+        return new BasTCPServerChannel(obj, selector, selMgr, processor, listener, pool, config);
 	}
 	
 	@Override
@@ -62,7 +64,7 @@ class BasChannelService implements ChannelManager {
     public TCPChannel createTCPChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(id);      
-        return new BasTCPChannel(obj, selector, selMgr, processor, pool);
+        return new BasTCPChannel(obj, selector, selMgr, processor, pool, config);
 	}
 
 	@Override
@@ -74,7 +76,7 @@ class BasChannelService implements ChannelManager {
     public UDPChannel createUDPChannel(String id) {
         preconditionChecks(id);
         IdObject obj = new IdObject(id);
-        return new UDPChannelImpl(obj, selector, selMgr, processor, pool);
+        return new UDPChannelImpl(obj, selector, selMgr, processor, pool, config);
     }
     
 	@Override

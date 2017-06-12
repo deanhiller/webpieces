@@ -188,9 +188,8 @@ public class JdkSocketChannelImpl implements org.webpieces.nio.api.jdk.JdkSocket
 	}
 
 	@Override
-	public void resetRegisteredOperations(int ops) {
-		SelectionKey key = keyFor();
-		key.interestOps(ops);
+	public SocketAddress getRemoteAddress() throws IOException {
+		return channel.getRemoteAddress();
 	}
 
 }

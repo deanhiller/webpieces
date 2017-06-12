@@ -85,11 +85,11 @@ public class WebServerModule implements Module {
 	@Provides
 	@Singleton
 	public ChannelManager providesChanMgr(WebServerConfig config, BufferPool pool) {
-		String id = "webpieces";
+		String id = "webpiecesThreadPool";
 		Executor executor = Executors.newFixedThreadPool(config.getNumFrontendServerThreads(), new NamedThreadFactory(id));
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config.getBackpressureConfig(), executor);
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr("selectorThread", pool, config.getBackpressureConfig(), executor);
 		
 		return chanMgr;
 	}

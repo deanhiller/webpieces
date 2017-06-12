@@ -13,19 +13,10 @@ public interface JdkSelect
      */
     JdkSocketChannel open() throws IOException;
 
-    /**
-     * @param newChan
-     * @return the newly opened SocketChannel
-     */
-    JdkSocketChannel open(java.nio.channels.SocketChannel newChan);
-    
 	JdkServerSocketChannel openServerSocket() throws IOException;
 
 	JdkDatagramChannel openDatagram() throws IOException;
 
-    /**
-     * 
-     */
     void wakeup();
 
     void startPollingThread(SelectorListener manager2, String threadName);

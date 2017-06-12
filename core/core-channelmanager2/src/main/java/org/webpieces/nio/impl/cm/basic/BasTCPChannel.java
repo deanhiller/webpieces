@@ -12,6 +12,7 @@ import java.nio.channels.SelectionKey;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
@@ -32,8 +33,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	private static final Logger log = LoggerFactory.getLogger(BasTCPChannel.class);
 	protected org.webpieces.nio.api.jdk.JdkSocketChannel channel;
 		    
-	public BasTCPChannel(IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
-		super(id, selMgr, router, pool);
+	public BasTCPChannel(
+			IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
+	) {
+		super(id, selMgr, router, pool, config);
+		this.channelState = ChannelState.NOT_STARTED;
+
 		try {
 			channel = selector.open();
 			channel.configureBlocking(false);
@@ -47,15 +52,18 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 	 * Only used from TCPServerChannel.accept().  please keep it that way. thanks.
 	 * @param newChan
 	 * @param pool 
+	 * @param config 
 	 * @param executor 
 	 */
-	public BasTCPChannel(IdObject id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
-		super(id, selMgr, router, pool);
+	public BasTCPChannel(
+			IdObject id, JdkSocketChannel newChan, SocketAddress remoteAddr, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
+	) {
+		super(id, selMgr, router, pool, config);
 		if(newChan.isBlocking())
 			throw new IllegalArgumentException(this+"TCPChannels can only be non-blocking socketChannels");
 		channel = newChan;
-		isConnected = true;
-		setConnecting(remoteAddr);
+		this.channelState = ChannelState.CONNECTED;
+		setConnectingTo(remoteAddr);
 	}
 	
     protected void bindImpl2(SocketAddress address) throws IOException {
@@ -131,7 +139,7 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 			boolean connected = channel.connect(addr);
 			log.trace(()->this+"connected status="+connected);
 	
-			setConnecting(addr);
+			setConnectingTo(addr);
 			if(connected) {
 				try {
 					future.complete(this);
@@ -233,18 +241,12 @@ class BasTCPChannel extends BasChannelImpl implements TCPChannel {
 
 
 	@Override
-	protected SelectionKey register(int allOps, WrapperAndListener struct) {
+	protected SelectionKey register(int allOps, ChannelInfo struct) {
 		try {
 			return channel.register(allOps, struct);
 		} catch (ClosedChannelException e) {
 			throw new NioClosedChannelException("On registering, we received closedChannel(did remote end or local end close the socket", e);
 		}
-	}
-
-
-	@Override
-	protected void resetRegisteredOperations(int ops) {
-		channel.resetRegisteredOperations(ops);
 	}
 
 }

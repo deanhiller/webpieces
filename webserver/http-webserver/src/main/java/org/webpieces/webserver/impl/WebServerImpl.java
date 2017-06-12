@@ -9,6 +9,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -49,7 +53,17 @@ public class WebServerImpl implements WebServer {
 	private HttpServer httpsServer;
 
 	@Override
-	public StreamListener start() {
+	public void start2() {
+		CompletableFuture<Void> future = startAsync();
+		try {
+			future.get(2, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			throw new RuntimeException("exception", e);
+		}
+	}
+	
+	@Override
+	public CompletableFuture<Void> startAsync() {
 		log.info("starting server");
 		routingService.start();
 
@@ -59,19 +73,22 @@ public class WebServerImpl implements WebServer {
 		FrontendConfig svrChanConfig = new FrontendConfig("http", config.getHttpListenAddress());
 		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
-		httpServer.start();
+		CompletableFuture<Void> future = httpServer.start();
+		CompletableFuture<Void> fut2 = CompletableFuture.completedFuture(null);
 
 		if(factory != null) {
 			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
-			httpsServer.start();
+			fut2 = httpsServer.start();
 		} else {
 			log.info("https port is disabled since configuration had no sslEngineFactory");
 		}
-		
-		log.info("server started");
-		return serverListener;
+
+		return fut2.thenCompose(v -> future).thenApply(v -> {
+			log.info("server started");
+			return null;
+		});
 	}
 
 	private void validateRouteIdsFromHtmlFiles() {

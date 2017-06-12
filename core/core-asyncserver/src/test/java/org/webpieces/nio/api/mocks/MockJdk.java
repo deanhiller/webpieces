@@ -2,7 +2,9 @@ package org.webpieces.nio.api.mocks;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.webpieces.mock.MethodEnum;
@@ -25,23 +27,20 @@ public class MockJdk extends MockSuperclass implements JdkSelect {
 
 	private SelectorListener cachedListener;
 	private Thread currentThread;
-	private MockChannel[] channels;
+	private MockSvrChannel mockSvrChannel;
 
-	public MockJdk(MockChannel ... channels) {
-		this.channels = channels;
-		for(MockChannel c : channels) {
-			super.addValueToReturn(Method.OPEN, c);
-		}
+	public MockJdk(MockSvrChannel mockSvrChannel) {
+		this.mockSvrChannel = mockSvrChannel;
 	}
 
 	@Override
 	public JdkSocketChannel open() throws IOException {
-		return (JdkSocketChannel) super.calledMethod(Method.OPEN, true);
+		return null;
 	}
 
 	@Override
 	public JdkServerSocketChannel openServerSocket() throws IOException {
-		return null;
+		return mockSvrChannel;
 	}
 	
 	@Override
@@ -75,11 +74,15 @@ public class MockJdk extends MockSuperclass implements JdkSelect {
 	@Override
 	public Keys select() {
 		Set<SelectionKey> keys = new HashSet<>(); 
-		for(MockChannel c : channels) {
+		for(MockChannel c : mockSvrChannel.getConnectedChannels()) {
 			SelectionKey key = c.getKey();
 			if(key != null)
 				keys.add(key);
 		}
+		
+		SelectionKey key = mockSvrChannel.getKey();
+		if(key != null)
+			keys.add(key);
 		
 		return new Keys(keys.size(), keys);
 	}

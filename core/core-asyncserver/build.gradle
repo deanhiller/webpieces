@@ -1,5 +1,7 @@
 dependencies {
     compile project(':core:core-channelmanager2')
+	
+	testCompile project(':core:core-mock')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

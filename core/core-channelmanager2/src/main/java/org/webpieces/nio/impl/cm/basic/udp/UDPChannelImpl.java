@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.UDPChannel;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
@@ -22,7 +23,8 @@ import org.webpieces.nio.impl.cm.basic.BasChannelImpl;
 import org.webpieces.nio.impl.cm.basic.IdObject;
 import org.webpieces.nio.impl.cm.basic.KeyProcessor;
 import org.webpieces.nio.impl.cm.basic.SelectorManager2;
-import org.webpieces.nio.impl.cm.basic.WrapperAndListener;
+import org.webpieces.nio.impl.cm.basic.ChannelInfo;
+import org.webpieces.nio.impl.cm.basic.ChannelState;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -34,8 +36,10 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	protected org.webpieces.nio.api.jdk.JdkDatagramChannel channel;
     private Calendar expires;
     
-	public UDPChannelImpl(IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
-		super(id, selMgr, router, pool);
+	public UDPChannelImpl(
+			IdObject id, JdkSelect selector, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config
+	) {
+		super(id, selMgr, router, pool, config);
 		try {
 			channel = selector.openDatagram();
 			channel.configureBlocking(false);
@@ -73,7 +77,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 		apiLog.trace(()->this+"Basic.disconnect called");
 		
 		try {
-			isConnected = false;        
+			channelState = ChannelState.CLOSED;
 			channel.disconnect();
 		} catch(IOException e) {
 			throw new NioException(e);
@@ -118,7 +122,7 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	public int readImpl(ByteBuffer b) {
 		if(b == null)
 			throw new IllegalArgumentException("Cannot use a null ByteBuffer");
-		else if(!isConnected)
+		else if(channelState != ChannelState.CONNECTED)
 			throw new IllegalStateException("Currently not connected");
 		try {
 			return channel.read(b);
@@ -159,18 +163,12 @@ public class UDPChannelImpl extends BasChannelImpl implements UDPChannel {
 	}
 
 	@Override
-	protected SelectionKey register(int allOps, WrapperAndListener struct) {
+	protected SelectionKey register(int allOps, ChannelInfo struct) {
 		try {
 			return channel.register(allOps, struct);
 		} catch (ClosedChannelException e) {
 			throw new NioClosedChannelException("Closed Channel", e);
 		}
-	}
-
-	@Override
-	protected void resetRegisteredOperations(int ops) {
-		channel.resetRegisteredOperations(ops);
-		
 	}
 
 }

@@ -3,6 +3,7 @@ package org.webpieces.webserver.test;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
@@ -32,8 +33,9 @@ public class MockServerChannel implements TCPServerChannel {
 	}
 
 	@Override
-	public void bind(SocketAddress addr) {
+	public CompletableFuture<Void> bind(SocketAddress addr) {
 		this.addr = (InetSocketAddress) addr;
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

@@ -1,11 +1,14 @@
 package org.webpieces.webserver.api;
 
-import org.webpieces.frontend2.api.StreamListener;
+import java.util.concurrent.CompletableFuture;
+
 import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface WebServer {
 
-	StreamListener start();
+	void start2();
+
+	CompletableFuture<Void> startAsync();
 
 	void stop();
 

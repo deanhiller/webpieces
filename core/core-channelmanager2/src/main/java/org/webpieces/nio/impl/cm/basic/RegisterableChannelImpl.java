@@ -91,9 +91,7 @@ abstract class RegisterableChannelImpl implements RegisterableChannel {
 
 	protected abstract SelectionKey keyFor();
 
-	protected abstract SelectionKey register(int allOps, WrapperAndListener struct);
-
-	protected abstract void resetRegisteredOperations(int ops);
+	protected abstract SelectionKey register(int allOps, ChannelInfo struct);
 
 	public SelectorManager2 getSelectorManager() {
 		return selMgr;

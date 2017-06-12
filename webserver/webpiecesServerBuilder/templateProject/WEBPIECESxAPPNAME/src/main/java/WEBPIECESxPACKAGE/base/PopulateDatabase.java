@@ -8,8 +8,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
 import org.webpieces.router.api.Startable;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 import WEBPIECESxPACKAGE.base.libs.EducationEnum;
 import WEBPIECESxPACKAGE.base.libs.RoleEnum;
@@ -18,7 +16,7 @@ import WEBPIECESxPACKAGE.base.libs.UserRole;
 
 public class PopulateDatabase implements Startable {
 
-	private static final Logger log = LoggerFactory.getLogger(PopulateDatabase.class);
+	//private static final Logger log = LoggerFactory.getLogger(PopulateDatabase.class);
 	private EntityManagerFactory factory;
 
 	@Inject

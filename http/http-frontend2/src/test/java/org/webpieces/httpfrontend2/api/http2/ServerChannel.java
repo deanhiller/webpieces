@@ -40,21 +40,6 @@ public class ServerChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Channel> registerForReads() {
-		return null;
-	}
-
-	@Override
-	public CompletableFuture<Channel> unregisterForReads() {
-		return null;
-	}
-
-	@Override
-	public boolean isRegisteredForReads() {
-		return false;
-	}
-
-	@Override
 	public InetSocketAddress getRemoteAddress() {
 		return null;
 	}
@@ -68,18 +53,6 @@ public class ServerChannel implements TCPChannel {
 	@Override
 	public ChannelSession getSession() {
 		return channelSession ;
-	}
-
-	@Override
-	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public int getMaxBytesBackupSize() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -113,9 +86,8 @@ public class ServerChannel implements TCPChannel {
 	}
 
 	@Override
-	public void bind(SocketAddress addr) {
-		// TODO Auto-generated method stub
-		
+	public CompletableFuture<Void> bind(SocketAddress addr) {
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

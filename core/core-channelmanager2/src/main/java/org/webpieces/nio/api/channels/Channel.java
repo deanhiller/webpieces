@@ -63,24 +63,6 @@ public interface Channel extends RegisterableChannel {
 	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener);
 	public CompletableFuture<Channel> write(ByteBuffer b);
 	public CompletableFuture<Channel> close();
-	
-    /**
-     * After you are connected, you are automatically registered for reads but if you want
-     * to apply back pressure down the channel to the client/server that is sending you data,
-     * you can call unregisterForReads and reads stop until you call unregisterForReads
-     */
-    public CompletableFuture<Channel> registerForReads();
-
-    /**
-     * Stop reading from the nic buffer for this channel such that the downstream client/server
-     * process will eventually block on sending you data.  It is a way to backpressure a specific
-     * channel safely to not overload your server when needed and when systems you are talking
-     * to take too long to respond
-     * 
-     */
-    public CompletableFuture<Channel> unregisterForReads();
-    
-    public boolean isRegisteredForReads();
     
     /**
      * Gets the remote address the channel is communicating with.
@@ -103,17 +85,6 @@ public interface Channel extends RegisterableChannel {
      * @return client's Session object
      */
     public ChannelSession getSession();
-   
-	/**
-     * It is important if far end stops reading that we only backup writes to a certain point and then
-     * fail so you don't blow your RAM and keep trying to write.  The default will be set to 500_000 bytes.  
-     * 
-     * Something similar to slowloris https://en.wikipedia.org/wiki/Slowloris_(computer_security) but with 
-     * the tweak that one could simply not read responses as the client	 
-	 */
-	public void setMaxBytesWriteBackupSize(int maxBytesBackup);
-	
-	public int getMaxBytesBackupSize();
 	
 	public boolean isSslChannel();
 	

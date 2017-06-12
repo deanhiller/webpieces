@@ -1,5 +1,7 @@
 package WEBPIECESxPACKAGE;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
@@ -21,7 +23,7 @@ public class TestLesson3BasicStart {
 	//our http parser and other pieces (which sometimes can catch bugs when you upgrade webpieces
 	// so in some cases, this can be valuable)
 	@Test
-	public void testBasicProdStartup() throws InterruptedException, IOException, ClassNotFoundException {
+	public void testBasicProdStartup() throws InterruptedException, IOException, ClassNotFoundException, ExecutionException, TimeoutException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//clear in-memory database

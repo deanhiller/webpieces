@@ -17,6 +17,7 @@ public class HttpServerImpl implements HttpServer {
 	private AsyncServer server;
 	private FrontendConfig config;
 	private Layer1ServerListener listener;
+	private boolean started;
 
 	public HttpServerImpl(AsyncServer server, FrontendConfig config, Layer1ServerListener listener) {
 		this.server = server;
@@ -25,17 +26,23 @@ public class HttpServerImpl implements HttpServer {
 	}
 	
 	@Override
-	public void start() {
+	public CompletableFuture<Void> start() {
 		// TODO Auto-generated method stub
 		log.info("starting to listen to port="+config.bindAddress);
-		server.start(config.bindAddress);
-		InetSocketAddress localAddr = server.getUnderlyingChannel().getLocalAddress();
-		listener.setSvrSocketAddr(localAddr);
-		log.info("now listening for incoming requests on "+localAddr);
+		CompletableFuture<Void> future = server.start(config.bindAddress);
+		return future.thenApply(v -> {
+			InetSocketAddress localAddr = server.getUnderlyingChannel().getLocalAddress();
+			listener.setSvrSocketAddr(localAddr);
+			started = true;
+			log.info("now listening for incoming requests on "+localAddr);
+			return null;
+		});
 	}
-	
+
 	@Override
 	public CompletableFuture<Void> close() {
+		if(!started)
+			throw new IllegalArgumentException("The server was not fully started yet.  you cannot close it until id is started");
 		return server.closeServerChannel();
 	}
 	

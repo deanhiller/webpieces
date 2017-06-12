@@ -35,16 +35,8 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.close();
 	}
 
-	public CompletableFuture<Channel> registerForReads() {
-		return channel.registerForReads().thenApply(c -> this);
-	}
-
 	public void setReuseAddress(boolean b) {
 		channel.setReuseAddress(b);
-	}
-
-	public CompletableFuture<Channel> unregisterForReads() {
-		return channel.unregisterForReads().thenApply(c -> this);
 	}
 
 	public boolean getKeepAlive() {
@@ -75,8 +67,8 @@ public class ProxyTCPChannel implements TCPChannel {
 		return channel.getName();
 	}
 
-	public void bind(SocketAddress addr) {
-		channel.bind(addr);
+	public CompletableFuture<Void> bind(SocketAddress addr) {
+		return channel.bind(addr);
 	}
 
 	public boolean isBlocking() {
@@ -98,18 +90,6 @@ public class ProxyTCPChannel implements TCPChannel {
 	@Override
 	public ChannelSession getSession() {
 		return channel.getSession();
-	}
-
-	public void setMaxBytesWriteBackupSize(int maxBytesBackup) {
-		channel.setMaxBytesWriteBackupSize(maxBytesBackup);
-	}
-
-	public int getMaxBytesBackupSize() {
-		return channel.getMaxBytesBackupSize();
-	}
-
-	public boolean isRegisteredForReads() {
-		return channel.isRegisteredForReads();
 	}
 
 	@Override

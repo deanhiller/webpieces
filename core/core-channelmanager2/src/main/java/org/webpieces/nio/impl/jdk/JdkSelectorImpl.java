@@ -50,16 +50,6 @@ public class JdkSelectorImpl implements JdkSelect
         java.nio.channels.SocketChannel channel = java.nio.channels.SocketChannel.open();
         return new JdkSocketChannelImpl(channel, selector);
     }
-
-    /**
-     * @see org.webpieces.nio.api.jdk.ChannelsFactory#open(java.nio.channels.SocketChannel)
-     */
-    public JdkSocketChannel open(java.nio.channels.SocketChannel newChan) {
-    	if(selector == null)
-    		throw new IllegalArgumentException("start must be called first to start the thread up");
-    	
-        return new JdkSocketChannelImpl(newChan, selector);
-    }
     
 	@Override
 	public JdkServerSocketChannel openServerSocket() throws IOException {

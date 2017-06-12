@@ -2,8 +2,11 @@ package org.webpieces.httpfrontend2.api;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapperGenerator;
@@ -42,7 +45,16 @@ class ServerFactory {
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool, new BackpressureConfig());
         FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(0));
         HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
-        server.start();
+        CompletableFuture<Void> fut = server.start();
+        try {
+			fut.get(2, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			throw new RuntimeException("exception", e);
+		} catch (ExecutionException e) {
+			throw new RuntimeException("exception", e);
+		} catch (TimeoutException e) {
+			throw new RuntimeException("exception", e);
+		}
         return server.getUnderlyingChannel().getLocalAddress().getPort();
     }
 

@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.webpieces.data.api.BufferPool;
+import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
@@ -20,6 +21,7 @@ import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
+import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -34,27 +36,35 @@ public abstract class BasChannelImpl
 	private static final Logger log = LoggerFactory.getLogger(BasChannelImpl.class);
 
     private ChannelSession session = new ChannelSessionImpl();
-    private long waitingBytesCounter = 0;
-	private ConcurrentLinkedQueue<WriteInfo> dataToBeWritten = new ConcurrentLinkedQueue<WriteInfo>();
-	private boolean isClosed = false;
-	private boolean doNotAllowWrites;
-	private int maxBytesWaitingSize = 500_000; 
-	private boolean isRegisterdForReads;
 	private BufferPool pool;
+	private KeyProcessor router;
 	private DataListener dataListener;
 	private Object writeLock = new Object();
+	
+    private long waitingBytesCounter = 0;
+	private ConcurrentLinkedQueue<WriteInfo> dataToBeWritten = new ConcurrentLinkedQueue<WriteInfo>();
+	private int maxBytesWaitingSize = 500_000;
+	
 	private boolean inDelayedWriteMode;
 	private boolean isRecording;
+
+	//for clients only
 	protected SocketAddress isConnectingTo;
+
+	protected ChannelState channelState;
+
 	private boolean isRemoteEndInitiateClose;
-	protected boolean isConnected;
-	private KeyProcessor router;
-	
-	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool) {
+	private int unackedBytes;
+	private int maxUnackedBytes;
+	private Integer readingThreshold;
+
+	public BasChannelImpl(IdObject id, SelectorManager2 selMgr, KeyProcessor router, BufferPool pool, BackpressureConfig config) {
 		super(id, selMgr);
 		this.pool = pool;
 		this.isRecording = false;
 		this.router = router;
+		this.maxUnackedBytes = config.getMaxBytes();
+		this.readingThreshold = config.getStartReadingThreshold();
 	}
 	
 	/* (non-Javadoc)
@@ -79,7 +89,7 @@ public abstract class BasChannelImpl
 		
 		CompletableFuture<Channel> future = connectImpl(addr);
 		return future.thenCompose(c -> {
-			isConnected = true;
+			channelState = ChannelState.CONNECTED;
 			return registerForReads(dataListener);
 		});
 	}
@@ -117,16 +127,14 @@ public abstract class BasChannelImpl
 			throw new IllegalArgumentException("buffer has no data");
 		else if(!selMgr.isRunning())
 			throw new IllegalStateException(this+"ChannelManager must be running and is stopped");		
-		else if(isClosed) {
+		else if(channelState == ChannelState.CLOSED) {
 			if(isRemoteEndInitiateClose)
 				throw new NioClosedChannelException(this+"Client cannot write after the remote end closed the socket");
 			else
 				throw new NioClosedChannelException(this+"Your Application cannot write after YOUR Application closed the socket");
-		} else if(!isConnected) {
+		} else if(channelState != ChannelState.CONNECTED) {
 			throw new NioException("The Channel is not connected yet");
-		} else if(doNotAllowWrites)
-			throw new IllegalStateException("This channel is in a failed state.  "
-					+ "failure functions were called so look for exceptions from them");
+		}
 		
 		apiLog.trace(()->this+"Basic.write");
 		
@@ -174,7 +182,6 @@ public abstract class BasChannelImpl
 	//synchronized with writeAll as both try to go through every element in the queue
 	//while most of the time there will be no contention(only on the close do we hit this)
 	private synchronized List<CompletableFuture<Void>> failAllWritesInQueue() {
-		doNotAllowWrites = true;
 		List<CompletableFuture<Void>> copy = new ArrayList<>();
 		while(!dataToBeWritten.isEmpty()) {
 			WriteInfo runnable = dataToBeWritten.remove();
@@ -242,13 +249,14 @@ public abstract class BasChannelImpl
         }
     }
 		
-    public void bind(SocketAddress addr) {
+    public CompletableFuture<Void> bind(SocketAddress addr) {
         if(!(addr instanceof InetSocketAddress))
             throw new IllegalArgumentException(this+"Can only bind to InetSocketAddress addressses");
         apiLog.trace(()->this+"Basic.bind called addr="+addr);
         
         try {
 			bindImpl(addr);
+			return CompletableFuture.completedFuture(null);
 		} catch (IOException e) {
 			throw new NioException(e);
 		}
@@ -286,7 +294,7 @@ public abstract class BasChannelImpl
 	public CompletableFuture<Channel> registerForReads() {
 		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
-		else if(!isConnecting() && !isConnected()) {
+		else if(channelState != ChannelState.CONNECTED) {
 			throw new IllegalStateException(this+"Must call one of the connect methods first(ie. connect THEN register for reads)");
 		} else if(isClosed())
 			throw new IllegalStateException("Channel is closed");
@@ -294,10 +302,7 @@ public abstract class BasChannelImpl
 		apiLog.trace(()->this+"Basic.registerForReads called");
 		
         try {
-			return selMgr.registerChannelForRead(this, dataListener).thenApply(v -> {
-				isRegisterdForReads = true;
-				return this;
-			});
+			return selMgr.registerChannelForRead(this, dataListener).thenApply(v -> this);
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -308,7 +313,6 @@ public abstract class BasChannelImpl
 	public CompletableFuture<Channel> unregisterForReads() {
 		apiLog.trace(()->this+"Basic.unregisterForReads called");		
 		try {
-			isRegisterdForReads = false;
 			return selMgr.unregisterChannelForRead(this).thenApply(v -> this);
 		} catch (IOException e) {
 			throw new NioException(e);
@@ -317,17 +321,13 @@ public abstract class BasChannelImpl
 		}
 	}	
            
-	protected void setConnecting(SocketAddress addr) {
+	protected void setConnectingTo(SocketAddress addr) {
 		this.isConnectingTo = addr;
 	}
 
-	protected boolean isConnecting() {
-		return this.isConnectingTo != null;
-	}
-
 	protected void setClosed(boolean b, boolean isServerClosing) {
-		isClosed = b;
 		isRemoteEndInitiateClose = isServerClosing;
+		channelState = ChannelState.CLOSED;
 	}
     
     @Override
@@ -366,18 +366,18 @@ public abstract class BasChannelImpl
     	return session;
     }
 
-	@Override
-	public void setMaxBytesWriteBackupSize(int maxQueueSize) {
-		this.maxBytesWaitingSize = maxQueueSize;
-	}
-	
-	@Override
-	public int getMaxBytesBackupSize() {
-		return maxBytesWaitingSize;
+	public void addUnackedByteCount(int bytes) {
+		unackedBytes += bytes;
 	}
 
-	public boolean isRegisteredForReads() {
-		return isRegisterdForReads;
+	public boolean isOverMaxUnacked() {
+		return unackedBytes >= maxUnackedBytes;
+	}
+
+	public boolean isUnderThreshold() {
+		if(unackedBytes <= readingThreshold)
+			return true;
+		return false;
 	}
 	
 }

@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.channels.Channel;
+import org.webpieces.nio.api.channels.RegisterableChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.jdk.JdkSelect;
@@ -26,41 +27,48 @@ public final class KeyProcessor {
 	//private static BufferHelper helper = ChannelManagerFactory.bufferHelper(null);
 	private static boolean logBufferNextRead = false;
 	private JdkSelect selector;
+	private BufferPool pool;
 
-	public KeyProcessor(JdkSelect selector) {
+	public KeyProcessor(JdkSelect selector, BufferPool pool) {
 		this.selector = selector;
+		this.pool = pool;
 	}
 	
-	public void processKeys(Set<SelectionKey> keySet, BufferPool pool) {
+	public void processKeys(Set<SelectionKey> keySet) {
 		Iterator<SelectionKey> iter = keySet.iterator();
 		while (iter.hasNext()) {
 			SelectionKey key = null;
+			RegisterableChannel channel = null;
 			try {
 				key = iter.next();
+				ChannelInfo struct = (ChannelInfo)key.attachment();
+				channel = struct.getChannel();
+
 				final SelectionKey current = key;
-				log.trace(() -> current.attachment()+" ops="+OpType.opType(current.readyOps())
+				final RegisterableChannel finalChannel = channel;
+				log.trace(() -> finalChannel+" ops="+OpType.opType(current.readyOps())
 							+" acc="+current.isAcceptable()+" read="+current.isReadable()+" write"+current.isWritable());
-				processKey(key, pool);
+				processKey(key, struct);
 				
 			} catch(IOException e) {
-				log.error(key.attachment()+"Processing of key failed, closing channel", e);
+				log.error(channel+"Processing of key failed, closing channel", e);
 				try {
 					if(key != null) 
 						key.channel().close();
 				} catch(Throwable ee) {
-					log.error(key.attachment()+"Close of channel failed", ee);
+					log.error(channel+"Close of channel failed", ee);
 				}
 			} catch(CancelledKeyException e) {
-				final SelectionKey current = key;
 				//TODO: get rid of this if...else statement by fixing
-				//CancelledKeyException on linux so the tests don't fail				
-				log.trace(() -> current.attachment()+"Processing of key failed, but continuing channel manager loop", e);				
+				//CancelledKeyException on linux so the tests don't fail
+				RegisterableChannel fChannel = channel;
+				log.trace(() -> fChannel+"Processing of key failed, but continuing channel manager loop", e);
 			} catch(Throwable e) {
-				log.error(key.attachment()+"Processing of key failed, but continuing channel manager loop", e);
+				log.error(channel+"Processing of key failed, but continuing channel manager loop", e);
 				try {
 					key.cancel();
 				} catch(Throwable ee) {
-					log.info("cancelling key failed.  exception type="+ee.getClass()+" msg="+ee.getMessage());
+					log.info(channel+"cancelling key failed.  exception type="+ee.getClass()+" msg="+ee.getMessage());
 				}
 			}
 		}
@@ -73,7 +81,7 @@ public final class KeyProcessor {
 		keySet.clear();
 	}
 	
-	private void processKey(SelectionKey key, BufferPool pool) throws IOException, InterruptedException {
+	private void processKey(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
 		log.trace(() -> key.attachment()+"proccessing");
 
 		//This is code to try to avoid the CancelledKeyExceptions as it makes the chances tighter
@@ -82,41 +90,38 @@ public final class KeyProcessor {
 		
 		//if isAcceptable, than is a ServerSocketChannel
 		if(key.isAcceptable()) {
-			acceptSocket(key);
+			acceptSocket(key, info);
 		} 
 		
 		if(key.isConnectable())
-			connect(key);
+			connect(key, info);
 		
 		if(key.isWritable()) {
-			write(key);
+			write(key, info);
 		}
             
 		//The read MUST be after the write as a call to key.isWriteable is invalid if the
 		//read resulted in the far end closing the socket.
 		if(key.isReadable()) {
-			read(key, pool);
+			read(key, info);
 		}                   
 	}
 	
 	//each of these functions should be a handler for a new type that we set up
 	//on the outside of this thing.  The signature is the same thing every time
 	// and we pass key and the Channel.  We can cast to the proper one.
-	private void acceptSocket(SelectionKey key) throws IOException {
-//		SelectableChannel s = key.channel();		
-		log.trace(() -> key.attachment()+"Incoming Connection="+key);
+	private void acceptSocket(SelectionKey key, ChannelInfo info) throws IOException {
+		log.trace(() -> info.getChannel()+"Incoming Connection="+key);
 		
-		WrapperAndListener struct = (WrapperAndListener)key.attachment();
-		BasTCPServerChannel channel = (BasTCPServerChannel)struct.getChannel();
+		BasTCPServerChannel channel = (BasTCPServerChannel)info.getChannel();
 		channel.accept(channel.getChannelCount());
 	}
 	
-	private void connect(SelectionKey key) throws IOException {
-		log.trace(() -> key.attachment()+"finishing connect process");
+	private void connect(SelectionKey key, ChannelInfo info) throws IOException {
+		log.trace(() -> info.getChannel()+"finishing connect process");
 		
-		WrapperAndListener struct = (WrapperAndListener)key.attachment();
-		CompletableFuture<Channel> callback = struct.getConnectCallback();
-		BasTCPChannel channel = (BasTCPChannel)struct.getChannel();
+		CompletableFuture<Channel> callback = info.getConnectCallback();
+		BasTCPChannel channel = (BasTCPChannel)info.getChannel();
 
 		try {
 			//must change the interests to not interested in connect anymore
@@ -133,19 +138,11 @@ public final class KeyProcessor {
 		}
 	}
 
-	private void read(SelectionKey key, BufferPool pool) throws IOException {
-		log.trace(() -> key.attachment()+"reading data");
+	private void read(SelectionKey key, ChannelInfo info) throws IOException {
+		log.trace(() -> info.getChannel()+"reading data");
 		
-		WrapperAndListener struct = (WrapperAndListener)key.attachment();
-		DataListener in = struct.getDataHandler();
-		BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
-		
-		//if someone JUST unregistered for reads, then let's not read from this socket since it would put more
-		//pressure in RAM so just wait until they re-registerForReads and they will get the data then
-		if(!channel.isRegisteredForReads()) {
-			//log.info("not registered for reads so skipping");
-			return; //do not process reads if we were unregistered
-		}
+		DataListener in = info.getDataHandler();
+		BasChannelImpl channel = (BasChannelImpl)info.getChannel();
 		
 		ByteBuffer chunk = pool.nextBuffer(1024);
 		
@@ -158,7 +155,7 @@ public final class KeyProcessor {
             	log.info(channel+"buffer2="+chunk);                	
             }
 
-            processBytes(key, chunk, bytes);
+            processBytes(key, info, chunk, bytes);
             
 		} catch(PortUnreachableException e) {
             //this is a normal occurence when some writes out udp to a port that is not
@@ -214,26 +211,28 @@ public final class KeyProcessor {
             //throw an IOException: "An existing connection was forcibly closed by the remote host"
             //we also close UDPChannels as well on IOException.  Not sure if this is good or not.
 			
-			process(key, in, channel, chunk, e);
+			process(key, in, info, chunk, e);
 		} catch(NioException e) {
 			Throwable cause = e.getCause();
 			if(cause instanceof IOException) {
 				IOException ioExc = (IOException) cause;
-				process(key, in, channel, chunk, ioExc);
+				process(key, in, info, chunk, ioExc);
 			} else
 				throw e;
 		}
 	}
 
-	private void process(SelectionKey key, DataListener in, BasChannelImpl channel,
+	private void process(SelectionKey key, DataListener in, ChannelInfo info,
 			ByteBuffer chunk, IOException e) throws IOException {
+        Channel channel = (Channel)info.getChannel();
+
 		String msg = e.getMessage();
 		if(msg != null && 
 			(msg.contains("An existing connection was forcibly closed")
 				|| msg.contains("Connection reset by peer")
 				|| msg.contains("An established connection was aborted by the software in your host machine"))) {
 		        log.trace(() -> "Exception 2", e);
-		        processBytes(key, chunk, -1);
+		        processBytes(key, info, chunk, -1);
 		} else {
 			log.error("IO Exception unexpected", e);
 			in.failure(channel, null, e);
@@ -247,11 +246,10 @@ public final class KeyProcessor {
      * @param mgr 
      * @throws IOException
      */
-    private void processBytes(SelectionKey key, ByteBuffer data, int bytes) throws IOException
+    private void processBytes(SelectionKey key, ChannelInfo info, ByteBuffer data, int bytes) throws IOException
     {
-        WrapperAndListener struct = (WrapperAndListener)key.attachment();
-        DataListener in = struct.getDataHandler();
-        BasChannelImpl channel = (BasChannelImpl)struct.getChannel();
+        DataListener in = info.getDataHandler();
+        BasChannelImpl channel = (BasChannelImpl)info.getChannel();
         
         ByteBuffer b = data;
         b.flip();
@@ -262,15 +260,41 @@ public final class KeyProcessor {
 			in.farEndClosed(channel);
 		} else if(bytes > 0) {
 			apiLog.trace(()->channel+"READ bytes="+bytes);
-			in.incomingData(channel, b);
+			fireIncomingRead(key, bytes, in, channel, b);
 		}
     }
-    
-	private void write(SelectionKey key) throws IOException, InterruptedException {
-		log.trace(()->key.attachment()+"writing data");
+
+	private void fireIncomingRead(SelectionKey key, int bytes, DataListener in, BasChannelImpl channel, ByteBuffer b) {
+		CompletableFuture<Void> future = in.incomingData(channel, b);
+		channel.addUnackedByteCount(bytes);
+		if(channel.isOverMaxUnacked()) {
+			log.warn(channel+"Overloaded channel.  unregistering until YOU catch up you slowass(lol)");
+			channel.unregisterForReads();
+		}
 		
-		WrapperAndListener struct = (WrapperAndListener)key.attachment();
-		BasChannelImpl channel = (BasChannelImpl)struct.getChannel();		
+		future.handle((v, t) -> {
+			channel.addUnackedByteCount(-bytes);
+			if(!isReading(key) && channel.isUnderThreshold()) {
+				log.warn(channel+"BOOM. you caught back up, reregistering for reads now");
+				channel.registerForReads();
+			}
+
+			if(t != null)
+				apiLog.error(channel+" Exception on incoming data", t);
+			return null;
+		});
+	}
+
+    private boolean isReading(SelectionKey key) {
+    	if((key.interestOps() & SelectionKey.OP_READ) > 0)
+    		return true;
+    	return false;
+    }
+    
+	private void write(SelectionKey key, ChannelInfo info) throws IOException, InterruptedException {
+		log.trace(()->info.getChannel()+"writing data");
+		
+		BasChannelImpl channel = (BasChannelImpl)info.getChannel();		
 		
 		log.trace(()->channel+"notifying channel of write");
 
@@ -292,14 +316,13 @@ public final class KeyProcessor {
 
 		int previous = key.interestOps();
 		int opsNow = previous & ~ops; //subtract out the operation
-		
-		channel.resetRegisteredOperations(opsNow);
+		key.interestOps(opsNow);
 		
 		//log.info("unregistering="+Helper.opType(opsNow)+" opToSubtract="+Helper.opType(ops)+" previous="+Helper.opType(previous)+" type="+type);
 		
 		//make sure we remove the appropriate listener and clean up
 		if(key.attachment() != null) {
-			WrapperAndListener struct = (WrapperAndListener)key.attachment();
+			ChannelInfo struct = (ChannelInfo)key.attachment();
 			struct.removeListener(ops);
 		}
 	}

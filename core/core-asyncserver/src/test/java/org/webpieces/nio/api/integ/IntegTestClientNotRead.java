@@ -79,7 +79,6 @@ public class IntegTestClientNotRead {
 	private void runWriting(Channel channel) {
 		log.info("unregister for reads");
 
-		channel.unregisterForReads(); //ensures we don't read from the channel
 		timeMillis = System.currentTimeMillis();
 		
 		log.info("starting writing");
