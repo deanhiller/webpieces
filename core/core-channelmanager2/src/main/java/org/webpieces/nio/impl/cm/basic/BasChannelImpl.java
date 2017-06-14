@@ -172,7 +172,7 @@ public abstract class BasChannelImpl
 
 			waitingBytesCounter += b.remaining();
 			if(waitingBytesCounter > maxBytesWaitingSize) {
-				log.warn("You have "+waitingBytesCounter+" bytes waiting to be written");
+				//log.warn("You have "+waitingBytesCounter+" bytes waiting to be written");
 			}
 		}
 
@@ -366,8 +366,9 @@ public abstract class BasChannelImpl
     	return session;
     }
 
-	public void addUnackedByteCount(int bytes) {
+	public int addUnackedByteCount(int bytes) {
 		unackedBytes += bytes;
+		return unackedBytes;
 	}
 
 	public boolean isOverMaxUnacked() {
@@ -378,6 +379,14 @@ public abstract class BasChannelImpl
 		if(unackedBytes <= readingThreshold)
 			return true;
 		return false;
+	}
+
+	public int getMaxUnacked() {
+		return maxUnackedBytes;
+	}
+	
+	public int getReadThreshold() {
+		return readingThreshold;
 	}
 	
 }

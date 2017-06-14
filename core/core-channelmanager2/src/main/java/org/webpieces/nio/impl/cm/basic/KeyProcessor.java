@@ -266,19 +266,36 @@ public final class KeyProcessor {
 
 	private void fireIncomingRead(SelectionKey key, int bytes, DataListener in, BasChannelImpl channel, ByteBuffer b) {
 		CompletableFuture<Void> future = in.incomingData(channel, b);
-		channel.addUnackedByteCount(bytes);
-		if(channel.isOverMaxUnacked()) {
-			log.warn(channel+"Overloaded channel.  unregistering until YOU catch up you slowass(lol)");
-			channel.unregisterForReads();
+		boolean unregister = false;
+		int unackedByteCnt;
+		synchronized(channel) {
+			unackedByteCnt = channel.addUnackedByteCount(bytes);
+			if(channel.isOverMaxUnacked()) {
+				unregister = true;
+
+			}
+		}
+
+		if(unregister) {
+			log.warn(channel+"Overloaded channel.  unregistering until YOU catch up you slowass(lol). num="+unackedByteCnt+" max="+channel.getMaxUnacked());
+			unregisterSelectableChannel(channel, SelectionKey.OP_READ);
 		}
 		
 		future.handle((v, t) -> {
-			channel.addUnackedByteCount(-bytes);
-			if(!isReading(key) && channel.isUnderThreshold()) {
-				log.warn(channel+"BOOM. you caught back up, reregistering for reads now");
+			boolean register = false;
+			int unackedCnt;
+			synchronized(channel) {
+				unackedCnt = channel.addUnackedByteCount(-bytes);
+				if(!isReading(key) && channel.isUnderThreshold()) {
+					register = true;
+				}
+			}
+			
+			if(register) {
+				log.warn(channel+"BOOM. you caught back up, reregistering for reads now. unackedCnt="+unackedCnt+" readThreshold="+channel.getReadThreshold());
 				channel.registerForReads();
 			}
-
+			
 			if(t != null)
 				apiLog.error(channel+" Exception on incoming data", t);
 			return null;

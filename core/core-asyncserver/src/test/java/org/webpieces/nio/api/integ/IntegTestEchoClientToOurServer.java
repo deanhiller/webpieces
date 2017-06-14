@@ -13,6 +13,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.nio.api.throughput.AsyncServerDataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 public class IntegTestEchoClientToOurServer {
@@ -40,7 +41,7 @@ public class IntegTestEchoClientToOurServer {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("server", pool, new BackpressureConfig(), executor);
 		AsyncServerManager serverMgr = AsyncServerMgrFactory.createAsyncServer(mgr);
-		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), new IntegTestLocalhostServerListener());
+		AsyncServer server = serverMgr.createTcpServer(new AsyncConfig("tcpServer"), null);
 		server.start(new InetSocketAddress(8080));
 
 		client.start(8080);

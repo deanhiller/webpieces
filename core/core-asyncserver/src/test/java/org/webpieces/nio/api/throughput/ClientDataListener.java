@@ -1,4 +1,4 @@
-package org.webpieces.nio.api.integ;
+package org.webpieces.nio.api.throughput;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +9,7 @@ import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-final class ClientDataListener implements DataListener {
+public final class ClientDataListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(ClientDataListener.class);
 	
 	private BufferPool pool2;

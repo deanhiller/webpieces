@@ -1,8 +1,9 @@
-package org.webpieces.nio.api.integ;
+package org.webpieces.nio.api.throughput;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class BytesRecorder {
 		return totalBytes;
 	}
 
-	protected synchronized void recordBytes(int size) {
+	public synchronized void recordBytes(int size) {
 		totalBytes += size;
 	}
 	
@@ -44,5 +45,15 @@ public class BytesRecorder {
 				logBytesTxfrd();
 			}
 		}, 1000, 5000);		
+	}
+
+	public void setClientChannel(TCPChannel channel) {
+	}
+
+	public void setServerChannel(TCPChannel proxy) {
+	}
+
+	public void markTime() {
+		lastTime = System.currentTimeMillis();
 	}
 }

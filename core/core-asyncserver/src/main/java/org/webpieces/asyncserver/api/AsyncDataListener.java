@@ -14,6 +14,6 @@ public interface AsyncDataListener extends DataListener {
 	 * @param proxy
 	 * @param isReadyForWrites
 	 */
-	void connectionOpened(TCPChannel proxy, boolean isReadyForWrites);
+	void connectionOpened(TCPChannel channel, boolean isReadyForWrites);
 
 }
