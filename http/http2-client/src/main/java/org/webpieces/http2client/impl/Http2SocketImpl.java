@@ -14,6 +14,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Trailers;
 import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2engine.api.client.Http2ClientEngine;
 import com.webpieces.http2engine.api.client.Http2ClientEngineFactory;
 import com.webpieces.http2parser.api.dto.DataFrame;
@@ -32,7 +33,7 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Http2Socket> connect(InetSocketAddress addr) {
+	public CompletableFuture<Void> connect(InetSocketAddress addr) {
 		if(addr == null)
 			throw new IllegalArgumentException("addr cannot be null");
 			
@@ -40,14 +41,14 @@ public class Http2SocketImpl implements Http2Socket {
 				.thenCompose(c -> incoming.sendInitialFrames())  //make sure 'sending' initial frames is part of connecting
 				.thenApply(f -> {
 					log.info("connecting complete as initial frames sent");
-					return this;
+					return null;
 				});
 	}
 
 	@Override
-	public CompletableFuture<Http2Socket> close() {
+	public CompletableFuture<Void> close() {
 		//TODO: For http/2, please send GOAWAY first(crap, do we need reason in the close method?...probably)
-		return outgoing.close().thenApply(channel -> this);
+		return outgoing.close();
 	}
 
 	/**
@@ -85,15 +86,20 @@ public class Http2SocketImpl implements Http2Socket {
 		trailers.setEndOfStream(true);
 		
 		return streamHandle.process(request.getHeaders(), responseListener)
-				.thenCompose(writer -> {
-					data.setStreamId(req.getStreamId());
-					return writer.processPiece(data);
-				})
-			.thenCompose(writer -> {
-				trailers.setStreamId(req.getStreamId());
-				return writer.processPiece(trailers);
-			})
-			.thenCompose(writer -> responseListener.fetchResponseFuture());
+				.thenCompose(writer -> writeStuff(writer, req, data, trailers, responseListener));
+
+	}
+	
+	private CompletableFuture<FullResponse> writeStuff(
+			StreamWriter writer, Http2Request req, DataFrame data, Http2Trailers trailers, SingleResponseListener responseListener) {
+		
+		data.setStreamId(req.getStreamId());
+		return writer.processPiece(data)
+						.thenCompose(v -> {
+							trailers.setStreamId(req.getStreamId());
+							return writer.processPiece(trailers);
+						})
+						.thenCompose(v -> responseListener.fetchResponseFuture());
 	}
 
 	private DataFrame createData(FullRequest request, boolean isEndOfStream) {

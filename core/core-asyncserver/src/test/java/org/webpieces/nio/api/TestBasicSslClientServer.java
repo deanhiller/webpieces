@@ -42,8 +42,8 @@ public class TestBasicSslClientServer {
 		System.out.println("port="+bound.getPort());
 		
 		TCPChannel channel = mgr.createTCPChannel("client", f.createEngineForSocket());
-		CompletableFuture<Channel> connect = channel.connect(bound, new ClientListener());
-		connect.thenAccept(c -> writeData(c));
+		CompletableFuture<Void> connect = channel.connect(bound, new ClientListener());
+		connect.thenAccept(v -> writeData(channel));
 		
 		synchronized (pool) {
 			while(values.size() < 10) 

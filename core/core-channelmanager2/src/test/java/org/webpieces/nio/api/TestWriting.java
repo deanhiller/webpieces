@@ -11,7 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.mocks.MockChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
@@ -26,7 +25,7 @@ public class TestWriting {
 	private TCPChannel channel;
 
 	@Before
-	public void setup() {
+	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		DirectExecutor exec = new DirectExecutor();
 		mgr = factory.createMultiThreadedChanMgr("test'n", new BufferCreationPool(), new BackpressureConfig(), exec);
@@ -37,15 +36,15 @@ public class TestWriting {
 		
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread());
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
-		Assert.assertTrue(future.isDone());
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		future.get(2, TimeUnit.SECONDS);
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
 	}
 
 	@Test
 	public void testImmediateWrite() throws InterruptedException, ExecutionException, TimeoutException {
 		mockChannel.setNumBytesToConsume(2);
-		CompletableFuture<Channel> future = channel.write(ByteBuffer.wrap(new byte[] { 1, 3 }));
+		CompletableFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 1, 3 }));
 		future.get(2, TimeUnit.SECONDS);
 		
 		Assert.assertEquals(1, mockChannel.nextByte());
@@ -55,7 +54,7 @@ public class TestWriting {
 	@Test
 	public void testDelayedWrite() throws InterruptedException, ExecutionException, TimeoutException {
 		
-		CompletableFuture<Channel> future = channel.write(ByteBuffer.wrap(new byte[] { 2, 5 }));
+		CompletableFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 2, 5 }));
 		Assert.assertFalse(future.isDone());		
 		Assert.assertTrue(mockChannel.isRegisteredForWrites());
 		
@@ -75,7 +74,7 @@ public class TestWriting {
 
 		mockChannel.setNumBytesToConsume(1);
 
-		CompletableFuture<Channel> future = channel.write(ByteBuffer.wrap(new byte[] { 9, 5 }));
+		CompletableFuture<Void> future = channel.write(ByteBuffer.wrap(new byte[] { 9, 5 }));
 		Assert.assertFalse(future.isDone());
 		Assert.assertEquals(1, mockChannel.getNumBytesConsumed());
 		Assert.assertEquals(9, mockChannel.nextByte());

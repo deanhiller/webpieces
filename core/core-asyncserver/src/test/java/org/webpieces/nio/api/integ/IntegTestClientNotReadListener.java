@@ -18,7 +18,7 @@ public class IntegTestClientNotReadListener implements AsyncDataListener {
 	@Override
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 		log.info("receiving data server..writing now");
-		CompletableFuture<Channel> future = channel.write(b);
+		CompletableFuture<Void> future = channel.write(b);
 
 		return future.thenAccept(p -> finished("data written", b));
 	}

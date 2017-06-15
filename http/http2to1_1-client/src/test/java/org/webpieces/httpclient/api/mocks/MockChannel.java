@@ -19,7 +19,6 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -42,27 +41,27 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		if(this.listener != null)
 			throw new IllegalStateException("connect should only be called once");
 		this.listener = listener;
-		return (CompletableFuture<Channel>) super.calledMethod(Method.CONNECT, addr, listener);
+		return (CompletableFuture<Void>) super.calledMethod(Method.CONNECT, addr, listener);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		DataWrapper wrapper = dataGen.wrapByteBuffer(b);
 		List<HttpPayload> parsedData = parser.parse(wrapper);
 		if(parsedData.size() != 1)
 			throw new IllegalArgumentException("The impl should be writing out full single payloads each write call");
 		HttpPayload payload = parsedData.get(0);
 		Http2Msg http2 = Http1_1ToHttp2.translate(payload, false);
-		return (CompletableFuture<Channel>) super.calledMethod(Method.WRITE, http2);
+		return (CompletableFuture<Void>) super.calledMethod(Method.WRITE, http2);
 	}
 
 	@Override
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -157,11 +156,11 @@ public class MockChannel extends MockSuperclass implements TCPChannel {
 		
 	}
 
-	public void setConnectFuture(CompletableFuture<java.nio.channels.Channel> future) {
+	public void setConnectFuture(CompletableFuture<Void> future) {
 		super.addValueToReturn(Method.CONNECT, future);
 	}
 
-	public void addWriteResponse(CompletableFuture<Channel> future) {
+	public void addWriteResponse(CompletableFuture<Void> future) {
 		super.addValueToReturn(Method.WRITE, future);
 	}
 

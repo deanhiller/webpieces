@@ -22,7 +22,7 @@ public class EngineStreamWriter implements StreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {		
+	public CompletableFuture<Void> processPiece(StreamMsg data) {		
 		if(data.getStreamId() != stream.getStreamId())
 			throw new IllegalArgumentException("PartialStream has incorrect stream id="+data
 					+" it should be="+stream.getStreamId()+" since initial request piece had that id");
@@ -33,7 +33,7 @@ public class EngineStreamWriter implements StreamWriter {
 		if(data.isEndOfStream())
 			streamEnded = true;
 		
-		return synchroLayer.sendDataToSocket(stream, data).thenApply(c -> this);
+		return synchroLayer.sendDataToSocket(stream, data);
 	}
 
 }

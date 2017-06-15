@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLEngine;
 
@@ -38,8 +40,8 @@ public class TestC3InitialHttpsConnections {
 	private MockTime mockTime = new MockTime(true);
 
 	@Before
-	public void setUp() throws InterruptedException, ExecutionException {
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(null));
 
         Http2Config config = new Http2Config();
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
@@ -56,9 +58,8 @@ public class TestC3InitialHttpsConnections {
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		socket = client.createHttpsSocket("simple", engine);
 		
-		CompletableFuture<Http2Socket> connect = socket.connect(addr);
-		Assert.assertTrue(connect.isDone());
-		Assert.assertEquals(socket, connect.get());
+		CompletableFuture<Void> connect = socket.connect(addr);
+		connect.get(2, TimeUnit.SECONDS);
 
 		//verify settings on connect were sent
 		//verify settings on connect were sent

@@ -52,7 +52,7 @@ public class IntegTestClientToEchoServer {
 
 		recorder.start();
 
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(4444), listener);
+		CompletableFuture<Void> connect = channel.connect(new InetSocketAddress(4444), listener);
 		connect.thenAccept(p -> runWriting(channel));
 		
 		synchronized(this) {
@@ -93,7 +93,7 @@ public class IntegTestClientToEchoServer {
 //			log.info("counter="+counter);
 		byte[] data = new byte[10240];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		CompletableFuture<Channel> write = channel.write(buffer);
+		CompletableFuture<Void> write = channel.write(buffer);
 		
 		write
 			.thenAccept(p -> write(channel, "wrote data from client"))

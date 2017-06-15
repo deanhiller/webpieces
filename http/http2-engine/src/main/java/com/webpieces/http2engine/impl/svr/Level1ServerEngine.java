@@ -146,12 +146,12 @@ public class Level1ServerEngine implements Http2ServerEngine {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			int streamId = data.getStreamId();
 			if(streamId != stream.getStreamId())
 				throw new IllegalArgumentException("response frame must have the same stream id as the push msg and did not.  pushStreamId="+stream.getStreamId()+" frame="+data);
 
-			return outgoingSync.sendDataToSocket(stream, data).thenApply(v -> this);
+			return outgoingSync.sendDataToSocket(stream, data);
 		}
 	}
 	

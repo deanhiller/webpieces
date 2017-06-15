@@ -5,7 +5,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -20,15 +19,15 @@ public class ProxyTCPChannel implements TCPChannel {
 		this.connectedChannels = connectedChannels;
 	}
 
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		return channel.connect(addr, listener);
 	}
 
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		return channel.write(b);
 	}
 
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		//technically we are not closed until FutureOperation does it's callback, but remove because we also
 		//do not need to call close a second time...
 		connectedChannels.removeChannel(channel);

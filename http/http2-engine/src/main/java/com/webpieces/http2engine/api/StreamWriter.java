@@ -6,6 +6,6 @@ import com.webpieces.http2parser.api.dto.lib.StreamMsg;
 
 public interface StreamWriter {
 
-	CompletableFuture<StreamWriter> processPiece(StreamMsg data);
+	CompletableFuture<Void> processPiece(StreamMsg data);
 
 }

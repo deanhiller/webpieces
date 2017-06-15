@@ -33,7 +33,7 @@ public class ConnectedChannels {
 		//first prevent other threads from calling above functions ever again
 		closed = true;
 
-		List<CompletableFuture<Channel>> futures = new ArrayList<>();
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
 		for(Channel c : connectedChannels.keySet()) {
 			futures.add(c.close());
 		}

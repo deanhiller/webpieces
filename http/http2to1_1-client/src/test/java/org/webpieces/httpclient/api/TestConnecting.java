@@ -1,7 +1,6 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.Channel;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
@@ -31,9 +30,9 @@ public class TestConnecting {
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
 		Http2Socket socket = httpClient.createHttpSocket("clientSocket1");
 
-		CompletableFuture<Channel> future1 = new CompletableFuture<Channel>();
+		CompletableFuture<Void> future1 = new CompletableFuture<Void>();
 		mockChannel.setConnectFuture(future1);
-		CompletableFuture<Http2Socket> future = socket.connect(new InetSocketAddress(8080));
+		CompletableFuture<Void> future = socket.connect(new InetSocketAddress(8080));
 		
 		Assert.assertFalse(future.isDone());
 		

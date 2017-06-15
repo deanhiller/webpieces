@@ -17,7 +17,6 @@ import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpLastChunk;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -113,8 +112,8 @@ public class Http1_1StreamImpl implements ResponseStream {
 
 	private class NoWritesWriter implements StreamWriter {
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
-			CompletableFuture<StreamWriter> future = new CompletableFuture<>();
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			CompletableFuture<Void> future = new CompletableFuture<>();
 			future.completeExceptionally(new IllegalStateException("You already sent a response with endStream==true"));
 			return future;
 		}
@@ -130,7 +129,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			closeCheck();
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
@@ -152,7 +151,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 			return write(httpData).thenApply(c -> {
 				if(frame.isEndOfStream())
 					permitQueue.releasePermit();
-				return this;
+				return null;
 			});
 		}
 	}
@@ -160,14 +159,14 @@ public class Http1_1StreamImpl implements ResponseStream {
 	private class Http11ChunkedWriter implements StreamWriter {
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			closeCheck();
 			if(!(data instanceof DataFrame))
 				throw new UnsupportedOperationException("not supported in http1.1="+data);
 			
 			DataFrame frame = (DataFrame) data;
 			
-			CompletableFuture<Channel> future = write(new HttpChunk(frame.getData()));
+			CompletableFuture<Void> future = write(new HttpChunk(frame.getData()));
 			
 			if(data.isEndOfStream()) {
 				remove(data);	
@@ -181,7 +180,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 				});
 			}
 			
-			return future.thenApply(c -> this);
+			return future;
 		}
 	}
 
@@ -201,7 +200,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 		
 	}
 	
-	private CompletableFuture<Channel> write(HttpPayload payload) {
+	private CompletableFuture<Void> write(HttpPayload payload) {
 		ByteBuffer buf = http11Parser.marshalToByteBuffer(socket.getHttp1_1MarshalState(), payload);
 		return socket.getChannel().write(buf);
 	}

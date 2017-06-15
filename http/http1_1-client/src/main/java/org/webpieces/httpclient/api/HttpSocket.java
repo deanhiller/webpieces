@@ -7,7 +7,7 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 
 public interface HttpSocket {
 
-	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr);
+	public CompletableFuture<Void> connect(InetSocketAddress addr);
 
 	/**
 	 * This can be used ONLY if 'you' know that the far end does NOT sended a chunked download. 
@@ -22,6 +22,6 @@ public interface HttpSocket {
 
 	public CompletableFuture<HttpDataWriter> send(HttpRequest request, HttpResponseListener l);
 
-	public CompletableFuture<HttpSocket> close();
+	public CompletableFuture<Void> close();
 
 }

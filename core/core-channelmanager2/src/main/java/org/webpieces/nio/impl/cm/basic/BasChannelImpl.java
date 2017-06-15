@@ -80,14 +80,14 @@ public abstract class BasChannelImpl
 	protected abstract int writeImpl(ByteBuffer b);
    
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		this.dataListener = listener;
 		
 		if(isRecording) 
 			dataListener = new RecordingDataListener("singleThreaded-", listener);
 		
 		CompletableFuture<Channel> future = connectImpl(addr);
-		return future.thenCompose(c -> {
+		return future.thenCompose(v -> {
 			channelState = ChannelState.CONNECTED;
 			return registerForReads(dataListener);
 		});
@@ -121,7 +121,7 @@ public abstract class BasChannelImpl
     }
 
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		if(b.remaining() == 0)
 			throw new IllegalArgumentException("buffer has no data");
 		else if(!selMgr.isRunning())
@@ -140,7 +140,7 @@ public abstract class BasChannelImpl
 		return writeSynchronized(b)
 				.thenApply(v -> {
 					pool.releaseBuffer(b);
-					return this;
+					return null;
 				});
 	}
 	
@@ -285,12 +285,12 @@ public abstract class BasChannelImpl
      */
     protected abstract void bindImpl2(SocketAddress addr) throws IOException;
     
-    CompletableFuture<Channel> registerForReads(DataListener l) {
+    CompletableFuture<Void> registerForReads(DataListener l) {
     	this.dataListener = l;
     	return registerForReads();
     }
     
-	public CompletableFuture<Channel> registerForReads() {
+	public CompletableFuture<Void> registerForReads() {
 		if(dataListener == null)
 			throw new IllegalArgumentException(this+"listener cannot be null");
 		else if(channelState != ChannelState.CONNECTED) {
@@ -301,7 +301,7 @@ public abstract class BasChannelImpl
 		apiLog.trace(()->this+"Basic.registerForReads called");
 		
         try {
-			return selMgr.registerChannelForRead(this, dataListener).thenApply(v -> this);
+			return selMgr.registerChannelForRead(this, dataListener);
 		} catch (IOException e) {
 			throw new NioException(e);
 		} catch (InterruptedException e) {
@@ -330,16 +330,16 @@ public abstract class BasChannelImpl
 	}
     
     @Override
-    public CompletableFuture<Channel> close() {
+    public CompletableFuture<Void> close() {
         //To prevent the following exception, in the readImpl method, we
         //check if the socket is already closed, and if it is we don't read
         //and just return -1 to indicate socket closed.
-    	CompletableFuture<Channel> future = new CompletableFuture<>();
+    	CompletableFuture<Void> future = new CompletableFuture<>();
     	try {
     		apiLog.trace(()->this+"Basic.close called");
     		
     		if(!isOpen()) {
-	        	future.complete(this);
+	        	future.complete(null);
 	        	return future;
 	        }
 	        

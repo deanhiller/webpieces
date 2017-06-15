@@ -40,7 +40,7 @@ public class TestWriteReads {
 	private Http2Socket socket;
 
 	@Before
-	public void setup() {
+	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
 		httpClient = Http2to1_1ClientFactory.createHttpClient(mockChannelMgr, pool);
 		
@@ -48,9 +48,9 @@ public class TestWriteReads {
 		socket = httpClient.createHttpSocket("clientSocket1");
 
 		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
-		CompletableFuture<Http2Socket> future = socket.connect(new InetSocketAddress(8080));
+		CompletableFuture<Void> future = socket.connect(new InetSocketAddress(8080));
 		
-		Assert.assertTrue(future.isDone());
+		future.get(2, TimeUnit.SECONDS);
 	}
 
 	@Test
@@ -115,14 +115,14 @@ public class TestWriteReads {
 		Assert.assertFalse(fut2.isDone()); //not resolved yet since client only has part of the data
 		
 		MockStreamWriter mockWriter = new MockStreamWriter();
-		CompletableFuture<StreamWriter> future2 = new CompletableFuture<StreamWriter>();
+		CompletableFuture<Void> future2 = new CompletableFuture<Void>();
 		mockWriter.addProcessResponse(future2);
 		future.complete(mockWriter);
 		
 		fut1.get(2, TimeUnit.SECONDS);
 		Assert.assertFalse(fut2.isDone());
 		
-		future2.complete(mockWriter);
+		future2.complete(null);
 		
 		fut2.get(2, TimeUnit.SECONDS);
 	}

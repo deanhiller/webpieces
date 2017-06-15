@@ -22,9 +22,9 @@ public class HttpChunkWriterImpl implements HttpDataWriter {
 	}
 
 	@Override
-	public CompletableFuture<HttpDataWriter> send(HttpData chunk) {
+	public CompletableFuture<Void> send(HttpData chunk) {
 		ByteBuffer buffer = parser.marshalToByteBuffer(state, chunk);
-		return channel.write(buffer).thenApply(c -> this);
+		return channel.write(buffer);
 	}
 
 }

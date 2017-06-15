@@ -17,14 +17,14 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 	}
 	
 	public void setDefaultRetValToThis() {
-		CompletableFuture<StreamWriter> completedFuture = CompletableFuture.completedFuture(this);
+		CompletableFuture<Void> completedFuture = CompletableFuture.completedFuture(null);
 		super.setDefaultReturnValue(Method.SEND_MORE, completedFuture);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
-		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.SEND_MORE, data);
+	public CompletableFuture<Void> processPiece(StreamMsg data) {
+		return (CompletableFuture<Void>) super.calledMethod(Method.SEND_MORE, data);
 	}
 
 	public StreamMsg getSingleFrame() {

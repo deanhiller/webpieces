@@ -8,8 +8,8 @@ import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.error.ConnReset2;
 import com.webpieces.http2engine.api.error.ConnectionCancelled;
-import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.api.error.ShutdownConnection;
+import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;

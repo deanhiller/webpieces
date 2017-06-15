@@ -19,13 +19,13 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 	}
 	
 	public MockStreamWriter() {
-		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(this));
+		setDefaultReturnValue(Method.INCOMING_DATA, CompletableFuture.completedFuture(null));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
-		return (CompletableFuture<StreamWriter>) super.calledMethod(Method.INCOMING_DATA, data);
+	public CompletableFuture<Void> processPiece(StreamMsg data) {
+		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_DATA, data);
 	}
 
 	public List<StreamMsg> getFrames() {

@@ -1,6 +1,8 @@
 package org.webpieces.httpfrontend2.api;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,8 +70,8 @@ class ServerFactory {
 		}
 		
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
-			return CompletableFuture.completedFuture(this);
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
+			return CompletableFuture.completedFuture(null);
 		}
 
     }
@@ -111,9 +113,9 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			log.error(stream+"receiving data="+data);
-			return CompletableFuture.completedFuture(this);
+			return CompletableFuture.completedFuture(null);
 		}
     }
 
@@ -129,7 +131,7 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			log.info(stream+"echoing back piece of data");
 			return writer.processPiece(data);
 		}
@@ -140,6 +142,7 @@ class ServerFactory {
 
 		private ResponseStream stream;
 		private Http2Response response;
+		private List<StreamMsg> datas = new ArrayList<>();
 
 		public CachedResponseWriter(ResponseStream stream, Http2Response response) {
 			this.stream = stream;
@@ -147,14 +150,23 @@ class ServerFactory {
 		}
 
 		@Override
-		public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+		public CompletableFuture<Void> processPiece(StreamMsg data) {
 			if(!data.isEndOfStream()) {
 				log.info(stream+"consuming data");
-				return CompletableFuture.completedFuture(this);
+				datas.add(data);
+				return CompletableFuture.completedFuture(null);
 			}
 			
-			return stream.sendResponse(response).thenApply(w -> new AppStreamWriter(stream, w));
+			CompletableFuture<StreamWriter> future = stream.sendResponse(response);
+			return future.thenCompose(w -> sendAllDatas(w, datas));
 		}
-    	
+		
+    	private CompletableFuture<Void> sendAllDatas(StreamWriter writer, List<StreamMsg> datas2) {
+    		CompletableFuture<Void> fut = CompletableFuture.completedFuture(null);
+    		for(StreamMsg m : datas2) {
+    			fut = fut.thenCompose(v -> writer.processPiece(m));
+    		}
+    		return fut;
+    	}
     }
 }

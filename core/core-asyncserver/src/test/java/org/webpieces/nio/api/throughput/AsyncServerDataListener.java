@@ -52,7 +52,7 @@ public class AsyncServerDataListener implements AsyncDataListener {
 			recorder2.markTime();
 	        while (true) {
 				ByteBuffer buffer = pool2.nextBuffer(32*1024);
-				CompletableFuture<Channel> future = channel.write(buffer);
+				CompletableFuture<Void> future = channel.write(buffer);
 				future.get(10, TimeUnit.SECONDS);
 	        }
 		}

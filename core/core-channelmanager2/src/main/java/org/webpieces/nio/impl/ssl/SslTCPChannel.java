@@ -36,8 +36,8 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	
 	private SocketDataListener socketDataListener = new SocketDataListener();
 	private ConnectionListener conectionListener;
-	private CompletableFuture<Channel> sslConnectfuture;
-	private CompletableFuture<Channel> closeFuture;
+	private CompletableFuture<Void> sslConnectfuture;
+	private CompletableFuture<Void> closeFuture;
 	private SslListener sslListener = new OurSslListener();
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
@@ -59,9 +59,9 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		clientDataListener = new SslTryCatchListener(listener);
-		CompletableFuture<Channel> future = realChannel.connect(addr, socketDataListener);
+		CompletableFuture<Void> future = realChannel.connect(addr, socketDataListener);
 		
 		return future.thenCompose( c -> beginHandshake());
 	}
@@ -70,21 +70,21 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		return socketDataListener;
 	}
 
-	private CompletableFuture<Channel> beginHandshake() {
-		sslConnectfuture = new CompletableFuture<Channel>();
+	private CompletableFuture<Void> beginHandshake() {
+		sslConnectfuture = new CompletableFuture<Void>();
 		sslEngine.beginHandshake();
 		return sslConnectfuture;
 	}
 	
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		if(b.remaining() == 0)
 			throw new IllegalArgumentException("You must pass in bytebuffers that contain data.  b.remaining==0 in this buffer");
-		return sslEngine.feedPlainPacket(b).thenApply(v -> this);
+		return sslEngine.feedPlainPacket(b);
 	}
 
 	@Override
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		closeFuture = new CompletableFuture<>();		
 		if(sslEngine == null) {
 			//this happens in the case where encryption link was not yet established(or even started for that matter)
@@ -93,19 +93,19 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			return realChannel.close();
 		}
 		sslEngine.close();
-		return closeFuture.thenApply(channel -> actuallyCloseSocket(channel, realChannel));
+		return closeFuture.thenApply(v -> actuallyCloseSocket(SslTCPChannel.this, realChannel));
 	}
 
-	private Channel actuallyCloseSocket(Channel sslChannel, Channel realChannel) {
+	private Void actuallyCloseSocket(Channel sslChannel, Channel realChannel) {
 		realChannel.close();
-		return sslChannel;
+		return null;
 	}
 	
 	private class OurSslListener implements SslListener {
 		@Override
 		public void encryptedLinkEstablished() {
 			if(sslConnectfuture != null)
-				sslConnectfuture.complete(SslTCPChannel.this);
+				sslConnectfuture.complete(null);
 			else {
 				CompletableFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this, true);
 				if(!future.isDone())
@@ -157,7 +157,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 			else if(closeFuture == null)
 				throw new RuntimeException("bug, this should not be possible");
 			else
-				closeFuture.complete(SslTCPChannel.this);
+				closeFuture.complete(null);
 		}
 	}
 	

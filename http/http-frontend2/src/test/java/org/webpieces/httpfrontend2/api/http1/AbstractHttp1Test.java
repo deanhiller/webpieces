@@ -43,7 +43,7 @@ public class AbstractHttp1Test {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		MockTcpServerChannel svrChannel = new MockTcpServerChannel();
 		mockChanMgr.addTCPSvrChannelToReturn(svrChannel);
-        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockChannel));
+        mockChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(null));
         mockListener.setDefaultRetVal(mockStreamWriter);
         mockStreamWriter.setDefaultRetValToThis();
 

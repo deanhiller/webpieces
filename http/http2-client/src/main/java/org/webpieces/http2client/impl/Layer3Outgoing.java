@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -19,11 +18,8 @@ public class Layer3Outgoing implements ClientEngineListener {
 	private static final Logger log = LoggerFactory.getLogger(Layer3Outgoing.class);
 	private TCPChannel channel;
 	
-	private Http2Socket socket;
-
 	public Layer3Outgoing(TCPChannel channel, Http2Socket socket) {
 		this.channel = channel;
-		this.socket = socket;
 	}
 
 	@Override
@@ -37,11 +33,11 @@ public class Layer3Outgoing implements ClientEngineListener {
 		channel.write(buf);
 	}
 
-	public CompletableFuture<Channel> connect(InetSocketAddress addr, Layer1Incoming incoming) {
+	public CompletableFuture<Void> connect(InetSocketAddress addr, Layer1Incoming incoming) {
 		return channel.connect(addr, incoming);
 	}
 
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		return channel.close();
 	}
 

@@ -60,9 +60,9 @@ public interface Channel extends RegisterableChannel {
 	 * @param listener Once connected, this is the listener that will start receiving data
 	 * @return
 	 */
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener);
-	public CompletableFuture<Channel> write(ByteBuffer b);
-	public CompletableFuture<Channel> close();
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener);
+	public CompletableFuture<Void> write(ByteBuffer b);
+	public CompletableFuture<Void> close();
     
     /**
      * Gets the remote address the channel is communicating with.

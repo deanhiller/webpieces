@@ -20,7 +20,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -59,7 +58,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		if(connected)
 			throw new IllegalStateException("already connected");
 		else if(listener == null)
@@ -68,7 +67,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		connected = true;
 		this.marshalState = parser.prepareToMarshal(4096, 4096);
 		this.listener = listener;
-		return CompletableFuture.completedFuture(this);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public void writeHexBack(String hex) {
@@ -99,7 +98,7 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		if(!prefaceReceived) {
 			//copy and store preface
 			ByteBuffer prefaceBuffer = ByteBuffer.allocate(b.remaining());
@@ -108,18 +107,18 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 			Preface preface = new Preface(prefaceBuffer);
 			List<Http2Msg> msgs = new ArrayList<>();
 			msgs.add(preface);
-			return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, msgs);
+			return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, msgs);
 		}
 		
 		return processData(b);
 	}
 
 	@SuppressWarnings("unchecked")
-	private CompletableFuture<Channel> processData(ByteBuffer b) {
+	private CompletableFuture<Void> processData(ByteBuffer b) {
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		parser.unmarshal(unmarshalState, data);
 		List<Http2Msg> parsedFrames = unmarshalState.getParsedFrames();
-		return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
+		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
 	}
 
 	public Http2Msg getFrameAndClear() {
@@ -141,14 +140,14 @@ public class MockHttp2Channel extends MockSuperclass implements TCPChannel {
 		return retVal.collect(Collectors.toList());
 	}
 	
-	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Channel> future) {
+	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Void> future) {
 		super.setDefaultReturnValue(Method.INCOMING_FRAME, future);
 	}
 	
 	
 	
 	@Override
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		isClosed = true;
 		return null;
 	}

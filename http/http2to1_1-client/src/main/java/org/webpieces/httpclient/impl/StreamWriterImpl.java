@@ -22,11 +22,11 @@ public class StreamWriterImpl implements StreamWriter {
 	}
 
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(StreamMsg data) {
+	public CompletableFuture<Void> processPiece(StreamMsg data) {
 		if(!(data instanceof DataFrame))
 			throw new IllegalArgumentException("You must feed in http1_1 compatible http2 payloads like DataFrame.  this is not http1_1 compatible="+data.getClass());
 		HttpData chunk = Http2ToHttp1_1.translate((DataFrame)data, req);
-		return dataWriter.send(chunk).thenApply(s -> this);
+		return dataWriter.send(chunk);
 	}
 
 }

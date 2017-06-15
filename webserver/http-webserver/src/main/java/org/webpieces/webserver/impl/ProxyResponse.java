@@ -32,7 +32,6 @@ import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.StatusCode;
 import com.webpieces.http2parser.api.dto.lib.Http2Header;
@@ -270,7 +269,7 @@ public class ProxyResponse implements ResponseStreamer {
 
 			List<DataFrame> frames = possiblyCompress(bytes, usingCompression, isCompressed);
 			
-			CompletableFuture<StreamWriter> future = CompletableFuture.completedFuture(writer);
+			CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 			
 			
 			for(int i = 0; i < frames.size(); i++) {

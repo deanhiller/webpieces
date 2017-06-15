@@ -42,7 +42,7 @@ public class MockTcpChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		memento	= parser.parse(memento, data);
 		List<HttpPayload> parsedMessages = memento.getParsedMessages();
@@ -55,7 +55,7 @@ public class MockTcpChannel implements TCPChannel {
 			}
 		}
 		
-		return CompletableFuture.completedFuture(this);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	public void sendResponse(HttpResponse response) {
@@ -113,13 +113,12 @@ public class MockTcpChannel implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Channel> close() {
-		// TODO Auto-generated method stub
+	public CompletableFuture<Void> close() {
 		return null;
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("no needed");
 	}
 

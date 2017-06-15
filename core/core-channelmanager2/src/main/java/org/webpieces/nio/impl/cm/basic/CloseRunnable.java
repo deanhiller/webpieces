@@ -2,7 +2,6 @@ package org.webpieces.nio.impl.cm.basic;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -11,9 +10,9 @@ public class CloseRunnable {
 
 	private static final Logger log = LoggerFactory.getLogger(CloseRunnable.class);
 	private BasChannelImpl channel;
-	private CompletableFuture<Channel> handler;
+	private CompletableFuture<Void> handler;
     
-	public CloseRunnable(BasChannelImpl c, CompletableFuture<Channel> future) {
+	public CloseRunnable(BasChannelImpl c, CompletableFuture<Void> future) {
 		channel = c;
 		handler = future;
 	}
@@ -29,7 +28,7 @@ public class CloseRunnable {
             //The above only happens on the client thread...on selector thread, close works fine.
             channel.wakeupSelector();
             
-            handler.complete(channel);
+            handler.complete(null);
 		} catch(Exception e) {
 			log.error(channel+"Exception occurred", e);
 			handler.completeExceptionally(e);

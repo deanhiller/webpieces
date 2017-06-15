@@ -26,8 +26,8 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Http2Socket> connect(InetSocketAddress addr) {
-		return socket1_1.connect(addr).thenApply(s -> this);
+	public CompletableFuture<Void> connect(InetSocketAddress addr) {
+		return socket1_1.connect(addr);
 	}
 
 	@Override
@@ -56,8 +56,8 @@ public class Http2SocketImpl implements Http2Socket {
 	}
 
 	@Override
-	public CompletableFuture<Http2Socket> close() {
-		return socket1_1.close().thenApply(s -> this);
+	public CompletableFuture<Void> close() {
+		return socket1_1.close();
 	}
 
 	@Override

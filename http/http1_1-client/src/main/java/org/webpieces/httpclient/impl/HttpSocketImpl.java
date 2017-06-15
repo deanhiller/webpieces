@@ -39,7 +39,7 @@ public class HttpSocketImpl implements HttpSocket {
 	
 	private TCPChannel channel;
 
-	private CompletableFuture<HttpSocket> connectFuture;
+	private CompletableFuture<Void> connectFuture;
 	private boolean isClosed;
 	private boolean connected;
 	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
@@ -62,7 +62,7 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 
 	@Override
-	public CompletableFuture<HttpSocket> connect(InetSocketAddress addr) {
+	public CompletableFuture<Void> connect(InetSocketAddress addr) {
 		if(isRecording ) {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
@@ -82,7 +82,7 @@ public class HttpSocketImpl implements HttpSocket {
 		return future;
 	}
 	
-	private synchronized HttpSocket connected() {
+	private synchronized Void connected() {
 		connected = true;
 		
 		while(!pendingRequests.isEmpty()) {
@@ -90,7 +90,7 @@ public class HttpSocketImpl implements HttpSocket {
 			actuallySendRequest(req.getFuture(), req.getRequest(), req.getListener());
 		}
 		
-		return this;
+		return null;
 	}
 
 	@Override
@@ -122,13 +122,13 @@ public class HttpSocketImpl implements HttpSocket {
 		responsesToComplete.offer(l);
 		
 		log.info("sending request now. req="+request.getRequestLine().getUri());
-		CompletableFuture<Channel> write = channel.write(wrap);
+		CompletableFuture<Void> write = channel.write(wrap);
 		
 		
 		write.handle((c, t) -> chainToFuture(c, t, future));
 	}
 	
-	private Void chainToFuture(Channel c, Throwable t, CompletableFuture<HttpDataWriter> future) {
+	private Void chainToFuture(Void v, Throwable t, CompletableFuture<HttpDataWriter> future) {
 		if(t != null) {
 			future.completeExceptionally(new RuntimeException(t));
 			return null;
@@ -141,17 +141,17 @@ public class HttpSocketImpl implements HttpSocket {
 	}
 	
 	@Override
-	public CompletableFuture<HttpSocket> close() {
+	public CompletableFuture<Void> close() {
 		if(isClosed) {
-			return CompletableFuture.completedFuture(this);
+			return CompletableFuture.completedFuture(null);
 		}
 		
 		cleanUpPendings("You closed the socket");
 		
-		CompletableFuture<Channel> future = channel.close();
+		CompletableFuture<Void> future = channel.close();
 		return future.thenApply(chan -> {
 			isClosed = true;
-			return this;
+			return null;
 		});
 	}
 

@@ -23,28 +23,28 @@ public class ThreadChannel implements Channel {
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		DataListener threaded = new ThreadDataListener(listener, sessionExecutor);
-		CompletableFuture<Channel> future = tcpChannel.connect(addr, threaded);
+		CompletableFuture<Void> future = tcpChannel.connect(addr, threaded);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> this, executor);
+		return future.thenApplyAsync(p -> null, executor);
 	}
 
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
-		CompletableFuture<Channel> future = tcpChannel.write(b);
+	public CompletableFuture<Void> write(ByteBuffer b) {
+		CompletableFuture<Void> future = tcpChannel.write(b);
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> this, executor);
+		return future.thenApplyAsync(p -> null, executor);
 	}
 
 	@Override
-	public CompletableFuture<Channel> close() {
-		CompletableFuture<Channel> future = tcpChannel.close();
+	public CompletableFuture<Void> close() {
+		CompletableFuture<Void> future = tcpChannel.close();
 		//transfer this to the SessionExecutor properly such that clients do
 		//not need to synchronize the ChannelSession writes/reads
-		return future.thenApplyAsync(p -> this, executor);
+		return future.thenApplyAsync(p -> null, executor);
 	}
 
 	public void setReuseAddress(boolean b) {

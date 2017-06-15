@@ -83,19 +83,19 @@ public class RequestStreamWriter implements StreamWriter {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(StreamMsg frame) {
+	public CompletableFuture<Void> processPiece(StreamMsg frame) {
 		if(cancelled)
-			return CompletableFuture.completedFuture(this);
+			return CompletableFuture.completedFuture(null);
 		else if(frame instanceof DataFrame) {
 			DataFrame dataFrame = (DataFrame) frame;
 			data = dataGen.chainDataWrappers(data, dataFrame.getData());
 			if(frame.isEndOfStream())
 				outstandingRequest = handleCompleteRequest();
-			return CompletableFuture.completedFuture(this);
+			return CompletableFuture.completedFuture(null);
 		} else if(frame instanceof Http2Headers) {
 			if(frame.isEndOfStream())
 				outstandingRequest = handleCompleteRequest();			
-			return CompletableFuture.completedFuture(this);
+			return CompletableFuture.completedFuture(null);
 		}
 		
 		throw new IllegalStateException("frame not expected="+frame);

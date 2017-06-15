@@ -10,7 +10,7 @@ import com.webpieces.http2engine.api.StreamHandle;
 
 public interface Http2Socket {
 	
-	CompletableFuture<Http2Socket> connect(InetSocketAddress addr);
+	CompletableFuture<Void> connect(InetSocketAddress addr);
 	
     /**
      * This can be used ONLY if 'you' know that the far end does NOT send a chunked download
@@ -45,7 +45,7 @@ public interface Http2Socket {
      */
     StreamHandle openStream();
     
-    CompletableFuture<Http2Socket> close();
+    CompletableFuture<Void> close();
 
     /**
      * Future is complete when ping response is returned such that you can measure latency

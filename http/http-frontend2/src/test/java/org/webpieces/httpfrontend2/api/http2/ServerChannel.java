@@ -5,7 +5,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -23,20 +22,20 @@ public class ServerChannel implements TCPChannel {
 	}
 
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new IllegalStateException("should be already connected");
 	}
 
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {
+	public CompletableFuture<Void> write(ByteBuffer b) {
 		listener.incomingData(clientChannel, b);
-		return CompletableFuture.completedFuture(this);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		listener.farEndClosed(clientChannel);
-		return CompletableFuture.completedFuture(this);
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

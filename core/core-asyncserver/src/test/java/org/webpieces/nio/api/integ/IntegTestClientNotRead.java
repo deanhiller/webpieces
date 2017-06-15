@@ -63,7 +63,7 @@ public class IntegTestClientNotRead {
 			}
 		}, 1000, 5000);
 		
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), new ClientDataListener());
+		CompletableFuture<Void> connect = channel.connect(new InetSocketAddress(8080), new ClientDataListener());
 		connect.thenAccept(p -> runWriting(channel));
 		
 		Thread.sleep(1000000000);
@@ -96,7 +96,7 @@ public class IntegTestClientNotRead {
 		log.info("write from client. reason="+ reason);
 		byte[] data = new byte[2000];
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		CompletableFuture<Channel> write = channel.write(buffer);
+		CompletableFuture<Void> write = channel.write(buffer);
 		final int count = counter+1;
 
 		if(counter >= 100) {

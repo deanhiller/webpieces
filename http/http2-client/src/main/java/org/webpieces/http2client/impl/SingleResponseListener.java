@@ -37,7 +37,7 @@ public class SingleResponseListener implements ResponseHandler, StreamWriter {
 	}
 	
 	@Override
-	public CompletableFuture<StreamWriter> processPiece(StreamMsg frame) {
+	public CompletableFuture<Void> processPiece(StreamMsg frame) {
 		if(frame instanceof DataFrame) {
 			incomingData((DataFrame) frame);
 		} else if(frame instanceof RstStreamFrame) {
@@ -49,7 +49,7 @@ public class SingleResponseListener implements ResponseHandler, StreamWriter {
 		
 		//complete immediately because client is in control of single request/response
 		//and can just send less requests if he wants to back off
-		return CompletableFuture.completedFuture(this);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	public void incomingData(DataFrame data) {

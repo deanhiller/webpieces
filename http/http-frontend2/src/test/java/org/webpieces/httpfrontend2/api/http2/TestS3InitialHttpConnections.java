@@ -50,7 +50,7 @@ public class TestS3InitialHttpConnections {
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		MockTcpServerChannel svrChannel = new MockTcpServerChannel();
 		mockChanMgr.addTCPSvrChannelToReturn(svrChannel);
-        mockTcpChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(mockTcpChannel));
+        mockTcpChannel.setIncomingFrameDefaultReturnValue(CompletableFuture.completedFuture(null));
         mockListener.setDefaultRetVal(mockStreamWriter);
         mockStreamWriter.setDefaultRetValToThis();
 

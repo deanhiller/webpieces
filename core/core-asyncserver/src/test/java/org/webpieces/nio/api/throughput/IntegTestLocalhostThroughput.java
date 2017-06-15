@@ -17,7 +17,6 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
@@ -61,7 +60,7 @@ public class IntegTestLocalhostThroughput {
 		recorder.setClientChannel(channel);
 		recorder.start();
 
-		CompletableFuture<Channel> connect = channel.connect(new InetSocketAddress(8080), listener);
+		CompletableFuture<Void> connect = channel.connect(new InetSocketAddress(8080), listener);
 		connect.get(2, TimeUnit.SECONDS);
 		
 		synchronized(this) {

@@ -17,7 +17,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.mock.ParametersPassedIn;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -47,17 +46,17 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 	}
 	
 	@Override
-	public CompletableFuture<Channel> connect(SocketAddress addr, DataListener listener) {
+	public CompletableFuture<Void> connect(SocketAddress addr, DataListener listener) {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public CompletableFuture<Channel> write(ByteBuffer b) {		
+	public CompletableFuture<Void> write(ByteBuffer b) {		
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		parser.unmarshal(unmarshalState, data);
 		List<Http2Msg> parsedFrames = unmarshalState.getParsedFrames();
-		return (CompletableFuture<Channel>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
+		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING_FRAME, parsedFrames);
 	}
 
 	public Http2Msg getFrameAndClear() {
@@ -76,14 +75,14 @@ public class Http2ChannelCache extends MockSuperclass implements TCPChannel {
 		return retVal.collect(Collectors.toList());
 	}
 	
-	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Channel> future) {
+	public void setIncomingFrameDefaultReturnValue(CompletableFuture<Void> future) {
 		super.setDefaultReturnValue(Method.INCOMING_FRAME, future);
 	}
 	
 	
 	
 	@Override
-	public CompletableFuture<Channel> close() {
+	public CompletableFuture<Void> close() {
 		isClosed = true;
 		return null;
 	}

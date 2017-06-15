@@ -132,8 +132,8 @@ public class Layer2Http1_1Handler {
 			if(msg.isEndOfStream())
 				stream.setSentFullRequest(true);
 
-			return requestWriter.processPiece(msg).thenApply(w -> {
-				stream.setRequestWriter(w);
+			return requestWriter.processPiece(msg).thenApply(v -> {
+				stream.setRequestWriter(requestWriter);
 				//since this is NOT end of stream, release permit for next data to come in
 				if(!msg.isEndOfStream())
 					permitQueue.releasePermit();

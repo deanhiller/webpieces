@@ -134,7 +134,7 @@ public class StaticFileReader {
 
 		AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);
 
-		CompletableFuture<StreamWriter> future;
+		CompletableFuture<Void> future;
 		try {
 			log.info(()->"sending chunked file via async read="+file);
 			long length = file.toFile().length();
@@ -143,11 +143,11 @@ public class StaticFileReader {
 			future = info.getResponseSender().sendResponse(response)
 					.thenCompose(s -> readLoop(s, info.getPool(), file, asyncFile, 0, remaining));
 		} catch(Throwable e) {
-			future = new CompletableFuture<StreamWriter>();
+			future = new CompletableFuture<Void>();
 			future.completeExceptionally(e);
 		}
 		
-		return future.handle((s, exc) -> handleClose(info, s, exc)) //our finally block for failures
+		return future.handle((s, exc) -> handleClose(info, exc)) //our finally block for failures
 					.thenAccept(s -> empty());
 	}
 
@@ -161,7 +161,7 @@ public class StaticFileReader {
 		return file;
 	}
 
-	private StreamWriter handleClose(RequestInfo info, StreamWriter s, Throwable exc) {
+	private Void handleClose(RequestInfo info, Throwable exc) {
 
 		//now we close if needed
 		try {
@@ -171,17 +171,12 @@ public class StaticFileReader {
 				log.error("Exception closing if needed", e);
 		}
 		
-		if(s != null)
-			return s;
-		else if(exc != null)
+		if(exc != null)
 			throw new RuntimeException(exc);
-		else {
-			log.error("oh crap, big bug");
-			throw new RuntimeException("This is really bizarre to get here");
-		}		
+		return null;
 	}
 	
-	private CompletableFuture<StreamWriter> readLoop(
+	private CompletableFuture<Void> readLoop(
 			StreamWriter writer, BufferPool pool, Path file, AsynchronousFileChannel asyncFile, int position,
 			AtomicLong remaining) {
 		//Because asyncRead creates a new future every time and dumps it to a fileExecutor threadpool, we do not need
@@ -232,7 +227,7 @@ public class StaticFileReader {
 		return future;
 	}
 	
-	private CompletableFuture<StreamWriter> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, Path file, boolean isEos) {
+	private CompletableFuture<Void> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, Path file, boolean isEos) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		
 		DataFrame frame = new DataFrame();
@@ -244,7 +239,7 @@ public class StaticFileReader {
 			buf.position(buf.limit());
 			
 			pool.releaseBuffer(buf);
-			return w;
+			return null;
 		});
 	}
 }

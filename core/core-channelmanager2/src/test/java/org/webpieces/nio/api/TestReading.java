@@ -3,13 +3,13 @@ package org.webpieces.nio.api;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.mocks.MockChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
@@ -25,7 +25,7 @@ public class TestReading {
 	private MockDataListener listener;
 
 	@Before
-	public void setup() {
+	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		DirectExecutor exec = new DirectExecutor();
 		BackpressureConfig config = new BackpressureConfig();
@@ -39,8 +39,8 @@ public class TestReading {
 		
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread());
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
-		Assert.assertTrue(future.isDone());
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
+		future.get(2, TimeUnit.SECONDS);
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
 	}
 

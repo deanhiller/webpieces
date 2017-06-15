@@ -11,7 +11,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.mocks.MockChannel;
@@ -40,7 +39,7 @@ public class TestConnecting {
 		
 		mockChannel.addConnectReturnValue(true);
 		mockJdk.setThread(Thread.currentThread());
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
 		Assert.assertTrue(future.isDone());
 		Assert.assertTrue(mockChannel.isRegisteredForReads());
 	}
@@ -52,7 +51,7 @@ public class TestConnecting {
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(true);
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
 		Assert.assertFalse(future.isDone());
 		Assert.assertFalse(mockChannel.isRegisteredForReads());
 		
@@ -70,7 +69,7 @@ public class TestConnecting {
 		
 		mockChannel.addConnectReturnValue(false);
 		mockJdk.setThread(Thread.currentThread());
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
 		Assert.assertFalse(future.isDone());
 		
 		Assert.assertFalse(mockChannel.isRegisteredForReads());
@@ -92,7 +91,7 @@ public class TestConnecting {
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(false);
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
 		
 		Assert.assertEquals(1, mockJdk.getNumTimesWokenUp());
 		Assert.assertFalse(future.isDone());
@@ -122,7 +121,7 @@ public class TestConnecting {
 		TCPChannel channel = mgr.createTCPChannel("myid");
 		
 		mockChannel.addConnectReturnValue(false);
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress(4444), listener);
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress(4444), listener);
 		
 		Assert.assertEquals(1, mockJdk.getNumTimesWokenUp());
 		Assert.assertFalse(future.isDone());

@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import org.junit.Assert;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.mocks.MockConnectionListener;
@@ -35,7 +34,7 @@ public class TestBasicSsl {
 		//don't really need to use a separate chan mgr but we will here..
 		ChannelManager chanMgr = createSvrChanMgr("client");
 		TCPChannel channel = chanMgr.createTCPChannel("client", sslFactory.createEngineForClient("cvs.xsoftware.biz", port));
-		CompletableFuture<Channel> future = channel.connect(new InetSocketAddress("localhost", port), mockClientDataListener);
+		CompletableFuture<Void> future = channel.connect(new InetSocketAddress("localhost", port), mockClientDataListener);
 		future.get();
 
 		byte[] data = new byte[] {0, 2, 4, 6, 8, 10};
