@@ -157,7 +157,6 @@ public class IntegSingleRequest {
         headers.add(new Http2Header(Http2HeaderName.AUTHORITY, host));
         headers.add(new Http2Header(Http2HeaderName.PATH, "/"));
         headers.add(new Http2Header(Http2HeaderName.SCHEME, scheme));
-        headers.add(new Http2Header(Http2HeaderName.HOST, host));
         headers.add(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
         headers.add(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
         headers.add(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/1.15.0"));

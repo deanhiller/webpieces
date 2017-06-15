@@ -2,6 +2,7 @@ dependencies {
     compile project(':core:core-asyncserver')
 	compile project(':http:http1_1-parser')
 	compile project(':http:http2-engine')
+	compile project(':http:http2-translations')
 	
     testCompile project(':core:core-mock')
 }

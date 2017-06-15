@@ -8,7 +8,7 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 
 public interface HttpStatefulParser {
 
-	ByteBuffer marshalToByteBuffer(HttpPayload request);
+	ByteBuffer marshalToByteBuffer(HttpPayload payload);
 	
 	List<HttpPayload> parse(DataWrapper moreData);
 

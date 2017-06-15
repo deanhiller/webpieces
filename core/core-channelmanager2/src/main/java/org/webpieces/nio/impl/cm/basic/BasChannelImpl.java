@@ -21,7 +21,6 @@ import org.webpieces.nio.api.exceptions.NioException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.nio.impl.util.ChannelSessionImpl;
-import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 

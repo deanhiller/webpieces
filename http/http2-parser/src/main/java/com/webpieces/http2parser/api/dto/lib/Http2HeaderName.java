@@ -28,7 +28,6 @@ public enum Http2HeaderName {
 	COOKIE("cookie", HeaderType.REQUEST),
 	EXPECT("expect", HeaderType.REQUEST),
 	FROM("from", HeaderType.REQUEST),
-	HOST("host", HeaderType.REQUEST),
 	IF_MATCH("if-match", HeaderType.REQUEST),
 	IF_MODIFIED_SINCE("if-modified-since", HeaderType.REQUEST),
 	IF_NONE_MATCH("if-none-match", HeaderType.REQUEST),

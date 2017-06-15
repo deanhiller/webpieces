@@ -20,13 +20,11 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.NamedThreadFactory;
 
 public class IntegTestLocalhostThroughput {
 
-	private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
+	//private static final Logger log = LoggerFactory.getLogger(IntegTestLocalhostThroughput.class);
 	private BytesRecorder recorder = new BytesRecorder();
 	
 	/**

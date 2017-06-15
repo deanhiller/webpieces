@@ -1,6 +1,5 @@
 package org.webpieces.webserver.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -13,8 +12,6 @@ import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.BufferPool;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RedirectResponse;
@@ -46,9 +43,6 @@ import groovy.lang.MissingPropertyException;
 public class ProxyResponse implements ResponseStreamer {
 
 	private static final Logger log = LoggerFactory.getLogger(ProxyResponse.class);
-	
-	//TODO: Actually should inject this so it is swappable.... (never have statics...it's annoying as hell when customizing)...
-	private static final DataWrapperGenerator wrapperFactory = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	@Inject
 	private TemplateService templatingService;

@@ -1,5 +1,8 @@
 dependencies {
     compile project(':http:http2-client'), project(':http:http1_1-client')
+	compile project(':http:http2-translations')
+	
+	testCompile project(':core:core-mock')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

@@ -2,7 +2,6 @@ package org.webpieces.httpclient.api;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 
 public interface HttpResponseListener {

@@ -10,7 +10,7 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.StreamListener;
-import org.webpieces.frontend2.impl.translation.Http2Translations;
+import org.webpieces.http2translations.api.Http1_1ToHttp2;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
@@ -23,7 +23,6 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.util.locking.PermitQueue;
 
@@ -113,7 +112,7 @@ public class Layer2Http1_1Handler {
 	}
 
 	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
-		Http2Msg msg = Http2Translations.translate(payload, socket.isHttps());
+		Http2Msg msg = Http1_1ToHttp2.translate(payload, socket.isHttps());
 
 		if(payload instanceof HttpRequest) {
 			return processInitialPieceOfRequest(socket, (HttpRequest) payload, (Http2Request)msg);

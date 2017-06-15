@@ -2,9 +2,7 @@ package org.webpieces.nio.api.mocks;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.webpieces.mock.MethodEnum;

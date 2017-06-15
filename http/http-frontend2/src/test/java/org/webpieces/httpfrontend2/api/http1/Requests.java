@@ -21,10 +21,6 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.net.URLEncoder;
 
-import com.webpieces.hpack.api.dto.Http2Response;
-import com.webpieces.http2parser.api.dto.lib.Http2Header;
-import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
-
 public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();

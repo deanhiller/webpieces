@@ -45,7 +45,6 @@ public class Requests {
 	    headers.add(new Http2Header(Http2HeaderName.AUTHORITY, "somehost.com"));
 	    headers.add(new Http2Header(Http2HeaderName.PATH, "/"));
 	    headers.add(new Http2Header(Http2HeaderName.SCHEME, "http"));
-	    headers.add(new Http2Header(Http2HeaderName.HOST, "somehost.com"));
 	    headers.add(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
 	    headers.add(new Http2Header(Http2HeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 	    headers.add(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/1.15.0"));

@@ -14,7 +14,6 @@ import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
@@ -41,15 +40,12 @@ public class RouteInvoker {
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
-	private RouterConfig config;
 
 	@Inject
 	public RouteInvoker(
-		ObjectToParamTranslator reverseTranslator,
-		RouterConfig config
+		ObjectToParamTranslator reverseTranslator
 	) {
 		this.reverseTranslator = reverseTranslator;
-		this.config = config;
 	}
 
 	public CompletableFuture<Void> invoke(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {

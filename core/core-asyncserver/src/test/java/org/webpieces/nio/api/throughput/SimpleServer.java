@@ -15,7 +15,8 @@ public class SimpleServer {
     	
     	Thread.sleep(1000);
     	
-        Socket socket = new Socket("127.0.0.1", 6666);
+        @SuppressWarnings("resource")
+		Socket socket = new Socket("127.0.0.1", 6666);
         InputStream input = socket.getInputStream();
         long total = 0;
         long start = System.currentTimeMillis();
@@ -36,7 +37,8 @@ public class SimpleServer {
     private static class MyRunnable implements Runnable {
 
 		public void runImpl() throws IOException {
-	        ServerSocket server = new ServerSocket(6666);
+	        @SuppressWarnings("resource")
+			ServerSocket server = new ServerSocket(6666);
 	        Socket socket = server.accept();
 	        OutputStream output = socket.getOutputStream();
 

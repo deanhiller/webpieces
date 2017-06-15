@@ -3,8 +3,8 @@ package org.webpieces.frontend2.impl;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.HttpStream;
+import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 
 import com.webpieces.hpack.api.dto.Http2Request;

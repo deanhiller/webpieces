@@ -3,9 +3,9 @@ package org.webpieces.frontend2.impl;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.frontend2.api.FrontendSocket;
-import org.webpieces.frontend2.api.StreamListener;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.ServerSocketInfo;
+import org.webpieces.frontend2.api.StreamListener;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;

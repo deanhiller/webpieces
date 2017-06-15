@@ -8,7 +8,7 @@ import org.webpieces.frontend2.api.FrontendSocket;
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.frontend2.api.StreamSession;
-import org.webpieces.frontend2.impl.translation.Http2Translations;
+import org.webpieces.http2translations.api.Http2ToHttp1_1;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -60,7 +60,7 @@ public class Http1_1StreamImpl implements ResponseStream {
 	@Override
 	public CompletableFuture<StreamWriter> sendResponse(Http2Response headers) {
 		closeCheck();
-		HttpResponse response = Http2Translations.translateResponse(headers);
+		HttpResponse response = Http2ToHttp1_1.translateResponse(headers);
 		
 		if(headers.isEndOfStream()) {
 			log.info(socket+" done sending response1");

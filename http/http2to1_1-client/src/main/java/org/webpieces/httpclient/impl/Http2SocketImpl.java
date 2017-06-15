@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
+import org.webpieces.http2translations.api.Http2ToHttp1_1;
 import org.webpieces.httpclient.api.HttpFullRequest;
 import org.webpieces.httpclient.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -37,9 +38,9 @@ public class Http2SocketImpl implements Http2Socket {
 	private class StreamImpl implements StreamHandle {
 		@Override
 		public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
-			HttpRequest req = Translations.translate(request);
+			HttpRequest req = Http2ToHttp1_1.translateRequest(request);
 			return socket1_1.send(req, new ResponseListener(socket1_1+"", responseListener))
-					.thenApply(s -> new StreamWriterImpl(s));
+					.thenApply(s -> new StreamWriterImpl(s, req));
 		}
 
 		@Override
@@ -50,8 +51,8 @@ public class Http2SocketImpl implements Http2Socket {
 	
 	@Override
 	public CompletableFuture<FullResponse> send(FullRequest request) {
-		HttpFullRequest req = Translations.translate(request);
-		return socket1_1.send(req).thenApply(r -> Translations.translate(r));
+		HttpFullRequest req = Translations2.translate(request);
+		return socket1_1.send(req).thenApply(r -> Translations2.translate(r));
 	}
 
 	@Override

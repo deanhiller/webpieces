@@ -1,0 +1,7 @@
+dependencies {
+    compile project(':http:http2-hpack'), project(':http:http1_1-parser')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Translations from http1_1 to http2 and back'
+}
