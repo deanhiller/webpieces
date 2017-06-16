@@ -89,4 +89,10 @@ public class SplitProxyWrapper extends SliceableDataWrapper  {
 	public String createStringFromUtf8(int offset, int length) {
 		return createStringFrom(offset, length, StandardCharsets.UTF_8);
 	}
+
+	@Override
+	public String toString() {
+		return "SplitData [" + wrapper + ", offset=" + offset + ", length=" + length + "]";
+	}
+	
 }

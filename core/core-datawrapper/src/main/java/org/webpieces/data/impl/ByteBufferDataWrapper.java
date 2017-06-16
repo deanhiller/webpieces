@@ -71,7 +71,7 @@ public class ByteBufferDataWrapper extends SliceableDataWrapper {
 
 	@Override
 	public String toString() {
-		return "ByteBufferDataWrapper [remaining=" + buffer.remaining() + ", buf="+buffer+"]";
+		return "ByteBufferDataWrapper [buf="+buffer+"]";
 	}
 
 	@Override

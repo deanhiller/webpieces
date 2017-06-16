@@ -174,31 +174,42 @@ public class HttpSocketImpl implements HttpSocket {
 	
 	private class MyDataListener implements DataListener {
 
+		private ByteAckTracker tracker = new ByteAckTracker();
 		private CompletableFuture<DataWriter> future;
 
 		@Override
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-			log.info("size="+b.remaining());
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
-			memento = parser.parse(memento, wrapper);
 
+			int totalBytes = memento.getLeftOverData().getReadableSize() + b.remaining();
+			memento = parser.parse(memento, wrapper);
+			int totalBytesParsed = totalBytes - memento.getLeftOverData().getReadableSize();
+			
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
+			AckAggregator ack = new AckAggregator(parsedMessages.size());
+
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
 					HttpData data = (HttpData) msg;
 					if(data.isEndOfData())
 						responsesToComplete.poll();
 					
-					future = future.thenCompose(w -> {
-						return w.incomingData(data);
+					future.thenCompose(w -> {
+						return w.incomingData(data).handle((v, t) -> ack.ack(v, t));
 					});
 					
 				} else if(msg instanceof HttpResponse) {
-					future = processResponse((HttpResponse)msg);
+					future = processResponse((HttpResponse)msg)
+								.handle((w, t) -> ack.ack(w, t));
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}
-			return future.thenApply(w -> null);
+
+			CompletableFuture<Void> byteAckableFuture = tracker.createTracker(b.remaining());
+			
+			ack.getFuture().thenApply(v -> tracker.ackParsedBytes(totalBytesParsed));
+			
+			return byteAckableFuture;
 		}
 
 		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {

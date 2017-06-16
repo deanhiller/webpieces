@@ -41,9 +41,9 @@ public class ResponseListener implements HttpResponseListener {
 		}
 
 		@Override
-		public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+		public CompletableFuture<Void> incomingData(HttpData chunk) {
 			DataFrame data = Http1_1ToHttp2.translateData(chunk);
-			return writer.processPiece(data).thenApply(c -> this);
+			return writer.processPiece(data);
 		}
 	}
 	@Override

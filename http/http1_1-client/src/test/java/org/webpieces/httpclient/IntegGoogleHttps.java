@@ -109,11 +109,11 @@ public class IntegGoogleHttps {
 
 		private class Writer implements DataWriter {
 			@Override
-			public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+			public CompletableFuture<Void> incomingData(HttpData chunk) {
 				DataWrapper wrapper = chunk.getBody();
 				String result = wrapper.createStringFrom(0, wrapper.getReadableSize(), HttpParserFactory.iso8859_1);
 				log.info("result=(lastChunk="+chunk.isEndOfData()+"\n"+result+"/////");
-				return CompletableFuture.completedFuture(this);
+				return CompletableFuture.completedFuture(null);
 			}
 		}
 

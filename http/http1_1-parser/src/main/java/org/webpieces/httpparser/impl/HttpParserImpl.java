@@ -334,6 +334,7 @@ public class HttpParserImpl implements HttpParser {
 		List<? extends DataWrapper> tuple = dataGen.split(dataToRead, i+4);
 		DataWrapper toBeParsed = tuple.get(0);
 		memento.setLeftOverData(tuple.get(1));
+		memento.setReadingHttpMessagePointer(0);
 		HttpMessage message = parseHttpMessage(memento, toBeParsed, markedPositions);
 		if(memento.isHttp2()) {
 			//shortcut to cut out so http2 parser can begin

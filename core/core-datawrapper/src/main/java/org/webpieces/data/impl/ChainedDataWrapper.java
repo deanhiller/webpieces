@@ -144,4 +144,9 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 	public String createStringFromUtf8(int offset, int length) {
 		return createStringFrom(offset, length, StandardCharsets.UTF_8);
 	}
+
+	@Override
+	public String toString() {
+		return "ChainedData[size="+getReadableSize()+"  containers=" + wrappers + "]";
+	}
 }

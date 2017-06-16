@@ -39,12 +39,12 @@ public class CatchResponseListener implements HttpResponseListener {
 		}
 
 		@Override
-		public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+		public CompletableFuture<Void> incomingData(HttpData chunk) {
 			try {
-				return writer.incomingData(chunk).thenApply(w -> this);
+				return writer.incomingData(chunk);
 			} catch(Throwable e) {
 				log.error("exception", e);
-				CompletableFuture<DataWriter> future = new CompletableFuture<DataWriter>();
+				CompletableFuture<Void> future = new CompletableFuture<Void>();
 				future.completeExceptionally(e);
 				return future;
 			}

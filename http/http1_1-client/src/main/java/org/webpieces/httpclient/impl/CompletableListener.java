@@ -36,14 +36,14 @@ public class CompletableListener implements HttpResponseListener {
 
 	private class NullWriter implements DataWriter {
 		@Override
-		public CompletableFuture<DataWriter> incomingData(HttpData data) {
+		public CompletableFuture<Void> incomingData(HttpData data) {
 			throw new UnsupportedOperationException("This should not happen");
 		}
 	}
 	
 	private class DataWriterImpl implements DataWriter {
 		@Override
-		public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+		public CompletableFuture<Void> incomingData(HttpData chunk) {
 			DataWrapper allData = dataGen.chainDataWrappers(response.getData(), chunk.getBodyNonNull());
 			response.setData(allData);
 			
@@ -52,7 +52,7 @@ public class CompletableListener implements HttpResponseListener {
 				response = null;
 			}
 			
-			return CompletableFuture.completedFuture(this);
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 	

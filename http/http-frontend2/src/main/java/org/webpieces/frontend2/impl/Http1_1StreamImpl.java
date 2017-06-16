@@ -74,8 +74,6 @@ public class Http1_1StreamImpl implements ResponseStream {
 			return write(response).thenApply(w -> new ContentLengthResponseWriter(headers));
 		}
 		
-		response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
-		
 		return write(response).thenApply(c -> new Http11ChunkedWriter());
 	}
 

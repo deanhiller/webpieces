@@ -6,6 +6,7 @@ import java.util.List;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpparser.api.dto.HttpChunk;
 import org.webpieces.httpparser.api.dto.HttpData;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -41,16 +42,17 @@ public class Requests {
 	public static Http2Response createResponse(int id, int contentLength) {
 		List<Http2Header> headers = new ArrayList<>();
 	    headers.add(new Http2Header(Http2HeaderName.STATUS, "200"));
-	    headers.add(new Http2Header(Http2HeaderName.SERVER, "id"));
+	    headers.add(new Http2Header(Http2HeaderName.SERVER, id+""));
 	    headers.add(new Http2Header(Http2HeaderName.CONTENT_LENGTH, contentLength+""));
 	    
 	    Http2Response response = new Http2Response(headers);
-	    response.setEndOfStream(true);
+	    if(contentLength == 0)
+	    	response.setEndOfStream(true);
 	    
 		return response;
 	}
 
-	public static HttpData createHttpChunk(int size) {
+	public static HttpData createHttpData(int size) {
 		
 		String s = "";
 		for(int i = 0; i < size; i++) {
@@ -58,5 +60,26 @@ public class Requests {
 		}
 		DataWrapper dataWrapper = dataGen.wrapByteArray(s.getBytes());
 		return new HttpData(dataWrapper, true);
+	}
+
+	public static HttpChunk createHttpChunk(int size) {
+		
+		String s = "";
+		for(int i = 0; i < size; i++) {
+			s+="h";
+		}
+		DataWrapper dataWrapper = dataGen.wrapByteArray(s.getBytes());
+		return new HttpChunk(dataWrapper);
+	}
+	
+	public static Http2Response createChunkedResponse(int id) {
+		List<Http2Header> headers = new ArrayList<>();
+	    headers.add(new Http2Header(Http2HeaderName.STATUS, "200"));
+	    headers.add(new Http2Header(Http2HeaderName.SERVER, id+""));
+	    
+	    Http2Response response = new Http2Response(headers);
+	    response.setEndOfStream(false);
+	    
+		return response;
 	}
 }

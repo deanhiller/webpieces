@@ -57,9 +57,9 @@ public class IntegColoradoEdu {
 
 		private class Writer implements DataWriter {
 			@Override
-			public CompletableFuture<DataWriter> incomingData(HttpData chunk) {
+			public CompletableFuture<Void> incomingData(HttpData chunk) {
 				log.info("received resp="+chunk+" last="+chunk.isEndOfData());
-				return CompletableFuture.completedFuture(this);
+				return CompletableFuture.completedFuture(null);
 			}
 		}
 		

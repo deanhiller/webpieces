@@ -52,9 +52,13 @@ public class Http2ToHttp1_1 {
 			}
 		}
 		
-		if(headers.isEndOfStream() && headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH) == null) {
-			//firefox really needs content length
-			response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+		if(headers.getHeaderLookupStruct().getHeader(Http2HeaderName.CONTENT_LENGTH) == null) {
+			if(headers.isEndOfStream()) {
+				//firefox really needs content length!!! if end of stream
+				response.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, "0"));
+			} else {
+				response.addHeader(new Header(KnownHeaderName.TRANSFER_ENCODING, "chunked"));
+			}
 		}
 		
 		if(status.getCode() == null)
