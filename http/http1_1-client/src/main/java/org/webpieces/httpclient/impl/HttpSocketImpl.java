@@ -26,7 +26,6 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
@@ -37,10 +36,8 @@ public class HttpSocketImpl implements HttpSocket {
 	
 	private TCPChannel channel;
 
-	private CompletableFuture<Void> connectFuture;
 	private boolean isClosed;
 	private boolean connected;
-	private ConcurrentLinkedQueue<PendingRequest> pendingRequests = new ConcurrentLinkedQueue<>();
 	
 	private HttpParser parser;
 	private Memento memento;
@@ -62,8 +59,7 @@ public class HttpSocketImpl implements HttpSocket {
 			dataListener = new RecordingDataListener("httpSock-", dataListener);
 		}
 		
-		connectFuture = channel.connect(addr, dataListener).thenApply(channel -> connected());
-		return connectFuture;
+		return channel.connect(addr, dataListener).thenApply(channel -> connected());
 	}
 
 	@Override
@@ -77,39 +73,20 @@ public class HttpSocketImpl implements HttpSocket {
 		return future;
 	}
 	
-	private synchronized Void connected() {
+	private Void connected() {
 		connected = true;
-		
-		while(!pendingRequests.isEmpty()) {
-			PendingRequest req = pendingRequests.remove();
-			actuallySendRequest(req.getFuture(), req.getRequest(), req.getListener());
-		}
-		
 		return null;
 	}
 
 	@Override
 	public CompletableFuture<HttpDataWriter> send(HttpRequest request, HttpResponseListener listener) {
-		if(connectFuture == null)
-			throw new IllegalArgumentException("You must at least call httpSocket.connect first(it "
-					+ "doesn't have to complete...you just have to call it before caling send)");
+		if(!connected)
+			throw new IllegalStateException("The socket is not yet connected");
 
-		CompletableFuture<HttpDataWriter> future = new CompletableFuture<>();
-		boolean wasConnected = false;
-		synchronized (this) {
-			if(!connected) {
-				pendingRequests.add(new PendingRequest(future, request, listener));
-			} else
-				wasConnected = true;
-		}
-		
-		if(wasConnected) 
-			actuallySendRequest(future, request, listener);
-		
-		return future;
+		return actuallySendRequest(request, listener);
 	}
 
-	private void actuallySendRequest(CompletableFuture<HttpDataWriter> future, HttpRequest request, HttpResponseListener listener) {
+	private CompletableFuture<HttpDataWriter> actuallySendRequest(HttpRequest request, HttpResponseListener listener) {
 		HttpResponseListener l = new CatchResponseListener(listener);
 		ByteBuffer wrap = parser.marshalToByteBuffer(state, request);
 		
@@ -117,22 +94,7 @@ public class HttpSocketImpl implements HttpSocket {
 		responsesToComplete.offer(l);
 		
 		log.info("sending request now. req="+request.getRequestLine().getUri());
-		CompletableFuture<Void> write = channel.write(wrap);
-		
-		
-		write.handle((c, t) -> chainToFuture(c, t, future));
-	}
-	
-	private Void chainToFuture(Void v, Throwable t, CompletableFuture<HttpDataWriter> future) {
-		if(t != null) {
-			future.completeExceptionally(new RuntimeException(t));
-			return null;
-		}
-		
-		HttpChunkWriterImpl impl = new HttpChunkWriterImpl(channel, parser, state);
-		future.complete(impl);
-		
-		return null;
+		return channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state));
 	}
 	
 	@Override
@@ -141,30 +103,11 @@ public class HttpSocketImpl implements HttpSocket {
 			return CompletableFuture.completedFuture(null);
 		}
 		
-		cleanUpPendings("You closed the socket");
-		
 		CompletableFuture<Void> future = channel.close();
 		return future.thenApply(chan -> {
 			isClosed = true;
 			return null;
 		});
-	}
-
-	private void cleanUpPendings(String msg) {
-		//do we need an isClosing state and cache that future?  (I don't think so but time will tell)
-		while(!responsesToComplete.isEmpty()) {
-			HttpResponseListener listener = responsesToComplete.poll();
-			if(listener != null) {
-				listener.failure(new NioClosedChannelException(msg+" before responses were received"));
-			}
-		}
-		
-		synchronized (this) {
-			while(!pendingRequests.isEmpty()) {
-				PendingRequest pending = pendingRequests.poll();
-				pending.getListener().failure(new NioClosedChannelException(msg+" before requests were sent"));
-			}
-		}
 	}
 	
 	private class MyDataListener implements DataListener {
@@ -221,7 +164,6 @@ public class HttpSocketImpl implements HttpSocket {
 		public void farEndClosed(Channel channel) {
 			log.info("far end closed");
 			isClosed = true;
-			cleanUpPendings("Remote end closed");		
 		}
 
 		@Override
