@@ -29,6 +29,9 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
+import com.webpieces.util.acking.AckAggregator;
+import com.webpieces.util.acking.ByteAckTracker;
+
 public class HttpSocketImpl implements HttpSocket {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
