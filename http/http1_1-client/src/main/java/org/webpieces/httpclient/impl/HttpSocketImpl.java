@@ -30,8 +30,6 @@ import org.webpieces.nio.api.exceptions.NioClosedChannelException;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 
-import com.webpieces.util.locking.PermitQueue;
-
 public class HttpSocketImpl implements HttpSocket {
 
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
@@ -51,14 +49,11 @@ public class HttpSocketImpl implements HttpSocket {
 	private boolean isRecording = false;
 	private MarshalState state;
 	
-	private PermitQueue queue;
-	
 	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
 		this.channel = channel;
 		this.parser = parser;
 		memento = parser.prepareToParse();
 		state = parser.prepareToMarshal();
-		queue = new PermitQueue("channel", 1, 3000, 100);
 	}
 
 	@Override
@@ -181,12 +176,14 @@ public class HttpSocketImpl implements HttpSocket {
 		public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
+			int bytesIn = b.remaining();
 			int totalBytes = memento.getLeftOverData().getReadableSize() + b.remaining();
 			memento = parser.parse(memento, wrapper);
 			int totalBytesParsed = totalBytes - memento.getLeftOverData().getReadableSize();
 			
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
-			AckAggregator ack = new AckAggregator(parsedMessages.size());
+
+			AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), totalBytesParsed);
 
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
@@ -204,12 +201,8 @@ public class HttpSocketImpl implements HttpSocket {
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}
-
-			CompletableFuture<Void> byteAckableFuture = tracker.createTracker(b.remaining());
 			
-			ack.getFuture().thenApply(v -> tracker.ackParsedBytes(totalBytesParsed));
-			
-			return byteAckableFuture;
+			return ack.getAckBytePayloadFuture();
 		}
 
 		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {

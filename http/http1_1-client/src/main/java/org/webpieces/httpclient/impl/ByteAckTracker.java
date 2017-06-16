@@ -9,10 +9,15 @@ public class ByteAckTracker {
 	public ConcurrentLinkedQueue<Record> records = new ConcurrentLinkedQueue<>();
 	private AtomicInteger numberBytesToAck = new AtomicInteger(0);
 	
-	public CompletableFuture<Void> createTracker(int incomingBytes) {
+	public AckAggregator createTracker(int incomingBytes, int numAcksNeeded, int totalBytesParsed) {
 		CompletableFuture<Void> byteFuture = new CompletableFuture<Void>();
 		records.add(new Record(incomingBytes, byteFuture));
-		return byteFuture;
+		
+		CompletableFuture<Void> allAcksReceived = new CompletableFuture<Void>();
+		AckAggregator ack = new AckAggregator(byteFuture, numAcksNeeded, allAcksReceived);
+		allAcksReceived.thenApply(v -> ackParsedBytes(totalBytesParsed));
+		
+		return ack;
 	}
 
 	private class Record {
@@ -22,6 +27,11 @@ public class ByteAckTracker {
 		public Record(int incomingBytes, CompletableFuture<Void> byteFuture) {
 			this.incomingBytes = incomingBytes;
 			this.byteFuture = byteFuture;
+		}
+
+		@Override
+		public String toString() {
+			return "Record [incomingBytes=" + incomingBytes + "]";
 		}
 	}
 
@@ -47,4 +57,5 @@ public class ByteAckTracker {
 			removedRecord.byteFuture.complete(null); //ack this set of bytes
 		}
 	}
+
 }
