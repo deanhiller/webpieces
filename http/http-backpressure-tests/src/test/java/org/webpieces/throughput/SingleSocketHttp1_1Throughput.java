@@ -13,7 +13,14 @@ public class SingleSocketHttp1_1Throughput extends ThroughputSetup {
 
 	public static void main(String[] args) throws InterruptedException {
 		SingleSocketHttp1_1Throughput example = new SingleSocketHttp1_1Throughput();
-		example.start(false, Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS);
+		
+		//BIG NOTE: It is not fair to set multiThreaded=true BECAUSE in that case you would need
+		//many many sockets because the threadpool causes context switching BUT keeps the one socket
+		//virtually single threaded(this is a BIG pretty awesome feature actually).  The REASON it keeps
+		//it virtually single threaded is so that SSL handshaking, http2 parsing, http1.1 parsing can
+		//all be delayed until the thread pool.  BUT we leave the switch here so we can play with it
+		//AND we need to code up another rps example for many many sockets
+		example.start(false, Mode.ASYNCHRONOUS, Mode.ASYNCHRONOUS);
 	}
 
 	@Override

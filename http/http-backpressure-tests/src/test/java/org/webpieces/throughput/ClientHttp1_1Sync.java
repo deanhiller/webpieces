@@ -95,14 +95,12 @@ public class ClientHttp1_1Sync {
 			try {
 				runImpl();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				log.error("exception", e);
 			}
 		}
 		
 		public void runImpl() throws IOException {
-			int counter = 0;
 			while(true) {
-				counter++;
 				HttpRequest request = RequestCreator.createHttp1_1Request();
 				ByteBuffer buffer = parser2.marshalToByteBuffer(request);
 				byte[] b = new byte[buffer.remaining()];

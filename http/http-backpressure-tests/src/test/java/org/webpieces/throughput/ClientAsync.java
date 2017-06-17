@@ -2,7 +2,9 @@ package org.webpieces.throughput;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
@@ -12,6 +14,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamHandle;
+import com.webpieces.http2engine.api.StreamWriter;
 
 public class ClientAsync {
 	private static final Logger log = LoggerFactory.getLogger(ClientAsync.class);
@@ -54,6 +57,14 @@ public class ClientAsync {
 
 		@Override
 		public void run() {
+			try {
+				runImpl();
+			} catch (Throwable e) {
+				log.error("Exception", e);
+			}
+		}
+		
+		public void runImpl() throws InterruptedException, ExecutionException, TimeoutException {
 	    	log.error("ASYNC CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
 	    	log.info("info messages automatically show up in black");
 	    	
@@ -63,7 +74,11 @@ public class ClientAsync {
 				Http2Request request = RequestCreator.createHttp2Request();
 				
 				StreamHandle stream = socket.openStream();
-				stream.process(request, responseListener);
+				CompletableFuture<StreamWriter> future = stream.process(request, responseListener);
+				
+				//the future puts the perfect amount of backpressure or performance will tank
+				//(ie. comment out this line and watch performance tank)
+				future.get(10, TimeUnit.SECONDS);
 			}
 		}
 		

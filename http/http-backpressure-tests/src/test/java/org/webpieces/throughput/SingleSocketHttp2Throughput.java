@@ -11,11 +11,15 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 
+/**
+ *
+ */
 public class SingleSocketHttp2Throughput extends ThroughputSetup {
 
 	public static void main(String[] args) throws InterruptedException {
 		SingleSocketHttp1_1Throughput example = new SingleSocketHttp1_1Throughput();
-		example.start(false, Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS);
+		throw new UnsupportedOperationException("not done yet");
+		//example.start(false, Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS);
 	}
 
 	@Override

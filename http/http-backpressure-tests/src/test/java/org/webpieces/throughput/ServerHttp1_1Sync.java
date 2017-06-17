@@ -86,7 +86,7 @@ public class ServerHttp1_1Sync {
 			try {
 				runImpl();
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("Exception", e);
 			}
 		}
     }
