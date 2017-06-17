@@ -29,31 +29,6 @@ public class HttpChunk extends HttpData {
 	public void addExtension(HttpChunkExtension extension) {
 		extensions.add(extension);
 	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		HttpChunk other = (HttpChunk) obj;
-		if (extensions == null) {
-			if (other.extensions != null)
-				return false;
-		} else if (!extensions.equals(other.extensions))
-			return false;
-		return true;
-	}
 
 	public List<HttpChunkExtension> getExtensions() {
 		return extensions;

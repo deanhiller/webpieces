@@ -57,38 +57,6 @@ public class HttpLastChunk extends HttpChunk {
 	public DataWrapper getBody() {
 		return DataWrapperGeneratorFactory.EMPTY;
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
-		result = prime * result + ((headers == null) ? 0 : headers.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		HttpLastChunk other = (HttpLastChunk) obj;
-		if (extensions == null) {
-			if (other.extensions != null)
-				return false;
-		} else if (!extensions.equals(other.extensions))
-			return false;
-		if (headers == null) {
-			if (other.headers != null)
-				return false;
-		} else if (!headers.equals(other.headers))
-			return false;
-		return true;
-	}
-
 	
 	@Override
 	public String createTrailer() {

@@ -2,7 +2,9 @@ package org.webpieces.httpparser.api;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,6 +28,21 @@ public class TestChunkedParsing {
 	private HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private MarshalState state = parser.prepareToMarshal();
+	
+	@Test
+	public void testEqualsHashChunkExtension() {
+		//a dumb test on code to increase code coverage only as this test doesn't test much
+		HttpChunkExtension c = new HttpChunkExtension("hi", "there");
+		HttpChunkExtension c2 = new HttpChunkExtension("hi", "there");
+		HttpChunkExtension c3 = new HttpChunkExtension("hi", "not");
+
+		Map<HttpChunkExtension, String> keyVal = new HashMap<>();
+		keyVal.put(c, "result");
+		String value = keyVal.get(c2);
+		Assert.assertEquals("result", value);
+		
+		Assert.assertFalse(c.equals(c3));
+	}
 	
 	@Test
 	public void testHex() {
