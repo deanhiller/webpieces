@@ -24,6 +24,8 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
+import com.webpieces.util.acking.AckAggregator;
+import com.webpieces.util.acking.ByteAckTracker;
 import com.webpieces.util.locking.PermitQueue;
 
 public class Layer2Http1_1Handler {
@@ -32,6 +34,7 @@ public class Layer2Http1_1Handler {
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
+	private ByteAckTracker ackTracker = new ByteAckTracker();
 	
 	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
@@ -43,7 +46,12 @@ public class Layer2Http1_1Handler {
 	}
 	
 	public InitiationResult initialDataImpl(FrontendSocketImpl socket, ByteBuffer buf) {
-		Memento state = parse(socket, buf);
+		
+		Memento state = socket.getHttp1_1ParseState();
+		int newDataSize = buf.remaining();
+		int total = state.getLeftOverData().getReadableSize() + buf.remaining(); 
+		state = parse(socket, buf);
+		int numBytesRead = total - state.getLeftOverData().getReadableSize();
 		
 		//IF we are receiving a preface, there will ONLY be ONE message AND leftover data
 		InitiationResult result = checkForPreface(socket, state);
@@ -54,10 +62,12 @@ public class Layer2Http1_1Handler {
 		//if so, return that initiation result and start using the http2 code
 		
 		//if we get this far, we now know we are http1.1
-		if(state.getParsedMessages().size() >= 0) {
-			processHttp1Messages(socket, state)
+		if(state.getParsedMessages().size() > 0) {
+			processWithBackpressure(socket, newDataSize, numBytesRead)
 				.exceptionally(t -> logException(t));
 			return new InitiationResult(InitiationStatus.HTTP1_1);
+		} else {
+			ackTracker.createTracker(newDataSize, 0, numBytesRead);
 		}
 		
 		return null; // we don't know yet(not enough data)
@@ -81,8 +91,33 @@ public class Layer2Http1_1Handler {
 	}
 
 	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
-		Memento state = parse(socket, buf);
-		return processHttp1Messages(socket, state);
+		Memento state = socket.getHttp1_1ParseState();
+		int newDataSize = buf.remaining();
+		int total = state.getLeftOverData().getReadableSize() + buf.remaining(); 
+		state = parse(socket, buf);
+		int numBytesRead = total - state.getLeftOverData().getReadableSize();
+		
+		return processWithBackpressure(socket, newDataSize, numBytesRead).exceptionally(t -> {
+			log.error("Exception", t);
+			socket.close("Exception so closing http1.1 socket="+t.getMessage());
+			return null;
+		});
+	}
+	
+	public CompletableFuture<Void> processWithBackpressure(
+			FrontendSocketImpl socket, int newDataSize, int numBytesRead) {
+		Memento state = socket.getHttp1_1ParseState();
+		List<HttpPayload> parsed = state.getParsedMessages();
+		AckAggregator ack = ackTracker.createTracker(newDataSize, parsed.size(), numBytesRead);
+
+		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
+		for(HttpPayload payload : parsed) {
+			future = future.thenCompose(w -> {
+				return processCorrectly(socket, payload);
+			}).handle((v, t) -> ack.ack(v, t));
+		}
+		
+		return ack.getAckBytePayloadFuture();
 	}
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {
@@ -91,26 +126,7 @@ public class Layer2Http1_1Handler {
 		state = httpParser.parse(state, moreData);
 		return state;
 	}
-	private CompletableFuture<Void> processHttp1Messages(FrontendSocketImpl socket, Memento state) {
-		return processHttp1MessagesImpl(socket, state).exceptionally(t -> {
-			log.error("Exception", t);
-			socket.close("Exception so closing http1.1 socket="+t.getMessage());
-			return null;
-		});
-	}
-
-	private CompletableFuture<Void> processHttp1MessagesImpl(FrontendSocketImpl socket, Memento state) {
-		List<HttpPayload> parsed = state.getParsedMessages();
-		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
-		for(HttpPayload payload : parsed) {
-			future = future.thenCompose(w -> {
-				log.info(socket+"msg received="+payload);
-				return processCorrectly(socket, payload);
-			});
-		}
-		return future.thenApply(w -> null);
-	}
-
+	
 	private CompletableFuture<Void> processCorrectly(FrontendSocketImpl socket, HttpPayload payload) {
 		Http2Msg msg = Http1_1ToHttp2.translate(payload, socket.isHttps());
 

@@ -45,7 +45,7 @@ class ServerFactory {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
         HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool, new BackpressureConfig());
-        FrontendConfig config = new FrontendConfig("id2", new InetSocketAddress(0));
+        FrontendConfig config = new FrontendConfig("id2");
         HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
         CompletableFuture<Void> fut = server.start();
         try {

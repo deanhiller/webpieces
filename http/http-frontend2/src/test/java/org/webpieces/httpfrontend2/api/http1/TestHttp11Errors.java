@@ -1,6 +1,7 @@
 package org.webpieces.httpfrontend2.api.http1;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,10 +22,11 @@ public class TestHttp11Errors extends AbstractHttp1Test {
 		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/xxxx");
 
-		mockChannel.write(req);		
+		mockChannel.sendToSvr(req);		
 		PassedIn in1 = mockListener.getSingleRequest();
 		
-		mockChannel.write(req2);
+		CompletableFuture<Void> fut = mockChannel.sendToSvrAsync(req2);
+		Assert.assertFalse(fut.isDone());
 		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
 		
 		mockChannel.simulateClose();

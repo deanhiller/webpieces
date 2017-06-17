@@ -47,6 +47,8 @@ public class TestByteBufferDataWrapper {
 		DataWrapper veryFirst = split2.get(0);
 		DataWrapper secondOfFirst = split2.get(1);
 		
+		Assert.assertEquals(2, veryFirst.getNumLayers());
+		
 		String firstStr = veryFirst.createStringFrom(0, veryFirst.getReadableSize(), Charset.defaultCharset());
 		Assert.assertEquals("01234", firstStr);
 		String secondStr = secondOfFirst.createStringFrom(0, secondOfFirst.getReadableSize(), Charset.defaultCharset());

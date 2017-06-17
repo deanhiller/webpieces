@@ -17,6 +17,10 @@ public class SplitProxyWrapper extends SliceableDataWrapper  {
 		this.wrapper = wrapper;
 		this.offset = offset;
 		this.length = length;
+		
+		int numLayers = getNumLayers();
+		if(numLayers > 8)
+			throw new IllegalStateException("This is protection against clients screwing up.  ending up with too many layers is a client issue");
 	}
 	
 	@Override
@@ -88,6 +92,18 @@ public class SplitProxyWrapper extends SliceableDataWrapper  {
 	@Override
 	public String createStringFromUtf8(int offset, int length) {
 		return createStringFrom(offset, length, StandardCharsets.UTF_8);
+	}
+
+	public SliceableDataWrapper getWrapper() {
+		return wrapper;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public int getLength() {
+		return length;
 	}
 
 	@Override

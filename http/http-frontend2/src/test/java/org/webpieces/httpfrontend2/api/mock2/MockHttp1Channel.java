@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,17 +56,36 @@ public class MockHttp1Channel extends MockSuperclass implements TCPChannel {
 		throw new UnsupportedOperationException("not implemented but could easily be with a one liner");
 	}
 
-	public void writeHexBack(String hex) {
+	public void sendHexToSvr(String hex) {
 		byte[] bytes = DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+",""));
 		ByteBuffer buf = ByteBuffer.wrap(bytes);
-		listener.incomingData(this, buf);		
+		CompletableFuture<Void> fut = listener.incomingData(this, buf);
+		try {
+			fut.get(2, TimeUnit.SECONDS);
+		} catch(Throwable e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
-	public void write(HttpPayload msg) {
+	public void sendToSvr(HttpPayload msg) {
+		CompletableFuture<Void> fut = sendToSvrAsync(msg);
+		try {
+			fut.get(2, TimeUnit.SECONDS);
+		} catch(Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public CompletableFuture<Void> sendToSvrAsync(HttpPayload msg) {
 		if(listener == null)
 			throw new IllegalStateException("Not connected so we cannot write back");
 		ByteBuffer buf = parser.marshalToByteBuffer(marshalState, msg);
-		listener.incomingData(this, buf);
+		CompletableFuture<Void> fut = listener.incomingData(this, buf);
+		return fut;
+	}
+	
+	public CompletableFuture<Void> sendToSvr(ByteBuffer buf) {
+		return listener.incomingData(this, buf);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -82,7 +82,23 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 
 	@Override
 	public List<? extends DataWrapper> split(DataWrapper dataToRead2, int splitAtPosition) {
-		if(dataToRead2 instanceof ChainedDataWrapper) {
+		List<DataWrapper> tuple = new ArrayList<>();
+
+		if(splitAtPosition > dataToRead2.getReadableSize()) {
+			throw new IllegalArgumentException("splitPosition="+splitAtPosition+" is greater than size of data="+dataToRead2.getReadableSize());
+		} else if(dataToRead2.getReadableSize() == 0) {
+			tuple.add(EMPTY_WRAPPER);
+			tuple.add(EMPTY_WRAPPER);
+			return tuple;
+		} else if(dataToRead2.getReadableSize() == splitAtPosition) {
+			tuple.add(dataToRead2);
+			tuple.add(EMPTY_WRAPPER);
+			return tuple;
+		} else if(0 == splitAtPosition) {
+			tuple.add(EMPTY_WRAPPER);
+			tuple.add(dataToRead2);
+			return tuple;
+		} else if(dataToRead2 instanceof ChainedDataWrapper) {
 			//A split proxy should never have a reference to a chained one or there is the potential for
 			//a memory leak in that as you grow, the right side is not releasing data from ChainedDataWrapper and you end
 			//up with  byteWrapper <-chained <- split <-chained <-split <- chained.... and it keeps going as data
@@ -90,25 +106,40 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 			return splitChainedWrapper((ChainedDataWrapper) dataToRead2, splitAtPosition);
 		} else if(!(dataToRead2 instanceof SliceableDataWrapper)) {
 			throw new IllegalArgumentException("Only SliceableDataWrappers or ChainedDataWrappers are allowed to be split");
+		} 
+		
+		return splitTheSliceable((SliceableDataWrapper) dataToRead2, splitAtPosition);
+	}
+	
+	List<SliceableDataWrapper> splitTheSliceable(SliceableDataWrapper dataToRead2, int splitAtPosition) {
+		if(dataToRead2 instanceof SplitProxyWrapper) {
+			//rather than ending up with many nests of SplitProxyWrapper, create views on the underlying DataWrappers
+			return splitProxyUp((SplitProxyWrapper)dataToRead2, splitAtPosition);
 		}
 		SliceableDataWrapper dataToRead = (SliceableDataWrapper) dataToRead2;
 		return splitSliceableWrapper(dataToRead, splitAtPosition);
 	}
 
-	List<SliceableDataWrapper> splitSliceableWrapper(SliceableDataWrapper dataToRead, int splitAtPosition) {
+	private List<SliceableDataWrapper> splitProxyUp(SplitProxyWrapper dataToRead2, int splitAtPosition) {
+		SliceableDataWrapper wrapper = dataToRead2.getWrapper();
+		int offset = dataToRead2.getOffset();
+		int length = dataToRead2.getLength();
 		
+		SplitProxyWrapper wrapper1 = new SplitProxyWrapper(wrapper, offset, splitAtPosition);
+		SplitProxyWrapper wrapper2 = new SplitProxyWrapper(wrapper, offset+splitAtPosition, length - splitAtPosition);
+		
+		//only increase by 1 as we removed a reference and added 2 references...
+		wrapper.increaseRefCount();
+
 		List<SliceableDataWrapper> tuple = new ArrayList<>();
-		if(splitAtPosition > dataToRead.getReadableSize()) {
-			throw new IllegalArgumentException("splitPosition="+splitAtPosition+" is greater than size of data="+dataToRead.getReadableSize());
-		} else if(dataToRead.getReadableSize() == 0) {
-			tuple.add(EMPTY_WRAPPER);
-			tuple.add(EMPTY_WRAPPER);
-			return tuple;
-		} else if(dataToRead.getReadableSize() == splitAtPosition) {
-			tuple.add(dataToRead);
-			tuple.add(EMPTY_WRAPPER);
-			return tuple;
-		}
+		tuple.add(wrapper1);
+		tuple.add(wrapper2);
+		
+		return tuple;
+	}
+
+	private List<SliceableDataWrapper> splitSliceableWrapper(SliceableDataWrapper dataToRead, int splitAtPosition) {
+		List<SliceableDataWrapper> tuple = new ArrayList<>();
 		
 		SplitProxyWrapper wrapper1 = new SplitProxyWrapper(dataToRead, 0, splitAtPosition);
 		dataToRead.increaseRefCount();
@@ -134,7 +165,7 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 					wrappersInBegin.add(wrapper);
 					foundSplit = true;
 				} else if(splitAtPosition < wrapper.getReadableSize()) {
-					splitBuffers = splitSliceableWrapper(wrapper, splitAtPosition);
+					splitBuffers = splitTheSliceable(wrapper, splitAtPosition);
 					wrappersInBegin.add(splitBuffers.get(0));
 					wrappersInEnd.add(splitBuffers.get(1));
 					foundSplit = true;

@@ -1,5 +1,6 @@
 package org.webpieces.frontend2.api;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.webpieces.asyncserver.api.AsyncConfig;
@@ -34,6 +35,10 @@ public class FrontendConfig {
 	
 	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 
+	public FrontendConfig(String id) {
+		this(id, new InetSocketAddress(0));
+	}
+	
 	public FrontendConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;
 		this.bindAddress = bindAddr;

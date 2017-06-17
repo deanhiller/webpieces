@@ -33,4 +33,8 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 			throw new IllegalArgumentException("method was not called exactly once. numTimes="+list.size());
 		return (StreamMsg) list.get(0).getArgs()[0];
 	}
+	
+	public void addProcessResponse(CompletableFuture<Void> future) {
+		super.addValueToReturn(Method.SEND_MORE, future);
+	}
 }

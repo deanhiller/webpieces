@@ -1,0 +1,11 @@
+dependencies {
+    compile project(':http:http2-client')
+	compile project(':http:http2to1_1-client')
+	compile project(':http:http-frontend2')
+	
+	testCompile project(':core:core-mock')
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='An http client'
+}

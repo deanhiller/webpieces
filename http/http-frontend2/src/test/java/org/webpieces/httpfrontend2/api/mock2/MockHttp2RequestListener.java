@@ -78,9 +78,13 @@ public class MockHttp2RequestListener extends MockSuperclass implements StreamLi
 	}
 	
 	public void addMockStreamToReturn(StreamWriter writer) {
-		CompletableFuture<StreamWriter> writerFuture = CompletableFuture.completedFuture(writer);
+		addMockStreamToReturn(CompletableFuture.completedFuture(writer));
+	}
+
+	public void addMockStreamToReturn(CompletableFuture<StreamWriter> writerFuture) {
 		super.addValueToReturn(Method.PROCESS, writerFuture);
 	}
+	
 	
 	public int getNumRequestsThatCameIn() {
 		return super.getCalledMethodList(Method.PROCESS).size();

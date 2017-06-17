@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
@@ -28,6 +26,8 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.util.acking.AckAggregator;
 import com.webpieces.util.acking.ByteAckTracker;
@@ -96,7 +96,6 @@ public class HttpSocketImpl implements HttpSocket {
 		//put this on the queue before the write to be completed from the listener below
 		responsesToComplete.offer(l);
 		
-		log.info("sending request now. req="+request.getRequestLine().getUri());
 		return channel.write(wrap).thenApply(v -> new HttpChunkWriterImpl(channel, parser, state));
 	}
 	

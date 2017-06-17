@@ -4,6 +4,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.impl.Http2ClientImpl;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
@@ -33,11 +34,10 @@ public abstract class Http2ClientFactory {
 		return createHttpClient(mgr, injConfig);
 	}
 	
-	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, Executor executor, Time time) {
-		BufferCreationPool pool = new BufferCreationPool();
+	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, BufferPool pool) {
 		HpackParser hpackParser = HpackParserFactory.createParser(pool, false);
 		
-		InjectionConfig injConfig = new InjectionConfig(hpackParser, time, config);
+		InjectionConfig injConfig = new InjectionConfig(hpackParser, new TimeImpl(), config);
 
 		return createHttpClient(mgr, injConfig);
 	}

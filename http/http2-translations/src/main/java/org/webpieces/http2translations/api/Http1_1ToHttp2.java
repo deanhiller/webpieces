@@ -34,7 +34,7 @@ public class Http1_1ToHttp2 {
 			return translateChunk((HttpChunk)payload, false);
 		else if(payload instanceof HttpData)
 			return translateData((HttpData)payload);
-		throw new UnsupportedOperationException("not supported yet="+payload);
+		throw new UnsupportedOperationException("not supported yet="+payload.getClass());
 	}
 	
 
@@ -76,9 +76,10 @@ public class Http1_1ToHttp2 {
         	} else {
         		resp.setEndOfStream(false);
         	}
-        } else {
+        } else if(response.isHasChunkedTransferHeader()) {
         	resp.setEndOfStream(false);
-        }
+        } else 
+        	resp.setEndOfStream(true);
         
         return resp;
 	}

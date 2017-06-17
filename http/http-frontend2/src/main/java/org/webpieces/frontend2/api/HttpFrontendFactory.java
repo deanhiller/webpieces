@@ -28,6 +28,18 @@ public abstract class HttpFrontendFactory {
 	public static final String HTTP2_ENGINE_THREAD_POOL = "http2EngineThreadPool";
 	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, BackpressureConfig config) {
+		ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+	
+		HttpParser httpParser = HttpParserFactory.createParser(pool);
+		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
+		
+		InjectionConfig injConfig = new InjectionConfig(http2Parser, new TimeImpl(), new Http2Config());
+		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );
+		
+		return new FrontEndServerManagerImpl(svrMgr, timer, svrEngineFactory, httpParser);
+	}
+	
 	/**
 	 * 
 	 * @param id Use for logging and also file recording names

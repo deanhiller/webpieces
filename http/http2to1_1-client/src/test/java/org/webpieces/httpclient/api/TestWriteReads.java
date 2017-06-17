@@ -182,18 +182,16 @@ public class TestWriteReads {
 		Http2Response response1 = Requests.createChunkedResponse(1);
 		HttpChunk response2 = Requests.createHttpChunk(250);
 		HttpLastChunk lastChunk = new HttpLastChunk();
-		List<ByteBuffer> buffers = create3BuffersWithTwoMessags(response1, response2, lastChunk);
+		List<ByteBuffer> buffers = create4BuffersWith3Messags(response1, response2, lastChunk);
 
 		DataListener dataListener = mockChannel.getConnectedListener();
-
-		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
-		listener.addProcessResponse(future);
 
 		CompletableFuture<Void> fut1 = dataListener.incomingData(mockChannel, buffers.get(0));
 		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not process(only has half the data)
 		
-		//This next one is confusing BUT in http1.1 parsing terms, data is data for content length so this results
-		//in a full HttpData packet actually...
+		CompletableFuture<StreamWriter> future = new CompletableFuture<StreamWriter>();
+		listener.addProcessResponse(future);
+		
 		CompletableFuture<Void> fut2 = dataListener.incomingData(mockChannel, buffers.get(1));
 		Assert.assertFalse(fut1.isDone()); //not resolved yet since client did not resolve future yet
 		Assert.assertFalse(fut2.isDone()); //not resolved yet since client only has part of the data
@@ -229,7 +227,7 @@ public class TestWriteReads {
 		fut4.get(2, TimeUnit.SECONDS);
 	}
 	
-	private List<ByteBuffer> create3BuffersWithTwoMessags(Http2Response response1, HttpChunk response2, HttpLastChunk lastChunk) {
+	private List<ByteBuffer> create4BuffersWith3Messags(Http2Response response1, HttpChunk response2, HttpLastChunk lastChunk) {
 		HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
 
 		HttpResponse resp1 = Http2ToHttp1_1.translateResponse(response1);

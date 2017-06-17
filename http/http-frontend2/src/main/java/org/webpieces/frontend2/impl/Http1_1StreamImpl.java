@@ -62,8 +62,6 @@ public class Http1_1StreamImpl implements ResponseStream {
 		HttpResponse response = Http2ToHttp1_1.translateResponse(headers);
 		
 		if(headers.isEndOfStream()) {
-			log.info(socket+" done sending response1");
-
 			validateHeader(response);
 			remove(headers);
 			return write(response).thenApply(w -> {

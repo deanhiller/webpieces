@@ -6,6 +6,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 #### A few key selling points
+* Run SingleSocketHttp1_1Throughput.java to see the server service 6,000,000 requests per minute(100,000 requests per second)
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
 * The http1.1 and http2 clients can backpressure the server as well (and in the case of webpieces, it may result in backpressuring where that data is coming from which may have been the client)
 * look ma, no restarting the server in development mode with complete java refactoring
@@ -117,11 +118,9 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* change nearly all return values to CompletableFuture<Void> instead of the type as it makes it more clear
-* http2 to 1 unit test streaming backpressure
 * frontend request backpressure
 * rps throughput test between both
-* http11 client rework
+* add http2 client backpressure tests
 * move gzip to frontend
 * Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine which WILL close the socket down and should not!!
 * move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
@@ -136,6 +135,7 @@ This project is essentially pieces that can be used to build any http related so
   * cancel request cancels file upload
 * (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
 * backpressure
+* add test to farEndClose on http1.1 and http2 clients and near end close and ensure all outstanding requests are failed AND ensure the futures for simple send request response all work
 * modify frontend to cache pipelined 1.1 requests and not serve to server until response finished each time
 * file upload
 * file download
