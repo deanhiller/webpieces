@@ -3,6 +3,7 @@ package com.webpieces.http2engine.impl.svr;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -27,7 +28,6 @@ import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
-import com.webpieces.util.locking.PermitQueue;
 
 public class Level1ServerEngine implements Http2ServerEngine {
 

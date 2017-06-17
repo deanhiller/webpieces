@@ -1,4 +1,4 @@
-package com.webpieces.util.time;
+package org.webpieces.util.time;
 
 public interface Time {
 

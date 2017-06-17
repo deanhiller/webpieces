@@ -1,4 +1,4 @@
-package com.webpieces.util.time;
+package org.webpieces.util.time;
 
 public class TimeImpl implements Time {
 

@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -21,7 +22,6 @@ import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.RemoteSettingsManagement;
 import com.webpieces.http2engine.impl.shared.StreamState;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
-import com.webpieces.util.locking.PermitQueue;
 
 public class Level1ClientEngine implements Http2ClientEngine {
 	

@@ -7,10 +7,9 @@ import java.util.concurrent.Executors;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.util.locking.FuturePermitQueue;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.threading.NamedThreadFactory;
-
-import com.webpieces.util.locking.FuturePermitQueue;
-import com.webpieces.util.locking.PermitQueue;
 
 public class TestPermitQueue {
 

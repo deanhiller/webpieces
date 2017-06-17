@@ -17,6 +17,9 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.util.acking.AckAggregator;
+import org.webpieces.util.acking.ByteAckTracker;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -24,9 +27,6 @@ import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.util.acking.AckAggregator;
-import com.webpieces.util.acking.ByteAckTracker;
-import com.webpieces.util.locking.PermitQueue;
 
 public class Layer2Http1_1Handler {
 	private static final Logger log = LoggerFactory.getLogger(Layer2Http1_1Handler.class);

@@ -5,13 +5,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.time.MsgRateRecorder;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
-import com.webpieces.util.time.MsgRateRecorder;
 
 public class ResponseCounterListener implements ResponseHandler {
 

@@ -2,6 +2,7 @@ package com.webpieces.http2engine.impl.shared;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -14,7 +15,6 @@ import com.webpieces.http2parser.api.dto.WindowUpdateFrame;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
-import com.webpieces.util.locking.PermitQueue;
 
 public abstract class Level5CStateMachine extends Level5BResets {
 

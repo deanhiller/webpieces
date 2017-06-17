@@ -1,6 +1,6 @@
 package org.webpieces.mock.time;
 
-import com.webpieces.util.time.Time;
+import org.webpieces.util.time.Time;
 
 public class MockTime implements Time {
 

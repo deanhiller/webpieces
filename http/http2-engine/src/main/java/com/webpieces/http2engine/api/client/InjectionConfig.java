@@ -1,11 +1,11 @@
 package com.webpieces.http2engine.api.client;
 
 import org.webpieces.data.api.BufferCreationPool;
+import org.webpieces.util.time.Time;
+import org.webpieces.util.time.TimeImpl;
 
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
-import com.webpieces.util.time.Time;
-import com.webpieces.util.time.TimeImpl;
 
 public class InjectionConfig {
 

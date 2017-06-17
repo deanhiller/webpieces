@@ -9,13 +9,13 @@ import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.webpieces.http2engine.api.error.FarEndClosedConnection;
 import com.webpieces.http2engine.api.error.ShutdownStream;
 import com.webpieces.http2engine.api.server.Http2ServerEngine;
-import com.webpieces.util.locking.PermitQueue;
 
 public class FrontendSocketImpl implements FrontendSocket {
 

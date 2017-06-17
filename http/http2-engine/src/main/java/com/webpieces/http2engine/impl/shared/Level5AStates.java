@@ -16,6 +16,8 @@ import org.webpieces.javasm.api.NoTransitionListener;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.StateMachineFactory;
+import org.webpieces.util.locking.AsyncLock;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -33,8 +35,6 @@ import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.error.StreamException;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.util.locking.AsyncLock;
-import com.webpieces.util.locking.PermitQueue;
 
 public class Level5AStates {
 

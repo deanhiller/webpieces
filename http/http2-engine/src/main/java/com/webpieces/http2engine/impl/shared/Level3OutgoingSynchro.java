@@ -3,6 +3,7 @@ package com.webpieces.http2engine.impl.shared;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -11,7 +12,6 @@ import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.SettingsFrame;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
-import com.webpieces.util.locking.PermitQueue;
 
 /**
  * We want events to run to completion so statemachine changes are final!!  This means advanced things

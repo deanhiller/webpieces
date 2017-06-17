@@ -7,6 +7,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -18,7 +19,6 @@ import com.webpieces.http2engine.impl.shared.Level7MarshalAndPing;
 import com.webpieces.http2engine.impl.shared.Synchro;
 import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 import com.webpieces.http2engine.impl.shared.data.Stream;
-import com.webpieces.util.locking.PermitQueue;
 
 public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements Synchro {
 

@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -31,7 +32,6 @@ import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.DataFrame;
 import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
 import com.webpieces.http2parser.api.dto.error.StreamException;
-import com.webpieces.util.locking.PermitQueue;
 
 public class Level5ServerStateMachine extends Level5CStateMachine {
 

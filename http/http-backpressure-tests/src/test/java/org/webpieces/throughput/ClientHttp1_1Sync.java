@@ -21,9 +21,9 @@ import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.time.MsgRateRecorder;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
-import com.webpieces.util.time.MsgRateRecorder;
 
 public class ClientHttp1_1Sync {
 	private static final Logger log = LoggerFactory.getLogger(ClientHttp1_1Sync.class);

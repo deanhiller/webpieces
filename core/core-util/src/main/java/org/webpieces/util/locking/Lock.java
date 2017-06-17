@@ -1,4 +1,4 @@
-package com.webpieces.util.locking;
+package org.webpieces.util.locking;
 
 public interface Lock {
 	

@@ -21,6 +21,8 @@ import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.templating.api.ConverterLookup;
 import org.webpieces.templating.api.RouterLookup;
 import org.webpieces.util.threading.NamedThreadFactory;
+import org.webpieces.util.time.Time;
+import org.webpieces.util.time.TimeImpl;
 import org.webpieces.webserver.api.WebServer;
 import org.webpieces.webserver.api.WebServerConfig;
 
@@ -31,8 +33,6 @@ import com.google.inject.util.Providers;
 import com.webpieces.hpack.api.HpackParser;
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.http2engine.api.client.InjectionConfig;
-import com.webpieces.util.time.Time;
-import com.webpieces.util.time.TimeImpl;
 
 public class WebServerModule implements Module {
 

@@ -16,11 +16,11 @@ import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.threading.DirectExecutorService;
+import org.webpieces.util.time.Time;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.webpieces.util.time.Time;
 
 public class PlatformOverridesForTest implements Module {
 	

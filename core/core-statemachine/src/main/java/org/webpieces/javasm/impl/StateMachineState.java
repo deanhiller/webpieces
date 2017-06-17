@@ -2,10 +2,9 @@ package org.webpieces.javasm.impl;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
+import org.webpieces.util.locking.FuturePermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-
-import com.webpieces.util.locking.FuturePermitQueue;
 
 /**
  */

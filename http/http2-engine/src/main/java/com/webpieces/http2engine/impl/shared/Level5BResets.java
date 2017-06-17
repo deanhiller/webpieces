@@ -3,6 +3,7 @@ package com.webpieces.http2engine.impl.shared;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
 
+import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -14,7 +15,6 @@ import com.webpieces.http2engine.impl.shared.data.Stream;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.RstStreamFrame;
 import com.webpieces.http2parser.api.dto.error.StreamException;
-import com.webpieces.util.locking.PermitQueue;
 
 public abstract class Level5BResets extends Level5AStates {
 	private final static Logger log = LoggerFactory.getLogger(Level5BResets.class);
