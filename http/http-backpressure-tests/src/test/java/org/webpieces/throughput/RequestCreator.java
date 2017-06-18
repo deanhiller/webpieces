@@ -13,6 +13,7 @@ public class RequestCreator {
 
 	public static Http2Request createHttp2Request() {
 		Http2Request request = new Http2Request();
+		request.setEndOfStream(true);
 		request.addHeader(new Http2Header(Http2HeaderName.METHOD, "/"));
 		request.addHeader(new Http2Header(Http2HeaderName.PATH, "/"));
 		request.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, "myhost.com"));
@@ -27,16 +28,17 @@ public class RequestCreator {
 		return http1Request;
 	}
 
-	public static Http2Response createHttp2Response() {
+	public static Http2Response createHttp2Response(int streamId) {
 		Http2Response resp = new Http2Response();
 		resp.addHeader(new Http2Header(Http2HeaderName.STATUS, "200"));
 		resp.addHeader(new Http2Header("serverid", "3"));
 		resp.setEndOfStream(true);
+		resp.setStreamId(streamId);
 		return resp;
 	}
 
 	public static HttpResponse createHttp1_1Response() {
-		Http2Response resp = createHttp2Response();
+		Http2Response resp = createHttp2Response(0);
 		return Http2ToHttp1_1.translateResponse(resp);
 	}
 

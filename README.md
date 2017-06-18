@@ -6,7 +6,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 #### A few key selling points
-* Run SingleSocketHttp1_1Throughput.java to see the server service 6,000,000 requests per minute(100,000 requests per second)
+* Run SingleSocketThroughput.java to see the server service 6,000,000 requests per minute(100,000 requests per second) with the single threaded implementations (multithreaded with more sockets can do more)
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
 * The http1.1 and http2 clients can backpressure the server as well (and in the case of webpieces, it may result in backpressuring where that data is coming from which may have been the client)
 * look ma, no restarting the server in development mode with complete java refactoring

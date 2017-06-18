@@ -1,4 +1,4 @@
-package org.webpieces.throughput;
+package org.webpieces.throughput.server;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
@@ -28,7 +28,7 @@ public class ServerAsync {
 	}
 
 	public CompletableFuture<InetSocketAddress> start() {
-    	log.error("running ASYNC SERVER");
+    	log.error("running ASYNC HTTP1.1 AND HTTP2 SERVER");
 
 		HttpServer server = createFrontend(multiThreaded);
 		CompletableFuture<Void> future = server.start();

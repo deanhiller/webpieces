@@ -1,4 +1,4 @@
-package org.webpieces.throughput;
+package org.webpieces.throughput.client;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;

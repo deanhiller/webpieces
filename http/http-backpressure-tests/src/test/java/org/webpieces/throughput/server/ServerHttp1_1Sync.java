@@ -1,4 +1,4 @@
-package org.webpieces.throughput;
+package org.webpieces.throughput.server;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +18,7 @@ import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -33,7 +34,7 @@ public class ServerHttp1_1Sync {
 	}
 	
 	public CompletableFuture<InetSocketAddress> startImpl() throws IOException {
-    	log.error("running SYNC SERVER");
+    	log.error("running SYNC HTTP1.1 SERVER");
 
 		ServerSocket server = new ServerSocket(0);
 		

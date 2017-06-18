@@ -1,4 +1,4 @@
-package org.webpieces.throughput;
+package org.webpieces.throughput.client;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
@@ -6,8 +6,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.webpieces.frontend2.api.Protocol;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
+import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -20,13 +22,14 @@ public class ClientAsync {
 	private static final Logger log = LoggerFactory.getLogger(ClientAsync.class);
 
 	private Http2Client client;
+	private Protocol protocol;
 
-	public ClientAsync(Http2Client client) {
+	public ClientAsync(Http2Client client, Protocol protocol) {
 		this.client = client;
+		this.protocol = protocol;
 	}
 
 	public void runAsyncClient(InetSocketAddress svrAddress) {
-		
 		Http2Socket socket = client.createHttpSocket("clientSocket");
 		CompletableFuture<Void> connect = socket.connect(svrAddress);
 		
@@ -65,7 +68,7 @@ public class ClientAsync {
 		}
 		
 		public void runImpl() throws InterruptedException, ExecutionException, TimeoutException {
-	    	log.error("ASYNC CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
+	    	log.error("ASYNC "+protocol+" CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
 	    	log.info("info messages automatically show up in black");
 	    	
 			ResponseHandler responseListener = new ResponseCounterListener();

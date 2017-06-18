@@ -1,4 +1,4 @@
-package org.webpieces.throughput;
+package org.webpieces.throughput.client;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,49 +6,45 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.http2translations.api.Http1_1ToHttp2;
-import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.httpparser.api.HttpStatefulParser;
-import org.webpieces.httpparser.api.dto.HttpPayload;
-import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.httpparser.api.dto.HttpResponse;
+import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.time.MsgRateRecorder;
 
+import com.webpieces.hpack.api.HpackConfig;
+import com.webpieces.hpack.api.HpackParserFactory;
+import com.webpieces.hpack.api.HpackStatefulParser;
+import com.webpieces.hpack.api.UnmarshalState;
+import com.webpieces.hpack.api.dto.Http2Request;
+import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
-public class ClientHttp1_1Sync {
-	private static final Logger log = LoggerFactory.getLogger(ClientHttp1_1Sync.class);
+public class Http2SynchronousClient implements SynchronousClient {
+	private static final Logger log = LoggerFactory.getLogger(Http2SynchronousClient.class);
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	private InetSocketAddress svrAddress;
-	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
+	private HpackStatefulParser parser = HpackParserFactory.createStatefulParser(new BufferCreationPool(), new HpackConfig("clientHpack"));
 
-	public ClientHttp1_1Sync(InetSocketAddress svrAddress) {
-		this.svrAddress = svrAddress;
-	}
-
-	public void start() {
+	@Override
+	public void start(InetSocketAddress svrAddress) {
 		try {
-	    	log.error("SYNC CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
+	    	log.error("SYNC HTTP2 CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
 	    	log.info("info messages automatically show up in black");
 	    	
-			startImpl();
+			startImpl(svrAddress);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public void startImpl() throws UnknownHostException, IOException {
+	public void startImpl(InetSocketAddress svrAddress) throws UnknownHostException, IOException {
         @SuppressWarnings("resource")
 		Socket socket = new Socket(svrAddress.getHostName(), svrAddress.getPort());
         OutputStream output = socket.getOutputStream();
@@ -68,13 +64,13 @@ public class ClientHttp1_1Sync {
             if (read < 0) break;
             
             DataWrapper dataWrapper = dataGen.wrapByteArray(bytes, 0, read);
-            List<HttpPayload> messages = parser.parse(dataWrapper);
+            UnmarshalState state = parser.unmarshal(dataWrapper);
+            List<Http2Msg> messages = state.getParsedFrames();
             
             //simulate going all the way to http2 like the other test does as well
-            for(HttpPayload p : messages) {
-            	HttpResponse resp = (HttpResponse) p;
-            	Http2Msg translate = Http1_1ToHttp2.responseToHeaders(resp);
-            	translate.getMessageType();
+            for(Http2Msg p : messages) {
+            	Http2Response resp = (Http2Response) p;
+            	resp.getStreamId();
             	recorder.increment();
             }
         }		
@@ -82,10 +78,10 @@ public class ClientHttp1_1Sync {
 
     private static class ClientWriter implements Runnable {
 
-		private HttpStatefulParser parser2;
+		private HpackStatefulParser parser2;
 		private OutputStream output;
 
-		public ClientWriter(HttpStatefulParser parser, OutputStream output) {
+		public ClientWriter(HpackStatefulParser parser, OutputStream output) {
 			parser2 = parser;
 			this.output = output;
 		}
@@ -101,10 +97,9 @@ public class ClientHttp1_1Sync {
 		
 		public void runImpl() throws IOException {
 			while(true) {
-				HttpRequest request = RequestCreator.createHttp1_1Request();
-				ByteBuffer buffer = parser2.marshalToByteBuffer(request);
-				byte[] b = new byte[buffer.remaining()];
-				buffer.get(b);
+				Http2Request request = RequestCreator.createHttp2Request();
+				DataWrapper buffer = parser2.marshal(request);
+				byte[] b = buffer.createByteArray();
 				output.write(b);
 			}
 		}

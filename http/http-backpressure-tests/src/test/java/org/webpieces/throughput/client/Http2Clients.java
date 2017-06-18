@@ -1,4 +1,4 @@
-package org.webpieces.throughput;
+package org.webpieces.throughput.client;
 
 import java.net.InetSocketAddress;
 
@@ -11,19 +11,16 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 
 import com.webpieces.http2engine.api.client.Http2Config;
 
-/**
- *
- */
-public class SingleSocketHttp2Throughput extends ThroughputSetup {
+public class Http2Clients implements Clients {
 
-	public static void main(String[] args) throws InterruptedException {
-		SingleSocketHttp1_1Throughput example = new SingleSocketHttp1_1Throughput();
-		throw new UnsupportedOperationException("not done yet");
-		//example.start(false, Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS);
+	private boolean multiThreaded;
+
+	public Http2Clients(boolean multiThreaded) {
+		this.multiThreaded = multiThreaded;
 	}
 
 	@Override
-	protected Http2Client createClient(boolean multiThreaded) {
+	public Http2Client createClient() {
 		if(multiThreaded)
 			return Http2ClientFactory.createHttpClient(20);
 		
@@ -35,7 +32,8 @@ public class SingleSocketHttp2Throughput extends ThroughputSetup {
 	}
 
 	@Override
-	protected void runSyncClient(InetSocketAddress svrAddress) {
+	public SynchronousClient createSyncClient() {
+		return new Http2SynchronousClient();
 	}
-	
+
 }
