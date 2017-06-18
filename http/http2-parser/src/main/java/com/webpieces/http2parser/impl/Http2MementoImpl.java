@@ -16,6 +16,8 @@ public class Http2MementoImpl implements Http2Memento {
 	private List<Http2Frame> parsedFrames = new ArrayList<>();
 	private FrameHeaderData frameHeaderData;
 	private volatile long maxFrameSize;
+	private int numBytesJustParsed = 0;
+	private int leftOverDataSize = 0;
 
 	public Http2MementoImpl(DataWrapper emptyWrapper, long maxFrameSize) {
 		this.leftOverData = emptyWrapper;
@@ -31,8 +33,9 @@ public class Http2MementoImpl implements Http2Memento {
 		return parsedFrames;
 	}
 
-	public void setLeftOverData(DataWrapper allData) {
+	public void setLeftOverData(DataWrapper allData, int size) {
 		this.leftOverData = allData;
+		leftOverDataSize += size;
 	}
 
 	public ParsingState getParsingState() {
@@ -55,7 +58,6 @@ public class Http2MementoImpl implements Http2Memento {
 		parsedFrames.add(parsedPayload);
 	}
 
-	@Override
 	public DataWrapper getLeftOverData() {
 		return leftOverData;
 	}
@@ -67,6 +69,23 @@ public class Http2MementoImpl implements Http2Memento {
 	@Override
 	public void setIncomingMaxFrameSize(long maxFrameSize) {
 		this.maxFrameSize = maxFrameSize;
+	}
+
+	@Override
+	public int getNumBytesJustParsed() {
+		return numBytesJustParsed;
+	}
+
+	public void setNumBytesJustParsed(int numBytesJustParsed) {
+		this.numBytesJustParsed = numBytesJustParsed;
+	}
+
+	public int getLeftOverDataSize() {
+		return leftOverDataSize;
+	}
+
+	public void setLeftOverDataSize(int leftOverDataSize) {
+		this.leftOverDataSize = leftOverDataSize;
 	}
 	
 }

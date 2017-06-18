@@ -28,6 +28,7 @@ public class MementoImpl implements Memento {
 	
 	private Integer contentLengthLeftToRead;
 	private boolean hasHttpMarkerMsg;
+	private int numBytesJustParsed;
 
 	@Override
 	public List<HttpPayload> getParsedMessages() {
@@ -128,6 +129,15 @@ public class MementoImpl implements Memento {
 
 	public void setHasHttpMarkerMsg(boolean hasHttpMarkerMsg) {
 		this.hasHttpMarkerMsg = hasHttpMarkerMsg;
+	}
+
+	@Override
+	public int getNumBytesJustParsed() {
+		return numBytesJustParsed;
+	}
+
+	public void setNumBytesJustParsed(int numBytesJustParsed) {
+		this.numBytesJustParsed = numBytesJustParsed;
 	}
 
 }

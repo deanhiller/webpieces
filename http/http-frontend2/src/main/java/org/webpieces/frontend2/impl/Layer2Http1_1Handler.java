@@ -49,9 +49,8 @@ public class Layer2Http1_1Handler {
 		
 		Memento state = socket.getHttp1_1ParseState();
 		int newDataSize = buf.remaining();
-		int total = state.getLeftOverData().getReadableSize() + buf.remaining(); 
 		state = parse(socket, buf);
-		int numBytesRead = total - state.getLeftOverData().getReadableSize();
+		int numBytesRead = state.getNumBytesJustParsed();
 		
 		//IF we are receiving a preface, there will ONLY be ONE message AND leftover data
 		InitiationResult result = checkForPreface(socket, state);
@@ -93,11 +92,9 @@ public class Layer2Http1_1Handler {
 	public CompletableFuture<Void> incomingData(FrontendSocketImpl socket, ByteBuffer buf) {
 		Memento state = socket.getHttp1_1ParseState();
 		int newDataSize = buf.remaining();
-		int total = state.getLeftOverData().getReadableSize() + buf.remaining(); 
 		state = parse(socket, buf);
-		int numBytesRead = total - state.getLeftOverData().getReadableSize();
 		
-		return processWithBackpressure(socket, newDataSize, numBytesRead).exceptionally(t -> {
+		return processWithBackpressure(socket, newDataSize, state.getNumBytesJustParsed()).exceptionally(t -> {
 			log.error("Exception", t);
 			socket.close("Exception so closing http1.1 socket="+t.getMessage());
 			return null;

@@ -106,7 +106,7 @@ public class TestHttp2Data{
     }
     
 	private Http2Frame assertGood() {
-		Assert.assertEquals(0, memento.getLeftOverData().getReadableSize());
+		Assert.assertEquals(0, memento.getLeftOverDataSize());
     	List<Http2Frame> frames = memento.getParsedFrames();
     	Assert.assertEquals(1, frames.size());
     	return frames.get(0);

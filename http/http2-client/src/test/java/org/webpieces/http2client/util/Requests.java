@@ -111,11 +111,20 @@ public class Requests {
 		return req;
 	}
 
-	public static DataFrame createData(int streamId) {
-		DataFrame data = new DataFrame(streamId, true);
+	public static DataFrame createData(int streamId, boolean eos) {
+		DataFrame data = new DataFrame(streamId, eos);
 		DataWrapper wrapByteArray = dataGen.wrapByteArray(new byte[] {2, 3});
 		data.setData(wrapByteArray);
 		return data;
 	}
 
+	public static DataFrame createBigData(int streamId, boolean eos) {
+		DataFrame data = new DataFrame(streamId, eos);
+		String s = "hi there, this is a bit more data so that we can test a few things out";
+		byte[] bytes = s.getBytes();
+		DataWrapper wrapByteArray = dataGen.wrapByteArray(bytes);
+		data.setData(wrapByteArray);
+		return data;
+	}
+	
 }

@@ -58,7 +58,7 @@ public class PriorityMarshaller extends AbstractFrameMarshaller implements Frame
 		FrameHeaderData frameHeaderData = state.getFrameHeaderData();
 		int streamId = frameHeaderData.getStreamId();
 		if(state.getFrameHeaderData().getPayloadLength() != 5)
-            throw new StreamException(CancelReasonCode.FRAME_SIZE_INCORRECT, streamId, 
+            throw new ConnectionException(CancelReasonCode.FRAME_SIZE_INCORRECT, streamId, 
             		"priority size not 5 and instead is="+state.getFrameHeaderData().getPayloadLength());
 		
         PriorityFrame frame = new PriorityFrame();

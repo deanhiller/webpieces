@@ -48,6 +48,18 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 		}
 		return wrapper;
 	}
+
+	@Override
+	public DataWrapper chainDataWrappers(DataWrapper firstData, DataWrapper ... theRest) {
+		if(theRest.length == 0)
+			return firstData;
+		
+		DataWrapper all = firstData;
+		for(DataWrapper d : theRest) {
+			all = chainDataWrappers(all, d);
+		}
+		return all;
+	}
 	
 	@Override
 	public DataWrapper chainDataWrappers(DataWrapper firstData, DataWrapper secondData) {
@@ -57,8 +69,9 @@ public class DataWrapperGeneratorImpl implements DataWrapperGenerator {
 			return firstData;
 		} else if(firstData instanceof ChainedDataWrapper) {
 			ChainedDataWrapper chained = (ChainedDataWrapper) firstData;
-			chained.addMoreData(secondData);
-			return chained;
+			ChainedDataWrapper newOne = new ChainedDataWrapper(chained.getWrappers());
+			newOne.addMoreData(secondData);
+			return newOne;
 		} else if(!(firstData instanceof SliceableDataWrapper)) {
 			throw new IllegalArgumentException("Only SliceableDataWrappers or ChainedDataWrappers are allowed to be chained");
 		} else if(secondData instanceof ChainedDataWrapper) {

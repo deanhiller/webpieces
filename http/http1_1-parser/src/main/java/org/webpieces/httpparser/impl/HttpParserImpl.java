@@ -205,7 +205,18 @@ public class HttpParserImpl implements HttpParser {
 					+ "memento created in prepareToParse which we always hand back"
 					+ "to you from this method.  It contains state of leftover data");
 		}
+
+		MementoImpl memento = (MementoImpl) state;
+		int totalData = state.getLeftOverData().getReadableSize()+moreData.getReadableSize();
+		memento = parse(memento, moreData);
+		int bytesParsed = totalData - memento.getLeftOverData().getReadableSize();
 		
+		memento.setNumBytesJustParsed(bytesParsed);
+		
+		return memento;
+	}
+	
+	private MementoImpl parse(MementoImpl memento, DataWrapper moreData) {
 		log.trace(()->"Trying to parse message");
 //		if(log.isDebugEnabled()) {
 //			byte[] someData = moreData.createByteArray();
@@ -213,7 +224,6 @@ public class HttpParserImpl implements HttpParser {
 //			log.info("about to parse=\n\n'"+readable+"'\n\n");
 //		}
 
-		MementoImpl memento = (MementoImpl) state;
 		//initialize state to need more data
 		memento.setParsedMessages(new ArrayList<>());
 		

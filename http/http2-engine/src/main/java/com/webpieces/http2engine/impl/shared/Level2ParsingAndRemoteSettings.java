@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.util.acking.AckAggregator;
+import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -38,6 +40,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 	private String logId;
 	protected Level3IncomingSynchro syncro;
 	private HeaderSettings localSettings;
+	private ByteAckTracker ackTracker = new ByteAckTracker();
 
 	protected Level3OutgoingSynchro outSyncro;
 
@@ -73,18 +76,12 @@ public abstract class Level2ParsingAndRemoteSettings {
 			future.completeExceptionally(t);
 		}
 		
-		return future.handle((resp, t) -> handleError(resp, t));
+		return future.handle((resp, t) -> handleFinalError(resp, t));
 	}
-
-	private Void handleError(Object object, Throwable e) {
-		if(e == null) 
+	private Void handleFinalError(Object object, Throwable e) {
+		if(e == null)
 			return null;
-		else if(e instanceof ConnectionClosedException) {
-			log.error("Normal exception since we are closing and they do not know yet", e);
-		} else if(e instanceof StreamException) {
-			log.error("shutting the stream down due to error", e);
-			syncro.sendRstToServerAndApp((StreamException) e).exceptionally( t -> logExc("stream", t));
-		} else if(e instanceof ConnectionException) {
+		else if(e instanceof ConnectionException) {
 			log.error("shutting the connection down due to error", e);
 			ConnectionFailure reset = new ConnectionFailure((ConnectionException)e);
 			syncro.sendGoAwayToSvrAndResetAllToApp(reset).exceptionally( t -> logExc("connection", t)); //send GoAway
@@ -96,6 +93,20 @@ public abstract class Level2ParsingAndRemoteSettings {
 		}
 		return null;
 	}
+	
+	private Void handleError(Object object, Throwable e) {
+		if(e == null) 
+			return null;
+		else if(e instanceof ConnectionClosedException) {
+			log.error("Normal exception since we are closing and they do not know yet", e);
+		} else if(e instanceof StreamException) {
+			log.error("shutting the stream down due to error", e);
+			syncro.sendRstToServerAndApp((StreamException) e).exceptionally( t -> logExc("stream", t));
+		} else 
+			handleFinalError(object, e);
+		
+		return null;
+	}
 
 	private Void logExc(String thing, Throwable t) {
 		log.error("error trying to close "+thing, t);
@@ -104,18 +115,34 @@ public abstract class Level2ParsingAndRemoteSettings {
 	
 	public CompletableFuture<Void> parseImpl(DataWrapper newData) {
 		parsingState = lowLevelParser.unmarshal(parsingState, newData);
+		
 		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
+		
+		int numBytesParsed = parsingState.getNumBytesJustParsed();
+		AckAggregator ack = ackTracker.createTracker(newData.getReadableSize(), parsedMessages.size(), numBytesParsed);
 		
 		CompletableFuture<Void> future = CompletableFuture.completedFuture((Void)null);
 		for(Http2Msg lowLevelFrame : parsedMessages) {
 			future = future.thenCompose(v -> {
-				return process(lowLevelFrame);
+				return process(lowLevelFrame)
+						.handle((s, t) -> ack.ack(s, t));
 			});
 		}
-		return future;
+		return ack.getAckBytePayloadFuture();
 	}
 
 	public CompletableFuture<Void> process(Http2Msg msg) {
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
+		try {
+			future = processImpl(msg);
+		} catch(Throwable e) {
+			future.completeExceptionally(e);
+		}
+		
+		return future.handle((v, t) -> handleError(v, t));
+	}
+	
+	public CompletableFuture<Void> processImpl(Http2Msg msg) {
 		log.info(logId+"frame from socket="+msg);
 		if(msg instanceof DataFrame) {
 			return syncro.sendDataToApp((DataFrame) msg);

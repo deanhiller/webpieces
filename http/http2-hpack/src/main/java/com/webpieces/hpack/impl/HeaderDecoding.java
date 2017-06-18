@@ -58,7 +58,7 @@ public class HeaderDecoding {
         String h = new String(name);
         String v = new String(value);
         if(!h.equals(h.toLowerCase()))
-            throw new StreamException(CancelReasonCode.HEADER_NOT_LOWER_CASE, logId, streamId, "header="+h+" was not lower case in stream="+streamId);
+            throw new ConnectionException(CancelReasonCode.HEADER_NOT_LOWER_CASE, logId, streamId, "header="+h+" was not lower case in stream="+streamId);
         
         Http2Header header = new Http2Header(h, v);
         headers.add(header);

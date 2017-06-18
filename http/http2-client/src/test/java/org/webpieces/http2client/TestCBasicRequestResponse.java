@@ -59,7 +59,7 @@ public class TestCBasicRequestResponse extends AbstractTest {
 		
 		Assert.assertFalse(future.isDone());
 
-		DataFrame data = Requests.createData(request1.getHeaders().getStreamId());
+		DataFrame data = Requests.createData(request1.getHeaders().getStreamId(), true);
 		mockChannel.write(data);
 
 		FullResponse response = future.get(2, TimeUnit.SECONDS);
@@ -84,8 +84,7 @@ public class TestCBasicRequestResponse extends AbstractTest {
 		
 		Assert.assertFalse(future.isDone());
 
-		DataFrame data = Requests.createData(request1.getHeaders().getStreamId());
-		data.setEndOfStream(false);
+		DataFrame data = Requests.createData(request1.getHeaders().getStreamId(), false);
 		mockChannel.write(data);
 		
 		Assert.assertFalse(future.isDone());

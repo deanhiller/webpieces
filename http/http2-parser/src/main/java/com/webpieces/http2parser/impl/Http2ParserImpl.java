@@ -63,10 +63,18 @@ public class Http2ParserImpl implements Http2Parser {
 	@Override
 	public Http2Memento parse(Http2Memento memento, DataWrapper newData) {
 		Http2MementoImpl state = (Http2MementoImpl) memento;
+		int size = state.getLeftOverDataSize()+newData.getReadableSize();
+		state = parse(state, newData);
+		int numParsed = size - state.getLeftOverDataSize();
+		state.setNumBytesJustParsed(numParsed);
+		return state;
+	}
+	
+	public Http2MementoImpl parse(Http2MementoImpl state, DataWrapper newData) {
 		state.getParsedFrames().clear();
 		
 		DataWrapper allData = dataGen.chainDataWrappers(state.getLeftOverData(), newData);
-		state.setLeftOverData(allData);
+		state.setLeftOverData(allData, newData.getReadableSize());
 		
 		while(true) {
 			switch(state.getParsingState()) {
@@ -116,8 +124,10 @@ public class Http2ParserImpl implements Http2Parser {
     				framePayloadData);
     	}
 
+		int headerSize = 9;
+		int size = framePayloadData.getReadableSize()+headerSize;
     	state.setFrameHeaderData(null); //reset header data
-    	state.setLeftOverData(split.get(1)); //set leftover data
+    	state.setLeftOverData(split.get(1), -size); //subtract out read message
     	state.addParsedFrame(frame);
 
 		return true;
@@ -132,7 +142,6 @@ public class Http2ParserImpl implements Http2Parser {
         int lengthOfData = allData.getReadableSize();
         if (lengthOfData < 9) {
             // Not even a frame header
-        	state.setLeftOverData(allData);
         	return false;
         }
         
@@ -150,7 +159,7 @@ public class Http2ParserImpl implements Http2Parser {
             		"Frame size="+payloadLength+" was greater than max="+maxFrameSize);
         
         state.setFrameHeaderData(new FrameHeaderData(payloadLength, streamId, frameTypeId, flagsByte));
-		state.setLeftOverData(left);
+		state.setLeftOverData(left, 0); //this data is still leftover as we do not have full message so add ZERO
 
         return true;
 	}

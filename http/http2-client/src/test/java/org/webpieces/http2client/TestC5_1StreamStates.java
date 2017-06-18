@@ -154,6 +154,7 @@ public class TestC5_1StreamStates extends AbstractTest {
 		MockResponseListener listener1 = new MockResponseListener();
 		listener1.setIncomingRespDefault(CompletableFuture.<StreamWriter>completedFuture(null));
 		Http2Request request = sendRequestToServer(listener1);
+		
 		sendEosResponseFromServer(listener1, request);
 
 		DataFrame dataFrame = new DataFrame(request.getStreamId(), false);

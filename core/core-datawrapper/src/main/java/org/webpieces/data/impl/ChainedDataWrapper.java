@@ -18,12 +18,12 @@ public class ChainedDataWrapper extends AbstractDataWrapper {
 		wrappers.add(wrapper2);
 	}
 
-	ChainedDataWrapper(List<SliceableDataWrapper> wrappers) {
-		this.wrappers = wrappers;
+	ChainedDataWrapper(List<SliceableDataWrapper> prefix) {
+		//we must clone to not modify a previous chaind data wrapper
+		wrappers.addAll(prefix);
 	}
-
+	
 	public ChainedDataWrapper(SliceableDataWrapper wrapper) {
-		this.wrappers = new ArrayList<>();
 		wrappers.add(wrapper);
 	}
 	

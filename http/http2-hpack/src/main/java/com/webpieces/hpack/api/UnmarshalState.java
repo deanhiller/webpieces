@@ -15,6 +15,8 @@ public interface UnmarshalState {
 	
 	int getLeftOverDataSize();
 	
+	int getNumBytesJustParsed();
+	
     void setDecoderMaxTableSize(int newSize);
     void setIncomingMaxFrameSize(long maxFrameSize);
 }

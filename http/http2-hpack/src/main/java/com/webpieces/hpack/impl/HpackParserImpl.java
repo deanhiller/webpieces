@@ -70,9 +70,20 @@ public class HpackParserImpl implements HpackParser {
 	@Override
 	public UnmarshalState unmarshal(UnmarshalState memento, DataWrapper newData) {
 		UnmarshalStateImpl state = (UnmarshalStateImpl) memento;
+		state.resetNumBytesJustParsed();
+
+		state = unmarshalImpl(state, newData);
+		
+		return state;
+	}
+	
+	private UnmarshalStateImpl unmarshalImpl(UnmarshalStateImpl state, DataWrapper newData) {
 		state.clearParsedFrames(); //reset any parsed frames
 		
+		state.addToDataToParseSize(newData.getReadableSize());
 		Http2Memento result = parser.parse(state.getLowLevelState(), newData);
+		
+		state.addHalfParsedSize(result.getNumBytesJustParsed());
 		
 		List<Http2Frame> parsedFrames = result.getParsedFrames();
 		for(Http2Frame frame: parsedFrames) {
@@ -100,7 +111,7 @@ public class HpackParserImpl implements HpackParser {
 		if(frame instanceof UnknownFrame && ignoreUnkownFrames) {
 			//do nothing
 		} else if(frame instanceof Http2Msg) {
-			state.getParsedFrames().add((Http2Msg) frame);
+			state.addParsedMessage((Http2Msg) frame);
 		} else {
 			throw new IllegalStateException("bug forgot support for frame="+frame);
 		}
@@ -150,13 +161,13 @@ public class HpackParserImpl implements HpackParser {
 			fullHeaders.setStreamId(f.getStreamId());
 			fullHeaders.setPriorityDetails(f.getPriorityDetails());
 			fullHeaders.setEndOfStream(f.isEndOfStream());
-			state.getParsedFrames().add(fullHeaders);
+			state.addParsedMessage(fullHeaders);
 		} else if(firstFrame instanceof PushPromiseFrame) {
 			PushPromiseFrame f = (PushPromiseFrame) firstFrame;
 			Http2Push fullHeaders = new Http2Push(headers);
 			fullHeaders.setStreamId(f.getStreamId());
 			fullHeaders.setPromisedStreamId(f.getPromisedStreamId());
-			state.getParsedFrames().add(fullHeaders);
+			state.addParsedMessage(fullHeaders);
 		}
 
 		hasHeaderFragmentList.clear();
@@ -193,7 +204,8 @@ public class HpackParserImpl implements HpackParser {
 	private void checkBadHeaders(Map<Http2HeaderName, Http2Header> knownHeaders, String logId, int streamId) {
 		for(Http2HeaderName name : requiredRequestHeaders) {
 			if(knownHeaders.containsKey(name))
-				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, "Response contains a header that is reserved only for requests="+name);
+				throw new StreamException(CancelReasonCode.MALFORMED_REQUEST, logId, streamId, 
+						"Response contains a header that is reserved only for requests(OR this request is missing the :method header)="+name);
 		}
 	}
 

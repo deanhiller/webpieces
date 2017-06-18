@@ -19,6 +19,9 @@ public class UnmarshalStateImpl implements UnmarshalState {
     private List<HasHeaderFragment> headersToCombine = new LinkedList<>();
 	private List<Http2Msg> parsedFrames = new ArrayList<>();
 	private String logId;
+	private int numBytesJustParsed = 0;
+	private int dataToParseSize = 0;
+	private int halfParsedSize;
 	
 	public UnmarshalStateImpl(String logId, Http2Memento lowLevelState, HeaderDecoding decoding, Decoder decoder) {
 		this.logId = logId;
@@ -30,11 +33,6 @@ public class UnmarshalStateImpl implements UnmarshalState {
 	@Override
 	public List<Http2Msg> getParsedFrames() {
 		return parsedFrames;
-	}
-
-	@Override
-	public int getLeftOverDataSize() {
-		return lowLevelState.getLeftOverData().getReadableSize();
 	}
 
 	public Http2Memento getLowLevelState() {
@@ -67,5 +65,37 @@ public class UnmarshalStateImpl implements UnmarshalState {
 		return logId;
 	}
 
+	@Override
+	public int getLeftOverDataSize() {
+		return dataToParseSize;
+	}
+	
+	@Override
+	public int getNumBytesJustParsed() {
+		return numBytesJustParsed;
+	}
+
+	public int getDataToParseSize() {
+		return dataToParseSize;
+	}
+
+	public void addToDataToParseSize(int readableSize) {
+		dataToParseSize += readableSize;
+	}
+
+	public void addHalfParsedSize(int numBytesJustParsed2) {
+		halfParsedSize += numBytesJustParsed2;
+	}
+
+	public void addParsedMessage(Http2Msg frame) {
+		numBytesJustParsed += halfParsedSize;
+		dataToParseSize -= halfParsedSize;
+		parsedFrames.add(frame);
+		halfParsedSize = 0;
+	}
+
+	public void resetNumBytesJustParsed() {
+		numBytesJustParsed = 0;
+	}
 
 }

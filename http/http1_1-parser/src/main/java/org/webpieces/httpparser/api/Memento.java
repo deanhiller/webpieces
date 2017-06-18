@@ -27,4 +27,6 @@ public interface Memento {
 	 */
 	DataWrapper getLeftOverData();
 	
+	int getNumBytesJustParsed();
+	
 }

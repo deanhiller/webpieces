@@ -18,7 +18,7 @@ public interface DataWrapper {
 	
 	public byte readByteAt(int i);
 
-	public byte[] readBytesAt(int i, int len);
+	public byte[] readBytesAt(int offset, int len);
 
 	public String createStringFrom(int offset, int length, Charset charSet);
 

@@ -27,6 +27,8 @@ public interface DataWrapperGenerator {
 	 */
 	DataWrapper chainDataWrappers(DataWrapper begin, DataWrapper end);
 	
+	DataWrapper chainDataWrappers(DataWrapper firstData, DataWrapper ... secondData);
+
 	DataWrapper chainDataWrappers(DataWrapper begin, ByteBuffer... end);
 	
 	/**
@@ -41,5 +43,6 @@ public interface DataWrapperGenerator {
 	 * @return
 	 */
 	List<? extends DataWrapper> split(DataWrapper dataToRead, int splitAtPosition);
+
 	
 }

@@ -128,4 +128,5 @@ public class MockResponseListener extends MockSuperclass implements ResponseHand
 		Stream<CancelReason> map = super.getCalledMethods(Method.CANCEL_PUSH).map(s -> (CancelReason)s.getArgs()[0]);
 		return map.collect(Collectors.toList());
 	}
+
 }

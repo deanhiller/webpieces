@@ -121,13 +121,11 @@ public class HttpSocketImpl implements HttpSocket {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
 			int bytesIn = b.remaining();
-			int totalBytes = memento.getLeftOverData().getReadableSize() + b.remaining();
 			memento = parser.parse(memento, wrapper);
-			int totalBytesParsed = totalBytes - memento.getLeftOverData().getReadableSize();
 			
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
-			AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), totalBytesParsed);
+			AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), memento.getNumBytesJustParsed());
 
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {

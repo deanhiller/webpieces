@@ -110,6 +110,36 @@ public class TestS4FrameSizeAndHeaders extends AbstractHttp2Test {
 		Assert.assertTrue(mockChannel.isClosed());
 	}
 	
+
+	/**
+	 *  A decoding error in a header block MUST be treated as a connection error (Section 5.4.1) of type COMPRESSION_ERROR.
+	 *  
+	 */
+	@Test
+	public void testBadSizePriorityFrame() {
+	    String priorityFrame = 
+	        	"00 00 06" + //length
+	            "02" + //type
+	            "00" + //flags
+	            "00 00 00 01" + // R + streamid
+	            "80 00 00 04" + // stream dependency
+	            "05 00"; // weight
+		mockChannel.sendHexBack(priorityFrame); //endOfStream=false
+
+		//no request comes in
+		Assert.assertEquals(0, mockListener.getNumRequestsThatCameIn());
+		//no cancels
+		Assert.assertEquals(0, mockListener.getNumCancelsThatCameIn());
+		
+		//remote receives goAway
+		GoAwayFrame goAway = (GoAwayFrame) mockChannel.getFrameAndClear();
+		Assert.assertEquals(Http2ErrorCode.FRAME_SIZE_ERROR, goAway.getKnownErrorCode());
+		DataWrapper debugData = goAway.getDebugData();
+		String msg = debugData.createStringFromUtf8(0, debugData.getReadableSize());
+		Assert.assertEquals("ConnectionException: stream1:(FRAME_SIZE_INCORRECT) priority size not 5 and instead is=6", msg);
+		Assert.assertTrue(mockChannel.isClosed());
+	}
+	
 	/**
 	 * Each header block is processed as a discrete unit. Header blocks 
 	 * MUST be transmitted as a contiguous sequence of frames, with no interleaved 

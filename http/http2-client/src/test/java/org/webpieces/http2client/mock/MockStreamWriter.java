@@ -41,4 +41,8 @@ public class MockStreamWriter extends MockSuperclass implements StreamWriter {
 		return frames.get(0);
 	}
 
+	public void addProcessResponse(CompletableFuture<Void> future) {
+		super.addValueToReturn(Method.INCOMING_DATA, future);
+	}
+
 }
