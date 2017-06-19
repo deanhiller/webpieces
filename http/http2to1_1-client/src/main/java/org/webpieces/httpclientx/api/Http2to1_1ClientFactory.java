@@ -1,8 +1,10 @@
-package org.webpieces.httpclient.api;
+package org.webpieces.httpclientx.api;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.api.Http2Client;
-import org.webpieces.httpclient.impl.Http2ClientProxy;
+import org.webpieces.httpclient11.api.HttpClient;
+import org.webpieces.httpclient11.api.HttpClientFactory;
+import org.webpieces.httpclientx.impl.Http2ClientProxy;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.nio.api.ChannelManager;

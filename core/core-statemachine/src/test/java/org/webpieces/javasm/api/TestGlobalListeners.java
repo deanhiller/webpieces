@@ -1,21 +1,15 @@
 package org.webpieces.javasm.api;
 
-import java.awt.event.ActionListener;
-
 import junit.framework.TestCase;
 
 /**
  */
 public class TestGlobalListeners extends TestCase
 {
-    private MockActionListener beforeCreateStateEntryList = new MockActionListener();
-    private MockActionListener afterCreateStateEntryList = new MockActionListener();
     private StateMachine sm;
     private String flipOn;
     private String flipOff;
     private State on;
-    private MockActionListener beforeCreateStateExitList = new MockActionListener();
-    private MockActionListener afterCreateStateExitList = new MockActionListener();
 
     /**
      * Creates an instance of TestStateMachine.
@@ -37,17 +31,11 @@ public class TestGlobalListeners extends TestCase
         StateMachineFactory factory = StateMachineFactory.createFactory();
         sm = factory.createStateMachine("TestGlobalListeners");
         
-        sm.addGlobalStateEntryAction((ActionListener)beforeCreateStateEntryList);
-        sm.addGlobalStateExitAction((ActionListener)beforeCreateStateExitList);
-        
         flipOn = "flipOn";
         flipOff = "flipOff";
         
         on = sm.createState("on");
         State off = sm.createState("off");
-        
-        sm.addGlobalStateEntryAction((ActionListener)afterCreateStateEntryList);
-        sm.addGlobalStateExitAction((ActionListener)afterCreateStateExitList);
         
         sm.createTransition(on, off, flipOff);
         sm.createTransition(off, on, flipOn);
@@ -68,26 +56,12 @@ public class TestGlobalListeners extends TestCase
         //fire turn off
         sm.fireEvent(memento, flipOff);
 
-        beforeCreateStateEntryList.expectOneMethodCall();
-        beforeCreateStateExitList.expectOneMethodCall();
-        afterCreateStateEntryList.expectOneMethodCall();
-        afterCreateStateExitList.expectOneMethodCall();
-
         //fire turn off again results in no events...
         sm.fireEvent(memento, flipOff);
-        
-        beforeCreateStateEntryList.expectNoMethodCalls();
-        beforeCreateStateExitList.expectNoMethodCalls();
-        afterCreateStateEntryList.expectNoMethodCalls();
-        afterCreateStateExitList.expectNoMethodCalls();
         
         //flip on now
         sm.fireEvent(memento, flipOn);
         
-        beforeCreateStateEntryList.expectOneMethodCall();
-        beforeCreateStateExitList.expectOneMethodCall();
-        afterCreateStateEntryList.expectOneMethodCall();
-        afterCreateStateExitList.expectOneMethodCall();
     }
     
 }

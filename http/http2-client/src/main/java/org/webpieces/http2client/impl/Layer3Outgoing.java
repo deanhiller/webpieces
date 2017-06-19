@@ -24,7 +24,7 @@ public class Layer3Outgoing implements ClientEngineListener {
 
 	@Override
 	public CompletableFuture<Void> sendToSocket(ByteBuffer data) {
-		log.info("writing out data to socket size="+data.remaining());
+		log.trace(() -> channel+"writing out data to socket size="+data.remaining());
 		return channel.write(data)
 						.thenApply(c -> null);
 	}

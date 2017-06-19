@@ -1,11 +1,11 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclientx.impl;
 
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.httpclient.api.HttpClient;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpClient;
+import org.webpieces.httpclient11.api.HttpSocket;
 
 public class Http2ClientProxy implements Http2Client {
 

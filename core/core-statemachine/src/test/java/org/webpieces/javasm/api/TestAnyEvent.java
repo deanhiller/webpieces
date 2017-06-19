@@ -2,16 +2,12 @@
  */
 package org.webpieces.javasm.api;
 
-import java.awt.event.ActionListener;
-
 import junit.framework.TestCase;
 
 /**
  */
 public class TestAnyEvent extends TestCase
 {
-    private MockActionListener mockOffListener = new MockActionListener();
-    private MockActionListener mockOnListener = new MockActionListener();
     private StateMachine sm;
     private String flipOn;
     private String flipOff;
@@ -33,10 +29,8 @@ public class TestAnyEvent extends TestCase
         State off = sm.createState("off");
 
         onToOff = sm.createTransition(on, off, StateMachineFactory.ANY_EVENT);
-        onToOff.addActionListener((ActionListener)mockOffListener);
 
         Transition offToOn = sm.createTransition(off, on, StateMachineFactory.ANY_EVENT);
-        offToOn.addActionListener((ActionListener)mockOnListener);
     }
 
     @Override
@@ -44,9 +38,6 @@ public class TestAnyEvent extends TestCase
     {
         super.tearDown();
         
-        //make sure no more extra events
-        mockOffListener.expectNoMethodCalls();
-        mockOnListener.expectNoMethodCalls();
     }
     
     public void testAnyEvent()
@@ -56,25 +47,14 @@ public class TestAnyEvent extends TestCase
         //fire turn off
         sm.fireEvent(memento, flipOff);
 
-        mockOffListener.expectOneMethodCall();
-        mockOnListener.expectNoMethodCalls();
-
         //fire turn off again...
         sm.fireEvent(memento, flipOff);
-
-        mockOnListener.expectOneMethodCall();
-        mockOffListener.expectNoMethodCalls();
 
         //fire turn on.....
         sm.fireEvent(memento, flipOn);
 
-        mockOffListener.expectOneMethodCall();
-        mockOnListener.expectNoMethodCalls();
-
         //fire turn off again...
         sm.fireEvent(memento, flipOff);
 
-        mockOnListener.expectOneMethodCall();
-        mockOffListener.expectNoMethodCalls();
     }
 }

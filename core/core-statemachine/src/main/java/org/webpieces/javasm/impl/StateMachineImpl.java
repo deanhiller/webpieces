@@ -1,23 +1,21 @@
 package org.webpieces.javasm.impl;
 
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.event.EventListenerList;
 
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
 import org.webpieces.javasm.api.StateMachine;
 import org.webpieces.javasm.api.Transition;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 /**
  */
 public class StateMachineImpl implements StateMachine
 {
+	private final static Logger log = LoggerFactory.getLogger(StateMachineImpl.class);
     private final Map<String, StateImpl> nameToState = new HashMap<String, StateImpl>();
-    private final EventListenerList globalEntryListeners = new EventListenerList();
-    private final EventListenerList globalExitListeners = new EventListenerList();
     private final String rawMapId;
 
     /**
@@ -37,7 +35,7 @@ public class StateMachineImpl implements StateMachine
         State name = nameToState.get(state.getName());
         if(name == null)
             throw new IllegalArgumentException(this + "This state does not exist in this statemachine.  name="+name);
-        return new StateMachineState(rawMapId, stateMachineId, state, this);
+        return new StateMachineState(stateMachineId, state, this);
     }
 
     /**
@@ -50,13 +48,7 @@ public class StateMachineImpl implements StateMachine
     		throw new IllegalArgumentException("This state already exists. You can't create the same state twice");
         state = new StateImpl(name);
         nameToState.put(name, state);
-        for(ActionListener l : globalEntryListeners.getListeners(ActionListener.class)) {
-            state.addEntryActionListener(l);
-        }
 
-        for(ActionListener l : globalExitListeners.getListeners(ActionListener.class)) {
-            state.addExitActionListener(l);
-        }
         return state;
     }
 
@@ -123,36 +115,10 @@ public class StateMachineImpl implements StateMachine
         } catch(RuntimeException e) {
             //NOTE: Stack trace is not logged here.  That is the responsibility of the javasm client
             //so exceptions don't get logged multiple times.
-            smState.getLogger().warn(this+"Exception occurred going out of state="+smState.getCurrentState()+", event="+evt);
+            log.warn(this+"Exception occurred going out of state="+smState.getCurrentState()+", event="+evt);
             throw e;
         }
 	}
-
-    /**
-     * @see org.webpieces.javasm.api.StateMachine#addGlobalStateEntryAction(java.awt.event.ActionListener)
-     */
-    public StateMachine addGlobalStateEntryAction(ActionListener l)
-    {
-        //first add it to all created states
-        for(State state : nameToState.values()) {
-            state.addEntryActionListener(l);
-        }
-        globalEntryListeners.add(ActionListener.class, l);
-        return this;
-    }
-
-    /**
-     * @see org.webpieces.javasm.api.StateMachine#addGlobalStateExitAction(java.awt.event.ActionListener)
-     */
-    public StateMachine addGlobalStateExitAction(ActionListener l)
-    {
-        //first add it to all created states
-        for(State state : nameToState.values()) {
-            state.addExitActionListener(l);
-        }
-        globalExitListeners.add(ActionListener.class, l);
-        return this;
-    }
 
     @Override
     public String toString() {

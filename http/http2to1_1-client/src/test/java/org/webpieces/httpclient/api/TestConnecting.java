@@ -12,6 +12,7 @@ import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
+import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
 
 public class TestConnecting {
 

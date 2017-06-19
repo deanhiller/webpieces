@@ -1,13 +1,13 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclient11.impl;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.DataWriter;
-import org.webpieces.httpclient.api.HttpFullResponse;
-import org.webpieces.httpclient.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 

@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclientx.impl;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
@@ -7,8 +7,8 @@ import org.webpieces.http2client.api.Http2Socket;
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
 import org.webpieces.http2translations.api.Http2ToHttp1_1;
-import org.webpieces.httpclient.api.HttpFullRequest;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
 import com.webpieces.hpack.api.dto.Http2Request;

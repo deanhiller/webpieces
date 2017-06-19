@@ -14,8 +14,8 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import com.webpieces.http2parser.api.Http2Memento;
 import com.webpieces.http2parser.api.Http2Parser;
 import com.webpieces.http2parser.api.dto.UnknownFrame;
-import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.error.CancelReasonCode;
+import com.webpieces.http2parser.api.dto.error.ConnectionException;
 import com.webpieces.http2parser.api.dto.lib.AbstractHttp2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2Frame;
 import com.webpieces.http2parser.api.dto.lib.Http2FrameType;
@@ -165,22 +165,37 @@ public class Http2ParserImpl implements Http2Parser {
 	}
 
 	private int getLength(DataWrapper data) {
-        ByteBuffer headerByteBuffer = bufferPool.nextBuffer(9);
-        headerByteBuffer.put(data.readBytesAt(0, 9));
-        headerByteBuffer.flip();
-
-        // Get 4 bytes and just drop the rightmost one.
-        return headerByteBuffer.getInt() >>> 8;
-    }
-
+	  byte[] bytes = data.readBytesAt(0, 4);
+	  ByteBuffer wrap = ByteBuffer.wrap(bytes);
+	
+	  // Get 4 bytes and just drop the rightmost one.
+	  return wrap.getInt() >>> 8;
+	}
+    
+//	private int getLength(DataWrapper data) {
+//        ByteBuffer headerByteBuffer = bufferPool.nextBuffer(9);
+//        headerByteBuffer.put(data.readBytesAt(0, 9));
+//        headerByteBuffer.flip();
+//
+//        // Get 4 bytes and just drop the rightmost one.
+//        return headerByteBuffer.getInt() >>> 8;
+//    }
     private int getStreamId(DataWrapper data) {
-        ByteBuffer streamIdBuffer = bufferPool.nextBuffer(4);
-        streamIdBuffer.put(data.readBytesAt(5, 4));
-        streamIdBuffer.flip();
+    	byte[] bytes = data.readBytesAt(5, 4);
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
 
         // Ignore the reserved bit
-        return streamIdBuffer.getInt() & 0x7FFFFFFF;
+        return wrap.getInt() & 0x7FFFFFFF;
     }
+//    private int getStreamId(DataWrapper data) {
+//    	
+//        ByteBuffer streamIdBuffer = bufferPool.nextBuffer(4);
+//        streamIdBuffer.put(data.readBytesAt(5, 4));
+//        streamIdBuffer.flip();
+//
+//        // Ignore the reserved bit
+//        return streamIdBuffer.getInt() & 0x7FFFFFFF;
+//    }
     
 	@Override
 	public DataWrapper marshal(Http2Frame frame) {

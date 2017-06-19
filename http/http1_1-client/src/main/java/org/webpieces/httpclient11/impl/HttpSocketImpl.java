@@ -1,4 +1,4 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclient11.impl;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -9,12 +9,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpclient.api.DataWriter;
-import org.webpieces.httpclient.api.HttpDataWriter;
-import org.webpieces.httpclient.api.HttpFullRequest;
-import org.webpieces.httpclient.api.HttpFullResponse;
-import org.webpieces.httpclient.api.HttpResponseListener;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpDataWriter;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;

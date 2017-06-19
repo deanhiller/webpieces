@@ -57,11 +57,11 @@ public class Level5ClientStateMachine extends Level5CStateMachine {
 		State reservedRemote = stateMachine.createState("Reserved(remote)");
 	
 		NoTransitionImpl failIfNoTransition = new NoTransitionImpl(true);
-		idleState.addNoTransitionListener(failIfNoTransition);
-		openState.addNoTransitionListener(failIfNoTransition);
-		reservedRemote.addNoTransitionListener(failIfNoTransition);
-		halfClosedLocal.addNoTransitionListener(failIfNoTransition);
-		closed.addNoTransitionListener(failIfNoTransition);
+		idleState.setNoTransitionListener(failIfNoTransition);
+		openState.setNoTransitionListener(failIfNoTransition);
+		reservedRemote.setNoTransitionListener(failIfNoTransition);
+		halfClosedLocal.setNoTransitionListener(failIfNoTransition);
+		closed.setNoTransitionListener(failIfNoTransition);
 
 		stateMachine.createTransition(idleState, openState, SENT_HEADERS);
 		stateMachine.createTransition(idleState, halfClosedLocal, SENT_HEADERS_EOS); //jump to half closed as is send H AND send ES

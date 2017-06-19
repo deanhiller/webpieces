@@ -106,7 +106,7 @@ public class Level7MarshalAndPing {
 	}
 
 	public CompletableFuture<Void> sendFrameToSocket(Http2Msg msg) {
-		log.info(key+"sending frame down to socket(from client)=\n"+msg);
+		log.debug(() -> key+"sending frame down to socket(from client)=\n"+msg);
 		DataWrapper data = parser.marshal(marshalState, msg);
 		ByteBuffer buffer = ByteBuffer.wrap(data.createByteArray());
 		return sendToSocket(buffer);

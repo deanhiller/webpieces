@@ -1,7 +1,5 @@
 package org.webpieces.throughput.client;
 
-import java.net.InetSocketAddress;
-
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2ClientFactory;
@@ -28,7 +26,9 @@ public class Http2Clients implements Clients {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, new BackpressureConfig());
 		
-		return Http2ClientFactory.createHttpClient(new Http2Config(), chanMgr, pool);
+		Http2Config http2Config = new Http2Config();
+		http2Config.setInitialRemoteMaxConcurrent(Integer.MAX_VALUE);
+		return Http2ClientFactory.createHttpClient(http2Config, chanMgr, pool);
 	}
 
 	@Override

@@ -45,17 +45,20 @@ public class Http2HeaderStruct {
 		return headers.get(key.toLowerCase());
 	}
 
+	protected void addHeader(Http2Header header) {
+		addHeader(header.getName().toLowerCase(), header);
+	}
 	/**
 	 * It is important that this is not exposed as the duplicate structure could get corrupted.
 	 * Adding anything to this from a client does nothing so we don't want to allow this as the
 	 * user would think that it would be marshalled out
 	 */
-	protected void addHeader(Http2Header header) {
-		List<Http2Header> list = headers.get(header.getName().toLowerCase());
+	protected void addHeader(String name, Http2Header header) {
+		List<Http2Header> list = headers.get(name);
 		if(list == null) {
-			list = new ArrayList<>();
+			list = new ArrayList<>(10);
 			//Header names are not case sensitive while values are
-			headers.put(header.getName().toLowerCase(), list);
+			headers.put(name, list);
 		}
 		list.add(header);
 	}

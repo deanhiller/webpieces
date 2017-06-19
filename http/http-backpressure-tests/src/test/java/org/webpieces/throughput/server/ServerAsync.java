@@ -18,6 +18,8 @@ import org.webpieces.nio.api.ChannelManagerFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
+import com.webpieces.http2engine.api.client.Http2Config;
+
 public class ServerAsync {
 	private static final Logger log = LoggerFactory.getLogger(ServerAsync.class);
 
@@ -46,7 +48,9 @@ public class ServerAsync {
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 
-		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(svrMgr, pool, new BackpressureConfig());
+		Http2Config config = new Http2Config();
+		config.setInitialRemoteMaxConcurrent(Integer.MAX_VALUE);
+		HttpFrontendManager mgr = HttpFrontendFactory.createFrontEnd(svrMgr, pool, new BackpressureConfig(), config);
 		return mgr.createHttpServer(new FrontendConfig("asyncsvr"), new EchoListener());
 	}
 	

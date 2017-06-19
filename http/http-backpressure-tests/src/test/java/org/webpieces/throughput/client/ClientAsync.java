@@ -81,7 +81,7 @@ public class ClientAsync {
 				
 				//the future puts the perfect amount of backpressure or performance will tank
 				//(ie. comment out this line and watch performance tank)
-				future.get(10, TimeUnit.SECONDS);
+				future.get(100, TimeUnit.SECONDS);
 			}
 		}
 		

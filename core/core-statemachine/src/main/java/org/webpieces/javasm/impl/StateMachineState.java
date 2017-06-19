@@ -3,8 +3,6 @@ package org.webpieces.javasm.impl;
 import org.webpieces.javasm.api.Memento;
 import org.webpieces.javasm.api.State;
 import org.webpieces.util.locking.FuturePermitQueue;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 /**
  */
@@ -12,19 +10,16 @@ public class StateMachineState implements Memento
 {
     private static final long serialVersionUID = 1L;
 
-    private Logger log;
     private String id;
     private State state;
     private StateMachineImpl stateMachine;
     private FuturePermitQueue permitQueue;
 
-    public StateMachineState(String rawMapId, String stateMachineId, State state, StateMachineImpl sm)
+    public StateMachineState(String stateMachineId, State state, StateMachineImpl sm)
     {
-        this.id = rawMapId+","+stateMachineId;
         this.state = state;
         this.stateMachine = sm;
-        String name = Memento.class.getPackage().getName();
-        log = LoggerFactory.getLogger(name+"."+rawMapId+"."+stateMachineId);
+        this.id = stateMachineId;
         permitQueue = new FuturePermitQueue(stateMachineId, 1);
     }
 
@@ -41,7 +36,7 @@ public class StateMachineState implements Memento
     public void setCurrentState(State state)
     {
         if(state == null)
-            throw new IllegalArgumentException("name cannot be null");
+            throw new IllegalArgumentException(id+" name cannot be null");
         this.state = state;
     }
 
@@ -50,13 +45,8 @@ public class StateMachineState implements Memento
         return stateMachine;
     }
 
-    public Logger getLogger()
-    {
-        return log;
-    }
-
 	public FuturePermitQueue getPermitQueue() {
 		return permitQueue;
 	}
-
+	
 }

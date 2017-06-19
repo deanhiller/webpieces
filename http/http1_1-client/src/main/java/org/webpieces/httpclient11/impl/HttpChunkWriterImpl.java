@@ -1,9 +1,9 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclient11.impl;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.httpclient.api.HttpDataWriter;
+import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.dto.HttpData;

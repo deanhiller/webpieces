@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.http2client.api.Http2Client;
-import org.webpieces.httpclient.api.Http2to1_1ClientFactory;
+import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;

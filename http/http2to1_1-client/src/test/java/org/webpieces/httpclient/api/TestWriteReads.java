@@ -21,6 +21,7 @@ import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclient.api.mocks.MockResponseListener;
 import org.webpieces.httpclient.api.mocks.MockStreamWriter;
+import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
 import org.webpieces.httpparser.api.dto.HttpChunk;

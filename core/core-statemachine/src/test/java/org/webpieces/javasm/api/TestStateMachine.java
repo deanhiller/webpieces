@@ -11,8 +11,6 @@ import junit.framework.TestCase;
 public class TestStateMachine extends TestCase
 {
 	private static final Logger log = Logger.getLogger(TestStateMachine.class.getName());
-    private MockActionListener mockOffListener = new MockActionListener();
-    private MockActionListener mockOnListener = new MockActionListener();
     private StateMachine sm;
     private String flipOn;
     private String flipOff;
@@ -46,10 +44,8 @@ public class TestStateMachine extends TestCase
         State off = sm.createState("off");
 
         onToOff = sm.createTransition(on, off, flipOff);
-        onToOff.addActionListener(mockOffListener);
 
         Transition offToOn = sm.createTransition(off, on, flipOn);
-        offToOn.addActionListener(mockOnListener);
     }
 
     /**
@@ -59,10 +55,6 @@ public class TestStateMachine extends TestCase
     protected void tearDown() throws Exception
     {
         super.tearDown();
-        
-        //make sure no more extra events
-        mockOffListener.expectNoMethodCalls();
-        mockOnListener.expectNoMethodCalls();
     }
 
     public void testBasic() {
@@ -71,48 +63,11 @@ public class TestStateMachine extends TestCase
         //fire turn off
         sm.fireEvent(memento, flipOff);
 
-        mockOnListener.expectNoMethodCalls();
-        mockOffListener.expectOneMethodCall();
-
         //fire turn off again...
         sm.fireEvent(memento, flipOff);
 
-        mockOnListener.expectNoMethodCalls();
-        mockOffListener.expectNoMethodCalls();
-
         //fire turn on.....
         sm.fireEvent(memento, flipOn);
-
-        mockOnListener.expectOneMethodCall();
-        mockOffListener.expectNoMethodCalls();
-    }
-
-    /**
-     * This makes sure an Exception causes the statemachine to not get corrupted.  This covers a
-     * bug we had where an exception would not allow future firing into statemachine.
-     *
-     */
-    public void testExceptionHandled() {
-        Memento memento = sm.createMementoFromState("id", on);
-
-        mockOffListener.addThrowException(() -> {
-        	throw new IllegalMonitorStateException();
-        });
-
-        try {
-            sm.fireEvent(memento, flipOff);
-            fail("Should have thrown exception");
-		} catch (IllegalMonitorStateException e) {
-        	log.info("This exception is expected");
-		}
-
-        mockOffListener.expectOneMethodCall();
-
-        //should now be able to fire in to statemachine still!!!!!
-        sm.fireEvent(memento, flipOff);
-
-        mockOnListener.expectNoMethodCalls();
-        mockOffListener.expectOneMethodCall();
     }
 
     public void testOrder()
@@ -120,14 +75,10 @@ public class TestStateMachine extends TestCase
         Memento memento = sm.createMementoFromState("id", on);
 
         MockFakeInterface mockFake = new MockFakeInterface();
-        onToOff.addActionListener(new FakeListener1(mockFake));
-        onToOff.addActionListener(new FakeListener2(mockFake));
 
         //fire turn off
         sm.fireEvent(memento, flipOff);
         
-        mockOffListener.expectOneMethodCall();
-        mockFake.expectCalls("first", "second");
     }
 
     public interface FakeInterface

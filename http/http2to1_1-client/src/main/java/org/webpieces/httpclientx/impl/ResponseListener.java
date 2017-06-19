@@ -1,10 +1,10 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclientx.impl;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.http2translations.api.Http1_1ToHttp2;
-import org.webpieces.httpclient.api.DataWriter;
-import org.webpieces.httpclient.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpResponseListener;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 

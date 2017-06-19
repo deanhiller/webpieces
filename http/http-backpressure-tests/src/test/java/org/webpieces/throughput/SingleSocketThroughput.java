@@ -20,12 +20,14 @@ public class SingleSocketThroughput {
 //		example.start(Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS, Protocol.HTTP11);
 //		example.start(Mode.ASYNCHRONOUS, Mode.SYNCHRONOUS, Protocol.HTTP11);
 //		
-//		example.start(Mode.ASYNCHRONOUS, Mode.ASYNCHRONOUS, Protocol.HTTP2);
+
+		example.start(Mode.ASYNCHRONOUS, Mode.ASYNCHRONOUS, Protocol.HTTP2);
 		
-		//NOTE: Sync version not using http2 engine so is a bit unfair/unrealistic but good for testing the async version
+		//NOTE: Synchronous is HARD to implement and must use the http2 engine to do it properly.
+		//This is an exercise for later.....
 //		example.start(Mode.SYNCHRONOUS, Mode.SYNCHRONOUS, Protocol.HTTP2);
 //		example.start(Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS, Protocol.HTTP2);		
-		example.start(Mode.ASYNCHRONOUS, Mode.SYNCHRONOUS, Protocol.HTTP2);
+//		example.start(Mode.SYNCHRONOUS, Mode.ASYNCHRONOUS, Protocol.HTTP2);
 		
 	}
 	

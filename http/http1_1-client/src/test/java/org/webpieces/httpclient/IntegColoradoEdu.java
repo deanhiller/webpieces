@@ -5,9 +5,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.webpieces.httpclient.api.DataWriter;
-import org.webpieces.httpclient.api.HttpResponseListener;
-import org.webpieces.httpclient.api.HttpSocket;
+import org.webpieces.httpclient11.api.DataWriter;
+import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpData;

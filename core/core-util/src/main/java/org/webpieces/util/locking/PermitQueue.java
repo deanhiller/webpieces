@@ -42,7 +42,7 @@ public class PermitQueue {
 	
 	@SuppressWarnings("unchecked")
 	public <RESP> CompletableFuture<RESP> runRequest(Supplier<CompletableFuture<RESP>> processor) {
-		String key = logId+counter.getAndIncrement();
+		long countId = counter.getAndIncrement();
 
 		long time = System.currentTimeMillis();
 		CompletableFuture<RESP> future = new CompletableFuture<RESP>();
@@ -50,13 +50,15 @@ public class PermitQueue {
 
 		//take a peek at the first item in queue and see when it was queued
 		QueuedRequest<RESP> item = (QueuedRequest<RESP>) queue.peek();
-		long timeQueued = item.getTimeQueued();
-		long timeDelayed = time - timeQueued;
-		if(timeDelayed > timeMsWarning)
-			log.warn("id:"+key+" Your PermitQueue/Lock has the first item in the queue waiting "+timeDelayed+"ms so you may have deadlock or just a very contentious lock(you probably should look into this)");		
-		if(backupSize() > queuedBackupWarnThreshold)
-			log.warn("id:"+key+" Your lock is backing up with requests.  either too much contention or deadlock occurred(either way, you should fix this)");
-
+		if(item != null) {
+			long timeQueued = item.getTimeQueued();
+			long timeDelayed = time - timeQueued;
+			if(timeDelayed > timeMsWarning)
+				log.warn("id:"+logId+countId+" Your PermitQueue/Lock has the first item in the queue waiting "+timeDelayed+"ms so you may have deadlock or just a very contentious lock(you probably should look into this)");		
+			if(backupSize() > queuedBackupWarnThreshold)
+				log.warn("id:"+logId+countId+" Your lock is backing up with requests.  either too much contention or deadlock occurred(either way, you should fix this)");
+		}
+		
 		processItemFromQueue();
 		
 		return future;

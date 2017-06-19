@@ -8,8 +8,6 @@ import junit.framework.TestCase;
  */
 public class TestEntryExitListeners extends TestCase
 {
-    private MockActionListener entryList = new MockActionListener();
-    private MockActionListener exitList= new MockActionListener();
     private StateMachine sm;
     private String flipOn;
     private String flipOff;
@@ -44,9 +42,6 @@ public class TestEntryExitListeners extends TestCase
         
         sm.createTransition(on, off, flipOff);
         
-        on.addEntryActionListener((ActionListener)entryList);
-        on.addExitActionListener((ActionListener)exitList);
-
         sm.createTransition(off, on, flipOn);
     }
 
@@ -65,10 +60,6 @@ public class TestEntryExitListeners extends TestCase
         
         //fire flipOn and enter state on
         sm.fireEvent(memento, flipOn);
-
-        exitList.expectNoMethodCalls();
-        entryList.expectOneMethodCall();
-        entryList.expectNoMethodCalls();
     }
     
     public void testExitListener()
@@ -78,8 +69,5 @@ public class TestEntryExitListeners extends TestCase
         //fire flipOff and exit state on
         sm.fireEvent(memento, flipOff);
 
-        exitList.expectOneMethodCall();
-        entryList.expectNoMethodCalls();
-        exitList.expectNoMethodCalls();
     }
 }

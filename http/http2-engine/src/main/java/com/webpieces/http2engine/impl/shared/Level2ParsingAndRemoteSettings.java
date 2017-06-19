@@ -143,7 +143,9 @@ public abstract class Level2ParsingAndRemoteSettings {
 	}
 	
 	public CompletableFuture<Void> processImpl(Http2Msg msg) {
-		log.info(logId+"frame from socket="+msg);
+		if(log.isDebugEnabled())
+			log.debug(() -> logId+"frame from socket="+msg);
+		
 		if(msg instanceof DataFrame) {
 			return syncro.sendDataToApp((DataFrame) msg);
 		} else if(msg instanceof Http2Trailers) {

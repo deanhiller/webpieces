@@ -110,7 +110,7 @@ public class Level5AStates {
 		if(isReleased && stream.isHasPermit()) {
 			maxConcurrentQueue.releasePermit();
 			int val = releasedCnt.incrementAndGet();
-			log.info("release permit(cause="+cause+").  size="+maxConcurrentQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
+			log.trace(() -> "release permit(cause="+cause+").  size="+maxConcurrentQueue.availablePermits()+" releasedCnt="+val+" stream="+stream.getStreamId());
 		}
 	}
 	
@@ -131,7 +131,7 @@ public class Level5AStates {
 		State old = currentState.getCurrentState();
 		
 		State result = stateMachine.fireEvent(currentState, event);
-		log.info(logId+"done firing evt="+event+" "+old+" -> "+result);
+		log.trace(() -> logId+"done firing evt="+event+" "+old+" -> "+result);
 	}
 	
 	public boolean isInClosedState(Stream stream) {
@@ -151,7 +151,7 @@ public class Level5AStates {
 		if(!isClosed)
 			return false; //do nothing
 		
-		log.info(logId+"stream closed="+stream.getStreamId());
+		log.trace(() -> logId+"stream closed="+stream.getStreamId());
 		
 //		if(!keepDelayedState) {
 			Stream removedStream = streamState.remove(stream, cause);

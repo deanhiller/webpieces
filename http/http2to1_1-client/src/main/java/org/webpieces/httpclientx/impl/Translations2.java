@@ -1,9 +1,9 @@
-package org.webpieces.httpclient.impl;
+package org.webpieces.httpclientx.impl;
 
 import org.webpieces.http2client.api.dto.FullRequest;
 import org.webpieces.http2client.api.dto.FullResponse;
-import org.webpieces.httpclient.api.HttpFullRequest;
-import org.webpieces.httpclient.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 
 public class Translations2 {
 

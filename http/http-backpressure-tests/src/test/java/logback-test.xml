@@ -12,6 +12,10 @@
 	    </filter>
     
 		<encoder>
+			<!--
+			This is performance intensive since it captures stack traces every log...
+			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern-->
+		
 			<pattern>%date{ISO8601} [%thread] %-4level: %message%n</pattern>
 		</encoder>
 	</appender>
@@ -22,6 +26,10 @@
     	</filter>
     
 		<encoder>
+			<!--
+			This is performance intensive since it captures stack traces every log...
+			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern-->
+			
 			<pattern>%date{ISO8601} [%thread] %-4level: %message%n</pattern>
 		</encoder>
 		<target>System.err</target>

@@ -1,8 +1,5 @@
 package org.webpieces.javasm.api;
 
-import java.awt.event.ActionListener;
-
-
 /**
  */
 public interface StateMachine
@@ -32,17 +29,5 @@ public interface StateMachine
      */
     public Transition createTransition(State startState, State endState, Object... events);
     public Transition createTransition(State[] startStates, State endState, Object... events);
-
-    /**
-     * @param l is the ActionListener for the action that occurs on entry in any State in this
-     *  StateMachine
-     */
-    public StateMachine addGlobalStateEntryAction(ActionListener l);
-
-    /**
-     * @param l is the ActionListener for the action that occurs on exit of any State in this
-     *  StateMachine
-     */
-    public StateMachine addGlobalStateExitAction(ActionListener l);
 
 }

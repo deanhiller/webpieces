@@ -51,11 +51,15 @@ public class Headers {
 	 * user would think that it would be marshalled out
 	 */
 	protected void addHeader(Header header) {
-		List<Header> list = headers.get(header.getName().toLowerCase());
+		addHeader(header.getName().toLowerCase(), header);
+	}
+	
+	protected void addHeader(String name, Header header) {
+		List<Header> list = headers.get(name);
 		if(list == null) {
-			list = new ArrayList<>();
+			list = new ArrayList<>(10);
 			//Header names are not case sensitive while values are
-			headers.put(header.getName().toLowerCase(), list);
+			headers.put(name, list);
 		}
 		list.add(header);
 	}

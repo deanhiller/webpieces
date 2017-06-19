@@ -57,7 +57,7 @@ public class Level3ClntOutgoingSyncro extends Level3OutgoingSynchro implements S
 		//This gets tricky, BUT must use the maxConcurrent permit queue first, THEN the serializer permit queue
 		return maxConcurrentQueue.runRequest( () -> {
 			int val = acquiredCnt.incrementAndGet();
-			log.info("got permit(cause="+headers+").  size="+maxConcurrentQueue.availablePermits()+" acquired="+val);
+			log.trace(() -> "got permit(cause="+headers+").  size="+maxConcurrentQueue.availablePermits()+" acquired="+val);
 			
 			return streamInit.createStreamAndSend(headers, responseListener);
 		});

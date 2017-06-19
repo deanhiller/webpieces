@@ -32,8 +32,11 @@ public class Http2SynchronousClient implements SynchronousClient {
 
 	private HpackStatefulParser parser = HpackParserFactory.createStatefulParser(new BufferCreationPool(), new HpackConfig("clientHpack"));
 
+	@SuppressWarnings("unused")
 	@Override
 	public void start(InetSocketAddress svrAddress) {
+		if(true)
+			throw new UnsupportedOperationException("This is broken and needs ot use the http2 engine to work");
 		try {
 	    	log.error("SYNC HTTP2 CLIENT: logging will log every 10 seconds as ERROR so it shows up in red");
 	    	log.info("info messages automatically show up in black");
@@ -96,8 +99,11 @@ public class Http2SynchronousClient implements SynchronousClient {
 		}
 		
 		public void runImpl() throws IOException {
+			int streamId = 1;
 			while(true) {
 				Http2Request request = RequestCreator.createHttp2Request();
+				request.setStreamId(streamId);
+				streamId = streamId + 2;
 				DataWrapper buffer = parser2.marshal(request);
 				byte[] b = buffer.createByteArray();
 				output.write(b);

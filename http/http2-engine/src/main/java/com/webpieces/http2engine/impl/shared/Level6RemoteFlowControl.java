@@ -53,7 +53,7 @@ public class Level6RemoteFlowControl {
 	}
 
 	public CompletableFuture<Void> sendPayloadToSocket(Stream stream, Http2Msg payload) {
-		log.info("sending payload to socket="+payload);
+		log.debug(() -> "sending payload to socket="+payload);
 		return layer6NotifyListener.sendFrameToSocket(payload);
 	}
 	

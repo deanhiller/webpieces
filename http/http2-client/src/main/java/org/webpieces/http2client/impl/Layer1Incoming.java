@@ -38,7 +38,7 @@ public class Layer1Incoming implements DataListener {
 
 	@Override
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-		log.info(channel+"incoming data. size="+b.remaining());
+		log.debug(() -> channel+"incoming data. size="+b.remaining());
 		DataWrapper data = dataGen.wrapByteBuffer(b);
 		//log.info("data="+data.createStringFrom(0, data.getReadableSize(), StandardCharsets.UTF_8));
 		return layer2.parse(data);
