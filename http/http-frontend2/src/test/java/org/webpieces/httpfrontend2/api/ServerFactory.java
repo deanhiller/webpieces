@@ -13,7 +13,8 @@ import java.util.concurrent.TimeoutException;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.frontend2.api.FrontendConfig;
+import org.webpieces.frontend2.api.HttpSvrConfig;
+import org.webpieces.frontend2.api.FrontendMgrConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
@@ -32,6 +33,7 @@ import org.webpieces.util.threading.NamedThreadFactory;
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.StreamWriter;
+import com.webpieces.http2engine.api.client.Http2Config;
 import com.webpieces.http2parser.api.dto.CancelReason;
 import com.webpieces.http2parser.api.dto.Http2Method;
 import com.webpieces.http2parser.api.dto.lib.StreamMsg;
@@ -44,9 +46,10 @@ class ServerFactory {
     static int createTestServer(boolean alwaysHttp2, Long maxConcurrentStreams) {
         BufferCreationPool pool = new BufferCreationPool();
         ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("webpieces-timer"));
-        HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", 10, timer, pool, new BackpressureConfig());
-        FrontendConfig config = new FrontendConfig("id2");
-        HttpServer server = frontEndMgr.createHttpServer(config, new OurListener());
+        FrontendMgrConfig config = new FrontendMgrConfig();
+        HttpFrontendManager frontEndMgr = HttpFrontendFactory.createFrontEnd("frontEnd", timer, pool, config);
+        HttpSvrConfig svrConfig = new HttpSvrConfig("id2");
+        HttpServer server = frontEndMgr.createHttpServer(svrConfig, new OurListener());
         CompletableFuture<Void> fut = server.start();
         try {
 			fut.get(2, TimeUnit.SECONDS);

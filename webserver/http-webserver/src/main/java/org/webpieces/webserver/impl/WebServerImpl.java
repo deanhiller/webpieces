@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.webpieces.frontend2.api.FrontendConfig;
+import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.nio.api.SSLEngineFactory;
@@ -67,14 +67,14 @@ public class WebServerImpl implements WebServer {
 		//validate html route id's and params on startup if 'org.webpieces.routeId.txt' exists
 		validateRouteIdsFromHtmlFiles();
 		
-		FrontendConfig svrChanConfig = new FrontendConfig("http", config.getHttpListenAddress());
+		HttpSvrConfig svrChanConfig = new HttpSvrConfig("http", config.getHttpListenAddress());
 		svrChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 		httpServer = serverMgr.createHttpServer(svrChanConfig, serverListener);
 		CompletableFuture<Void> future = httpServer.start();
 		CompletableFuture<Void> fut2 = CompletableFuture.completedFuture(null);
 
 		if(factory != null) {
-			FrontendConfig secureChanConfig = new FrontendConfig("https", config.getHttpsListenAddress(), 10000);
+			HttpSvrConfig secureChanConfig = new HttpSvrConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);
 			fut2 = httpsServer.start();

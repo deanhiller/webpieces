@@ -1,10 +1,7 @@
 package org.webpieces.throughput.client;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
 
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.time.MsgRateRecorder;
 
 import com.webpieces.hpack.api.dto.Http2Response;

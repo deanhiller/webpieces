@@ -16,13 +16,18 @@ import org.webpieces.throughput.server.ServerHttp2Sync;
 
 public class ThroughputEngine {
 
+	private AsyncConfig config;
+
+	public ThroughputEngine(AsyncConfig config) {
+		this.config = config;
+	}
+
 	protected void start(Mode clientConfig, Mode svrConfig, Protocol protocol) throws InterruptedException {
-		boolean multiThreaded = false;
 		CompletableFuture<InetSocketAddress> future;
 		if(svrConfig == Mode.ASYNCHRONOUS) {
 			//The asynchronous server supports BOTH protocols and automatically ends up doing
 			//the protocol of the client...
-			ServerAsync svr = new ServerAsync(multiThreaded);
+			ServerAsync svr = new ServerAsync(config);
 			future = svr.start();
 		} else if(protocol == Protocol.HTTP11){
 			ServerHttp1_1Sync svr = new ServerHttp1_1Sync();
@@ -32,19 +37,19 @@ public class ThroughputEngine {
 			future = svr.start();
 		}
 		
-		future.thenApply(addr -> runClient(addr, multiThreaded, clientConfig, protocol));
+		future.thenApply(addr -> runClient(addr, config, clientConfig, protocol));
 
 		synchronized(this) {
 			this.wait(); //wait forever
 		}
 	}
 	
-	private Void runClient(InetSocketAddress svrAddress, boolean multiThreaded, Mode clientConfig, Protocol protocol) {
+	private Void runClient(InetSocketAddress svrAddress, AsyncConfig config, Mode clientConfig, Protocol protocol) {
 		Clients creator;
 		if(protocol == Protocol.HTTP11)
-			creator = new Http11Clients(multiThreaded);
+			creator = new Http11Clients(config);
 		else
-			creator = new Http2Clients(multiThreaded);
+			creator = new Http2Clients(config);
 		
 		if(clientConfig == Mode.ASYNCHRONOUS) {
 			runAsyncClient(svrAddress, protocol, creator);

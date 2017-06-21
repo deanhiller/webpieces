@@ -6,7 +6,7 @@ import java.net.SocketAddress;
 import org.webpieces.asyncserver.api.AsyncConfig;
 import org.webpieces.data.api.BufferCreationPool;
 
-public class FrontendConfig {
+public class HttpSvrConfig {
 
 	public AsyncConfig asyncServerConfig = new AsyncConfig();
 	
@@ -35,16 +35,16 @@ public class FrontendConfig {
 	
 	public int maxBodyOrChunkSize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 
-	public FrontendConfig(String id) {
+	public HttpSvrConfig(String id) {
 		this(id, new InetSocketAddress(0));
 	}
 	
-	public FrontendConfig(String id, SocketAddress bindAddr) {
+	public HttpSvrConfig(String id, SocketAddress bindAddr) {
 		asyncServerConfig.id = id;
 		this.bindAddress = bindAddr;
 	}
 	
-	public FrontendConfig(String id, SocketAddress bindAddr, Integer connectToRequestTimeout) {
+	public HttpSvrConfig(String id, SocketAddress bindAddr, Integer connectToRequestTimeout) {
 		asyncServerConfig.id = id;
 		this.bindAddress = bindAddr;
 		maxConnectToRequestTimeoutMs = connectToRequestTimeout;

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.frontend2.api.FrontendConfig;
+import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.HttpFrontendFactory;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
@@ -58,7 +58,7 @@ public class TestS3InitialHttpConnections {
         config.setLocalSettings(localSettings);        
 		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
 
-		FrontendConfig frontendConfig = new FrontendConfig("http", new InetSocketAddress("me", 8080));
+		HttpSvrConfig frontendConfig = new HttpSvrConfig("http", new InetSocketAddress("me", 8080));
 		HttpFrontendManager manager = HttpFrontendFactory.createFrontEnd(mockChanMgr, mockTimer, injConfig);
 		HttpServer httpServer = manager.createHttpServer(frontendConfig, mockListener);
 		httpServer.start();

@@ -59,8 +59,6 @@ public class ServerHttp1_1Sync {
 		}
 
 		public void runImpl() throws IOException {
-	        @SuppressWarnings("resource")
-
 	        Socket socket = server.accept();
 	        InputStream input = socket.getInputStream();
 	        OutputStream output = socket.getOutputStream();

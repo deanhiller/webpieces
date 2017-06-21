@@ -4,7 +4,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.webpieces.asyncserver.api.AsyncServer;
 import org.webpieces.asyncserver.api.AsyncServerManager;
-import org.webpieces.frontend2.api.FrontendConfig;
+import org.webpieces.frontend2.api.HttpSvrConfig;
 import org.webpieces.frontend2.api.HttpFrontendManager;
 import org.webpieces.frontend2.api.HttpServer;
 import org.webpieces.frontend2.api.StreamListener;
@@ -29,7 +29,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpServer createHttpServer(FrontendConfig config, StreamListener httpListener) {
+	public HttpServer createHttpServer(HttpSvrConfig config, StreamListener httpListener) {
 		preconditionCheck(config);
 
 		Layer1ServerListener listener = buildDatalListener(httpListener, false);
@@ -46,7 +46,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 		return listener;
 	}
 
-	private void preconditionCheck(FrontendConfig config) {
+	private void preconditionCheck(HttpSvrConfig config) {
 		if(config.bindAddress == null)
 			throw new IllegalArgumentException("config.bindAddress must be set");
 		if(config.keepAliveTimeoutMs != null && timer == null)
@@ -56,7 +56,7 @@ public class FrontEndServerManagerImpl implements HttpFrontendManager {
 	}
 
 	@Override
-	public HttpServer createHttpsServer(FrontendConfig config, StreamListener httpListener,
+	public HttpServer createHttpsServer(HttpSvrConfig config, StreamListener httpListener,
                                         SSLEngineFactory factory) {
 		preconditionCheck(config);
 		

@@ -46,6 +46,12 @@ public class Http2HeaderStruct {
 	}
 
 	protected void addHeader(Http2Header header) {
+//		char[] newVal = new char[header.getName().length()];
+//		for (int i = 0; i < newVal.length; i++) {
+//			char ch= header.getName().charAt(i);
+//			newVal[i]= ch >= 'A' && ch <= 'Z' ? (char) (ch + 'a' - 'A') : ch;
+//		}
+		
 		addHeader(header.getName().toLowerCase(), header);
 	}
 	/**

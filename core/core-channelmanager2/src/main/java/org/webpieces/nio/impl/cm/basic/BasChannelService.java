@@ -31,6 +31,8 @@ class BasChannelService implements ChannelManager {
 	private BackpressureConfig config;
 
 	BasChannelService(String threadName, JdkSelect apis, BufferPool pool, BackpressureConfig config) {
+		if(config == null)
+			throw new IllegalArgumentException("config must be supplied");
 		this.pool = pool;
 		this.config = config;
 		processor = new KeyProcessor(apis, pool);

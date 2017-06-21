@@ -28,7 +28,7 @@ public abstract class HttpFrontendFactory {
 	public static final String HTTP2_ENGINE_THREAD_POOL = "http2EngineThreadPool";
 	public static final String FILE_READ_EXECUTOR = "fileReadExecutor";
 	
-	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, BackpressureConfig config, Http2Config http2Config) {
+	public static HttpFrontendManager createFrontEnd(AsyncServerManager svrMgr, BufferPool pool, Http2Config http2Config) {
 		ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
 	
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
@@ -49,18 +49,18 @@ public abstract class HttpFrontendFactory {
 	 * @return
 	 */
 	public static HttpFrontendManager createFrontEnd(
-			String id, int threadPoolSize, ScheduledExecutorService timer, BufferPool pool, BackpressureConfig config) {
-		Executor executor = Executors.newFixedThreadPool(threadPoolSize, new NamedThreadFactory(id));
+			String id, ScheduledExecutorService timer, BufferPool pool, FrontendMgrConfig config) {
+		Executor executor = Executors.newFixedThreadPool(config.getThreadPoolSize(), new NamedThreadFactory(id));
 		
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config, executor);
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(id, pool, config.getBackpressureConfig(), executor);
 
 		AsyncServerManager svrMgr = AsyncServerMgrFactory.createAsyncServer(chanMgr);
 		
 		HttpParser httpParser = HttpParserFactory.createParser(pool);
 		HpackParser http2Parser = HpackParserFactory.createParser(pool, true);
 		
-		InjectionConfig injConfig = new InjectionConfig(http2Parser, new TimeImpl(), new Http2Config());
+		InjectionConfig injConfig = new InjectionConfig(http2Parser, new TimeImpl(), config.getHttp2Config());
 		Http2ServerEngineFactory svrEngineFactory = new Http2ServerEngineFactory(injConfig );
 		
 		return new FrontEndServerManagerImpl(svrMgr, timer, svrEngineFactory, httpParser);

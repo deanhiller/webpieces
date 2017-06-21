@@ -1,34 +1,32 @@
 package org.webpieces.throughput.client;
 
-import java.net.InetSocketAddress;
-
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
-import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.ChannelManager;
 import org.webpieces.nio.api.ChannelManagerFactory;
+import org.webpieces.throughput.AsyncConfig;
 
 public class Http11Clients implements Clients {
 
-	private boolean multiThreaded;
+	private AsyncConfig config;
 
-	public Http11Clients(boolean multiThreaded) {
-		this.multiThreaded = multiThreaded;
+	public Http11Clients(AsyncConfig config) {
+		this.config = config;
 	}
 
 	@Override
 	public Http2Client createClient() {
-		if(!multiThreaded) {
-			BufferCreationPool pool = new BufferCreationPool();
-			ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
-			ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, new BackpressureConfig());
+		if(config.getClientThreadCount() != null)
+			return Http2to1_1ClientFactory.createHttpClient(config.getClientThreadCount(), config.getBackpressureConfig());
 			
-			Http2Client client = Http2to1_1ClientFactory.createHttpClient(chanMgr, pool);
-			return client;
-		}
+		//single threaded version...
+		BufferCreationPool pool = new BufferCreationPool();
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
+		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		
-		return Http2to1_1ClientFactory.createHttpClient(20);
+		Http2Client client = Http2to1_1ClientFactory.createHttpClient(chanMgr, pool);
+		return client;
 	}
 	
 	@Override
