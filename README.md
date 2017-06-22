@@ -7,8 +7,9 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 
 #### A few key selling points
 * Run SingleSocketThroughput.java to see the server service(well, on my small laptop at least) 6,000,000 requests per minute(100,000 requests per second) with the single threaded implementations (multithreaded with more sockets can do more)
+* Run IntegTestLocalhostThroughput.java to see MB throughput of re-usable NIO layer (On my machine it was 24 Gigbits/second for a single thread, single socket)
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
-* The http1.1 and http2 clients can backpressure the server as well (and in the case of webpieces, it may result in backpressuring where that data is coming from which may have been the client)
+* The http1.1 and http2 clients can backpressure the server as well (if a client backpressures webpieces server, the server will then backpressure to the client sending it through a chain all automatically)
 * look ma, no restarting the server in development mode with complete java refactoring
 * holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win
 * Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme unlike any server before it)

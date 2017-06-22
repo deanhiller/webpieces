@@ -8,13 +8,15 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.time.RateRecorder;
 
 public final class ClientDataListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(ClientDataListener.class);
 	
 	private BufferPool pool2;
 	private BytesRecorder recorder;
-	
+	private RateRecorder recorder2 = new RateRecorder(10, "MB/second", 1000*1000);
+
 	public ClientDataListener(BufferPool pool2, BytesRecorder recorder) {
 		this.pool2 = pool2;
 		this.recorder = recorder;
@@ -22,6 +24,7 @@ public final class ClientDataListener implements DataListener {
 	
 	@Override
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		recorder2.increment(b.remaining());
 		recorder.recordBytes(b.remaining());
 		
 		b.position(b.limit());

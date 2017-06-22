@@ -6,7 +6,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 
 public interface WebServer {
 
-	void start2();
+	void startSync();
 
 	CompletableFuture<Void> startAsync();
 

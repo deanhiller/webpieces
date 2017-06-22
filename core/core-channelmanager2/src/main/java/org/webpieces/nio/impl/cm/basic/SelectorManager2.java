@@ -247,7 +247,7 @@ public class SelectorManager2 implements SelectorListener {
 		log.trace(()->"coming into select");
 		
 		final Keys keys = selector.select();
-		
+
 		log.trace(()->"coming out of select with newkeys="+keys.getKeyCount()+" setSize="+keys.getSelectedKeys().size()+
 					" regCnt="+listenerList.size()+" needCloseOrRegister="+needCloseOrRegister+
 					" wantShutdown="+selector.isWantShutdown());

@@ -9,6 +9,7 @@ public class AsyncConfig {
 	private boolean isHttps;
 	private int clientMaxConcurrentRequests;
 	private BackpressureConfig backpressureConfig;
+	private int numSockets = 1;
 
 	public boolean isHttps() {
 		return isHttps;
@@ -48,6 +49,14 @@ public class AsyncConfig {
 
 	public void setServerThreadCount(Integer serverThreadCount) {
 		this.serverThreadCount = serverThreadCount;
+	}
+
+	public int getNumSockets() {
+		return numSockets;
+	}
+
+	public void setNumSockets(int numSockets) {
+		this.numSockets = numSockets;
 	}
 
 }

@@ -22,7 +22,7 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.util.time.MsgRateRecorder;
+import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.http2parser.api.dto.lib.Http2Msg;
 
@@ -57,7 +57,7 @@ public class Http11SynchronousClient implements SynchronousClient {
         
         InputStream input = socket.getInputStream();
         
-        MsgRateRecorder recorder = new MsgRateRecorder(10);
+        RateRecorder recorder = new RateRecorder(10);
 
         while(true) {
             byte[] bytes = new byte[1024];

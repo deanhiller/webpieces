@@ -20,6 +20,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 	private Layer2Http2Handler http2Handler;
 
 	private ServerSocketInfo svrSocketInfo;
+	//private MsgRateRecorder recorder = new MsgRateRecorder(10, "bytes/second");
 
 	public Layer1ServerListener(
 			Layer2Http1_1Handler http1_1Listener, 
@@ -32,6 +33,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 
 	@Override
 	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		//recorder.increment(b.remaining());
 		FrontendSocketImpl socket = getSocket(channel);
 		switch (socket.getProtocol()) {
 		case HTTP2:
@@ -47,6 +49,7 @@ public class Layer1ServerListener implements AsyncDataListener {
 	}
 
 	private void initialData(ByteBuffer b, FrontendSocketImpl socket) {
+		
 		InitiationResult initialData;
 		try {
 			initialData = http1_1Handler.initialData(socket, b);

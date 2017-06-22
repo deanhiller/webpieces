@@ -61,16 +61,16 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 	/* (non-Javadoc)
 	 * @see api.biz.xsoftware.nio.TCPServerChannel#accept()
 	 */
-	public void accept(int newSocketNum) throws IOException {
+	public boolean accept(int newSocketNum) throws IOException {
 		CompletableFuture<Void> future;
 		try {
 			//special code...see information in close() method
 			if(isClosed())
-				return;
+				return false;
 			
 			JdkSocketChannel newChan = channel.accept();
 			if(newChan == null)
-				return;
+				return false;
 			newChan.configureBlocking(false);
             
             SocketAddress remoteAddress = newChan.getRemoteAddress();
@@ -90,6 +90,7 @@ class BasTCPServerChannel extends RegisterableChannelImpl implements TCPServerCh
 			connectionListener.failed(this, t);
 			return null;
 		});
+		return true;
 	}
 	
 	public void registerForReads(DataListener listener) throws IOException, InterruptedException {

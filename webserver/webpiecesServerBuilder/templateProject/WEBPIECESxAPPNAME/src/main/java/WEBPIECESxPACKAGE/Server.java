@@ -227,7 +227,7 @@ public class Server {
 	}
 	
 	public void start() {
-		webServer.start2();
+		webServer.startSync();
 	}
 
 	public void stop() {

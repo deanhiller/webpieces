@@ -1,11 +1,14 @@
 package org.webpieces.throughput;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.webpieces.frontend2.api.Protocol;
 import org.webpieces.nio.api.BackpressureConfig;
 
 public class SingleSocketThroughput {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
 		//All of these are variables that can impact performance so we surface them here to play with
 		BackpressureConfig backpressureConfig = new BackpressureConfig();
 		//num unacked bytes (client did not ack yet) before we backpressure
@@ -15,13 +18,14 @@ public class SingleSocketThroughput {
 		backpressureConfig.setStartReadingThreshold(8_192*2); 
 
 		AsyncConfig config = new AsyncConfig();
-		config.setClientThreadCount(null); //turns off mulithreaded but useless for this test!!! since there is only one socket
-		config.setServerThreadCount(null); //turns off mulithreaded but useless for this test!!! since there is only one socket
+		config.setClientThreadCount(20); //turns off mulithreaded but useless for this test!!! since there is only one socket
+		config.setServerThreadCount(20); //turns off mulithreaded but useless for this test!!! since there is only one socket
 		config.setHttps(false);
 		config.setBackPressureConfig(backpressureConfig);
 		
 		//this setting only applies to http2 server/client pair...
 		config.setHttp2ClientMaxConcurrentRequests(200);
+		config.setNumSockets(100);
 		
 		ThroughputEngine example = new ThroughputEngine(config);
 		

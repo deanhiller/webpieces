@@ -27,7 +27,7 @@ public class BytesRecorder {
 		long roundBytesPerMs = bytesThisRound / roundTime;
 		double megaRoundPerMs = ((double)roundBytesPerMs) / 1_000_000;
 		double megaRoundPerSec = megaRoundPerMs * 1000;
-		log.info("this round="+megaRoundPerSec+"MBytes/Sec.  bytes=" +bytesThisRound+" totalBytes="+bytesTxfrd);
+		log.info("this round="+megaRoundPerSec+"MBytes/Sec.  bytesThisRound=" +bytesThisRound+" totalBytes="+bytesTxfrd+" time="+roundTime);
 	}
 	
 	private synchronized long getBytes() {

@@ -48,6 +48,8 @@ public class JdkServerSocketChannelImpl implements JdkServerSocketChannel {
 
 	public JdkSocketChannel accept() throws IOException {
 		SocketChannel s = channel.accept();
+		if(s == null)
+			return null;
 		return new JdkSocketChannelImpl(s, selector);
 	}
 

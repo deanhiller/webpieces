@@ -2,7 +2,7 @@ package org.webpieces.throughput.client;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.util.time.MsgRateRecorder;
+import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.hpack.api.dto.Http2Response;
 import com.webpieces.http2engine.api.PushStreamHandle;
@@ -12,7 +12,7 @@ import com.webpieces.http2parser.api.dto.CancelReason;
 
 public class ResponseCounterListener implements ResponseHandler {
 
-	private MsgRateRecorder recorder = new MsgRateRecorder(10);
+	private RateRecorder recorder = new RateRecorder(10);
 
 	@Override
 	public CompletableFuture<StreamWriter> process(Http2Response response) {

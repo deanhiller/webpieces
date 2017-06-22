@@ -10,6 +10,7 @@ import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.time.RateRecorder;
 
 public class ProxyDataListener implements DataListener {
 
@@ -68,6 +69,7 @@ public class ProxyDataListener implements DataListener {
 	}
 
 	public void connectionOpened(Channel channel, boolean isReadyForWrites) {
+		log.info("connection opened");
 		TCPChannel proxy = lookupExistingOrCreateNew(channel);
 		dataListener.connectionOpened(proxy, isReadyForWrites);
 	}

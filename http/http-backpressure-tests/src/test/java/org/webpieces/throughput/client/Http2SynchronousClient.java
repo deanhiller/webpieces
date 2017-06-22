@@ -15,7 +15,7 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.throughput.RequestCreator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.util.time.MsgRateRecorder;
+import org.webpieces.util.time.RateRecorder;
 
 import com.webpieces.hpack.api.HpackConfig;
 import com.webpieces.hpack.api.HpackParserFactory;
@@ -59,7 +59,7 @@ public class Http2SynchronousClient implements SynchronousClient {
         
         InputStream input = socket.getInputStream();
         
-        MsgRateRecorder recorder = new MsgRateRecorder(10);
+        RateRecorder recorder = new RateRecorder(10);
 
         while(true) {
             byte[] bytes = new byte[1024];

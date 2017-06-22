@@ -2,6 +2,9 @@ package org.webpieces.throughput;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.webpieces.frontend2.api.Protocol;
 import org.webpieces.http2client.api.Http2Client;
@@ -22,7 +25,7 @@ public class ThroughputEngine {
 		this.config = config;
 	}
 
-	protected void start(Mode clientConfig, Mode svrConfig, Protocol protocol) throws InterruptedException {
+	protected void start(Mode clientConfig, Mode svrConfig, Protocol protocol) throws InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<InetSocketAddress> future;
 		if(svrConfig == Mode.ASYNCHRONOUS) {
 			//The asynchronous server supports BOTH protocols and automatically ends up doing
@@ -37,7 +40,9 @@ public class ThroughputEngine {
 			future = svr.start();
 		}
 		
-		future.thenApply(addr -> runClient(addr, config, clientConfig, protocol));
+		InetSocketAddress addr = future.get(2, TimeUnit.SECONDS);
+		
+		runClient(addr, config, clientConfig, protocol);
 
 		synchronized(this) {
 			this.wait(); //wait forever
@@ -75,7 +80,7 @@ public class ThroughputEngine {
 
 	private void runAsyncClient(InetSocketAddress svrAddress, Protocol protocol, Clients creator) {
 		Http2Client client = creator.createClient();
-		ClientAsync async = new ClientAsync(client, protocol);
+		ClientAsync async = new ClientAsync(client, config, protocol);
 		async.runAsyncClient(svrAddress);
 	}
 }

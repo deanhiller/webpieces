@@ -93,7 +93,7 @@ public class WebserverForTest {
 	}
 	
 	public void start() {
-		webServer.start2();
+		webServer.startSync();
 	}
 
 	public void stop() {

@@ -50,9 +50,12 @@ public class WebServerImpl implements WebServer {
 	private HttpServer httpsServer;
 
 	@Override
-	public void start2() {
+	public void startSync() {
 		CompletableFuture<Void> future = startAsync();
 		try {
+			//If your server starts taking more than 2 seconds to start, your feature tests run the risk of being too
+			//long.  Go back and make sure you only load what you need for the tests and keep this under 2 seconds and make
+			//production use the async method!
 			future.get(2, TimeUnit.SECONDS);
 		} catch (Exception e) {
 			throw new RuntimeException("exception", e);
