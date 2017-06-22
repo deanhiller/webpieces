@@ -18,14 +18,14 @@ public class SingleSocketThroughput {
 		backpressureConfig.setStartReadingThreshold(8_192*2); 
 
 		AsyncConfig config = new AsyncConfig();
-		config.setClientThreadCount(20); //turns off mulithreaded but useless for this test!!! since there is only one socket
-		config.setServerThreadCount(20); //turns off mulithreaded but useless for this test!!! since there is only one socket
+		config.setClientThreadCount(null); //turns off mulithreaded but useless for this test!!! since there is only one socket
+		config.setServerThreadCount(null); //turns off mulithreaded but useless for this test!!! since there is only one socket
 		config.setHttps(false);
 		config.setBackPressureConfig(backpressureConfig);
 		
 		//this setting only applies to http2 server/client pair...
 		config.setHttp2ClientMaxConcurrentRequests(200);
-		config.setNumSockets(100);
+		config.setNumSockets(1);
 		
 		ThroughputEngine example = new ThroughputEngine(config);
 		
