@@ -4,12 +4,12 @@ import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 
-public class HttpDummyRequest {
+public class Http11FullRequest {
 
 	private HttpRequest request;
 	private HttpData data;
 
-	public HttpDummyRequest(HttpRequest request, HttpData data) {
+	public Http11FullRequest(HttpRequest request, HttpData data) {
 		this.request = request;
 		this.data = data;
 	}

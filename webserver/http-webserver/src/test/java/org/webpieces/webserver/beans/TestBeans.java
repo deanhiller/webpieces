@@ -30,7 +30,7 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.HttpDummyRequest;
+import org.webpieces.webserver.test.Http11FullRequest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -80,7 +80,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testPostFailDueToSecureTokenCheck() {
-		HttpDummyRequest req = Requests.createPostRequest("/postuser", 
+		Http11FullRequest req = Requests.createPostRequest("/postuser", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -96,7 +96,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testComplexBeanSaved() {
-		HttpDummyRequest req = Requests.createPostRequest("/postuser2", 
+		Http11FullRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -120,7 +120,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testNullIdFromForm() {
-		HttpDummyRequest req = Requests.createPostRequest("/postuser2",
+		Http11FullRequest req = Requests.createPostRequest("/postuser2",
 				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
 				);
 		
@@ -134,7 +134,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testInvalidComplexBean() {
-		HttpDummyRequest req = Requests.createPostRequest("/postuser2", 
+		Http11FullRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -176,7 +176,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testIncomingDataAndDataSeperate() {
-		HttpDummyRequest req = Requests.createPostRequest("/postArray2",
+		Http11FullRequest req = Requests.createPostRequest("/postArray2",
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",
@@ -210,7 +210,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	}
 	@Test
 	public void testArraySaved() {
-		HttpDummyRequest req = Requests.createPostRequest("/postArray2", 
+		Http11FullRequest req = Requests.createPostRequest("/postArray2", 
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",
@@ -248,7 +248,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testDeveloperMistypesBeanNameVsFormNames() {
-		HttpDummyRequest req = Requests.createPostRequest("/postuser", 
+		Http11FullRequest req = Requests.createPostRequest("/postuser", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.fullName", "Dean Hiller",
@@ -263,7 +263,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testDeveloperMistypesBeanNameVsFormNamesButNullableIsUsed() {
-		HttpDummyRequest req = Requests.createPostRequest("/postusernullable", 
+		Http11FullRequest req = Requests.createPostRequest("/postusernullable", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.fullName", "Dean Hiller",

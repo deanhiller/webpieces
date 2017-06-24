@@ -15,7 +15,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.HttpDummyRequest;
+import org.webpieces.webserver.test.Http11FullRequest;
 
 public class TestJson extends AbstractWebpiecesTest {
 	
@@ -31,7 +31,7 @@ public class TestJson extends AbstractWebpiecesTest {
 
 	@Test
 	public void testAsyncJsonGet() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/async/45");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/async/45");
 		
 		http11Socket.send(req);
 		
@@ -43,7 +43,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testAsyncBadJsonGet() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/async/45");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/async/45");
 		
 		http11Socket.send(req);
 		
@@ -55,7 +55,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testAsyncJsonPost() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/async/45");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/async/45");
 		
 		http11Socket.send(req);
 		
@@ -67,7 +67,7 @@ public class TestJson extends AbstractWebpiecesTest {
 
 	@Test
 	public void testAsyncWriteOnlyPost() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/writeasync");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/writeasync");
 		
 		http11Socket.send(req);
 		
@@ -78,7 +78,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testAsyncBadJsonPost() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/async/45");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/async/45");
 		
 		http11Socket.send(req);
 		
@@ -90,7 +90,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSyncJsonGet() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
 		
 		http11Socket.send(req);
 		
@@ -103,7 +103,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	//had a bug on this one so add a test
 	@Test
 	public void testSimulateCurl() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/45");
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
 		http11Socket.send(req);
 		
@@ -115,7 +115,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSyncBadJsonGet() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/45");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.GET, "/json/45");
 		
 		http11Socket.send(req);
 		
@@ -127,7 +127,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSyncJsonPost() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/45");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/45");
 		
 		http11Socket.send(req);
 		
@@ -139,7 +139,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSyncWriteOnlyPost() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/write");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.POST, "/json/write");
 		
 		http11Socket.send(req);
 		
@@ -150,7 +150,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSyncBadJsonPost() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/45");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/45");
 		
 		http11Socket.send(req);
 		
@@ -162,7 +162,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundInJsonUrls() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/some/notexist/route");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/some/notexist/route");
 		
 		http11Socket.send(req);
 		
@@ -174,7 +174,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundInHtmlUrls() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/html");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/html");
 		
 		http11Socket.send(req);
 		
@@ -186,7 +186,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testRouteParamConversionFail() {
-		HttpDummyRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/somenotexistroute");
+		Http11FullRequest req = Requests.createBadJsonRequest(KnownHttpMethod.POST, "/json/somenotexistroute");
 		
 		http11Socket.send(req);
 		
@@ -198,7 +198,7 @@ public class TestJson extends AbstractWebpiecesTest {
 
 	@Test
 	public void testControllerThrowsNotFound() {
-		HttpDummyRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/throw/333");
+		Http11FullRequest req = Requests.createJsonRequest(KnownHttpMethod.GET, "/json/throw/333");
 		
 		http11Socket.send(req);
 		

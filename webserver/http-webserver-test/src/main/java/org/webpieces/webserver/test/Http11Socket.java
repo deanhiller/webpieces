@@ -25,7 +25,7 @@ public class Http11Socket {
 		this.state = parser.prepareToMarshal();
 	}
 
-	public void send(HttpDummyRequest req) {
+	public void send(Http11FullRequest req) {
 		send(req.getRequest());
 		send(req.getData());
 	}
