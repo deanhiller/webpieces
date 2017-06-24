@@ -1,7 +1,6 @@
 package org.webpieces.throughput.server;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.webpieces.frontend2.api.HttpStream;
 import org.webpieces.frontend2.api.ResponseStream;
@@ -19,8 +18,6 @@ public class EchoListener implements StreamListener {
 
 	private static final Logger log = LoggerFactory.getLogger(EchoListener.class);
 	
-	private AtomicInteger counter = new AtomicInteger();
-	
 	@Override
 	public HttpStream openStream() {
 		return new EchoStream();
@@ -30,11 +27,6 @@ public class EchoListener implements StreamListener {
 		@Override
 		public CompletableFuture<StreamWriter> incomingRequest(Http2Request request, ResponseStream stream) {
 			Http2Response resp = RequestCreator.createHttp2Response(request.getStreamId());
-			
-//			int total = counter.incrementAndGet();
-//			if(total % 2000 == 0) {
-//				log.info("echoing response");
-//			}
 			
 			//automatically transfers backpressure back to the writer so if the reader of responses(the client in this case) 
 			//slows down, the writer(the client as well in this case) also is forced to slow down sending requests
