@@ -1,21 +1,23 @@
 package org.webpieces.webserver.tags;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -39,9 +41,9 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	public void testCustomTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/customtag");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using Custom Tag");
 		response.assertContains("This is a custom tag which can also use tags in itself <a href=`/verbatim`>Some Link Here</a>".replace('`', '"'));
@@ -55,9 +57,9 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	public void testRenderTagArgsTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderTagArgs");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using renderTagArgs Tag");
 		response.assertContains("The user is override"); //using variable from tag args in the called template
@@ -68,9 +70,9 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	public void testRenderPageArgsTag() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/renderPageArgs");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using renderPageArgs Tag");
 		response.assertContains("The user is Dean Hiller"); //using variable from page args in the called template

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -24,12 +26,12 @@ import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -95,56 +97,56 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	@Test
 	public void testGuiceModuleAddAndControllerChange() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		http11Socket.send(req);
-		verifyPageContents("user=Dean Hiller");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verifyPageContents(respFuture1, "user=Dean Hiller");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/guiceModule");
 		
-		http11Socket.send(req);
-		verifyPageContents("newuser=Joseph");
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		verifyPageContents(respFuture, "newuser=Joseph");
 	}
 
 	//Different than swapping out meta 
 	@Test
 	public void testJustControllerChanged() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
-		http11Socket.send(req);
-		verifyPageContents("user=Dean Hiller");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verifyPageContents(respFuture1, "user=Dean Hiller");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/controllerChange");
 		
-		http11Socket.send(req);
-		verifyPageContents("user=CoolJeff");
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		verifyPageContents(respFuture, "user=CoolJeff");
 	}
 
 	@Test
 	public void testRouteAdditionWithNewControllerPath() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/routeChange");
 		
-		http11Socket.send(req);
-		verifyPageContents("Existing Route Page");
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		verifyPageContents(respFuture, "Existing Route Page");
 	}
 	
 	@Test
 	public void testFilterChanged() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/filterChange");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-		response = ResponseExtract.assertSingleResponse(http11Socket);
+		response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/causeError", response.getRedirectUrl());
 	}
@@ -152,9 +154,9 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	@Test
 	public void testNotFoundDisplaysWithIframeANDSpecialUrl() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		//platform should convert request into a development not found page which has an iframe
@@ -166,42 +168,42 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	@Test
 	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotFound?webpiecesShowPage");
-		http11Socket.send(req);
-		verify404PageContents("value1=something1");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verify404PageContents(respFuture1, "value1=something1");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-		verify404PageContents("value1=something1");
+		verify404PageContents(respFuture, "value1=something1");
 	}
 	
 	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotfound?webpiecesShowPage=true");
-		http11Socket.send(req);
-		verify404PageContents("value1=something1");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verify404PageContents(respFuture1, "value1=something1");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
 		
-		http11Socket.send(req);
-		verify404PageContents("value2=something2");
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		verify404PageContents(respFuture, "value2=something2");
 	}
 
 	@Test
 	public void testNotFoundFilterModified() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 
-		verify303("http://myhost.com/home");
+		verify303(respFuture1, "http://myhost.com/home");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/notFound");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		verify303("http://myhost.com/filter");
+		verify303(respFuture, "http://myhost.com/filter");
 	}
 
-	private void verify303(String url) {
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+	private void verify303(CompletableFuture<HttpFullResponse> respFuture, String url) {
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(url, response.getRedirectUrl());
 	}
@@ -209,13 +211,13 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	@Test
 	public void testInternalErrorModifiedAndControllerModified() throws IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
-		http11Socket.send(req);
-		verify500PageContents("InternalError1=error1");
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
+		verify500PageContents(respFuture1, "InternalError1=error1");
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/internalError");
 		
-		http11Socket.send(req);
-		verify500PageContents("InternalError2=error2");		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		verify500PageContents(respFuture, "InternalError2=error2");		
 	}
 	
 	private void simulateDeveloperMakesChanges(String directory) throws IOException {
@@ -223,20 +225,20 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		FileUtils.copyDirectory(srcDir, existingCodeLoc, null, false);
 	}
 
-	private void verifyPageContents(String contents) {
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+	private void verifyPageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains(contents);
 	}
 	
-	private void verify404PageContents(String contents) {
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+	private void verify404PageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains(contents);
 	}
 	
-	private void verify500PageContents(String contents) {
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+	private void verify500PageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains(contents);
 	}

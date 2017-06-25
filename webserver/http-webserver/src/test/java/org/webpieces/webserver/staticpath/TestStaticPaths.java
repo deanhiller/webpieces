@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -13,16 +14,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 
 public class TestStaticPaths extends AbstractWebpiecesTest {
@@ -45,9 +47,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDir() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver.staticpath.app.StaticMeta");
 		response.assertContentType("text/plain; charset=utf-8");
@@ -57,9 +59,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirWithHashGeneration() throws FileNotFoundException, IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 
 		String hash = loadUrlEncodedHash();
 		
@@ -72,9 +74,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		String hash = loadUrlEncodedHash();		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("themes.googleusercontent.com");
 		response.assertContentType("text/css; charset=utf-8");
@@ -93,9 +95,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirWithBadHashDoesNotLoadMismatchFileIntoBrowser() throws FileNotFoundException, IOException {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
@@ -103,9 +105,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirJpg() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContentType("image/jpeg");
 		int size = response.getBody().getReadableSize();
@@ -116,9 +118,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticDirAndNotFound() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		//render html page when not found...
 		response.assertContentType("text/html; charset=utf-8");
@@ -128,9 +130,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticFile() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("app.TagsMeta");
 	}
@@ -140,9 +142,9 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	public void testStaticFileCssLarger() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/mycss");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Open Sans");
 	}

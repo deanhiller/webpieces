@@ -52,7 +52,7 @@ public class Requests {
 		return req;
 	}
 
-	public static HttpRequest createGetRequest(String domain, String url) {
+	public static HttpFullRequest createGetRequest(String domain, String url) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(KnownHttpMethod.GET);
@@ -63,7 +63,8 @@ public class Requests {
 
 		req.addHeader(new Header(KnownHeaderName.HOST, domain));
 
-		return req;
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
 	}
 
 	public static HttpFullRequest createPostRequest(String url, String ... argTuples) {

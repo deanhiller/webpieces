@@ -2,12 +2,14 @@ package org.webpieces.webserver.dev;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -17,7 +19,6 @@ import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -27,6 +28,7 @@ import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -75,9 +77,9 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 	public void testNotFoundRoute() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your app's webpage was not found");
 	}
@@ -88,9 +90,9 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		//no int doesn't really exist so it's a NotFound
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your app's webpage was not found");		
 	}
@@ -99,9 +101,9 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 	public void testWebappThrowsNotFound() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your app's webpage was not found");		
 	}
@@ -113,9 +115,9 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		mockInternalSvrErrorLib.throwNotFound();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");
 	}
@@ -129,9 +131,9 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");	
 	}
@@ -142,9 +144,9 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		mockInternalSvrErrorLib.throwRuntime();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");	
 	}

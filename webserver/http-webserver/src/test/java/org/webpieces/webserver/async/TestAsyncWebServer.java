@@ -9,17 +9,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -42,9 +43,9 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 	public void testCompletePromiseOnRequestThread() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}
@@ -56,16 +57,15 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
 		//no response yet...
-		List<FullResponse> responses1 = http11Socket.getResponses();
-		Assert.assertEquals(0, responses1.size());
+		Assert.assertFalse(respFuture.isDone());
 		
 		//now have the server complete processing
 		future.complete(5);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Hi Dean Hiller, This is a page");
 	}
@@ -74,9 +74,9 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirect() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 	}	

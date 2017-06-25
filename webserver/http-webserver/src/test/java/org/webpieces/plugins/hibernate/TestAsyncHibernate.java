@@ -1,6 +1,7 @@
 package org.webpieces.plugins.hibernate;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -12,6 +13,7 @@ import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -22,11 +24,11 @@ import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -57,15 +59,14 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 	private String saveBean(String path) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		List<FullResponse> responses1 = http11Socket.getResponses();
-		Assert.assertEquals(0, responses1.size());
+		Assert.assertFalse(respFuture.isDone());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
 		mockExecutor.clear();
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
@@ -76,14 +77,13 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 	private void readBean(String redirectUrl, String email) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		List<FullResponse> responses1 = http11Socket.getResponses();
-		Assert.assertEquals(0, responses1.size());
+		Assert.assertFalse(respFuture.isDone());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
 
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name=SomeName email="+email);
 	}
@@ -106,14 +106,13 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		List<FullResponse> responses1 = http11Socket.getResponses();
-		Assert.assertEquals(0, responses1.size());
+		Assert.assertFalse(respFuture.isDone());
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 	

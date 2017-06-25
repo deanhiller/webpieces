@@ -1,6 +1,7 @@
 package org.webpieces.webserver.basic;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -8,16 +9,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 
 public class TestSyncWebServer extends AbstractWebpiecesTest {
@@ -36,9 +38,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testBasic() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 		response.assertContentType("text/html; charset=utf-8");
@@ -50,9 +52,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testAbsoluteHtmlPath() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute2");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 		response.assertContentType("text/html; charset=utf-8");
@@ -64,9 +66,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirect() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
@@ -76,9 +78,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testJsonFile() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("red");
 		response.assertContentType("application/json");
@@ -88,9 +90,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirectRawRelativeUrl() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawurlredirect");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("http://myhost.com/myroute", response.getRedirectUrl());
@@ -100,9 +102,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testRedirectRawAbsoluteUrl() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawabsoluteurlredirect");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 		Assert.assertEquals("https://something.com/hi", response.getRedirectUrl());
@@ -112,9 +114,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testScopedRoot() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}	
@@ -123,9 +125,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void testScopedRootWithSlash() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}	

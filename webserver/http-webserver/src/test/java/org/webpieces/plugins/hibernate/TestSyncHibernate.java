@@ -1,5 +1,6 @@
 package org.webpieces.plugins.hibernate;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -15,6 +16,7 @@ import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -24,11 +26,11 @@ import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 
 
@@ -57,9 +59,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	private String saveBean(String path) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		return response.getRedirectUrl();
@@ -68,9 +70,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	private void readBean(String redirectUrl, String email) {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name=SomeName email="+email);
 	}
@@ -94,9 +96,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/dynamic/"+id);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 
@@ -151,9 +153,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 		
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/list");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<a href=`/user/new`>Add User</a>".replace("`", "\""));
 		response.assertContains("<a href=`/user/edit/1`>Edit</a>".replace("`", "\""));
@@ -163,9 +165,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	public void testRenderAddPage() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/new");
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name='' email=''");
 	}
@@ -175,9 +177,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 		int id = loadDataInDb().getId();
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/edit/"+id);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name='SomeName' email='dean2@sync.xsoftware.biz'");
 	}
@@ -190,9 +192,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 				"user.name", "blah1",
 				"user.firstName", "blah2");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = load(user.getId());
@@ -211,9 +213,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 				"user.firstName", "blah2",
 				"user.levelOfEducation", LevelEducation.COLLEGE.getDbCode()+"");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = loadByEmail(email);
@@ -230,9 +232,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 				"user.name", "blah1",
 				"user.firstName", "blah2");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		UserTestDbo user2 = loadByEmail(email);
@@ -245,9 +247,9 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 
 		mock.addException(() -> {throw new RuntimeException("for test");});
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 
 		Assert.assertEquals(2, TransactionFilter.getState());

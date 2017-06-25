@@ -11,6 +11,7 @@ import java.util.zip.GZIPInputStream;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.ContentType;
@@ -28,9 +29,14 @@ public class FullResponse {
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private HttpResponse response;
 	private List<HttpData> datas = new ArrayList<>();
+	private HttpFullResponse fullResp;
 	
 	public FullResponse(HttpResponse response) {
 		this.response = response;
+	}
+
+	public FullResponse(HttpFullResponse resp) {
+		this.fullResp = resp;
 	}
 
 	public void addChunk(HttpData httpChunk) {

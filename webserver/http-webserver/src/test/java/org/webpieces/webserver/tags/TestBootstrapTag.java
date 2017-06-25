@@ -1,20 +1,22 @@
 package org.webpieces.webserver.tags;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 
 public class TestBootstrapTag extends AbstractWebpiecesTest {
@@ -35,9 +37,9 @@ public class TestBootstrapTag extends AbstractWebpiecesTest {
 	public void testBootstrap() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/bootstrap");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("$(`#editLink_2`).click(function(e){".replaceAll("`", "\""));
 		response.assertContains("$('#addEditModal').load('/user/2', function(response, status, xhr){");

@@ -1,5 +1,6 @@
 package org.webpieces.webserver.scopes;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -7,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
@@ -15,10 +17,10 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
-import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseExtract;
 
 
 
@@ -38,9 +40,9 @@ public class TestScopes extends AbstractWebpiecesTest {
 	public void testSessionScope() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
@@ -52,9 +54,9 @@ public class TestScopes extends AbstractWebpiecesTest {
 	public void testSessionScopeModificationByClient() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("age=30");
@@ -65,12 +67,12 @@ public class TestScopes extends AbstractWebpiecesTest {
 		value = value.replace("; path=/; HttpOnly", "");
 		
 		//modify cookie and rerequest...
-		HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
+		HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/displaySession");
 		req2.addHeader(new Header(KnownHeaderName.COOKIE, value));
 		
-		http11Socket.send(req2);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req2);
 		
-        response = ResponseExtract.assertSingleResponse(http11Socket);
+        response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		Header cookie2 = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
@@ -84,9 +86,9 @@ public class TestScopes extends AbstractWebpiecesTest {
 	@Test
     public void testFlashMessage() {
         HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        http11Socket.send(req);
+        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
@@ -96,18 +98,18 @@ public class TestScopes extends AbstractWebpiecesTest {
 	@Test
     public void testGetStaticFileDoesNotClearFlashMessage() {
         HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
-        http11Socket.send(req);
+        CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         
 		Header header = response.createCookieRequestHeader();
-        HttpRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css");
+        HttpFullRequest req2 = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css");
         req2.addHeader(header);
-        http11Socket.send(req2);
+        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req2);
         
-        FullResponse response2 = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response2 = ResponseExtract.waitResponseAndWrap(respFuture);
         response2.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         Header cookie = response2.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
         Assert.assertNull("static routes should not be clearing cookies or things go south", cookie);
@@ -136,9 +138,9 @@ public class TestScopes extends AbstractWebpiecesTest {
 				"user.address.street", "Coolness Dr.");		
 		req.addHeader(header);
 
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/user/list", response.getRedirectUrl());
@@ -152,9 +154,9 @@ public class TestScopes extends AbstractWebpiecesTest {
 				"user.address.zipCode", "555",
 				"user.address.street", "Coolness Dr.");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		return response;
 	}
@@ -165,9 +167,9 @@ public class TestScopes extends AbstractWebpiecesTest {
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
-        http11Socket.send(req);
+        CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
+        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("First name must be more than 2 characters");

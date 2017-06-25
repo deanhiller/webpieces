@@ -1,7 +1,8 @@
 package WEBPIECESxPACKAGE;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +10,9 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -22,7 +26,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -46,11 +50,11 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 	
 	@Before
-	public void setUp() throws InterruptedException, ClassNotFoundException {
+	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		log.info("Setting up test");
 		Asserts.assertWasCompiledWithParamNames("test");
 		
@@ -62,7 +66,7 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(platformOverrides, new AppOverridesModule(), new ServerConfig(pUnit));
 		webserver.start();
-		http11Socket = AbstractWebpiecesTest.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	/**
@@ -70,15 +74,12 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testSynchronousController() {
-		HttpRequest req = createRequest("/");
+		HttpFullRequest req = createRequest("/");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		List<FullResponse> responses = http11Socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 	}
 	
 	/**
@@ -94,24 +95,20 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 	public void testAsyncControllerAndRemoteSystem() {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockRemote.addValueToReturn(future);
-		HttpRequest req = createRequest("/async");
+		HttpFullRequest req = createRequest("/async");
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		List<FullResponse> responses = http11Socket.getResponses();
-		Assert.assertEquals(0, responses.size());
+		Assert.assertFalse(respFuture.isDone());
 
 		//notice that the thread returned but there is no response back to browser yet such that thread can do more work.
 		//next, simulate remote system returning a value..
 		int value = 85;
 		future.complete(value);
 
-		List<FullResponse> responses2 = http11Socket.getResponses();
-		Assert.assertEquals(1, responses2.size());
-		
-		FullResponse httpPayload = responses2.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		httpPayload.assertContains("This is a page with value="+value);
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("This is a page with value="+value);
 	}
 
 	/**
@@ -119,27 +116,26 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testChunkedCompression() {
-		HttpRequest req = createRequest("/");
+		HttpFullRequest req = createRequest("/");
 		req.addHeader(new Header(KnownHeaderName.ACCEPT_ENCODING, "gzip, deflate"));
 		
-		http11Socket.send(req);
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		List<FullResponse> responses = http11Socket.getResponses();
-		Assert.assertEquals(1, responses.size());
-
-		FullResponse httpPayload = responses.get(0);
-		httpPayload.assertStatusCode(KnownStatusCode.HTTP_200_OK);
-		httpPayload.uncompressBodyAndAssertContainsString("Webpieces");
+		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.uncompressBodyAndAssertContainsString("Webpieces");
 	}
 	
-	static HttpRequest createRequest(String uri) {
+	static HttpFullRequest createRequest(String uri) {
 		HttpRequestLine requestLine = new HttpRequestLine();
         requestLine.setMethod(KnownHttpMethod.GET);
 		requestLine.setUri(new HttpUri(uri));
 		HttpRequest req = new HttpRequest();
 		req.setRequestLine(requestLine );
 		req.addHeader(new Header(KnownHeaderName.HOST, "yourdomain.com"));
-		return req;
+		
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
 	}
 	
 	private class AppOverridesModule implements Module {
