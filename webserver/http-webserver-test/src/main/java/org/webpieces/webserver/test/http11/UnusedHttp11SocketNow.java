@@ -13,7 +13,6 @@ import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpResponseListener;
-import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.Memento;
@@ -31,7 +30,7 @@ import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.IncomingDataListener;
 import org.webpieces.webserver.test.MockTcpChannel;
 
-public class UnusedHttp11SocketNow implements HttpSocket {
+public class UnusedHttp11SocketNow {
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private static final Logger log = LoggerFactory.getLogger(UnusedHttp11SocketNow.class);
 
@@ -53,7 +52,6 @@ public class UnusedHttp11SocketNow implements HttpSocket {
 		memento = parser.prepareToParse();
 	}
 	
-	@Override
 	public CompletableFuture<Void> connect(InetSocketAddress addr) {
 		CompletableFuture<DataListener> connected = connListener.connected(channel, true);
 		return connected.thenApply(d -> {
@@ -62,7 +60,6 @@ public class UnusedHttp11SocketNow implements HttpSocket {
 		});
 	}
 
-	@Override
 	public CompletableFuture<HttpFullResponse> send(HttpFullRequest request) {
 		
 		throw new UnsupportedOperationException("not yet");
@@ -71,7 +68,6 @@ public class UnusedHttp11SocketNow implements HttpSocket {
 //		return null;
 	}
 
-	@Override
 	public CompletableFuture<HttpDataWriter> send(HttpRequest request, HttpResponseListener l) {
 		ByteBuffer buf = parser.marshalToByteBuffer(state, request);
 		return dataListener.incomingData(channel, buf).thenApply(v -> new MyHttpDataWriter());
@@ -85,7 +81,6 @@ public class UnusedHttp11SocketNow implements HttpSocket {
 		}
 	}
 	
-	@Override
 	public CompletableFuture<Void> close() {
 		dataListener.farEndClosed(channel);
 		return CompletableFuture.completedFuture(null);

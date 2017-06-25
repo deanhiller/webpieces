@@ -11,9 +11,10 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.mock.lib.MockExecutor;
@@ -26,7 +27,6 @@ import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -35,7 +35,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 
 	
 	private MockExecutor mockExecutor = new MockExecutor();
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
@@ -51,11 +51,11 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	private String saveBean(String path) {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.POST, path);
 		
 		http11Socket.send(req);
 		
@@ -74,7 +74,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 	}
 	
 	private void readBean(String redirectUrl, String email) {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, redirectUrl);
 
 		http11Socket.send(req);
 		
@@ -104,7 +104,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		Integer id = TestSyncHibernate.loadDataInDb().getId();
 		TestSyncHibernate.verifyLazyLoad(id);
 		
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/async/dynamic/"+id);
 
 		http11Socket.send(req);
 		

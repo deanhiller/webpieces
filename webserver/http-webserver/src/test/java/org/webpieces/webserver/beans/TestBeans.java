@@ -14,10 +14,10 @@ import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.MarshalState;
-import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.mock.lib.MockExecutor;
@@ -32,7 +32,6 @@ import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -43,19 +42,19 @@ public class TestBeans extends AbstractWebpiecesTest {
 	private MockSomeLib mockSomeLib = new MockSomeLib();
 	private MockSomeOtherLib mockSomeOtherLib = new MockSomeOtherLib();
 	private MockExecutor mockExecutor = new MockExecutor();
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
     public void testPageParam() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 		
 		http11Socket.send(req);
 		
@@ -67,7 +66,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
     @Test
     public void testPageParamAsync() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam_async");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam_async");
 		
 		http11Socket.send(req);
 		
@@ -160,7 +159,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testArrayForm() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/arrayForm");
 		
 		http11Socket.send(req);
 		
@@ -280,7 +279,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testQueryParamsToUserBean() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser");
 		
 		http11Socket.send(req);
 		
@@ -290,7 +289,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testBeanMissingForGetSoNotFoundResults() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser?user.firstName=jeff&password=as");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/getuser?user.firstName=jeff&password=as");
 		
 		http11Socket.send(req);
 		

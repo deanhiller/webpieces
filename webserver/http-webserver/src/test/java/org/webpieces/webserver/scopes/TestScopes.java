@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -18,24 +19,24 @@ import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+
 
 
 public class TestScopes extends AbstractWebpiecesTest {
 
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
 	public void testSessionScope() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
 		http11Socket.send(req);
 		
@@ -49,7 +50,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 
 	@Test
 	public void testSessionScopeModificationByClient() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		
 		http11Socket.send(req);
 		
@@ -82,7 +83,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 
 	@Test
     public void testFlashMessage() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         http11Socket.send(req);
 
         FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
@@ -94,7 +95,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 
 	@Test
     public void testGetStaticFileDoesNotClearFlashMessage() {
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/flashmessage");
         http11Socket.send(req);
 
         FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
@@ -160,7 +161,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 	
 	private FullResponse runGetUserFormWithErrors(FullResponse response1) {
 		Assert.assertEquals("http://myhost.com/user/new", response1.getRedirectUrl());
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/new");
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/user/new");
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         

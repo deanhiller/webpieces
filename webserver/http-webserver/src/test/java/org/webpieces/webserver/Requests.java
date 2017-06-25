@@ -21,11 +21,21 @@ public class Requests {
 
 	private static DataWrapperGenerator gen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 
-	public static HttpRequest createRequest(KnownHttpMethod method, String url) {
+	public static HttpFullRequest createRequest(KnownHttpMethod method, String url) {
 		return createRequest(method, url, null);
 	}
 	
-	public static HttpRequest createRequest(KnownHttpMethod method, String url, Integer port) {
+	public static HttpRequest createBaseRequest(KnownHttpMethod method, String url) {
+		return createBaseRequest(method, url, null);
+	}
+
+	public static HttpFullRequest createRequest(KnownHttpMethod method, String url, Integer port) {
+		HttpRequest req = createBaseRequest(method, url, port);
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
+	}
+	
+	public static HttpRequest createBaseRequest(KnownHttpMethod method, String url, Integer port) {
 		HttpUri httpUri = new HttpUri(url);
 		HttpRequestLine requestLine = new HttpRequestLine();
 		requestLine.setMethod(method);
@@ -97,7 +107,7 @@ public class Requests {
 	}
 
 	public static HttpFullRequest createJsonRequest(KnownHttpMethod method, String url) {
-		HttpRequest request = createRequest(method, url);
+		HttpRequest request = createBaseRequest(method, url);
 		String json = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
 		HttpData data = new HttpData(body, true);
@@ -108,7 +118,7 @@ public class Requests {
 	}
 
 	public static HttpFullRequest createBadJsonRequest(KnownHttpMethod method, String url) {
-		HttpRequest request = createRequest(method, url);
+		HttpRequest request = createBaseRequest(method, url);
 		String json = "{ `query `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
 		HttpData data = new HttpData(body, true);

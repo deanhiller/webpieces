@@ -62,7 +62,7 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(platformOverrides, new AppOverridesModule(), new ServerConfig(pUnit));
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = AbstractWebpiecesTest.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	/**

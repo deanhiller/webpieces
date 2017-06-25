@@ -5,6 +5,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -16,25 +18,25 @@ import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+
 
 public class TestHttps extends AbstractWebpiecesTest {
 	
-	private Http11Socket httpSocket;
-	private Http11Socket httpsSocket;
+	private HttpSocket httpSocket;
+	private HttpSocket httpsSocket;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("httpsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		httpSocket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
-		httpsSocket = http11Simulator.createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());		
+		httpSocket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		httpsSocket = createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());		
 	}
 
 	@Test
 	public void testSecureLoginHasHttpsPage() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal"); 
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal"); 
 		
 		httpsSocket.send(req);
 		
@@ -45,7 +47,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testBasicPageOverHttps() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
 		httpsSocket.send(req);
 		
@@ -56,7 +58,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testAccessHttpsPageOverHttp() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secureRoute");
 		
 		httpSocket.send(req);
 		
@@ -67,7 +69,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSameRouteHttpAndHttpsWrongOrder() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same"); 
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same"); 
 		
 		httpsSocket.send(req);
 		
@@ -84,7 +86,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 
 	@Test
 	public void testSameRouteHttpAndHttpsCorrectOrder() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same2");
 		
 		httpsSocket.send(req);
 		
@@ -101,7 +103,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testUseHttpButGoThroughLoginFilter() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/randomPage");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/randomPage");
 		
 		httpSocket.send(req);
 		
@@ -112,7 +114,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testSecureLoginNotFoundHttpsPage() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/notFoundPage");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/notFoundPage");
 		
 		httpsSocket.send(req);
 		
@@ -125,7 +127,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	public void testSecureAndLoggedInAlready() {
 		Header cookie = simulateLogin();
 		
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal"); 
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/secure/internal"); 
 		req.addHeader(cookie);
 		
 		httpsSocket.send(req);
@@ -138,7 +140,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 
 	@Test
 	public void testReverseUrlLookupOnHttpPageForHttpsUrl() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same");
 		
 		httpSocket.send(req);
 		
@@ -149,7 +151,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 
 	@Test
 	public void testReverseUrlLookupOnHttpPageForHttpsUrl8443() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", 8080);
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/same", 8080);
 		
 		httpSocket.send(req);
 		

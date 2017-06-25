@@ -5,7 +5,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.Requests;
@@ -18,7 +19,6 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -34,7 +34,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -45,12 +45,12 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, null);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test
 	public void testNotFoundRoute() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -63,7 +63,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testNotFoundFromMismatchArgType() {	
 		//because 'notAnInt' is not convertable to integer, this result in NotFound rather than 500 as truly a route with
 		//no int doesn't really exist so it's a NotFound
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/redirectint/notAnInt");
 		
 		http11Socket.send(req);
 		
@@ -74,7 +74,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testWebappThrowsNotFound() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
 		http11Socket.send(req);
 
@@ -86,7 +86,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	@Test
 	public void testNotFoundHandlerThrowsNotFound() {
 		mockNotFoundLib.throwNotFound();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -98,7 +98,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	@Test
 	public void testNotFoundThrowsException() {
 		mockNotFoundLib.throwRuntime();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -111,7 +111,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testNotFoundThrowsThenInternalSvrErrorHandlerThrows() {
 		mockNotFoundLib.throwRuntime();
 		mockInternalSvrErrorLib.throwRuntime();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -125,7 +125,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testInternalSvrErrorRouteThrowsNotFound() {
 		mockNotFoundLib.throwRuntime();
 		mockInternalSvrErrorLib.throwNotFound();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -141,7 +141,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	@Test
 	public void testWebAppHasBugRenders500Route() {
 		mockNotFoundLib.throwRuntime();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
 		http11Socket.send(req);
 		
@@ -154,7 +154,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	public void testWebAppHasBugAndRender500HasBug() {
 		mockNotFoundLib.throwRuntime();
 		mockInternalSvrErrorLib.throwRuntime();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
 		http11Socket.send(req);
 		
@@ -167,7 +167,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	//this by putting some if(responseSent) throw in the wrong place
 	@Test
 	public void testTemplateHasBug() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/badtemplate");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/badtemplate");
 		
 		http11Socket.send(req);
 		
@@ -180,7 +180,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	@Test
 	public void testReturnNull() {
 		mockNotFoundLib.throwRuntime();
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/null");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/null");
 		
 		http11Socket.send(req);
 		

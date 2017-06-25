@@ -15,8 +15,8 @@ import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.hibernate.app.HibernateAppMeta;
@@ -32,7 +32,7 @@ import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+
 
 
 public class TestFlashAndSelect extends AbstractWebpiecesTest {
@@ -40,7 +40,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	private ServiceToFailMock mock = new ServiceToFailMock();
 	private UserTestDbo user;
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
@@ -56,13 +56,13 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		config.setAppOverrides(new TestModule(mock));
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
 	public void testAssertBeanNoNullsOnLastNameAndEnum() {
 		String urlPath = "/user/edit/"+user.getId();
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         
         http11Socket.send(req);
 
@@ -93,7 +93,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		
 		String urlPath = "/user/edit/"+user.getId();
 		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
@@ -111,7 +111,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	@Test
 	public void testRenderGetMultiselect() {
 		String urlPath = "/multiselect/"+user.getId();
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         
         http11Socket.send(req);
 
@@ -144,7 +144,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		
 		String urlPath = "/multiselect/"+user.getId();
 		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         
@@ -177,7 +177,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		
 		String urlPath = "/multiselect/"+user.getId();
 		Assert.assertEquals("http://myhost.com"+urlPath, response1.getRedirectUrl());
-        HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
+        HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, urlPath);
         Header cookieHeader = response1.createCookieRequestHeader();
         req.addHeader(cookieHeader);
         

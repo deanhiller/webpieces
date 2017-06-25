@@ -5,6 +5,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -13,18 +14,18 @@ import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+
 
 public class TestDomainMatching extends AbstractWebpiecesTest {
 
-	private Http11Socket httpsSocket;
+	private HttpSocket httpsSocket;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		httpsSocket = http11Simulator.createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());
+		httpsSocket = createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());
 	}
 
 	@Test

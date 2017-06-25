@@ -7,9 +7,10 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.Requests;
@@ -17,23 +18,23 @@ import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+
 
 public class TestSyncWebServer extends AbstractWebpiecesTest {
 
 	
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, null);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}
 	
 	@Test
 	public void testBasic() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
 		http11Socket.send(req);
 		
@@ -47,7 +48,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 
 	@Test
 	public void testAbsoluteHtmlPath() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute2");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute2");
 		
 		http11Socket.send(req);
 		
@@ -61,7 +62,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testRedirect() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
 		http11Socket.send(req);
 		
@@ -73,7 +74,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 
 	@Test
 	public void testJsonFile() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/somejson");
 		
 		http11Socket.send(req);
 		
@@ -85,7 +86,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testRedirectRawRelativeUrl() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawurlredirect");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawurlredirect");
 		
 		http11Socket.send(req);
 		
@@ -97,7 +98,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testRedirectRawAbsoluteUrl() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawabsoluteurlredirect");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/rawabsoluteurlredirect");
 		
 		http11Socket.send(req);
 		
@@ -109,7 +110,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testScopedRoot() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped");
 		
 		http11Socket.send(req);
 		
@@ -120,7 +121,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testScopedRootWithSlash() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/scoped/");
 		
 		http11Socket.send(req);
 		

@@ -12,7 +12,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -22,14 +23,14 @@ import org.webpieces.webserver.ResponseExtract;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
+
 
 public class TestStaticPaths extends AbstractWebpiecesTest {
 
 	
 	
 	private File cacheDir;
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
@@ -37,12 +38,12 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		cacheDir = webserver.getCacheDir();
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
 	public void testStaticDir() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/staticMeta.txt");
 
 		http11Socket.send(req);
 		
@@ -54,7 +55,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 
 	@Test
 	public void testStaticDirWithHashGeneration() throws FileNotFoundException, IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/pageparam");
 
 		http11Socket.send(req);
 		
@@ -69,7 +70,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	@Test
 	public void testStaticDirWithHashLoad() throws FileNotFoundException, IOException {
 		String hash = loadUrlEncodedHash();		
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash="+hash);
 
 		http11Socket.send(req);
 		
@@ -90,7 +91,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testStaticDirWithBadHashDoesNotLoadMismatchFileIntoBrowser() throws FileNotFoundException, IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/fonts.css?hash=BADHASH");
 
 		http11Socket.send(req);
 		
@@ -100,7 +101,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testStaticDirJpg() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/image.jpg");
 		
 		http11Socket.send(req);
 		
@@ -113,7 +114,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testStaticDirAndNotFound() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/pics.ext/notFound.jpg");
 		
 		http11Socket.send(req);
 		
@@ -125,7 +126,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testStaticFile() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/myfile");
 		
 		http11Socket.send(req);
 		
@@ -137,7 +138,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 	//a general test for testing if chunking is working or broken in relation to static files
 	@Test
 	public void testStaticFileCssLarger() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/mycss");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/public/mycss");
 		
 		http11Socket.send(req);
 		

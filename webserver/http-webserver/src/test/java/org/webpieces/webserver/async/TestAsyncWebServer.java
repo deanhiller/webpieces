@@ -8,7 +8,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
@@ -19,7 +20,6 @@ import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -28,19 +28,19 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 
 	
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}
 	
 	@Test
 	public void testCompletePromiseOnRequestThread() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/myroute");
 		
 		http11Socket.send(req);
 		
@@ -54,7 +54,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future );
 		
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncSuccessRoute");
 
 		http11Socket.send(req);
 
@@ -72,7 +72,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testRedirect() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
 		http11Socket.send(req);
 		

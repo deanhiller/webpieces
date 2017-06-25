@@ -8,7 +8,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.exceptions.NotFoundException;
@@ -23,7 +24,6 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -39,7 +39,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	
 	private MockSomeOtherLib mockNotFoundLib = new MockSomeOtherLib();
 	private MockSomeLib mockInternalSvrErrorLib = new MockSomeLib();
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 
 	@Before
 	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
@@ -48,7 +48,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test
@@ -56,7 +56,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		//NOTE: This is adding future to the notFound route 
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -77,7 +77,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.queueFuture(future);
 		CompletableFuture<Integer> future2 = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future2);
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/throwNotFound");
 		
 		http11Socket.send(req);
 
@@ -100,7 +100,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	public void testNotFoundHandlerThrowsNotFound() {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 
@@ -118,7 +118,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	public void testNotFoundThrowsException() {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 		
@@ -139,7 +139,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		CompletableFuture<Integer> future2 = new CompletableFuture<Integer>();
 		mockInternalSvrErrorLib.queueFuture(future2);
 
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/route/that/does/not/exist");
 		
 		http11Socket.send(req);
 
@@ -166,7 +166,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	public void testWebAppHasBugRenders500Route() {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future);
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
 		http11Socket.send(req);
 
@@ -186,7 +186,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		mockNotFoundLib.queueFuture(future);
 		CompletableFuture<Integer> future2 = new CompletableFuture<Integer>();
 		mockInternalSvrErrorLib.queueFuture(future2);
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/");
 		
 		http11Socket.send(req);
 		
@@ -210,7 +210,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockNotFoundLib.queueFuture(future );
 		
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/asyncFailRoute");
 		
 		http11Socket.send(req);
 

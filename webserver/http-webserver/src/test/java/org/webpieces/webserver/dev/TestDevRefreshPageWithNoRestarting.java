@@ -14,7 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.devrouter.api.DevRouterModule;
-import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
@@ -28,7 +29,6 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.Http11Socket;
 import org.webpieces.webserver.test.PlatformOverridesForTest;
 
 import com.google.inject.Module;
@@ -43,7 +43,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	private File existingCodeLoc;
 	private String userDir;
 
-	private Http11Socket http11Socket;
+	private HttpSocket http11Socket;
 	
 	@Before
 	public void setUp() throws ClassNotFoundException, IOException, InterruptedException, ExecutionException, TimeoutException {
@@ -82,7 +82,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@After
@@ -94,7 +94,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testGuiceModuleAddAndControllerChange() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		http11Socket.send(req);
 		verifyPageContents("user=Dean Hiller");
 		
@@ -107,7 +107,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	//Different than swapping out meta 
 	@Test
 	public void testJustControllerChanged() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/home");
 		http11Socket.send(req);
 		verifyPageContents("user=Dean Hiller");
 		
@@ -119,7 +119,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 
 	@Test
 	public void testRouteAdditionWithNewControllerPath() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
 		http11Socket.send(req);
 		
 		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
@@ -133,7 +133,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testFilterChanged() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
 		http11Socket.send(req);
 		
 		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
@@ -151,7 +151,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 
 	@Test
 	public void testNotFoundDisplaysWithIframeANDSpecialUrl() {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
 		http11Socket.send(req);
 		
 		FullResponse response = ResponseExtract.assertSingleResponse(http11Socket);
@@ -165,7 +165,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundFilterNotChangedAndTwoRequests() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotFound?webpiecesShowPage");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotFound?webpiecesShowPage");
 		http11Socket.send(req);
 		verify404PageContents("value1=something1");
 
@@ -176,7 +176,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNotFoundRouteModifiedAndControllerModified() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotfound?webpiecesShowPage=true");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/anyNotfound?webpiecesShowPage=true");
 		http11Socket.send(req);
 		verify404PageContents("value1=something1");
 		
@@ -188,7 +188,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 
 	@Test
 	public void testNotFoundFilterModified() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/enableFilter?webpiecesShowPage=true");
 		http11Socket.send(req);
 
 		verify303("http://myhost.com/home");
@@ -208,7 +208,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testInternalErrorModifiedAndControllerModified() throws IOException {
-		HttpRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/causeError");
 		http11Socket.send(req);
 		verify500PageContents("InternalError1=error1");
 		
