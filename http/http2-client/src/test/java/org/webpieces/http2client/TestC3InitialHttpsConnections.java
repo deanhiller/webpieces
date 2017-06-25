@@ -47,7 +47,7 @@ public class TestC3InitialHttpsConnections {
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
 		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
-        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
+        Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addSSLChannelToReturn(mockChannel);
 		
@@ -56,7 +56,7 @@ public class TestC3InitialHttpsConnections {
 		int port = addr.getPort();
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
-		socket = client.createHttpsSocket("simple", engine);
+		socket = client.createHttpsSocket(engine);
 		
 		CompletableFuture<Void> connect = socket.connect(addr);
 		connect.get(2, TimeUnit.SECONDS);

@@ -93,13 +93,13 @@ public class IntegSingleRequest {
 		ForTestSslClientEngineFactory ssl = new ForTestSslClientEngineFactory();
 		SSLEngine engine = ssl.createSslEngine(host, port);
 		
-		Http2Client client = Http2ClientFactory.createHttpClient(mgr, injConfig);
+		Http2Client client = Http2ClientFactory.createHttpClient(id, mgr, injConfig);
 		
 		Http2Socket socket;
 		if(isHttp) {
-			socket = client.createHttpSocket(id);
+			socket = client.createHttpSocket();
 		} else {
-			socket = client.createHttpsSocket(id, engine);
+			socket = client.createHttpsSocket(engine);
 		}
 		
 		return socket;

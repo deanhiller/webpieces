@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -29,7 +30,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.Http11FullRequest;
+
 
 public class TestFlashAndSelect extends AbstractWebpiecesTest {
 
@@ -52,7 +53,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		config.setAppOverrides(new TestModule(mock));
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
@@ -73,7 +74,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testNullWillFlashProperly() {
-		Http11FullRequest req1 = Requests.createPostRequest("/user/post", 
+		HttpFullRequest req1 = Requests.createPostRequest("/user/post", 
 				"entity.id", user.getId()+"",
 				"entity.firstName", "NextName", //invalid first name
 				"entity.email", "dean@zz.com",
@@ -122,7 +123,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testMultiSelect() {
-		Http11FullRequest req1 = Requests.createPostRequest("/multiselect", 
+		HttpFullRequest req1 = Requests.createPostRequest("/multiselect", 
 				"entity.id", user.getId()+"",
 				"entity.firstName", "NextName", //invalid first name
 				"entity.email", "dean@zz.com",
@@ -156,7 +157,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testMultiSelectSingleSelection() {
-		Http11FullRequest req1 = Requests.createPostRequest("/multiselect", 
+		HttpFullRequest req1 = Requests.createPostRequest("/multiselect", 
 				"entity.id", user.getId()+"",
 				"entity.firstName", "NextName", //invalid first name
 				"entity.email", "dean@zz.com",

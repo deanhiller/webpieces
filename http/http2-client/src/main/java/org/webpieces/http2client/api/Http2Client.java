@@ -9,13 +9,13 @@ public interface Http2Client {
 	 * 
 	 * @return
 	 */
-	public Http2Socket createHttpSocket(String idForLogging);
+	public Http2Socket createHttpSocket();
 
 	/**
 	 * HttpClientSocket is so you can send multiple requests.
 	 * 
 	 * @return
 	 */
-	public Http2Socket createHttpsSocket(String idForLogging, SSLEngine factory);
+	public Http2Socket createHttpsSocket(SSLEngine factory);
 	
 }

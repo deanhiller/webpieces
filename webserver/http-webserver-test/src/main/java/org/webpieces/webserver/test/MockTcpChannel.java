@@ -3,21 +3,8 @@ package org.webpieces.webserver.test;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
-import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.Memento;
-import org.webpieces.httpparser.api.common.Header;
-import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpData;
-import org.webpieces.httpparser.api.dto.HttpPayload;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.channels.ChannelSession;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
@@ -28,93 +15,20 @@ import org.webpieces.util.logging.LoggerFactory;
 public class MockTcpChannel implements TCPChannel {
 
 	private static final Logger log = LoggerFactory.getLogger(MockTcpChannel.class);
-	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
 	private ChannelSession session = new ChannelSessionImpl();
-	private List<FullResponse> payloads = new ArrayList<>();
-	private FullResponse chunkedResponse;
-	private HttpParser parser;
-	private Memento memento;
 
-	public MockTcpChannel(HttpParser parser) {
-		this.parser = parser;
-		memento = parser.prepareToParse();
-	}
+	private DataListener dataListener;
 
 	@Override
 	public CompletableFuture<Void> write(ByteBuffer b) {
-		DataWrapper data = dataGen.wrapByteBuffer(b);
-		memento	= parser.parse(memento, data);
-		List<HttpPayload> parsedMessages = memento.getParsedMessages();
-		
-		for(HttpPayload payload : parsedMessages) {
-			if(payload instanceof HttpResponse) {
-				sendResponse((HttpResponse) payload);
-			} else {
-				sendData((HttpData) payload);
-			}
-		}
-		
-		return CompletableFuture.completedFuture(null);
+		return dataListener.incomingData(this, b);
 	}
 
-	public void sendResponse(HttpResponse response) {
-		if(isParsingBody()) {
-			FullResponse nextResp = new FullResponse(response);
-			if(!hasValidContentLength(response) && !hasChunkedEncoding(response)) {
-				payloads.add(nextResp);
-			} else
-				chunkedResponse = nextResp;
-		}
-		else {
-			log.error("expecting sendData but got Response instead=" + response);
-			throw new IllegalStateException("Sending the data never ended from last response and we are getting next response already?");
-		}
-
-	}
-	
-	private boolean hasChunkedEncoding(HttpResponse response) {
-		Header transferHeader = response.getHeaderLookupStruct().getLastInstanceOfHeader(KnownHeaderName.TRANSFER_ENCODING);
-
-		if(transferHeader != null && "chunked".equals(transferHeader.getValue())) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean hasValidContentLength(HttpResponse response) {
-		Integer contentLen = null;
-		Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_LENGTH);
-		if(header != null) {
-			contentLen = Integer.parseInt(header.getValue());
-		}
-		if(contentLen != null && contentLen > 0)
-			return true;
-		return false;
-	}
-
-	private boolean isParsingBody() {
-		return chunkedResponse == null;
-	}
-
-	public CompletableFuture<Void> sendData(HttpData httpData) {
-		if(isParsingBody())
-			throw new IllegalStateException("We are not in a state of sending content length body nor chunked data.  there is a bug somewhere");
-		
-		chunkedResponse.addChunk(httpData);
-
-		if(httpData.isEndOfData()) {
-			log.info("last chunk");
-			payloads.add(chunkedResponse);
-			chunkedResponse = null;
-		}
-
-		return CompletableFuture.completedFuture(null);
-	}
-	
 	@Override
 	public CompletableFuture<Void> close() {
-		return null;
+		dataListener.farEndClosed(this);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	@Override
@@ -210,12 +124,8 @@ public class MockTcpChannel implements TCPChannel {
 
 	}
 
-	public List<FullResponse> getResponses() {
-		return payloads;
-	}
-
-	public void clear() {
-		this.payloads.clear();
+	public void setDataListener(DataListener dataListener) {
+		this.dataListener = dataListener;
 	}
 
 }

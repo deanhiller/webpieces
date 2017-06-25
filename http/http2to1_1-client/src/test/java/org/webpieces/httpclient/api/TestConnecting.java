@@ -23,13 +23,13 @@ public class TestConnecting {
 	@Before
 	public void setup() {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient(mockChannelMgr, pool);
+		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient2", mockChannelMgr, pool);
 	}
 
 	@Test
 	public void testConnecting() {
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
-		Http2Socket socket = httpClient.createHttpSocket("clientSocket1");
+		Http2Socket socket = httpClient.createHttpSocket();
 
 		CompletableFuture<Void> future1 = new CompletableFuture<Void>();
 		mockChannel.setConnectFuture(future1);

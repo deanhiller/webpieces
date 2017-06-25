@@ -2,6 +2,8 @@ dependencies {
     compile deps['guice']
 	compile project(':core:core-mock')
 	compile project(':http:http-frontend2')
+	compile project(':http:http1_1-client')
+	compile project(':http:http2-client')
 	
     //For testing, swap in just templating-dev such that we can debug test failures in an IDE without some
     //need for a generate html to class files each time (it uses the same template compiler that the

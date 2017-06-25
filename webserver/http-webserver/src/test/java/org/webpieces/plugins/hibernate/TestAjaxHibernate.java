@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
@@ -25,7 +26,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.Http11FullRequest;
+
 
 public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
@@ -45,7 +46,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test
@@ -62,7 +63,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
 	@Test
 	public void testAjaxAddUser() {
-		Http11FullRequest req = Requests.createPostRequest("/ajax/user/post",
+		HttpFullRequest req = Requests.createPostRequest("/ajax/user/post",
 				"entity.id", "",
 				"entity.name", "blah1",
 				"entity.firstName", "blah2",

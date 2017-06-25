@@ -1,5 +1,7 @@
 package org.webpieces.httpclient11.impl;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.net.ssl.SSLEngine;
 
 import org.webpieces.httpclient11.api.HttpClient;
@@ -12,22 +14,30 @@ public class HttpClientImpl implements HttpClient {
 
 	private ChannelManager mgr;
 	private HttpParser parser;
+	private String id;
+	private AtomicInteger counter = new AtomicInteger();
+	private AtomicInteger httpsCounter = new AtomicInteger();
 
-	public HttpClientImpl(ChannelManager mgr, HttpParser parser) {
+	public HttpClientImpl(String id, ChannelManager mgr, HttpParser parser) {
+		this.id = id;
 		this.mgr = mgr;
 		this.parser = parser;
 	}
 
 	@Override
-	public HttpSocket createHttpSocket(String idForLogging) {
+	public HttpSocket createHttpSocket() {
+		int count = counter.getAndIncrement();
+		String idForLogging = id+count+"Http";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging);
-		return new HttpSocketImpl(channel, parser);
+		return new HttpSocketImpl(new Proxy(channel), parser);
 	}
 	
 	@Override
-	public HttpSocket createHttpsSocket(String idForLogging, SSLEngine engine) {
+	public HttpSocket createHttpsSocket(SSLEngine engine) {
+		int count = httpsCounter.getAndIncrement();
+		String idForLogging = id+count+"Https";
 		TCPChannel channel = mgr.createTCPChannel(idForLogging, engine);
-		return new HttpSocketImpl(channel, parser);
+		return new HttpSocketImpl(new Proxy(channel), parser);
 	}
 
 }

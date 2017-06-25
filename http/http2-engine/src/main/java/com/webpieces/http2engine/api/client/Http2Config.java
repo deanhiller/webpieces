@@ -4,6 +4,7 @@ import com.webpieces.http2engine.impl.shared.data.HeaderSettings;
 
 public class Http2Config {
 
+	private String id = "client";
 	//you may want to start off with 1 rather than 100.  some apis like Apple send a settings frame of
 	//only 1 max concurrent request and the other 49 will blow up if you just start doing http2 off the bat
 	private int initialRemoteMaxConcurrent = 100;
@@ -13,6 +14,12 @@ public class Http2Config {
 	//messages for a time period when you the client send a stream reset.  
 	private int afterResetExpireSeconds = 5;
 	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public int getInitialRemoteMaxConcurrent() {
 		return initialRemoteMaxConcurrent;
 	}

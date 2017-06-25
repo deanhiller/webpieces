@@ -49,7 +49,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	private String saveBean(String path) {

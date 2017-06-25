@@ -71,10 +71,10 @@ public class IntegGoogleHttps {
 		HttpClient client = createHttpClient();
 		HttpSocket socket;
 		if(isHttp)
-			socket = client.createHttpSocket("oneTimer");
+			socket = client.createHttpSocket();
 		else {
 			ForTestSslClientEngineFactory sslFactory = new ForTestSslClientEngineFactory();
-			socket = client.createHttpsSocket("oneTimer", sslFactory.createSslEngine(host, port));
+			socket = client.createHttpsSocket(sslFactory.createSslEngine(host, port));
 		}
 		return socket;
 	}
@@ -87,7 +87,7 @@ public class IntegGoogleHttps {
 		
 		HttpParser parser = HttpParserFactory.createParser(pool2);
 		
-		HttpClient client = HttpClientFactory.createHttpClient(mgr, parser);
+		HttpClient client = HttpClientFactory.createHttpClient("myClient", mgr, parser);
 		return client;
 	}
 

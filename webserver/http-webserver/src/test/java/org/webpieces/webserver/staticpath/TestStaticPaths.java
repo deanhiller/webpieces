@@ -35,7 +35,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		cacheDir = webserver.getCacheDir();
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test

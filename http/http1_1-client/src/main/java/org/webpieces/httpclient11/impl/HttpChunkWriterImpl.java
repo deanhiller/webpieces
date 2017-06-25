@@ -7,15 +7,14 @@ import org.webpieces.httpclient11.api.HttpDataWriter;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.dto.HttpData;
-import org.webpieces.nio.api.channels.TCPChannel;
 
 public class HttpChunkWriterImpl implements HttpDataWriter {
 
-	private TCPChannel channel;
+	private ChannelProxy channel;
 	private HttpParser parser;
 	private MarshalState state;
 
-	public HttpChunkWriterImpl(TCPChannel channel, HttpParser parser, MarshalState state) {
+	public HttpChunkWriterImpl(ChannelProxy channel, HttpParser parser, MarshalState state) {
 		this.channel = channel;
 		this.parser = parser;
 		this.state = state;

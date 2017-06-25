@@ -59,7 +59,7 @@ public class TestLesson2Errors extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		Server webserver = new Server(platformOverrides, new AppOverridesModule(), new ServerConfig(pUnit));
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	/**

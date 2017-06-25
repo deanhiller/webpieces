@@ -18,14 +18,14 @@ public class Http11Clients implements Clients {
 	@Override
 	public Http2Client createClient() {
 		if(config.getClientThreadCount() != null)
-			return Http2to1_1ClientFactory.createHttpClient(config.getClientThreadCount(), config.getBackpressureConfig());
+			return Http2to1_1ClientFactory.createHttpClient("onlyClient", config.getClientThreadCount(), config.getBackpressureConfig());
 			
 		//single threaded version...
 		BufferCreationPool pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager chanMgr = factory.createSingleThreadedChanMgr("clientCmLoop", pool, config.getBackpressureConfig());
 		
-		Http2Client client = Http2to1_1ClientFactory.createHttpClient(chanMgr, pool);
+		Http2Client client = Http2to1_1ClientFactory.createHttpClient("onlyClient", chanMgr, pool);
 		return client;
 	}
 	

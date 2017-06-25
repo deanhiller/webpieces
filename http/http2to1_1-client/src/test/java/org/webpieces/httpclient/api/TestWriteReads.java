@@ -1,9 +1,6 @@
 package org.webpieces.httpclient.api;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -16,19 +13,10 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.http2client.api.Http2Client;
 import org.webpieces.http2client.api.Http2Socket;
-import org.webpieces.http2translations.api.Http2ToHttp1_1;
 import org.webpieces.httpclient.api.mocks.MockChannel;
 import org.webpieces.httpclient.api.mocks.MockChannelMgr;
 import org.webpieces.httpclient.api.mocks.MockResponseListener;
-import org.webpieces.httpclient.api.mocks.MockStreamWriter;
 import org.webpieces.httpclientx.api.Http2to1_1ClientFactory;
-import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.httpparser.api.HttpStatefulParser;
-import org.webpieces.httpparser.api.dto.HttpChunk;
-import org.webpieces.httpparser.api.dto.HttpData;
-import org.webpieces.httpparser.api.dto.HttpLastChunk;
-import org.webpieces.httpparser.api.dto.HttpResponse;
-import org.webpieces.nio.api.handlers.DataListener;
 
 import com.webpieces.hpack.api.dto.Http2Request;
 import com.webpieces.hpack.api.dto.Http2Response;
@@ -45,10 +33,10 @@ public class TestWriteReads {
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient(mockChannelMgr, pool);
+		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient4", mockChannelMgr, pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
-		socket = httpClient.createHttpSocket("clientSocket1");
+		socket = httpClient.createHttpSocket();
 
 		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
 		CompletableFuture<Void> future = socket.connect(new InetSocketAddress(8080));

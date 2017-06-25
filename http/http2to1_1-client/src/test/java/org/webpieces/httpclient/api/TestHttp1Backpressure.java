@@ -45,10 +45,10 @@ public class TestHttp1Backpressure {
 	@Before
 	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		BufferPool pool = new BufferCreationPool();
-		httpClient = Http2to1_1ClientFactory.createHttpClient(mockChannelMgr, pool);
+		httpClient = Http2to1_1ClientFactory.createHttpClient("myClient3", mockChannelMgr, pool);
 		
 		mockChannelMgr.addTCPChannelToReturn(mockChannel);
-		socket = httpClient.createHttpSocket("clientSocket1");
+		socket = httpClient.createHttpSocket();
 
 		mockChannel.setConnectFuture(CompletableFuture.completedFuture(null));
 		CompletableFuture<Void> future = socket.connect(new InetSocketAddress(8080));

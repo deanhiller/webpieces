@@ -14,17 +14,17 @@ import org.webpieces.util.threading.NamedThreadFactory;
 
 public abstract class HttpClientFactory {
 
-	public static HttpClient createHttpClient(int numThreads, BackpressureConfig backPressureConfig) {
+	public static HttpClient createHttpClient(String id, int numThreads, BackpressureConfig backPressureConfig) {
 		Executor executor = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory("httpclient"));
 		BufferCreationPool pool = new BufferCreationPool();
 		HttpParser parser = HttpParserFactory.createParser(pool);
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, backPressureConfig, executor);
 		
-		return createHttpClient(mgr, parser);		
+		return createHttpClient(id, mgr, parser);		
 	}
 
-	public static HttpClient createHttpClient(ChannelManager mgr, HttpParser parser) {
-		return new HttpClientImpl(mgr, parser);
+	public static HttpClient createHttpClient(String id, ChannelManager mgr, HttpParser parser) {
+		return new HttpClientImpl(id, mgr, parser);
 	}
 }

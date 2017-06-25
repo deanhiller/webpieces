@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.webpieces.ddl.api.JdbcApi;
 import org.webpieces.ddl.api.JdbcConstants;
 import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
@@ -26,7 +27,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.Http11FullRequest;
+
 
 public class TestSyncHibernate extends AbstractWebpiecesTest {
 
@@ -47,7 +48,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 		config.setAppOverrides(new TestModule(mock));
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	private String saveBean(String path) {
@@ -181,7 +182,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	@Test
 	public void testHibernatePostPartialDataDoesntBlowDataAway() {
 		UserTestDbo user = loadDataInDb();
-		Http11FullRequest req = Requests.createPostRequest("/testmerge",
+		HttpFullRequest req = Requests.createPostRequest("/testmerge",
 				"user.id", user.getId()+"",
 				"user.name", "blah1",
 				"user.firstName", "blah2");
@@ -200,7 +201,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	@Test
 	public void testHibernateNoUserIdWillSaveNewUser() {
 		String email = "test2";
-		Http11FullRequest req = Requests.createPostRequest("/testmerge",
+		HttpFullRequest req = Requests.createPostRequest("/testmerge",
 				"user.id", "",
 				"user.email", email,
 				"user.name", "blah1",
@@ -221,7 +222,7 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 	@Test
 	public void testHibernateNoUserIdParamWillSaveNewUser() {
 		String email = "test1";
-		Http11FullRequest req = Requests.createPostRequest("/testmerge",
+		HttpFullRequest req = Requests.createPostRequest("/testmerge",
 				"user.email", email,
 				"user.name", "blah1",
 				"user.firstName", "blah2");

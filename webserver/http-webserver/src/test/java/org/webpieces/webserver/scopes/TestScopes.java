@@ -3,6 +3,7 @@ package org.webpieces.webserver.scopes;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -15,7 +16,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.Http11FullRequest;
+
 
 public class TestScopes extends AbstractWebpiecesTest {
 
@@ -26,7 +27,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
@@ -122,7 +123,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 		FullResponse response2 = runGetUserFormWithErrors(response1);
 		
 		Header header = response2.createCookieRequestHeader();
-		Http11FullRequest req = Requests.createPostRequest("/user/post", 
+		HttpFullRequest req = Requests.createPostRequest("/user/post", 
 				"user.id", "",
 				"user.firstName", "Dean", //valid firstname
 				"user.lastName", "Hiller",
@@ -140,7 +141,7 @@ public class TestScopes extends AbstractWebpiecesTest {
 	}
 
 	private FullResponse runInvalidPost() {
-		Http11FullRequest req = Requests.createPostRequest("/user/post", 
+		HttpFullRequest req = Requests.createPostRequest("/user/post", 
 				"user.firstName", "D", //invalid first name
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",

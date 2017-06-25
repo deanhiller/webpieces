@@ -43,7 +43,7 @@ public class ClientAsync {
 		for(int i = 0; i < config.getNumSockets(); i++) {	
 			try {
 				log.info("connecting socket num="+i);
-				Http2Socket socket = client.createHttpSocket("clientSock"+i);
+				Http2Socket socket = client.createHttpSocket();
 				CompletableFuture<Void> connect = socket.connect(svrAddress);
 				connect.get(2, TimeUnit.SECONDS);
 				sockets.add(socket);

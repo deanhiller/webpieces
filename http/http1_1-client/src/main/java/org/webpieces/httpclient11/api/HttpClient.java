@@ -14,8 +14,8 @@ public interface HttpClient {
 	 * 
 	 * @return
 	 */
-	public HttpSocket createHttpSocket(String idForLogging);
+	public HttpSocket createHttpSocket();
 	
-	public HttpSocket createHttpsSocket(String idForLogging, SSLEngine engine);
+	public HttpSocket createHttpsSocket(SSLEngine engine);
 	
 }

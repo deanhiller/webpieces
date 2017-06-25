@@ -36,7 +36,7 @@ public class HttpSocketImpl implements HttpSocket {
 	private static final Logger log = LoggerFactory.getLogger(HttpSocketImpl.class);
 	private static DataWrapperGenerator wrapperGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
-	private TCPChannel channel;
+	private ChannelProxy channel;
 
 	private boolean isClosed;
 	private boolean connected;
@@ -48,7 +48,7 @@ public class HttpSocketImpl implements HttpSocket {
 	private boolean isRecording = false;
 	private MarshalState state;
 	
-	public HttpSocketImpl(TCPChannel channel, HttpParser parser) {
+	public HttpSocketImpl(ChannelProxy channel, HttpParser parser) {
 		this.channel = channel;
 		this.parser = parser;
 		memento = parser.prepareToParse();

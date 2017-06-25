@@ -16,14 +16,14 @@ public class Http2ClientProxy implements Http2Client {
 	}
 
 	@Override
-	public Http2Socket createHttpSocket(String idForLogging) {
-		HttpSocket socket1_1 = client1_1.createHttpSocket(idForLogging);
+	public Http2Socket createHttpSocket() {
+		HttpSocket socket1_1 = client1_1.createHttpSocket();
 		return new Http2SocketImpl(socket1_1);
 	}
 
 	@Override
-	public Http2Socket createHttpsSocket(String idForLogging, SSLEngine factory) {
-		HttpSocket socket1_1 = client1_1.createHttpSocket(idForLogging);
+	public Http2Socket createHttpsSocket(SSLEngine factory) {
+		HttpSocket socket1_1 = client1_1.createHttpSocket();
 		return new Http2SocketImpl(socket1_1);
 	}
 

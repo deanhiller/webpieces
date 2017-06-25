@@ -26,7 +26,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	public void setUp() {
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, null);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();		
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}
 	
 	@Test

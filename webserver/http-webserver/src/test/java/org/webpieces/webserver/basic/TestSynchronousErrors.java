@@ -42,7 +42,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, null);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test

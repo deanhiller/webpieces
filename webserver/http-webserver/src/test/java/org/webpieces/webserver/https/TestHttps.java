@@ -25,8 +25,8 @@ public class TestHttps extends AbstractWebpiecesTest {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("httpsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		httpSocket = http11Simulator.openHttp();
-		httpsSocket = http11Simulator.openHttps();		
+		httpSocket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		httpsSocket = http11Simulator.createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());		
 	}
 
 	@Test
@@ -71,8 +71,6 @@ public class TestHttps extends AbstractWebpiecesTest {
 		FullResponse response = ResponseExtract.assertSingleResponse(httpsSocket);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Http Route"); //notice the Https Route page is not shown		
-		
-		httpsSocket.clear();
 
 		httpSocket.send(req);
 		

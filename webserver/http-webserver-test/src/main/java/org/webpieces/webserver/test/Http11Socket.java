@@ -1,56 +1,55 @@
 package org.webpieces.webserver.test;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
+import org.webpieces.httpclient11.api.HttpDataWriter;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpResponseListener;
+import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.dto.HttpPayload;
+import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.nio.api.handlers.DataListener;
+import org.webpieces.webserver.test.http11.Http11SocketImpl;
 
 public class Http11Socket {
 
-	//This dataListener is the production listener that listens to the socket...
-	private DataListener dataListener;
-	//This is where the response is written to
-	private MockTcpChannel channel;
-	private HttpParser parser;
-	private MarshalState state;
+	private HttpSocket socket;
 
-	public Http11Socket(DataListener dataListener, MockTcpChannel channel, HttpParser parser) {
-		this.dataListener = dataListener;
-		this.channel = channel;
-		this.parser = parser;
-		this.state = parser.prepareToMarshal();
+	public Http11Socket(HttpSocket socket) {
+		this.socket = socket;
 	}
 
-	public void send(Http11FullRequest req) {
-		send(req.getRequest());
-		send(req.getData());
+	public CompletableFuture<HttpFullResponse> send(HttpFullRequest req) {
+		return socket.send(req);
 	}
 	
 	public void send(HttpPayload payload) {
+		socket.send(request, l)
+		
 		ByteBuffer buf = parser.marshalToByteBuffer(state, payload);
 		dataListener.incomingData(channel, buf);
 	}
 	
-	public void close() {
-		dataListener.farEndClosed(channel);
+	public CompletableFuture<Void> close() {
+		return socket.close();
 	}
 
 	public List<FullResponse> getResponses() {
 		return channel.getResponses();
 	}
 
-	public void sendBytes(DataWrapper dataWrapper) {
-		byte[] bytes = dataWrapper.createByteArray();
-		ByteBuffer wrap = ByteBuffer.wrap(bytes);
-		dataListener.incomingData(channel, wrap);
+	public CompletableFuture<Void> sendBytes(DataWrapper dataWrapper) {
+//		Http11SocketImpl impl = (Http11SocketImpl) socket;
+//		return impl.sendBytes(dataWrapper);
 	}
 
-	public void clear() {
-		channel.clear();
-	}
+
 
 }

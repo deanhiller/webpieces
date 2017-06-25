@@ -21,7 +21,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		httpsSocket = http11Simulator.openHttps();
+		httpsSocket = http11Simulator.createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());
 	}
 
 	@Test

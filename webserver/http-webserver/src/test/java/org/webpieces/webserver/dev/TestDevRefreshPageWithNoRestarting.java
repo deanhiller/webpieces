@@ -80,7 +80,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@After

@@ -46,10 +46,10 @@ public class TestC6_5SettingsFrameErrors {
         config.setInitialRemoteMaxConcurrent(1); //start with 1 max concurrent
         config.setLocalSettings(localSettings);
 		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
-        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
+        Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
-		socket = client.createHttpSocket("simple");
+		socket = client.createHttpSocket();
 		
 		CompletableFuture<Void> connect = socket.connect(new InetSocketAddress(555));
 		connect.get(2, TimeUnit.SECONDS);

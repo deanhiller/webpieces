@@ -6,6 +6,7 @@ import org.webpieces.nio.api.BackpressureConfig;
 
 public class Http2ClientConfig {
 
+	
 	private int numThreads = 20;
 	private Http2Config http2Config;
 	private BackpressureConfig backpressureConfig;

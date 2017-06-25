@@ -48,10 +48,10 @@ public class AbstractTest {
         localSettings.setInitialWindowSize(localSettings.getMaxFrameSize()*4);
         config.setLocalSettings(localSettings);
 		InjectionConfig injConfig = new InjectionConfig(mockTime, config);
-        Http2Client client = Http2ClientFactory.createHttpClient(mockChanMgr, injConfig);
+        Http2Client client = Http2ClientFactory.createHttpClient("test2Client", mockChanMgr, injConfig);
         
         mockChanMgr.addTCPChannelToReturn(mockChannel);
-		httpSocket = client.createHttpSocket("simple");
+		httpSocket = client.createHttpSocket();
 		
 		CompletableFuture<Void> connect = httpSocket.connect(new InetSocketAddress(555));
 		connect.get(2, TimeUnit.SECONDS);

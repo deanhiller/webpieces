@@ -28,7 +28,7 @@ public abstract class Http2ClientFactory {
 		ChannelManager mgr = factory.createMultiThreadedChanMgr("httpClientChanMgr", pool, config.getBackpressureConfig(), executor);
 
 		InjectionConfig injConfig = new InjectionConfig(hpackParser, new TimeImpl(), config.getHttp2Config());
-		return createHttpClient(mgr, injConfig);
+		return createHttpClient(config.getHttp2Config().getId(), mgr, injConfig);
 	}
 	
 	public static Http2Client createHttpClient(Http2Config config, ChannelManager mgr, BufferPool pool) {
@@ -36,11 +36,11 @@ public abstract class Http2ClientFactory {
 		
 		InjectionConfig injConfig = new InjectionConfig(hpackParser, new TimeImpl(), config);
 
-		return createHttpClient(mgr, injConfig);
+		return createHttpClient(config.getId(), mgr, injConfig);
 	}
 	
-	public static Http2Client createHttpClient(ChannelManager mgr, InjectionConfig injectionConfig) {
+	public static Http2Client createHttpClient(String id, ChannelManager mgr, InjectionConfig injectionConfig) {
 		Http2ClientEngineFactory engineFactory = new Http2ClientEngineFactory(injectionConfig);
-		return new Http2ClientImpl(mgr, engineFactory );
+		return new Http2ClientImpl(id, mgr, engineFactory );
 	}
 }

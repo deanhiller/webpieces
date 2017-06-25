@@ -11,6 +11,7 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.MarshalState;
@@ -30,7 +31,6 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.Http11Socket;
-import org.webpieces.webserver.test.Http11FullRequest;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -48,7 +48,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
 		webserver.start();
-		http11Socket = http11Simulator.openHttp();
+		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testPostFailDueToSecureTokenCheck() {
-		Http11FullRequest req = Requests.createPostRequest("/postuser", 
+		HttpFullRequest req = Requests.createPostRequest("/postuser", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -96,7 +96,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testComplexBeanSaved() {
-		Http11FullRequest req = Requests.createPostRequest("/postuser2", 
+		HttpFullRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -120,7 +120,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testNullIdFromForm() {
-		Http11FullRequest req = Requests.createPostRequest("/postuser2",
+		HttpFullRequest req = Requests.createPostRequest("/postuser2",
 				"user.id", "" //multipart is "" and nearly all webservers convert that to null(including ours)
 				);
 		
@@ -134,7 +134,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testInvalidComplexBean() {
-		Http11FullRequest req = Requests.createPostRequest("/postuser2", 
+		HttpFullRequest req = Requests.createPostRequest("/postuser2", 
 				"user.firstName", "D&D", 
 				"user.lastName", "Hiller",
 				"user.fullName", "Dean Hiller",
@@ -176,7 +176,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 
 	@Test
 	public void testIncomingDataAndDataSeperate() {
-		Http11FullRequest req = Requests.createPostRequest("/postArray2",
+		HttpFullRequest req = Requests.createPostRequest("/postArray2",
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",
@@ -210,7 +210,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	}
 	@Test
 	public void testArraySaved() {
-		Http11FullRequest req = Requests.createPostRequest("/postArray2", 
+		HttpFullRequest req = Requests.createPostRequest("/postArray2", 
 				"user.accounts[1].name", "Account2Name",
 				"user.accounts[1].color", "green",
 				"user.accounts[2].addresses[0].number", "56",
@@ -248,7 +248,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testDeveloperMistypesBeanNameVsFormNames() {
-		Http11FullRequest req = Requests.createPostRequest("/postuser", 
+		HttpFullRequest req = Requests.createPostRequest("/postuser", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.fullName", "Dean Hiller",
@@ -263,7 +263,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testDeveloperMistypesBeanNameVsFormNamesButNullableIsUsed() {
-		Http11FullRequest req = Requests.createPostRequest("/postusernullable", 
+		HttpFullRequest req = Requests.createPostRequest("/postusernullable", 
 				"entity.firstName", "D&D", 
 				"entity.lastName", "Hiller",
 				"entity.fullName", "Dean Hiller",
