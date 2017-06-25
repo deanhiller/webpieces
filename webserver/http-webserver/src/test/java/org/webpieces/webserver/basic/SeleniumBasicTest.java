@@ -49,7 +49,6 @@ public class SeleniumBasicTest {
 
 	
 	//You must have firefox installed to run this test...
-	//@Ignore
 	@Test
 	public void testSomething() throws ClassNotFoundException {
 

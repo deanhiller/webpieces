@@ -1,7 +1,5 @@
 package org.webpieces.webserver.beans;
 
-import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -9,18 +7,10 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.webpieces.data.api.BufferCreationPool;
-import org.webpieces.data.api.DataWrapper;
-import org.webpieces.data.api.DataWrapperGenerator;
-import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
-import org.webpieces.httpparser.api.HttpParser;
-import org.webpieces.httpparser.api.HttpParserFactory;
-import org.webpieces.httpparser.api.MarshalState;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.mock.lib.MockExecutor;
@@ -178,43 +168,6 @@ public class TestBeans extends AbstractWebpiecesTest {
 		response.assertContains("StreetX");
 	}
 
-	@Ignore
-	@Test
-	public void testIncomingDataAndDataSeperate() {
-		HttpFullRequest req = Requests.createPostRequest("/postArray2",
-				"user.accounts[1].name", "Account2Name",
-				"user.accounts[1].color", "green",
-				"user.accounts[2].addresses[0].number", "56",
-				"user.firstName", "D&D",
-				"user.lastName", "Hiller",
-				"user.fullName", "Dean Hiller"
-		);
-
-		DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-		HttpParser parser = HttpParserFactory.createParser(new BufferCreationPool());
-		MarshalState state = parser.prepareToMarshal();
-		ByteBuffer buffer = parser.marshalToByteBuffer(state, req.getRequest());
-		DataWrapper d1 = dataGen.wrapByteBuffer(buffer);
-		ByteBuffer buf2 = parser.marshalToByteBuffer(state, req.getData());
-		DataWrapper data = dataGen.chainDataWrappers(d1, dataGen.wrapByteBuffer(buf2));
-		
-		// Split the body in half
-		List<? extends DataWrapper> split = dataGen.split(data, data.getReadableSize() - 20);
-
-		if(true)
-			throw new RuntimeException("need to fix this test case");
-//		http11Socket.sendBytes(split.get(0));
-//		http11Socket.sendBytes(split.get(1));
-//		
-//		FullResponse response = ResponseExtract.assertSingleResponse(respFuture);
-//		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
-
-		UserDto user = mockSomeLib.getUser();
-		Assert.assertEquals("D&D", user.getFirstName());
-		Assert.assertEquals(3, user.getAccounts().size());
-		Assert.assertEquals("Account2Name", user.getAccounts().get(1).getName());
-		Assert.assertEquals(56, user.getAccounts().get(2).getAddresses().get(0).getNumber());
-	}
 	@Test
 	public void testArraySaved() {
 		HttpFullRequest req = Requests.createPostRequest("/postArray2", 

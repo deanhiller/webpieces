@@ -132,7 +132,7 @@ public class ResponseCreator {
 			cookieTranslator.addScopeToCookieIfExist(cookies, Current.session());
 			return cookies;
 		} catch(CookieTooLargeException e) {
-			if(isInternalError)
+			if(!isInternalError)
 				throw e;
 			//ELSE this is the second time we are rendering a response AND it was MOST likely caused by the same
 			//thing when we tried to marshal out cookies to strings and they were too big, sooooooooooo in this

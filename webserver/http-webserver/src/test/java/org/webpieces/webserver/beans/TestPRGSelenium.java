@@ -47,7 +47,6 @@ public class TestPRGSelenium {
 
 	
 	//You must have firefox installed to run this test...
-	//@Ignore
 	@Test
 	public void testBasicForm() throws ClassNotFoundException {
 		driver.get("http://localhost:"+port+"/listusers");
@@ -95,7 +94,6 @@ public class TestPRGSelenium {
 	}
 	
 	//You must have firefox installed to run this test...
-	//@Ignore
 	@Test
 	public void testArrayFieldInForm() throws ClassNotFoundException {
 		driver.get("http://localhost:"+port+"/arrayForm");
