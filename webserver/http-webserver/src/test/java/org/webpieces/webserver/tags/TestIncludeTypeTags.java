@@ -1,5 +1,8 @@
 package org.webpieces.webserver.tags;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -24,7 +27,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		Module allOverrides = Modules.combine(platformOverrides, new TagOverridesModule(TagOverrideLookupForTesting.class));
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(allOverrides, null, false, metaFile);

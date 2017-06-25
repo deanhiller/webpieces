@@ -1,6 +1,8 @@
 package org.webpieces.webserver.filters;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,7 +29,7 @@ public class TestFilters extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("filtersMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverrides(), false, metaFile);
 		webserver.start();

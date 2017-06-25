@@ -2,7 +2,9 @@ package org.webpieces.webserver.test;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLEngine;
 
@@ -20,25 +22,17 @@ public class Http11ClientSimulator {
 		client = new DirectHttp11Client(mgr);
 	}
 	
-	public Http11Socket createHttpSocket(InetSocketAddress addr) {
+	public Http11Socket createHttpSocket(InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
 		HttpSocket socket = client.createHttpSocket();
 		CompletableFuture<Void> connect = socket.connect(addr);
-		try {
-			connect.get(2, TimeUnit.SECONDS);
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
+		connect.get(2, TimeUnit.SECONDS);
 		return new Http11Socket(socket);
 	}
 
-	public Http11Socket createHttpsSocket(SSLEngine engine, InetSocketAddress addr) {
+	public Http11Socket createHttpsSocket(SSLEngine engine, InetSocketAddress addr) throws InterruptedException, ExecutionException, TimeoutException {
 		HttpSocket socket = client.createHttpsSocket(engine);
 		CompletableFuture<Void> connect = socket.connect(addr);
-		try {
-			connect.get(2, TimeUnit.SECONDS);
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
+		connect.get(2, TimeUnit.SECONDS);
 		return new Http11Socket(socket);
 	}
 }

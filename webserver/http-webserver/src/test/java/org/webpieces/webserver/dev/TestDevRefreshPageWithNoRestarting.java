@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -44,7 +46,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 	
 	@Before
-	public void setUp() throws ClassNotFoundException, IOException {
+	public void setUp() throws ClassNotFoundException, IOException, InterruptedException, ExecutionException, TimeoutException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		userDir = System.getProperty("user.dir");
 		log.info("running from dir="+userDir);

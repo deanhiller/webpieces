@@ -1,5 +1,8 @@
 package org.webpieces.webserver.https;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpparser.api.common.Header;
@@ -21,7 +24,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 	private Http11Socket httpsSocket;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("httpsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();

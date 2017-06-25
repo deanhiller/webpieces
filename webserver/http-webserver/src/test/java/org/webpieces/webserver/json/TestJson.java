@@ -1,5 +1,8 @@
 package org.webpieces.webserver.json;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +26,7 @@ public class TestJson extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("jsonMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();

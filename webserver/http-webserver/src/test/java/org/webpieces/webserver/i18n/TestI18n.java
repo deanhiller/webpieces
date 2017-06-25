@@ -1,5 +1,8 @@
 package org.webpieces.webserver.i18n;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpparser.api.common.Header;
@@ -21,7 +24,7 @@ public class TestI18n extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("i18nMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();

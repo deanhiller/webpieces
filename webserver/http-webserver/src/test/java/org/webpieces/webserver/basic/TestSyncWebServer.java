@@ -1,6 +1,8 @@
 package org.webpieces.webserver.basic;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +25,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, null);
 		webserver.start();
 		http11Socket = http11Simulator.createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		

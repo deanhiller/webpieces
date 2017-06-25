@@ -2,6 +2,8 @@ package org.webpieces.webserver.dev;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +48,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 
 	@Before
-	public void setUp() throws InterruptedException, ClassNotFoundException {
+	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		String filePath1 = System.getProperty("user.dir");

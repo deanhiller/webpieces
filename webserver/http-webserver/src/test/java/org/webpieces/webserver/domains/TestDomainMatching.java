@@ -1,5 +1,8 @@
 package org.webpieces.webserver.domains;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -17,7 +20,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	private Http11Socket httpsSocket;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();

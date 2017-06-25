@@ -2,6 +2,8 @@ package org.webpieces.webserver.async;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -40,7 +42,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 
 	@Before
-	public void setUp() throws InterruptedException, ClassNotFoundException {
+	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());

@@ -1,5 +1,8 @@
 package org.webpieces.webserver.basic;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.httpparser.api.dto.HttpRequest;
@@ -34,7 +37,7 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 
 	@Before
-	public void setUp() throws InterruptedException, ClassNotFoundException {
+	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your

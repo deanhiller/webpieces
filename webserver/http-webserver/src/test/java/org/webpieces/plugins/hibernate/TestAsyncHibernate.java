@@ -1,7 +1,9 @@
 package org.webpieces.plugins.hibernate;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +38,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 	private Http11Socket http11Socket;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		//clear in-memory database
 		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 		jdbc.dropAllTablesFromDatabase();
