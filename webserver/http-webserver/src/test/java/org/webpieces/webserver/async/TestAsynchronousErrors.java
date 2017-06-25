@@ -46,9 +46,9 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test

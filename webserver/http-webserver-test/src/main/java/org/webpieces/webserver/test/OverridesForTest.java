@@ -22,21 +22,20 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
 
-public class PlatformOverridesForTest implements Module {
+public class OverridesForTest implements Module {
 	
-	private static final Logger log = LoggerFactory.getLogger(PlatformOverridesForTest.class);
+	private static final Logger log = LoggerFactory.getLogger(OverridesForTest.class);
 
 	private TemplateCompileConfig templateConfig;
 	private MockChannelManager mgr;
 	private MockTime time;
 	private MockTimer mockTimer;
 	
-	
-	public PlatformOverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer) {
+	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer) {
 		this(mgr, time, mockTimer, new TemplateCompileConfig(isGradleRunning()));
 	}
 	
-	public PlatformOverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, TemplateCompileConfig config) {	
+	public OverridesForTest(MockChannelManager mgr, MockTime time, MockTimer mockTimer, TemplateCompileConfig config) {	
 		this.mgr = mgr;
 		this.time = time;
 		this.mockTimer = mockTimer;

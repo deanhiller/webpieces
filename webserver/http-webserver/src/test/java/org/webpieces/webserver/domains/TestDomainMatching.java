@@ -25,9 +25,9 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, metaFile);
 		webserver.start();
-		httpsSocket = createHttpsSocket(null, webserver.getUnderlyingHttpsChannel().getLocalAddress());
+		httpsSocket = connectHttps(false, null, webserver.getUnderlyingHttpsChannel().getLocalAddress());
 	}
 
 	@Test

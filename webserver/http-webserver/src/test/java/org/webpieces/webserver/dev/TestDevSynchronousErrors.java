@@ -27,7 +27,7 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.OverridesForTest;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
@@ -62,7 +62,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(false);
 
 		Module platformOverrides = Modules.combine(
-				new PlatformOverridesForTest(mgr, time, mockTimer, templateConfig),
+				new OverridesForTest(mgr, time, mockTimer, templateConfig),
 				new ForTestingStaticDevelopmentModeModule());
 		
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
@@ -70,7 +70,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		//This is however pretty fast to do in many systems...
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, null);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test

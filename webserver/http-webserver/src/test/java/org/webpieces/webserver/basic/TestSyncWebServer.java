@@ -29,9 +29,9 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, null);
+		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, null);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());		
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}
 	
 	@Test

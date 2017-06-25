@@ -30,11 +30,11 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		Module allOverrides = Modules.combine(platformOverrides, new TagOverridesModule(TagOverrideLookupForTesting.class));
+		Module allOverrides = Modules.combine(getOverrides(false), new TagOverridesModule(TagOverrideLookupForTesting.class));
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
 		WebserverForTest webserver = new WebserverForTest(allOverrides, null, false, metaFile);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test

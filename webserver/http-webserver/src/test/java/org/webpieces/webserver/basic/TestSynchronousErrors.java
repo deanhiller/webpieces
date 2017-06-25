@@ -45,9 +45,9 @@ public class TestSynchronousErrors extends AbstractWebpiecesTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, new AppOverridesModule(), false, null);
+		WebserverForTest webserver = new WebserverForTest(getOverrides(false), new AppOverridesModule(), false, null);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@Test

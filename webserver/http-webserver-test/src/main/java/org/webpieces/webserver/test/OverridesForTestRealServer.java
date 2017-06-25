@@ -6,15 +6,15 @@ import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 
-public class SeleniumOverridesForTest implements Module {
+public class OverridesForTestRealServer implements Module {
 	
 	private TemplateCompileConfig templateConfig;
 	
-	public SeleniumOverridesForTest() {
-		this(new TemplateCompileConfig(PlatformOverridesForTest.isGradleRunning()));
+	public OverridesForTestRealServer() {
+		this(new TemplateCompileConfig(OverridesForTest.isGradleRunning()));
 	}
 	
-	public SeleniumOverridesForTest(TemplateCompileConfig templateCompileConfig) {
+	public OverridesForTestRealServer(TemplateCompileConfig templateCompileConfig) {
 		this.templateConfig = templateCompileConfig;
 	}
 	

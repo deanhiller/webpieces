@@ -30,7 +30,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.FullResponse;
-import org.webpieces.webserver.test.PlatformOverridesForTest;
+import org.webpieces.webserver.test.OverridesForTest;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Module;
@@ -80,11 +80,11 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),
-										new PlatformOverridesForTest(mgr, time, mockTimer, templateConfig));
+										new OverridesForTest(mgr, time, mockTimer, templateConfig));
 		
 		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	@After

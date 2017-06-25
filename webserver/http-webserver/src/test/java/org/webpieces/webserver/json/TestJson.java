@@ -1,5 +1,8 @@
 package org.webpieces.webserver.json;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -7,6 +10,8 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
@@ -15,24 +20,43 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.FullResponse;
 import org.webpieces.webserver.test.ResponseExtract;
 
-
-
+@RunWith(Parameterized.class)
 public class TestJson extends AbstractWebpiecesTest {
 	
+	private static final Logger log = LoggerFactory.getLogger(TestJson.class);
 	private HttpSocket http11Socket;
 
+	private boolean isRemote;
+
+	@SuppressWarnings("rawtypes")
+	@Parameterized.Parameters
+	public static Collection bothServers() {
+        List<Object[]> args = new ArrayList<Object[]>();
+        args.add(new Object[] { true });
+        args.add(new Object[] { false});
+        
+		return args;
+	}
+	 
+	public TestJson(boolean isDirect) {
+		this.isRemote = isDirect;
+		log.info("constructing test suite for client isRemote="+isDirect);
+	}
+	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("jsonMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(getOverrides(isRemote), null, true, metaFile);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test

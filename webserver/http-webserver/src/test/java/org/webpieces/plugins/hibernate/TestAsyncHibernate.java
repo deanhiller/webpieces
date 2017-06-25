@@ -48,12 +48,12 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		mockExecutor.clear();
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
 		TestConfig config = new TestConfig();
-		config.setPlatformOverrides(platformOverrides);
+		config.setPlatformOverrides(getOverrides(false));
 		config.setAppOverrides(new TestOverrides());
 		config.setMetaFile(metaFile);
 		WebserverForTest webserver = new WebserverForTest(config);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	private String saveBean(String path) {

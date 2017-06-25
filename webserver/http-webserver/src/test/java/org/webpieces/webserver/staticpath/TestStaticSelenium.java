@@ -10,7 +10,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.SeleniumOverridesForTest;
+import org.webpieces.webserver.test.OverridesForTestRealServer;
 
 public class TestStaticSelenium {
 	
@@ -34,7 +34,7 @@ public class TestStaticSelenium {
 		Asserts.assertWasCompiledWithParamNames("test");
 		
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("staticMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(new SeleniumOverridesForTest(), null, true, metaFile);
+		WebserverForTest webserver = new WebserverForTest(new OverridesForTestRealServer(), null, true, metaFile);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

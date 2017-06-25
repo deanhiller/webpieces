@@ -28,9 +28,9 @@ public class TestListGenerator extends AbstractWebpiecesTest {
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
 		VirtualFileClasspath metaFile = new VirtualFileClasspath("tagsMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
+		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, metaFile);
 		webserver.start();
-		http11Socket = createHttpSocket(webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 
 	@Test
