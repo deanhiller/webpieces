@@ -18,7 +18,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
@@ -44,7 +44,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is the first raw html page");
 	}
@@ -64,7 +64,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 		//now have the server complete processing
 		future.complete(5);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Hi Dean Hiller, This is a page");
 	}
@@ -75,7 +75,7 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(0, response.getBody().getReadableSize());
 	}	

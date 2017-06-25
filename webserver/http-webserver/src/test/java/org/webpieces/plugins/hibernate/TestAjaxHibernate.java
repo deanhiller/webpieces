@@ -28,7 +28,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -60,7 +60,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		response.assertContains("Your page was not found");
@@ -76,7 +76,7 @@ public class TestAjaxHibernate extends AbstractWebpiecesTest {
 
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/ajax/user/list", response.getRedirectUrl());
 		

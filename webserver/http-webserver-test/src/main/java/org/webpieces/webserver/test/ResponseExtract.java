@@ -8,10 +8,10 @@ import org.webpieces.httpclient11.api.HttpFullResponse;
 
 public class ResponseExtract {
 
-	public static FullResponse waitResponseAndWrap(CompletableFuture<HttpFullResponse> respFuture) {
+	public static ResponseWrapper waitResponseAndWrap(CompletableFuture<HttpFullResponse> respFuture) {
 		try {
 			HttpFullResponse resp = respFuture.get(2, TimeUnit.SECONDS);
-			return new FullResponse(resp);
+			return new ResponseWrapper(resp);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}

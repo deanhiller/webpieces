@@ -40,7 +40,7 @@ import org.webpieces.webserver.basic.app.biz.UserDto;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.MockTcpChannel;
 
 import com.google.inject.Binder;
@@ -115,7 +115,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		dataListener.incomingData(channel, buffer1);
 		dataListener.incomingData(channel, buffer2);
 
-		FullResponse response = create();
+		ResponseWrapper response = create();
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 
 		UserDto user = mockSomeLib.getUser();
@@ -127,7 +127,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 	
 	private HttpStatefulParser parser = HttpParserFactory.createStatefulParser(new BufferCreationPool());
 	
-	private FullResponse create() {
+	private ResponseWrapper create() {
 		List<HttpPayload> payloads = parser.parse(dataReceived);
 		HttpResponse response = (HttpResponse) payloads.get(0);
 		DataWrapper all = dataGen.emptyWrapper();
@@ -137,7 +137,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		}
 		
 		HttpFullResponse fResponse = new HttpFullResponse(response, all);
-		return new FullResponse(fResponse);
+		return new ResponseWrapper(fResponse);
 	}
 	
 	private class AppOverridesModule implements Module {

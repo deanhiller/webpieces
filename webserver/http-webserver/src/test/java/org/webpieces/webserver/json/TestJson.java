@@ -25,7 +25,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 @RunWith(Parameterized.class)
@@ -65,7 +65,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:8,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -77,7 +77,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
 		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -89,7 +89,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:98,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -101,7 +101,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		Assert.assertEquals("", response.getBodyAsString());
 	}
@@ -112,7 +112,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
 		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -124,7 +124,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:5,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -137,7 +137,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:5,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -149,7 +149,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
 		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -161,7 +161,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:99,`matches`:[`match1`,`match2`]}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -173,7 +173,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		Assert.assertEquals("", response.getBodyAsString());
 	}
@@ -184,7 +184,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_400_BADREQUEST);
 		response.assertContains("{`error`:`invalid json in client request.  Unexpected character ('c' (code 99)): was expecting a colon to separate field name and value".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -196,7 +196,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -208,7 +208,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");
 		response.assertContentType("text/html; charset=utf-8");
@@ -220,7 +220,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND); //clearly this url has nothing there
 		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -232,7 +232,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND); //clearly this url has nothing there
 		response.assertContains("{`error`:`This url has no api.  try another url`,`code`:0}".replace("`", "\""));
 		response.assertContentType("application/json");
@@ -244,7 +244,7 @@ public class TestJson extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("{`searchTime`:1,`matches`:[]}".replace("`", "\""));
 		response.assertContentType("application/json");

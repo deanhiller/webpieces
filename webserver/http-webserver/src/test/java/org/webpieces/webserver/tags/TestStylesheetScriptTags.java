@@ -15,7 +15,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -38,7 +38,7 @@ public class TestStylesheetScriptTags extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<img alt=`hi` src=`public/pic.jpg`>".replace('`', '"'));
 		response.assertContains("<link rel=`stylesheet` type=`text/css` href=`/public/fonts.css?hash=kxR6cr1IXKXcWyOAiVdRAQ%3D%3D` />".replace('`', '"'));

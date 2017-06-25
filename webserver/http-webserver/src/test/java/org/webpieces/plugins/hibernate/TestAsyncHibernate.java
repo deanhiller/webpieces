@@ -27,7 +27,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
@@ -66,7 +66,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		runnables.get(0).run();
 		mockExecutor.clear();
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		Header header = response.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
@@ -83,7 +83,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
 
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("name=SomeName email="+email);
 	}
@@ -112,7 +112,7 @@ public class TestAsyncHibernate extends AbstractWebpiecesTest {
 		List<Runnable> runnables = mockExecutor.getRunnablesScheduled();
 		runnables.get(0).run();
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 	}
 	

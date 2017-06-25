@@ -16,7 +16,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Module;
@@ -43,7 +43,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using Custom Tag");
 		response.assertContains("This is a custom tag which can also use tags in itself <a href=`/verbatim`>Some Link Here</a>".replace('`', '"'));
@@ -59,7 +59,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using renderTagArgs Tag");
 		response.assertContains("The user is override"); //using variable from tag args in the called template
@@ -72,7 +72,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using renderPageArgs Tag");
 		response.assertContains("The user is Dean Hiller"); //using variable from page args in the called template

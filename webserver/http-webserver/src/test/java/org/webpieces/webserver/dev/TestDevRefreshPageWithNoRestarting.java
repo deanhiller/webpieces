@@ -29,7 +29,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.OverridesForTest;
 import org.webpieces.webserver.test.ResponseExtract;
 
@@ -124,7 +124,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/newroute");
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		
 		simulateDeveloperMakesChanges("src/test/devServerTest/routeChange");
@@ -138,7 +138,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/filter");
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals("http://myhost.com/home", response.getRedirectUrl());
 		
@@ -156,7 +156,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/notFound");
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 
 		//platform should convert request into a development not found page which has an iframe
@@ -203,7 +203,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	}
 
 	private void verify303(CompletableFuture<HttpFullResponse> respFuture, String url) {
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		Assert.assertEquals(url, response.getRedirectUrl());
 	}
@@ -226,19 +226,19 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 	}
 
 	private void verifyPageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains(contents);
 	}
 	
 	private void verify404PageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains(contents);
 	}
 	
 	private void verify500PageContents(CompletableFuture<HttpFullResponse> respFuture, String contents) {
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains(contents);
 	}

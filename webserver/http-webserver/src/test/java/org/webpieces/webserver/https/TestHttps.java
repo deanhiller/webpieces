@@ -17,7 +17,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -41,7 +41,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//before we can show you the page, you need to be logged in, redirect to login page...
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
@@ -52,7 +52,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("home page");
 	}
@@ -63,7 +63,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//Even though the page exists....if accessed over http, it does not exist...
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
@@ -74,7 +74,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture1 = https11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Http Route"); //notice the Https Route page is not shown		
 
@@ -91,7 +91,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture1 = https11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Https Route");
 
@@ -108,7 +108,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//Even though the page exists....if accessed over http, it does not exist...
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);		
 	}
@@ -119,7 +119,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//Even though the page doesn't exist, we redirect all /secure/* to login page
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 	}
@@ -133,7 +133,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		//before we can show you the page, you need to be logged in, redirect to login page...
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is some home page");
@@ -145,7 +145,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("https://myhost.com:8443"); //notice the Https Route page is not shown	
 	}
@@ -156,7 +156,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("https://myhost.com:8443"); //notice the Https Route page is not shown	
 	}
@@ -166,7 +166,7 @@ public class TestHttps extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture);
 		Header header = response1.getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.SET_COOKIE);
 		String value = header.getValue();
 		value = value.replace("; path=/; HttpOnly", "");

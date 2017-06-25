@@ -32,7 +32,7 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -68,7 +68,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         
         CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         //assert the nulls came through
@@ -90,7 +90,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		String urlPath = "/user/edit/"+user.getId();
@@ -101,7 +101,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         
         CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         //assert the nulls came through
@@ -117,7 +117,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         
         CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         //assert the nulls came through
@@ -141,7 +141,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		String urlPath = "/multiselect/"+user.getId();
@@ -152,7 +152,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         
         CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("<option value=`b` >Badass</script>".replace('`', '\"'));
@@ -174,7 +174,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture1 = http11Socket.send(req1);
 		
-		FullResponse response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
+		ResponseWrapper response1 = ResponseExtract.waitResponseAndWrap(respFuture1);
 		response1.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		
 		String urlPath = "/multiselect/"+user.getId();
@@ -185,7 +185,7 @@ public class TestFlashAndSelect extends AbstractWebpiecesTest {
         
         CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
         response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
         response.assertContains("<option value=`b` >Badass</script>".replace('`', '\"'));

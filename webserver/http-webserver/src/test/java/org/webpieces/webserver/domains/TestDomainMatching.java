@@ -14,7 +14,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -36,7 +36,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is domain1");
 	}
@@ -47,7 +47,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is domain1");
 	}
@@ -58,7 +58,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page for Domain1 was not found");
 	}
@@ -69,7 +69,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");
 	}
@@ -80,7 +80,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("This is domain2");
 	}
@@ -91,7 +91,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver");
 	}
@@ -102,7 +102,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver");
 	}
@@ -113,7 +113,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver");
 	}
@@ -124,7 +124,7 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = httpsSocket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver");
 	}

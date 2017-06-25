@@ -15,7 +15,7 @@ import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -39,7 +39,7 @@ public class TestListGenerator extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("<td>dean</td><td>5</td><td>red</td>");
 		response.assertContains("<td>jeff</td><td>2</td><td>blue</td");
@@ -52,7 +52,7 @@ public class TestListGenerator extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertNotContains("<td>dean</td><td>5</td><td>red</td>");
 		response.assertNotContains("<td>jeff</td><td>2</td><td>blue</td");

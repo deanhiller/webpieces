@@ -22,7 +22,7 @@ import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.Binder;
@@ -65,7 +65,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		//now resolve the future (which would be done on another thread)
 		future.complete(22);
 
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");
 	}
@@ -88,7 +88,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		future2.complete(55);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		response.assertContains("Your page was not found");		
 	}
@@ -105,7 +105,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		future.completeExceptionally(new NotFoundException("testing notfound from notfound route"));
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");
 	}
@@ -122,7 +122,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		future.completeExceptionally(new RuntimeException("testing notfound from notfound route"));
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");		
 	}
@@ -146,7 +146,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		future2.completeExceptionally(new RuntimeException("fail internal server error route"));
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");
 	}
@@ -167,7 +167,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		future.completeExceptionally(new RuntimeException("test async exception"));
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software...sorry about that");	
 	}
@@ -190,7 +190,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		
 		future2.completeExceptionally(new RuntimeException("fail internal server error route"));
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("The webpieces platform saved them");	
 	}
@@ -207,7 +207,7 @@ public class TestAsynchronousErrors extends AbstractWebpiecesTest {
 		//now have the server complete processing
 		future.complete(5);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_500_INTERNAL_SVR_ERROR);
 		response.assertContains("There was a bug in our software");
 	}

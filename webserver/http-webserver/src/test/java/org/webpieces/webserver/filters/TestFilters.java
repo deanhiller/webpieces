@@ -19,7 +19,7 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.filters.app.Remote;
 import org.webpieces.webserver.https.MockRemote;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 import com.google.inject.AbstractModule;
@@ -44,7 +44,7 @@ public class TestFilters extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-		FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		
 		List<Integer> recorded = mockRemote.getRecorded();

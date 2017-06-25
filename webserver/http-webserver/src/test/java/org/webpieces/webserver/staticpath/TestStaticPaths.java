@@ -23,7 +23,7 @@ import org.webpieces.util.net.URLEncoder;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.FullResponse;
+import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
 
 
@@ -49,7 +49,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("org.webpieces.webserver.staticpath.app.StaticMeta");
 		response.assertContentType("text/plain; charset=utf-8");
@@ -61,7 +61,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 
 		String hash = loadUrlEncodedHash();
 		
@@ -76,7 +76,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("themes.googleusercontent.com");
 		response.assertContentType("text/css; charset=utf-8");
@@ -97,7 +97,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 	}
 	
@@ -107,7 +107,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContentType("image/jpeg");
 		int size = response.getBody().getReadableSize();
@@ -120,7 +120,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_404_NOTFOUND);
 		//render html page when not found...
 		response.assertContentType("text/html; charset=utf-8");
@@ -132,7 +132,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("app.TagsMeta");
 	}
@@ -144,7 +144,7 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
-        FullResponse response = ResponseExtract.waitResponseAndWrap(respFuture);
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Open Sans");
 	}

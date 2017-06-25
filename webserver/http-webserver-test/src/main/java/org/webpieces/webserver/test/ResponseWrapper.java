@@ -21,13 +21,13 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
  * This ensures your test is the same rather it is a chunked download of the resource or a single HttpResponse so testing
  * becomes easier and changes between chunked and non-chunked coming down don't matter 
  */
-public class FullResponse {
+public class ResponseWrapper {
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private final HttpFullResponse fullResp;
 	
-	public FullResponse(HttpFullResponse resp) {
+	public ResponseWrapper(HttpFullResponse resp) {
 		this.fullResp = resp;
 	}
 
