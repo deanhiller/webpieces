@@ -88,9 +88,16 @@ public class JdkSelectorImpl implements JdkSelect
 	        thread.setDaemon(true);
 	        thread.setName(threadName);
 	        thread.start();
+	        
+	        synchronized (this) {
+	        	if(!running)
+	        		this.wait(10000);
+			}
         } catch(IOException e) {
         	throw new NioException(e);
-        }
+        } catch (InterruptedException e) {
+        	throw new RuntimeException(e);
+		}
     }
 
     public void stopPollingThread() {
@@ -122,6 +129,11 @@ public class JdkSelectorImpl implements JdkSelect
         public void run() {
             try {           
                 running = true;
+                
+                synchronized (this) {
+					this.notifyAll();
+				}
+                
                 runLoop();
                 log.trace(()->"shutting down the PollingThread");
                 selector.close();
