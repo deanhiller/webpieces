@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
@@ -177,6 +178,7 @@ public class TestBeans extends AbstractWebpiecesTest {
 		response.assertContains("StreetX");
 	}
 
+	@Ignore
 	@Test
 	public void testIncomingDataAndDataSeperate() {
 		HttpFullRequest req = Requests.createPostRequest("/postArray2",

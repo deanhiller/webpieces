@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -15,7 +14,6 @@ import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.ContentType;
-import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 
@@ -27,33 +25,18 @@ public class FullResponse {
 
 	private static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 	private DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
-	private HttpResponse response;
-	private List<HttpData> datas = new ArrayList<>();
-	private HttpFullResponse fullResp;
+	private final HttpFullResponse fullResp;
 	
-	public FullResponse(HttpResponse response) {
-		this.response = response;
-	}
-
 	public FullResponse(HttpFullResponse resp) {
 		this.fullResp = resp;
 	}
 
-	public void addChunk(HttpData httpChunk) {
-		datas.add(httpChunk);
-	}
-
 	public HttpResponse getResponse() {
-		return response;
+		return fullResp.getResponse();
 	}
 
 	public DataWrapper getBody() {
-		DataWrapper data = dataGen.emptyWrapper();
-		for(HttpData httpData : datas) {
-			data = dataGen.chainDataWrappers(data, httpData.getBodyNonNull());
-		}
-
-		return data;
+		return fullResp.getData();
 	}
 
 	public String getBodyAsString() {
@@ -67,7 +50,7 @@ public class FullResponse {
 	}
 
 	private Charset extractCharset() {
-		Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_TYPE);
+		Header header = getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.CONTENT_TYPE);
 		if(header == null)
 			throw new IllegalArgumentException("no ContentType header could be found");
 		ContentType ct = ContentType.parse(header);
@@ -78,7 +61,7 @@ public class FullResponse {
 	}
 
 	public void assertStatusCode(KnownStatusCode status) {
-		KnownStatusCode knownStatus = response.getStatusLine().getStatus().getKnownStatus();
+		KnownStatusCode knownStatus = getResponse().getStatusLine().getStatus().getKnownStatus();
 		if(status != knownStatus)
 			throw new IllegalStateException("Expected status="+status+" but received="+knownStatus);
 	}
@@ -133,7 +116,7 @@ public class FullResponse {
 	}
 
 	public String getRedirectUrl() {
-		Header header = response.getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
+		Header header = getResponse().getHeaderLookupStruct().getHeader(KnownHeaderName.LOCATION);
 		if(header == null)
 			return null;
 		return header.getValue();
@@ -145,7 +128,7 @@ public class FullResponse {
 	 * @return
 	 */
 	public Header createCookieRequestHeader() {
-		List<Header> headers = response.getHeaderLookupStruct().getHeaders(KnownHeaderName.SET_COOKIE);
+		List<Header> headers = getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.SET_COOKIE);
 		String fullRequestCookie = "";
 		boolean firstLine = true;
 		for(Header header : headers) {

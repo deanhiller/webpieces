@@ -41,7 +41,7 @@ public class DirectHttp11Client implements HttpClient {
 	}
 
 	public HttpSocket createHttpsSocket(SSLEngine engine) {
-		ConnectionListener listener = mgr.getHttpConnection();
+		ConnectionListener listener = mgr.getHttpsConnection();
 		MockTcpChannel channel = new MockTcpChannel();
 
 		try {
