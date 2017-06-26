@@ -5,17 +5,17 @@
 Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
-#### A few key selling points
-* Run SingleSocketThroughput.java to see the server service(well, on my small laptop at least) 6,000,000 requests per minute(100,000 requests per second) with the single threaded implementations (multithreaded with more sockets can do more)
-* Run IntegTestLocalhostThroughput.java to see MB throughput of re-usable NIO layer (On my machine it was 24 Gigbits/second for a single thread, single socket)
+#### A few key selling points(longer down on this page further)
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
-* The http1.1 and http2 clients can backpressure the server as well (if a client backpressures webpieces server, the server will then backpressure to the client sending it through a chain all automatically)
+* Run SingleSocketThroughput.java to see performance.  Well, on my small laptop at least and single threaded, 6 ,000,000 requests per minute(100,000 requests per second)
+* Run IntegTestLocalhostThroughput.java to see MB throughput of re-usable NIO layer (On my machine it was 24 Gigabits/second for a single thread, single socket).  It is a library not a framework like netty(I think of frameworks as inheritance and libraries as composition(ie. prefer composition over inheritance)
+* The http1.1 and http2 clients can backpressure the server as well (if a client backpressures webpieces server, the server will then backpressure to the client sending it through a chain all automatically).  Beware, some servers may close their socket on you or fall over if you backpressure them. You can turn backpressure off if desired.
 * look ma, no restarting the server in development mode with complete java refactoring
 * holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win
 * Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme unlike any server before it)
 * and sooooooo much more
 
-#### Steps to try the webserver
+#### 10 Steps to try the webserver
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
@@ -55,7 +55,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 
 I want to try something new on this project.  If you want something fixed, I will pair with you to fix it ramping up your knowledge while fixing the issue.  We do this with screenhero(remote desktop sharing and control)
 
-A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http client and an independent async http parser1.1 and independent http parser2 and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely 'Feature' Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one for GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
+A project containing all the web pieces (WITH apis) to create a web server (and an actual web server, and an actual http proxy and an http 1.1 client and an http2 client and an independent async http parser1.1 and independent http2 parser and a templating engine and an http router......getting the idea yet, self contained pieces).  This webserver is also made to be extremely 'Feature' Test Driven Development for web app developers such that tests can be written that will test all your filters, controllers, views, redirects and everything all together in one.  This gives GREAT whitebox QE type testing that can be done by the developer.  Don't write brittle low layer tests and instead write high layer tests that are less brittle then their fine grained counter parts (something many of us do at twitter).  
 
 This project is essentially pieces that can be used to build any http related software and full stacks as well.  
 
@@ -114,70 +114,64 @@ This project is essentially pieces that can be used to build any http related so
  * http/http1_1-client - http1.1 client
  * http/http2-parser - An asynchronous http2 parser with all the advantages of no "head of line blocking" issues and pre-emptively sending responses, etc. etc.
  * http/http2-client - http 2 client built on above core components because you know if you server supports http2 AND noy doing 1.1 keeps it simple!!!
- * http/http-frontend - An very thin http library.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end)
- * webserver/http-webserver - a webserver with http 2 support and tons of overriddable pieces via guice
- * core/runtimecompiler - create a compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
+ * http/http2to1_1-client - http1.1 client with an http2 interface SOOOOOO http2-client and http2to1_1-client are swappable as they implement the same api
+ * http/http-frontend - An very thin http webserver.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end and adds it's own http-router and templating engine)
+ * webserver/http-webserver - a webserver with http2 and http1.1 support and tons of overriddable pieces via guice
+ * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
 * let's move to 2.0.x now AND create backwards compatibility test!!!! such that we do not break the example at version 2.0.1. script can check if exist, git clone if not (maybe git pull as we add to that example app?)
 * SSL tests at wrong level.  now that we have mocked the jdk apis, move SSL tests into the asyncserver tests directory(easier apis to mock than chanmgr AND can make sure timeouts and such work AND can verify server backpressure at that level)
-* frontend request backpressure
-* rps throughput test between both
-* add http2 client backpressure tests
-* move gzip to frontend
-* Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine which WILL close the socket down and should not!!
-* move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
-* remove synchronized from http2 engine remote and local flow controls
-* finish up the statemachine tests and with closing stream delay!!
-* add test on client cancelling request stream, cancelling push stream
-* add test on server cancelling request stream, cancelling push stream
-* tests on webserver to test out these cases
+* backpressure through SSL
+* be able to turn off maxconcurrent requests on server and client!!! (though you can set it to Integer.MAX anyways soooo.....maybe not needed)
+* tests, tests, tests
+  * test backpressure on upload file http1.1
+  * test backpressure on download webpieces webserver static route file, http1.1
+  * finish up the statemachine tests and with closing stream delay!!
   * cancel request cancels the future AND all promises
   * cancel request cancets filedowload
   * cancel request cancels static file download(ie. stops reading from filesystem)
   * cancel request cancels file upload
-* (no webserver on the planet does this, but with advent of http2 probably don't need this) eventually do 5.0 version where CompletableFuture is returned from all incomingData calls and we load xxxx bytes but backpressure until more bytes released from acking futures....this is VERY difficult to do through the encryption layer, http1.1 parser, and http2 parser, but alleviates slow attacks in an easier way and http2 never needed connection flow ctrl as webservers could have done this  
-* backpressure
-* add test to farEndClose on http1.1 and http2 clients and near end close and ensure all outstanding requests are failed AND ensure the futures for simple send request response all work
-* modify frontend to cache pipelined 1.1 requests and not serve to server until response finished each time
+  * remote and local flow control test cases on http client and server together OR just one(they use the same engine...soooo?)
+  * add test on client cancelling request stream, cancelling push stream
+  * add test on server cancelling request stream, cancelling push stream
+  * add test to farEndClose on http1.1 and http2 clients and near end close and ensure all outstanding requests are failed AND ensure the futures for simple send request response all work
+  * error test cases http2 client
+  * tests on network outage during ajax calls to make that even cooler (ie. remember how redirect is screwed up.  we need to make network outage behave really nice as well)
+  * tests on whitespace issues on tags and formatting so we can isolate the differences
+  * http1.1 protect pipeline errors with tests(hmmm, is this error out one request and make second request work or something)
+  * channelmanager error testing
+* error test cases on server http2 and then try H2Test
+* move gzip to frontend and move gzip to http client as well!!
+* Need to make sure EVERY exit point calling into the client applications have try...catch and handle to not let their exceptions into the engine which WILL close the socket down and should not!!
+* move this into http11 frontend only channelCloser.closeIfNeeded(request, stream);
+* remove synchronized from http2 engine remote and local flow controls
 * file upload
 * file download
+* streaming forever from controller
+* streaming upload but forever into controller
 * range request?
-* be able to turn off maxconcurrent requests on server and client!!!
 * start an actual multi-homed project
 * add more and more tag examples
 * move examples to @examples url instead
-* write http2 tests for server
-* write http2 tests for client
-* flow control test cases on http client
-* error test cases http2 client
-* flow control server test?  client may cover that same code
-* error test cases on server http2 and then try H2Test
-* tests on network outage during ajax calls to make that even cooler
-* tests on whitespace issues on tags and formatting so we can isolate the differences
-* verify upload file can work http2,etc
-* http1.1 protect pipeline errors with tests
-* max concurent streams is 50 right now for safety ...need to rework that 
+* (post ALPN implementation)verify upload file can work http2,etc
 * java tmp locations seem to be deleted after a while.  research this so tests dont' fail(perhaps touch the files each build so all files have same timestamp)
 * deal with line '                    if(payloadLength > settings.get(Http2Settings.Parameter.SETTINGS_MAX_FRAME_SIZE)'
 * add optimistic locking test case for hibernate plugin with example in webapp and feature tests as examples as well
 * implement Upgrade-Insecure-Requests where if server has SSL enabled, we redirect all pages to ssl
 * response headers to add - X-Frame-Options (add in consumer webapp so can be changed), Keep-Alive with timeout?, Expires -1 (http/google.com), Content-Range(range requests)
-* Database session state plugin tab state as well?
-* Tab state (rather than just global session, but per tab state to put data)
+* Tab state cookies (rather than just global session, but per tab state to put data)
+* Database session state plugin(not tab, session) (ie. can use db for session or cookie)
+* Database tab session state plugin (ie. can use db for tab state instead of cookie?)
 * Metrics/Stats - Need a library to record stats(for graphing) that can record 99 percentile latency(not just average) per controller method as well as stats for many other things as well
 * A/B split testing and experiments - hooks to wire into existing system and hooks to make it easier to create A/B pages
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * google protobuf BodyContentBinder plugin
 * thrift BodyContentBinder plugin
 * plugin for localhost:8080/@documentation and install on the development server
-* streaming forever from controller
-* streaming upload but forever into controller
 * dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
 * codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
-* playing with channel manager, add testing back maybe from legacy version? OR maybe asyncserver project
-* turning the server into a protocol server(with http2, there is no more need for protocol servers...all protocols work over http2 especially if you own the client and webserver like we do above)
 
 #### Examples.....
 
