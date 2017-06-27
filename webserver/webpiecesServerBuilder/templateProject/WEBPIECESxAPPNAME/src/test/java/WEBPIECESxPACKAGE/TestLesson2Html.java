@@ -41,9 +41,9 @@ import WEBPIECESxPACKAGE.mock.MockRemoteSystem;
  * @author dhiller
  *
  */
-public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
+public class TestLesson2Html extends AbstractWebpiecesTest {
 
-	private final static Logger log = LoggerFactory.getLogger(TestLesson1BasicRequestResponse.class);
+	private final static Logger log = LoggerFactory.getLogger(TestLesson2Html.class);
 	
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
@@ -126,7 +126,7 @@ public class TestLesson1BasicRequestResponse extends AbstractWebpiecesTest {
 		response.uncompressBodyAndAssertContainsString("Webpieces");
 	}
 	
-	static HttpFullRequest createRequest(String uri) {
+	public static HttpFullRequest createRequest(String uri) {
 		HttpRequestLine requestLine = new HttpRequestLine();
         requestLine.setMethod(KnownHttpMethod.GET);
 		requestLine.setUri(new HttpUri(uri));

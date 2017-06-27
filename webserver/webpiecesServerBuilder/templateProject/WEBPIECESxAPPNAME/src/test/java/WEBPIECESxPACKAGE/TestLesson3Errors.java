@@ -41,7 +41,7 @@ import WEBPIECESxPACKAGE.mock.MockSomeLibrary;
  * @author dhiller
  *
  */
-public class TestLesson2Errors extends AbstractWebpiecesTest {
+public class TestLesson3Errors extends AbstractWebpiecesTest {
 
 	//see below comments in AppOverrideModule
 	private MockRemoteSystem mockRemote = new MockRemoteSystem(); //our your favorite mock library
@@ -74,7 +74,7 @@ public class TestLesson2Errors extends AbstractWebpiecesTest {
 		mockLibrary.addExceptionToThrow(() -> {
 			throw new RuntimeException("test internal bug page");
 		});
-		HttpFullRequest req = TestLesson1BasicRequestResponse.createRequest("/");
+		HttpFullRequest req = TestLesson2Html.createRequest("/");
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
@@ -88,7 +88,7 @@ public class TestLesson2Errors extends AbstractWebpiecesTest {
 	 */
 	@Test
 	public void testNotFound() {
-		HttpFullRequest req = TestLesson1BasicRequestResponse.createRequest("/route/that/does/not/exist");
+		HttpFullRequest req = TestLesson2Html.createRequest("/route/that/does/not/exist");
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
@@ -104,7 +104,7 @@ public class TestLesson2Errors extends AbstractWebpiecesTest {
 	public void testRemoteSystemDown() {
 		CompletableFuture<Integer> future = new CompletableFuture<Integer>();
 		mockRemote.addValueToReturn(future);
-		HttpFullRequest req = TestLesson1BasicRequestResponse.createRequest("/async");
+		HttpFullRequest req = TestLesson2Html.createRequest("/async");
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		

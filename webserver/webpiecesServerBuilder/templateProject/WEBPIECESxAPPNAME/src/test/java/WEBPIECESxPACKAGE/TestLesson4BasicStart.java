@@ -10,7 +10,7 @@ import org.webpieces.ddl.api.JdbcFactory;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.webserver.test.Asserts;
 
-public class TestLesson3BasicStart {
+public class TestLesson4BasicStart {
 
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;

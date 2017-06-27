@@ -23,7 +23,6 @@ import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
-import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
 import org.webpieces.util.acking.AckAggregator;
@@ -66,9 +65,15 @@ public class HttpSocketImpl implements HttpSocket {
 
 	@Override
 	public CompletableFuture<HttpFullResponse> send(HttpFullRequest request) {
+		if(!request.getRequest().isHasNonZeroContentLength())
+			throw new IllegalArgumentException("HttpRequest must have Content-Length header");
+		else if(request.getRequest().getContentLength() != request.getData().getReadableSize())
+			throw new IllegalArgumentException("HttpRequest Content-Length header value="
+					+request.getRequest().getContentLength()+" does not match payload size="+request.getData().getReadableSize());
+
 		CompletableFuture<HttpFullResponse> future = new CompletableFuture<HttpFullResponse>();
 		HttpResponseListener l = new CompletableListener(future);
-		HttpData data = request.getData();
+		HttpData data = new HttpData(request.getData(), true);
 		send(request.getRequest(), l).thenCompose(w -> {
 			return w.send(data);
 		});

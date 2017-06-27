@@ -34,7 +34,7 @@ import com.google.inject.Module;
  * @author dhiller
  */
 //@Ignore
-public class TestLesson4WithSelenium {
+public class TestLesson5WithSelenium {
 	
 	private static WebDriver driver;
 	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);

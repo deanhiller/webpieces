@@ -10,7 +10,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.data.api.DataWrapper;
@@ -18,7 +17,6 @@ import org.webpieces.data.api.DataWrapperGenerator;
 import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpclient11.api.HttpFullResponse;
-import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.HttpParser;
 import org.webpieces.httpparser.api.HttpParserFactory;
 import org.webpieces.httpparser.api.HttpStatefulParser;
@@ -40,8 +38,8 @@ import org.webpieces.webserver.basic.app.biz.UserDto;
 import org.webpieces.webserver.mock.MockSomeLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.MockTcpChannel;
+import org.webpieces.webserver.test.ResponseWrapper;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -53,7 +51,6 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 	private MockSomeLib mockSomeLib = new MockSomeLib();
 	private MockSomeOtherLib mockSomeOtherLib = new MockSomeOtherLib();
 	private MockExecutor mockExecutor = new MockExecutor();
-	private HttpSocket http11Socket;
 
 	private MockTcpChannel channel = new MockTcpChannel();
 	private DataListener dataListener;
@@ -104,8 +101,7 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 		MarshalState state = parser.prepareToMarshal();
 		ByteBuffer buffer = parser.marshalToByteBuffer(state, req.getRequest());
 		DataWrapper d1 = dataGen.wrapByteBuffer(buffer);
-		ByteBuffer buf2 = parser.marshalToByteBuffer(state, req.getData());
-		DataWrapper data = dataGen.chainDataWrappers(d1, dataGen.wrapByteBuffer(buf2));
+		DataWrapper data = dataGen.chainDataWrappers(d1, req.getData());
 		
 		// Split the body in half
 		List<? extends DataWrapper> split = dataGen.split(data, data.getReadableSize() - 20);

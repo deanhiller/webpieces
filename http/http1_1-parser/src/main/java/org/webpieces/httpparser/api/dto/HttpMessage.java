@@ -41,16 +41,23 @@ public abstract class HttpMessage extends HttpPayload {
     }
     
     public boolean isHasNonZeroContentLength() {
+    	Integer contentLength = getContentLength();
+    	if(contentLength == null)
+    		return false;
+    	else if(contentLength.intValue() == 0)
+    		return false;
+    	return true;
+    }
+    
+    public Integer getContentLength() {
 		Header header = headersStruct.getLastInstanceOfHeader(KnownHeaderName.CONTENT_LENGTH);
 		if(header == null)
-			return false;
+			return null;
 		String value = header.getValue();
 		if(value == null)
-			return false;
+			return null;
 		
 		int len = Integer.parseInt(value);
-		if(len > 0)
-			return true;
-		return false;
+		return len;
     }
 }

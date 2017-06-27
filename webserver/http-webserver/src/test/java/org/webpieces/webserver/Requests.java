@@ -9,7 +9,6 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.httpclient11.api.HttpFullRequest;
 import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
-import org.webpieces.httpparser.api.dto.HttpData;
 import org.webpieces.httpparser.api.dto.HttpRequest;
 import org.webpieces.httpparser.api.dto.HttpRequestLine;
 import org.webpieces.httpparser.api.dto.HttpUri;
@@ -99,34 +98,31 @@ public class Requests {
 		
 		byte[] bytes = encodedParams.getBytes(StandardCharsets.UTF_8);
 		DataWrapper body = gen.wrapByteArray(bytes);
-		HttpData data = new HttpData(body, true);
 		
 		req.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, ""+body.getReadableSize()));
 		req.addHeader(new Header(KnownHeaderName.CONTENT_TYPE, "application/x-www-form-urlencoded"));
 		
-		return new HttpFullRequest(req, data);
+		return new HttpFullRequest(req, body);
 	}
 
 	public static HttpFullRequest createJsonRequest(KnownHttpMethod method, String url) {
 		HttpRequest request = createBaseRequest(method, url);
 		String json = "{ `query`: `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
-		HttpData data = new HttpData(body, true);
 
 		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
 		
-		return new HttpFullRequest(request, data);
+		return new HttpFullRequest(request, body);
 	}
 
 	public static HttpFullRequest createBadJsonRequest(KnownHttpMethod method, String url) {
 		HttpRequest request = createBaseRequest(method, url);
 		String json = "{ `query `cats and dogs`, `meta`: { `numResults`: 4 } }".replace("`", "\"");
 		DataWrapper body = gen.wrapByteArray(json.getBytes());
-		HttpData data = new HttpData(body, true);
 
 		request.addHeader(new Header(KnownHeaderName.CONTENT_LENGTH, body.getReadableSize()+""));
 		
-		return new HttpFullRequest(request, data);
+		return new HttpFullRequest(request, body);
 	}
 	
 }

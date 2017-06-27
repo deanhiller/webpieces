@@ -128,6 +128,9 @@ This project is essentially pieces that can be used to build any http related so
   * test backpressure on upload file http1.1
   * test backpressure on download webpieces webserver static route file, http1.1
   * finish up the statemachine tests and with closing stream delay!!
+  * IOException ChannelManager (needs to be manually tested on diff. scenarios)
+    * manual then simulate - close remote socket on mac, windows, linux and then simulate automated test(each may be different)
+    * manual then simulate - unplug computer from network and simulate
   * cancel request cancels the future AND all promises
   * cancel request cancets filedowload
   * cancel request cancels static file download(ie. stops reading from filesystem)
