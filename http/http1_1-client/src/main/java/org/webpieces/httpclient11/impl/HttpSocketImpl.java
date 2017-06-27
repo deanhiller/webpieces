@@ -65,7 +65,11 @@ public class HttpSocketImpl implements HttpSocket {
 
 	@Override
 	public CompletableFuture<HttpFullResponse> send(HttpFullRequest request) {
-		if(!request.getRequest().isHasNonZeroContentLength())
+		Integer contentLength = request.getRequest().getContentLength();
+		if(request.getData() == null || request.getData().getReadableSize() == 0) {
+			if(contentLength != null && contentLength != 0)
+				throw new IllegalArgumentException("HttpRequest has 0 Content-Length but readable size="+request.getData().getReadableSize());
+		} else if(!request.getRequest().isHasNonZeroContentLength())
 			throw new IllegalArgumentException("HttpRequest must have Content-Length header");
 		else if(request.getRequest().getContentLength() != request.getData().getReadableSize())
 			throw new IllegalArgumentException("HttpRequest Content-Length header value="
