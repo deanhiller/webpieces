@@ -26,16 +26,7 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 		JsonError error = new JsonError();
 		error.setError(escapeJson);
 		error.setCode(0);
-		
-		try {
-			return mapper.writeValueAsBytes(error);
-		} catch (JsonGenerationException e) {
-			throw new RuntimeException(e);
-		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return translateJson(mapper, error);
 	}
 
 	@Override
@@ -43,16 +34,7 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 		JsonError error = new JsonError();
 		error.setError("This url has no api.  try another url");
 		error.setCode(0);
-		try {
-			byte[] data = mapper.writeValueAsBytes(error);
-			return data;
-		} catch (JsonGenerationException e) {
-			throw new RuntimeException(e);
-		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return translateJson(mapper, error);
 	}
 
 	@Override
@@ -60,16 +42,7 @@ public class TestCatchAllFilter extends JacksonCatchAllFilter {
 		JsonError error = new JsonError();
 		error.setError("Server ran into a bug, please report");
 		error.setCode(0);
-		try {
-			byte[] data = mapper.writeValueAsBytes(error);
-			return data;
-		} catch (JsonGenerationException e) {
-			throw new RuntimeException(e);
-		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return translateJson(mapper, error);
 	}
 	
 }

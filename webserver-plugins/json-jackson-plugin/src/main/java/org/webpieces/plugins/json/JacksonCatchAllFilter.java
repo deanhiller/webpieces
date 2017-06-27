@@ -1,10 +1,14 @@
 package org.webpieces.plugins.json;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
@@ -87,5 +91,17 @@ public abstract class JacksonCatchAllFilter extends RouteFilter<JsonConfig> {
 	 * json if you really want
 	 */
 	protected abstract byte[] createNotFoundJsonResponse();
+	
+	protected byte[] translateJson(ObjectMapper mapper, Object error) {
+		try {
+			return mapper.writeValueAsBytes(error);
+		} catch (JsonGenerationException e) {
+			throw new RuntimeException(e);
+		} catch (JsonMappingException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 }
