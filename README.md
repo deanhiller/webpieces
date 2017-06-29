@@ -97,6 +97,7 @@ This project is essentially pieces that can be used to build any http related so
 * Security - cookie is hashed so can't be modified without failing next request
 * Security - Form auth token in play1.3.x+  can be accidentally missed leaving security hole unless app developer is diligent.  By default, we make it near impossible to miss the auth token AND check that token in forms for the developer(putting it in is automatic in play 1.3 but checking it is not leaving a hole if you don't know and many don't know)
 * State per tab rather than just per session.  All web frameworks have a location to store session state but if you go to buy a plane ticket in 3 different tabs, the three tabs can step on each other.  A location to store information for each tab is needed
+* Tests now test for backwards compatibility so we(developers) do not accidentally break compatibility with your app except on major releases
 
 #### Downsides
   Currently documentation is lacking but there is an example for pretty much everything in webpieces/webserver/http-webserver/src/test/java/* as we do something called feature testing(testing as user would use the system) for all paths of code.
@@ -120,7 +121,6 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* let's move to 2.0.x now AND create backwards compatibility test!!!! such that we do not break the example at version 2.0.1. script can check if exist, git clone if not (maybe git pull as we add to that example app?)
 * SSL tests at wrong level.  now that we have mocked the jdk apis, move SSL tests into the asyncserver tests directory(easier apis to mock than chanmgr AND can make sure timeouts and such work AND can verify server backpressure at that level)
 * backpressure through SSL
 * be able to turn off maxconcurrent requests on server and client!!! (though you can set it to Integer.MAX anyways soooo.....maybe not needed)
