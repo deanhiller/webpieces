@@ -6,6 +6,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 #### A few key selling points(longer down on this page further)
+* Over 370 customer facing tests(QA tests testing from your point of view)
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
 * Run SingleSocketThroughput.java to see performance.  Well, on my small laptop at least and single threaded, 6 ,000,000 requests per minute(100,000 requests per second)
 * Run IntegTestLocalhostThroughput.java to see MB throughput of re-usable NIO layer (On my machine it was 24 Gigabits/second for a single thread, single socket).  It is a library not a framework like netty(I think of frameworks as inheritance and libraries as composition(ie. prefer composition over inheritance)
