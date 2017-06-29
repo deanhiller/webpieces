@@ -18,7 +18,7 @@ plugins {
     //google "gradle build scan" or https://github.com/gradle/gradle-build-scan-quickstart
     // essentially, ./gradlew build -Dscan
     id 'com.gradle.build-scan' version '1.0' //google "gradle build scan"
-    id 'com.dorongold.task-tree' version '1.2.2' //This prints out a task tree dependency (pretty print)
+    //id 'com.dorongold.task-tree' version '1.2.2' //This prints out a task tree dependency (pretty print)
 }
 
 //This is only used in the master project to close a repo and promote with nexus..(and the plugin only allows top level usage)
@@ -84,7 +84,7 @@ allprojects {
    }
 
    jacoco {
-      toolVersion = '0.7.1.201405082137'
+      toolVersion = '0.7.9'
    }
 }
 
@@ -337,7 +337,10 @@ if(project.hasProperty('projVersion')) {
 //We will do this if we see it breaking now and then if needed to prevent breaks
 //task integrationTestTemplate
 
-task uploadArchives2 << { }
+task uploadArchives2 { 
+    doLast {
+    }
+}
 
 uploadArchives2.dependsOn {
     project.subprojects.collectMany { project -> project.tasks }.findAll { task -> task.name.equals("uploadArchives") }
@@ -351,8 +354,10 @@ promoteRepository.doFirst {
   println("done sleeping go promote repo now");
 }
 
-task printTasks << {
-    project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
+task printTasks {
+    doLast {
+       project.tasks.collect { task -> println("task="+task+" dependsOn="+task.dependsOn) }
+    }
 }
 
 task release(dependsOn: ':webserver:githubRelease')
@@ -384,7 +389,9 @@ task jacocoTestReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
 //project BUT we need build and clean to work inline with the java projects
 task build(dependsOn: ':jacocoTestReport')
 
-task clean() << {
-   delete "${buildDir}"
+task clean() {
+   doLast {
+      delete "${buildDir}"
+   }
 }
 
