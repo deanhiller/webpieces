@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.exceptions.NioException;
-import org.webpieces.nio.api.mocks.MockChannel;
+import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.util.threading.DirectExecutor;
@@ -21,7 +21,7 @@ import org.webpieces.util.threading.DirectExecutor;
 public class TestConnecting {
 
 	private ChannelManager mgr;
-	private MockChannel mockChannel = new MockChannel();
+	private MockClientSideJdkChannel mockChannel = new MockClientSideJdkChannel();
 	private MockJdk mockJdk = new MockJdk(mockChannel);
 
 	@Before

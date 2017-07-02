@@ -4,6 +4,7 @@ import javax.net.ssl.SSLEngine;
 
 import org.webpieces.data.api.BufferPool;
 import org.webpieces.ssl.impl.AsyncSSLEngine2Impl;
+import org.webpieces.ssl.impl.SSLParserImpl;
 
 public class AsyncSSLFactory {
 
@@ -20,5 +21,9 @@ public class AsyncSSLFactory {
 		//like api depending on implementation, we need reflection here to create this
 		//instance...
 		return new AsyncSSLEngine2Impl(loggingId, engine, pool, listener);
+	}
+	
+	public static SSLParser create(String logId, SSLEngine engine, BufferPool pool) {
+		return new SSLParserImpl(logId, engine, pool);
 	}
 }

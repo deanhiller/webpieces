@@ -10,11 +10,11 @@ test_result=$?
 if [ $test_result -eq 0 ]
 then
   echo "##################################"
-  echo "Successfully BUILT FAKE RELEASE $?"
+  echo "Successfully BUILT FAKE MAVEN RELEASE(FOR TESTING) $?"
   echo "##################################"
 else
   echo "##################################"
-  echo "BUILDING FAKE RELEASE FAILED $test_result"
+  echo "BUILDING FAKE MAVEN RELEASE(FOR TESTING) FAILED $test_result"
   echo "##################################"
   exit $test_result
 fi

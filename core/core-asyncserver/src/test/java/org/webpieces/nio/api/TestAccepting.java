@@ -12,14 +12,14 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
-import org.webpieces.nio.api.mocks.MockChannel;
+import org.webpieces.nio.api.mocks.MockSvrSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
 public class TestAccepting {
 
-	private MockChannel mockChannel = new MockChannel(); 
+	private MockSvrSideJdkChannel mockChannel = new MockSvrSideJdkChannel(); 
 	private MockSvrChannel mockSvrChannel = new MockSvrChannel();
 	private MockJdk mockJdk = new MockJdk(mockSvrChannel);
 	private AsyncServerManager svrMgr;

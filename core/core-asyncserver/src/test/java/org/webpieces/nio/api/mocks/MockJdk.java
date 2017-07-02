@@ -72,7 +72,7 @@ public class MockJdk extends MockSuperclass implements JdkSelect {
 	@Override
 	public Keys select() {
 		Set<SelectionKey> keys = new HashSet<>(); 
-		for(MockChannel c : mockSvrChannel.getConnectedChannels()) {
+		for(MockSvrSideJdkChannel c : mockSvrChannel.getConnectedChannels()) {
 			SelectionKey key = c.getKey();
 			if(key != null)
 				keys.add(key);

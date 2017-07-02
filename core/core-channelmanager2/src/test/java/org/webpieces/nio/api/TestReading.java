@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.mocks.MockChannel;
+import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.util.threading.DirectExecutor;
@@ -19,7 +19,7 @@ import org.webpieces.util.threading.DirectExecutor;
 public class TestReading {
 
 	private ChannelManager mgr;
-	private MockChannel mockChannel = new MockChannel();
+	private MockClientSideJdkChannel mockChannel = new MockClientSideJdkChannel();
 	private MockJdk mockJdk = new MockJdk(mockChannel);
 	private TCPChannel channel;
 	private MockDataListener listener;
@@ -46,10 +46,7 @@ public class TestReading {
 
 	@Test
 	public void testRead() throws InterruptedException, ExecutionException, TimeoutException {
-		mockChannel.addToRead(new byte[] { 4, 5 });
-		mockChannel.setReadyToRead();
-		
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 4, 5 });
 
 		byte[] data = listener.getSingleData();
 		Assert.assertEquals(data[0], 4);
@@ -68,27 +65,19 @@ public class TestReading {
 		listener.addIncomingRetValue(future3);
 		listener.addIncomingRetValue(future4);
 		
-		mockChannel.addToRead(new byte[] { 1, 2, 3 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 1, 2, 3 });
 
 		Assert.assertEquals(3, listener.getSingleData().length);
 		
-		mockChannel.addToRead(new byte[] { 4, 5 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 4, 5 });
 
 		Assert.assertEquals(2, listener.getSingleData().length);
 
-		mockChannel.addToRead(new byte[] { 6, 7, 8 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 6, 7, 8 });
 		
 		Assert.assertEquals(3, listener.getSingleData().length);
 
-		mockChannel.addToRead(new byte[] { 6, 7, 8, 9 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 6, 7, 8, 9 });
 		
 		Assert.assertEquals(0, listener.getNumTimesCalledIncomingData());
 		

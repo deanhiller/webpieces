@@ -1,5 +1,7 @@
 #!/bin/bash
 
+start=`date +%s`
+
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 cd $DIR
@@ -21,3 +23,9 @@ fi
 #MUST turn parallel builds off for release or it fails!!!
 #We skip tests since those are done in runAllTesting.sh AND that script ALSO test legacy compatibility and building a fake project from the new release AND starting the server
 time ./gradlew --stacktrace -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -PprojVersion=$@ clean release -x test
+
+end=`date +%s`
+runtime=$((end-start))
+echo "###################################"
+echo "RUNTIME=$runtime (MOST of this is due to sonas plugin needing to be single threaded)"
+echo "###################################"

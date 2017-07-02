@@ -25,11 +25,11 @@ public class MockJdk extends MockSuperclass implements JdkSelect {
 
 	private SelectorListener cachedListener;
 	private Thread currentThread;
-	private MockChannel[] channels;
+	private MockClientSideJdkChannel[] channels;
 
-	public MockJdk(MockChannel ... channels) {
+	public MockJdk(MockClientSideJdkChannel ... channels) {
 		this.channels = channels;
-		for(MockChannel c : channels) {
+		for(MockClientSideJdkChannel c : channels) {
 			super.addValueToReturn(Method.OPEN, c);
 		}
 	}
@@ -75,7 +75,7 @@ public class MockJdk extends MockSuperclass implements JdkSelect {
 	@Override
 	public Keys select() {
 		Set<SelectionKey> keys = new HashSet<>(); 
-		for(MockChannel c : channels) {
+		for(MockClientSideJdkChannel c : channels) {
 			SelectionKey key = c.getKey();
 			if(key != null)
 				keys.add(key);

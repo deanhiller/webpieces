@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.TCPChannel;
-import org.webpieces.nio.api.mocks.MockChannel;
+import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockDataListener;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.util.threading.DirectExecutor;
@@ -20,7 +20,7 @@ import org.webpieces.util.threading.DirectExecutor;
 public class TestWriting {
 
 	private ChannelManager mgr;
-	private MockChannel mockChannel = new MockChannel();
+	private MockClientSideJdkChannel mockChannel = new MockClientSideJdkChannel();
 	private MockJdk mockJdk = new MockJdk(mockChannel);
 	private TCPChannel channel;
 

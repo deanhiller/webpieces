@@ -17,8 +17,8 @@ import org.webpieces.nio.api.jdk.JdkSocketChannel;
 
 public class MockSvrChannel extends MockSuperclass implements JdkServerSocketChannel {
 
-	private List<MockChannel> toConnect = new ArrayList<>();
-	private List<MockChannel> connected2 = new ArrayList<>();
+	private List<MockSvrSideJdkChannel> toConnect = new ArrayList<>();
+	private List<MockSvrSideJdkChannel> connected2 = new ArrayList<>();
 
 	private MockSelectionKey selectionKey;
 
@@ -49,7 +49,7 @@ public class MockSvrChannel extends MockSuperclass implements JdkServerSocketCha
 
 	@Override
 	public JdkSocketChannel accept() throws IOException {
-		MockChannel channel = toConnect.remove(0);
+		MockSvrSideJdkChannel channel = toConnect.remove(0);
 		if(toConnect.size() == 0) {
 			selectionKey = null;
 		}
@@ -95,14 +95,14 @@ public class MockSvrChannel extends MockSuperclass implements JdkServerSocketCha
 		return true;
 	}
 
-	public void addNewChannel(MockChannel mockChannel) {
+	public void addNewChannel(MockSvrSideJdkChannel mockChannel) {
 		if(selectionKey == null)
 			selectionKey = new MockSelectionKey();
 		selectionKey.setReadyToAccept();
 		this.toConnect.add(mockChannel);
 	}
 
-	public List<MockChannel> getConnectedChannels() {
+	public List<MockSvrSideJdkChannel> getConnectedChannels() {
 		return connected2;
 	}
 

@@ -14,14 +14,14 @@ import org.webpieces.asyncserver.api.AsyncServerManager;
 import org.webpieces.asyncserver.api.AsyncServerMgrFactory;
 import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.mocks.MockAsyncListener;
-import org.webpieces.nio.api.mocks.MockChannel;
+import org.webpieces.nio.api.mocks.MockSvrSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSvrChannel;
 import org.webpieces.util.threading.DirectExecutor;
 
 public class TestSvrReading {
 
-	private MockChannel mockChannel = new MockChannel(); 
+	private MockSvrSideJdkChannel mockChannel = new MockSvrSideJdkChannel(); 
 	private MockSvrChannel mockSvrChannel = new MockSvrChannel();
 	private MockJdk mockJdk = new MockJdk(mockSvrChannel);
 	private MockAsyncListener listener;
@@ -53,10 +53,7 @@ public class TestSvrReading {
 	@Test
 	public void testBasicConnectingOnSelectorThread() {
 
-		mockChannel.addToRead(new byte[] { 4, 5 });
-		mockChannel.setReadyToRead();
-		
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 4, 5 });
 
 		byte[] data = listener.getSingleData();
 		Assert.assertEquals(data[0], 4);
@@ -75,27 +72,19 @@ public class TestSvrReading {
 		listener.addIncomingRetValue(future3);
 		listener.addIncomingRetValue(future4);
 		
-		mockChannel.addToRead(new byte[] { 1, 2, 3 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 1, 2, 3 });
 
 		Assert.assertEquals(3, listener.getSingleData().length);
 		
-		mockChannel.addToRead(new byte[] { 4, 5 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 4, 5 });
 
 		Assert.assertEquals(2, listener.getSingleData().length);
 
-		mockChannel.addToRead(new byte[] { 6, 7, 8 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 6, 7, 8 });
 		
 		Assert.assertEquals(3, listener.getSingleData().length);
 
-		mockChannel.addToRead(new byte[] { 6, 7, 8, 9 });
-		mockChannel.setReadyToRead();
-		mockJdk.fireSelector();
+		mockChannel.forceDataRead(mockJdk, new byte[] { 6, 7, 8, 9 });
 		
 		Assert.assertEquals(0, listener.getNumTimesCalledIncomingData());
 		
