@@ -5,11 +5,11 @@
 Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
-#### A few key selling points(longer down on this page further)
-* Over 370 customer facing tests(QA tests testing from your point of view)
+#### A few key selling points( More advantages in another section below as well)
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
+  * This feature is tough requiring the need for backpressure translation across our http2 parser, http1.1 parser, and the SSL encryption layer which is why nearly all webservers do not do this feature
 * Run SingleSocketThroughput.java to see performance.  Well, on my small laptop at least and single threaded, 6 ,000,000 requests per minute(100,000 requests per second)
-* Run IntegTestLocalhostThroughput.java to see MB throughput of re-usable NIO layer (On my machine it was 24 Gigabits/second for a single thread, single socket).  It is a library not a framework like netty(I think of frameworks as inheritance and libraries as composition(ie. prefer composition over inheritance)
+* Run IntegTestLocalhostThroughput.java to see MB throughput of re-usable NIO layer (On my machine it was 24 Gigabits/second for a single thread, single socket).  It is a library not a framework (I think of frameworks as inheritance and libraries as composition(ie. prefer composition over inheritance)).  netty is a framwork making it tougher to use.
 * The http1.1 and http2 clients can backpressure the server as well (if a client backpressures webpieces server, the server will then backpressure to the client sending it through a chain all automatically).  Beware, some servers may close their socket on you or fall over if you backpressure them. You can turn backpressure off if desired.
 * look ma, no restarting the server in development mode with complete java refactoring
 * holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win
@@ -62,6 +62,7 @@ This project is essentially pieces that can be used to build any http related so
 
 #### Advantages of webpieces
 
+* Over 370 customer facing tests(QA tests testing from customers point of view)
 * Ability to backpressure to prevent clients from writing to their sockets during extreme load so the server never falls over
 * Clients and the nio library uses also have backpressure mechanics that can be used to backpressure servers if desired(generally you should keep up with the server since you are a client though!!).  If you back pressure a webpieces client talking to a webpieces server, the server could start backpressuring your client requests as well
 * holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win

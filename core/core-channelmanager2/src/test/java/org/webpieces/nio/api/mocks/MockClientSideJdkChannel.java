@@ -9,12 +9,16 @@ import java.nio.channels.SelectionKey;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
 
 public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocketChannel {
 
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	enum Method implements MethodEnum {
 		CONNECT,
 		FAR_END_CLOSED,
@@ -80,8 +84,10 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 		return queue.remove();
 	}
 	
-	public byte[] nextPayload() {
-		return payloadQueue.remove();
+	public DataWrapper nextPayload() {
+		byte[] payload = payloadQueue.remove();
+		DataWrapper dataWrapper = dataGen.wrapByteArray(payload);
+		return dataWrapper;
 	}
 	
 	@Override
@@ -220,6 +226,10 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 	}
 	public int getNumBytesConsumed() {
 		return queue.size();
+	}
+
+	public void forceDataRead(MockJdk mockJdk, DataWrapper wrapper) {
+		forceDataRead(mockJdk, wrapper.createByteArray());
 	}
 	
 	public void forceDataRead(MockJdk mockJdk, byte[] buffer) {

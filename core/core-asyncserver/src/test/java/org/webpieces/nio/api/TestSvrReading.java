@@ -3,6 +3,7 @@ package org.webpieces.nio.api;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
@@ -27,7 +28,7 @@ public class TestSvrReading {
 	private MockAsyncListener listener;
 
 	@Before
-	public void setup() {
+	public void setup() throws InterruptedException, ExecutionException, TimeoutException {
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
 		DirectExecutor exec = new DirectExecutor();
 		BackpressureConfig config = new BackpressureConfig();
@@ -43,6 +44,11 @@ public class TestSvrReading {
 		CompletableFuture<Void> future = server.start(new InetSocketAddress(4444));
 		Assert.assertFalse(future.isDone());
 
+		mockJdk.setThread(Thread.currentThread());
+		mockJdk.fireSelector();
+		
+		future.get(2, TimeUnit.SECONDS);
+		
 		mockSvrChannel.addNewChannel(mockChannel);
 		mockJdk.setThread(Thread.currentThread());
 		mockJdk.fireSelector();

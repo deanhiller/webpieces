@@ -9,12 +9,17 @@ import java.nio.channels.SelectionKey;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.webpieces.data.api.DataWrapper;
+import org.webpieces.data.api.DataWrapperGenerator;
+import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.mock.MethodEnum;
 import org.webpieces.mock.MockSuperclass;
 import org.webpieces.nio.api.jdk.JdkSocketChannel;
 
 public class MockSvrSideJdkChannel extends MockSuperclass implements JdkSocketChannel {
 
+	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
+	
 	enum Method implements MethodEnum {
 		CONNECT,
 		FAR_END_CLOSED,
@@ -25,6 +30,7 @@ public class MockSvrSideJdkChannel extends MockSuperclass implements JdkSocketCh
 	private MockSelectionKey selectionKey;
 	private int numBytesToConsume;
 	private Queue<Byte> queue = new LinkedBlockingQueue<>();
+	private Queue<byte[]> payloadQueue = new LinkedBlockingQueue<>();
 	private Queue<byte[]> toRead = new LinkedBlockingQueue<>();
 
 	public void addConnectReturnValue(boolean isConnected) {
@@ -67,6 +73,7 @@ public class MockSvrSideJdkChannel extends MockSuperclass implements JdkSocketCh
 		numBytesToConsume -= min;
 		byte[] data = new byte[min];
 		buf.get(data); //simulate consumption
+		payloadQueue.add(data);
 		for(byte b : data)
 			queue.add(b);
 		return min;
@@ -74,6 +81,12 @@ public class MockSvrSideJdkChannel extends MockSuperclass implements JdkSocketCh
 
 	public byte nextByte() {
 		return queue.remove();
+	}
+	
+	public DataWrapper nextPayload() {
+		byte[] payload = payloadQueue.remove();
+		DataWrapper dataWrapper = dataGen.wrapByteArray(payload);
+		return dataWrapper;
 	}
 	
 	@Override
@@ -214,6 +227,10 @@ public class MockSvrSideJdkChannel extends MockSuperclass implements JdkSocketCh
 		return queue.size();
 	}
 
+	public void forceDataRead(MockJdk mockJdk, DataWrapper buffer) {
+		forceDataRead(mockJdk, buffer.createByteArray());
+	}
+	
 	public void forceDataRead(MockJdk mockJdk, byte[] buffer) {
 		toRead.add(buffer);
 		selectionKey.setReadyToRead(); //update key state to ready to read
@@ -223,6 +240,9 @@ public class MockSvrSideJdkChannel extends MockSuperclass implements JdkSocketCh
 	@Override
 	public SocketAddress getRemoteAddress() throws IOException {
 		return null;
+	}
+	public int getPayloadQueueSize() {
+		return payloadQueue.size();
 	}
 
 }

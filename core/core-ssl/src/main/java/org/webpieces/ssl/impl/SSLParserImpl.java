@@ -1,6 +1,8 @@
 package org.webpieces.ssl.impl;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLEngine;
@@ -12,8 +14,8 @@ import org.webpieces.data.api.DataWrapperGeneratorFactory;
 import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.SslListener;
-import org.webpieces.ssl.api.SslResult;
-import org.webpieces.ssl.api.SslState;
+import org.webpieces.ssl.api.dto.SslAction;
+import org.webpieces.ssl.api.dto.SslActionEnum;
 
 public class SSLParserImpl implements SSLParser {
 
@@ -39,12 +41,22 @@ public class SSLParserImpl implements SSLParser {
 
 		@Override
 		public CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
+			if(encryptedData != null) {
+				DataWrapper newBuf = dataGen.wrapByteBuffer(engineToSocketData);
+				encryptedData = dataGen.chainDataWrappers(encryptedData, newBuf);
+				return CompletableFuture.completedFuture(null);
+			}
 			encryptedData = dataGen.wrapByteBuffer(engineToSocketData);
 			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override
 		public void sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+			if(encryptedData != null) {
+				DataWrapper newBuf = dataGen.wrapByteBuffer(engineToSocketData);
+				encryptedData = dataGen.chainDataWrappers(encryptedData, newBuf);
+				return;
+			}
 			encryptedData = dataGen.wrapByteBuffer(engineToSocketData);
 		}
 
@@ -67,9 +79,11 @@ public class SSLParserImpl implements SSLParser {
 	}
 
 	@Override
-	public CompletableFuture<SslResult> parseIncoming(DataWrapper dataWrapper) {
+	public CompletableFuture<List<SslAction>> parseIncoming(DataWrapper dataWrapper) {
 		byte[] bytes = dataWrapper.createByteArray();
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		encryptedData = null;
+		decryptedData = null;
 		do {
 			if(lastRunnable != null) {
 				Runnable toRun = lastRunnable;
@@ -80,21 +94,37 @@ public class SSLParserImpl implements SSLParser {
 
 		} while(lastRunnable != null);
 
-		SslState state;
-		if(encryptedData != null)
-			state = SslState.SEND_TO_SOCKET;
-		else if(decryptedData != null)
-			state = SslState.SEND_TO_APP;
-		else
-			throw new IllegalStateException("state not expected.  all is null?");
-			
-		SslResult result = new SslResultImpl(
-				state,
-				encryptedData,
-				decryptedData,
-				isClientInitiatedClosed);
+		return createResult();
+	}
+
+	private CompletableFuture<List<SslAction>> createResult() {
+		List<SslAction> infos = new ArrayList<>();
+		
+		if(encryptedData != null) {
+			infos.add(new SslAction(SslActionEnum.SEND_TO_SOCKET, encryptedData, null));
+			encryptedData = null;
+		} 
+		
+		if(decryptedData != null) {
+			infos.add(new SslAction(SslActionEnum.SEND_TO_APP, null, decryptedData));
+			decryptedData = null;
+		}
+		
+		if(encryptedLinkEsstablished) {
+			encryptedLinkEsstablished = false;
+			infos.add(new SslAction(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, null, null));
+		}
+
+		if(infos.size() == 0)
+			infos.add(new SslAction(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, null, null));
 		
 		//get result from above
-		return CompletableFuture.completedFuture(result);
+		return CompletableFuture.completedFuture(infos);
+	}
+
+	@Override
+	public CompletableFuture<List<SslAction>> beginHandshake() {
+		engine.beginHandshake();
+		return createResult();
 	}
 }

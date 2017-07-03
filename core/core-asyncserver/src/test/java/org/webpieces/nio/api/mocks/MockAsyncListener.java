@@ -47,9 +47,26 @@ public class MockAsyncListener extends MockSuperclass implements AsyncDataListen
 
 	@Override
 	public void connectionOpened(TCPChannel proxy, boolean isReadyForWrites) {
-		super.calledVoidMethod(Method.CONNECTION_OPENED, proxy, isReadyForWrites);
+		super.calledVoidMethod(Method.CONNECTION_OPENED, new ConnectionOpen(proxy, isReadyForWrites));
 	}
 
+	public ConnectionOpen getConnectionOpenedInfo() {
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.CONNECTION_OPENED);
+		if(list.size() != 1)
+			throw new IllegalStateException("This method was not called exactly once which is expected");
+		return (ConnectionOpen) list.get(0).getArgs()[0];
+	}
+	
+	public static class ConnectionOpen {
+		public TCPChannel channel;
+		public boolean isReadyForWrites;
+
+		public ConnectionOpen(TCPChannel channel, boolean isReadyForWrites) {
+			this.channel = channel;
+			this.isReadyForWrites = isReadyForWrites;
+		}
+	}
+	
 	public int getNumTimesCalledConnectionOpen() {
 		return super.getCalledMethodList(Method.CONNECTION_OPENED).size();
 	}
