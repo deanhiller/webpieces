@@ -19,7 +19,9 @@ public class VirtualFileImpl implements VirtualFile {
 	private File file;
 
 	public VirtualFileImpl(File file) {
-		this.file = file;
+		//next one line is an odd fix needed for apple and 1.8.0_111.  remove and rerun tests to see if fixed ;)
+		//for some reason, to work, the absolute file is needed which is there but not being used for some reason
+		this.file = new File(file.getAbsolutePath());
 	}
 	
 	public VirtualFileImpl(String fileName) {

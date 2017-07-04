@@ -79,7 +79,9 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 			store(metaFile, properties);
 	}
 
-	private void store(File metaFile, Properties p) {
+	private void store(File metaFile1, Properties p) {
+		//next one line is an odd fix needed for apple and 1.8.0_111.  remove and rerun tests to see if fixed ;)
+		File metaFile = new File(metaFile1.getAbsolutePath());
 		try {
 			FileOutputStream out = new FileOutputStream(metaFile);
 			p.store(out, "file hashes for next time.  Single file format(key:urlPathOnly, value:hash), directory format(key:urlPath+relativeFilePath, value:hash)");
@@ -121,7 +123,9 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		return modified;
 	}
 
-	private boolean maybeAddFileToCache(Properties properties, File src, File destination, String urlPath) {
+	private boolean maybeAddFileToCache(Properties properties, File src, File destination1, String urlPath) {
+		//next one line is an odd fix needed for apple and 1.8.0_111.  remove and rerun tests to see if fixed ;)
+		File destination = new File(destination1.getAbsolutePath());
 		String name = src.getName();
 		int indexOf = name.lastIndexOf(".");
 		if(indexOf < 0) {
@@ -195,16 +199,25 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 	}
 
 	private void createDirectory(File directoryToCreate) {
-		if(directoryToCreate.exists()) {
-			if(!directoryToCreate.isDirectory())
-				throw new RuntimeException("File="+directoryToCreate+" is NOT a directory and we need a directory there...perhaps"
+		//ran into this on MAC
+		//directoryToCreate.getAbsolutePath() and
+		//new File(System.getProperty("user.dir"), directoryToCreate.getPath()).getAbsolutePath
+		//were EXACTLY the same!!!!
+		//BUT
+		//directoryToCreate.exists() returns false AND
+		//new File(System.getProperty("user.dir"), directoryToCreate.getPath()).exists() returns true
+		//so, form the whole path first
+		File absoluteDirToCreate = new File(directoryToCreate.getAbsolutePath());
+		if(absoluteDirToCreate.exists()) {
+			if(!absoluteDirToCreate.isDirectory())
+				throw new RuntimeException("File="+absoluteDirToCreate+" is NOT a directory and we need a directory there...perhaps"
 						+ " delete the cache and restart the server as something is corrupt");
 			return;
 		}
 		
-		boolean success = directoryToCreate.mkdirs();
+		boolean success = absoluteDirToCreate.mkdirs();
 		if(!success)
-			throw new RuntimeException("Could not create cache directory="+directoryToCreate);
+			throw new RuntimeException("Could not create cache directory="+absoluteDirToCreate);
 	}
 
 	@Override

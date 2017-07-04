@@ -29,7 +29,7 @@ public class TestCompressionCache {
 	
 	private CompressionCacheSetup cache;
 	private TestFileUtilProxy proxy = new TestFileUtilProxy();
-	private File cacheDir = new File(System.getProperty("java.io.tmpdir")+"/cacheForTesting");
+	private File cacheDir = new File(System.getProperty("java.io.tmpdir")+"/webpieces/cacheForTesting");
 
 	@Before
 	public void setUp() throws IOException {

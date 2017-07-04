@@ -346,6 +346,10 @@ if(project.hasProperty('projVersion')) {
 task deleteJavaCache {
     doLast {
         System.out.println("DELETE java caches here to prevent intermitten build failures from java deleting files")
+        def cacheDir =  new File(System.getProperty("java.io.tmpdir")+"/webpiecesCache");
+        def deleted = cacheDir.deleteDir();
+        if(!deleted)        
+          throw new IllegalStateException("Directory="+cacheDir+" not deleted");
     }
 }
 

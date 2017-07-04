@@ -60,7 +60,7 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(false), new AppOverridesModule(), new ServerConfig(pUnit));
+		Server webserver = new Server(getOverrides(false), new AppOverridesModule(), new ServerConfig(pUnit, JavaCache.getCacheLocation()));
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

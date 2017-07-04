@@ -19,7 +19,7 @@ public class TestLesson6RouteValidation {
 		if(property == null || !"true".equals(property))
 			return; //don't run test except in gradle build
 		
-		ServerConfig serverConfig = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT);
+		ServerConfig serverConfig = new ServerConfig(HibernatePlugin.PERSISTENCE_TEST_UNIT, JavaCache.getCacheLocation());
 		serverConfig.setHttpPort(0); //bind to any port
 		serverConfig.setHttpsPort(0); //bind to any port
 		serverConfig.setValidateRouteIdsOnStartup(true);

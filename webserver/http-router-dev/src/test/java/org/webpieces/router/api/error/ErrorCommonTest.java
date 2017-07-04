@@ -145,7 +145,7 @@ public class ErrorCommonTest {
 		//otherwise create the development server
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
-		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
+		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());		
 		log.info("bytecode dir="+compileConfig.getByteCodeCacheDir());
 		RouterService server = DevRouterFactory.create(f, compileConfig);
 		return server;

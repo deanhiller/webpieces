@@ -60,7 +60,7 @@ public class DevelopmentServer {
 														.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		
 		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths)
+		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getTmpDir())
 										.setFileEncoding(Server.ALL_FILE_ENCODINGS);
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),

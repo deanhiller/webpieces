@@ -57,7 +57,7 @@ public class TestLesson5WithSelenium {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test and NOT drop tables but clear and re-populate
 		Server webserver = new Server(
-				new OverridesForTestRealServer(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit));
+				new OverridesForTestRealServer(), new AppOverridesModule(), new ServerConfig(0, 0, pUnit, JavaCache.getCacheLocation()));
 		webserver.start();
 		httpPort = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 		httpsPort = webserver.getUnderlyingHttpsChannel().getLocalAddress().getPort();

@@ -1,5 +1,6 @@
 package WEBPIECESxPACKAGE;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -14,18 +15,25 @@ public class ServerConfig {
 	private int httpPort = 8080;
 	private int httpsPort = 8443;
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
+	private File compressionCacheDir;
 	private Map<String, String> webAppMetaProperties = new HashMap<>();
 
-	public ServerConfig(int httpPort, int httpsPort, String persistenceUnit) {
+	public ServerConfig(int httpPort, int httpsPort, String persistenceUnit, File compressionCache) {
 		webAppMetaProperties.put(HibernatePlugin.PERSISTENCE_UNIT_KEY, persistenceUnit);
 		this.httpPort = httpPort;
 		this.httpsPort = httpsPort;
+		this.compressionCacheDir = compressionCache;
 	}
 	
-	public ServerConfig(String persistenceUnit) {
-		this(8080, 8443, persistenceUnit);
+	public ServerConfig(String persistenceUnit, File compressionCache) {
+		this(8080, 8443, persistenceUnit, compressionCache);
 	}
 
+	//really for production use only...
+	public ServerConfig(String persistenceUnit) {
+		this(8080, 8443, persistenceUnit, new File("webpiecesCache/staticFiles"));
+	}
+	
 	public VirtualFile getMetaFile() {
 		return metaFile;
 	}
@@ -60,6 +68,14 @@ public class ServerConfig {
 
 	public Map<String, String> getWebAppMetaProperties() {
 		return webAppMetaProperties;
+	}
+
+	public File getCompressionCacheDir() {
+		return compressionCacheDir;
+	}
+
+	public void setCompressionCacheDir(File compressionCacheDir) {
+		this.compressionCacheDir = compressionCacheDir;
 	}
 
 }

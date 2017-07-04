@@ -40,7 +40,6 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 
 	private static final Logger log = LoggerFactory.getLogger(TestDevSynchronousErrors.class);
 	
-	
 	private File stashedExistingCodeDir;
 	private File existingCodeLoc;
 	private String userDir;
@@ -62,7 +61,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		
 		//cache existing code for use by teardown...
 
-		stashedExistingCodeDir = new File(System.getProperty("java.io.tmpdir")+"/webpiecesTestDevServer/app");
+		stashedExistingCodeDir = new File(System.getProperty("java.io.tmpdir")+"/webpieces/testDevServer/app");
 		FileUtils.copyDirectory(existingCodeLoc, stashedExistingCodeDir);
 		
 		//list all source paths here as you add them(or just create for loop)
@@ -76,7 +75,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		//html and json template file encoding...
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(srcPaths);
 		//java source files encoding...
-		CompileConfig devConfig = new CompileConfig(srcPaths);
+		CompileConfig devConfig = new CompileConfig(srcPaths, CompileConfig.getTmpDir());
 		
 		Module platformOverrides = Modules.combine(
 										new DevRouterModule(devConfig),

@@ -59,7 +59,7 @@ public class TestSimpleRoutes {
 		
 		String filePath = System.getProperty("user.dir");
 		File myCodePath = new File(filePath + "/src/test/java");
-		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath));		
+		CompileConfig compileConfig = new CompileConfig(new VirtualFileImpl(myCodePath), CompileConfig.getTmpDir());		
 		RouterService devSvc = DevRouterFactory.create(config, compileConfig);
 		
 		return Arrays.asList(new Object[][] {

@@ -33,17 +33,17 @@ public class CompileConfig {
 		this.byteCodeCacheDir = byteCodeCacheDir;
 	}
 	
-	public CompileConfig(VirtualFile javaPath) {
-		this(createList(javaPath), getTmpDir());
+	public CompileConfig(VirtualFile javaPath, VirtualFile byteCodeCacheDir) {
+		this(createList(javaPath), byteCodeCacheDir);
 	}
 
 	public CompileConfig(List<VirtualFile> javaPaths) {
-		this(javaPaths, getTmpDir());
+		this(javaPaths, new VirtualFileImpl(new File("webpiecesCache/bytecodeCache")));
 	}
 	
-	private static VirtualFile getTmpDir() {
+	public static VirtualFile getTmpDir() {
 		String tmpPath = System.getProperty("java.io.tmpdir");
-		return new VirtualFileImpl(new File(tmpPath, "bytecode"));
+		return new VirtualFileImpl(new File(tmpPath+"/webpiecesCache/bytecodeCache"));
 	}
 
 	private static List<VirtualFile> createList(VirtualFile javaPath) {

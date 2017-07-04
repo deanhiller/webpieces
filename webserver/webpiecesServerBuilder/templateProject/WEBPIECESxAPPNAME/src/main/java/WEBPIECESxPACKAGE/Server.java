@@ -102,7 +102,8 @@ public class Server {
 											.setWebappOverrides(appOverrides)
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
 											.setSecretKey(signingKey)
-											.setPortConfigCallback(() -> fetchPortsForRedirects());
+											.setPortConfigCallback(() -> fetchPortsForRedirects())
+											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir());
 		
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)

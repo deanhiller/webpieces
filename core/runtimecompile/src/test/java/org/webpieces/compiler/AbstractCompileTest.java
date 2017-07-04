@@ -21,7 +21,7 @@ import org.webpieces.util.logging.LoggerFactory;
 public abstract class AbstractCompileTest {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractCompileTest.class);
-	private static final String property = System.getProperty("java.io.tmpdir");
+	private static final String property = System.getProperty("java.io.tmpdir")+"/webpiecesCache/compiler";
 	private File javaFileCacheDir = new File(property + "/cachedJavaFiles");
 	private static final String filePath = System.getProperty("user.dir");
 	protected static final File myCodePath = new File(filePath + "/src/test/java");
