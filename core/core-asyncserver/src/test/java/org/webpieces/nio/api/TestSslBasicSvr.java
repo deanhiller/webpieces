@@ -37,7 +37,7 @@ import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
 import org.webpieces.util.threading.DirectExecutor;
 
-public class TestBasicSsl {
+public class TestSslBasicSvr {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	
@@ -73,10 +73,7 @@ public class TestBasicSsl {
 		SSLEngine clientSsl = sslFactory.createEngineForSocket();
 		clientSslParser = AsyncSSLFactory.create("svr", clientSsl, pool);
 
-		CompletableFuture<List<SslAction>> actionsFuture = clientSslParser.beginHandshake();
-		List<SslAction> actions = actionsFuture.get(2, TimeUnit.SECONDS);
-		Assert.assertEquals(1, actions.size());
-		SslAction result = actions.get(0);
+		SslAction result = clientSslParser.beginHandshake();
 		
 		//simulate the jdk firing the selector with a new channel...
 		mockSvrChannel.addNewChannel(mockChannel);

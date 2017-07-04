@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -29,12 +28,13 @@ import org.webpieces.nio.api.mocks.MockClientSideJdkChannel;
 import org.webpieces.nio.api.mocks.MockJdk;
 import org.webpieces.nio.api.mocks.MockSslDataListener;
 import org.webpieces.ssl.api.AsyncSSLFactory;
+import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SSLParser;
 import org.webpieces.ssl.api.dto.SslAction;
 import org.webpieces.ssl.api.dto.SslActionEnum;
 import org.webpieces.util.threading.DirectExecutor;
 
-public class TestBasicSsl {
+public class TestSslCloseClient {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
@@ -50,15 +50,8 @@ public class TestBasicSsl {
 
 	@Before
 	public void setup() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
-		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();	
-		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
-		SSLEngine clientSsl = sslFactory.createEngineForSocket();
-		SSLEngine svrSsl = sslFactory.createEngineForServerSocket();
-		svrSslParser = AsyncSSLFactory.create("svr", svrSsl, pool);
-
-		ChannelManager chanMgr = createSvrChanMgr("server");
-		
-		channel = chanMgr.createTCPChannel("client", clientSsl);
+		svrSslParser = createSslSvrParser();
+		channel = createClientChannel("server", mockJdk);
 		
 		int port = 8443;
 		
@@ -72,16 +65,7 @@ public class TestBasicSsl {
 		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result.getSslAction());
 		
 		mockChannel.forceDataRead(mockJdk, result.getEncryptedData());
-	}
-	
-	//begin handshake results in ONE packet client -> server (server creates runnable, creating ONE
-	//server creates runnable, runs it creating ONE packet server -> client
-	//client creates runnable, runs it creating THREE packets client -> server
-	//all 3 received, server creates TWO packets  client -> server (server is connected here)
-	//client receives two packets as ONE packet here and is connected
-	
-	@Test
-	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException, GeneralSecurityException, IOException {
+		
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());
 		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, parseIncoming().getSslAction());
 		
@@ -99,7 +83,7 @@ public class TestBasicSsl {
 		
 		transferBigData();
 	}
-
+	
 	private void transferBigData() throws InterruptedException, ExecutionException, TimeoutException {
 		ByteBuffer b = ByteBuffer.allocate(17000);
 		b.put((byte) 1);
@@ -108,7 +92,7 @@ public class TestBasicSsl {
 		b.put((byte) 3);
 		b.put((byte) 4);
 		b.flip();
-		
+
 		CompletableFuture<Void> future = channel.write(b);
 		future.get(2, TimeUnit.SECONDS);
 
@@ -122,65 +106,70 @@ public class TestBasicSsl {
 	}
 	
 	@Test
-	public void testCombineBuffers() throws InterruptedException, ExecutionException, TimeoutException {
-		//in this case, combine the output of all 3 of the client engine...
-		DataWrapper fullData = dataGen.chainDataWrappers(mockChannel.nextPayload(), mockChannel.nextPayload(), mockChannel.nextPayload());
-		
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(fullData);
-		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
-		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
-		Assert.assertEquals(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, result2.get(1).getSslAction());
-		
-		Assert.assertFalse(connectFuture.isDone()); //client is still NOT connected yet until the SSL handshake final messages are received
-		
-		mockChannel.forceDataRead(mockJdk, result2.get(0).getEncryptedData());
-		
-		connectFuture.get(2, TimeUnit.SECONDS);
+	public void testBasicCloseFromServer() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
+		SslAction action = svrSslParser.close();
+		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
+
+		mockChannel.forceDataRead(mockJdk, action.getEncryptedData());
+
+		Assert.assertTrue(mockClientDataListener.isClosed());
+
+		SslAction action2 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, action2.getSslAction());
 	}
 	
 	@Test
-	public void testHalfThenTooMuchFedInPacket() throws InterruptedException, ExecutionException, TimeoutException {
-		List<DataWrapper> packets = reshuffle();
+	public void testBasicCloseFromClient() throws GeneralSecurityException, IOException, InterruptedException, ExecutionException, TimeoutException {
+		CompletableFuture<Void> future = channel.close();
+		Assert.assertFalse(future.isDone());
 
-		SslAction action1 = parseIncoming(packets.get(0));
-		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, action1.getSslAction());
-
-		SslAction action2 = parseIncoming(packets.get(1));
-		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, action2.getSslAction());
-
-		SslAction action3 = parseIncoming(packets.get(2));
-		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, action3.getSslAction());
-
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(packets.get(3));
+		DataWrapper payload = mockChannel.nextPayload();
+		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
 		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
-		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
-		Assert.assertEquals(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, result2.get(1).getSslAction());
+		Assert.assertEquals(2, result2.size());
 		
-		Assert.assertFalse(connectFuture.isDone()); //client is still NOT connected yet until the SSL handshake final messages are received
+		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, result2.get(0).getSslAction());
+		Assert.assertEquals(SslActionEnum.SEND_LINK_CLOSED_TO_APP, result2.get(1).getSslAction());
 		
 		mockChannel.forceDataRead(mockJdk, result2.get(0).getEncryptedData());
 		
-		connectFuture.get(2, TimeUnit.SECONDS);
+		future.get(2, TimeUnit.SECONDS);
 	}
 	
-	private List<DataWrapper> reshuffle() {
-		DataWrapper payload1 = mockChannel.nextPayload(); 
-		DataWrapper payload2 = mockChannel.nextPayload(); 
-		DataWrapper payload3 = mockChannel.nextPayload(); 
+	@Test
+	public void testBothEndsAtSameTime() throws InterruptedException, ExecutionException, TimeoutException {
+		CompletableFuture<Void> future = channel.close();
+		SslAction action = svrSslParser.close();
 		
-		List<DataWrapper> fourDatas = new ArrayList<>();
-		List<? extends DataWrapper> split1 = dataGen.split(payload1, payload1.getReadableSize()/2);
-		List<? extends DataWrapper> split2 = dataGen.split(payload2, payload2.getReadableSize()/2);
-		List<? extends DataWrapper> split3 = dataGen.split(payload3, payload3.getReadableSize()/2);
+		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
+		Assert.assertFalse(future.isDone());
 		
-		fourDatas.add(split1.get(0));
-		fourDatas.add(dataGen.chainDataWrappers(split1.get(1), split2.get(0)));
-		fourDatas.add(dataGen.chainDataWrappers(split2.get(1), split3.get(0)));
-		fourDatas.add(split3.get(1));
+		mockChannel.forceDataRead(mockJdk, action.getEncryptedData());
+		future.get(2, TimeUnit.SECONDS);
 
-		return fourDatas;
+		SslAction action2 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, action2.getSslAction());
+		
+		//far end closed should NOT be called...
+		Assert.assertFalse(mockClientDataListener.isClosed());
 	}
+	
+	@Test
+	public void testRaceFarendCloseThenClientCloses() throws InterruptedException, ExecutionException, TimeoutException {
+		SslAction action = svrSslParser.close();
+		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action.getSslAction());
 
+		mockChannel.forceDataRead(mockJdk, action.getEncryptedData());
+		Assert.assertTrue(mockClientDataListener.isClosed());
+
+		SslAction action2 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, action2.getSslAction());
+
+		//but before the client knew it was closing and was notified, it calls close as well
+		CompletableFuture<Void> future = channel.close();
+		future.get(2, TimeUnit.SECONDS);
+	}
+	
 	private SslAction parseIncoming() throws InterruptedException, ExecutionException, TimeoutException {
 		DataWrapper payload = mockChannel.nextPayload();
 		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
@@ -189,16 +178,20 @@ public class TestBasicSsl {
 		return result2.get(0);
 	}
 
-	private SslAction parseIncoming(DataWrapper payload) throws InterruptedException, ExecutionException, TimeoutException {
-		CompletableFuture<List<SslAction>> resultFuture2 = svrSslParser.parseIncoming(payload);
-		List<SslAction> result2 = resultFuture2.get(2, TimeUnit.SECONDS);
-		Assert.assertEquals(1, result2.size());
-		return result2.get(0);
+	public static TCPChannel createClientChannel(String name, MockJdk mockJdk) throws GeneralSecurityException, IOException {
+		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
+		ChannelManager chanMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
+
+		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
+		SSLEngine clientSsl = sslFactory.createEngineForSocket();	
+		TCPChannel channel1 = chanMgr.createTCPChannel("client", clientSsl);
+		return channel1;
 	}
 	
-	private ChannelManager createSvrChanMgr(String name) {
-		ChannelManagerFactory factory = ChannelManagerFactory.createFactory(mockJdk);
-		ChannelManager svrMgr = factory.createMultiThreadedChanMgr(name+"Mgr", new BufferCreationPool(), new BackpressureConfig(), new DirectExecutor());
-		return svrMgr;
+	public static SSLParser createSslSvrParser() throws GeneralSecurityException, IOException {
+		MockSSLEngineFactory sslFactory = new MockSSLEngineFactory();
+		BufferPool pool = new BufferCreationPool(false, 17000, 1000);
+		SSLEngine svrSsl = sslFactory.createEngineForServerSocket();
+		return AsyncSSLFactory.create("svr", svrSsl, pool);
 	}
 }

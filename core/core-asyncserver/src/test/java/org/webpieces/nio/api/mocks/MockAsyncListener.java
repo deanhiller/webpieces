@@ -86,4 +86,16 @@ public class MockAsyncListener extends MockSuperclass implements AsyncDataListen
 	public void addIncomingRetValue(CompletableFuture<Void> future1) {
 		super.addValueToReturn(Method.INCOMING_DATA, future1);
 	}
+	
+	public Channel getConnectionClosed() {
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.FAR_END_CLOSED);
+		if(list.size() != 1)
+			throw new IllegalStateException("not exactly 1. size="+list.size());
+		return (Channel) list.get(0).getArgs()[0];
+	}
+
+	public int getNumConnectionsClosed() {
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.FAR_END_CLOSED);
+		return list.size();
+	}
 }

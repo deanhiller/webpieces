@@ -37,7 +37,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private SocketDataListener socketDataListener = new SocketDataListener();
 	private ConnectionListener conectionListener;
 	private CompletableFuture<Void> sslConnectfuture;
-	private CompletableFuture<Void> closeFuture;
+	private CompletableFuture<Void> closeFuture = new CompletableFuture<>();
 	private SslListener sslListener = new OurSslListener();
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
@@ -85,7 +85,6 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 
 	@Override
 	public CompletableFuture<Void> close() {
-		closeFuture = new CompletableFuture<>();		
 		if(sslEngine == null) {
 			//this happens in the case where encryption link was not yet established(or even started for that matter)
 			//ie. HttpFrontend does a timeout on incoming client connections to the server so if someone connects to ssl, it
@@ -152,12 +151,10 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 
 		@Override
 		public void closed(boolean clientInitiated) {
+			closeFuture.complete(null);
+			
 			if(!clientInitiated)
 				clientDataListener.farEndClosed(SslTCPChannel.this);
-			else if(closeFuture == null)
-				throw new RuntimeException("bug, this should not be possible");
-			else
-				closeFuture.complete(null);
 		}
 	}
 	

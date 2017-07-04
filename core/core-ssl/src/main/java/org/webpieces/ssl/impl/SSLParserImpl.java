@@ -94,10 +94,10 @@ public class SSLParserImpl implements SSLParser {
 
 		} while(lastRunnable != null);
 
-		return createResult();
+		return CompletableFuture.completedFuture(createResult());
 	}
 
-	private CompletableFuture<List<SslAction>> createResult() {
+	private List<SslAction> createResult() {
 		List<SslAction> infos = new ArrayList<>();
 		
 		if(encryptedData != null) {
@@ -115,16 +115,35 @@ public class SSLParserImpl implements SSLParser {
 			infos.add(new SslAction(SslActionEnum.SEND_LINK_ESTABLISHED_TO_APP, null, null));
 		}
 
+		if(isClosed) {
+			if(isClientInitiatedClosed)
+				infos.add(new SslAction(SslActionEnum.LINK_SUCCESSFULLY_CLOSED, null, null));
+			else
+				infos.add(new SslAction(SslActionEnum.SEND_LINK_CLOSED_TO_APP, null, null));
+		}
+		
 		if(infos.size() == 0)
 			infos.add(new SslAction(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, null, null));
 		
 		//get result from above
-		return CompletableFuture.completedFuture(infos);
+		return infos;
 	}
 
 	@Override
-	public CompletableFuture<List<SslAction>> beginHandshake() {
+	public SslAction beginHandshake() {
 		engine.beginHandshake();
-		return createResult();
+		List<SslAction> results = createResult();
+		if(results.size() != 1)
+			throw new IllegalStateException("I thought begin handshake only results in ONE action.  fix this");
+		return results.get(0);
+	}
+
+	@Override
+	public SslAction close() {
+		engine.close();
+		List<SslAction> results = createResult();
+		if(results.size() != 1)
+			throw new IllegalStateException("I thought close engine only results in ONE action.  fix this");
+		return results.get(0);
 	}
 }

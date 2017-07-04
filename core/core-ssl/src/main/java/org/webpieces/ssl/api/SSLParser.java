@@ -13,7 +13,7 @@ public interface SSLParser {
 	 * 
 	 * @return
 	 */
-	CompletableFuture<List<SslAction>> beginHandshake();
+	SslAction beginHandshake();
 	
 	/**
 	 * Asynchronous in case the client wants to run the Runnables that SSLEngine returns offline in a different thread
@@ -24,5 +24,7 @@ public interface SSLParser {
 	 * to the client app (this is a result of sometimes a list of actions needs to come back for the sslEngine
 	 */
 	CompletableFuture<List<SslAction>> parseIncoming(DataWrapper dataWrapper);
+
+	SslAction close();
 
 }
