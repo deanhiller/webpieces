@@ -233,6 +233,7 @@ subprojects {
 
    assemble.dependsOn('syncJars')
 
+   test.dependsOn (":deleteJavaCache")
    test{
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
@@ -341,6 +342,12 @@ if(project.hasProperty('projVersion')) {
 //created template and all tests should pass which would guarantee the template is still working and not broken
 //We will do this if we see it breaking now and then if needed to prevent breaks
 //task integrationTestTemplate
+
+task deleteJavaCache {
+    doLast {
+        System.out.println("DELETE java caches here to prevent intermitten build failures from java deleting files")
+    }
+}
 
 task uploadArchives2 { 
     doLast {

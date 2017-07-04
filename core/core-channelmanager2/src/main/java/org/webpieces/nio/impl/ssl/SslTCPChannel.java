@@ -119,13 +119,9 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 
 		@Override
 		public CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
-			return realChannel.write(engineToSocketData).thenApply(c -> empty());
+			return realChannel.write(engineToSocketData);
 		}
 		
-		public Void empty() {
-			return null;
-		}
-
 		@Override
 		public void sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
 			try {
