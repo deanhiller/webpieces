@@ -6,7 +6,7 @@ public class JavaCache {
 
 	public static File getCacheLocation() {
 		String tmpPath = System.getProperty("java.io.tmpdir");
-		return new File(tmpPath+"/webpieces/WEBPIECESxAPPNAMECache/staticFiles");
+		return new File(tmpPath+"/webpieces/WEBPIECESxAPPNAMECache/precompressedFiles");
 	}
 	
 }

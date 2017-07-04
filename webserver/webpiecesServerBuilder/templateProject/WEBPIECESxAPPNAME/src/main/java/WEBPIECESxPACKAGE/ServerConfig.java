@@ -31,7 +31,7 @@ public class ServerConfig {
 
 	//really for production use only...
 	public ServerConfig(String persistenceUnit) {
-		this(8080, 8443, persistenceUnit, new File("webpiecesCache/staticFiles"));
+		this(8080, 8443, persistenceUnit, new File("webpiecesCache/precompressedFiles"));
 	}
 	
 	public VirtualFile getMetaFile() {

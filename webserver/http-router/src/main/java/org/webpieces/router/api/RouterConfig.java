@@ -37,7 +37,7 @@ public class RouterConfig {
 	private boolean tokenCheckOn = true;
 	
 	//location of precompressed static files(css, js, html, etc. etc....no jpg, png compressed)
-	private File cachedCompressedDirectory = new File("webpiecesCache/staticFiles");
+	private File cachedCompressedDirectory = new File("webpiecesCache/precompressedFiles");
 	//compression type to put in cachedCompressedDirectory
 	private String startupCompression = "gzip";
 
