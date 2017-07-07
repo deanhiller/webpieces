@@ -14,7 +14,7 @@ public class MockConnectionListener implements ConnectionListener {
 	private List<Channel> channels = new ArrayList<>();
 	private DataListener dataListener;
 
-	public MockConnectionListener(MockSslDataListener serverListener) {
+	public MockConnectionListener(MockMulithreadedSslDataListener serverListener) {
 		this.dataListener = serverListener;
 	}
 

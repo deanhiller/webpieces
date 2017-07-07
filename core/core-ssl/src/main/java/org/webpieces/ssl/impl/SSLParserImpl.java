@@ -146,4 +146,13 @@ public class SSLParserImpl implements SSLParser {
 			throw new IllegalStateException("I thought close engine only results in ONE action.  fix this");
 		return results.get(0);
 	}
+
+	@Override
+	public DataWrapper encrypt(DataWrapper data) {
+		ByteBuffer b = ByteBuffer.wrap(data.createByteArray());
+		engine.feedPlainPacket(b);
+		DataWrapper retVal = encryptedData;
+		encryptedData = null;
+		return retVal;
+	}
 }

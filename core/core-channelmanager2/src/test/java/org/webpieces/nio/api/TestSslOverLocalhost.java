@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,17 +15,17 @@ import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.channels.TCPChannel;
 import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.nio.api.mocks.MockConnectionListener;
-import org.webpieces.nio.api.mocks.MockSslDataListener;
+import org.webpieces.nio.api.mocks.MockMulithreadedSslDataListener;
 import org.webpieces.util.threading.NamedThreadFactory;
 
-public class TestBasicSsl {
+public class TestSslOverLocalhost {
 
-	private MockSslDataListener mockSvrDataListener = new MockSslDataListener();
+	private MockMulithreadedSslDataListener mockSvrDataListener = new MockMulithreadedSslDataListener();
 	private MockConnectionListener mockConnListener = new MockConnectionListener(mockSvrDataListener);
-	private MockSslDataListener mockClientDataListener = new MockSslDataListener();
+	private MockMulithreadedSslDataListener mockClientDataListener = new MockMulithreadedSslDataListener();
 	
 	@Test
-	public void testBasic() throws InterruptedException, ExecutionException {
+	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException {
 		ChannelManager svrMgr = createSvrChanMgr("server");
 		SelfSignedSSLEngineFactory sslFactory = new SelfSignedSSLEngineFactory();
 		TCPServerChannel svrChannel = svrMgr.createTCPServerChannel("svrChan", mockConnListener, sslFactory);
@@ -41,7 +43,7 @@ public class TestBasicSsl {
 		ByteBuffer buf = ByteBuffer.wrap(data);
 		channel.write(buf);
 
-		ByteBuffer result = mockSvrDataListener.getFirstBuffer().get();
+		ByteBuffer result = mockSvrDataListener.getFirstBuffer().get(2, TimeUnit.SECONDS);
 		
 		byte[] newData = new byte[result.remaining()];
 		result.get(newData);

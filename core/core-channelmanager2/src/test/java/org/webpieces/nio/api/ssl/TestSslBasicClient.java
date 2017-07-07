@@ -82,6 +82,31 @@ public class TestSslBasicClient {
 		connectFuture.get(2, TimeUnit.SECONDS);
 		
 		transferBigData();
+		
+		transferBigDataOtherWay();
+		
+		rehandShake();
+	}
+
+	private void rehandShake() throws InterruptedException, ExecutionException, TimeoutException {
+		SslAction action1 = svrSslParser.beginHandshake();
+
+		mockChannel.forceDataRead(mockJdk, action1.getEncryptedData());
+
+		SslAction action2 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action2.getSslAction());
+
+		mockChannel.forceDataRead(mockJdk, action2.getEncryptedData());
+
+		SslAction action3 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, action3.getSslAction());
+		SslAction action4 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.WAIT_FOR_MORE_DATA_FROM_REMOTE_END, action4.getSslAction());
+		SslAction action5 = parseIncoming();
+		Assert.assertEquals(SslActionEnum.SEND_TO_SOCKET, action5.getSslAction());
+		
+		mockChannel.forceDataRead(mockJdk, action5.getEncryptedData());
+		
 	}
 
 	private void transferBigData() throws InterruptedException, ExecutionException, TimeoutException {
@@ -103,6 +128,29 @@ public class TestSslBasicClient {
 		Assert.assertEquals(SslActionEnum.SEND_TO_APP, action2.getSslAction());
 		
 		Assert.assertEquals(17000, action.getDecryptedData().getReadableSize()+action2.getDecryptedData().getReadableSize());
+	}
+	
+	private void transferBigDataOtherWay() throws InterruptedException, ExecutionException, TimeoutException {
+		ByteBuffer b = ByteBuffer.allocate(17000);
+		b.put((byte) 1);
+		b.put((byte) 2);
+		b.position(b.limit()-2); //simulate buffer full of 0's except first 2 and last 2
+		b.put((byte) 3);
+		b.put((byte) 4);
+		b.flip();
+
+		DataWrapper data = dataGen.wrapByteBuffer(b);
+		DataWrapper encrypted = svrSslParser.encrypt(data);
+		
+		mockChannel.forceDataRead(mockJdk, encrypted);
+
+		ByteBuffer buffer = mockClientDataListener.getSingleBuffer();
+		
+		mockChannel.forceDataRead(mockJdk);
+		
+		ByteBuffer buffer2 = mockClientDataListener.getSingleBuffer();		
+
+		Assert.assertEquals(17000, buffer.remaining()+buffer2.remaining());
 	}
 	
 	@Test

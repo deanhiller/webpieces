@@ -123,8 +123,9 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* SSL tests at wrong level.  now that we have mocked the jdk apis, move SSL tests into the asyncserver tests directory(easier apis to mock than chanmgr AND can make sure timeouts and such work AND can verify server backpressure at that level)
-* backpressure through SSL
+* backpressure through SSL(should we use the channel manager to channelmanager api for easier testing?)
+* tie BufferPool max size, http1.1 max size, http2 max local size, channelmanager backpressure (size*10 (and for ssl*1.2))
+* have the write method implemented so the future resolution gets dumped in the threadpool on channelmanager so it doesn't use the selector thread
 * be able to turn off maxconcurrent requests on server and client!!! (though you can set it to Integer.MAX anyways soooo.....maybe not needed)
 * tests, tests, tests
   * test backpressure on upload file http1.1

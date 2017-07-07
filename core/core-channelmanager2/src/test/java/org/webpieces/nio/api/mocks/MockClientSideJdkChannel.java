@@ -30,7 +30,7 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 	private int numBytesToConsume;
 	private Queue<Byte> queue = new LinkedBlockingQueue<>();
 	private Queue<byte[]> payloadQueue = new LinkedBlockingQueue<>();
-	private Queue<byte[]> toRead = new LinkedBlockingQueue<>();
+	private Queue<ByteBuffer> toRead = new LinkedBlockingQueue<>();
 
 	public void addConnectReturnValue(boolean isConnected) {
 		super.addValueToReturn(Method.CONNECT, isConnected);
@@ -92,12 +92,20 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 	
 	@Override
 	public int read(ByteBuffer b) throws IOException {
-		byte[] data = toRead.poll();
-		if(data == null)
-			return -1;
 
+		ByteBuffer buffer = toRead.peek();
+		if(buffer == null)
+			return -1;
+		
+		int min = Math.min(b.remaining(), buffer.remaining());
+		byte[] data = new byte[min];
+		buffer.get(data);
 		b.put(data);
-		return data.length;
+		
+		if(buffer.remaining() == 0)
+			toRead.poll(); //remove it since it is all read
+		
+		return min;
 	}
 
 	@Override
@@ -228,12 +236,17 @@ public class MockClientSideJdkChannel extends MockSuperclass implements JdkSocke
 		return queue.size();
 	}
 
+	public void forceDataRead(MockJdk mockJdk) {
+		selectionKey.setReadyToRead(); //update key state to ready to read
+		mockJdk.fireSelector(); //simulate the jdk firing selector from key update		
+	}
+	
 	public void forceDataRead(MockJdk mockJdk, DataWrapper wrapper) {
 		forceDataRead(mockJdk, wrapper.createByteArray());
 	}
 	
 	public void forceDataRead(MockJdk mockJdk, byte[] buffer) {
-		toRead.add(buffer);
+		toRead.add(ByteBuffer.wrap(buffer));
 		selectionKey.setReadyToRead(); //update key state to ready to read
 		mockJdk.fireSelector(); //simulate the jdk firing selector from key update
 	}

@@ -27,4 +27,6 @@ public interface SSLParser {
 
 	SslAction close();
 
+	DataWrapper encrypt(DataWrapper data);
+
 }

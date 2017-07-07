@@ -5,23 +5,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.webpieces.mock.MethodEnum;
+import org.webpieces.mock.MockSuperclass;
+import org.webpieces.mock.ParametersPassedIn;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 
-public class MockSslDataListener implements DataListener {
+public class MockSslDataListener extends MockSuperclass implements DataListener {
 
-	private List<ByteBuffer> buffers = new ArrayList<>();
-	private CompletableFuture<ByteBuffer> firstBufferFuture;
+	enum Method implements MethodEnum {
+		INCOMING
+	}
+	
 	private boolean isClosed;
 
+	public MockSslDataListener() {
+		setDefaultReturnValue(Method.INCOMING, CompletableFuture.completedFuture(null));
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
-		if(buffers.isEmpty() && firstBufferFuture != null) {
-			firstBufferFuture.complete(b);
-		}
-		this.buffers.add(b);
-		
-		return CompletableFuture.completedFuture(null);
+	public CompletableFuture<Void> incomingData(Channel channel, ByteBuffer b) {
+		return (CompletableFuture<Void>) super.calledMethod(Method.INCOMING, channel, b);
 	}
 
 	@Override
@@ -33,17 +38,20 @@ public class MockSslDataListener implements DataListener {
 	public void failure(Channel channel, ByteBuffer data, Exception e) {
 	}
 
-	public synchronized CompletableFuture<ByteBuffer> getFirstBuffer() {
-		firstBufferFuture = new CompletableFuture<>();
-		if(buffers.isEmpty()) {
-			return firstBufferFuture;
-		}
-		firstBufferFuture.complete(buffers.get(0));
-		return firstBufferFuture;
+	public synchronized ByteBuffer getSingleBuffer() {
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
+		if(list.size() != 1)
+			throw new IllegalStateException("not exactly 1 is called");
+		return (ByteBuffer) list.get(0).getArgs()[1];
 	}
 
 	public boolean isClosed() {
 		return isClosed;
+	}
+
+	public ByteBuffer getFirstBuffer() {
+		List<ParametersPassedIn> list = super.getCalledMethodList(Method.INCOMING);
+		return (ByteBuffer) list.get(0).getArgs()[1];
 	}
 
 }
