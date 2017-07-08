@@ -27,7 +27,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 7. unzip {projectDir} which is your whole webserver
 8. ./bin/{project} to start the production webserver
 6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
-    NOTE: tested out on Eclipse Neon 4.6.0 build id 20160613-1800 and gradle 2.14.1
+    NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
   * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
        eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
        go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
