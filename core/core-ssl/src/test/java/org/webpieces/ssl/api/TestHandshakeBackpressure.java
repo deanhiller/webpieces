@@ -3,6 +3,7 @@ package org.webpieces.ssl.api;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -212,74 +213,67 @@ public class TestHandshakeBackpressure {
 		return buf;
 	}
 
-//	
-//	@Test
-//	public void testHalfThenTooMuchFedInPacket() {
-//		List<ByteBuffer> buffers = clientListener.getToSendToSocket();
-//		List<ByteBuffer> first = split(buffers.get(0));
-//		List<ByteBuffer> second = split(buffers.get(1));
-//		ByteBuffer halfAndHalf = combine(first.get(1), second.get(0));
-//		
-//		svrEngine.feedEncryptedPacket(first.get(0));
-//		
-//		svrEngine.feedEncryptedPacket(halfAndHalf);
-//		Runnable run = svrListener.getRunnable();
-//		run.run();
-//		
-//		svrEngine.feedEncryptedPacket(second.get(1));
-//		
-//		svrEngine.feedEncryptedPacket(buffers.get(2));
-//		Assert.assertEquals(ConnectionState.CONNECTED, svrEngine.getConnectionState());
-//		Assert.assertTrue(svrListener.connected);
-//	}
-//
-//	@Test
-//	public void testHalfThenTooMuchFedInPacketAndRunnableDelayed() {
-//		List<ByteBuffer> buffers = clientListener.getToSendToSocket();
-//		List<ByteBuffer> first = split(buffers.get(0));
-//		List<ByteBuffer> second = split(buffers.get(1));
-//		ByteBuffer halfAndHalf = combine(first.get(1), second.get(0));
-//		
-//		svrEngine.feedEncryptedPacket(first.get(0));
-//		
-//		svrEngine.feedEncryptedPacket(halfAndHalf);
-//		Runnable run = svrListener.getRunnable();
-//		
-//		svrEngine.feedEncryptedPacket(second.get(1));
-//		
-//		run.run();
-//		
-//		svrEngine.feedEncryptedPacket(buffers.get(2));
-//		Assert.assertEquals(ConnectionState.CONNECTED, svrEngine.getConnectionState());		
-//		Assert.assertTrue(svrListener.connected);
-//	}
-//	
-//	private List<ByteBuffer> split(ByteBuffer byteBuffer) {
-//		int splitPoint = byteBuffer.remaining() / 2;
-//		byte[] one = new byte[splitPoint];
-//		byte[] two = new byte[byteBuffer.remaining() - splitPoint];
-//		byteBuffer.get(one);
-//		byteBuffer.get(two);
-//		if(byteBuffer.hasRemaining())
-//			throw new RuntimeException("bug, shoudl have consumed it all");		
-//
-//		ByteBuffer buf1 = ByteBuffer.wrap(one);
-//		ByteBuffer buf2 = ByteBuffer.wrap(two);
-//		
-//		List<ByteBuffer> list = new ArrayList<>();
-//		list.add(buf1);
-//		list.add(buf2);
-//		
-//		return list;
-//	}
-//	
-//	private ByteBuffer combine(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
-//		ByteBuffer newBuf = ByteBuffer.allocate(byteBuffer.remaining()+byteBuffer2.remaining());
-//		newBuf.put(byteBuffer);
-//		newBuf.put(byteBuffer2);
-//		newBuf.flip();
-//		return newBuf;
-//	}
+	
+	@Test
+	public void testHalfThenTooMuchFedInPacket() throws InterruptedException, ExecutionException, TimeoutException {
+		List<ByteBuffer> first = split(buffers.get(0).engineToSocketData);
+		List<ByteBuffer> second = split(buffers.get(1).engineToSocketData);
+		ByteBuffer halfAndHalf = combine(first.get(1), second.get(0));
+		
+		CompletableFuture<Void> future1 = svrEngine.feedEncryptedPacket(first.get(0));
+		Assert.assertEquals(0, svrListener.getHandshake().size());
+		Assert.assertFalse(future1.isDone());
+
+		CompletableFuture<Void> future2 = svrEngine.feedEncryptedPacket(halfAndHalf);
+		Assert.assertEquals(0, svrListener.getHandshake().size());
+		future1.get(2, TimeUnit.SECONDS);
+		Assert.assertFalse(future2.isDone());
+		
+		CompletableFuture<Void> future3 = svrEngine.feedEncryptedPacket(second.get(1));
+		Assert.assertEquals(0, svrListener.getHandshake().size());
+		future2.get(2, TimeUnit.SECONDS);
+		future3.get(2, TimeUnit.SECONDS);
+
+		CompletableFuture<Void> future4 = svrEngine.feedEncryptedPacket(buffers.get(2).engineToSocketData);
+
+		List<BufferedFuture> buf = svrListener.getHandshake();
+
+		Assert.assertEquals(ConnectionState.CONNECTED, svrEngine.getConnectionState());
+		Assert.assertTrue(svrListener.connected);
+
+		buf.get(0).future.complete(null);
+		
+		Assert.assertFalse(future4.isDone());
+		buf.get(1).future.complete(null);		
+		future4.get(2, TimeUnit.SECONDS);		
+	}
+	
+	private List<ByteBuffer> split(ByteBuffer byteBuffer) {
+		int splitPoint = byteBuffer.remaining() / 2;
+		byte[] one = new byte[splitPoint];
+		byte[] two = new byte[byteBuffer.remaining() - splitPoint];
+		byteBuffer.get(one);
+		byteBuffer.get(two);
+		if(byteBuffer.hasRemaining())
+			throw new RuntimeException("bug, shoudl have consumed it all");		
+
+		ByteBuffer buf1 = ByteBuffer.wrap(one);
+		ByteBuffer buf2 = ByteBuffer.wrap(two);
+		
+		List<ByteBuffer> list = new ArrayList<>();
+		list.add(buf1);
+		list.add(buf2);
+		
+		return list;
+	}
+	
+	private ByteBuffer combine(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
+		ByteBuffer newBuf = ByteBuffer.allocate(byteBuffer.remaining()+byteBuffer2.remaining());
+		newBuf.put(byteBuffer);
+		newBuf.put(byteBuffer2);
+		newBuf.flip();
+		return newBuf;
+	}
 
 }
 
