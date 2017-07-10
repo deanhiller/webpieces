@@ -20,7 +20,7 @@ sourceSets {
         resources {
             //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
             srcDirs = ["src/main/java", "src/test/resources"]
-            excludes = ["**/*.java"]
+            //excludes = ["**/*.java"] //gradle upgrade from 2.4 to 4.x required we remove this for eclipse to work
         }
     }
     main {

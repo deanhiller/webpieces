@@ -12,7 +12,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
             resources {
                 //This ADDS src/main/java/**/*.html
                 srcDirs = ["src/main/java", "src/test/resources"]
-                excludes = ["**/*.java"]
+                //excludes = ["**/*.java"] //upgrading to gradle 4 from 2.4 required we remove this for eclipse to work on import gradle
             }
         }
     }
