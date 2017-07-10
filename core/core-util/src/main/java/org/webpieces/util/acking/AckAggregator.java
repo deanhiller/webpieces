@@ -6,17 +6,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
-public class AckAggregator2 {
+public class AckAggregator {
 
-	private static final Logger log = LoggerFactory.getLogger(AckAggregator2.class);
+	private static final Logger log = LoggerFactory.getLogger(AckAggregator.class);
 	
 	private AtomicInteger countDown;
 	private CompletableFuture<Void> future = new CompletableFuture<Void>();
 
-	public AckAggregator2(
+	public AckAggregator(
 		int numAcksNeeded,
 		int numBytesToAck,
-		ByteAckTracker2 tracker
+		ByteAckTracker tracker
 	) {
 		this.countDown = new AtomicInteger(numAcksNeeded);
 		future.thenApply(v -> {

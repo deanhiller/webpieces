@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.util.acking.AckAggregator2;
-import org.webpieces.util.acking.ByteAckTracker2;
+import org.webpieces.util.acking.AckAggregator;
+import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -40,7 +40,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 	private String logId;
 	protected Level3IncomingSynchro syncro;
 	private HeaderSettings localSettings;
-	private ByteAckTracker2 tracker2 = new ByteAckTracker2();
+	private ByteAckTracker tracker2 = new ByteAckTracker();
 
 	protected Level3OutgoingSynchro outSyncro;
 
@@ -123,7 +123,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 		
 		int numBytesParsed = parsingState.getNumBytesJustParsed();
 		
-		AckAggregator2 aggregator = new AckAggregator2(parsedMessages.size(), numBytesParsed, tracker2);
+		AckAggregator aggregator = new AckAggregator(parsedMessages.size(), numBytesParsed, tracker2);
 		
 		CompletableFuture<Void> future = CompletableFuture.completedFuture((Void)null);
 		for(Http2Msg lowLevelFrame : parsedMessages) {

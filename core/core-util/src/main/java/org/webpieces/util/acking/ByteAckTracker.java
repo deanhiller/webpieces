@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
-public class ByteAckTracker2 {
+public class ByteAckTracker {
 
 	public ConcurrentLinkedQueue<Record> records = new ConcurrentLinkedQueue<>();
 	private AtomicInteger numberBytesToAck = new AtomicInteger(0);

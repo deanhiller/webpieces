@@ -17,8 +17,8 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.util.acking.AckAggregator2;
-import org.webpieces.util.acking.ByteAckTracker2;
+import org.webpieces.util.acking.AckAggregator;
+import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -34,7 +34,7 @@ public class Layer2Http1_1Handler {
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
-	private ByteAckTracker2 tracker2 = new ByteAckTracker2();
+	private ByteAckTracker tracker2 = new ByteAckTracker();
 
 	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
@@ -109,7 +109,7 @@ public class Layer2Http1_1Handler {
 		Memento state = socket.getHttp1_1ParseState();
 		List<HttpPayload> parsed = state.getParsedMessages();
 		
-		AckAggregator2 aggregator = new AckAggregator2(parsed.size(), numBytesRead, tracker2);
+		AckAggregator aggregator = new AckAggregator(parsed.size(), numBytesRead, tracker2);
 
 		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {

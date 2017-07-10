@@ -25,8 +25,8 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
-import org.webpieces.util.acking.AckAggregator2;
-import org.webpieces.util.acking.ByteAckTracker2;
+import org.webpieces.util.acking.AckAggregator;
+import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -122,7 +122,7 @@ public class HttpSocketImpl implements HttpSocket {
 	
 	private class MyDataListener implements DataListener {
 
-		private ByteAckTracker2 tracker2 = new ByteAckTracker2();
+		private ByteAckTracker tracker2 = new ByteAckTracker();
 
 		private CompletableFuture<DataWriter> future;
 
@@ -136,7 +136,7 @@ public class HttpSocketImpl implements HttpSocket {
 			
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
-			AckAggregator2 aggregator = new AckAggregator2(parsedMessages.size(), memento.getNumBytesJustParsed(), tracker2);
+			AckAggregator aggregator = new AckAggregator(parsedMessages.size(), memento.getNumBytesJustParsed(), tracker2);
 			//AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), memento.getNumBytesJustParsed());
 
 			for(HttpPayload msg : parsedMessages) {

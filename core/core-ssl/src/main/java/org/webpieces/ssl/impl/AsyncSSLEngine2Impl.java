@@ -17,7 +17,7 @@ import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SslListener;
-import org.webpieces.util.acking.ByteAckTracker2;
+import org.webpieces.util.acking.ByteAckTracker;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -41,8 +41,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	private AtomicBoolean fireClosed = new AtomicBoolean(false);
 	private AtomicBoolean fireConnected = new AtomicBoolean(false);
 
-	private ByteAckTracker2 encryptionTracker = new ByteAckTracker2();
-	private ByteAckTracker2 decryptionTracker = new ByteAckTracker2();
+	private ByteAckTracker encryptionTracker = new ByteAckTracker();
+	private ByteAckTracker decryptionTracker = new ByteAckTracker();
 	
 	public AsyncSSLEngine2Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
 		if(listener == null)
