@@ -154,13 +154,6 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		}
 
 		@Override
-		public void runTask(Runnable r) {
-			//we are multithreaded underneath anyways using SessionExecutor so
-			//we mine as well run this on same thread.
-			r.run();
-		}
-
-		@Override
 		public void closed(boolean clientInitiated) {
 			closeFuture.complete(null);
 			

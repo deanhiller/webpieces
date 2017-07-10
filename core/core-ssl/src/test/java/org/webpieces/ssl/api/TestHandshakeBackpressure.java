@@ -46,8 +46,6 @@ public class TestHandshakeBackpressure {
 		
 		CompletableFuture<Void> svrFuture = svrEngine.feedEncryptedPacket(toSend.engineToSocketData);
 		Assert.assertEquals(ConnectionState.CONNECTING, svrEngine.getConnectionState());
-		Runnable r = svrListener.getRunnable();
-		r.run();
 		
 		Assert.assertEquals(ConnectionState.CONNECTING, svrEngine.getConnectionState());
 		BufferedFuture toSend2 = svrListener.getSingleHandshake();
@@ -56,7 +54,6 @@ public class TestHandshakeBackpressure {
 		
 		CompletableFuture<Void> clientFuture = clientEngine.feedEncryptedPacket(toSend2.engineToSocketData);
 		Assert.assertEquals(ConnectionState.CONNECTING, clientEngine.getConnectionState());
-		clientListener.getRunnable().run();
 		
 		buffers = clientListener.getHandshake();
 		buffers.get(0).future.complete(null);
@@ -149,8 +146,6 @@ public class TestHandshakeBackpressure {
 	
 	private void finishHandshake() throws InterruptedException, ExecutionException, TimeoutException {
 		CompletableFuture<Void> fut1 = svrEngine.feedEncryptedPacket(buffers.get(0).engineToSocketData);
-		Assert.assertFalse(fut1.isDone());
-		svrListener.getRunnable().run();
 		fut1.get(2, TimeUnit.SECONDS);
 
 		CompletableFuture<Void> fut2 = svrEngine.feedEncryptedPacket(buffers.get(1).engineToSocketData);
@@ -183,7 +178,6 @@ public class TestHandshakeBackpressure {
 		ByteBuffer combine = combine(buffers);
 		
 		CompletableFuture<Void> svrFut = svrEngine.feedEncryptedPacket(combine);
-		svrListener.getRunnable().run();
 		
 		List<BufferedFuture> toClientBuffers = svrListener.getHandshake();
 		
@@ -217,25 +211,7 @@ public class TestHandshakeBackpressure {
 		buf.flip();
 		return buf;
 	}
-//
-//	@Test
-//	public void testRunnableRunAfterNextPacket() {
-//		List<ByteBuffer> buffers = clientListener.getToSendToSocket();
-//		
-//		svrEngine.feedEncryptedPacket(buffers.get(0));
-//		Runnable run = svrListener.getRunnable();
-//		
-//		svrEngine.feedEncryptedPacket(buffers.get(1));
-//		
-//		svrEngine.feedEncryptedPacket(buffers.get(2));
-//		
-//		run.run();
-//		
-//		Assert.assertEquals(ConnectionState.CONNECTED, svrEngine.getConnectionState());
-//		Assert.assertTrue(svrListener.connected);
-//		List<ByteBuffer> toClientBuffers = svrListener.getToSendToSocket();
-//		Assert.assertEquals(2, toClientBuffers.size());
-//	}
+
 //	
 //	@Test
 //	public void testHalfThenTooMuchFedInPacket() {

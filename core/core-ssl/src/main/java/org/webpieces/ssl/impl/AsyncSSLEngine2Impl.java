@@ -69,25 +69,30 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	}
 	
 	private CompletableFuture<Void> createRunnable() {
+		//KISS here so we do not need to worry about race condition of runnable and
+		//incoming handshake packets (also decreases API surface area)
+		
 		SSLEngine sslEngine = mem.getEngine();
 		Runnable r = sslEngine.getDelegatedTask();
-		CompletableFuture<Void> future = new CompletableFuture<Void>();
-		listener.runTask(new Runnable() {
-			@Override
-			public void run() {
-				r.run();
-				
-				runnableComplete().handle((v, t) -> {
-					if(t != null)
-						future.completeExceptionally(t);
-					else
-						future.complete(null);
-					return null;
-				});
-			}
-		});
-		
-		return future;
+//		CompletableFuture<Void> future = new CompletableFuture<Void>();
+//		listener.runTask(new Runnable() {
+//			@Override
+//			public void run() {
+//				r.run();
+//				
+//				runnableComplete().handle((v, t) -> {
+//					if(t != null)
+//						future.completeExceptionally(t);
+//					else
+//						future.complete(null);
+//					return null;
+//				});
+//			}
+//		});
+//		
+//		return future;
+		r.run();
+		return runnableComplete();
 	}
 	
 	private CompletableFuture<Void> runnableComplete() {

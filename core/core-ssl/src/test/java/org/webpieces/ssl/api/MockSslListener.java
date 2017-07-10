@@ -14,7 +14,6 @@ public class MockSslListener extends MockSuperclass implements SslListener {
 	public boolean connected;
 	public boolean closed;
 	public boolean clientInitiated;
-	public Runnable runnable;
 	
 	enum Method implements MethodEnum {
 		ENCRYPTED, ENCRYPTED_HANDSHAKE, DECRYPTED,
@@ -59,22 +58,11 @@ public class MockSslListener extends MockSuperclass implements SslListener {
 	}
 
 	@Override
-	public void runTask(Runnable r) {
-		this.runnable = r;
-	}
-
-	@Override
 	public void closed(boolean clientInitiated) {
 		if(closed)
 			throw new RuntimeException("bug in implementation.  we should not fire closed twice");
 		closed = true;
 		this.clientInitiated = clientInitiated;
-	}
-
-	public Runnable getRunnable() {
-		Runnable temp = runnable;
-		runnable = null;
-		return temp;
 	}
 
 	public List<BufferedFuture> getEncrypted() {

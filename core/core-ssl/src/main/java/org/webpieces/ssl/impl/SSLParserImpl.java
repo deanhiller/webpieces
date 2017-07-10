@@ -21,7 +21,6 @@ public class SSLParserImpl implements SSLParser {
 
 	private static final DataWrapperGenerator dataGen = DataWrapperGeneratorFactory.createDataWrapperGenerator();
 	private AsyncSSLEngine engine;
-	private Runnable lastRunnable;
 	private DataWrapper encryptedData;
 	private DataWrapper decryptedData;
 	private boolean encryptedLinkEsstablished;
@@ -68,11 +67,6 @@ public class SSLParserImpl implements SSLParser {
 		}
 
 		@Override
-		public void runTask(Runnable r) {
-			lastRunnable = r;
-		}
-
-		@Override
 		public void closed(boolean clientInitiated) {
 			isClosed = true;
 			isClientInitiatedClosed = clientInitiated;
@@ -85,15 +79,8 @@ public class SSLParserImpl implements SSLParser {
 		ByteBuffer buffer = ByteBuffer.wrap(bytes);
 		encryptedData = null;
 		decryptedData = null;
-		do {
-			if(lastRunnable != null) {
-				Runnable toRun = lastRunnable;
-				lastRunnable = null;//need to clear runnable in case another one is scheduled
-				toRun.run();
-			} else
-				engine.feedEncryptedPacket(buffer);
 
-		} while(lastRunnable != null);
+		engine.feedEncryptedPacket(buffer);
 
 		return CompletableFuture.completedFuture(createResult());
 	}

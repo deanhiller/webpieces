@@ -33,15 +33,6 @@ public interface SslListener {
 	 * @param out
 	 */
 	CompletableFuture<Void> packetUnencrypted(ByteBuffer out);
-	
-	/**
-	 * Java's SSL Engine gives us a Runnable so you can run it on a different thread.  In reality, most clients
-	 * are have a thread pool and just run it on the same thread so you can just call r.run() when you implement
-	 * this method.  
-     *
-	 * @param r
-	 */
-	void runTask(Runnable r);
 
 	/**
 	 * Called when the engine is closed after initiating a close

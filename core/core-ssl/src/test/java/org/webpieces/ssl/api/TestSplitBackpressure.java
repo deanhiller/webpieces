@@ -51,9 +51,6 @@ public class TestSplitBackpressure {
 		
 		CompletableFuture<Void> svrFuture2 = svrEngine.feedEncryptedPacket(split.get(1));
 		
-		Runnable r = svrListener.getRunnable();
-		r.run();
-		
 		Assert.assertEquals(ConnectionState.CONNECTING, svrEngine.getConnectionState());
 		BufferedFuture toSend2 = svrListener.getSingleHandshake();
 
@@ -67,11 +64,8 @@ public class TestSplitBackpressure {
 		List<ByteBuffer> split2 = split(toSend2.engineToSocketData);		
 		CompletableFuture<Void> clientFuture1 = clientEngine.feedEncryptedPacket(split2.get(0));
 		Assert.assertEquals(ConnectionState.CONNECTING, clientEngine.getConnectionState());
-		Assert.assertNull(clientListener.getRunnable());
 
 		CompletableFuture<Void> clientFuture2 = clientEngine.feedEncryptedPacket(split2.get(1));
-
-		clientListener.getRunnable().run();
 
 		List<BufferedFuture> buffers = clientListener.getHandshake();
 		buffers.get(0).future.complete(null);
@@ -84,8 +78,6 @@ public class TestSplitBackpressure {
 		clientFuture2.get(2, TimeUnit.SECONDS);
 		
 		CompletableFuture<Void> fut1 = svrEngine.feedEncryptedPacket(buffers.get(0).engineToSocketData);
-		Assert.assertFalse(fut1.isDone());
-		svrListener.getRunnable().run();
 		fut1.get(2, TimeUnit.SECONDS);
 
 		CompletableFuture<Void> fut2 = svrEngine.feedEncryptedPacket(buffers.get(1).engineToSocketData);
