@@ -3,7 +3,7 @@ apply plugin: 'jacoco' //code coverage
 sourceSets {
     test {
         resources {
-            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
+            //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
             srcDirs = ["src/test/java", "src/test/resources"]
             excludes = ["**/*.java"]
         }
