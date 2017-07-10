@@ -123,7 +123,6 @@ This project is essentially pieces that can be used to build any http related so
  * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
-* a few more tests on SSL backpressure but it is generally done
 * tie BufferPool max size, http1.1 max size, http2 max local size, channelmanager backpressure (size*10 (and for ssl*1.2))
 * have the write method implemented so the future resolution gets dumped in the threadpool on channelmanager so it doesn't use the selector thread
 * be able to turn off maxconcurrent requests on server and client!!! (though you can set it to Integer.MAX anyways soooo.....maybe not needed)

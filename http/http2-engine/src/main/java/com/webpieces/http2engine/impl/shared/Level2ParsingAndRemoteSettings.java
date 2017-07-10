@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.data.api.DataWrapper;
-import org.webpieces.util.acking.AckAggregator;
-import org.webpieces.util.acking.ByteAckTracker;
+import org.webpieces.util.acking.AckAggregator2;
+import org.webpieces.util.acking.ByteAckTracker2;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -40,7 +40,7 @@ public abstract class Level2ParsingAndRemoteSettings {
 	private String logId;
 	protected Level3IncomingSynchro syncro;
 	private HeaderSettings localSettings;
-	private ByteAckTracker ackTracker = new ByteAckTracker();
+	private ByteAckTracker2 tracker2 = new ByteAckTracker2();
 
 	protected Level3OutgoingSynchro outSyncro;
 
@@ -114,21 +114,25 @@ public abstract class Level2ParsingAndRemoteSettings {
 	}
 	
 	public CompletableFuture<Void> parseImpl(DataWrapper newData) {
+		
+		CompletableFuture<Void> future2 = tracker2.addBytesToTrack(newData.getReadableSize());
+		
 		parsingState = lowLevelParser.unmarshal(parsingState, newData);
 		
 		List<Http2Msg> parsedMessages = parsingState.getParsedFrames();
 		
 		int numBytesParsed = parsingState.getNumBytesJustParsed();
-		AckAggregator ack = ackTracker.createTracker(newData.getReadableSize(), parsedMessages.size(), numBytesParsed);
+		
+		AckAggregator2 aggregator = new AckAggregator2(parsedMessages.size(), numBytesParsed, tracker2);
 		
 		CompletableFuture<Void> future = CompletableFuture.completedFuture((Void)null);
 		for(Http2Msg lowLevelFrame : parsedMessages) {
 			future = future.thenCompose(v -> {
 				return process(lowLevelFrame)
-						.handle((s, t) -> ack.ack(s, t));
+						.handle((s, t) -> aggregator.ack(s, t));
 			});
 		}
-		return ack.getAckBytePayloadFuture();
+		return future2;
 	}
 
 	public CompletableFuture<Void> process(Http2Msg msg) {

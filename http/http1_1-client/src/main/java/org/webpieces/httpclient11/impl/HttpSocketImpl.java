@@ -25,8 +25,8 @@ import org.webpieces.httpparser.api.dto.HttpResponse;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.nio.api.handlers.RecordingDataListener;
-import org.webpieces.util.acking.AckAggregator;
-import org.webpieces.util.acking.ByteAckTracker;
+import org.webpieces.util.acking.AckAggregator2;
+import org.webpieces.util.acking.ByteAckTracker2;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -122,7 +122,8 @@ public class HttpSocketImpl implements HttpSocket {
 	
 	private class MyDataListener implements DataListener {
 
-		private ByteAckTracker tracker = new ByteAckTracker();
+		private ByteAckTracker2 tracker2 = new ByteAckTracker2();
+
 		private CompletableFuture<DataWriter> future;
 
 		@Override
@@ -130,11 +131,13 @@ public class HttpSocketImpl implements HttpSocket {
 			DataWrapper wrapper = wrapperGen.wrapByteBuffer(b);
 
 			int bytesIn = b.remaining();
+			CompletableFuture<Void> future2 = tracker2.addBytesToTrack(bytesIn);
 			memento = parser.parse(memento, wrapper);
 			
 			List<HttpPayload> parsedMessages = memento.getParsedMessages();
 
-			AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), memento.getNumBytesJustParsed());
+			AckAggregator2 aggregator = new AckAggregator2(parsedMessages.size(), memento.getNumBytesJustParsed(), tracker2);
+			//AckAggregator ack = tracker.createTracker(bytesIn, parsedMessages.size(), memento.getNumBytesJustParsed());
 
 			for(HttpPayload msg : parsedMessages) {
 				if(msg instanceof HttpData) {
@@ -143,17 +146,17 @@ public class HttpSocketImpl implements HttpSocket {
 						responsesToComplete.poll();
 					
 					future.thenCompose(w -> {
-						return w.incomingData(data).handle((v, t) -> ack.ack(v, t));
+						return w.incomingData(data).handle((v, t) -> aggregator.ack(v, t));
 					});
 					
 				} else if(msg instanceof HttpResponse) {
 					future = processResponse((HttpResponse)msg)
-								.handle((w, t) -> ack.ack(w, t));
+								.handle((w, t) -> aggregator.ack(w, t));
 				} else
 					throw new IllegalStateException("invalid payload received="+msg);
 			}
 			
-			return ack.getAckBytePayloadFuture();
+			return future2;
 		}
 
 		private CompletableFuture<DataWriter> processResponse(HttpResponse msg) {

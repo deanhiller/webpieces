@@ -17,8 +17,8 @@ import org.webpieces.httpparser.api.Memento;
 import org.webpieces.httpparser.api.dto.HttpMessageType;
 import org.webpieces.httpparser.api.dto.HttpPayload;
 import org.webpieces.httpparser.api.dto.HttpRequest;
-import org.webpieces.util.acking.AckAggregator;
-import org.webpieces.util.acking.ByteAckTracker;
+import org.webpieces.util.acking.AckAggregator2;
+import org.webpieces.util.acking.ByteAckTracker2;
 import org.webpieces.util.locking.PermitQueue;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -34,8 +34,8 @@ public class Layer2Http1_1Handler {
 	private HttpParser httpParser;
 	private StreamListener httpListener;
 	private AtomicInteger counter = new AtomicInteger(1);
-	private ByteAckTracker ackTracker = new ByteAckTracker();
-	
+	private ByteAckTracker2 tracker2 = new ByteAckTracker2();
+
 	public Layer2Http1_1Handler(HttpParser httpParser, StreamListener httpListener) {
 		this.httpParser = httpParser;
 		this.httpListener = httpListener;
@@ -66,7 +66,7 @@ public class Layer2Http1_1Handler {
 				.exceptionally(t -> logException(t));
 			return new InitiationResult(InitiationStatus.HTTP1_1);
 		} else {
-			ackTracker.createTracker(newDataSize, 0, numBytesRead);
+			tracker2.addBytesToTrack(newDataSize);
 		}
 		
 		return null; // we don't know yet(not enough data)
@@ -103,18 +103,22 @@ public class Layer2Http1_1Handler {
 	
 	public CompletableFuture<Void> processWithBackpressure(
 			FrontendSocketImpl socket, int newDataSize, int numBytesRead) {
+		
+		CompletableFuture<Void> future2 = tracker2.addBytesToTrack(newDataSize);
+		
 		Memento state = socket.getHttp1_1ParseState();
 		List<HttpPayload> parsed = state.getParsedMessages();
-		AckAggregator ack = ackTracker.createTracker(newDataSize, parsed.size(), numBytesRead);
+		
+		AckAggregator2 aggregator = new AckAggregator2(parsed.size(), numBytesRead, tracker2);
 
 		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		for(HttpPayload payload : parsed) {
 			future = future.thenCompose(w -> {
 				return processCorrectly(socket, payload);
-			}).handle((v, t) -> ack.ack(v, t));
+			}).handle((v, t) -> aggregator.ack(v, t));
 		}
 		
-		return ack.getAckBytePayloadFuture();
+		return future2;
 	}
 
 	private Memento parse(FrontendSocketImpl socket, ByteBuffer buf) {
