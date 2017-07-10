@@ -35,16 +35,15 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	private final TCPChannel realChannel;
 	
 	private SocketDataListener socketDataListener = new SocketDataListener();
-	private ConnectionListener conectionListener;
-	private CompletableFuture<Void> sslConnectfuture;
 	private CompletableFuture<Void> closeFuture = new CompletableFuture<>();
-	private SslListener sslListener = new OurSslListener();
+	private OurSslListener sslListener;
 	private SSLEngineFactory sslFactory;
 	private BufferPool pool;
 	private ClientHelloParser parser;
 	
 	public SslTCPChannel(Function<SslListener, AsyncSSLEngine> function, TCPChannel realChannel) {
 		super(realChannel);
+		this.sslListener = new OurSslListener();
 		sslEngine = function.apply(sslListener );
 		this.realChannel = realChannel;
 	}
@@ -54,7 +53,7 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		this.pool = pool;
 		parser = new ClientHelloParser(pool);
 		this.realChannel = realChannel2;
-		this.conectionListener = connectionListener;
+		this.sslListener = new OurSslListener(connectionListener);
 		this.sslFactory = sslFactory;
 	}
 
@@ -71,9 +70,10 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	}
 
 	private CompletableFuture<Void> beginHandshake() {
-		sslConnectfuture = new CompletableFuture<Void>();
-		sslEngine.beginHandshake();
-		return sslConnectfuture;
+		CompletableFuture<Void> sslConnectfuture = new CompletableFuture<Void>();
+		sslListener.setSslClientConnectFuture(sslConnectfuture);
+		CompletableFuture<Void> future = sslEngine.beginHandshake();
+		return future.thenCompose(v -> sslConnectfuture);
 	}
 	
 	@Override
@@ -101,10 +101,26 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 	}
 	
 	private class OurSslListener implements SslListener {
+		private ConnectionListener conectionListener;
+		private CompletableFuture<Void> sslClientConnectFuture;
+
+		public OurSslListener() {
+		}
+
+		public OurSslListener(ConnectionListener conectionListener) {
+			if(conectionListener == null)
+				throw new IllegalArgumentException("conectionLsitener is null");
+			this.conectionListener = conectionListener;
+		}
+
+		public void setSslClientConnectFuture(CompletableFuture<Void> sslConnectfuture) {
+			this.sslClientConnectFuture = sslConnectfuture;
+		}
+		
 		@Override
 		public void encryptedLinkEstablished() {
-			if(sslConnectfuture != null)
-				sslConnectfuture.complete(null);
+			if(sslClientConnectFuture != null)
+				sslClientConnectFuture.complete(null);
 			else {
 				CompletableFuture<DataListener> future = conectionListener.connected(SslTCPChannel.this, true);
 				if(!future.isDone())
@@ -123,14 +139,13 @@ public class SslTCPChannel extends SslChannel implements TCPChannel {
 		}
 		
 		@Override
-		public void sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+		public CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
 			try {
-				realChannel.write(engineToSocketData);
+				return realChannel.write(engineToSocketData);
 			} catch(NioClosedChannelException e) {
 				log.info("Remote end closed before handshake was finished.  (nothing we can do about that)");
+				return CompletableFuture.completedFuture(null);
 			}
-			//we don't care about future as we won't write anything out anyways until we get
-			//data back and we have not fired connected to client so he should also not be writing yet too
 		}
 		
 		@Override

@@ -25,7 +25,7 @@ public interface SslListener {
 	 * 
 	 * @param engineToSocketData
 	 */
-	void sendEncryptedHandshakeData(ByteBuffer engineToSocketData);
+	CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData);
 	
 	/**
 	 * This is NOT in a synchronization block in case clients take a long time processing the packet

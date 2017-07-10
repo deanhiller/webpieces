@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,7 +30,7 @@ public class TestBasicSslClientServer {
 	private List<Integer> values = new ArrayList<>();
 
 	@Test
-	public void testBasic() throws InterruptedException {
+	public void testBasic() throws InterruptedException, ExecutionException, TimeoutException {
 		pool = new BufferCreationPool();
 		ChannelManagerFactory factory = ChannelManagerFactory.createFactory();
 		ChannelManager mgr = factory.createSingleThreadedChanMgr("sslChanMgr", pool, new BackpressureConfig());
@@ -43,7 +46,8 @@ public class TestBasicSslClientServer {
 		
 		TCPChannel channel = mgr.createTCPChannel("client", f.createEngineForSocket());
 		CompletableFuture<Void> connect = channel.connect(bound, new ClientListener());
-		connect.thenAccept(v -> writeData(channel));
+		connect.get(10000000, TimeUnit.SECONDS);
+		writeData(channel);
 		
 		synchronized (pool) {
 			while(values.size() < 10) 

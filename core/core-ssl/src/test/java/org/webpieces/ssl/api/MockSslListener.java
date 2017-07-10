@@ -1,19 +1,34 @@
 package org.webpieces.ssl.api;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class MockSslListener implements SslListener {
+import org.webpieces.mock.MethodEnum;
+import org.webpieces.mock.MockSuperclass;
+
+public class MockSslListener extends MockSuperclass implements SslListener {
 
 	public boolean connected;
 	public boolean closed;
 	public boolean clientInitiated;
 	public Runnable runnable;
-	public List<ByteBuffer> encrypted = new ArrayList<>();
-	public List<ByteBuffer> unEncrypted = new ArrayList<>();
-	private List<CompletableFuture<Void>> futures = new ArrayList<>();
+	
+	enum Method implements MethodEnum {
+		ENCRYPTED, ENCRYPTED_HANDSHAKE, DECRYPTED,
+	}
+	
+	class BufferedFuture {
+		public CompletableFuture<Void> future;
+		public ByteBuffer engineToSocketData;
+
+		public BufferedFuture(CompletableFuture<Void> future, ByteBuffer engineToSocketData) {
+			this.future = future;
+			this.engineToSocketData = engineToSocketData;
+		}
+	}
 	
 	@Override
 	public void encryptedLinkEstablished() {
@@ -24,21 +39,23 @@ public class MockSslListener implements SslListener {
 
 	@Override
 	public CompletableFuture<Void> packetEncrypted(ByteBuffer engineToSocketData) {
-		encrypted.add(engineToSocketData);
 		CompletableFuture<Void> future = new CompletableFuture<Void>();
-		futures.add(future);
+		super.calledVoidMethod(Method.ENCRYPTED, new BufferedFuture(future, engineToSocketData));
 		return future;
 	}
 
 	@Override
-	public void sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
-		encrypted.add(engineToSocketData);
+	public CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+		CompletableFuture<Void> future = new CompletableFuture<Void>();		
+		super.calledVoidMethod(Method.ENCRYPTED_HANDSHAKE, new BufferedFuture(future, engineToSocketData));
+		return future;
 	}
 	
 	@Override
 	public CompletableFuture<Void> packetUnencrypted(ByteBuffer out) {
-		unEncrypted.add(out);
-		return CompletableFuture.completedFuture(null);
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
+		super.calledVoidMethod(Method.DECRYPTED, new BufferedFuture(future, out));
+		return future;
 	}
 
 	@Override
@@ -54,26 +71,39 @@ public class MockSslListener implements SslListener {
 		this.clientInitiated = clientInitiated;
 	}
 
-	public List<ByteBuffer> getToSendToSocket() {
-		List<ByteBuffer> temp = encrypted;
-		encrypted = new ArrayList<>();
-		return temp;
-	}
-
 	public Runnable getRunnable() {
 		Runnable temp = runnable;
 		runnable = null;
 		return temp;
 	}
 
-	public List<ByteBuffer> getToSendToClient() {
-		List<ByteBuffer> temp = unEncrypted;
-		unEncrypted = new ArrayList<>();
-		return temp;
+	public List<BufferedFuture> getEncrypted() {
+		Stream<BufferedFuture> map = super.getCalledMethods(Method.ENCRYPTED).map(s -> (BufferedFuture)s.getArgs()[0]);
+		return map.collect(Collectors.toList());
 	}
 
-	public List<CompletableFuture<Void>> getFutures() {
-		return futures;
+	public List<BufferedFuture> getHandshake() {
+		Stream<BufferedFuture> map = super.getCalledMethods(Method.ENCRYPTED_HANDSHAKE).map(s -> (BufferedFuture)s.getArgs()[0]);
+		return map.collect(Collectors.toList());
+	}
+	
+	public List<BufferedFuture> getDecrypted() {
+		Stream<BufferedFuture> map = super.getCalledMethods(Method.DECRYPTED).map(s -> (BufferedFuture)s.getArgs()[0]);
+		return map.collect(Collectors.toList());
+	}
+
+	public BufferedFuture getSingleDecrypted() {
+		List<BufferedFuture> list = getDecrypted();
+		if(list.size() != 1)
+			throw new IllegalArgumentException("not exactly 1.  size="+list.size());
+		return list.get(0);
+	}
+	
+	public BufferedFuture getSingleHandshake() {
+		List<BufferedFuture> list = getHandshake();
+		if(list.size() != 1)
+			throw new IllegalArgumentException("not exactly 1 called.  size="+list.size());
+		return list.get(0);
 	}
 
 }

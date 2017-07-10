@@ -51,13 +51,14 @@ public class SSLParserImpl implements SSLParser {
 		}
 
 		@Override
-		public void sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
+		public CompletableFuture<Void> sendEncryptedHandshakeData(ByteBuffer engineToSocketData) {
 			if(encryptedData != null) {
 				DataWrapper newBuf = dataGen.wrapByteBuffer(engineToSocketData);
 				encryptedData = dataGen.chainDataWrappers(encryptedData, newBuf);
-				return;
+				return CompletableFuture.completedFuture(null);
 			}
 			encryptedData = dataGen.wrapByteBuffer(engineToSocketData);
+			return CompletableFuture.completedFuture(null);
 		}
 
 		@Override

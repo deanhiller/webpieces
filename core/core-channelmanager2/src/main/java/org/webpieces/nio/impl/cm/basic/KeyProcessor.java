@@ -272,7 +272,6 @@ public final class KeyProcessor {
 			unackedByteCnt = channel.addUnackedByteCount(bytes);
 			if(channel.isOverMaxUnacked()) {
 				unregister = true;
-
 			}
 		}
 

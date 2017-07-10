@@ -6,20 +6,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
-public class ByteAckTracker {
+public class ByteAckTracker2 {
 
 	public ConcurrentLinkedQueue<Record> records = new ConcurrentLinkedQueue<>();
 	private AtomicInteger numberBytesToAck = new AtomicInteger(0);
 	
-	public AckAggregator createTracker(int incomingBytes, int numAcksNeeded, int totalBytesParsed) {
+	public CompletableFuture<Void> addBytesToTrack(int incomingBytes) {
 		CompletableFuture<Void> byteFuture = new CompletableFuture<Void>();
 		records.add(new Record(incomingBytes, byteFuture));
 		
-		CompletableFuture<Void> allAcksReceived = new CompletableFuture<Void>();
-		AckAggregator ack = new AckAggregator(byteFuture, numAcksNeeded, allAcksReceived);
-		allAcksReceived.thenApply(v -> ackParsedBytes(totalBytesParsed));
-		
-		return ack;
+		return byteFuture;
 	}
 
 	private class Record {
@@ -37,7 +33,7 @@ public class ByteAckTracker {
 		}
 	}
 
-	private Void ackParsedBytes(int numBytes) {
+	public Void ackBytes(int numBytes) {
 		numberBytesToAck.addAndGet(numBytes);
 		
 		while(true) {

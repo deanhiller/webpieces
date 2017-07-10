@@ -17,6 +17,7 @@ import org.webpieces.ssl.api.AsyncSSLEngine;
 import org.webpieces.ssl.api.AsyncSSLEngineException;
 import org.webpieces.ssl.api.ConnectionState;
 import org.webpieces.ssl.api.SslListener;
+import org.webpieces.util.acking.ByteAckTracker2;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -39,8 +40,13 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	private boolean clientInitiated;
 	private AtomicBoolean fireClosed = new AtomicBoolean(false);
 	private AtomicBoolean fireConnected = new AtomicBoolean(false);
+
+	private ByteAckTracker2 encryptionTracker = new ByteAckTracker2();
+	private ByteAckTracker2 decryptionTracker = new ByteAckTracker2();
 	
 	public AsyncSSLEngine2Impl(String loggingId, SSLEngine engine, BufferPool pool, SslListener listener) {
+		if(listener == null)
+			throw new IllegalArgumentException("listener cannot be null");
 		this.pool = pool;
 		this.listener = listener;
 		ByteBuffer cachedOutBuffer = pool.nextBuffer(engine.getSession().getApplicationBufferSize());
@@ -48,7 +54,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	}
 
 	@Override
-	public void beginHandshake() {
+	public CompletableFuture<Void> beginHandshake() {
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
 		SSLEngine sslEngine = mem.getEngine();
 		
@@ -59,24 +65,32 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			throw new AsyncSSLEngineException(e);
 		}
 		
-		sendHandshakeMessage();
+		return sendHandshakeMessage();
 	}
 	
-	private void createRunnable() {
+	private CompletableFuture<Void> createRunnable() {
 		SSLEngine sslEngine = mem.getEngine();
 		Runnable r = sslEngine.getDelegatedTask();
-		
+		CompletableFuture<Void> future = new CompletableFuture<Void>();
 		listener.runTask(new Runnable() {
 			@Override
 			public void run() {
 				r.run();
 				
-				runnableComplete();
+				runnableComplete().handle((v, t) -> {
+					if(t != null)
+						future.completeExceptionally(t);
+					else
+						future.complete(null);
+					return null;
+				});
 			}
 		});
+		
+		return future;
 	}
 	
-	private void runnableComplete() {
+	private CompletableFuture<Void> runnableComplete() {
 		SSLEngine sslEngine = mem.getEngine();
 		
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
@@ -87,25 +101,27 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			if(cached != null) {
 				mem.setCachedEncryptedData(null); //wipe out the data we are now procesing
 				log.trace(()->mem+"[AfterRunnable][socketToEngine] refeeding myself pos="+cached.position()+" lim="+cached.limit());
-				feedEncryptedPacketImpl(cached);
+				//here the 'cached' was already recorded when fed in...(There is a test for this)
+				return feedEncryptedPacketImpl(cached, CompletableFuture.completedFuture(null));
 			}
+			return CompletableFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
 			log.trace(()->mem+"[Runnable]continuing handshake");
-			sendHandshakeMessage();
+			return sendHandshakeMessage();
 		} else {
 			throw new UnsupportedOperationException("need to support state="+hsStatus);
 		}
 	}
 
-	private void sendHandshakeMessage() {
+	private CompletableFuture<Void> sendHandshakeMessage() {
 		try {
-			sendHandshakeMessageImpl();
+			return sendHandshakeMessageImpl();
 		} catch (SSLException e) {
 			throw new AsyncSSLEngineException(e);
 		}
 	}
 	
-	private void sendHandshakeMessageImpl() throws SSLException {
+	private CompletableFuture<Void> sendHandshakeMessageImpl() throws SSLException {
 		SSLEngine sslEngine = mem.getEngine();
 		log.trace(()->mem+"sending handshake message");
 		//HELPER.eraseBuffer(empty);
@@ -114,6 +130,7 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		if(hsStatus != HandshakeStatus.NEED_WRAP)
 			throw new IllegalStateException("we should only be calling this method when hsStatus=NEED_WRAP.  hsStatus="+hsStatus);
 		
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
 		while(hsStatus == HandshakeStatus.NEED_WRAP) {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 			
@@ -132,7 +149,8 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 					throw new RuntimeException("status not right, status="+lastStatus+" even though we sized the buffer to consume all?");
 				
 				engineToSocketData.flip();
-				listener.sendEncryptedHandshakeData(engineToSocketData);
+				CompletableFuture<Void> fut = listener.sendEncryptedHandshakeData(engineToSocketData);
+				futures.add(fut);
 			}
 			
 			if(lastStatus == Status.CLOSED && !clientInitiated) {
@@ -148,6 +166,9 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		if(hsStatus == HandshakeStatus.FINISHED) {
 			fireLinkEstablished();
 		}
+		
+		CompletableFuture<Void> futureAll = CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+		return futureAll;
 	}
 
 	/**
@@ -157,24 +178,24 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 	 * 
 	 */
 	@Override
-	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer b) {
+	public CompletableFuture<Void> feedEncryptedPacket(ByteBuffer encryptedInData) {
 		if(mem.getConnectionState() == ConnectionState.DISCONNECTED)
 			throw new IllegalStateException(mem+"SSLEngine is closed");
 		
 		mem.compareSet(ConnectionState.NOT_STARTED, ConnectionState.CONNECTING);
-		
-		return feedEncryptedPacketImpl(b);
+
+		CompletableFuture<Void> future = decryptionTracker.addBytesToTrack(encryptedInData.remaining());
+
+		return feedEncryptedPacketImpl(encryptedInData, future);
 	}
 	
-	private CompletableFuture<Void> feedEncryptedPacketImpl(ByteBuffer encryptedInData) {	
+	private CompletableFuture<Void> feedEncryptedPacketImpl(ByteBuffer encryptedInData, CompletableFuture<Void> byteAcker) {	
 		SSLEngine sslEngine = mem.getEngine();
 		HandshakeStatus hsStatus = sslEngine.getHandshakeStatus();
 		Status status = null;
 
-		final HandshakeStatus hsStatus2 = hsStatus;
-		log.trace(()->mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
-					" lim="+encryptedInData.limit()+" hsStatus="+hsStatus2+" cached="+mem.getCachedToProcess());
-
+		logTrace1(encryptedInData, hsStatus);
+		
 		ByteBuffer encryptedData = encryptedInData;
 		ByteBuffer cached = mem.getCachedToProcess();
 		if(cached != null) {
@@ -182,91 +203,120 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 			mem.setCachedEncryptedData(null);
 		}
 		
-		CompletableFuture<Void> future = CompletableFuture.completedFuture(null);
 		int i = 0;
 		//stay in loop while we 
 		//1. need unwrap or not_handshaking or need_task AND
 		//2. have data in buffer
 		//3. have enough data in buffer(ie. not underflow)
+		int totalToAck = 0;
 		while(encryptedData.hasRemaining() && status != Status.BUFFER_UNDERFLOW && status != Status.CLOSED) {
 			i++;
 			SSLEngineResult result;
 			
 			ByteBuffer outBuffer = mem.getCachedOut();
+			int remainBeforeDecrypt = encryptedData.remaining();
 			try {
 				result = sslEngine.unwrap(encryptedData, outBuffer);
+				status = result.getStatus();
 			} catch(SSLException e) {
 				AsyncSSLEngineException ee = new AsyncSSLEngineException("status="+status+" hsStatus="+hsStatus+" b="+encryptedData, e);
 				throw ee;
 			} finally {
+				int totalBytesToAck = remainBeforeDecrypt - encryptedData.remaining();
 				if(outBuffer.position() != 0) {
 					outBuffer.flip();
-					future = future.thenCompose(v -> listener.packetUnencrypted(outBuffer));
-					
+					listener.packetUnencrypted(outBuffer).handle((v, t) -> {
+						if(t != null)
+							log.error("Exception in ssl listener", t);
+						
+						decryptionTracker.ackBytes(totalBytesToAck);
+						return null;
+					});
+
 					//frequently the out buffer is not used so we only ask the pool for buffers AFTER it has been consumed/used
 					ByteBuffer newCachedOut = pool.nextBuffer(sslEngine.getSession().getApplicationBufferSize());
 					mem.setCachedOut(newCachedOut);
+				} else {
+					totalToAck += totalBytesToAck;
 				}
 			}
+
 			status = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
-			
-			final ByteBuffer data = encryptedData;
-			final Status status2 = status;
-			final HandshakeStatus hsStatus3 = hsStatus;
-			log.trace(()->mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
-						data.limit()+" status="+status2+" hs="+hsStatus3);
-			
-			if(i > 1000)
-				throw new RuntimeException(this+"Bug, stuck in loop, bufIn="+encryptedData+" bufOut="+outBuffer+
-						" hsStatus="+hsStatus+" status="+status);
-			else if(hsStatus == HandshakeStatus.NEED_TASK) {
+			if(hsStatus == HandshakeStatus.NEED_TASK) {
 				//if status is need task, we need to break to run the task before other handshake
 				//messages?
 				break;
-			} else if(status == Status.BUFFER_UNDERFLOW) {
-				final ByteBuffer data1 = encryptedData;
-				log.trace(()->"buffer underflow. data="+data1.remaining());
 			}
+			
+			logAndCheck(encryptedData, result, outBuffer, status, hsStatus, i);
 		}
 
 		if(encryptedData.hasRemaining()) {
 			mem.setCachedEncryptedData(encryptedData);
 		}
 		
-		final ByteBuffer data2 = encryptedData;
-		final Status status2 = status;
-		final HandshakeStatus hsStatus3 = hsStatus;
-		log.trace(()->mem+"[sockToEngine] reset pos="+data2.position()+" lim="+data2.limit()+" status="+status2+" hs="+hsStatus3);
-
-		cleanAndFire(hsStatus, status, encryptedData);
+		logTrace(encryptedData, status, hsStatus);
 		
-		return future;
-	}
-
-	private void cleanAndFire(HandshakeStatus hsStatus, Status status, ByteBuffer encryptedData) {
 		if(!encryptedData.hasRemaining())
 			pool.releaseBuffer(encryptedData);
 		
+		int bytesToAck = totalToAck;
+		return cleanAndFire(hsStatus, status)
+				.thenApply(v -> {
+					decryptionTracker.ackBytes(bytesToAck);
+					return null;
+				})
+				.thenCompose(v -> byteAcker);
+	}
+
+	private void logTrace1(ByteBuffer encryptedInData, HandshakeStatus hsStatus) {
+		log.trace(()->mem+"[sockToEngine] going to unwrap pos="+encryptedInData.position()+
+					" lim="+encryptedInData.limit()+" hsStatus="+hsStatus+" cached="+mem.getCachedToProcess());
+	}
+
+	private void logTrace(ByteBuffer encryptedData, Status status, HandshakeStatus hsStatus) {
+		log.trace(()->mem+"[sockToEngine] reset pos="+encryptedData.position()+" lim="+encryptedData.limit()+" status="+status+" hs="+hsStatus);
+	}
+
+	private void logAndCheck(ByteBuffer encryptedData, SSLEngineResult result, ByteBuffer outBuffer, Status status, HandshakeStatus hsStatus, int i) {
+		final ByteBuffer data = encryptedData;
+
+		log.trace(()->mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
+					data.limit()+" status="+status+" hs="+hsStatus);
+		if(i > 1000) {
+			throw new RuntimeException(this+"Bug, stuck in loop, bufIn="+encryptedData+" bufOut="+outBuffer+
+					" hsStatus="+hsStatus+" status="+status);
+		} else if(status == Status.BUFFER_UNDERFLOW) {
+			final ByteBuffer data1 = encryptedData;
+			log.trace(()->"buffer underflow. data="+data1.remaining());
+		}		
+	}
+
+	private CompletableFuture<Void> cleanAndFire(HandshakeStatus hsStatus, Status status) {
 		//First if avoids case where the close handshake is still going on so we are not closed
 		//yet I think(I am writing this from memory)...
 		if(status == Status.CLOSED) {
 			if(hsStatus == HandshakeStatus.NEED_WRAP) {
 				mem.compareSet(ConnectionState.CONNECTED, ConnectionState.DISCONNECTING);
-				sendHandshakeMessage();
+				return sendHandshakeMessage();
 			} else {
 				fireClose();
+				return CompletableFuture.completedFuture(null);
 			}
 		} else if(hsStatus == HandshakeStatus.NEED_TASK) {
-			createRunnable();
+			return createRunnable();
 		} else if(hsStatus == HandshakeStatus.NEED_UNWRAP) {
 			//just need to wait for more data
+			return CompletableFuture.completedFuture(null);			
 		} else if(hsStatus == HandshakeStatus.NEED_WRAP) {
-			sendHandshakeMessage();
+			return sendHandshakeMessage();
 		} else if(hsStatus ==HandshakeStatus.FINISHED) {
 			fireLinkEstablished();
+			return CompletableFuture.completedFuture(null);
 		} else if(hsStatus == HandshakeStatus.NOT_HANDSHAKING) {
 			//nothing to do.  packet already fed
+			return CompletableFuture.completedFuture(null);			
 		} else {
 			throw new UnsupportedOperationException("need to support state="+hsStatus+" status="+status);
 		}
@@ -311,7 +361,6 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public CompletableFuture<Void> feedPlainPacketImpl(ByteBuffer buffer) throws SSLException {
 		if(mem.getConnectionState() != ConnectionState.CONNECTED)
 			throw new IllegalStateException(mem+" SSLEngine is not connected right now");
@@ -321,13 +370,15 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		SSLEngine sslEngine = mem.getEngine();
 		log.trace(()->mem+"feedPlainPacket [in-buffer] pos="+buffer.position()+" lim="+buffer.limit());
 		
-		List<CompletableFuture> futures = new ArrayList<>();
+		CompletableFuture<Void> future = encryptionTracker.addBytesToTrack(buffer.remaining());
+		
 		while(buffer.hasRemaining()) {
 			ByteBuffer engineToSocketData = pool.nextBuffer(sslEngine.getSession().getPacketBufferSize());
 
+			int remainBefore = buffer.remaining();
 			synchronized(wrapLock) {
 				SSLEngineResult result = sslEngine.wrap(buffer, engineToSocketData);
-				
+				int numEncrypted = remainBefore - buffer.remaining();
 				Status status = result.getStatus();
 				HandshakeStatus hsStatus = result.getHandshakeStatus();
 				if(status != Status.OK)
@@ -338,15 +389,18 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 							" lim="+engineToSocketData.limit()+" hsStatus="+hsStatus+" status="+status);
 				
 				engineToSocketData.flip();
-				CompletableFuture future = listener.packetEncrypted(engineToSocketData);
-				futures.add(future);
+				listener.packetEncrypted(engineToSocketData).handle( (v, t) -> {
+					if(t != null)
+						log.error("Exception from ssl listener", t);
+					encryptionTracker.ackBytes(numEncrypted);
+					return null;
+				});
 			}
 		}
 
 		pool.releaseBuffer(buffer);
 		
-		CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
-		return CompletableFuture.allOf(array);
+		return future;
 	}
 
 	@Override
