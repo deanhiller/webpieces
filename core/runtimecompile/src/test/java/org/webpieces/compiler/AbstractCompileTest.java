@@ -29,7 +29,7 @@ public abstract class AbstractCompileTest {
 	private static final File myResourcePath = FileFactory.newBaseFile("src/test/changedJavaFiles");
 	protected CompileOnDemand compiler;
 	private boolean filesMoved;
-	protected File byteCodeCacheDir = FileFactory.newBaseFile("bytecode");
+	protected File byteCodeCacheDir = FileFactory.newFile(tmpDirectory, "bytecode");
 
 	@Before
 	public void setUp() {		
