@@ -28,7 +28,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 6. cd {projectDir}-all/{projectDir}/output/distributions/
 7. unzip {projectDir} which is your whole webserver
 8. ./bin/{project} to start the production webserver
-6. IF Eclipse, This part gets tricky since eclipse gradle plugin has a bug(and ./gradlew eclipse has a different bug :( )
+6. IF Eclipse,
     NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
   * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
        eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
@@ -37,11 +37,15 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
   * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
        NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
 6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better).  The first steps are to
+  * NOTE: Running tests in intellij is broken!!!!  (in eclipse and gradle they work, but the newest intellij/gradle combo has some issue preventing tests from working)
   * From Welcome screen, choose Import Project
   * Select your folder {yourapp}-all and click ok
   * Choose 'Import project from external model' and choose gradle and click next
   * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
-  * Open Preferences, expand "Build, Execution, and Deployment", expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+  * Open Preferences, expand "Build, Execution, and Deployment", 
+     * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+     * Click Ok to close dialogue
+     * Click Build menu and click Rebuild Project
 7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart
      the webserver (even in debug mode)
