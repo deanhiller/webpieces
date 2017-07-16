@@ -37,9 +37,7 @@ public class AppRoutes extends AbstractRoutes {
 		addRoute(GET, "/redirect/{id}", "examples/ExamplesController.redirect", REDIRECT_PAGE);    //shows a redirect example in the controller method
 		addRoute(GET, "/async",         "examples/ExamplesController.myAsyncMethod", ASYNC_ROUTE); //for advanced users who want to release threads to do more work
 
-		//Add where all the html files exist
-		String workingDir = System.getProperty("user.dir");
-		addStaticDir("/assets/", workingDir+"/public/", false);
+		addStaticDir("/assets/", "public/", false);
 		//Add a single file by itself(not really needed)
 		addStaticFile("/favicon.ico", "public/favicon.ico", false);
 		addStaticFile("/test.css", "public/crud/fonts.css", false);

@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemandFactory;
 import org.webpieces.compiler.impl.test.ForTestRouteId;
+import org.webpieces.util.file.FileFactory;
 
 /**
  * NOTE: I am not sure we want it to cache byte code only on class loading rather than compiling but then again if we are
@@ -22,8 +23,8 @@ import org.webpieces.compiler.impl.test.ForTestRouteId;
 public class AnonymousByteCacheTest extends AbstractCompileTest {
 
 	String packageStr = "org.webpieces.compiler.anonymous";
-	File byteCodeControllerFile = new File(byteCodeCacheDir, packageStr + ".AnonymousController");
-	File byteCodeEnumFile = new File(byteCodeCacheDir, packageStr + ".AnonymousRouteId");
+	File byteCodeControllerFile = FileFactory.newFile(byteCodeCacheDir, packageStr + ".AnonymousController");
+	File byteCodeEnumFile = FileFactory.newFile(byteCodeCacheDir, packageStr + ".AnonymousRouteId");
 	
 	@Override
 	protected String getPackageFilter() {

@@ -13,6 +13,9 @@ import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.UrlPath;
+import org.webpieces.util.file.FileFactory;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
@@ -29,16 +32,16 @@ public class TestCompressionCache {
 	
 	private CompressionCacheSetup cache;
 	private TestFileUtilProxy proxy = new TestFileUtilProxy();
-	private File cacheDir = new File(System.getProperty("java.io.tmpdir")+"/webpieces/cacheForTesting");
+	private File cacheDir = FileFactory.newTmpFile("webpieces/cacheForTesting"); 
 
 	@Before
 	public void setUp() throws IOException {
 		FileUtils.deleteDirectory(cacheDir);
 		log.info("deleting dir="+cacheDir);
-		File stagingDir = new File("output/staging");
+		File stagingDir = FileFactory.newBaseFile("output/staging");
 		FileUtils.deleteDirectory(stagingDir);
 		
-		RouterConfig config = new RouterConfig();
+		RouterConfig config = new RouterConfig(FileFactory.getBaseWorkingDir());
 		config.setSecretKey(SecretKeyInfo.generateForTest());
 		config.setCachedCompressedDirectory(cacheDir);
 		Module allMods = Modules.override(new ProdRouterModule(config)).with(new TestModule());
@@ -49,7 +52,7 @@ public class TestCompressionCache {
 	@Test
 	public void testStartServerTwiceNoChanges() throws IOException {
 		File f = new File("src/test/resources/cacheTest1");
-		File stagingDir = new File("output/staging");
+		File stagingDir = FileFactory.newBaseFile("output/staging");
 		FileUtils.copyDirectory(f, stagingDir);
 		
 		List<StaticRoute> routes = runBasicServerOnce(stagingDir);
@@ -63,7 +66,8 @@ public class TestCompressionCache {
 
 	private List<StaticRoute> runBasicServerOnce(File stagingDir) {
 		List<StaticRoute> routes = new ArrayList<>();
-		routes.add(new StaticRoute(new UrlPath("", "/public/"), stagingDir.getAbsolutePath()+"/", false, cacheDir));
+		VirtualFile dir = VirtualFileFactory.newFile(stagingDir);
+		routes.add(new StaticRoute(new UrlPath("", "/public/"), dir, false, cacheDir));
 		cache.setupCache(routes);
 		Assert.assertEquals(2, proxy.getReadFiles().size());
 		Assert.assertEquals(2, proxy.getCompressedFiles().size());
@@ -74,13 +78,15 @@ public class TestCompressionCache {
 	@Test
 	public void testStartServerTwiceButUrlPathChanges() throws IOException {
 		File f = new File("src/test/resources/cacheTest1");
-		File stagingDir = new File("output/staging");
+		File stagingDir = FileFactory.newBaseFile("output/staging");
+
 		FileUtils.copyDirectory(f, stagingDir);
 		
 		runBasicServerOnce(stagingDir);
 		
 		List<StaticRoute> routes2 = new ArrayList<>();
-		routes2.add(new StaticRoute(new UrlPath("", "/public1.4/"), stagingDir.getAbsolutePath()+"/", false, cacheDir));
+		VirtualFile dir = VirtualFileFactory.newFile(stagingDir);
+		routes2.add(new StaticRoute(new UrlPath("", "/public1.4/"), dir, false, cacheDir));
 
 		//if server is just restarted(no file changes), we should skip reading files...
 		cache.setupCache(routes2);
@@ -92,7 +98,8 @@ public class TestCompressionCache {
 	@Test
 	public void testCreateCacheAndUpdateTimestampButNotChangeFileContents() throws IOException {
 		File f = new File("src/test/resources/cacheTest1");
-		File stagingDir = new File("output/staging");
+		File stagingDir = FileFactory.newBaseFile("output/staging");
+
 		FileUtils.copyDirectory(f, stagingDir);
 		
 		List<StaticRoute> routes = runBasicServerOnce(stagingDir);
@@ -109,7 +116,8 @@ public class TestCompressionCache {
 	@Test
 	public void testModifyFileContentsButNotUrlPathFailure() throws IOException {
 		File f = new File("src/test/resources/cacheTest1");
-		File stagingDir = new File("output/staging");
+		File stagingDir = FileFactory.newBaseFile("output/staging");
+
 		FileUtils.copyDirectory(f, stagingDir);
 		
 		List<StaticRoute> routes = runBasicServerOnce(stagingDir);

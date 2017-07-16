@@ -94,4 +94,9 @@ public class VirtualFileInputStream implements VirtualFile {
 		return getAbsolutePath();
 	}
 
+	@Override
+	public boolean isFile() {
+		return true;
+	}
+
 }

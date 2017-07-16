@@ -10,12 +10,8 @@ public class Domain2Routes extends AbstractRoutes {
 	public void configure() {
 		addRoute(GET ,     "/domain2",             "DomainsController.domain2", DomainsRouteId.DOMAIN2);
 		
-		
-		String property = System.getProperty("user.dir");
-		
-		//absolute path...
-		addStaticFile("/public/myfile", property + "/src/test/resources/tagsMeta.txt", false);
-		//relative path(to user.dir)
+		addStaticFile("/public/myfile", "src/test/resources/tagsMeta.txt", false);
+		//relative path(relative to baseDirectory in RouterConfig)
 		addStaticDir("/public/", "src/test/resources/staticRoutes/", false);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");

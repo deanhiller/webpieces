@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFileImpl;
 
 public class CompileConfig {
@@ -38,12 +39,15 @@ public class CompileConfig {
 	}
 
 	public CompileConfig(List<VirtualFile> javaPaths) {
-		this(javaPaths, new VirtualFileImpl(new File("webpiecesCache/bytecodeCache")));
+		this(javaPaths, new VirtualFileImpl(
+				FileFactory.newBaseFile("webpiecesCache/bytecodeCache")
+				));
 	}
 	
 	public static VirtualFile getTmpDir() {
-		String tmpPath = System.getProperty("java.io.tmpdir");
-		return new VirtualFileImpl(new File(tmpPath+"/webpiecesCache/bytecodeCache"));
+		File tmpFile = FileFactory.getTmpDirectory();
+		File cacheDir = FileFactory.newFile(tmpFile, "webpiecesCache/bytecodeCache");
+		return new VirtualFileImpl(cacheDir);
 	}
 
 	private static List<VirtualFile> createList(VirtualFile javaPath) {

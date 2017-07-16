@@ -11,6 +11,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
@@ -59,6 +60,8 @@ public class WebserverForTest {
 			httpsPort = 0;
 		}
 		
+		File baseWorkingDir = FileFactory.getBaseWorkingDir();
+
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
 				.setPlatformOverrides(testConfig.getPlatformOverrides())
@@ -66,7 +69,7 @@ public class WebserverForTest {
 				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
 				.setSslEngineFactory(new SSLEngineFactoryWebServerTesting())
 				.setFunctionToConfigureServerSocket(s -> configure(s));
-		RouterConfig routerConfig = new RouterConfig()
+		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(metaFile )
 											.setWebappOverrides(testConfig.getAppOverrides())
 											.setFileEncoding(CHAR_SET_TO_USE)

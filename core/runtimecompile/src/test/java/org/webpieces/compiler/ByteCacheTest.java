@@ -5,6 +5,7 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.util.file.FileFactory;
 
 /**
  * NOTE: I am not sure we want it to cache byte code only on class loading rather than compiling but then again if we are
@@ -18,8 +19,8 @@ import org.junit.Test;
 public class ByteCacheTest extends AbstractCompileTest {
 
 	String packageStr = "org.webpieces.compiler.bytecache";
-	File byteCodeControllerFile = new File(byteCodeCacheDir, packageStr + ".ByteCacheController");
-	File byteCodeEnumFile = new File(byteCodeCacheDir, packageStr + ".ByteCacheRouteId");
+	File byteCodeControllerFile = FileFactory.newFile(byteCodeCacheDir, packageStr + ".ByteCacheController");
+	File byteCodeEnumFile = FileFactory.newFile(byteCodeCacheDir, packageStr + ".ByteCacheRouteId");
 	
 	@Override
 	protected String getPackageFilter() {

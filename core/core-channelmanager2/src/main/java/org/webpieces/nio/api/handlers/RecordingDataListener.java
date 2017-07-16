@@ -1,5 +1,6 @@
 package org.webpieces.nio.api.handlers;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
@@ -10,14 +11,17 @@ import java.util.concurrent.CompletableFuture;
 import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.recording.api.Recorder;
 import org.webpieces.recording.api.RecordingPlaybackFactory;
+import org.webpieces.util.file.FileFactory;
 
 public class RecordingDataListener implements DataListener {
 
 	private DataListener realListener;
 	private Map<Channel, Recorder> channelToRecorder = new Hashtable<>();
 	private String fileSuffix;
+	private File baseDir;
 	
 	public RecordingDataListener(String fileSuffix, DataListener realListener) {
+		this.baseDir = FileFactory.getBaseWorkingDir();
 		this.fileSuffix = fileSuffix;
 		this.realListener = realListener;
 	}
@@ -39,7 +43,8 @@ public class RecordingDataListener implements DataListener {
 
 	private Recorder createRecorder(Channel channel) {
 		try {
-			FileOutputStream str = new FileOutputStream(fileSuffix+channel.getChannelId()+".recording");
+			File f = FileFactory.newFile(baseDir, fileSuffix+channel.getChannelId()+".recording");
+			FileOutputStream str = new FileOutputStream(f);
 			return RecordingPlaybackFactory.createRecorder(str, 1);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);

@@ -16,8 +16,8 @@ import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.api.TagOverridesModule;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 
 import com.google.inject.Module;
 import com.google.inject.util.Modules;

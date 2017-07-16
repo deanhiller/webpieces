@@ -5,6 +5,7 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.util.file.FileFactory;
 
 
 public class AddFileTest extends AbstractCompileTest {
@@ -52,11 +53,11 @@ public class AddFileTest extends AbstractCompileTest {
 
 	private void removeAddedFile() {
 		String packageFilter = getPackageFilter();
-		String path = packageFilter.replace('.', '/');
+		String path = packageFilter.replace('.', File.separatorChar);
 
-		File existingDir = new File(myCodePath, path);
+		File existingDir = FileFactory.newFile(myCodePath, path);
 		
-		File javaFile = new File(existingDir, "MyAddedClass.java");
+		File javaFile = FileFactory.newFile(existingDir, "MyAddedClass.java");
 		//javaFile must exist for test to be run...
 		Assert.assertTrue(javaFile.exists());
 		Assert.assertTrue(javaFile.delete());

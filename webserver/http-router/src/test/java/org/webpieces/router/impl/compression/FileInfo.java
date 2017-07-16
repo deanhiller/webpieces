@@ -1,13 +1,13 @@
 package org.webpieces.router.impl.compression;
 
-import java.io.File;
+import org.webpieces.util.file.VirtualFile;
 
 public class FileInfo {
 
 	public String urlPath;
-	public File src;
+	public VirtualFile src;
 
-	public FileInfo(String urlPath, File src) {
+	public FileInfo(String urlPath, VirtualFile src) {
 		this.urlPath = urlPath;
 		this.src = src;
 	}

@@ -19,8 +19,8 @@ import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.filters.app.Remote;
 import org.webpieces.webserver.https.MockRemote;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 
 import com.google.inject.AbstractModule;
 

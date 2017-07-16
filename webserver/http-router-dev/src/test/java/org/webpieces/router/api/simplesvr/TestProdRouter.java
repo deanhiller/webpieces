@@ -1,5 +1,6 @@
 package org.webpieces.router.api.simplesvr;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.webpieces.router.api.RouterSvcFactory;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -39,8 +41,9 @@ public class TestProdRouter {
 		String moduleFileContents = AppModules.class.getName();
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
+		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 		TestModule module = new TestModule();
-		RouterConfig config = new RouterConfig()
+		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());

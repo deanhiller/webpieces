@@ -10,13 +10,10 @@ public class StaticRoutes extends AbstractRoutes {
 	public void configure() {
 		addRoute(GET , "/pageparam",         "StaticController.home", StaticRouteId.PAGE_PARAM);
 		
-		String property = System.getProperty("user.dir");
-		
-		//absolute path...
-		addStaticFile("/public/myfile", property + "/src/test/resources/tagsMeta.txt", false);
-		addStaticFile("/public/mycss",  property + "/src/test/resources/fortest.css", false);
+		addStaticFile("/public/myfile", "src/test/resources/tagsMeta.txt", false);
+		addStaticFile("/public/mycss",  "src/test/resources/fortest.css", false);
 
-		//relative path(to user.dir)
+		//relative path(to working directory)
 		addStaticDir("/public/", "src/test/resources/staticRoutes/", false);
 		
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");

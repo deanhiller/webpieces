@@ -1,5 +1,6 @@
 package org.webpieces.nio.test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
@@ -10,6 +11,9 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
+
+import org.webpieces.util.file.VirtualFileFactory;
+
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
@@ -19,6 +23,16 @@ import junit.framework.TestCase;
 public class TestSSLEngine extends TestCase {
 
 	//private static final Logger log = LoggerFactory.getLogger(TestSSLEngine.class);
+	
+	private	String password = "root01";
+	private File clientKeystore;
+	private File serverKeystore;	
+	
+	public SSLEngineFactoryForTest() {
+		File baseWorkingDir = VirtualFileFactory.getBaseWorkingDir();
+		clientKeystore = VirtualFileFactory.createRawFile(baseWorkingDir, "src/test/resources/client.keystore");
+		serverKeystore = VirtualFileFactory.createRawFile(baseWorkingDir, "src/test/resources/server.keystore");
+	}
 	
 	/**
 	 * Sunny day scenaior of normal two normal SSLEngines...no split packets,
@@ -210,9 +224,6 @@ public class TestSSLEngine extends TestCase {
 		assertEquals(Status.OK, result.getStatus());
 	}
 	
-	private	String password = "root01";
-	private String clientKeystore = "src/test/resources/client.keystore";
-	private String serverKeystore = "src/test/resources/server.keystore";	
 	private SSLEngine getServerEngine() throws Exception {
 		char[] passphrase = password.toCharArray();
 		// First initialize the key and trust material.

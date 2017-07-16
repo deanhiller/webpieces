@@ -14,6 +14,7 @@ import org.webpieces.compiler.api.CompileConfig;
 import org.webpieces.compiler.api.CompileOnDemand;
 import org.webpieces.compiler.impl.CompileOnDemandImpl;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -21,19 +22,19 @@ import org.webpieces.util.logging.LoggerFactory;
 public abstract class AbstractCompileTest {
 
 	protected static final Logger log = LoggerFactory.getLogger(AbstractCompileTest.class);
-	private static final String property = System.getProperty("java.io.tmpdir")+"/webpiecesCache/compiler";
-	private File javaFileCacheDir = new File(property + "/cachedJavaFiles");
-	private static final String filePath = System.getProperty("user.dir");
-	protected static final File myCodePath = new File(filePath + "/src/test/java");
-	private static final File myResourcePath = new File(filePath + "/src/test/changedJavaFiles");
+	private static final File tmpDirectory = FileFactory.newTmpFile("webpiecesCache/compiler");
+	
+	private File javaFileCacheDir = FileFactory.newFile(tmpDirectory, "cachedJavaFiles");
+	protected static final File myCodePath = FileFactory.newBaseFile("src/test/java");
+	private static final File myResourcePath = FileFactory.newBaseFile("src/test/changedJavaFiles");
 	protected CompileOnDemand compiler;
 	private boolean filesMoved;
-	protected File byteCodeCacheDir = new File(property+"/bytecode");
+	protected File byteCodeCacheDir = FileFactory.newBaseFile("bytecode");
 
 	@Before
 	public void setUp() {		
 		log.info("storing bytecode cache in="+byteCodeCacheDir.getAbsolutePath());
-		log.info("running tests from user.dir="+filePath);
+		log.info("running tests from user.dir="+FileFactory.getBaseWorkingDir());
 		
 		// clear out the bytecode cache (maybe not every time?)
 		clearByteCodeCache(byteCodeCacheDir);
@@ -100,9 +101,9 @@ public abstract class AbstractCompileTest {
 		File testDir = getTestCacheDir();
 
 		String packageFilter = getPackageFilter();
-		String path = packageFilter.replace('.', '/');
+		String path = packageFilter.replace('.', File.separatorChar);
 
-		File existingDir = new File(myCodePath, path);
+		File existingDir = FileFactory.newFile(myCodePath, path);
 		copyFiles(testDir, existingDir);
 	}
 
@@ -115,12 +116,12 @@ public abstract class AbstractCompileTest {
 			testDir.mkdirs();
 
 		String packageFilter = getPackageFilter();
-		String path = packageFilter.replace('.', '/');
+		String path = packageFilter.replace('.', File.separatorChar);
 
-		File existingDir = new File(myCodePath, path);
+		File existingDir = FileFactory.newFile(myCodePath, path);
 		copyFiles(existingDir, testDir);
 
-		File resourceDir = new File(myResourcePath, path);
+		File resourceDir = FileFactory.newFile(myResourcePath, path);
 		copyFiles(resourceDir, existingDir);
 		
 		filesMoved = true;
@@ -129,7 +130,7 @@ public abstract class AbstractCompileTest {
 	private void copyFiles(File existingDir, File testDir) {
 		try {
 			for (File from : existingDir.listFiles()) {
-				File toFile = new File(testDir, from.getName());
+				File toFile = FileFactory.newFile(testDir, from.getName());
 				if(toFile.exists())
 					toFile.delete();
 				Files.copy(from.toPath(), toFile.toPath());
@@ -140,7 +141,7 @@ public abstract class AbstractCompileTest {
 	}
 
 	private File getTestCacheDir() {
-		File testDir = new File(javaFileCacheDir, getPackageFilter());
+		File testDir = FileFactory.newFile(javaFileCacheDir, getPackageFilter());
 		return testDir;
 	}
 

@@ -18,8 +18,8 @@ import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 
 
 public class TestSyncWebServer extends AbstractWebpiecesTest {

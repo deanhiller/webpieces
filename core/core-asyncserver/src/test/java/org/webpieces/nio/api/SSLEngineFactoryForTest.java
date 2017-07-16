@@ -1,5 +1,6 @@
 package org.webpieces.nio.api;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 
@@ -8,15 +9,23 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.webpieces.util.file.FileFactory;
+
 
 public class SSLEngineFactoryForTest implements SSLEngineFactory {
 
 	//private static final Logger log = Logger.getLogger(MockSSLEngineFactory.class.getName());
 	
-	private String clientKeystore = "src/test/resources/client.keystore";
-	private String serverKeystore = "src/test/resources/server.keystore";
+	private File clientKeystore;
+	private File serverKeystore;
 	private	String password = "root01";
 
+	public SSLEngineFactoryForTest() {
+		File baseWorkingDir = FileFactory.getBaseWorkingDir();
+		clientKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/client.keystore");
+		serverKeystore = FileFactory.newFile(baseWorkingDir, "src/test/resources/server.keystore");
+	}
+	
 	@Override
     public SSLEngine createSslEngine() {
 		try {

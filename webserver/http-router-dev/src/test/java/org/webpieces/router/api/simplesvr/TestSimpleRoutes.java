@@ -25,6 +25,7 @@ import org.webpieces.router.api.mocks.VirtualFileInputStream;
 import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
@@ -47,7 +48,8 @@ public class TestSimpleRoutes {
 		VirtualFile f = new VirtualFileInputStream(moduleFileContents.getBytes(), "testAppModules");		
 		
 		TestModule module = new TestModule();
-		RouterConfig config = new RouterConfig()
+		File baseWorkingDir = FileFactory.getBaseWorkingDir();
+		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
 										.setSecretKey(SecretKeyInfo.generateForTest());

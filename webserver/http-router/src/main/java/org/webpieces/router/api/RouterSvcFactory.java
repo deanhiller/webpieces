@@ -1,7 +1,9 @@
 package org.webpieces.router.api;
 
+import java.io.File;
 import java.util.List;
 
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
 
@@ -15,7 +17,8 @@ public class RouterSvcFactory {
     protected RouterSvcFactory() {}
 
     public static RouterService create(VirtualFile routersFile) {
-    	return create(new RouterConfig().setMetaFile(routersFile).setSecretKey(SecretKeyInfo.generateForTest()));
+    		File baseWorkingDir = FileFactory.getBaseWorkingDir();
+    		return create(new RouterConfig(baseWorkingDir).setMetaFile(routersFile).setSecretKey(SecretKeyInfo.generateForTest()));
     }
     
 	public static RouterService create(RouterConfig config) {

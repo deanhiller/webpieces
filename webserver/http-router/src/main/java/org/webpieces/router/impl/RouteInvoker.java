@@ -28,6 +28,7 @@ import org.webpieces.router.impl.ctx.RequestLocalCtx;
 import org.webpieces.router.impl.ctx.ResponseProcessor;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectToParamTranslator;
+import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -160,7 +161,8 @@ public class RouteInvoker {
 				resp.setFilePath(route.getFileSystemPath());
 			} else {
 				String relativeUrl = result.getPathParams().get("resource");
-				resp.setRelativeFile(route.getFileSystemPath(), relativeUrl);
+				VirtualFile fullPath = route.getFileSystemPath().child(relativeUrl);
+				resp.setFileAndRelativePath(fullPath, relativeUrl);
 			}
 
 			return processor.renderStaticResponse(resp);

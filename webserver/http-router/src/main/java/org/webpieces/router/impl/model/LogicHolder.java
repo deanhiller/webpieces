@@ -43,6 +43,8 @@ public class LogicHolder {
 	public File getCachedCompressedDirectory() {
 		return config.getCachedCompressedDirectory();
 	}
-	
-	
+
+	public RouterConfig getConfig() {
+		return config;
+	}
 }

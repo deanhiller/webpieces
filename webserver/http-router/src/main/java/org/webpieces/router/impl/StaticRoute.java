@@ -1,7 +1,6 @@
 package org.webpieces.router.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -11,11 +10,17 @@ import java.util.regex.Pattern;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.util.file.FileFactory;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class StaticRoute implements Route {
 
+	private static final Logger log = LoggerFactory.getLogger(StaticRoute.class);
+	
 	private String urlPath;
-	private String fileSystemPath;
+	private VirtualFile fileSystemPath;
 
 	private boolean isFile = false;
 	private Pattern patternToMatch;
@@ -24,8 +29,8 @@ public class StaticRoute implements Route {
 	private File targetCacheLocation;
 	private Properties hashMeta;
 
-	public StaticRoute(UrlPath url, String fileSystemPath, boolean isOnClassPath, File cachedCompressedDirectory) {
-		this.fileSystemPath = fileSystemPath;
+	public StaticRoute(UrlPath url, VirtualFile file, boolean isOnClassPath, File cachedCompressedDirectory) {
+		this.fileSystemPath = file;
 		this.isOnClassPath = isOnClassPath;
 		
 		String urlSubPath = url.getSubPath();
@@ -34,51 +39,33 @@ public class StaticRoute implements Route {
 		//very big conflict between domain/path/path/path
 		if(!urlSubPath.startsWith("/"))
 			throw new IllegalArgumentException("static resource url paths must start with / and can't have domain name at this time="+urlSubPath);
-		else if(isOnClassPath) {
-			if(!fileSystemPath.startsWith("/"))
-				throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
-		} else {//on filesystem
-			if(!fileSystemPath.startsWith("/")) {
-				String path = System.getProperty("user.dir");
-				this.fileSystemPath = path + "/"+fileSystemPath;
-			}
-		}
 
-		File f = new File(this.fileSystemPath);
-		if(!f.exists())
-			throw new IllegalArgumentException("File="+getCanonicalPath(f)+" does not exist");
+		if(!file.exists())
+			throw new IllegalArgumentException("Static File="+file.getCanonicalPath()+" does not exist. fileSysPath="+this.fileSystemPath+" abs="+file.getAbsolutePath());
 
 		if(isDirectory(urlSubPath)) {
 			this.isFile = false;
-			if(!isDirectory(fileSystemPath))
+			if(!file.isDirectory())
 				throw new IllegalArgumentException("Static directory so fileSystemPath must end with a /");
-			else if(!f.isDirectory())
-				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a directory and must be for static directories");
+			else if(!file.isDirectory())
+				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a directory and must be for static directories");
 			this.patternToMatch = Pattern.compile("^"+urlSubPath+"(?<resource>.*)$");
 			this.pathParamNames.add("resource");
 		} else {
 			this.isFile = true;
-			if(isDirectory(fileSystemPath))
+			if(file.isDirectory())
 				throw new IllegalArgumentException("Static file so fileSystemPath must NOT end with a /");
-			else if(!f.isFile())
-				throw new IllegalArgumentException("file="+getCanonicalPath(f)+" is not a file and must be for static file route");
+			else if(!file.isFile())
+				throw new IllegalArgumentException("file="+file.getCanonicalPath()+" is not a file and must be for static file route");
 			this.patternToMatch = Pattern.compile("^"+urlSubPath+"$");
 		}
 		
 		String relativePath = urlSubPath.substring(1);
-		this.targetCacheLocation = new File(cachedCompressedDirectory, relativePath);
+		this.targetCacheLocation = FileFactory.newFile(cachedCompressedDirectory, relativePath);
 	}
 
 	private boolean isDirectory(String urlSubPath) {
 		return urlSubPath.endsWith("/");
-	}
-
-	private String getCanonicalPath(File f) {
-		try {
-			return f.getCanonicalPath();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override
@@ -150,7 +137,7 @@ public class StaticRoute implements Route {
 		return isOnClassPath;
 	}
 
-	public String getFileSystemPath() {
+	public VirtualFile getFileSystemPath() {
 		return fileSystemPath;
 	}
 

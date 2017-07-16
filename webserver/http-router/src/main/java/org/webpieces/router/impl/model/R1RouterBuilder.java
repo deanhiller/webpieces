@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +16,8 @@ import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.UrlPath;
+import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -83,10 +86,17 @@ public class R1RouterBuilder extends AbstractDomainBuilder  {
 	}
 
 	private void addStaticRoute(String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		if(isOnClassPath)
+		if(isOnClassPath) {
+			if(!fileSystemPath.startsWith("/"))
+				throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
 			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
+		} else if(fileSystemPath.startsWith("/"))
+			throw new IllegalArgumentException("Absolute file system path is not supported as it is not portable across OS when done wrong.  Override the modules working directory instead");
 		
-		StaticRoute route = new StaticRoute(new UrlPath(routerInfo, urlPath), fileSystemPath, isOnClassPath, holder.getCachedCompressedDirectory());
+		File workingDir = holder.getConfig().getWorkingDirectory();
+		VirtualFile file = VirtualFileFactory.newFile(workingDir, fileSystemPath);
+		
+		StaticRoute route = new StaticRoute(new UrlPath(routerInfo, urlPath), file, isOnClassPath, holder.getCachedCompressedDirectory());
 		staticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());

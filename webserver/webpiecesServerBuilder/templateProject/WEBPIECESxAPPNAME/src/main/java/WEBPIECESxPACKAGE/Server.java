@@ -12,6 +12,7 @@ import org.webpieces.nio.api.channels.TCPServerChannel;
 import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.logging.Logger;
@@ -71,7 +72,7 @@ public class Server {
 		String filePath = System.getProperty("user.dir");
 		log.info("original user.dir before modification="+filePath);
 
-		modifyUserDirForManyEnvironments(filePath);
+		File baseWorkingDir = modifyUserDirForManyEnvironments(filePath);
 
 		VirtualFile metaFile = svrConfig.getMetaFile();
 		//Dev server has to override this
@@ -97,7 +98,7 @@ public class Server {
 		
 		//A SECOND note is that some properties can be modified at runtime and so some config objects could be exposed
 		//through JMX or other means for dynamically changing things at runtime
-		RouterConfig routerConfig = new RouterConfig()
+		RouterConfig routerConfig = new RouterConfig(baseWorkingDir)
 											.setMetaFile(metaFile)
 											.setWebappOverrides(appOverrides)
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
@@ -146,10 +147,10 @@ public class Server {
 		return Base64.getDecoder().decode(base64Key);
 	}
 
-	private void modifyUserDirForManyEnvironments(String filePath) {
+	private File modifyUserDirForManyEnvironments(String filePath) {
 		String finalUserDir = modifyUserDirForManyEnvironmentsImpl(filePath);
-		System.setProperty("user.dir", finalUserDir);
-		log.info("RECONFIGURED user.dir="+finalUserDir);
+		log.info("RECONFIGURED working directory(based off user.dir)="+finalUserDir+" previous user.dir="+filePath);
+		return new File(finalUserDir);
 	}
 
 	/**

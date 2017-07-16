@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
+import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.Security;
@@ -63,12 +64,12 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		
 		boolean modified;
 		if(route.isFile()) {
-			File file = new File(route.getFileSystemPath());
+			VirtualFile file = route.getFileSystemPath();
 			log.info("setting up cache for file="+file);
 			File destination = new File(routeCache, file.getName()+".gz");
 			modified = maybeAddFileToCache(properties, file, destination, route.getFullPath());
 		} else {
-			File directory = new File(route.getFileSystemPath());
+			VirtualFile directory = route.getFileSystemPath();
 			log.info("setting up cache for directory="+directory);
 			String urlPrefix = route.getFullPath();
 			modified = transferAndCompress(properties, directory, routeCache, urlPrefix);
@@ -102,10 +103,10 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		}
 	}
 
-	private boolean transferAndCompress(Properties p, File directory, File destination, String urlPath) {
-		File[] files = directory.listFiles();
+	private boolean transferAndCompress(Properties p, VirtualFile directory, File destination, String urlPath) {
+		List<VirtualFile> files = directory.list();
 		boolean modified = false;
-		for(File f : files) {
+		for(VirtualFile f : files) {
 			if(f.isDirectory()) {
 				File newTarget = new File(destination, f.getName());
 				createDirectory(newTarget);
@@ -123,7 +124,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		return modified;
 	}
 
-	private boolean maybeAddFileToCache(Properties properties, File src, File destination1, String urlPath) {
+	private boolean maybeAddFileToCache(Properties properties, VirtualFile src, File destination1, String urlPath) {
 		//next one line is an odd fix needed for apple and 1.8.0_111.  remove and rerun tests to see if fixed ;)
 		File destination = new File(destination1.getAbsolutePath());
 		String name = src.getName();
@@ -190,7 +191,7 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		}
 	}
 
-	private void writeFile(File destination, Compression compression, byte[] allData, String urlPath, File src) throws FileNotFoundException, IOException {
+	private void writeFile(File destination, Compression compression, byte[] allData, String urlPath, VirtualFile src) throws FileNotFoundException, IOException {
 		FileOutputStream out = new FileOutputStream(destination);
 		try(OutputStream compressionOut = compression.createCompressionStream(out)) 
 		{

@@ -30,6 +30,8 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.compression.Compression;
 import org.webpieces.router.impl.compression.CompressionLookup;
+import org.webpieces.util.file.FileFactory;
+import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.api.WebServerConfig;
@@ -84,18 +86,13 @@ public class StaticFileReader {
 	}
 	
 	private CompletableFuture<Void> runAsyncFileRead(RequestInfo info, RenderStaticResponse renderStatic) throws IOException {
-		boolean isFile = true;
-		String fullFilePath = renderStatic.getFilePath();
-		if(fullFilePath == null) {
-			isFile = false;
-			fullFilePath = renderStatic.getDirectory()+renderStatic.getRelativePath();
-		}
+		VirtualFile fullFilePath = renderStatic.getFilePath();
 	    
+		String fileName = fullFilePath.getName();
 	    String extension = null;
-	    int lastDirIndex = fullFilePath.lastIndexOf("/");
-	    int lastDot = fullFilePath.lastIndexOf(".");
-	    if(lastDot > lastDirIndex) {
-	    	extension = fullFilePath.substring(lastDot+1);
+	    int lastDot = fileName.lastIndexOf(".");
+	    if(lastDot > 0) {
+	    		extension = fileName.substring(lastDot+1);
 	    }
 
 	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(),
@@ -115,21 +112,20 @@ public class StaticFileReader {
 		//since we do compression of all text files on server startup, we only support the compression that was used
 		//during startup as I don't feel like paying a cpu penalty for compressing while live
 	    if(compr != null && compr.getCompressionType().equals(routerConfig.getStartupCompression())) {
-	    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
-	    	File routesCache = renderStatic.getTargetCache();
-	    	
-	    	File fileReference;
-	    	if(isFile) {
-	    	    String fileName = fullFilePath.substring(lastDirIndex+1);
-	    	    fileReference = new File(routesCache, fileName);
-	    	} else {
-	    		fileReference = new File(routesCache, renderStatic.getRelativePath());
-	    	}
-	    	
-	    	fullFilePath = fileReference.getAbsolutePath();
-	    	file = fetchFile("Compressed File from cache=", fullFilePath+".gz");
+		    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
+		    	File routesCache = renderStatic.getTargetCache();
+	
+			String relativeUrl = renderStatic.getRelativeUrl();
+		    	File fileReference;
+		    	if(relativeUrl == null) {
+		    	    fileReference = FileFactory.newFile(routesCache, fileName);
+		    	} else {
+		    		fileReference = FileFactory.newFile(routesCache, relativeUrl);
+		    	}
+		    	
+		    	file = fetchFile("Compressed File from cache=", fileReference.getAbsolutePath()+".gz");
 	    } else {
-	    	file = fetchFile("File=", fullFilePath);
+	    		file = fetchFile("File=", fullFilePath.getAbsolutePath());
 	    }
 
 		AsynchronousFileChannel asyncFile = AsynchronousFileChannel.open(file, options, fileExecutor);

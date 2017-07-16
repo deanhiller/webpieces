@@ -44,4 +44,6 @@ public interface VirtualFile {
 
 	String getCanonicalPath();
 
+	boolean isFile();
+
 }

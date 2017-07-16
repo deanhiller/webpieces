@@ -25,8 +25,8 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
-import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 
 @RunWith(Parameterized.class)
 public class TestJson extends AbstractWebpiecesTest {

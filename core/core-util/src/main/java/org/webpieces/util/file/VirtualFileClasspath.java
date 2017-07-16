@@ -130,4 +130,9 @@ public class VirtualFileClasspath implements VirtualFile {
 		return "[VirtualFileClasspath: path="+path+" resource="+resourceStr+"]";
 	}
 
+	@Override
+	public boolean isFile() {
+		return true;
+	}
+
 }

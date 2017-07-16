@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.webpieces.util.file.FileFactory;
 
 
 public class RemoveFileTest extends AbstractCompileTest {
@@ -46,9 +47,9 @@ public class RemoveFileTest extends AbstractCompileTest {
 		String packageFilter = getPackageFilter();
 		String path = packageFilter.replace('.', '/');
 
-		File existingDir = new File(myCodePath, path);
+		File existingDir = FileFactory.newFile(myCodePath, path);
 		
-		File javaFile = new File(existingDir, "ClassToBeRemoved.java");
+		File javaFile = FileFactory.newFile(existingDir, "ClassToBeRemoved.java");
 		//javaFile must exist for test to be run...
 		Assert.assertTrue(javaFile.exists());
 		Assert.assertTrue(javaFile.delete());

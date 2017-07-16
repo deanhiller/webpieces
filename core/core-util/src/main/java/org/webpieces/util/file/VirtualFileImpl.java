@@ -19,9 +19,11 @@ public class VirtualFileImpl implements VirtualFile {
 	private File file;
 
 	public VirtualFileImpl(File file) {
-		//next one line is an odd fix needed for apple and 1.8.0_111.  remove and rerun tests to see if fixed ;)
-		//for some reason, to work, the absolute file is needed which is there but not being used for some reason
-		this.file = new File(file.getAbsolutePath());
+		//per http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4117557 
+		//or https://stackoverflow.com/questions/2275362/java-file-exists-inconsistencies-when-setting-user-dir
+		if(!file.isAbsolute())
+			throw new IllegalArgumentException("All paths must be absolute since user.dir property cannot be modified");
+		this.file = file;
 	}
 	
 	public VirtualFileImpl(String fileName) {
@@ -64,7 +66,7 @@ public class VirtualFileImpl implements VirtualFile {
 
 	@Override
 	public VirtualFile child(String fileName) {
-		File child = new File(file, fileName);
+		File child = FileFactory.newFile(file, fileName);
 		return new VirtualFileImpl(child);
 	}
 
@@ -132,6 +134,11 @@ public class VirtualFileImpl implements VirtualFile {
 	@Override
 	public boolean delete() {
 		return file.delete();
+	}
+
+	@Override
+	public boolean isFile() {
+		return file.isFile();
 	}
 
 }

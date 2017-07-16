@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.security.SecretKeyInfo;
 
@@ -37,7 +38,7 @@ public class RouterConfig {
 	private boolean tokenCheckOn = true;
 	
 	//location of precompressed static files(css, js, html, etc. etc....no jpg, png compressed)
-	private File cachedCompressedDirectory = new File("webpiecesCache/precompressedFiles");
+	private File cachedCompressedDirectory;
 	//compression type to put in cachedCompressedDirectory
 	private String startupCompression = "gzip";
 
@@ -46,6 +47,15 @@ public class RouterConfig {
 	private PortConfigCallback portConfigCallback;
 
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
+
+	private File workingDirectory;
+
+	public RouterConfig(File workingDirectory) {
+		if(!workingDirectory.isAbsolute())
+			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
+		this.workingDirectory = workingDirectory;
+		cachedCompressedDirectory = FileFactory.newFile(workingDirectory, "webpiecesCache/precompressedFiles");
+	}
 	
 	public VirtualFile getMetaFile() {
 		return metaFile;
@@ -120,7 +130,10 @@ public class RouterConfig {
 	}
 
 	public RouterConfig setCachedCompressedDirectory(File cachedCompressedDirectory) {
-		this.cachedCompressedDirectory = cachedCompressedDirectory;
+		if(cachedCompressedDirectory.isAbsolute())
+			this.cachedCompressedDirectory = cachedCompressedDirectory;
+		else
+			this.cachedCompressedDirectory = FileFactory.newFile(workingDirectory, cachedCompressedDirectory.getPath());
 		return this;
 	}
 	
@@ -161,6 +174,10 @@ public class RouterConfig {
 	public RouterConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
 		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
 		return this;
+	}
+
+	public File getWorkingDirectory() {
+		return workingDirectory;
 	}
 	
 }
