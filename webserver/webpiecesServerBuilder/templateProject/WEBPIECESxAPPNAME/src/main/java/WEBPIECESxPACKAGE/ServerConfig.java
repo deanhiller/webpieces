@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 
 public class ServerConfig {
@@ -31,7 +32,7 @@ public class ServerConfig {
 
 	//really for production use only...
 	public ServerConfig(String persistenceUnit) {
-		this(8080, 8443, persistenceUnit, new File("webpiecesCache/precompressedFiles"));
+		this(8080, 8443, persistenceUnit, FileFactory.newBaseFile("webpiecesCache/precompressedFiles"));
 	}
 	
 	public VirtualFile getMetaFile() {

@@ -43,9 +43,9 @@ public class FileFactory {
 	
 	static String convertToOsPath(String relativePath) {
 		if(relativePath.startsWith("/"))
-			throw new IllegalArgumentException("Relative path cannot start with /");
+			throw new IllegalArgumentException("Relative path cannot start with /. path="+relativePath);
 		if(relativePath.contains("\\"))
-			throw new IllegalArgumentException("All relative paths must contain / not \\");
+			throw new IllegalArgumentException("All relative paths must contain / not \\. path="+relativePath);
 		
 		String[] split = relativePath.split("/");
 		StringBuilder builder = new StringBuilder(split[0]);
