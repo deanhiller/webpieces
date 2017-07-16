@@ -16,7 +16,7 @@ public class TestUserDirProperty {
 		File f = new File("src/test/resources/logback-test.xml");
 
 		//assert absolute path is correct
-		Assert.assertEquals("/Library/Workflow/webpieces/core/core-util/src/test/resources/logback-test.xml", f.getAbsolutePath());
+		//Assert.assertEquals("/Library/Workflow/webpieces/core/core-util/src/test/resources/logback-test.xml", f.getAbsolutePath());
 		Assert.assertTrue(f.exists());
 
 		//NOW, change user.dir
@@ -26,7 +26,7 @@ public class TestUserDirProperty {
 		File f2 = new File("test/resources/logback-test.xml");
 		
 		//verify absolute path is still the full correct path for f2 and it is
-		Assert.assertEquals("/Library/Workflow/webpieces/core/core-util/src/test/resources/logback-test.xml", f2.getAbsolutePath());
+		//Assert.assertEquals("/Library/Workflow/webpieces/core/core-util/src/test/resources/logback-test.xml", f2.getAbsolutePath());
 		
 		//since absolute path was correct, it should exist 
 		Assert.assertFalse(f2.exists());
