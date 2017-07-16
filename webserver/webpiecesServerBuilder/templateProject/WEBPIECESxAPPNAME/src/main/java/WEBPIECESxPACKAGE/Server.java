@@ -190,19 +190,20 @@ public class Server {
 	 * - else modify user.dir=myapp to myapp/src/dist
 	 */
 	private String modifyUserDirForManyEnvironmentsImpl(String filePath) {
+		String s = File.separator; //MUST be done for windows to work!!!
 		File f = new File(filePath);
 		String name = f.getName();
 		if("WEBPIECESxAPPNAME-all".equals(name)) {
-			return new File(filePath, "WEBPIECESxAPPNAME/src/dist").getAbsolutePath();
+			return new File(filePath, "WEBPIECESxAPPNAME"+s+"src"+s+"dist").getAbsolutePath();
 		} else if("WEBPIECESxAPPNAME-dev".equals(name)) {
 			File parent = f.getParentFile();
-			return new File(parent, "WEBPIECESxAPPNAME/src/dist").getAbsolutePath();
+			return new File(parent, "WEBPIECESxAPPNAME"+s+"src"+s+"dist").getAbsolutePath();
 		} else if(!"WEBPIECESxAPPNAME".equals(name)) {
-			if(filePath.endsWith("WEBPIECESxAPPNAME/src/dist"))
+			if(filePath.endsWith("WEBPIECESxAPPNAME"+s+"src"+s+"dist"))
 				return filePath; //This occurs when a previous test ran already and set user.dir
 			else if(filePath.endsWith("webpieces")) //
 				return filePath+"/webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist";
-			throw new IllegalStateException("bug, we must have missed an environment="+name);
+			throw new IllegalStateException("bug, we must have missed an environment="+name+" full path="+filePath);
 		}
 		
 		File bin = new File(f, "bin");
