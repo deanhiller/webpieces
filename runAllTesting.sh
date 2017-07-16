@@ -45,6 +45,7 @@ else
 fi
 
 cd ../webpiecesexample-all
+git checkout master # just in case checkout the project to master
 
 ./gradlew clean build assembleDist
 test_result=$?
