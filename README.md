@@ -37,7 +37,8 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
   * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
        NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
 6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better).  The first steps are to
-  * NOTE: Running tests in intellij is broken!!!!  (in eclipse and gradle they work, but the newest intellij/gradle combo has some issue preventing tests from working)
+  * NOTE: Running tests in intellij is broken(they have a bug)!!!!  (in eclipse and gradle they work, but the newest intellij/gradle combo has some issue preventing tests from working)
+  * Issue report is: https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970
   * From Welcome screen, choose Import Project
   * Select your folder {yourapp}-all and click ok
   * Choose 'Import project from external model' and choose gradle and click next
