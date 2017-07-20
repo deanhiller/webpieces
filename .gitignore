@@ -16,6 +16,7 @@
 #Intellij Idea files
 *.iml
 .idea
+**/out
 
 #Do I need these too...
 #*.iws

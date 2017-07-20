@@ -18,8 +18,6 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 
 #### 10 Steps to try the webserver
 
-(with recent upgrade to gradle 4.x, I will be retesting the IDE parts of this process soon 7/9/17.  the rest is part of the autobuild)
-
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
 3. cd {projectDir}-all
@@ -29,16 +27,15 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 7. unzip {projectDir} which is your whole webserver
 8. ./bin/{project} to start the production webserver
 6. IF Eclipse,
-    NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
+  * NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
   * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
        eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
        go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
        'Store information about method parameters'
   * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
        NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
-6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better).  The first steps are to
-  * NOTE: Running tests in intellij is broken(they have a bug)!!!!  (in eclipse and gradle they work, but the newest intellij/gradle combo has some issue preventing tests from working)
-  * Issue report is: https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970
+6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better). 
+  * NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970)  
   * From Welcome screen, choose Import Project
   * Select your folder {yourapp}-all and click ok
   * Choose 'Import project from external model' and choose gradle and click next

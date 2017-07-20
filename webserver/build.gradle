@@ -1,4 +1,5 @@
 apply plugin: 'co.riiid.gradle'
+apply plugin: 'idea'
 
 project.ext {
   stagingDirName = 'webpiecesServerBuilder'
@@ -6,13 +7,26 @@ project.ext {
 }
 
 project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
+
+    //Intellij Idea has a weird quirk we need to avoid AND gradle needs the *.html files in the classpath
+    //eclipse is just fine and needs nothing
+    // to add src/main/java/**/*.html files for the IntelliJ resource builder
     sourceSets {
-        //For testing, we need to put the html files on the classpath which are co-located with the controllers
-        test {
+        main {
             resources {
-                //This ADDS src/main/java/**/*.html
-                srcDirs = ["src/main/java", "src/test/resources"]
-                //excludes = ["**/*.java"] //upgrading to gradle 4 from 2.4 required we remove this for eclipse to work on import gradle
+                srcDirs += ["src/main/java"]
+                excludes = ["logback.xml"]
+            }
+        }
+    }
+
+    //Intellij Idea has a weird quirk we need to avoid
+    if (System.getProperty('idea.active')) {
+
+        // to have classes and resources in the same output directory
+        idea {
+            module {
+                outputDir file("out/production/classes")
             }
         }
     }
