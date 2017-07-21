@@ -19,6 +19,13 @@ public class FileFactory {
 		return new File(tmpPath);
 	}
 	
+	public static File newAbsoluteFile(String absolutePath) {
+		File f = new File(absolutePath);
+		if(!f.isAbsolute())
+			throw new IllegalArgumentException("The file path must be absolute and was not.  path="+absolutePath);
+		return f;
+	}
+	
 	public static File newFile(File baseDir, String relativePath) {
 		if(!baseDir.isAbsolute())
 			throw new IllegalArgumentException("baseDir MUST be absolute to avoid dependencies on user.dir property which is not modifiable while working dir is");
@@ -54,5 +61,10 @@ public class FileFactory {
 		}
 		String correctPathForThisOs = builder.toString();
 		return correctPathForThisOs;
+	}
+
+	public static boolean endsWith(File filePath, String path) {
+		String osPath = convertToOsPath(path);
+		return filePath.getPath().endsWith(osPath);
 	}
 }

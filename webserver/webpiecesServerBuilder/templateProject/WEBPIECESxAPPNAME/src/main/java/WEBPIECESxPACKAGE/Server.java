@@ -148,9 +148,10 @@ public class Server {
 	}
 
 	private File modifyUserDirForManyEnvironments(String filePath) {
-		String finalUserDir = modifyUserDirForManyEnvironmentsImpl(filePath);
-		log.info("RECONFIGURED working directory(based off user.dir)="+finalUserDir+" previous user.dir="+filePath);
-		return new File(finalUserDir);
+		File absPath = FileFactory.newAbsoluteFile(filePath);
+		File finalUserDir = modifyUserDirForManyEnvironmentsImpl(absPath);
+		log.info("RECONFIGURED working directory(based off user.dir)="+finalUserDir.getAbsolutePath()+" previous user.dir="+filePath);
+		return finalUserDir;
 	}
 
 	/**
@@ -190,32 +191,33 @@ public class Server {
 	 * - else if myapp has directories bin, lib, config, public then do nothing
 	 * - else modify user.dir=myapp to myapp/src/dist
 	 */
-	private String modifyUserDirForManyEnvironmentsImpl(String filePath) {
-		String s = File.separator; //MUST be done for windows to work!!!
-		File f = new File(filePath);
-		String name = f.getName();
+	private File modifyUserDirForManyEnvironmentsImpl(File filePath) {
+		if(!filePath.isAbsolute())
+			throw new IllegalArgumentException("If filePath is not absolute, you will have trouble working in all environments in the comment above. path="+filePath.getPath());
+		
+		String name = filePath.getName();
 		if("WEBPIECESxAPPNAME-all".equals(name)) {
-			return new File(filePath, "WEBPIECESxAPPNAME"+s+"src"+s+"dist").getAbsolutePath();
+			return FileFactory.newFile(filePath, "WEBPIECESxAPPNAME/src/dist");
 		} else if("WEBPIECESxAPPNAME-dev".equals(name)) {
-			File parent = f.getParentFile();
-			return new File(parent, "WEBPIECESxAPPNAME"+s+"src"+s+"dist").getAbsolutePath();
+			File parent = filePath.getParentFile();
+			return FileFactory.newFile(parent, "WEBPIECESxAPPNAME/src/dist");
 		} else if(!"WEBPIECESxAPPNAME".equals(name)) {
-			if(filePath.endsWith("WEBPIECESxAPPNAME"+s+"src"+s+"dist"))
+			if(FileFactory.endsWith(filePath, "WEBPIECESxAPPNAME/src/dist"))
 				return filePath; //This occurs when a previous test ran already and set user.dir
-			else if(filePath.endsWith("webpieces")) //
-				return filePath+"/webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist";
+			else if(name.equals("webpieces"))
+				return FileFactory.newFile(filePath, "webserver/webpiecesServerBuilder/templateProject/WEBPIECESxAPPNAME/src/dist");
 			throw new IllegalStateException("bug, we must have missed an environment="+name+" full path="+filePath);
 		}
 		
-		File bin = new File(f, "bin");
-		File lib = new File(f, "lib");
-		File config = new File(f, "config");
-		File publicFile = new File(f, "public");
+		File bin = FileFactory.newFile(filePath, "bin");
+		File lib = FileFactory.newFile(filePath, "lib");
+		File config = FileFactory.newFile(filePath, "config");
+		File publicFile = FileFactory.newFile(filePath, "public");
 		if(bin.exists() && lib.exists() && config.exists() && publicFile.exists()) {
 			return filePath;
 		}
 		
-		return new File(f, "src/dist").getAbsolutePath();
+		return FileFactory.newFile(filePath, "src/dist");
 	}
 
 	/**

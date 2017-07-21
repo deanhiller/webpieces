@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
 
+TODO: 
+ remove extra 'out' directory in generated template from new intellij?
+
 Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
@@ -50,6 +53,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
   * today 4/27/17 newest intellij introduced a bug where dev server fails to start as src/main/resources is not on classpath
 9. In a browser go to http://localhost:8080
 10. refactor your code like crazy and hit the website again(no restart needed)
+11. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against so we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
 
 #### To try modifying/contributing to the actual webserver
 

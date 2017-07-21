@@ -33,16 +33,6 @@ if (System.getProperty('idea.active')) {
             outputDir file("out/production/classes")
         }
     }
-} else {
-    sourceSets {
-        main {
-            resources {
-                //This is so we don't put this in production as it is really only for running prod server in 
-                //the IDE and luckily some IDE's ignore this piece and don't exclude it
-                excludes = ["logback.xml"]
-            }
-        }
-    }
 }
 
 //ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
