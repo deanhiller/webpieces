@@ -49,7 +49,6 @@ NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 
    * Open eclipse preferences
    * Expand 'Java' and click 'Compiler' 
    * select a checkbox near the bottom that says 'Store information about method parameters'
-
 4. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 5. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
 6. In a browser go to http://localhost:8080
@@ -62,15 +61,15 @@ IF Intellij, you will have a bit more pain in the debugger(the debugger is not a
 NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970)  
 
 1. Import Project
-  * From Welcome screen, choose Import Project
-  * Select your folder {yourapp}-all and click ok
-  * Choose 'Import project from external model' and choose gradle and click next
-  * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
+   * From Welcome screen, choose Import Project
+   * Select your folder {yourapp}-all and click ok
+   * Choose 'Import project from external model' and choose gradle and click next
+   * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
 2. Modify compiling with parameters option(Intellij does not suck this setting in from gradle :( )
-  * Open Preferences, expand "Build, Execution, and Deployment", 
-  * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
-  * Click Ok to close dialogue
-  * Click Build menu and click Rebuild Project
+   * Open Preferences, expand "Build, Execution, and Deployment", 
+   * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+   * Click Ok to close dialogue
+   * Click Build menu and click Rebuild Project
 3. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
 4. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
 5. In a browser go to http://localhost:8080
