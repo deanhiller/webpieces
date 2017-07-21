@@ -19,41 +19,63 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 * Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme unlike any server before it)
 * and sooooooo much more
 
-#### 10 Steps to try the webserver
+#### 9 Steps to try the webserver
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
 3. cd {projectDir}-all
-4. ./gradlew build # runs all the tests and verify everything is working.  If you want the selenium test to work install firefox 47.0.1
+4. ./gradlew build # runs all the tests and verify everything is working. 
 5. ./gradlew assembleDist  #creates the actual webserver distribution zip and tar files
 6. cd {projectDir}-all/{projectDir}/output/distributions/
 7. unzip {projectDir} which is your whole webserver
 8. ./bin/{project} to start the production webserver
-6. IF Eclipse,
-  * NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
-  * eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
-       eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to
-       go to eclipse preferences and expand 'Java' and click 'Compiler' and select a checkbox near the bottom that says
-       'Store information about method parameters'
-  * gradle eclipse plugin - The plugin that runs with ./gradle eclipse (installed with apply 'eclipse' in gradle file)
-       NOTE: ./gradlew eclipse does not work unless you delete the conflicting paths in .classpath file after generating it(gradle eclipse plugin bug)
-6. IF Intellij, you will have a bit more pain in the debugger(it's not as stable as eclipse BUT the IDE usability is much better). 
-  * NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970)  
+9. In a browser go to http://localhost:8080
+
+### Eclipse Setup
+
+NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 4.1-milestone-1
+
+1. install eclipse gradle plugin - The buildship gradle plugin that you install into eclipse
+   * Click Help menu -> Eclipse Marketplace...
+   * Type in 'Gradle' in the Find text box
+   * Click install on Buildship Gradle Integration 2.0
+2. import project into eclipse using gradle
+   * Click File menu -> Import...
+   * Expand Gradle folder
+   * Choose Existing Gradle Project and click Next
+   * Click Next
+   * Click Finish
+3. eclipse buildship gradle plugin works except for passing in -parameters to the settings file like ./gradlew eclipse did so you have to do a few more steps here
+   * Open eclipse preferences
+   * Expand 'Java' and click 'Compiler' 
+   * select a checkbox near the bottom that says 'Store information about method parameters'
+
+4. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
+5. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
+6. In a browser go to http://localhost:8080
+7. refactor your code like crazy and hit the website again(no restart needed)
+8. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
+
+### Intellij Setup
+
+IF Intellij, you will have a bit more pain in the debugger(the debugger is not as nice as eclipse BUT the IDE usability is much better). 
+NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000451564-Intellij-2017-1-5-and-gradle-4-1-milestone-upgrade-broke-this-project?page=1#community_comment_115000373970)  
+
+1. Import Project
   * From Welcome screen, choose Import Project
   * Select your folder {yourapp}-all and click ok
   * Choose 'Import project from external model' and choose gradle and click next
   * Even though gradle location is unknown, that is ok since 'use default gradle wrapper' is selected so click Finish
+2. Modify compiling with parameters option(Intellij does not suck this setting in from gradle :( )
   * Open Preferences, expand "Build, Execution, and Deployment", 
-     * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
-     * Click Ok to close dialogue
-     * Click Build menu and click Rebuild Project
-7. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
-8. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart
-     the webserver (even in debug mode)
-  * today 4/27/17 newest intellij introduced a bug where dev server fails to start as src/main/resources is not on classpath
-9. In a browser go to http://localhost:8080
-10. refactor your code like crazy and hit the website again(no restart needed)
-11. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against so we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
+  * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
+  * Click Ok to close dialogue
+  * Click Build menu and click Rebuild Project
+3. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
+4. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
+5. In a browser go to http://localhost:8080
+6. refactor your code like crazy and hit the website again(no restart needed)
+7. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
 
 #### To try modifying/contributing to the actual webserver
 
