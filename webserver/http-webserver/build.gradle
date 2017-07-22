@@ -1,4 +1,5 @@
 apply plugin: 'jacoco' //code coverage
+apply plugin: 'idea'
 
 sourceSets {
     test {
@@ -6,6 +7,17 @@ sourceSets {
             //This ADDS src/test/java/**/*.html and we still read in src/test/resources/**
             srcDirs = ["src/test/java", "src/test/resources"]
             excludes = ["**/*.java"]
+        }
+    }
+}
+
+//Intellij Idea has a weird quirk we need to avoid
+if (System.getProperty('idea.active')) {
+
+    // to have classes and resources in the same output directory
+    idea {
+        module {
+            testOutputDir file("out/production/classes")
         }
     }
 }
