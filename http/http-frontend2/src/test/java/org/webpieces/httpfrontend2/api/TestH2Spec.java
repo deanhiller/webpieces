@@ -77,9 +77,9 @@ public class TestH2Spec {
     public void setup() {
         String goPath = System.getenv("GOPATH");
         if(goPath == null) {
-        	File f = new File("/Users/dhiller/workspace/gowork");
-        	if(f.exists())
-        		goPath = f.getAbsolutePath();
+	        	File f = new File("/Users/dhiller/workspace/gowork");
+	        	if(f.exists())
+	        		goPath = f.getAbsolutePath();
         }
         
         if(goPath == null) {

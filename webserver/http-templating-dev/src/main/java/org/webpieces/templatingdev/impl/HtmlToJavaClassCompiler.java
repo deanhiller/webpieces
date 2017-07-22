@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.source.GroovyScriptGenerator;
 import org.webpieces.templatingdev.impl.source.ScriptOutputImpl;
+import org.webpieces.util.file.FileFactory;
 
 import groovy.lang.GroovyClassLoader;
 
@@ -62,13 +63,13 @@ public class HtmlToJavaClassCompiler {
 		while((index = className.indexOf(".")) >= 0) {
 			String dir = className.substring(0, index);
 			className = className.substring(index+1);
-			currentDir = new File(currentDir, dir);
+			currentDir = FileFactory.newFile(currentDir, dir);
 		}
 		
 		if(!currentDir.exists())
 			currentDir.mkdirs();
 		
-		File groovySrcFile = new File(currentDir, className+".groovy");
+		File groovySrcFile = FileFactory.newFile(currentDir, className+".groovy");
 		Charset fileEncoding = config.getFileEncoding();
 
 		try (FileOutputStream str = new FileOutputStream(groovySrcFile);
