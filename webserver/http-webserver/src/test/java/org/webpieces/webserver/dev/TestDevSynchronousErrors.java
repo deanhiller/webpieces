@@ -15,7 +15,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.file.VirtualFileImpl;
+import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.webserver.Requests;
@@ -57,7 +57,7 @@ public class TestDevSynchronousErrors extends AbstractWebpiecesTest {
 		log.info("running from dir="+filePath1);
 		
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(new VirtualFileImpl(filePath1+"/src/test/java"));
+		srcPaths.add(VirtualFileFactory.newBaseFile("src/test/java"));
 		
 		TemplateCompileConfig templateConfig = new TemplateCompileConfig(false);
 

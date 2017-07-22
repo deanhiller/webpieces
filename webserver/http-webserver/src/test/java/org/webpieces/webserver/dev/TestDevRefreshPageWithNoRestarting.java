@@ -21,7 +21,9 @@ import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
+import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -52,24 +54,24 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 		userDir = System.getProperty("user.dir");
 		log.info("running from dir="+userDir);
 
-		existingCodeLoc = new File(userDir+"/src/test/java/org/webpieces/webserver/dev/app");
+		existingCodeLoc = FileFactory.newBaseFile("src/test/java/org/webpieces/webserver/dev/app");
 		
 		//developers tend to exit their test leaving the code in a bad state so if they run it again, restore the original
 		//version for them(if we change the original version, we have to copy it to this directory as well though :(
-		File original = new File(userDir+"/src/test/devServerTest/devServerOriginal");
+		File original = FileFactory.newBaseFile("src/test/devServerTest/devServerOriginal");
 		FileUtils.copyDirectory(original, existingCodeLoc, null);
 		
 		//cache existing code for use by teardown...
 
-		stashedExistingCodeDir = new File(System.getProperty("java.io.tmpdir")+"/webpieces/testDevServer/app");
+		stashedExistingCodeDir = FileFactory.newTmpFile("webpieces/testDevServer/app");
 		FileUtils.copyDirectory(existingCodeLoc, stashedExistingCodeDir);
 		
 		//list all source paths here as you add them(or just create for loop)
 		//These are the list of directories that we detect java file changes under
 		List<VirtualFile> srcPaths = new ArrayList<>();
-		srcPaths.add(new VirtualFileImpl(userDir+"/src/test/java"));
+		srcPaths.add(VirtualFileFactory.newBaseFile("src/test/java"));
 		
-		VirtualFile metaFile = new VirtualFileImpl(userDir + "/src/test/resources/devMeta.txt");
+		VirtualFile metaFile = VirtualFileFactory.newBaseFile("src/test/resources/devMeta.txt");
 		log.info("LOADING from meta file="+metaFile.getCanonicalPath());
 		
 		//html and json template file encoding...

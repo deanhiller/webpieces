@@ -14,5 +14,15 @@ public class VirtualFileFactory {
 			throw new IllegalArgumentException("file must be absolute path created");
 		return new VirtualFileImpl(absoluteFile);
 	}
+
+	public static VirtualFile newBaseFile(String absPath) {
+		File file = FileFactory.newBaseFile(absPath);
+		return new VirtualFileImpl(file);
+	}
+
+	public static VirtualFileImpl newAbsoluteFile(String path) {
+		File file = FileFactory.newAbsoluteFile(path);
+		return new VirtualFileImpl(file);
+	}
 	
 }

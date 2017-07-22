@@ -26,10 +26,6 @@ public class VirtualFileImpl implements VirtualFile {
 		this.file = file;
 	}
 	
-	public VirtualFileImpl(String fileName) {
-		this(new File(fileName));
-	}
-
 	@Override
 	public boolean isDirectory() {
 		return file.isDirectory();
