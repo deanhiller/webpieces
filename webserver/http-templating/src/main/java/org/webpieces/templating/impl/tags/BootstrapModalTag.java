@@ -34,13 +34,13 @@ public class BootstrapModalTag implements HtmlTag {
         Object modalId = args.get("modalId");
         Object linkId = args.get("linkId");
         if(route == null)
-        	throw new IllegalArgumentException("#{bootstrapModal/}# tag must contain a route argument like #{bootstrapModal route:@[AJAX_EDIT_USER_FORM, id:'{id}']@}#. "+srcLocation);
+        		throw new IllegalArgumentException("#{bootstrapModal/}# tag must contain a route argument like #{bootstrapModal route:@[AJAX_EDIT_USER_FORM, id:'{id}']@}#. "+srcLocation);
         else if(modalId == null)
-        	throw new IllegalArgumentException("#{bootstrapModal/}# tag must contain a modalId argument like #{bootstrapModal modalId:'addEditModal'}#. "+srcLocation);
+        		throw new IllegalArgumentException("#{bootstrapModal/}# tag must contain a modalId argument like #{bootstrapModal modalId:'addEditModal'}#. "+srcLocation);
         else if(linkId == null)
-        	throw new IllegalArgumentException("#{bootstrapModal/}# tag must contain a linkId argument like #{bootstrapModal linkId:'edit_'+entity.id}#. "+srcLocation);
+        		throw new IllegalArgumentException("#{bootstrapModal/}# tag must contain a linkId argument like #{bootstrapModal linkId:'edit_'+entity.id}#. "+srcLocation);
         else if(body != null)
-        	throw new IllegalArgumentException("Only #{bootstrapModal/}# can be used.  You cannot do #{bootstrapModal}# #{/bootstrapModal} as the body is not used with this tag"+srcLocation);
+        		throw new IllegalArgumentException("Only #{bootstrapModal/}# can be used.  You cannot do #{bootstrapModal}# #{/bootstrapModal} as the body is not used with this tag"+srcLocation);
 
         String urlPath = fillInUrlParams(route+"", args);
         printXX(out, "<script type=`text/javascript`>");
@@ -49,6 +49,8 @@ public class BootstrapModalTag implements HtmlTag {
         println(out, "             $('#"+modalId+"').load('"+urlPath+"', function(response, status, xhr){");
         println(out, "                 if (xhr.status == "+AJAX_REDIRECT_CODE+") {");
         println(out, "                     window.location = xhr.getResponseHeader('Location')");
+        println(out, "                 } else if (xhr.status != 200) {");
+        println(out, "                     alert('Cannot connect to server.  Check your network connection')");
         println(out, "                 } else {");
         printXX(out, "                     $(`#"+modalId+"`).modal('show');");
         println(out, "                 }");
