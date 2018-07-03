@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 
@@ -177,12 +178,21 @@ public class TemplateCompilerTask extends AbstractCompile {
 			String name = clazz.getName();
 			String path = name.replace('.', '/');
 			String fullPathName = path+".class";
-			File f = new File(destinationDir, fullPathName);
-			//File f = createFile(destinationDir, name);
-			System.out.println("file write to="+f);
+			
+			File target = new File(destinationDir, fullPathName);
+
+			//Seems sometimes need to create and sometimes don't(it failed when I upgraded gradle when
+			//I just used 'new File' so converted this back to the original createFile
+			//I think we have been flip flopping but not sure what caused each issue yet.
+			//I think this if exists, skip this piece should fix the flipflopping
+			if(target.exists())
+				return;
+			
+			createFile(target);
+			System.out.println("file write to="+target);
 			
 			try {
-				try (FileOutputStream str = new FileOutputStream(f)) {
+				try (FileOutputStream str = new FileOutputStream(target)) {
 					IOUtils.write(clazz.getBytes(), str);
 				}
 			} catch(IOException e) {
@@ -190,6 +200,16 @@ public class TemplateCompilerTask extends AbstractCompile {
 			}
 		}
 
+		public File createFile(File target) {
+			target.getParentFile().mkdirs();
+			try {
+				Files.createFile(target.toPath());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			return target;
+		}		
+		
 		@Override
 		public void recordRouteId(String routeId, List<String> argNames, String sourceLocation) {
 			String argStr = "";
