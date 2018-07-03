@@ -8,9 +8,6 @@ project.ext {
 
 project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
 
-    //Intellij Idea has a weird quirk we need to avoid AND gradle needs the *.html files in the classpath
-    //eclipse is just fine and needs nothing
-    // to add src/main/java/**/*.html files for the IntelliJ resource builder
     sourceSets {
         main {
             resources {
@@ -47,17 +44,6 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
 
     //task uploadArchives(overwrite: true) << {
     //}
-
-	//ok, this is the deal here.  JPA/hibernate made the decision to look for a persistence.xml file
-	//and scan for classes with @Entity in the directory OR jar with that xml file only
-	//maven(and I hate this) a long time ago separated src/main/java and src/main/resources but
-	//this screws tools in many situations like this one so this puts it back so the output is at
-	//least put to the same location
-	sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-	compileJava.doLast { 
-	   tasks.processResources.execute() 
-	   logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
-	}
 
     test {
         if (project.hasProperty('excludeSelenium')) {
