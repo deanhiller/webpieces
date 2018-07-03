@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration scan="true" scanPeriod="30 seconds" debug="true">
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-	    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">      
+	    <!-- We NO longer use this as it screws up the log files in gradle where logging statements
+	     at level warn/error are not interleaved with info so we log all warn twice in IDE's so that
+	     in test logs from gradle, it is interleaved.  do NOT change this -->
+	    <!-- filter class="ch.qos.logback.core.filter.EvaluatorFilter">      
 	      <evaluator class="ch.qos.logback.classic.boolex.GEventEvaluator"> 
 	        <expression>
 	           e.level.toInt() &lt;= INFO.toInt()
@@ -9,7 +12,7 @@
 	      </evaluator>
 	      <OnMismatch>DENY</OnMismatch>
 	      <OnMatch>NEUTRAL</OnMatch>
-	    </filter>
+	    </filter-->
     
 		<encoder>
 			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern>
@@ -53,8 +56,9 @@
     <logger name="jdbc.resultset" level="WARN"/>
     <logger name="jdbc.connection" level="WARN"/>
     
-    <logger name="org.webpieces.javasm.api" level="DEBUG"/>    
-    
+    <!-- this will crush performance if uncommented, but it's useful to see interactions with cassandra.  Leave it commented out unless you know what you are doing. -->
+    <!-- logger name="com.alvazan.orm.layer9z.spi.db.cassandra.CassandraSession" level="TRACE"/ -->
+  
 	<root>
 		<level value="INFO" />
 		<appender-ref ref="STDOUT"/>

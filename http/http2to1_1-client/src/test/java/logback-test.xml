@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration scan="true" scanPeriod="30 seconds" debug="true">
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-	    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">      
+	    <!-- We NO longer use this as it screws up the log files in gradle where logging statements
+	     at level warn/error are not interleaved with info so we log all warn twice in IDE's so that
+	     in test logs from gradle, it is interleaved.  do NOT change this -->
+	    <!-- filter class="ch.qos.logback.core.filter.EvaluatorFilter">      
 	      <evaluator class="ch.qos.logback.classic.boolex.GEventEvaluator"> 
 	        <expression>
 	           e.level.toInt() &lt;= INFO.toInt()
@@ -9,10 +12,10 @@
 	      </evaluator>
 	      <OnMismatch>DENY</OnMismatch>
 	      <OnMatch>NEUTRAL</OnMatch>
-	    </filter>
+	    </filter-->
     
 		<encoder>
-			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>
+			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern>
 		</encoder>
 	</appender>
 
@@ -22,7 +25,7 @@
     	</filter>
     
 		<encoder>
-			<pattern>%date{ISO8601} [%thread] %caller{1} %-4level: %message%n</pattern>
+			<pattern>%date{ISO8601} [%thread] %caller{1..2} %-4level: %message%n</pattern>
 		</encoder>
 		<target>System.err</target>
 	</appender>

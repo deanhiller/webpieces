@@ -5,7 +5,10 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $DIR
 
 #RUN test first by building fake release THEN building fake project THEN building the fake project to make sure it works
-./gradlew clean build release -x javadoc
+#./gradlew clean build release -x javadoc
+./gradlew clean build release -PexcludeSelenium=true -x javadoc
+#./gradlew -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false build -PexcludeSelenium=true -PexcludeH2Spec=true
+
 test_result=$?
 if [ $test_result -eq 0 ]
 then
