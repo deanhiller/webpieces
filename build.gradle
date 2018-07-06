@@ -42,6 +42,7 @@ ext {
        'commons-beans':   'commons-beanutils:commons-beanutils:1.9.2',
 
        'javax-inject':    'javax.inject:javax.inject:1',
+       'jaxb':            'javax.xml.bind:jaxb-api:2.3.0',
        'slf4j-api':       'org.slf4j:slf4j-api:1.7.21',
        //do we need this one...
        //'logback-core':  'ch.qos.logback:logback-core:1.1.7', 
@@ -60,9 +61,9 @@ ext {
        'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
        'h2db':            'com.h2database:h2:1.4.192',
 	   
-	   //look into removing and using a copied single file as we only use one thing
-	   'commons-lang':    'org.apache.commons:commons-lang3:3.5',
-	   'jackson':         'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
+       //look into removing and using a copied single file as we only use one thing
+       'commons-lang':    'org.apache.commons:commons-lang3:3.5',
+       'jackson':         'org.codehaus.jackson:jackson-mapper-asl:1.9.13'
 	   
     ]
 
@@ -84,7 +85,7 @@ allprojects {
    }
 
    jacoco {
-      toolVersion = '0.7.9'
+      toolVersion = '0.8.1'
    }
 }
 
@@ -96,13 +97,15 @@ subprojects {
    apply plugin: 'signing'
    apply plugin: 'maven'
 
+   def currentJvm = org.gradle.internal.jvm.Jvm.current()
+println currentJvm
    group = 'org.webpieces'
    if(project.hasProperty('projVersion')) {
      project.version = '1.9.'+project.projVersion
-     println("CREATING RELEASE VERSION "+project.version)
+     println("CREATING RELEASE VERSION "+project.version+"  jvm="+currentJvm)
    } else {
      project.version = '1.9-developer'
-     println("CREATING DEVELOPER VERSION "+version)
+     println("CREATING DEVELOPER VERSION "+version+"  jvm="+currentJvm)
    }
 
    ext {

@@ -67,12 +67,19 @@ fi
 #reset to webpieces directory
 cd ../webpieces 
 
+echo path=$PWD
+
 ##############################################################
 # Test creation of project, build of new project and start of the server
 #############################################################
 
 cd webserver/output/webpiecesServerBuilder
+
+echo path2=$PWD
+
 ./createProject.sh MyTest com.test ..
+
+echo createproject done
 test_result=$?
 if [ $test_result -eq 0 ]
 then
@@ -87,6 +94,7 @@ else
 fi
 
 cd ../mytest-all
+echo about to build assembleDist
 ./gradlew build assembleDist
 test_result=$?
 if [ $test_result -eq 0 ]

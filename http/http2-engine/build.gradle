@@ -1,8 +1,14 @@
 dependencies {
+    compile deps['jaxb']
     compile project(':http:http2-hpack')
     compile project(':core:core-statemachine')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {
    description='A re-usable asynchronous http2 parser'
+}
+
+//hack to use java.xml.bind
+compileTestJava {
+  options.compilerArgs += ["--add-modules", "java.xml.bind"]
 }

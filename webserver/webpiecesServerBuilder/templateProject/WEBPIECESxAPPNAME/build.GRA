@@ -41,7 +41,6 @@ if (System.getProperty('idea.active')) {
 //this screws tools in many situations like this one so this puts it back so the output is at
 //least put to the same location
 sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
-compileJava.doLast { tasks.processResources.execute() }
 
 dependencies {
   //add maven dependencies here
