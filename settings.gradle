@@ -30,8 +30,8 @@ include 'webserver:projectcreator'
 include 'webserver:gradle-plugin-htmlcompiler'
 include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev'
 include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME'
-include 'webserver-plugins:hibernate-plugin'
-include 'webserver-plugins:h2db-plugin'
-include 'webserver-plugins:json-jackson-plugin'
+include 'webserver-plugins:plugin-hibernate'
+include 'webserver-plugins:plugin-h2db'
+include 'webserver-plugins:plugin-json-jackson'
 
 

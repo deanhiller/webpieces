@@ -31,13 +31,13 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
     dependencies {
         compile project(':webserver:http-webserver')
         //we start people off with the hibernate plugin 
-        compile project(':webserver-plugins:hibernate-plugin')
-		compile project(':webserver-plugins:json-jackson-plugin')
-		compile deps['commons-lang'] //used in json escaping
+        compile project(':webserver-plugins:plugin-hibernate')
+	compile project(':webserver-plugins:plugin-json-jackson')
+	compile deps['commons-lang'] //used in json escaping
 		
         testCompile project(':core:core-ddl')
         testCompile project(':core:core-mock')
-        testCompile project(':webserver-plugins:h2db-plugin')
+        testCompile project(':webserver-plugins:plugin-h2db')
         testCompile project(':webserver:http-webserver-test')
         testCompile deps['selenium']
     }
@@ -72,7 +72,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME-dev') {
 
         //we start people off with h2 plugin in dev mode that they can delete later if they want(easier to delete then to setup)
         //h2 works well for in-memory testing if using jdbc.  if using nosql, just delete this and code that no longer compiles after that
-        compile project(':webserver-plugins:h2db-plugin')
+        compile project(':webserver-plugins:plugin-h2db')
     }
     
     //task uploadArchives(overwrite: true) << {

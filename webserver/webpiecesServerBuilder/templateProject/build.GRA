@@ -24,12 +24,12 @@ ext {
        'web-devtemplating':  "org.webpieces:http-templating-dev:${webpiecesVersion}",
        'core-mock':          "org.webpieces:core-mock:${webpiecesVersion}",
        'core-ddl':           "org.webpieces:core-ddl:${webpiecesVersion}",
-       'plugin-hibernate':   "org.webpieces:hibernate-plugin:${webpiecesVersion}",
+       'plugin-hibernate':   "org.webpieces:plugin-hibernate:${webpiecesVersion}",
        
-       'plugin-jackson':     "org.webpieces:json-jackson-plugin:${webpiecesVersion}",
+       'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
        
-       'plugin-h2':          "org.webpieces:h2db-plugin:${webpiecesVersion}",
+       'plugin-h2':          "org.webpieces:plugin-h2db:${webpiecesVersion}",
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'h2db':            'com.h2database:h2:1.4.192',
        //These next two are in case you have libraries that want to use an
