@@ -33,5 +33,6 @@ include 'webserver:webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME'
 include 'webserver-plugins:plugin-hibernate'
 include 'webserver-plugins:plugin-h2db'
 include 'webserver-plugins:plugin-json-jackson'
+include 'webserver-plugins:plugin-install-sslcert'
 
 

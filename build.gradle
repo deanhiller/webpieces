@@ -48,7 +48,7 @@ ext {
        //'logback-core':  'ch.qos.logback:logback-core:1.1.7', 
        'logback-classic': 'ch.qos.logback:logback-classic:1.1.7',
        'joda-time':       'joda-time:joda-time:2.9.4',
-       'guice':           'com.google.inject:guice:4.0',
+       'guice':           'com.google.inject:guice:4.2.0',
        'guice-multibindings': 'com.google.inject.extensions:guice-multibindings:4.0',
        'guava':           'com.google.guava:guava:19.0',
        'eclipse-compiler':'org.eclipse.jdt.core.compiler:ecj:4.5.1',
@@ -57,11 +57,12 @@ ext {
        'selenium':        'org.seleniumhq.selenium:selenium-java:2.53.1',
        'twitter-hpack':   'com.twitter:hpack:v1.0.1',
        'jetty-hpack':     'org.eclipse.jetty.http2:http2-hpack:9.4.0.M1',
-       'hibernate':       'org.hibernate:hibernate-core:5.2.3.Final',
+       'hibernate':       'org.hibernate:hibernate-core:5.3.2.Final',
        'log4jdbc':        'com.googlecode.log4jdbc:log4jdbc:1.2',
        'h2db':            'com.h2database:h2:1.4.192',
 
        'acme-sslcerts':   'org.shredzone.acme4j:acme4j-client:2.1',
+       'acme-utils':      'org.shredzone.acme4j:acme4j-utils:2.1',
 
        //look into removing and using a copied single file as we only use one thing
        'commons-lang':    'org.apache.commons:commons-lang3:3.5',

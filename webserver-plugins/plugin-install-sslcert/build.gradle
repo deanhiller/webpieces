@@ -1,0 +1,5 @@
+dependencies {
+    compile deps['acme-sslcerts']    
+    compile deps['acme-utils']
+    compile project(':webserver:http-router'), project(':http:http1_1-parser')
+}

@@ -2,6 +2,7 @@ package WEBPIECESxPACKAGE.base;
 
 import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.Startable;
+import org.webpieces.router.api.routing.SimpleStorage;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -11,6 +12,7 @@ import WEBPIECESxPACKAGE.base.libs.EducationEnum;
 import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.base.libs.RemoteServiceImpl;
 import WEBPIECESxPACKAGE.base.libs.RoleEnum;
+import WEBPIECESxPACKAGE.base.libs.SimpleStorageImpl;
 import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
 import WEBPIECESxPACKAGE.base.libs.SomeLibraryImpl;
 
@@ -33,7 +35,10 @@ public class GuiceModule implements Module {
 		conversionBinder.addBinding().to(RoleEnum.WebConverter.class);
 	    
 	    binder.bind(SomeLibrary.class).to(SomeLibraryImpl.class);
-	    binder.bind(RemoteService.class).to(RemoteServiceImpl.class);
+	    binder.bind(RemoteService.class).to(RemoteServiceImpl.class).asEagerSingleton();
+
+	    //Must bind a SimpleStorage for plugins to read/save data and render their html pages
+	    binder.bind(SimpleStorage.class).to(SimpleStorageImpl.class).asEagerSingleton();
 	}
 
 }

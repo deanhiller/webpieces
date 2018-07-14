@@ -11,5 +11,5 @@ sourceSets {
 
 dependencies {
     compile deps['h2db']
-	compile project(':webserver:http-router')
+    compile project(':webserver:http-router')
 }

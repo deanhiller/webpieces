@@ -50,10 +50,11 @@ dependencies {
   //optional plugin for if you have a json api
   compile deps['plugin-jackson']
   compile deps['commons-lang'] //used in json escaping
-  
-  //REMOVE once you are on a real database
+ 
+  //REMOVE once you are on a real database as there is a line testCompile deps['plugin-h2'] that brings this in for tests
+  //AND we only use this so you work out of the box to start hacking 
   compile deps['h2db']
-  
+ 
   //IF you add dependencies on other projects locally, you need to modify WEBPIECESxCLASSDevServer.java to include those
   //SOURCE paths(ie. *.java file paths not *.class files)) or it will not recompile that code as it changes
 
