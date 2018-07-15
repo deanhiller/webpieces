@@ -57,7 +57,8 @@ public class PluginSetup {
 		
 		//wire in startup and start the startables.  This is a function since Dev and Production differ
 		//in that Development we have to make sure we don't run startup code twice as it is likely to
-		//blow up....or should we make this configurable?
+		//blow up....or should we make this configurable?  ie. Dev may run on a recompile after starting up at
+		//a later time and we most likely don't want to run startup code multiple times
 		startupFunction.accept(appInjector);
 	}
 

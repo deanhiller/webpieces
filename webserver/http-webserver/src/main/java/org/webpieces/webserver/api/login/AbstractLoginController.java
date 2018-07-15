@@ -4,18 +4,19 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
+import org.webpieces.router.api.routing.RouteId;
 
-public abstract class LoginController {
+public abstract class AbstractLoginController {
 	
 	public Action logout() {
 		Current.session().remove(getLoginSessionKey());
-		return Actions.redirect(LoginRouteId.LOGIN);
+		return Actions.redirect(getRenderLoginRoute());
 	}
 	
 	public Action login() {
 		String user = Current.session().get(getLoginSessionKey());
 		if(user != null)
-			return Actions.redirect(LoginRouteId.LOGGED_IN_HOME);
+			return Actions.redirect(getRenderAfterLoginHome());
 		
 		Current.flash().keep(); //we must keep previous data like the url
 		
@@ -26,7 +27,7 @@ public abstract class LoginController {
 		
 		boolean authenticated = isValidLogin(username, password);
 		if(!authenticated || Current.validation().hasErrors()) {
-			return Actions.redirectFlashAllSecure(LoginRouteId.LOGIN, Current.getContext(), "password");
+			return Actions.redirectFlashAllSecure(getRenderLoginRoute(), Current.getContext(), "password");
 		}
 		
 		//officially makes them logged in by putting the token in the session
@@ -36,14 +37,15 @@ public abstract class LoginController {
 		if(url != null) {
 			return Actions.redirectToUrl(url); //page the user was trying to access before logging in
 		}
-		return Actions.redirect(LoginRouteId.LOGGED_IN_HOME); //base page after login screen
+		return Actions.redirect(getRenderAfterLoginHome()); //base page after login screen
 	}
 
-	protected String getLoginSessionKey() {
-		return LoginInfo.LOGIN_TOKEN1;
-	}
+	protected abstract String getLoginSessionKey();
 	
 	protected abstract boolean isValidLogin(String username, String password);
 	protected abstract Action fetchGetLoginPageAction();
+
+	protected abstract RouteId getRenderLoginRoute();
+	protected abstract RouteId getRenderAfterLoginHome();
 	
 }

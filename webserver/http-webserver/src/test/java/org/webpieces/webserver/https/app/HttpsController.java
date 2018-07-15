@@ -11,6 +11,8 @@ import org.webpieces.webserver.api.login.LoginInfo;
 @Singleton
 public class HttpsController {
 	
+	public static final String LOGIN_TOKEN = "someUserId";
+	
 	public Action home() {
 		return Actions.renderThis();
 	}
@@ -25,7 +27,7 @@ public class HttpsController {
 	
 	public Redirect postLogin() {
 		//simulating successful login here...
-		Current.session().put(LoginInfo.LOGIN_TOKEN1, "someId");
+		Current.session().put(LOGIN_TOKEN, "someId");
 		
 		String url = Current.flash().get("url");
 		if(url != null) {

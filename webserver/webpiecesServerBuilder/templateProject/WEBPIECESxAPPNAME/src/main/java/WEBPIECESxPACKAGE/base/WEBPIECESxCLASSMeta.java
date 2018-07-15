@@ -3,21 +3,22 @@ package WEBPIECESxPACKAGE.base;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.json.JacksonPlugin;
+import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.webserver.api.login.LoginRoutes;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
 import WEBPIECESxPACKAGE.base.crud.CrudRoutes;
 import WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudRoutes;
-import WEBPIECESxPACKAGE.base.crud.login.LoggedInRoutes;
+import WEBPIECESxPACKAGE.base.crud.login.LoginRoutes;
 import WEBPIECESxPACKAGE.base.json.JsonCatchAllFilter;
 import WEBPIECESxPACKAGE.base.json.JsonRoutes;
 
@@ -30,6 +31,7 @@ import WEBPIECESxPACKAGE.base.json.JsonRoutes;
 public class WEBPIECESxCLASSMeta implements WebAppMeta {
 
 	private static final Logger log = LoggerFactory.getLogger(WEBPIECESxCLASSMeta.class);
+	public static final String BACKEND_PATH = "/backend1";
 	private String persistenceUnit;
 
 	@Override
@@ -51,8 +53,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
 				new AppRoutes(),
-				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController","/secure/.*"),
-				new LoggedInRoutes(),
+				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController", "/secure/.*"),
 				new CrudRoutes(),
 				new AjaxCrudRoutes(),
 				new JsonRoutes()
@@ -67,7 +68,9 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
 				new HibernatePlugin(persistenceUnit),
-				new JacksonPlugin("/json/.*", JsonCatchAllFilter.class)
+				new JacksonPlugin("/json/.*", JsonCatchAllFilter.class),
+				new BackendPlugin(),
+				new InstallSslCertPlugin()
 				);
 	}
 

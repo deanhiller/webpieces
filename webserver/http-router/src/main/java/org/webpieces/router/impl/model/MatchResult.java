@@ -21,11 +21,6 @@ public class MatchResult {
 		this(meta, new HashMap<>());
 	}
 
-	public MatchResult(boolean isFound) {
-		this.meta = null;
-		this.pathParams = null;
-	}
-
 	public RouteMeta getMeta() {
 		return meta;
 	}

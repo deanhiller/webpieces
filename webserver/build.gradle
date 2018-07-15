@@ -32,8 +32,10 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
         compile project(':webserver:http-webserver')
         //we start people off with the hibernate plugin 
         compile project(':webserver-plugins:plugin-hibernate')
-	compile project(':webserver-plugins:plugin-json-jackson')
-	compile deps['commons-lang'] //used in json escaping
+        compile project(':webserver-plugins:plugin-json-jackson')
+        compile project(':webserver-plugins:plugin-backend')
+        compile project(':webserver-plugins:plugin-install-sslcert')
+        compile deps['commons-lang'] //used in json escaping
 		
         testCompile project(':core:core-ddl')
         testCompile project(':core:core-mock')

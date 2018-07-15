@@ -1,6 +1,6 @@
-package org.webpieces.plugins.json;
+package org.webpieces.plugins.sslcert;
 
-import org.webpieces.router.api.Startable;
+import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
@@ -16,9 +16,8 @@ public class InstallSslCertModule extends AbstractModule {
 	
 	@Override
 	protected void configure() {
-		Multibinder<Startable> uriBinder = Multibinder.newSetBinder(binder(), Startable.class);
-	    uriBinder.addBinding().to(InstallSslCertStartup.class);
-	    
+		Multibinder<BackendGuiDescriptor> backendBinder = Multibinder.newSetBinder(binder(), BackendGuiDescriptor.class);
+	    backendBinder.addBinding().to(BackendInfoImpl.class);
 	}
 
 }

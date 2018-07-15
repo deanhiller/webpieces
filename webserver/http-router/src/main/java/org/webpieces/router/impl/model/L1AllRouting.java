@@ -1,6 +1,7 @@
 package org.webpieces.router.impl.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,10 @@ public class L1AllRouting {
 		return routes;
 	}
 
+	public Collection<L2DomainRoutes> getSpecificDomains() {
+		return specificDomainRoutes.values();
+	}
+	
 	public List<L2DomainRoutes> getAllDomains() {
 		List<L2DomainRoutes> list = new ArrayList<>();
 		list.add(main);

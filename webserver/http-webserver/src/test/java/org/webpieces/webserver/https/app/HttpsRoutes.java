@@ -33,10 +33,10 @@ public class HttpsRoutes extends AbstractRoutes {
 		//Unlike routes which apply regex to request urls, filters regexs are applied to route regexs so if a filter
 		//matches a route, it will be added to all requests for that route.  This is done so we don't have to
 		//figure out which filters to apply on each request and on startup can wire up all filters once
-		addFilter("/secure/.*", LoginFilter.class, new LoginInfo(LoginInfo.LOGIN_TOKEN1, HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
+		addFilter("/secure/.*", LoginFilter.class, new LoginInfo(HttpsController.LOGIN_TOKEN, HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
 		addFilter("/backend/.*", LoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), PortType.HTTPS_FILTER);
 	
-		addNotFoundFilter(LoginFilter.class, new LoginInfo(LoginInfo.LOGIN_TOKEN1, HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
+		addNotFoundFilter(LoginFilter.class, new LoginInfo(HttpsController.LOGIN_TOKEN, HttpsRouteId.LOGIN), PortType.HTTPS_FILTER);
 		addNotFoundFilter(LoginFilter.class, new LoginInfo("mgrId", HttpsRouteId.LOGIN_BACKEND), PortType.HTTPS_FILTER);
 
 		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");

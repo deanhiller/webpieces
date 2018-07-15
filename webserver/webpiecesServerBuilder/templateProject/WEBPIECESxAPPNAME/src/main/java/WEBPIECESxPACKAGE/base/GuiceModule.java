@@ -1,5 +1,6 @@
 package WEBPIECESxPACKAGE.base;
 
+import org.webpieces.plugins.backend.login.BackendLogin;
 import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.routing.SimpleStorage;
@@ -8,6 +9,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 
+import WEBPIECESxPACKAGE.base.crud.login.BackendLoginImpl;
 import WEBPIECESxPACKAGE.base.libs.EducationEnum;
 import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.base.libs.RemoteServiceImpl;
@@ -39,6 +41,9 @@ public class GuiceModule implements Module {
 
 	    //Must bind a SimpleStorage for plugins to read/save data and render their html pages
 	    binder.bind(SimpleStorage.class).to(SimpleStorageImpl.class).asEagerSingleton();
+	    
+	    //Must bind a BackendLogin for the backend plugin(or remove the backend plugin)
+	    binder.bind(BackendLogin.class).to(BackendLoginImpl.class).asEagerSingleton();
 	}
 
 }

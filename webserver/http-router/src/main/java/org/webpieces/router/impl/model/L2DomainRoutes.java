@@ -50,11 +50,11 @@ public class L2DomainRoutes {
 
 	public MatchResult fetchRoute(List<RouteMeta> staticRoutes, RouterRequest req, String relativePath) {
 		MatchResult result = domainRoutes.fetchRoute(req, relativePath);
-		if(!result.isFound()) {
+		if(result == null) {
 			result = domainRoutes.findRouteMatch(staticRoutes, req, relativePath);
 		}
 		
-		if(!result.isFound()) //if still not found in static routes, return pageNotFoundRoute
+		if(result == null) //if still not found in static routes, return pageNotFoundRoute
 			return new MatchResult(pageNotFoundRoute);
 		
 		return result;

@@ -6,10 +6,13 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Render;
-import org.webpieces.webserver.api.login.LoginController;
+import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.webserver.api.login.AbstractLoginController;
 
 @Singleton
-public class AppLoginController extends LoginController {
+public class AppLoginController extends AbstractLoginController {
+
+	public static final String TOKEN = "userId";
 
 	@Override
 	protected boolean isValidLogin(String username, String password) {
@@ -37,5 +40,20 @@ public class AppLoginController extends LoginController {
 	
 	public Render index() {
 		return Actions.renderThis();
+	}
+
+	@Override
+	protected String getLoginSessionKey() {
+		return TOKEN;
+	}
+
+	@Override
+	protected RouteId getRenderLoginRoute() {
+		return LoginRouteId.LOGIN;
+	}
+
+	@Override
+	protected RouteId getRenderAfterLoginHome() {
+		return LoginRouteId.LOGGED_IN_HOME;
 	}
 }

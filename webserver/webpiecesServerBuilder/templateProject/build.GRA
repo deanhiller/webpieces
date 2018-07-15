@@ -25,7 +25,8 @@ ext {
        'core-mock':          "org.webpieces:core-mock:${webpiecesVersion}",
        'core-ddl':           "org.webpieces:core-ddl:${webpiecesVersion}",
        'plugin-hibernate':   "org.webpieces:plugin-hibernate:${webpiecesVersion}",
-       
+       'plugin-backend':     "org.webpieces:plugin-backend:${webpiecesVersion}",
+       'plugin-install-sslcert': "org.webpieces:plugin-install-sslcert:${webpiecesVersion}", 
        'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
        

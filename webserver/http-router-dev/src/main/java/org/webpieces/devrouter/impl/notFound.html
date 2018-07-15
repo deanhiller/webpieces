@@ -1,11 +1,40 @@
 <html>
-  <head>
-  </head>
-  <body>
-   You are in the WebPieces Development Server. Your request received a 404.<br/><br/>
-   Your app's webpage was not found for this reason: ${error}$
-    <br/>
-    <br/>
+<head>
+</head>
+<body>
+    You are in the WebPieces Development Server. Your request received a 404.<br/><br/>
+    Your app's webpage was not found for this reason: ${error}$
+    
+    <ul>
+        <li><a href="">Existing Routes in your WebApp</a></li>
+        <li><a href="">What your webpage looks like in Production</a></li>
+    </ul>
+
+    <h3>Domain Specific Routes</h3>
+    Most WebApps will not have Domain Specific Routes.  This is for special situations.  If there is no match on
+    any domains, the router skips to the next section looking for a match.  If there is a match on a domain, the router
+    narrows to only matching here in this section
+        <ul>
+        #{list items:domains, as:'domain'}#
+            <li>${domain.domain}$</li>
+        #{/list}#
+        #{else}#
+            <li>You have no domain specific routes that match only on domain</li>
+        #{/else}#
+        </ul>
+    
+    <h3>Non Domain Routes</h3>
+    Next, these routes are matched digging into scopes such that any sublist is matched in order after matching on scope. 
+    It's good to have scopes so instead of looping over 3000 urls, the router loops over 10 or so in a scope to match
+
+    <pre>
+    <span style="line-height: 8px;">    
+    #{htmlEscapingOff}#
+    ${routeHtml}$
+    #{/htmlEscapingOff}#
+    </span>
+    </pre>
+    
     TODO: Fill in the module we ended up using and the routes in that module that did not match here to make it
     easy for the developer to see why he got a 404
     <br/>

@@ -1,16 +1,16 @@
-package org.webpieces.plugins.json;
+package org.webpieces.plugins.sslcert;
 
 import java.util.List;
 
+import org.webpieces.router.api.routing.BackendPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Module;
 
-public class InstallSslCertPlugin implements Plugin {
+public class InstallSslCertPlugin implements BackendPlugin {
 
-	
 	public InstallSslCertPlugin() {
 		super();
 	}

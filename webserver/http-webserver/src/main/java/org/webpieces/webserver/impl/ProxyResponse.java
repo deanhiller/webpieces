@@ -200,7 +200,7 @@ public class ProxyResponse implements ResponseStreamer {
 	
 	@Override
 	public CompletableFuture<Void> sendRenderStatic(RenderStaticResponse renderStatic) {
-		log.info(() -> "Sending render static html response. req="+request);
+		log.debug(() -> "Sending render static html response. req="+request);
 		RequestInfo requestInfo = new RequestInfo(routerRequest, request, pool, stream);
 		return reader.sendRenderStatic(requestInfo, renderStatic);
 	}

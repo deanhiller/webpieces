@@ -49,7 +49,6 @@ public class L3PrefixedRouting {
 		routes.add(meta);
 	}
 
-
 	public MatchResult fetchRoute(RouterRequest request, String subPath) {
 		if("".equals(subPath))
 			return findRouteMatch(routes, request, subPath);
@@ -85,7 +84,14 @@ public class L3PrefixedRouting {
 				return result;
 		}
 
-		return new MatchResult(false);
+		return null;
 	}
 	
+	public List<RouteMeta> getRoutes() {
+		return routes;
+	}
+	
+	public Map<String, L3PrefixedRouting> getScopedRoutes() {
+		return pathPrefixToInfo;
+	}
 }

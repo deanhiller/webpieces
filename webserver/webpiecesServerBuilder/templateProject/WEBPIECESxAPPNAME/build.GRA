@@ -45,6 +45,10 @@ sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
 dependencies {
   //add maven dependencies here
   compile deps['web-webserver']
+  //optional plugin BUT required for any backend type plugins since they all plugin to this guys login
+  compile deps['plugin-backend']
+  //optional plugin for EASY https cert install and auto renew
+  compile deps['plugin-install-sslcert']
   //optional plugin for if you use hibernate
   compile deps['plugin-hibernate']
   //optional plugin for if you have a json api

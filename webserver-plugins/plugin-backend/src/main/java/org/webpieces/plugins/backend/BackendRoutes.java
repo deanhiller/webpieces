@@ -1,9 +1,14 @@
-package org.webpieces.router.api.routing;
+package org.webpieces.plugins.backend;
+
+import org.webpieces.router.api.routing.ScopedRoutes;
 
 public class BackendRoutes extends ScopedRoutes {
+	
+	public static final String BACKEND_ROUTE = "/backend";
+	
     @Override
     protected String getScope() {
-        return "/backend";
+        return BACKEND_ROUTE;
     }
 
     @Override

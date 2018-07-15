@@ -1,4 +1,4 @@
-package org.webpieces.plugins.json;
+package org.webpieces.plugins.sslcert;
 
 import org.webpieces.router.api.routing.RouteId;
 

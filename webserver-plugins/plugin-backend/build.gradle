@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':webserver:http-router'), project(':http:http1_1-parser')
+    compile project(':webserver:http-webserver')
+}

@@ -93,6 +93,8 @@ public class RouteLoader {
 		//just in case plugins will need it(most won't, hibernate will).  In production, this is really a no-op and does
 		//nothing.  I don't like dev code existing in production :( so perhaps we should abstract this out at some 
 		//point perhaps with a lambda of a lambda function
+		//OR have a DevelopmentRouteLoader subclass this ProdRouteLoader and add just his needed classloader lines!!! which
+		//would be more clear
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(clazz.getClassLoader());
@@ -103,15 +105,17 @@ public class RouteLoader {
 	
 			log.info(WebAppMeta.class.getSimpleName()+" loaded.  initializing next");
 	
+			RoutingHolder routingHolder = new RoutingHolder();
+			
 			WebAppMeta routerModule = (WebAppMeta) obj;
 			routerModule.initialize(config.getWebAppMetaProperties());
 			log.info(WebAppMeta.class.getSimpleName()+" initialized.");
 			
-			Injector injector = createInjector(routerModule);
+			Injector injector = createInjector(routerModule, routingHolder);
 				
 			pluginSetup.wireInPluginPoints(injector, startupFunction);
 			
-			loadAllRoutes(routerModule, injector);
+			loadAllRoutes(routerModule, injector, routingHolder);
 			
 			return routerModule;
 		} finally {
@@ -119,12 +123,12 @@ public class RouteLoader {
 		}
 	}
 
-	public Injector createInjector(WebAppMeta routerModule) {
+	public Injector createInjector(WebAppMeta routerModule, RoutingHolder routingHolder) {
 		List<Module> guiceModules = routerModule.getGuiceModules();
 		if(guiceModules == null)
 			guiceModules = new ArrayList<>();
 		
-		guiceModules.add(new EmptyPluginModule());
+		guiceModules.add(new EmptyPluginModule(routingHolder));
 		
 		Module module = Modules.combine(guiceModules);
 		
@@ -147,13 +151,14 @@ public class RouteLoader {
 	
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
-	public void loadAllRoutes(WebAppMeta rm, Injector injector) {
+	public void loadAllRoutes(WebAppMeta rm, Injector injector, RoutingHolder routingHolder) {
 		log.info("adding routes");
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config);
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
 		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config);
 		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder, false);
+		routingHolder.setRouterBuilder(routerBuilder);
 		invoker.init(reverseRoutes);
 		
 		List<Routes> all = new ArrayList<>();
