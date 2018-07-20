@@ -27,7 +27,7 @@ public class SimpleStorageDbo {
 	@Id
 	@SequenceGenerator(name="simplestorage_id_gen",sequenceName="simplestorage_sequence" ,initialValue=1,allocationSize=10)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="simplestorage_id_gen")
-	private String id;
+	private Long id;
 	
 	@Column(length = 255)
 	private String pluginKey;
@@ -38,6 +38,10 @@ public class SimpleStorageDbo {
 	@Column(length = 2000)
 	private String value;
 
+	public SimpleStorageDbo() {
+		super();
+	}
+	
 	public SimpleStorageDbo(String pluginKey, String mapKey, String value) {
 		super();
 		this.pluginKey = pluginKey;
@@ -45,11 +49,11 @@ public class SimpleStorageDbo {
 		this.value = value;
 	}
 
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

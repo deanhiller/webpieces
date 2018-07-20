@@ -67,8 +67,9 @@ public class AcmeClientProxy {
 			Login login = session.login(accountUrl, accountKeyPair);
 			Account account = login.getAccount();
 	
+			String domainTemp = "something.com";
 			Order order = account.newOrder()
-				.domain(domain)
+				.domain(domainTemp)
 				.create();
 			
 			List<AuthAndChallenge> challenges = processAuths(order);
@@ -136,7 +137,8 @@ public class AcmeClientProxy {
 	private List<AuthAndChallenge> processAuths(Order order) {
 		List<AuthAndChallenge> challenges = new ArrayList<>();
 		for(Authorization auth : order.getAuthorizations()) {
-			if(auth.getStatus() == Status.READY) {
+			Status status = auth.getStatus();
+			if(status == Status.PENDING) {
 				Http01Challenge challenge = auth.findChallenge(Http01Challenge.TYPE);
 				challenges.add(new AuthAndChallenge(auth, challenge));
 			} else

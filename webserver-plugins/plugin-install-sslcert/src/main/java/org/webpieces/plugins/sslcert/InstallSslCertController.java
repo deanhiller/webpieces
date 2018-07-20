@@ -94,7 +94,9 @@ public class InstallSslCertController {
 		if(keyPair == null)
 			return Actions.redirect(InstallSslCertRouteId.INSTALL_SSL_SETUP);
 		
-		return Actions.renderThis("keyPair", keyPair);
+		return Actions.renderThis(
+				"menus", menuCreator.getMenu(), 
+				"keyPair", keyPair);
 	}
 
 	public CompletableFuture<Redirect> postStep2(String organization) {

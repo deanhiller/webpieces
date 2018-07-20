@@ -29,6 +29,7 @@ public class SimpleStorageImpl implements SimpleStorage {
 		
 		mgr.flush();
 		mgr.getTransaction().commit();
+		mgr.close();
 		
 		return CompletableFuture.completedFuture(null);
 	}
@@ -44,20 +45,23 @@ public class SimpleStorageImpl implements SimpleStorage {
 		
 		mgr.flush();
 		mgr.getTransaction().commit();
+		mgr.close();
 		
 		return CompletableFuture.completedFuture(null);
 	}
-	
+
 	@Override
 	public CompletableFuture<Map<String, String>> read(String key) {
 		EntityManager mgr = factory.createEntityManager();
-		mgr.getTransaction().begin();
+		//mgr.getTransaction().begin();
 		
 		List<SimpleStorageDbo> rows = SimpleStorageDbo.findAll(mgr, key);
 		Map<String, String> properties = new HashMap<>();
 		for(SimpleStorageDbo row: rows) {
 			properties.put(row.getMapKey(), row.getValue());
 		}
+		
+		mgr.close();
 		
 		return CompletableFuture.completedFuture(properties);
 	}
