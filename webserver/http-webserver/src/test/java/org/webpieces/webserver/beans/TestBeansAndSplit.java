@@ -30,7 +30,6 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -40,6 +39,7 @@ import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.MockTcpChannel;
 import org.webpieces.webserver.test.ResponseWrapper;
+import org.webpieces.webserver.test.http11.Requests;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

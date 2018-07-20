@@ -23,12 +23,12 @@ import org.webpieces.mock.lib.MockExecutor;
 import org.webpieces.plugins.hibernate.app.ServiceToFail;
 import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.TestConfig;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
+import org.webpieces.webserver.test.http11.Requests;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

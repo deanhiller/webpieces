@@ -7,6 +7,10 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
 #### A few key selling points( More advantages in another section below as well)
+* Contains a Backend Plugin which BackendPlugins plug into exposing new html pages, controllers, startup code all for that plugin
+  * One example is the InstallCert plugin which allows you to manage the https cert and one click install
+  * Another example will be a StatsBackendPlugin to manage stats
+  * Another example will be a management plugin allowing you to modify properties(and you can stop using property files!!!!).  This is all saved to a database.
 * The server automatically puts backpressure on clients when needed preventing clients from writing to their sockets during extreme load so the server never falls over
   * This feature is tough requiring the need for backpressure translation across our http2 parser, http1.1 parser, and the SSL encryption layer which is why nearly all webservers do not do this feature
 * Run SingleSocketThroughput.java to see performance.  Well, on my small laptop at least and single threaded, 6 ,000,000 requests per minute(100,000 requests per second)

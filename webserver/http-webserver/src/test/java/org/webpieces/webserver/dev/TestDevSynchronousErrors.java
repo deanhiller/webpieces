@@ -18,7 +18,6 @@ import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.webserver.Requests;
 import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
@@ -29,6 +28,7 @@ import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
+import org.webpieces.webserver.test.http11.Requests;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

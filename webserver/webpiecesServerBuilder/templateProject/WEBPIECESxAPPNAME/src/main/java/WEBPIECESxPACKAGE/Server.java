@@ -91,10 +91,12 @@ public class Server {
 		
 		SecretKeyInfo signingKey = new SecretKeyInfo(fetchKey(), "HmacSHA1");
 		
+		WebSSLFactory webSSLFactory = new WebSSLFactory();
+
 		//Different pieces of the server have different configuration objects where settings are set
 		//You could move these to property files but definitely put some thought if you want people 
 		//randomly changing those properties and restarting the server without going through some testing
-		//by a QA team.  We leave most of these properties right here.
+		//by a QA team.  We leave most of these properties right here so changes get tested by QA.
 		
 		//A SECOND note is that some properties can be modified at runtime and so some config objects could be exposed
 		//through JMX or other means for dynamically changing things at runtime
@@ -104,13 +106,14 @@ public class Server {
 											.setWebAppMetaProperties(svrConfig.getWebAppMetaProperties())
 											.setSecretKey(signingKey)
 											.setPortConfigCallback(() -> fetchPortsForRedirects())
-											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir());
-		
+											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
+											.setNeedsSimpleStorage(webSSLFactory); 
+				
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
 										.setHttpListenAddress(new InetSocketAddress(svrConfig.getHttpPort()))
 										.setHttpsListenAddress(new InetSocketAddress(svrConfig.getHttpsPort()))
-										.setSslEngineFactory(new WebSSLFactory())
+										.setSslEngineFactory(webSSLFactory)
 										.setFunctionToConfigureServerSocket(s -> configure(s))
 										.setValidateRouteIdsOnStartup(svrConfig.isValidateRouteIdsOnStartup())
 										.setStaticFileCacheTimeSeconds(svrConfig.getStaticFileCacheTimeSeconds());

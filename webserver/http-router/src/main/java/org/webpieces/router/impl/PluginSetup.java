@@ -37,7 +37,7 @@ public class PluginSetup {
 
 	/**
 	 * This is where we wire in all plugin points EXCEPT the Startup one
-	 * we can't inject them 
+	 * we can't inject them :( 
 	 */
 	@SuppressWarnings("rawtypes")
 	public void wireInPluginPoints(Injector appInjector, Consumer<Injector> startupFunction) {

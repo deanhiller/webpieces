@@ -7,16 +7,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.NeedsSimpleStorage;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.SimpleStorage;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
@@ -26,6 +32,7 @@ import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.model.AbstractRouteBuilder;
 import org.webpieces.router.impl.model.L1AllRouting;
+import org.webpieces.router.impl.model.L3PrefixedRouting;
 import org.webpieces.router.impl.model.LogicHolder;
 import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.R1RouterBuilder;
@@ -112,15 +119,36 @@ public class RouteLoader {
 			log.info(WebAppMeta.class.getSimpleName()+" initialized.");
 			
 			Injector injector = createInjector(routerModule, routingHolder);
-				
+
+			CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
+			
 			pluginSetup.wireInPluginPoints(injector, startupFunction);
 			
 			loadAllRoutes(routerModule, injector, routingHolder);
 			
+			//We wait for the storage load next as that has to be complete before the router startup is finished!!!!
+			//BUT notice we wait AFTER load of routes so all that is done in parallel
+			storageLoadComplete.get(3, TimeUnit.SECONDS);
+			
 			return routerModule;
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			throw new RuntimeException(e);
+		} catch (TimeoutException e) {
+			throw new RuntimeException(e);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
+	}
+
+	private CompletableFuture<Void> setupSimpleStorage(Injector injector) {
+		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
+		NeedsSimpleStorage needsStorage = config.getNeedsStorage();
+		if(needsStorage != null)
+			return needsStorage.init(storage);
+		else
+			return CompletableFuture.completedFuture(null);
 	}
 
 	public Injector createInjector(WebAppMeta routerModule, RoutingHolder routingHolder) {
@@ -247,5 +275,20 @@ public class RouteLoader {
 	public FileMeta relativeUrlToHash(String urlPath) {
 		return compressionCacheSetup.relativeUrlToHash(urlPath);
 	}
-	
+
+
+	public void printAllRoutes(Route route) {
+		if(!log.isDebugEnabled())
+			return;
+		else if(route.getRouteType() != RouteType.NOT_FOUND)
+			return;
+
+		L1AllRouting routingInfo = routerBuilder.getRouterInfo();
+		
+		//TODO: domain specific routes
+		//Collection<L2DomainRoutes> domains = routingInfo.getSpecificDomains();
+
+		L3PrefixedRouting mainRoutes = routingInfo.getMainRoutes().getRoutesForDomain();
+		mainRoutes.printRoutes(route.isHttpsRoute(), "");
+	}
 }

@@ -12,7 +12,7 @@ public class BackendInfoImpl implements BackendGuiDescriptor {
 	@Override
 	public List<PageDescriptor> getWireIntoGuiDescriptors() {
 		List<PageDescriptor> descriptors = new ArrayList<>();
-		descriptors.add(new PageDescriptor(MenuCategory.MANAGEMENT, "SSL Cert Management", InstallSslCertRoutes.SETUP_PATH));
+		descriptors.add(new PageDescriptor(MenuCategory.MANAGEMENT, "SSL Cert Management", InstallSslCertRoutes.BACKEND_SETUP_PATH));
 		return descriptors;
 	}
 

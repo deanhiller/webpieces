@@ -58,6 +58,9 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 	@Override
 	public CompletableFuture<Void> incomingRequestImpl(RequestContext ctx, ResponseStreamer responseCb) {
 		MatchResult result = fetchRoute(ctx);
+		
+		//this only prints if in debug mode
+		routeLoader.printAllRoutes(result.getMeta().getRoute() );
 	
 		CompletableFuture<Void> future;
 		try {

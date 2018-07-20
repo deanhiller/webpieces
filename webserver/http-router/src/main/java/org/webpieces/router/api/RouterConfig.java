@@ -50,6 +50,8 @@ public class RouterConfig {
 
 	private File workingDirectory;
 
+	private NeedsSimpleStorage needsStorage;
+
 	public RouterConfig(File workingDirectory) {
 		if(!workingDirectory.isAbsolute())
 			throw new IllegalArgumentException("baseDirectory must be absolute and can typically be FileFactory.getBaseDirectory()");
@@ -179,5 +181,14 @@ public class RouterConfig {
 	public File getWorkingDirectory() {
 		return workingDirectory;
 	}
-	
+
+	public RouterConfig setNeedsSimpleStorage(NeedsSimpleStorage needsStorage) {
+		this.needsStorage = needsStorage;
+		return this;
+	}
+
+	public NeedsSimpleStorage getNeedsStorage() {
+		return needsStorage;
+	}
+
 }

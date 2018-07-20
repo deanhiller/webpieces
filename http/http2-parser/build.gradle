@@ -1,5 +1,7 @@
 dependencies {
     compile project(':core:core-datawrapper')
+    
+    testCompile project(':core:core-util')
 }
 
 uploadArchives.repositories.mavenDeployer.pom.project {

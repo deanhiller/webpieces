@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.webpieces.router.api.routing.SimpleStorage;
+import org.webpieces.router.api.SimpleStorage;
 
 public class SimpleStorageImpl implements SimpleStorage {
 	
@@ -20,6 +20,19 @@ public class SimpleStorageImpl implements SimpleStorage {
 		this.factory = factory;
 	}
 
+	@Override
+	public CompletableFuture<Void> save(String key, String subKey, String value) {
+		EntityManager mgr = factory.createEntityManager();
+		mgr.getTransaction().begin();
+
+		mgr.persist(new SimpleStorageDbo(key, subKey, value));
+		
+		mgr.flush();
+		mgr.getTransaction().commit();
+		
+		return CompletableFuture.completedFuture(null);
+	}
+	
 	@Override
 	public CompletableFuture<Void> save(String key, Map<String, String> properties) {
 		EntityManager mgr = factory.createEntityManager();
@@ -34,7 +47,7 @@ public class SimpleStorageImpl implements SimpleStorage {
 		
 		return CompletableFuture.completedFuture(null);
 	}
-
+	
 	@Override
 	public CompletableFuture<Map<String, String>> read(String key) {
 		EntityManager mgr = factory.createEntityManager();

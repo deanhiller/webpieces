@@ -76,7 +76,7 @@ public class WebServerImpl implements WebServer {
 		CompletableFuture<Void> future = httpServer.start();
 		CompletableFuture<Void> fut2 = CompletableFuture.completedFuture(null);
 
-		if(factory != null) {
+		if(factory != null && config.getHttpsListenAddress() != null) {
 			HttpSvrConfig secureChanConfig = new HttpSvrConfig("https", config.getHttpsListenAddress(), 10000);
 			secureChanConfig.asyncServerConfig.functionToConfigureBeforeBind = config.getFunctionToConfigureServerSocket();
 			httpsServer = serverMgr.createHttpsServer(secureChanConfig, serverListener, factory);

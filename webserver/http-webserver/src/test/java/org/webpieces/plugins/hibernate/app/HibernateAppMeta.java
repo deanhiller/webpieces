@@ -8,9 +8,11 @@ import java.util.concurrent.Executors;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
+import org.webpieces.router.api.SimpleStorage;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.webserver.EmptyStorage;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
@@ -46,6 +48,8 @@ public class HibernateAppMeta implements WebAppMeta {
 		public void configure(Binder binder) {
 			ExecutorService executor = Executors.newSingleThreadExecutor();
 			binder.bind(Executor.class).toInstance(executor);
+			
+			binder.bind(SimpleStorage.class).toInstance(new EmptyStorage());
 		}
 	}
 }

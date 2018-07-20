@@ -17,7 +17,7 @@ public class BackendPlugin implements Plugin {
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList();
+		return Lists.newArrayList(new BackendModule());
 	}
 
 	@Override

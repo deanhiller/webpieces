@@ -3,4 +3,6 @@ dependencies {
     compile deps['acme-utils']
     compile project(':webserver:http-router'), project(':http:http1_1-parser')
     compile project(':webserver-plugins:plugin-backend')
+    
+    testCompile project(':webserver:http-webserver-test')
 }

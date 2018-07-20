@@ -19,6 +19,7 @@ import org.webpieces.devrouter.api.DevRouterFactory;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
+import org.webpieces.router.api.SimpleStorage;
 import org.webpieces.router.api.dto.RedirectResponse;
 import org.webpieces.router.api.mocks.MockResponseStream;
 import org.webpieces.router.api.mocks.VirtualFileInputStream;
@@ -75,6 +76,7 @@ public class TestSimpleRoutes {
 		@Override
 		public void configure(Binder binder) {
 			binder.bind(SomeService.class).toInstance(mockService);
+			binder.bind(SimpleStorage.class).toInstance(new EmptyStorage());
 		}
 	}
 	

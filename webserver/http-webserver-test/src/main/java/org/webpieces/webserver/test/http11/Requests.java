@@ -1,4 +1,4 @@
-package org.webpieces.webserver;
+package org.webpieces.webserver.test.http11;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;

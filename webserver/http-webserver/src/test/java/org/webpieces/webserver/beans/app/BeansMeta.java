@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.webpieces.router.api.SimpleStorage;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.webserver.EmptyStorage;
 
 import com.google.common.collect.Lists;
 import com.google.inject.AbstractModule;
@@ -23,6 +25,7 @@ public class BeansMeta implements WebAppMeta {
 			@Override
 			protected void configure() {
 				bind(Executor.class).toInstance(Executors.newFixedThreadPool(1));
+				bind(SimpleStorage.class).toInstance(new EmptyStorage());
 			}
 		});
 	}

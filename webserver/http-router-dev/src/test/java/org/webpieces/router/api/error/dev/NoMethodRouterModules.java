@@ -3,9 +3,11 @@ package org.webpieces.router.api.error.dev;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.router.api.SimpleStorage;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
+import org.webpieces.router.api.simplesvr.EmptyStorage;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
@@ -21,6 +23,7 @@ public class NoMethodRouterModules implements WebAppMeta {
 		return Lists.newArrayList(new Module() {
 			@Override
 			public void configure(Binder binder) {
+				binder.bind(SimpleStorage.class).toInstance(new EmptyStorage());
 			}});
 	}
 	

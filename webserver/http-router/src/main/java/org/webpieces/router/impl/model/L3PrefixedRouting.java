@@ -6,9 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.impl.Route;
+import org.webpieces.router.impl.RouteLoader;
 import org.webpieces.router.impl.RouteMeta;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
 
 public class L3PrefixedRouting {
+
+	private static final Logger log = LoggerFactory.getLogger(L3PrefixedRouting.class);
 
 	final Map<String, L3PrefixedRouting> pathPrefixToInfo = new HashMap<>();
 	
@@ -54,7 +60,7 @@ public class L3PrefixedRouting {
 			return findRouteMatch(routes, request, subPath);
 		else if(!subPath.startsWith("/"))
 			throw new IllegalArgumentException("path must start with /");
-
+		
 		String prefix = subPath;
 		int index = subPath.indexOf("/", 1);
 		if(index == 1) {
@@ -94,4 +100,55 @@ public class L3PrefixedRouting {
 	public Map<String, L3PrefixedRouting> getScopedRoutes() {
 		return pathPrefixToInfo;
 	}
+
+	
+	@Override
+	public String toString() {
+		return build("");
+	}
+
+	public void printRoutes(boolean isHttps, String tabSpaces) {
+		//This is a pain but dynamically build up the html
+		String routeHtml = build(tabSpaces);
+		
+		//print in warn so it's in red for anyone and to stderr IF they have debug enabled
+		//it's kind of weird BUT great for tests
+		if(!isHttps)
+			log.warn("WARNING: The request is NOT https so perhaps your route is only accessible over https so modify your request" + routeHtml);
+		else
+			log.warn(routeHtml);
+	}
+
+	private String build(String spacing) {
+		String text = "\n";
+		
+		Map<String, L3PrefixedRouting> scopedRoutes = getScopedRoutes();
+		for(Map.Entry<String, L3PrefixedRouting> entry : scopedRoutes.entrySet()) {
+			L3PrefixedRouting childRouting = entry.getValue();
+			text += spacing+ "SCOPE:"+entry.getKey();
+			text += childRouting.build(spacing +"    ");
+		}
+		
+		List<RouteMeta> routes = getRoutes();
+		for(RouteMeta route: routes) {
+			Route rt = route.getRoute();
+			String http = rt.isHttpsRoute() ? "https" : "http";
+			text += spacing+pad(rt.getMethod(), 5)+":"+pad(http, 5)+" : "+rt.getFullPath()+"\n";
+		}
+		
+		text+="\n";
+		
+		return text;
+	}
+
+	private String pad(String msg, int n) {
+		int left = n-msg.length();
+		if(left < 0)
+			left = 0;
+		
+		for(int i = 0; i < left; i++) {
+			msg += " ";
+		}
+		return msg;
+	}	
 }
