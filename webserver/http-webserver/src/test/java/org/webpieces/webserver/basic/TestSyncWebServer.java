@@ -15,7 +15,7 @@ import org.webpieces.httpparser.api.common.Header;
 import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
@@ -29,7 +29,7 @@ public class TestSyncWebServer extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, null);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), null, false, null);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}

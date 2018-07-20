@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +17,10 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.plugins.backend.login.BackendLogin;
+import org.webpieces.plugins.fortesting.TestConfig;
+import org.webpieces.plugins.fortesting.WebserverForTest;
 import org.webpieces.router.api.SimpleStorage;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.TestConfig;
-import org.webpieces.webserver.WebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
@@ -95,9 +94,9 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 	public void testAlreadyLoggedInAndAlreadyHavePropertiesSetup() {
 		
 	}
-	
+
 	@Test
-	public void testPostEmailAndGenerateStuff() {
+	public void testPostEmailNotLoggedInBecauseeNoCookie() {
 		HttpFullRequest req = Requests.createPostRequest( "/backend/secure/postEmail", 
 				"email", "dean@gmail.com"
 			);
@@ -108,8 +107,25 @@ public class TestSslSetup extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.LOCATION);
 		Assert.assertEquals(1, headers.size());
-		Assert.assertEquals("https://myhost.com/backend/secure/loggedinhome", headers.get(0).getValue());
+		Assert.assertEquals("https://myhost.com/backend/login", headers.get(0).getValue());
 	}
 	
+//	@Test
+//	public void testPostEmail() {
+//		HttpFullRequest req = Requests.createPostRequest( "/backend/secure/postEmail", 
+//				"email", "dean@gmail.com"
+//			);
+//		//response from logging in taken from TestLogin in backend plugin test suite
+//		//set-cookie: webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin; path=/; HttpOnly
+//		req.addHeader(new Header(KnownHeaderName.COOKIE, "webSession=1-xjrs6SeNeSxmJQtaTwM8gDorNiQ=:backendUser=admin"));
+//		
+//		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
+//		
+//		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+//		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
+//		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.LOCATION);
+//		Assert.assertEquals(1, headers.size());
+//		Assert.assertEquals("https://myhost.com/backend/asdf", headers.get(0).getValue());
+//	}
 }
 

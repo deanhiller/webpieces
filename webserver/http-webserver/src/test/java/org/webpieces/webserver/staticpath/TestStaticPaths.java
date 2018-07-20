@@ -20,7 +20,7 @@ import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.net.URLEncoder;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
@@ -36,8 +36,8 @@ public class TestStaticPaths extends AbstractWebpiecesTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("staticMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, metaFile);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("staticMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), null, false, metaFile);
 		cacheDir = webserver.getCacheDir();
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());

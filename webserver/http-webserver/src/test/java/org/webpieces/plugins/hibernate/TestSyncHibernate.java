@@ -25,8 +25,8 @@ import org.webpieces.plugins.hibernate.app.ServiceToFailMock;
 import org.webpieces.plugins.hibernate.app.dbo.LevelEducation;
 import org.webpieces.plugins.hibernate.app.dbo.UserTestDbo;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.TestConfig;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateTestConfig;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
@@ -46,12 +46,12 @@ public class TestSyncHibernate extends AbstractWebpiecesTest {
 		JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 		jdbc.dropAllTablesFromDatabase();
 		
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", WebserverForTest.class.getClassLoader());
-		TestConfig config = new TestConfig();
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("plugins/hibernateMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		PrivateTestConfig config = new PrivateTestConfig();
 		config.setPlatformOverrides(getOverrides(false));
 		config.setMetaFile(metaFile);
 		config.setAppOverrides(new TestModule(mock));
-		WebserverForTest webserver = new WebserverForTest(config);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(config);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

@@ -11,7 +11,7 @@ import org.webpieces.httpclient11.api.HttpFullResponse;
 import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
@@ -24,8 +24,8 @@ public class TestDomainMatching extends AbstractWebpiecesTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, metaFile);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("domainsMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), null, false, metaFile);
 		webserver.start();
 		httpsSocket = connectHttps(false, null, webserver.getUnderlyingHttpsChannel().getLocalAddress());
 	}

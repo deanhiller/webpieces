@@ -13,7 +13,7 @@ import org.webpieces.httpclient11.api.HttpSocket;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.mock.MockSomeOtherLib;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
@@ -32,8 +32,8 @@ public class TestAsyncWebServer extends AbstractWebpiecesTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("asyncMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());		
 	}

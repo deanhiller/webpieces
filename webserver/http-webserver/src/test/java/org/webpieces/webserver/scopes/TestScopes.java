@@ -15,7 +15,7 @@ import org.webpieces.httpparser.api.common.KnownHeaderName;
 import org.webpieces.httpparser.api.dto.KnownHttpMethod;
 import org.webpieces.httpparser.api.dto.KnownStatusCode;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
@@ -29,8 +29,8 @@ public class TestScopes extends AbstractWebpiecesTest {
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(getOverrides(false), null, false, metaFile);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("scopesMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), null, false, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

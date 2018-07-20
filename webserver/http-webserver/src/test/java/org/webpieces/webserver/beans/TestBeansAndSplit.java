@@ -30,7 +30,7 @@ import org.webpieces.nio.api.channels.Channel;
 import org.webpieces.nio.api.handlers.ConnectionListener;
 import org.webpieces.nio.api.handlers.DataListener;
 import org.webpieces.util.file.VirtualFileClasspath;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.basic.app.biz.SomeLib;
 import org.webpieces.webserver.basic.app.biz.SomeOtherLib;
 import org.webpieces.webserver.basic.app.biz.UserDto;
@@ -58,8 +58,8 @@ public class TestBeansAndSplit extends AbstractWebpiecesTest {
 
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {
-		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", WebserverForTest.class.getClassLoader());
-		WebserverForTest webserver = new WebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
+		VirtualFileClasspath metaFile = new VirtualFileClasspath("beansMeta.txt", PrivateWebserverForTest.class.getClassLoader());
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(getOverrides(false), new AppOverridesModule(), false, metaFile);
 		webserver.start();
 		
 		channel.setDataListener(new DataReceiver());

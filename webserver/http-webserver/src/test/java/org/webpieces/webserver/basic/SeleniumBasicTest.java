@@ -7,7 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTestRealServer;
 
@@ -41,7 +41,7 @@ public class SeleniumBasicTest {
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run multi-threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		WebserverForTest webserver = new WebserverForTest(new OverridesForTestRealServer(), new AppOverridesModule(), true, null);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(new OverridesForTestRealServer(), new AppOverridesModule(), true, null);
 		webserver.start();
 		port = webserver.getUnderlyingHttpChannel().getLocalAddress().getPort();
 	}

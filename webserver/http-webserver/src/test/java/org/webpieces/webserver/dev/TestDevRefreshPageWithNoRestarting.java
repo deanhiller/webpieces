@@ -27,7 +27,7 @@ import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.file.VirtualFileImpl;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.webserver.WebserverForTest;
+import org.webpieces.webserver.PrivateWebserverForTest;
 import org.webpieces.webserver.test.AbstractWebpiecesTest;
 import org.webpieces.webserver.test.Asserts;
 import org.webpieces.webserver.test.OverridesForTest;
@@ -83,7 +83,7 @@ public class TestDevRefreshPageWithNoRestarting extends AbstractWebpiecesTest {
 										new DevRouterModule(devConfig),
 										new OverridesForTest(mgr, time, mockTimer, templateConfig));
 		
-		WebserverForTest webserver = new WebserverForTest(platformOverrides, null, false, metaFile);
+		PrivateWebserverForTest webserver = new PrivateWebserverForTest(platformOverrides, null, false, metaFile);
 		webserver.start();
 		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}

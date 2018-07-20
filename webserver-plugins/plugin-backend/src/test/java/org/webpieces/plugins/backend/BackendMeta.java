@@ -3,6 +3,8 @@ package org.webpieces.plugins.backend;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.plugins.fortesting.EmptyModule;
+import org.webpieces.plugins.fortesting.FillerRoutes;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;

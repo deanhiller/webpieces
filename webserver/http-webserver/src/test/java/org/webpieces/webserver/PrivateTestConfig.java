@@ -4,7 +4,7 @@ import org.webpieces.util.file.VirtualFile;
 
 import com.google.inject.Module;
 
-public class TestConfig {
+public class PrivateTestConfig {
 
 	private Module platformOverrides;
 	private Module appOverrides;
@@ -12,10 +12,10 @@ public class TestConfig {
 	private VirtualFile metaFile;
 	private boolean useTokenCheck = false;
 
-	public TestConfig() {
+	public PrivateTestConfig() {
 	}
 	
-	public TestConfig(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile, boolean useTokenCheck) {
+	public PrivateTestConfig(Module platformOverrides, Module appOverrides, boolean usePortZero, VirtualFile metaFile, boolean useTokenCheck) {
 		this.platformOverrides = platformOverrides;
 		this.appOverrides = appOverrides;
 		this.usePortZero = usePortZero;

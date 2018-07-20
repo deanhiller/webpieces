@@ -1,0 +1,23 @@
+sourceSets {
+    //For testing, we need to put the html files on the classpath which are co-located with the controllers
+    main {
+        resources {
+            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
+            srcDirs = ["src/main/java", "src/main/resources"]
+            excludes = ["**/*.java"]
+        }
+    }
+}
+
+dependencies {
+    //compile deps['guice']
+    compile project(':webserver:http-webserver')
+    //compile project(':core:core-datawrapper')
+	
+    //DO NOT DEPEND ON HTTP1.1 NOR HTTP2 here!!!!!
+    //this keeps us pluggable with ANY http parser implementation
+}
+
+uploadArchives.repositories.mavenDeployer.pom.project {
+   description='Library for helping plugins write tests testing controller and web pages'
+}

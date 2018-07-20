@@ -1,8 +1,20 @@
+sourceSets {
+    //For testing, we need to put the html files on the classpath which are co-located with the controllers
+    main {
+        resources {
+            //This ADDS src/main/java/**/*.html and we still read in src/test/resources/**
+            srcDirs = ["src/main/java", "src/main/resources"]
+            excludes = ["**/*.java"]
+        }
+    }
+}
+
 dependencies {
     compile deps['acme-sslcerts']    
     compile deps['acme-utils']
     compile project(':webserver:http-router'), project(':http:http1_1-parser')
     compile project(':webserver-plugins:plugin-backend')
     
+    testCompile project(':webserver:http-fortesting-plugins')
     testCompile project(':webserver:http-webserver-test')
 }

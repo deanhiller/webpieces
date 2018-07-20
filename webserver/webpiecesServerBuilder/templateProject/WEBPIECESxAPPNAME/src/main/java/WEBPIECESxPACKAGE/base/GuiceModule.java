@@ -1,5 +1,7 @@
 package WEBPIECESxPACKAGE.base;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.webpieces.plugins.backend.login.BackendLogin;
 import org.webpieces.router.api.ObjectStringConverter;
 import org.webpieces.router.api.SimpleStorage;
@@ -20,6 +22,8 @@ import WEBPIECESxPACKAGE.base.libs.SomeLibraryImpl;
 
 public class GuiceModule implements Module {
 
+	private static final Logger log = LoggerFactory.getLogger(GuiceModule.class);
+	
 	//This is where you would put the guice bindings you need though generally if done
 	//right, you won't have much in this file.
 	
@@ -28,6 +32,9 @@ public class GuiceModule implements Module {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void configure(Binder binder) {
+		
+		log.info("running module");
+		
 		//all modules have access to adding their own Startable objects to be run on server startup
 		Multibinder<Startable> uriBinder = Multibinder.newSetBinder(binder, Startable.class);
 	    uriBinder.addBinding().to(PopulateDatabase.class);
