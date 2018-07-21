@@ -11,7 +11,7 @@ import com.google.inject.Module;
 
 public class BackendPlugin implements Plugin {
 
-	public BackendPlugin() {
+	public BackendPlugin(BackendConfig config) {
 		super();
 	}
 	

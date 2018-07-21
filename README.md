@@ -19,6 +19,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 * look ma, no restarting the server in development mode with complete java refactoring
 * holy crap, my back button always works.  Developers are not even allowed to break that behavior as they are forced to make the back button work...#win
 * Override ANY component in the platform server just by binding a subclass of the component(fully customizable server to the extreme unlike any server before it)
+* SSL Cert wizard installs the certificate on ALL hosts in one go.  no more uploading certs to each host you maintain(what a pain that was)
 * and sooooooo much more
 
 #### 9 Steps to try the webserver

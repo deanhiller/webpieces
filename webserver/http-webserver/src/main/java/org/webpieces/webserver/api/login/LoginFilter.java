@@ -1,6 +1,8 @@
 package org.webpieces.webserver.api.login;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -23,6 +25,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 
 	private String token;
 	private RouteId loginRoute;
+	private Pattern patternToMatch;
 
 	@Inject
 	public LoginFilter() {
@@ -32,10 +35,20 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	public void initialize(LoginInfo initialConfig) {
 		token = initialConfig.getTokenThatExistsIfLoggedIn();
 		loginRoute = initialConfig.getLoginRouteId();
+		String securePath = initialConfig.getSecurePath();
+		if(securePath != null)
+			patternToMatch = Pattern.compile(initialConfig.getSecurePath());
 	}
 	
 	@Override
 	public CompletableFuture<Action> filter(MethodMeta meta, Service<MethodMeta, Action> next) {
+		if(patternToMatch != null) {
+			//If we have a securePath, we act as a NotFoundFilter so we want to redirect to Login ONLY if this is a secure path request
+			Matcher matcher = patternToMatch.matcher(meta.getCtx().getRequest().relativePath);
+			if(!matcher.matches())
+				return next.invoke(meta);
+		}
+	
 		Session session = Current.session();
 		if(session.containsKey(token)) {
 			Current.addModifyResponse(resp -> addCacheHeaders(resp));

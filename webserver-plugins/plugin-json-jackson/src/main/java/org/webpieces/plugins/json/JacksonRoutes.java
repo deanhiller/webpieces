@@ -10,10 +10,9 @@ public class JacksonRoutes extends AbstractRoutes {
 	private String filterPattern;
 	private Class<? extends JacksonCatchAllFilter> filter;
 
-	public JacksonRoutes(String filterPattern, 
-			Class<? extends JacksonCatchAllFilter> filter) {
-		this.filterPattern = filterPattern;
-		this.filter = filter;
+	public JacksonRoutes(JacksonConfig config) {
+		this.filterPattern = config.getFilterPattern();
+		this.filter = config.getFilterClazz();
 	}
 	
 	@Override

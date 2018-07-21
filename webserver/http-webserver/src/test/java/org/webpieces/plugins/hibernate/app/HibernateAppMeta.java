@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.webpieces.plugins.hibernate.HibernateConfig;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
 import org.webpieces.plugins.hibernate.app.ajax.AjaxHibernateCrudRoutes;
 import org.webpieces.router.api.SimpleStorage;
@@ -40,7 +41,7 @@ public class HibernateAppMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.<Plugin>newArrayList(
-				new HibernatePlugin(PERSISTENCE_TEST_UNIT));
+				new HibernatePlugin(new HibernateConfig(PERSISTENCE_TEST_UNIT)));
 	}
 
 	private class AppModule implements Module {

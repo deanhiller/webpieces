@@ -1,24 +1,24 @@
 package org.webpieces.plugins.sslcert;
 
-import org.shredzone.acme4j.Certificate;
-import org.shredzone.acme4j.util.CSRBuilder;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 public class CertAndSigningRequest {
 
-	private CSRBuilder signingRequest;
-	private Certificate finalCertificate;
+	private String csr;
+	private List<X509Certificate> certChain;
 
-	public CertAndSigningRequest(CSRBuilder signingRequest, Certificate finalCertificate) {
-		this.signingRequest = signingRequest;
-		this.finalCertificate = finalCertificate;
+	public CertAndSigningRequest(String csr, List<X509Certificate> certChain) {
+		this.csr = csr;
+		this.certChain = certChain;
 	}
 
-	public CSRBuilder getSigningRequest() {
-		return signingRequest;
+	public String getCsr() {
+		return csr;
 	}
 
-	public Certificate getFinalCertificate() {
-		return finalCertificate;
+	public List<X509Certificate> getCertChain() {
+		return certChain;
 	}
-	
+
 }

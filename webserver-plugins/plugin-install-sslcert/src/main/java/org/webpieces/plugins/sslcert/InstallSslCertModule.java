@@ -7,6 +7,8 @@ import com.google.inject.multibindings.Multibinder;
 
 public class InstallSslCertModule extends AbstractModule {
 
+	private InstallSslCertConfig config;
+
 	//Variables to consider in this plugin
 	// 1. production with an actual domain on first time startup and need cert
 	// 2. production with an actual domain on second tie startup and have cert
@@ -14,10 +16,16 @@ public class InstallSslCertModule extends AbstractModule {
 	// 4. local development startup and population of an empty database.
 	//MUST test all those situations when modifying this plugin 'manually' :( :( :(
 	
+	public InstallSslCertModule(InstallSslCertConfig config) {
+		this.config = config;
+	}
+
 	@Override
 	protected void configure() {
 		Multibinder<BackendGuiDescriptor> backendBinder = Multibinder.newSetBinder(binder(), BackendGuiDescriptor.class);
 	    backendBinder.addBinding().to(BackendInfoImpl.class);
+	    
+	    binder().bind(InstallSslCertConfig.class).toInstance(config);
 	}
 
 }

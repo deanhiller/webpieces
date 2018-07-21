@@ -3,6 +3,7 @@ package org.webpieces.plugins.sslcert;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.plugins.backend.BackendConfig;
 import org.webpieces.plugins.backend.BackendPlugin;
 import org.webpieces.plugins.fortesting.EmptyModule;
 import org.webpieces.plugins.fortesting.FillerRoutes;
@@ -30,8 +31,8 @@ public class SslCertMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.newArrayList(
-				new BackendPlugin(),
-				new InstallSslCertPlugin()
+				new BackendPlugin(new BackendConfig()),
+				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 		);
 	}
 }

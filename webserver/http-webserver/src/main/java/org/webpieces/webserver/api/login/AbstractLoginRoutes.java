@@ -32,7 +32,7 @@ public abstract class AbstractLoginRoutes extends AbstractRoutes {
 		addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute()), PortType.HTTPS_FILTER);
 		//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
 		//ie. you can only get not found AFTER logging in
-		addNotFoundFilter(LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute()), PortType.HTTPS_FILTER);
+		addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute()), PortType.HTTPS_FILTER);
 	}
 
 	protected abstract void addLoggedInHome(Router router);

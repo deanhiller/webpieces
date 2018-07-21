@@ -14,14 +14,16 @@ public class InstallSslCertPlugin implements BackendPlugin {
 	public static final String CERT_CHAIN_PREFIX = "certChain";
 	public static final String ACCOUNT_KEYPAIR_KEY = "accountKeyPair";
 	public static final String CSR = "CSR";
+	private InstallSslCertConfig config;
 
-	public InstallSslCertPlugin() {
+	public InstallSslCertPlugin(InstallSslCertConfig config) {
 		super();
+		this.config = config;
 	}
 	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new InstallSslCertModule());
+		return Lists.newArrayList(new InstallSslCertModule(config));
 	}
 
 	@Override

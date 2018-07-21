@@ -3,6 +3,7 @@ package org.webpieces.webserver.json.app;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.plugins.json.JacksonConfig;
 import org.webpieces.plugins.json.JacksonPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
@@ -28,6 +29,6 @@ public class JsonMeta implements WebAppMeta {
 	@Override
 	public List<Plugin> getPlugins() {
 		return Lists.<Plugin>newArrayList(
-				new JacksonPlugin("/json/.*", TestCatchAllFilter.class));
+				new JacksonPlugin(new JacksonConfig("/json/.*", TestCatchAllFilter.class)));
 	}
 }

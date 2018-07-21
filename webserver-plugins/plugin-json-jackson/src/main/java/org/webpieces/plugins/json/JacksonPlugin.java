@@ -10,13 +10,11 @@ import com.google.inject.Module;
 
 public class JacksonPlugin implements Plugin {
 
-	private String filterPattern;
-	private Class<? extends JacksonCatchAllFilter> filterClazz;
+	private JacksonConfig config;
 	
-	public JacksonPlugin(String filterPattern, Class<? extends JacksonCatchAllFilter> filterClazz) {
+	public JacksonPlugin(JacksonConfig config) {
 		super();
-		this.filterPattern = filterPattern;
-		this.filterClazz = filterClazz;
+		this.config = config;
 	}
 	
 	@Override
@@ -26,7 +24,7 @@ public class JacksonPlugin implements Plugin {
 
 	@Override
 	public List<Routes> getRouteModules() {
-		return Lists.newArrayList(new JacksonRoutes(filterPattern, filterClazz));
+		return Lists.newArrayList(new JacksonRoutes(config));
 	}
 
 }

@@ -3,9 +3,13 @@ package WEBPIECESxPACKAGE.base;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.plugins.backend.BackendConfig;
 import org.webpieces.plugins.backend.BackendPlugin;
+import org.webpieces.plugins.hibernate.HibernateConfig;
 import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.plugins.json.JacksonConfig;
 import org.webpieces.plugins.json.JacksonPlugin;
+import org.webpieces.plugins.sslcert.InstallSslCertConfig;
 import org.webpieces.plugins.sslcert.InstallSslCertPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
@@ -60,6 +64,9 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				);
 	}
 
+	//NOTE: EACH Plugin takes a Config object such that we can add properties later without breaking your compile
+	//This allows us to be more backwards compatible
+	
 	@Override
 	public List<Plugin> getPlugins() {
 		log.info("classloader for meta="+this.getClass().getClassLoader());
@@ -67,10 +74,10 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				//if you want to remove hibernate, just remove it first from the build file and then remove
 				//all the compile error code(it will remove more than half of the jar size of the web app actually due
 				//to transitive dependencies)
-				new HibernatePlugin(persistenceUnit),
-				new JacksonPlugin("/json/.*", JsonCatchAllFilter.class),
-				new BackendPlugin(),
-				new InstallSslCertPlugin()
+				new HibernatePlugin(new HibernateConfig(persistenceUnit)),
+				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
+				new BackendPlugin(new BackendConfig()),
+				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 				);
 	}
 

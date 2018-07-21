@@ -19,9 +19,9 @@ public class HibernatePlugin implements Plugin {
 			
 	private String persistenceUnit;
 
-	public HibernatePlugin(String persistenceUnit) {
+	public HibernatePlugin(HibernateConfig config) {
 		log.info("classloader="+getClass().getClassLoader());
-		this.persistenceUnit = persistenceUnit;
+		this.persistenceUnit = config.getPersistenceUnit();
 	}
 	
 	@Override
