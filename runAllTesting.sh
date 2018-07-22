@@ -134,16 +134,34 @@ sleep 5
 echo "Grepping log"
 
 if grep -q "o.w.w.i.WebServerImpl     server started" logs/server.log; then
-  kill -9 $server_pid
   echo "##################################"
-  echo "Server is located at `pwd`"
+  echo "11111 Server is located at `pwd`"
   echo "Server Startup Succeeded!!"
   echo "##################################"
 else
   echo "##################################"
-  echo "Server Startup Failed to be done in 5 seconds"
+  echo "11111 Server Startup Failed to be done in 5 seconds"
   echo "Failed Server is located at `pwd`"
   echo "##################################"
+  kill -9 $server_pid
   exit 99
 fi
 
+#Test out a curl request to localhost to make sure basic webpage is working
+curl -k https://localhost:8443
+
+
+if grep -q "ssl worked" logs/server.log; then
+  kill -9 $server_pid
+  echo "##################################"
+  echo "2222 Server is located at `pwd`"
+  echo "Server Startup Succeeded!!"
+  echo "##################################"
+else
+  echo "##################################"
+  echo "2222 Server Startup Failed to be done in 5 seconds"
+  echo "Failed Server is located at `pwd`"
+  echo "##################################"
+  kill -9 $server_pid
+  #exit 99
+fi

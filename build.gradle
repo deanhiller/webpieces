@@ -10,6 +10,7 @@ buildscript {
         //we created a pull request on this but until then, use our customer forked one
         classpath fileTree(dir: 'gradle/deanslib', includes: ['gradle-nexus-staging-plugin-0.5.4-SNAPSHOT.jar'])
         //classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.102'
     }
 }
 
@@ -240,7 +241,7 @@ println currentJvm
    assemble.dependsOn('syncJars')
 
    test.dependsOn (":deleteJavaCache")
-   test{
+   test {
       beforeTest{ descr ->
         logger.warn("Starting Test ${descr.className} : ${descr.name}")
       }

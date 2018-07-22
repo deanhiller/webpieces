@@ -60,6 +60,7 @@ public class WebSSLFactory implements SSLEngineFactory, NeedsSimpleStorage {
 	//N machines in your cluster, it will be read from storage that you lock down).
 	@Override
 	public CompletableFuture<Void> init(SimpleStorage storage) {
+		log.info("intializing storage="+storage);
 		this.storage = storage;
 		CompletableFuture<Map<String, String>> future = storage.read(InstallSslCertPlugin.PLUGIN_PROPERTIES_KEY);
 		return future.thenApply((props) -> setupCert(props));

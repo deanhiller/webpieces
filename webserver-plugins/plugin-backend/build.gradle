@@ -1,3 +1,5 @@
+apply plugin: 'org.webpieces.templatecompiler'
+
 sourceSets {
     //For testing, we need to put the html files on the classpath which are co-located with the controllers
     main {
@@ -14,4 +16,8 @@ dependencies {
     
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-fortesting-plugins')
+}
+
+test {
+    systemProperty "gradle.running", "true"
 }
