@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
+import org.webpieces.plugins.backend.menu.MenuCreator;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.routing.RouteId;
@@ -15,10 +16,12 @@ public class BackendLoginController extends AbstractLoginController {
 	public static final String TOKEN = "backendUser";
 	
 	private BackendLogin login;
+	private MenuCreator menuCreator;
 
 	@Inject
-	public BackendLoginController(BackendLogin login) {
+	public BackendLoginController(BackendLogin login, MenuCreator menuCreator) {
 		this.login = login;
+		this.menuCreator = menuCreator;
 	}
 	
 	@Override
@@ -42,7 +45,7 @@ public class BackendLoginController extends AbstractLoginController {
 	
 	@Override
 	protected Action fetchGetLoginPageAction() {
-		return Actions.renderView("/org/webpieces/plugins/backend/login/login.html");
+		return Actions.renderView("/org/webpieces/plugins/backend/login/login.html", "menu", menuCreator.getMenu());
 	}
 
 	@Override

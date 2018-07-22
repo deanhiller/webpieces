@@ -37,9 +37,12 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 	}
 
 	@Override
-	protected void addLoggedInHome(Router router) {
-		Router scopedRouter = router.getScopedRouter("/secure", true);
+	protected void addLoggedInHome(Router httpsRouter) {
+		Router scopedRouter = httpsRouter.getScopedRouter("/secure", true);
 		scopedRouter.addRoute(HttpMethod.GET ,   "/loggedinhome",        "org.webpieces.plugins.backend.BackendController.home", BackendLoginRouteId.BACKEND_LOGGED_IN_HOME);
+		
+		Router scoped2 = router.getScopedRouter(basePath, false);
+		scoped2.addRoute(HttpMethod.GET,  "", "org.webpieces.plugins.backend.BackendController.redirectToLogin", BackendLoginRouteId.LOGGED_OUT_LANDING);
 	}
 
 }

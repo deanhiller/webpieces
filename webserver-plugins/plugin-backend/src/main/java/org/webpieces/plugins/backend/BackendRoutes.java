@@ -4,7 +4,7 @@ import org.webpieces.router.api.routing.ScopedRoutes;
 
 public class BackendRoutes extends ScopedRoutes {
 	
-	public static final String BACKEND_ROUTE = "/backend";
+	public static final String BACKEND_ROUTE = "/@backend";
 	
     @Override
     protected String getScope() {

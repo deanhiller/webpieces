@@ -19,9 +19,10 @@ import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
+import org.webpieces.router.api.routing.ReverseRouteLookup;
 import org.webpieces.router.api.routing.RouteId;
 
-public class ReverseRoutes {
+public class ReverseRoutes implements ReverseRouteLookup {
 
 	//I don't like this solution(this class) all that much but it works for verifying routes in web pages exist with a run of
 	//a special test to find web app errors before deploying it.  good enough beats perfect and lookup is still fast

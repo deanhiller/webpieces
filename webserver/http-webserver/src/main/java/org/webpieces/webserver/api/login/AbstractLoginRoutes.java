@@ -12,7 +12,7 @@ public abstract class AbstractLoginRoutes extends AbstractRoutes {
 
 	private String controller;
 	private String securePath;
-	private String basePath;
+	protected String basePath;
 
 	public AbstractLoginRoutes(String controller, String basePath, String securePath) {
 		this.controller = controller;
@@ -35,7 +35,7 @@ public abstract class AbstractLoginRoutes extends AbstractRoutes {
 		addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute()), PortType.HTTPS_FILTER);
 	}
 
-	protected abstract void addLoggedInHome(Router router);
+	protected abstract void addLoggedInHome(Router httpsRouter);
 
 	protected abstract String getSessionToken();
 

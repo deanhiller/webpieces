@@ -27,5 +27,7 @@ public interface Route {
 
 	boolean isHttpsRoute();
 
+	HttpMethod getHttpMethod();
+	
 	String getMethod();
 }

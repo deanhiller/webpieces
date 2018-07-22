@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.plugins.backend.MenuCreator;
+import org.webpieces.plugins.backend.menu.MenuCreator;
 import org.webpieces.plugins.sslcert.acme.AcmeClientProxy;
 import org.webpieces.plugins.sslcert.acme.AcmeInfo;
 import org.webpieces.plugins.sslcert.acme.ProxyAuthorization;
@@ -74,7 +74,7 @@ public class InstallSslCertController {
 
 			return future.thenApply((info) -> {
 				return Actions.renderThis(
-						"menus", menuCreator.getMenu(), 
+						"menu", menuCreator.getMenu(), 
 						"agreement", info.getTermsOfServiceUri()+"", 
 						"website", info.getWebsite()
 						);
@@ -125,7 +125,7 @@ public class InstallSslCertController {
 		
 		log.info("rendering step");
 		return Actions.renderThis(
-				"menus", menuCreator.getMenu(), 
+				"menu", menuCreator.getMenu(), 
 				"keyPair", keyPair);
 	}
 

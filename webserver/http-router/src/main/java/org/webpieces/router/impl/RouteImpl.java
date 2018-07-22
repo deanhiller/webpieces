@@ -121,5 +121,10 @@ public class RouteImpl implements Route {
 	public String getMethod() {
 		return method+"";
 	}
+
+	@Override
+	public HttpMethod getHttpMethod() {
+		return method;
+	}
 	
 }

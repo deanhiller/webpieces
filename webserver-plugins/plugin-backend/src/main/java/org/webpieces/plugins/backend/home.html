@@ -3,12 +3,12 @@
 #{set tab:'loggedinhome'/}#
 
 <ul>
-    #{list items:menus, as:'menu'}#
+    #{list items:menu.secureMenu, as:'menu'}#
       <li id="tab_${menu.menuCategory.lowerCaseMenuTitle}$"><a id="${menu.menuCategory.lowerCaseMenuTitle}$" href="">${menu.menuCategory.menuTitle}$</a>
 
         <ul>
             #{list items:menu.menuItems, as:'item'}#
-            <li><a href="${item.relativeUrl}$">${item.menuTitle}$</a></li>
+            <li><a href="${item.url}$">${item.menuTitle}$</a></li>
              #{/list}#
              #{else}#
              <li><a href="">Plugin missing items</a>

@@ -170,4 +170,9 @@ public class StaticRoute implements Route {
 		return "GET";
 	}
 
+	@Override
+	public HttpMethod getHttpMethod() {
+		return HttpMethod.GET;
+	}
+
 }

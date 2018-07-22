@@ -43,14 +43,14 @@
             <div class="nav-collapse collapse">
                 <ul class="nav pull-right">
                    	#{if _session.get('backendUser') != null}#
-                	<li id="tab_loggedinhome"><a id="loggedinhome" href="@[BACKEND_LOGGED_IN_HOME]@">&{'Home', 'link.home'}&</a></li>
+                	    <li id="tab_loggedinhome"><a id="loggedinhome" href="@[BACKEND_LOGGED_IN_HOME]@">&{'Home', 'link.home'}&</a></li>
                 	
-	                	#{list items:menus, as:'menu'}#
-	                	  <li id="tab_${menu.menuCategory.lowerCaseMenuTitle}$" class="dropdown">
-	                	    <a  href="#" id="${menu.menuCategory.lowerCaseMenuTitle}$" class="dropdown-toggle" data-toggle="dropdown">${menu.menuCategory.menuTitle}$</a>
+	                	#{list items:menu.secureMenu, as:'topMenu'}#
+	                	  <li id="tab_${topMenu.menuCategory.lowerCaseMenuTitle}$" class="dropdown">
+	                	    <a  href="#" id="${topMenu.menuCategory.lowerCaseMenuTitle}$" class="dropdown-toggle" data-toggle="dropdown">${topMenu.menuCategory.menuTitle}$</a>
 	                	    <ul class="dropdown-menu">
-                                #{list items:menu.menuItems, as:'item'}#
-	                	        <li><a href="${item.relativeUrl}$">${item.menuTitle}$</a></li>
+                                #{list items:topMenu.menuItems, as:'item'}#
+	                	        <li><a href="${item.url}$">${item.menuTitle}$</a></li>
 	                             #{/list}#
 	                             #{else}#
                                  <li><a href="">Plugin missing items</a>
@@ -61,7 +61,23 @@
 				        #{else}#
 				        <li id="tab_none"><a id="none" href="">No Plugins Found</a></li>
 				        #{/else}#
+                    #{/if}#
                     
+                    #{list items:menu.publicMenu, as:'topMenu'}#
+                          <li id="tab_${topMenu.menuCategory.lowerCaseMenuTitle}$" class="dropdown">
+                            <a  href="#" id="${topMenu.menuCategory.lowerCaseMenuTitle}$" class="dropdown-toggle" data-toggle="dropdown">${topMenu.menuCategory.menuTitle}$</a>
+                            <ul class="dropdown-menu">
+                                #{list items:topMenu.menuItems, as:'item'}#
+                                <li><a href="${item.url}$">${item.menuTitle}$</a></li>
+                                 #{/list}#
+                                 #{else}#
+                                 <li><a href="">Plugin missing items</a>
+                                 #{/else}#
+                            </ul>
+                          </li>
+                    #{/list}#
+                    
+                    #{if _session.get('backendUser') != null}#                    
                     <li>
                     	<div style="padding-left: 15px;padding-right: 15px">
                     	<div>${_session.get('backendUser')}$</div>

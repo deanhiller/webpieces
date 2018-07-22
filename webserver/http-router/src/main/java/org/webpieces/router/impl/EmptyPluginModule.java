@@ -31,7 +31,11 @@ public class EmptyPluginModule implements Module {
 		//special case so the notFound controller can inpsect and list all routes in a web page
 		//OR some client application can inject and introspect all web routes as well
 		//OR some plugin on startup can look at all routes as well
+		
+		//Also, special case so the backend plugin can accept route ids and reverse lookup the URL on them
+		//or other things it the web application can
 		binder.bind(RoutingHolder.class).toInstance(routingHolder);
+		
 	}
 
 }

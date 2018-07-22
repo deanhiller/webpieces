@@ -1,19 +1,24 @@
 package org.webpieces.plugins.backend.spi;
 
-import org.webpieces.plugins.backend.BackendController;
-import org.webpieces.plugins.backend.BackendRoutes;
+import org.webpieces.router.api.routing.RouteId;
 
 public class PageDescriptor {
 
 	private MenuCategory category;
 	private String menuTitle;
-	private String relativeUrl;
+	private RouteId routeId;
+	private boolean isSecure;
 	
-	public PageDescriptor(MenuCategory category, String menuTitle, String relativeUrl) {
+	public PageDescriptor(MenuCategory category, String menuTitle, RouteId routeId) {
+		this(category, menuTitle, routeId, true);
+	}
+
+	public PageDescriptor(MenuCategory category, String menuTitle, RouteId routeId, boolean isSecure) {
 		super();
 		this.category = category;
 		this.menuTitle = menuTitle;
-		this.relativeUrl = relativeUrl;
+		this.routeId = routeId;
+		this.isSecure = isSecure;
 	}
 	
 	public MenuCategory getMenuCategory() {
@@ -27,8 +32,13 @@ public class PageDescriptor {
 	public String getLowerCaseMenuTitle() {
 		return menuTitle.toLowerCase();
 	}
-	
-	public String getRelativeUrl() {
-		return BackendRoutes.BACKEND_ROUTE+relativeUrl;
+
+	public RouteId getRouteId() {
+		return routeId;
 	}
+
+	public boolean isSecure() {
+		return isSecure;
+	}
+	
 }

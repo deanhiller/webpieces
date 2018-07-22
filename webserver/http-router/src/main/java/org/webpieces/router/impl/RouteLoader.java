@@ -187,6 +187,7 @@ public class RouteLoader {
 		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config);
 		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder, false);
 		routingHolder.setRouterBuilder(routerBuilder);
+		routingHolder.setReverseRouteLookup(reverseRoutes);
 		invoker.init(reverseRoutes);
 		
 		List<Routes> all = new ArrayList<>();
