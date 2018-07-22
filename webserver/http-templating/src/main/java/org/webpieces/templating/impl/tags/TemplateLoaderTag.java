@@ -42,13 +42,12 @@ public abstract class TemplateLoaderTag implements HtmlTag {
 		return path;
 	}
 	
-	/**
+	/*
 	 * This is a bit nasty circular dependency but this tag is special and whether in dev or prod mode needs
 	 * to re-use all the loadTemplate/runTemplate logic
 	 * 
 	 * TEmplateService -> HtmlTagLookup -> HtmlFileTag -> TemplateService
 	 * 
-	 * @param svc
 	 */
 	public void initialize(TemplateService svc) {
 		this.svc = svc;

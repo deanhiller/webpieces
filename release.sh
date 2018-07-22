@@ -20,6 +20,16 @@ else
   exit $test_result
 fi
 
+echo "##################################"
+echo "next copy over legacy project to upgrade it(auto-upgrade)"
+echo "##################################"
+
+cp -r webserver/output/webpiecesexample-all/* ../webpiecesexample-all
+
+echo "##################################"
+echo "next release to maven repositories"
+echo "##################################"
+
 #MUST turn parallel builds off for release or it fails!!!
 #We skip tests since those are done in runAllTesting.sh AND that script ALSO test legacy compatibility and building a fake project from the new release AND starting the server
 ./gradlew --stacktrace -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -PprojVersion=$@ clean release -x test
@@ -37,12 +47,6 @@ else
 fi 
 
 git tag v1.9.$@
-
-echo "##################################"
-echo "DONE tagging, next copy over legacy project to upgrade it(auto-upgrade)"
-echo "##################################"
-
-cp -r webserver/output/webpiecesexample-all/* ../webpiecesexample-all
 
 end=`date +%s`
 runtime=$((end-start))
