@@ -12,7 +12,7 @@ sourceSets {
 }
 
 dependencies {
-    compile project(':webserver:http-webserver'), project(':http:http1_1-parser')
+    compile project(':webserver:http-webserver')
     
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-fortesting-plugins')

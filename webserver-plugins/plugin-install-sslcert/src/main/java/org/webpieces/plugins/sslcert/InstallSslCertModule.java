@@ -23,7 +23,7 @@ public class InstallSslCertModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		Multibinder<BackendGuiDescriptor> backendBinder = Multibinder.newSetBinder(binder(), BackendGuiDescriptor.class);
-	    backendBinder.addBinding().to(BackendInfoImpl.class);
+	    backendBinder.addBinding().to(InstallSslCertGuiDescriptor.class);
 	    
 	    binder().bind(InstallSslCertConfig.class).toInstance(config);
 	}

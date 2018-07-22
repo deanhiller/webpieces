@@ -7,7 +7,7 @@ import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 import org.webpieces.plugins.backend.spi.MenuCategory;
 import org.webpieces.plugins.backend.spi.PageDescriptor;
 
-public class BackendInfoImpl implements BackendGuiDescriptor {
+public class InstallSslCertGuiDescriptor implements BackendGuiDescriptor {
 
 	@Override
 	public List<PageDescriptor> getWireIntoGuiDescriptors() {

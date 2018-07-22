@@ -7,4 +7,6 @@ dependencies {
   
   //optional plugin for if you use H2 which supplies a GUI to access in memory database during development
   compile deps['plugin-h2']
+  //we load the documentation plugin in the development server (not the production server)
+  compile deps['plugin-webpieces-documentation']
 }

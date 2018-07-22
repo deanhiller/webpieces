@@ -2,7 +2,7 @@ package org.webpieces.plugins.backend.spi;
 
 public enum MenuCategory {
 
-	MANAGEMENT("Management");
+	MANAGEMENT("Management"), DOCUMENTATION("Documentation");
 	
 	private String title;
 
