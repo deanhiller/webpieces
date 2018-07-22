@@ -55,3 +55,14 @@ runtime=$((end-start))
 echo "###################################"
 echo "RUNTIME=$runtime (MOST of this is due to sonas plugin needing to be single threaded)"
 echo "###################################"
+
+echo ""
+echo ""
+echo ""
+echo ""
+
+echo "###################################"
+echo "IMPORTANT: Next go cd ../webpiecesexample-all and run git status and git diff"
+echo "THEN, undo the build.gradle version number, the securekey, and the README usually and leave everything else"
+echo "THEN, check it in and commit with the message of this version you just released $@"
+echo "###################################"
