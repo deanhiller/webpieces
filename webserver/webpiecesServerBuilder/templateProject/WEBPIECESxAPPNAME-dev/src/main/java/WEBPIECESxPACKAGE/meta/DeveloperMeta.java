@@ -3,6 +3,7 @@ package WEBPIECESxPACKAGE.meta;
 import java.util.List;
 import java.util.Map;
 
+import org.webpieces.plugins.hsqldb.H2DbConfig;
 import org.webpieces.plugins.hsqldb.H2DbPlugin;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
@@ -37,7 +38,7 @@ public class DeveloperMeta implements WebAppMeta {
 		List<Plugin> prodPlugins = prodMeta.getPlugins();
 		List<Plugin> devPlugins = Lists.newArrayList(
 				//This is only for the development server to expose a GUI to use http://localhost:9000/@db
-				new H2DbPlugin()
+				new H2DbPlugin(new H2DbConfig(0, "/@db"))
 				);
 
 		prodPlugins.addAll(devPlugins);

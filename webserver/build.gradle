@@ -54,7 +54,6 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
     //least put to the same location
     sourceSets.main.output.resourcesDir = sourceSets.main.output.classesDir
     compileJava.doLast {
-       //tasks.processResources.execute()
        logger.warn("processed resources="+sourceSets.main.output.resourcesDir)
     }
 

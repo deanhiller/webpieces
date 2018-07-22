@@ -9,16 +9,14 @@ import org.webpieces.router.api.actions.Render;
 @Singleton
 public class H2DbController {
 
-	private H2DbConfig config;
+	private ServerConfig config;
 
 	@Inject
-	public H2DbController(H2DbConfig config) {
+	public H2DbController(ServerConfig config) {
 		this.config = config;
 	}
 	
 	public Render databaseGui() {
 		return Actions.renderThis("port", config.getPort());
-		
-		//return Actions.redirectToUrl("http://localhost:"+config.getPort());
 	}
 }

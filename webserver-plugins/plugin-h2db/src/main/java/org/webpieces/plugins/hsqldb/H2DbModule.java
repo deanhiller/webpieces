@@ -12,11 +12,13 @@ public class H2DbModule extends AbstractModule {
 
 	private static final Logger log = LoggerFactory.getLogger(H2DbModule.class);
 	private H2DbConfig config;
+	private ServerConfig svrConfig = new ServerConfig();
 
-	public H2DbModule() {
+	public H2DbModule(H2DbConfig config) {
 		
 			try {
-				String args[] = new String[] { "-webPort", "0" };
+				this.config = config;
+				String args[] = new String[] { "-webPort", config.getPort()+"" };
 				
 				log.info("trying to start H2 webserver GUI interface to serve up as a webpage(for development servers)");
 				// start the TCP Server
@@ -25,8 +27,7 @@ public class H2DbModule extends AbstractModule {
 				
 				int port = server.getPort();
 				log.info("H2 webserver started on port="+port);
-				this.config = new H2DbConfig();
-				this.config.setPort(port);
+				this.svrConfig.setPort(port);
 				return;
 			} catch(SQLException e) {
 				throw new RuntimeException(e);
@@ -36,6 +37,7 @@ public class H2DbModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(H2DbConfig.class).toInstance(config);
+		bind(ServerConfig.class).toInstance(svrConfig);
 	}
 
 }

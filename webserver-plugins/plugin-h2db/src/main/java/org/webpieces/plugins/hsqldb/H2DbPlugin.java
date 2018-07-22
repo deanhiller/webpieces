@@ -10,14 +10,20 @@ import com.google.inject.Module;
 
 public class H2DbPlugin implements Plugin {
 
+	private H2DbConfig config;
+
+	public H2DbPlugin(H2DbConfig config) {
+		this.config = config;
+	}
+	
 	@Override
 	public List<Module> getGuiceModules() {
-		return Lists.newArrayList(new H2DbModule());
+		return Lists.newArrayList(new H2DbModule(config));
 	}
 
 	@Override
 	public List<Routes> getRouteModules() {
-		return Lists.newArrayList(new H2DbRoutes());
+		return Lists.newArrayList(new H2DbRoutes(config));
 	}
 
 }

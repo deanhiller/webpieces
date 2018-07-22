@@ -1,3 +1,5 @@
+apply plugin: 'org.webpieces.templatecompiler'
+
 sourceSets {
 	//For testing, we need to put the html files on the classpath which are co-located with the controllers
 	main {
@@ -12,4 +14,11 @@ sourceSets {
 dependencies {
     compile deps['h2db']
     compile project(':webserver:http-router')
+}
+
+//This allows the tests to use *_html.class templates since for some reason, I was having trouble
+//getting the *.html files on the classpath WHILE compiling the templates which is needed to build the
+//jar.
+test {
+    systemProperty "gradle.running", "true"
 }
