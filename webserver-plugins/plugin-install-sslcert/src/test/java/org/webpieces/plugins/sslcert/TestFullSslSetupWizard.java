@@ -71,10 +71,10 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testFullSuccessWizardWalkthrough() throws MalformedURLException {
-		renderFirstPage("/backend/secure/sslsetup");
-		postFirstPageAndEmail("/backend/secure/postEmail");
-		renderStep2AskingForOrg("/backend/secure/step2");
-		MockProxyAuthorization proxyAuth = postOrgAndPlaceOrderAndFinalizeOrder("/backend/secure/postStep2");
+		renderFirstPage("/@backend/secure/sslsetup");
+		postFirstPageAndEmail("/@backend/secure/postEmail");
+		renderStep2AskingForOrg("/@backend/secure/step2");
+		MockProxyAuthorization proxyAuth = postOrgAndPlaceOrderAndFinalizeOrder("/@backend/secure/postStep2");
 
 		verifyTokenPageSetup(proxyAuth);
 	}
@@ -128,7 +128,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.LOCATION);
 		Assert.assertEquals(1, headers.size());
-		Assert.assertEquals("https://myhost.com/backend/secure/step2", headers.get(0).getValue());
+		Assert.assertEquals("https://myhost.com/@backend/secure/step2", headers.get(0).getValue());
 	}
 
 	private void renderStep2AskingForOrg(String url) {
@@ -168,7 +168,7 @@ public class TestFullSslSetupWizard extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.LOCATION);
 		Assert.assertEquals(1, headers.size());
-		Assert.assertEquals("https://myhost.com/backend/secure/maintainssl", headers.get(0).getValue());
+		Assert.assertEquals("https://myhost.com/@backend/secure/maintainssl", headers.get(0).getValue());
 		return mockProxyAuth;
 	}
 

@@ -150,7 +150,7 @@ fi
 #Downloading https page on server
 
 #Test out a curl request to localhost to make sure basic webpage is working
-curl -kL https://localhost:8443/backend/secure/sslsetup > downloadedhtml.txt
+curl -kL https://localhost:8443/@backend/secure/sslsetup > downloadedhtml.txt
 
 if grep -q "BACKEND Login" downloadedhtml.txt; then
   kill -9 $server_pid

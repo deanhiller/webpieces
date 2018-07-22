@@ -55,7 +55,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testLoginNotExistOnHttp() {
-		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/backend/login");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/login");
 		
 		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 		
@@ -65,7 +65,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 	
 	@Test
 	public void testLoginPageRender() {
-		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/backend/login");
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/@backend/login");
 		
 		CompletableFuture<HttpFullResponse> respFuture = https11Socket.send(req);
 		
@@ -78,7 +78,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 	public void testLoginPost() {
 		mockLogin.setAuthentication(true);
 		
-		HttpFullRequest req = Requests.createPostRequest( "/backend/postLogin", 
+		HttpFullRequest req = Requests.createPostRequest( "/@backend/postLogin", 
 				"username", "admin",
 				"password", "admin");
 		
@@ -88,7 +88,7 @@ public class TestLogin extends AbstractWebpiecesTest {
 		response.assertStatusCode(KnownStatusCode.HTTP_303_SEEOTHER);
 		List<Header> headers = response.getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.LOCATION);
 		Assert.assertEquals(1, headers.size());
-		Assert.assertEquals("https://myhost.com/backend/secure/loggedinhome", headers.get(0).getValue());
+		Assert.assertEquals("https://myhost.com/@backend/secure/loggedinhome", headers.get(0).getValue());
 	}
 
 }
