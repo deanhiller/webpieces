@@ -77,7 +77,7 @@ cd webserver/output/webpiecesServerBuilder
 
 echo path2=$PWD
 
-./createProject.sh MyTest com.test ..
+./createProject.sh WebpiecesExample org.webpieces ..
 
 echo createproject done
 test_result=$?
@@ -93,7 +93,7 @@ else
   exit $test_result
 fi
 
-cd ../mytest-all
+cd ../webpiecesexample-all
 echo about to build assembleDist
 ./gradlew build assembleDist
 test_result=$?
@@ -109,8 +109,8 @@ else
   exit $test_result
 fi
 
-cd mytest/output/distributions
-unzip mytest.zip
+cd webpiecesexample/output/distributions
+unzip webpiecesexample.zip
 test_result=$?
 if [ $test_result -eq 0 ]
 then
@@ -125,8 +125,8 @@ else
 fi
 
 #TODO: startup the server in background and run test to grep out success in log files
-cd mytest
-./bin/mytest &
+cd webpiecesexample
+./bin/webpiecesexample &
 server_pid=$!
 
 echo "sleep 5 seconds"
@@ -141,27 +141,28 @@ if grep -q "o.w.w.i.WebServerImpl     server started" logs/server.log; then
 else
   echo "##################################"
   echo "11111 Server Startup Failed to be done in 5 seconds"
-  echo "Failed Server is located at `pwd`"
+  echo "Failed Startup.  Server is located at `pwd`"
   echo "##################################"
   kill -9 $server_pid
   exit 99
 fi
 
+#Downloading https page on server
+
 #Test out a curl request to localhost to make sure basic webpage is working
-curl -k https://localhost:8443
+curl -kL https://localhost:8443/backend/secure/sslsetup > downloadedhtml.txt
 
-
-if grep -q "ssl worked" logs/server.log; then
+if grep -q "BACKEND Login" downloadedhtml.txt; then
   kill -9 $server_pid
   echo "##################################"
   echo "2222 Server is located at `pwd`"
-  echo "Server Startup Succeeded!!"
+  echo "Server Download Page Successful!!"
   echo "##################################"
 else
   echo "##################################"
   echo "2222 Server Startup Failed to be done in 5 seconds"
-  echo "Failed Server is located at `pwd`"
+  echo "Failed Download https page.  Server is located at `pwd`"
   echo "##################################"
   kill -9 $server_pid
-  #exit 99
+  exit 99
 fi

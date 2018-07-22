@@ -38,6 +38,12 @@ fi
 
 git tag v1.9.$@
 
+echo "##################################"
+echo "DONE tagging, next copy over legacy project to upgrade it(auto-upgrade)"
+echo "##################################"
+
+cp -r webserver/output/webpiecesexample-all/* ../webpiecesexample-all
+
 end=`date +%s`
 runtime=$((end-start))
 echo "###################################"
