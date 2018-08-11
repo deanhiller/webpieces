@@ -2,6 +2,7 @@ package org.webpieces.webserver.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
@@ -75,16 +76,75 @@ public class StaticFileReader {
 	}
 	
 	public CompletableFuture<Void> sendRenderStatic(RequestInfo info, RenderStaticResponse renderStatic) {
-		if(renderStatic.isOnClassPath())
-			throw new UnsupportedOperationException("not implemented yet");
-		
 		try {
+			if(renderStatic.isOnClassPath())
+				return runClassPathRead(info, renderStatic);
 			return runAsyncFileRead(info, renderStatic);
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
+	private CompletableFuture<Void> runClassPathRead(RequestInfo info, RenderStaticResponse renderStatic) throws IOException {
+		VirtualFile fullFilePath = renderStatic.getFilePath();
+	    
+		String fileName = fullFilePath.getAbsolutePath();
+	    String extension = null;
+	    int lastDot = fileName.lastIndexOf(".");
+	    if(lastDot > 0) {
+	    		extension = fileName.substring(lastDot+1);
+	    }
+
+	    ResponseEncodingTuple tuple = responseCreator.createResponse(info.getRequest(),
+	    		StatusCode.HTTP_200_OK, extension, "application/octet-stream", false);
+	    Http2Response response = tuple.response;
+
+		//On startup, we protect developers from breaking clients.  In http, all files that change
+		//must also change the hash automatically and the %%{ }%% tag generates those hashes so the
+	    //files loaded are always the latest
+	    
+		Long timeMs = config.getStaticFileCacheTimeSeconds();
+		if(timeMs != null)
+			response.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "max-age="+timeMs));
+
+		log.info(()->"sending classpath resource="+fullFilePath);
+
+		InputStream inputStream = fullFilePath.openInputStream();
+		CompletableFuture<Void> future = info.getResponseSender().sendResponse(response)
+					.thenCompose(s -> classpathReadLoop(s, inputStream, fullFilePath, info));
+		
+		return future.handle((s, exc) -> handleClose(info, exc)); //our finally block for failures
+	}
 	
+	private CompletableFuture<Void> classpathReadLoop(StreamWriter writer, InputStream inputStream, VirtualFile fullFilePath, RequestInfo info) {
+		try {
+			byte[] byteArray = new byte[BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE];
+			int bytesRead = inputStream.read(byteArray);
+			
+			DataWrapper data;
+			boolean isEos;
+			if(bytesRead < 0) {
+				data = wrapperFactory.emptyWrapper();
+				isEos = true;
+			} else {
+				data = wrapperFactory.wrapByteArray(byteArray, 0, bytesRead);
+				isEos = false;
+			}
+	
+			DataFrame frame = new DataFrame();
+			frame.setEndOfStream(isEos);
+			frame.setData(data);
+			return writer.processPiece(frame).thenCompose(v -> {
+				if(isEos)
+					return CompletableFuture.completedFuture(null);
+				else
+					return classpathReadLoop(writer, inputStream, fullFilePath, info);
+			});
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private CompletableFuture<Void> runAsyncFileRead(RequestInfo info, RenderStaticResponse renderStatic) throws IOException {
 		VirtualFile fullFilePath = renderStatic.getFilePath();
 	    
@@ -192,10 +252,10 @@ public class StaticFileReader {
 					if(read != readCount)
 						throw new IllegalStateException("read bytes into buf does not match readCount. read="+read+" cnt="+readCount);
 					else if(bytesLeft == 0) {
-						return sendHttpChunk(writer, pool, buf, file, true);
+						return sendHttpChunk(writer, pool, buf, true);
 					}
 
-					return sendHttpChunk(writer, pool, buf, file, false).thenCompose( (w) -> {
+					return sendHttpChunk(writer, pool, buf, false).thenCompose( (w) -> {
 						int newPosition = position + read;
 						//BIG NOTE: RECURSIVE READ HERE!!!!
 						return readLoop(writer, pool, file, asyncFile, newPosition, remaining);								
@@ -223,7 +283,7 @@ public class StaticFileReader {
 		return future;
 	}
 	
-	private CompletableFuture<Void> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, Path file, boolean isEos) {
+	private CompletableFuture<Void> sendHttpChunk(StreamWriter writer, BufferPool pool, ByteBuffer buf, boolean isEos) {
 		DataWrapper data = wrapperFactory.wrapByteBuffer(buf);
 		
 		DataFrame frame = new DataFrame();
