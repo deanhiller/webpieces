@@ -115,7 +115,7 @@ public class StaticFileReader {
 		    	response.addHeader(new Http2Header(Http2HeaderName.CONTENT_ENCODING, compr.getCompressionType()));
 		    	File routesCache = renderStatic.getTargetCache();
 	
-			String relativeUrl = renderStatic.getRelativeUrl();
+		    	String relativeUrl = renderStatic.getRelativeUrl();
 		    	File fileReference;
 		    	if(relativeUrl == null) {
 		    	    fileReference = FileFactory.newFile(routesCache, fileName);

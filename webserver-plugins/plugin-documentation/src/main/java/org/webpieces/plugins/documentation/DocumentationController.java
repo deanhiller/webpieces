@@ -29,4 +29,12 @@ public class DocumentationController {
 	public Render routes() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
+	
+	public Render design() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
+	public Render quickStart() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
 }

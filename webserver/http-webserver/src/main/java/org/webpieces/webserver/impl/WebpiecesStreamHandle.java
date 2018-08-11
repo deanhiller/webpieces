@@ -16,7 +16,6 @@ public class WebpiecesStreamHandle implements HttpStream {
 
 	public WebpiecesStreamHandle(RequestHelpFacade facade) {
 		this.facade = facade;
-		
 	}
 
 	@Override

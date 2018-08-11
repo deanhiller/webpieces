@@ -17,6 +17,7 @@ import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.util.file.VirtualFile;
+import org.webpieces.util.file.VirtualFileClasspath;
 import org.webpieces.util.file.VirtualFileFactory;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -86,17 +87,34 @@ public class R1RouterBuilder extends AbstractDomainBuilder  {
 	}
 
 	private void addStaticRoute(String urlPath, String fileSystemPath, boolean isOnClassPath) {
-		if(isOnClassPath) {
-			if(!fileSystemPath.startsWith("/"))
-				throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
-			throw new UnsupportedOperationException("oops, isOnClassPath not supported yet");
-		} else if(fileSystemPath.startsWith("/"))
+		if(isOnClassPath)
+			addStaticClasspathFile(urlPath, fileSystemPath);
+		else
+			addStaticLocalFile(urlPath, fileSystemPath);
+	}
+	
+	private void addStaticClasspathFile(String urlPath, String fileSystemPath) {
+		if(!fileSystemPath.startsWith("/"))
+			throw new IllegalArgumentException("Classpath resources must start with a / and be absolute on the classpath");
+		
+		boolean isDirectory = fileSystemPath.endsWith("/");
+		VirtualFile file = new VirtualFileClasspath(fileSystemPath, getClass(), isDirectory);
+		
+		StaticRoute route = new StaticRoute(new UrlPath(routerInfo, urlPath), file, true, holder.getCachedCompressedDirectory());
+		staticRoutes.add(route);
+		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
+		RouteMeta meta = new RouteMeta(route, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());
+		allRouting.addStaticRoute(meta);
+	}
+	
+	private void addStaticLocalFile(String urlPath, String fileSystemPath) {
+		if(fileSystemPath.startsWith("/"))
 			throw new IllegalArgumentException("Absolute file system path is not supported as it is not portable across OS when done wrong.  Override the modules working directory instead");
 		
 		File workingDir = holder.getConfig().getWorkingDirectory();
 		VirtualFile file = VirtualFileFactory.newFile(workingDir, fileSystemPath);
 		
-		StaticRoute route = new StaticRoute(new UrlPath(routerInfo, urlPath), file, isOnClassPath, holder.getCachedCompressedDirectory());
+		StaticRoute route = new StaticRoute(new UrlPath(routerInfo, urlPath), file, false, holder.getCachedCompressedDirectory());
 		staticRoutes.add(route);
 		log.info("scope:'"+routerInfo+"' adding static route="+route.getFullPath()+" fileSystemPath="+route.getFileSystemPath());
 		RouteMeta meta = new RouteMeta(route, holder.getInjector(), currentPackage.get(), holder.getUrlEncoding());

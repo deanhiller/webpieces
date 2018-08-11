@@ -1,0 +1,123 @@
+#{extends '../backend/main.html'/}#
+#{set title:'SSL Setup'/}#
+#{set tab:'management'/}#
+
+<h1>Creating the Project</h1>
+
+<h2>Introduction</h2>
+
+In this tutorial, you will learn the webpieces webserver library by coding a real web application, from start to
+finish.  In this application, we will try to use everything you would need in a real project.
+
+We have split the tutorial into several parts.  Each part will introduce more complex features, and provide
+everything that a real project needs: validation, error handling, a complete security framework, an automated
+test suite.
+
+<h2>The project</h2>
+
+We chose to create a blog engine so we can keep things simple.  
+
+<h2>Prerequisites</h2>
+
+Webpieces required that you have a working installation of jdk9.  We do not require intellij or eclipse
+but highlly recommend one of those as your editors.  
+
+We will assume you already have knowledge of Java and Web development(especially HTML, CSS).  However,
+you don't need to have any knowledge of JEE components exept a little knowledge in JPA can help.  Webpieces
+is a 'full stack' Java framework.  
+
+A solid understanding of Guice can help or at least a good understanding of @javax.inject annotations which are
+used in Spring and Guice.
+
+<h2>Installing Webpieces</h2>
+
+Hah!!!  Since Webpieces webserver is a library, there is no installation as you just depend on it like
+a normal maven artifact.  However, because we don't want everyone that uses webpieces to have to create
+a full build that builds a production server, we supply a createProject script that can be run.  It generates
+a project with gradle build files that work out of the box along with a main Server class that you can
+modify to your heart's desire.
+
+For now, view the section <a href="https://github.com/deanhiller/webpieces">9 Steps to try the webserver</a> in
+the README on github.
+
+Next, view the section on Eclipse Setup or Intellij Setup.
+
+<h2>A Walkthrough of the generated Server.java</h2>
+
+When you start up DevelopmentServer.java, most changes to your web application will not require a restart.  Because
+webpieces is a library, however, changes to the 3 classes that startup webpieces would require a restart and they are
+
+<ol>
+   <li>Server.java</li>
+   <li>ServerConfig.java</li>
+   <li>WebSSLFactory.java</li>
+</ol>
+
+Any changes to these classes or classes that these depend on would require a development server restart to see the changes.
+Luckily, these classes pretty much do not really need to ever be touched.
+
+Looking closer at Server.java, you will notice 3 different configurations
+
+<ol>
+   <li>WebServerConfig</li>
+   <li>RouterConfig</li>
+   <li>TemplateConfig</li>
+</ol>
+
+Each config object configure that piece of the webserver making it easier to trace what different configurations do
+as well as keep each piece separate from each other.  
+
+We have a firm belief that nearly all properties should be in the database and not on the filesystem including 
+configuration properties.  We generate Server.java such that you could modify it and put any properties 
+you like on the filesystem but we advise against 99% of properties there as typically you want property file 
+changes to go through your test team rather than someone getting on a production server and tweaking a property.
+Of course, the 1 property that must be a command line argument or a property is the database connection such that
+your server can exist in multiple environments like development, staging, and production with different database
+connections.  
+
+To make it simpler for all components/plugins to read/write properties into a database, an interface SimpleStorage.java
+is provided.  The generated application implements this interface connecting it to hibernate but you could change it
+to connect to some noSQL database or whatever else you would like.
+
+TBD: There will be a discovery service for those who implement an interface XXXXXXManaged that will call set/get and
+will
+
+<ol>
+   <li>expose a web page dynamically to modify those properties(for one node or for all machines)</li>
+   <li>read in the properties from SimpleStorage on startup to set them back to what they were</li>
+   <li>write changes from the web page into the database so they are persisted</li>
+</ol>
+
+This automatically managed way of doing properties is preferred of using property files
+
+<h2>A walkthrough of Meta & Modules & Plugins</h2>
+
+The main bootstrap file that webpieces webserver reads in is {yourproject}-all/{yourproject}/src/main/resources/appmeta.txt
+for production mode and {yourproject}-all/{yourproject}/src/main/resources/appmeta-dev.txt for Development mode.  This
+file boostraps your web application by telling us your meta file.  
+
+If you look closely, you will notice the appmeta-dev.txt contains DeveloperMeta.java and in that file, he just re-uses all
+the production meta stuff as well as adding 2 plugins that are only in the development server.  After all, we don't
+want to expose a SQL GUI nor webpieces documentation on our production website.
+
+Next, looking at {yourproject}Meta.java file, you will notice it is broken down into 3 main components
+
+<ol>
+   <li>list of Guice Modules</li>
+   <li>list of Route Modules</li>
+   <li>list of Plugins</li>
+</ol>
+
+I won't go in depth on plugins at this point but just note that plugins can be another fully contained web
+application with it's own guice modules, route modules, controllers, and html pages.  
+
+Guice modules are where you can wire things into the platform for your web application.
+
+
+
+
+
+
+
+
+

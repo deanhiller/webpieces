@@ -4,6 +4,6 @@ import org.webpieces.router.api.routing.RouteId;
 
 public enum DocumentationRouteId implements RouteId {
 
-	MAIN_DOCS, TEMPLATES, ROUTES
+	MAIN_DOCS, TEMPLATES, ROUTES, QUICK_START, DESIGN
 	
 }

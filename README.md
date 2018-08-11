@@ -22,7 +22,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 * SSL Cert wizard installs the certificate on ALL hosts in one go.  no more uploading certs to each host you maintain(what a pain that was)
 * and sooooooo much more
 
-#### 9 Steps to try the webserver
+#### 9 Steps to try the webserver (and view official documentation)
 
 1. Download the release(https://github.com/deanhiller/webpieces/releases), unzip
 2. run ./createProject.sh
@@ -33,6 +33,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 7. unzip {projectDir} which is your whole webserver
 8. ./bin/{project} to start the production webserver
 9. In a browser go to http://localhost:8080
+10. To view the documentation, you need to start the development server in eclipse setup or intellij setup below
 
 ### Eclipse Setup
 
@@ -57,6 +58,7 @@ NOTE: last tested out on Eclipse Oxygen 4.7.0 build id 20170620-1800 and gradle 
 6. In a browser go to http://localhost:8080
 7. refactor your code like crazy and hit the website again(no restart needed)
 8. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
+9. For Documentation go to http://localhost:8080/@documentation and you can access the references and tutorials
 
 ### Intellij Setup
 
@@ -78,6 +80,7 @@ NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbr
 5. In a browser go to http://localhost:8080
 6. refactor your code like crazy and hit the website again(no restart needed)
 7. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
+9. For Documentation go to http://localhost:8080/@documentation and you can access the references and tutorials
 
 #### To try modifying/contributing to the actual webserver
 

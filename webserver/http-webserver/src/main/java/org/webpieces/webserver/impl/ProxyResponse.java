@@ -88,8 +88,6 @@ public class ProxyResponse implements ResponseStreamer {
 
 		log.info("sending REDIRECT response responseSender="+ stream);
 		return stream.sendResponse(response).thenApply(w -> {
-			
-			
 			channelCloser.closeIfNeeded(request, stream);
 			return null;
 		});
@@ -113,7 +111,7 @@ public class ProxyResponse implements ResponseStreamer {
 			String prefix = "http://";
 			if(httpResponse.isHttps)
 				prefix = "https://";
-			
+
 			String portPostfix = "";
 			if(httpResponse.port != 443 && httpResponse.port != 80)
 				portPostfix = ":"+httpResponse.port;

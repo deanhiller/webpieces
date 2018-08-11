@@ -1,0 +1,33 @@
+#{extends '../backend/main.html'/}#
+#{set title:'SSL Setup'/}#
+#{set tab:'management'/}#
+
+<ol>
+   <li>MVC</li>
+   <li>Webpieces Design</li>
+</ol>
+
+Webpieces is designed such that EVERYTHING is a library including the main webserver.  Here is a full picture of the dependencies between
+the most important jar files.
+
+<img src="%[/org/webpieces/plugins/documentation/webpiecesDesign.jpg]%"/>
+
+Notice that http-webserver really only depends on 3 things to create the webserver
+
+<ol>
+   <li>http-frontend2 - By using this library, you deal with http messages and stop dealing with sockets.  This is the only piece you need if you want to create a micro-webserver</li>
+   <li>http-router - The http-webserver listends to http-frontend2 and translates/feeds requests into http-router</li>
+   <li>http-templating - The http-templating is responsible for rending html templates when the webserver tells it to</li>
+</ol>
+
+Notice that any one of these pieces could be taken to build another webserver.  http-router actually knows nothing about http
+and only knows of a RouterRequest keeping it independet of protocol.  http-webserver is the glue between these 3 main pieces of
+the webserver.  
+
+Of course, digging deeper, http2-frontend2 depends on even more pieces and in fact some of those pieces are what are used to
+build the http-client that is independent of the http-webserver.
+
+
+
+
+

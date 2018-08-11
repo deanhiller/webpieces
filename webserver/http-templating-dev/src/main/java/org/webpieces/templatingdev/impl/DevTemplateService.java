@@ -88,7 +88,7 @@ public class DevTemplateService extends ProdTemplateService {
 		}
 
 		if(theResource == null) 
-			theResource = new VirtualFileClasspath(fullTemplatePath, DevTemplateService.class);
+			theResource = new VirtualFileClasspath(fullTemplatePath, DevTemplateService.class, false);
 		
 		if(!theResource.exists())
 			throw new FileNotFoundException("resource="+fullTemplatePath+" was not found in classpath");

@@ -13,7 +13,10 @@ import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.Messages;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.PortConfig;
+import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.ResponseStreamer;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.MethodMeta;
@@ -41,12 +44,16 @@ public class RouteInvoker {
 	//initialized in init() method and re-initialized in dev mode from that same method..
 	private ReverseRoutes reverseRoutes;
 	private ObjectToParamTranslator reverseTranslator;
+	private PortConfigCallback portCallback;
+	private volatile PortConfig portConfig;
 
 	@Inject
 	public RouteInvoker(
-		ObjectToParamTranslator reverseTranslator
+		ObjectToParamTranslator reverseTranslator,
+		RouterConfig config
 	) {
 		this.reverseTranslator = reverseTranslator;
+		this.portCallback = config.getPortConfigCallback();
 	}
 
 	public CompletableFuture<Void> invoke(MatchResult result, RequestContext requestCtx, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
@@ -108,8 +115,10 @@ public class RouteInvoker {
 	}
 	
 	public Void finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
-		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e); 
-		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, null, responseCb);
+		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
+		if(portConfig == null)
+			portConfig = portCallback.fetchPortConfig();
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, null, responseCb, portConfig);
 		processor.failureRenderingInternalServerErrorPage(e);
 		return null;
 	}
@@ -149,8 +158,10 @@ public class RouteInvoker {
 	
 	public CompletableFuture<Void> invokeImpl(MatchResult result, Service<MethodMeta, Action> service, 
 			RequestContext requestCtx, ResponseStreamer responseCb) {
+		if(portConfig == null)
+			portConfig = portCallback.fetchPortConfig();
 		RouteMeta meta = result.getMeta();
-		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb);
+		ResponseProcessor processor = new ResponseProcessor(requestCtx, reverseRoutes, reverseTranslator, meta, responseCb, portConfig);
 		
 		if(meta.getRoute().getRouteType() == RouteType.STATIC) {
 			StaticRoute route = (StaticRoute) meta.getRoute();

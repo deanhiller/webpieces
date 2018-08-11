@@ -11,6 +11,7 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.actions.RenderContent;
 import org.webpieces.router.api.dto.RedirectResponse;
@@ -39,14 +40,16 @@ public class ResponseProcessor {
 	private ResponseStreamer responseCb;
 
 	private boolean responseSent = false;
+	private PortConfig portConfig;
 
 	public ResponseProcessor(RequestContext ctx, ReverseRoutes reverseRoutes, 
-			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb) {
+			ObjectToParamTranslator reverseTranslator, RouteMeta meta, ResponseStreamer responseCb, PortConfig portConfig) {
 		this.ctx = ctx;
 		this.reverseRoutes = reverseRoutes;
 		this.reverseTranslator = reverseTranslator;
 		this.matchedMeta = meta;
 		this.responseCb = responseCb;
+		this.portConfig = portConfig;
 	}
 
 	public CompletableFuture<Void> createRawRedirect(RawRedirect controllerResponse) {
@@ -106,7 +109,15 @@ public class ResponseProcessor {
 			path = path.replace("{"+name+"}", value);
 		}
 		
-		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, request.isHttps, request.domain, request.port, path);
+		//if the request is https, stay in https as everything is accessible on https
+		//if the request is http, then convert to https IF new route is secure
+		boolean isSecure = request.isHttps || route.isHttpsRoute();
+		int port = request.port;
+		//if need to change port to https port, this is how we do it...
+		if(!request.isHttps && route.isHttpsRoute())
+			port = portConfig.getHttpsPort();
+		
+		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);
 		
 		return wrapFunctionInContext(() -> responseCb.sendRedirect(redirectResponse));
 	}

@@ -21,7 +21,12 @@ public class DocumentationRoutes extends ScopedRoutes {
 		addRoute(HttpMethod.GET,  "", "DocumentationController.mainDocs", DocumentationRouteId.MAIN_DOCS);
 		addRoute(HttpMethod.GET, "/templates", "DocumentationController.templates", DocumentationRouteId.TEMPLATES);
 		addRoute(HttpMethod.GET, "/routes", "DocumentationController.routes", DocumentationRouteId.ROUTES);
-
+		addRoute(HttpMethod.GET, "/design", "DocumentationController.design", DocumentationRouteId.DESIGN);
+		addRoute(HttpMethod.GET, "/quickstart", "DocumentationController.quickStart", DocumentationRouteId.QUICK_START);
+		
+		//Because the html hardcode the url path here, we must use baseRouter and avoid whatever path
+		//the user passed in :(
+		baseRouter.addStaticDir("/org/webpieces/plugins/documentation/", "/org/webpieces/plugins/documentation/", true);		
     }
 
 	@Override

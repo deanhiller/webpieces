@@ -14,20 +14,23 @@ public class VirtualFileClasspath implements VirtualFile {
 	
 	private URL resource;
 	private String path;
+	private boolean isDirectory;
 
 	public VirtualFileClasspath(String path, ClassLoader classLoader) {
 		resource = classLoader.getResource(path);
 		this.path = path;
+		isDirectory = false;
 	}
 
-	public VirtualFileClasspath(String path, Class<?> clazz) {
+	public VirtualFileClasspath(String path, Class<?> clazz, boolean isDirectory) {
+		this.isDirectory = isDirectory;
 		resource = clazz.getResource(path);
 		this.path = path;
 	}
 	
 	@Override
 	public boolean isDirectory() {
-		return false;
+		return isDirectory;
 	}
 
 	@Override
@@ -69,7 +72,8 @@ public class VirtualFileClasspath implements VirtualFile {
 
 	@Override
 	public VirtualFile child(String fileName) {
-		throw new UnsupportedOperationException("not yet");
+		String full = path+fileName;
+		return new VirtualFileClasspath(full, getClass(), false);
 	}
 
 	@Override
