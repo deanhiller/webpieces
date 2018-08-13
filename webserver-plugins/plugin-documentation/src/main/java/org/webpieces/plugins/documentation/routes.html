@@ -15,10 +15,13 @@
    <li><a href="#httpsRoutes">Http vs. Https Routes</a></li>
    <li><a href="#staticFiles">Static File Routes</a></li>
    <li><a href="#specialRoutes">NotFound Route and InternalError Route</a></li>
+   <li><a href="#scopedRoutes">Scoped Routes</a></li>
    <li><a href="#order">Process of Matching URI</a></li>
 </ol>
 
 <h2 id="routing">Routing</h2>
+
+<p><b>You will want to read this page in it's entirety</b></p>
 
 <p>Routing is about taking the request and calling the correct method on the Controller along with any parameters from the
 request.  For an http POST request, the Router will convert all the form parameters into an array of javabeans to be passed
@@ -293,6 +296,35 @@ the internal error route also can only be defined once and is done like so</p>
 <code>setInternalErrorRoute("examples/ExamplesController.internalError");</code>
 </pre>
 
+<h4 id="scopedRoutes">Scoped Routes</h4>
+
+<p>You can further divide routes into groups of scoped routes like so</p>
+
+<pre>
+<code>Router scope1 = router.getScopedRouter("/backend", false);
+Router scope2 = router.getScopedRouter("users", false);
+scope2.addRoute(GET , "/list",         "HttpsController.home", HttpsRouteId.HOME);</code>
+</pre>
+
+<p>Above, if a request comes in for /backend/users/list, the route is matched.  If a request for /list comes in,
+not found will be displayed as /list is only found in the scopes that were setup.  Webpieces always tries to
+find a scoped router first and loop through those matches first before falling back to the global no scoped
+router.</p>
+
 <h4 id="order">Process of Matching URI</h4>
 
+<p>The order of matching URI's is best explained by running the DevelopmentServer and hitting a page that
+does not exist which will then display this page(only in development server is this shown, not in production).  As
+you can see below, the Domain Specific Routes are listed first.  If a Domain matches and there is no routes that
+match in that domain, there is no fallback and a page not found will be displayed.  Each domain router has it's
+own not found route.  Continued below the image..</p>
+
+<img src="%[/org/webpieces/plugins/documentation/notFound.png]%"/>
+
+<p>Let's say a request comes in for GET /secure/crud/something/blah, the first router will lookup a scoped router
+'secure' and then that router will try to find a scoped router 'crud' and that router will try to find a router
+'something'.  These are all O(1) lookups on a HashMap so they are very quick.  Since it does not find a scoped 
+router called 'something', it then loops through all the routes in the 'crud' router trying to find a match.  If it
+finds none, it falls back to the 'secure' router and loops through his routes if any and finally falls back to 
+the global routes looking for a match.  If none is found, the not found route is displayed</p>
 
