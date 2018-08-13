@@ -43,10 +43,6 @@ public class ReverseRoutes implements ReverseRouteLookup {
 	public ReverseRoutes(RouterConfig config) {
 		this.portConfigCallback = config.getPortConfigCallback();
 		this.urlEncoding = config.getUrlEncoding();		
-		if(portConfigCallback == null) {
-			ports = new PortConfig(8080, 8443);
-		}
-			
 	}
 
 	public void addContentRoute(RouteMeta meta) {

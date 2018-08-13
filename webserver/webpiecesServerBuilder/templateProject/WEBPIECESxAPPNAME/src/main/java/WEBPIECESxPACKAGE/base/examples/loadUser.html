@@ -1,0 +1,23 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <h1>Webpieces Webserver (in home.html file)</h1>
+  
+    Here is an if statement based off the user variable from the controller...<br/>
+    If the user exists, it prints the first line 'Hello there {user}'</br>    
+    #{if user}#
+        Hello there ${user}$<br/>
+    #{/if}#
+    #{else}#
+        Hi, we don't know you
+    #{/else}#
+    
+    <br/>
+    This next one is a custom tag passing in two custom args and a body to be used by mytag.tag file<br/>
+    #{mytag someArgument:'something', otherArgument:user}#Some body#{/mytag}#
+    
+    <br/><br/>
+    This is the end of the html page
+  </body>
+</html>

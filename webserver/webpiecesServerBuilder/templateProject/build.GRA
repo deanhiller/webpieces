@@ -27,6 +27,7 @@ ext {
        'plugin-hibernate':   "org.webpieces:plugin-hibernate:${webpiecesVersion}",
        'plugin-backend':     "org.webpieces:plugin-backend:${webpiecesVersion}",
        'plugin-install-sslcert': "org.webpieces:plugin-install-sslcert:${webpiecesVersion}", 
+       'plugin-webpieces-documentation': "org.webpieces:plugin-webpieces-documentation:${webpiecesVersion}",
        'plugin-jackson':     "org.webpieces:plugin-json-jackson:${webpiecesVersion}",
        'commons-lang':       "org.apache.commons:commons-lang3:3.5",
        

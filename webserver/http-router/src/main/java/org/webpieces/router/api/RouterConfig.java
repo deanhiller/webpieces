@@ -44,7 +44,7 @@ public class RouterConfig {
 
 	private Map<String, String> webAppMetaProperties;
 
-	private PortConfigCallback portConfigCallback;
+	private PortConfigCallback portConfigCallback = () -> new PortConfig(8080, 8443);
 
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
 

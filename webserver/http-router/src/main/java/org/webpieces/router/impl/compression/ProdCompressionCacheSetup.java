@@ -51,7 +51,8 @@ public class ProdCompressionCacheSetup implements CompressionCacheSetup {
 		
 		log.info("setting up compressed cache directories");
 		for(StaticRoute route : staticRoutes) {
-			createCache(route);
+			if(!route.getIsOnClassPath())
+				createCache(route);
 		}
 		log.info("all cached directories setup");
 	}

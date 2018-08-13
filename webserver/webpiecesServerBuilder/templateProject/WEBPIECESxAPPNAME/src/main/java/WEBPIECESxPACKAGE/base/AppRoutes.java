@@ -26,12 +26,13 @@ public class AppRoutes extends AbstractRoutes {
 		//The controller.method is a relative or absolute path with ClassName.method at the end
 		//RouteIds are used to redirect in the webapp itself and must be unique
 		addRoute(GET, "/",              "examples/ExamplesController.index", MAIN_ROUTE);
+		addRoute(GET, "/main2",         "/WEBPIECESxPACKAGE/base/examples/ExamplesController.index", MAIN_ROUTE2);
+		addRoute(GET, "/main3",         "WEBPIECESxPACKAGE.base.examples.ExamplesController.index", MAIN_ROUTE3);
 		
 		addRoute(GET, "/home",          "crud/login/AppLoginController.index", ExamplesRouteId.HOME);
 		addRoute(GET, "/tags",          "crud/login/AppLoginController.tags", ExamplesRouteId.TAGS);
 
-		addRoute(GET, "/main2",         "/WEBPIECESxPACKAGE/base/examples/ExamplesController.index", MAIN_ROUTE2);
-		addRoute(GET, "/main3",         "WEBPIECESxPACKAGE.base.examples.ExamplesController.index", MAIN_ROUTE3);
+		addRoute(GET, "/user/{name}", "examples/ExamplesController.loadUser", ExamplesRouteId.LOAD_USER);    
 
 		addRoute(GET, "/examples",      "examples/ExamplesController.exampleList", LIST_EXAMPLES);      //local controller(same package as your RouteModule!!!!)
 		addRoute(GET, "/redirect/{id}", "examples/ExamplesController.redirect", REDIRECT_PAGE);    //shows a redirect example in the controller method

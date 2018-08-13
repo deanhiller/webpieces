@@ -11,7 +11,7 @@ public enum ExamplesRouteId implements RouteId {
 	LIST_EXAMPLES, 
 
 	//controller type basic examples
-	REDIRECT_PAGE, ASYNC_ROUTE, HOME, TAGS
+	REDIRECT_PAGE, ASYNC_ROUTE, HOME, TAGS, LOAD_USER
 	
 	//using different tag examples
 	

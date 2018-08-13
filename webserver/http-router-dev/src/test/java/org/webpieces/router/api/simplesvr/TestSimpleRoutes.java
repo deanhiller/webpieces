@@ -16,6 +16,7 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.devrouter.api.DevRouterFactory;
+import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.router.api.RouterSvcFactory;
@@ -53,6 +54,7 @@ public class TestSimpleRoutes {
 		RouterConfig config = new RouterConfig(baseWorkingDir)
 										.setMetaFile(f)
 										.setWebappOverrides(module)
+										.setPortConfigCallback(() -> fetchPorts())
 										.setSecretKey(SecretKeyInfo.generateForTest());
 		
 		RouterService prodSvc = RouterSvcFactory.create(config);
@@ -71,6 +73,10 @@ public class TestSimpleRoutes {
 	      });
 	}
 	
+	private static PortConfig fetchPorts() {
+		return new PortConfig(80, 443);
+	}
+
 	private static class TestModule implements Module {
 		public MockSomeService mockService = new MockSomeService();
 		@Override

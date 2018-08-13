@@ -26,14 +26,19 @@ public class DevelopmentServer {
 	//webserver classes to put in a place a runtime compiler so we can compile your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
-		new DevelopmentServer(false).start();
-		
-		//Since we typically use only 3rd party libraries with daemon threads, that means this
-		//main thread is the ONLY non-daemon thread letting the server keep running so we need
-		//to block it and hold it up from exiting.  Modify this to release if you want an ability
-		//to remotely shutdown....
-		synchronized(DevelopmentServer.class) {
-			DevelopmentServer.class.wait();
+		try {
+			new DevelopmentServer(false).start();
+			
+			//Since we typically use only 3rd party libraries with daemon threads, that means this
+			//main thread is the ONLY non-daemon thread letting the server keep running so we need
+			//to block it and hold it up from exiting.  Modify this to release if you want an ability
+			//to remotely shutdown....
+			synchronized(DevelopmentServer.class) {
+				DevelopmentServer.class.wait();
+			}
+		} catch(Throwable e) {
+			log.error("Failed to startup.  exiting jvm", e);
+			System.exit(1); // should not be needed BUT some 3rd party libraries start non-daemon threads :(
 		}
 	}
 	

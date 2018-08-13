@@ -19,10 +19,12 @@ public class DocumentationRoutes extends ScopedRoutes {
     @Override
     protected void configure() {
 		addRoute(HttpMethod.GET,  "", "DocumentationController.mainDocs", DocumentationRouteId.MAIN_DOCS);
-		addRoute(HttpMethod.GET, "/templates", "DocumentationController.templates", DocumentationRouteId.TEMPLATES);
 		addRoute(HttpMethod.GET, "/routes", "DocumentationController.routes", DocumentationRouteId.ROUTES);
+		addRoute(HttpMethod.GET, "/controllers", "DocumentationController.controllers", DocumentationRouteId.CONTROLLERS);
+		addRoute(HttpMethod.GET, "/templates", "DocumentationController.templates", DocumentationRouteId.TEMPLATES);
 		addRoute(HttpMethod.GET, "/design", "DocumentationController.design", DocumentationRouteId.DESIGN);
 		addRoute(HttpMethod.GET, "/quickstart", "DocumentationController.quickStart", DocumentationRouteId.QUICK_START);
+		addRoute(HttpMethod.GET, "/randomfeatures", "DocumentationController.randomFeatures", DocumentationRouteId.RANDOM_FEATURES);
 		
 		//Because the html hardcode the url path here, we must use baseRouter and avoid whatever path
 		//the user passed in :(

@@ -36,6 +36,10 @@ public class ExamplesController {
 		return Actions.redirect(ExamplesRouteId.MAIN_ROUTE);
 	}
 	
+	public Action loadUser(String name) {
+		return Actions.renderThis("user", name);
+	}
+	
 	public CompletableFuture<Action> myAsyncMethod() {
 		CompletableFuture<Integer> remoteValue = service.fetchRemoteValue("dean", 21);
 		return remoteValue.thenApply(s -> convertToAction(s));

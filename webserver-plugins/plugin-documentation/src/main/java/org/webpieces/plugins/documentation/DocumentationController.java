@@ -30,11 +30,19 @@ public class DocumentationController {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 	
+	public Render controllers() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
 	public Render design() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 	
 	public Render quickStart() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
+	public Render randomFeatures() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 }

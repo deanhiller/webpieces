@@ -57,7 +57,7 @@ public class TestDocs extends AbstractWebpiecesTest {
 		
 		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);		
-		response.assertContains("Hi there");
+		response.assertContains("Quick Start");
 	}
 
 }

@@ -3,6 +3,7 @@ package org.webpieces.webserver.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
@@ -88,6 +89,7 @@ public class StaticFileReader {
 	private CompletableFuture<Void> runClassPathRead(RequestInfo info, RenderStaticResponse renderStatic) throws IOException {
 		VirtualFile fullFilePath = renderStatic.getFilePath();
 	    
+		URL url = fullFilePath.toURL();
 		String fileName = fullFilePath.getAbsolutePath();
 	    String extension = null;
 	    int lastDot = fileName.lastIndexOf(".");
