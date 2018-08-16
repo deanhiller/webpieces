@@ -90,8 +90,18 @@ public class DevTemplateService extends ProdTemplateService {
 		if(theResource == null) 
 			theResource = new VirtualFileClasspath(fullTemplatePath, DevTemplateService.class, false);
 		
-		if(!theResource.exists())
-			throw new FileNotFoundException("resource="+fullTemplatePath+" was not found in classpath");
+		if(!theResource.exists()) {
+			try {
+				//This is for plugins in the jar file that someone's webapp is using so there is no *.html files in that jar
+				//and it only has xxxxx_html.class files(precompiled templates)
+				return super.loadTemplate(fullTemplatePath, templateFullClassName);
+			} catch(ClassNotFoundException e) {
+				//ok, class is not found, throw original, file not found exception
+				FileNotFoundException exc = new FileNotFoundException("resource="+fullTemplatePath+" was not found in classpath AND corresponding *.class file not found too");
+				exc.initCause(e);
+				throw exc;
+			}
+		}
 		
 		try(InputStream resource = theResource.openInputStream()) {
 			String viewSource = IOUtils.toString(resource, config.getFileEncoding().name());

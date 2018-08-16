@@ -18,7 +18,7 @@ import com.google.inject.Module;
  * Uses the production Router but the dev template compiler so you 'could' step through prod router code
  * to see if something is going on
  * 
- * TODO: modify this to put gradle groovy template *.class files (ones generated from the html) and then we
+ * TODO: modify this to compile ALL gradle groovy template *.class files (ones generated from the html) and then we
  * could run full production mode from the IDE
  */
 public class ProdServerForIDE {

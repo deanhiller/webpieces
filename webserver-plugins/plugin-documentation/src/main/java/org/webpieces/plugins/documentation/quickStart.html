@@ -6,7 +6,7 @@
 
 <h2>Introduction</h2>
 
-<p>A very simple tutorial, that will just help you to discover the Webpieces library 
+<p>A very simple tutorial, that will just help you to learn the Webpieces library 
 with the famous ‘Hello World’ example.</p>
 
 <p>We have split the tutorial into several parts.  Each part will introduce more complex features, and provide
@@ -14,8 +14,8 @@ everything that a real project needs: validation, error handling, an automated t
 
 <h2>Prerequisites</h2>
 
-<p>Webpieces required that you have a working installation of jdk9.  We do not require intellij or eclipse
-but highlly recommend one of those as your editors.</p>  
+<p>Webpieces requires that you have a working installation of jdk9.  We do not require intellij or eclipse
+but highly recommend one of those as your editors.</p>  
 
 <p>We will assume you already have knowledge of Java and Web development(especially HTML, CSS).  However,
 you don't need to have any knowledge of JEE components except a little knowledge in JPA can help.  Webpieces
@@ -37,11 +37,177 @@ a project with gradle build files that work out of the box along with a main Ser
 modify to your heart's desire.  Obviously, you could completely swap out the build system if you desire.  I will 
 warn you however though, some systems like maven are rigid and you may start pulling your hair out</p>
 
-<p>To start, follow the steps in the section 9 Steps to try the webserver in
-<a href="https://github.com/deanhiller/webpieces">the README on github.</a></p>
+<p>To start, download the zip that can create a shell project for you that uses the webpieces library following
+these steps</p>
+
+<ol>
+    <li>Download the release(https://github.com/deanhiller/webpieces/releases)</li>
+    <li>unzip the file you downloaded</li>
+    <li>run ./createProject.sh</li>
+    <li>For the camel case app name, enter 'MyHelloWorld'</li>
+    <li>For the package, enter org.webpieces.helloworld</li>
+    <li>For the directory, enter '..'</li>
+    <li>cd ../myhelloworld-all</li>
+    <li>./gradlew build</li>
+</ol>
+
+<p> At this point, your build should have been successful and all tests are passing as we provide some example tests.
+Next, we want to create a production release in the form of a zip file with the logging config, html files, and jar files.</p>
+
+<ol>    
+    <li>./gradlew assembleDist #creates the actual webserver distribution zip and tar files</li>
+    <li>cd myhelloworld-all/myhelloworld/output/distributions/</li>
+    <li>unzip myhelloworld.zip which is your whole webserver</li>
+    <li>./bin/{project} to start the production webserver</li>
+    <li>In a browser go to http://localhost:8080</li>
+</ol>
+
+<p>Here, you will hit the main webpieces webpage with examples that you can click through and use tweak/copy, etc.  Eventually,
+you will just delete all the example code.  Next, when you unzipped the zip file, you may have seen 4 directories.  
+Now, if you look there are 6 directories which are</p>
+
+<dl>
+    <dt>bin</dt>
+    <dd>Where your startup scripts are located(we created these for you but you own main so you can create new ones)</dd>
+    <dt>config</dt>
+    <dd>Where any config files reside, currently only the logback.xml for logging config exists here</dd>
+    <dt>lib</dt>
+    <dd>All jar files exist here</dd>
+    <dt>logs</dt>
+    <dd>The generated directory where all log files will be put from logback unless you reconfigure logback.xml</dd>
+    <dt>public</dt>
+    <dd>The location for all *.jpg, *.css, *.js and all static resources</dd>
+    <dt>webpiecesCache</dt>
+    <dd>Webpieces pre-compresses text resources on startup to send to browsers to avoid on-demand compression speeding up performance over low bandwidth connections</dd> 
+</dl>
 
 <p>Next, view the section in the <a href="https://github.com/deanhiller/webpieces">README on github</a> on 
 Eclipse Setup or Intellij Setup.</p>
+
+<p>There is built in documentation at http://localhost:8080/@documentation when running the development server.  The production
+server above does not have this so you will want to run the development server in intellij or eclipse.  This is because the
+documentation plugin is only installed on the development server.  You could install it on the production server if you
+really wanted to(and just make sure to uninstall from the dev server so there is not a conflict of both installing the same
+plugin)</p>
+
+<h2>Your first RouteModule</h2>
+
+<p>Now, that you have the beginnings of a webpieces webapp, lets add a new RouteModule.  In the project
+myhelloworold-all/myhelloworld create a package org.webpieces.helloworld.myapp
+    where we will put all the helloworld code.  In that package, create a RouteId file called MyRouteId.java like so</p>
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import org.webpieces.router.api.routing.RouteId;
+
+public enum MyMainRouteId implements RouteId {
+    HELLO_WORLD
+}</code>
+</pre>
+
+<p>This is where we will put all the RouteIds for this package and for this RouteModule.  Notice that the enum must extend
+    RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
+RouteModule called MyMainRoutes with a single route to our new webpage</p>
+
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routing.AbstractRoutes;
+
+public class MyMainRoutes extends AbstractRoutes {
+    @Override
+    protected void configure() {
+        addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+    }
+}</code>
+</pre>
+
+<p>Here, we are saying when the browser calls any of these urls that end up on our server, webpieces will invoke
+MyMainController.helloWorld</p>
+
+<ol>
+    <li>http://localhost:8080/helloworld</li>
+    <li>https://localhost:8080/helloworld</li>
+    <li>http://anydomain.com/helloworld  #As long as your DNS is setup properly and we receive the request</li>
+</ol>
+
+<p>Basically, domains are ignored by default though you can match on domain(see the Routes Reference for more info).
+Now that we defined a route and a Controller and method to invoke, we should create the Controller</p>
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import javax.inject.Singleton;
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.actions.Actions;
+
+@Singleton
+public class MyMainController {
+    public Action helloWorld() {
+        return Actions.renderThis();
+    }
+}</code>
+</pre>
+
+<p>Lastly, Actions.renderThis() informs webpieces to render the html file with the same name as the method helloWorld so
+next create a file called helloWorld.html in the same directory as the Controller</p>
+
+<pre>
+<code><html>
+    <head></head>
+    <body>
+        Hello World
+    </body>
+</html></code>
+</pre>
+
+<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
+MyHelloWorldMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
+getRouteModules method should look like so</p>
+
+<pre>
+<code>@Override
+public List<Routes> getRouteModules() {
+    return Lists.newArrayList(
+    new AppRoutes(),
+    new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
+    new CrudRoutes(),
+    new AjaxCrudRoutes(),
+    new JsonRoutes(),
+    new MyMainRoutes()
+    );
+}</code>
+</pre>
+
+<p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
+they are all examples.  While LoginRoutes is an example as well, you most likely want a way to login so you would keep
+the LoginRoutes module</p>
+
+<p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
+or go to https://localhost:8443/helloworld</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*{
 
 <h2>A Walkthrough of the generated Server.java</h2>
 
@@ -116,13 +282,5 @@ application with it's own guice modules, route modules, controllers, and html pa
 full webapplications into your webapplication.  It's what we use for all the backend plugins that could be removed
 if you desire a really thin lightweight server</p>  
 
-<p>Guice modules are where you tell guice wha</p>
-
-
-
-
-
-
-
-
+}*
 

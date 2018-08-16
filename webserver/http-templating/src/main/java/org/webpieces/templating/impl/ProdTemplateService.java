@@ -40,6 +40,7 @@ public class ProdTemplateService implements TemplateService {
 	}
 	
 	protected final Template loadTemplate(String templatePath) {
+		
 		if(!templatePath.startsWith("/"))
 			throw new IllegalArgumentException("templatePath must start with / and be absolute reference from base of classpath");
 		else if(templatePath.contains("_"))
@@ -50,18 +51,18 @@ public class ProdTemplateService implements TemplateService {
 			isInitialized = true;
 		}
 		
-		String fullClassName = TemplateUtil.convertTemplatePathToClass(templatePath);
-		return loadTemplate(templatePath, fullClassName);
-	}
-	
-	protected Template loadTemplate(String fullTemplatePath, String fullClassName) {
-		ClassLoader cl = getClass().getClassLoader();
 		try {
-			Class<?> compiledTemplate = cl.loadClass(fullClassName);
-			return new TemplateImpl(urlLookup, lookup, compiledTemplate);
+			String fullClassName = TemplateUtil.convertTemplatePathToClass(templatePath);
+			return loadTemplate(templatePath, fullClassName);
 		} catch(ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	protected Template loadTemplate(String fullTemplatePath, String fullClassName) throws ClassNotFoundException {
+		ClassLoader cl = getClass().getClassLoader();
+		Class<?> compiledTemplate = cl.loadClass(fullClassName);
+		return new TemplateImpl(urlLookup, lookup, compiledTemplate);
 	}
 
 	protected final void runTemplate(Template template, StringWriter out, Map<String, Object> pageArgs) {
