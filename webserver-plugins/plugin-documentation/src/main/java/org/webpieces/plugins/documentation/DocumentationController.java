@@ -41,6 +41,14 @@ public class DocumentationController {
 	public Render quickStart() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
+
+	public Render quickStart2() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
+	public Render quickStart3() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
 	
 	public Render randomFeatures() {
 		return Actions.renderThis("menu", menuCreator.getMenu());

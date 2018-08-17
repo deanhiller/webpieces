@@ -1,6 +1,7 @@
 package org.webpieces.plugins.hibernate;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -10,6 +11,8 @@ import javax.persistence.EntityTransaction;
 
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.dto.MethodMeta;
+import org.webpieces.router.api.exceptions.HttpException;
+import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -49,14 +52,17 @@ public class TransactionFilter extends RouteFilter<Void> {
 		}
 	}
 
-	private Action commitOrRollback(EntityManager em, Action action, Throwable t) {
+	private Action commitOrRollback(EntityManager em, Action action, Throwable t) throws HttpException {
 		EntityTransaction tx = em.getTransaction();
 		
 		if(t != null) {
 			log.info("Transaction being rolled back");
 			rollbackTx(t, tx);
 			closeEm(t, em);
-			throw new RuntimeException(t);
+			if(t instanceof HttpException)
+				throw (HttpException)t;
+			else
+				throw new RuntimeException(t);
 		}
 		
 		log.info("Transaction being committed");

@@ -1,8 +1,6 @@
 package org.webpieces.router.api.exceptions;
 
-import java.util.concurrent.CompletionException;
-
-public class NotFoundException extends CompletionException {
+public class NotFoundException extends HttpException {
 
 	private static final long serialVersionUID = 7804145831639203745L;
 

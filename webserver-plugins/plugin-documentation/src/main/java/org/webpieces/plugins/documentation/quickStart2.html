@@ -1,0 +1,96 @@
+#{extends '../backend/main.html'/}#
+#{set title:'Dynamic Hello World'/}#
+#{set tab:'management'/}#
+
+<ol>
+    <li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
+    <li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
+    <li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
+</ol>
+
+<h1>Dynamic Hello World</h1>
+
+<h2>Dynamic Route</h2>
+
+<p>Next, let's add DYNAMIC_HELLO_WORLD as a new RouteId to MyMainRouteId like so </p>
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import org.webpieces.router.api.routing.RouteId;
+
+public enum MyMainRouteId implements RouteId {
+	HELLO_WORLD, DYNAMIC_HELLO_WORLD
+}</code>
+</pre>
+
+<p>Next, let's create our first dynamic route that will capture the {name} that is typed in the url.  Modify MyMainRoutes
+to look like so</p>
+
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routing.AbstractRoutes;
+
+public class MyMainRoutes extends AbstractRoutes {
+	@Override
+	protected void configure() {
+		addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+		addRoute(HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+
+	}
+}</code>
+</pre>
+
+<p>This new route will match urls like http://localhost/helloworld/dean/123 and http://localhost/helloworld/declan/765
+and will capture the name that is typed in to be stored in the name variable. It will store the id in the id variable.
+Next, let's add the dynamicHelloWorld method which accepts the name and id variables(The variables MUST be named
+'name' and 'id' matching the route such that we can do many dynamic matches in the url.
+The resulting Controller file is then</p>
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import javax.inject.Singleton;
+
+import org.webpieces.router.api.actions.Action;
+import org.webpieces.router.api.actions.Actions;
+
+@Singleton
+public class MyMainController {
+	public Action helloWorld() {
+		return Actions.renderThis();
+	}
+
+	public Action dynamicHelloWorld(String name, int id) {
+		return Actions.renderThis(
+				"name", name,
+				"id", id);
+	}
+}</code>
+</pre>
+
+<p>Finally, let's add the html file with the same name as the method dynamichHelloWorld.html but this time, let's
+insert ${name}$ and ${id}$ so we echo back what was entered into the url</p>
+
+<pre>
+<code>&lt;html&gt;
+    &lt;head&gt;&lt;/head&gt;
+    &lt;body&gt;
+        Hello ${name}$.  Your id is ${id}$
+    &lt;/body&gt;
+&lt;/html&gt;</code>
+</pre>
+
+<p>NOTE: This can be a bit of a security hole since someone could put lots of html and javascript into the name variable
+so be careful on how you handle these situations.  We will show you later that most of the time, we can handle this for
+you</p>
+
+<p>Hopefully your DevelopmentServer is still running in which case you can now go to your new route
+http://localhost:8080/helloworld/dean/892 or http://localhost:8080/helloworld/catalina/444 or any name you like</p>
+
+<p>Congratulations on your first 'dynamic' webpieces page, next we will make our app a bit more persistent so
+that we save stuff to a database</p>
+

@@ -24,6 +24,9 @@ public class DocumentationRoutes extends ScopedRoutes {
 		addRoute(HttpMethod.GET, "/templates", "DocumentationController.templates", DocumentationRouteId.TEMPLATES);
 		addRoute(HttpMethod.GET, "/design", "DocumentationController.design", DocumentationRouteId.DESIGN);
 		addRoute(HttpMethod.GET, "/quickstart", "DocumentationController.quickStart", DocumentationRouteId.QUICK_START);
+		addRoute(HttpMethod.GET, "/quickstart2", "DocumentationController.quickStart2", DocumentationRouteId.QUICK_START2);
+		addRoute(HttpMethod.GET, "/quickstart3", "DocumentationController.quickStart3", DocumentationRouteId.QUICK_START3);
+
 		addRoute(HttpMethod.GET, "/randomfeatures", "DocumentationController.randomFeatures", DocumentationRouteId.RANDOM_FEATURES);
 		
 		//Because the html hardcode the url path here, we must use baseRouter and avoid whatever path
