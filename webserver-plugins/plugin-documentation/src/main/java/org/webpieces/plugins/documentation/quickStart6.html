@@ -13,99 +13,9 @@
     <li><a href="@[QUICK_START7]@">&{ 'Helloworld Tag', 'helloworldTag'}&</a>
 </ol>
 
-<h1>Creating the Project</h1>
+<h2>Your first Hibernate entity</h2>
 
-<h2>Introduction</h2>
-
-<p>A very simple tutorial, that will just help you to learn the Webpieces library 
-with the famous ‘Hello World’ example.</p>
-
-<p>We have split the tutorial into several parts.  Each part will introduce more complex features, and provide
-everything that a real project needs: validation, error handling, an automated test suite.</p>
-
-<h2>Prerequisites</h2>
-
-<p>Webpieces requires that you have a working installation of jdk9.  We do not require intellij or eclipse
-but highly recommend one of those as your editors.</p>  
-
-<p>We will assume you already have knowledge of Java and Web development(especially HTML, CSS).  However,
-you don't need to have any knowledge of JEE components except a little knowledge in JPA can help.  Webpieces
-is a 'full stack' Java framework.</p>  
-
-<p>A solid understanding of one of these two things can help</p>
-
-<ul>
-    <li>Guice</li>
-    <li>@javax.inject annotations</li>
-</ul>
-
-<h2>Installing Webpieces</h2>
-
-<p>Hah!!!  Since Webpieces webserver is a library, there is no installation as you just depend on it like
-a normal maven artifact!  However, because we don't want everyone that uses webpieces to have to create
-all the build files that builds a production server, we supply a createProject script that can be run.  It generates
-a project with gradle build files that work out of the box along with a main Server class that you can
-modify to your heart's desire.  Obviously, you could completely swap out the build system if you desire.  I will 
-warn you however though, some systems like maven are rigid and you may start pulling your hair out</p>
-
-<p>To start, download the zip that can create a shell project for you that uses the webpieces library following
-these steps</p>
-
-<ol>
-    <li>Download the release(https://github.com/deanhiller/webpieces/releases)</li>
-    <li>unzip the file you downloaded</li>
-    <li>run ./createProject.sh</li>
-    <li>For the camel case app name, enter 'MyHelloWorld'</li>
-    <li>For the package, enter org.webpieces.helloworld</li>
-    <li>For the directory, enter '..'</li>
-    <li>cd ../myhelloworld-all</li>
-    <li>./gradlew build</li>
-</ol>
-
-<p> At this point, your build should have been successful and all tests are passing as we provide some example tests.
-Next, we want to create a production release in the form of a zip file with the logging config, html files, and jar files.</p>
-
-<ol>    
-    <li>./gradlew assembleDist #creates the actual webserver distribution zip and tar files</li>
-    <li>cd myhelloworld-all/myhelloworld/output/distributions/</li>
-    <li>unzip myhelloworld.zip which is your whole webserver</li>
-    <li>./bin/{project} to start the production webserver</li>
-    <li>In a browser go to http://localhost:8080</li>
-</ol>
-
-<p>Here, you will hit the main webpieces webpage with examples that you can click through and use tweak/copy, etc.  Eventually,
-you will just delete all the example code.  Next, when you unzipped the zip file, you may have seen 4 directories.  
-Now, if you look there are 6 directories which are</p>
-
-<dl>
-    <dt>bin</dt>
-    <dd>Where your startup scripts are located(we created these for you but you own main so you can create new ones)</dd>
-    <dt>config</dt>
-    <dd>Where any config files reside, currently only the logback.xml for logging config exists here</dd>
-    <dt>lib</dt>
-    <dd>All jar files exist here</dd>
-    <dt>logs</dt>
-    <dd>The generated directory where all log files will be put from logback unless you reconfigure logback.xml</dd>
-    <dt>public</dt>
-    <dd>The location for all *.jpg, *.css, *.js and all static resources</dd>
-    <dt>webpiecesCache</dt>
-    <dd>Webpieces pre-compresses text resources on startup to send to browsers to avoid on-demand compression speeding up performance over low bandwidth connections</dd> 
-</dl>
-
-<p>Next, view the section in the <a href="https://github.com/deanhiller/webpieces">README on github</a> on 
-Eclipse Setup or Intellij Setup.</p>
-
-<p>There is built in documentation at http://localhost:8080/@documentation when running the development server.  The production
-server above does not have this so you will want to run the development server in intellij or eclipse.  This is because the
-documentation plugin is only installed on the development server.  You could install it on the production server if you
-really wanted to(and just make sure to uninstall from the dev server so there is not a conflict of both installing the same
-plugin)</p>
-
-<h2>Your first RouteModule</h2>
-
-<p>Now, that you have the beginnings of a webpieces webapp, lets add a new RouteModule.  In the project
-myhelloworold-all/myhelloworld create a package org.webpieces.helloworld.myapp
-    where we will put all the helloworld code.  In that package, create a RouteId file called MyRouteId.java like so</p>
+<p>Ideally however in a dynamic web application, we would like to let people </p>
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
@@ -118,9 +28,8 @@ public enum MyMainRouteId implements RouteId {
 </pre>
 
 <p>This is where we will put all the RouteIds for this package and for this RouteModule.  Notice that the enum must extend
-    RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
+RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
 RouteModule called MyMainRoutes with a single route to our new webpage</p>
-
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
@@ -202,7 +111,7 @@ or go to https://localhost:8443/helloworld</p>
 
 <p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
 
-<a class="btn btn-primary" href="@[QUICK_START2]@" role="button">Next Dynamic Helloworld</a>
+
 
 
 

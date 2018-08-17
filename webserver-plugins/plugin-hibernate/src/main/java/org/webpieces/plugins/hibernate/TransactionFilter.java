@@ -60,7 +60,7 @@ public class TransactionFilter extends RouteFilter<Void> {
 			rollbackTx(t, tx);
 			closeEm(t, em);
 			if(t instanceof HttpException)
-				throw (HttpException)t;
+				throw (HttpException)t; //the platform needs the original HttpException to translate to an http code
 			else
 				throw new RuntimeException(t);
 		}

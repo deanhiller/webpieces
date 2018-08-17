@@ -26,6 +26,10 @@ public class DocumentationRoutes extends ScopedRoutes {
 		addRoute(HttpMethod.GET, "/quickstart", "DocumentationController.quickStart", DocumentationRouteId.QUICK_START);
 		addRoute(HttpMethod.GET, "/quickstart2", "DocumentationController.quickStart2", DocumentationRouteId.QUICK_START2);
 		addRoute(HttpMethod.GET, "/quickstart3", "DocumentationController.quickStart3", DocumentationRouteId.QUICK_START3);
+		addRoute(HttpMethod.GET, "/quickstart4", "DocumentationController.quickStart4", DocumentationRouteId.QUICK_START4);
+		addRoute(HttpMethod.GET, "/quickstart5", "DocumentationController.quickStart5", DocumentationRouteId.QUICK_START5);
+		addRoute(HttpMethod.GET, "/quickstart6", "DocumentationController.quickStart6", DocumentationRouteId.QUICK_START6);
+		addRoute(HttpMethod.GET, "/quickstart7", "DocumentationController.quickStart7", DocumentationRouteId.QUICK_START7);
 
 		addRoute(HttpMethod.GET, "/randomfeatures", "DocumentationController.randomFeatures", DocumentationRouteId.RANDOM_FEATURES);
 		

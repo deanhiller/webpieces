@@ -3,9 +3,14 @@
 #{set tab:'management'/}#
 
 <ol>
-    <li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
-    <li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
+	<li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
+	<li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
+	<li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
+	<li><a href="@[QUICK_START3]@">&{ 'CRUD no ajax', 'crudNoAjax'}&</a>
+	<li><a href="@[QUICK_START4]@">&{ 'ajax CRUD', 'ajaxCrud'}&</a>
+	<li><a href="@[QUICK_START5]@">&{ 'Login', 'ajaxCrud'}&</a>
+	<li><a href="@[QUICK_START6]@">&{ 'Helloworld Test', 'helloworldTest'}&</a>
+	<li><a href="@[QUICK_START7]@">&{ 'Helloworld Tag', 'helloworldTag'}&</a>
 </ol>
 
 <h1>Dynamic Hello World</h1>
@@ -45,10 +50,9 @@ public class MyMainRoutes extends AbstractRoutes {
 </pre>
 
 <p>This new route will match urls like http://localhost/helloworld/dean/123 and http://localhost/helloworld/declan/765
-and will capture the name that is typed in to be stored in the name variable. It will store the id in the id variable.
-Next, let's add the dynamicHelloWorld method which accepts the name and id variables(The variables MUST be named
-'name' and 'id' matching the route such that we can do many dynamic matches in the url.
-The resulting Controller file is then</p>
+and will capture the name and id that is typed in to be stored in the name and id variables.
+Next, let's add the dynamicHelloWorld method which accepts the name and id variables.  However in this case, we will
+require the id to be an int.  The resulting Controller file is then</p>
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
@@ -72,14 +76,16 @@ public class MyMainController {
 }</code>
 </pre>
 
-<p>Finally, let's add the html file with the same name as the method dynamichHelloWorld.html but this time, let's
-insert ${name}$ and ${id}$ so we echo back what was entered into the url</p>
+<p>This means if someone types in the url http://localhost:8080/helloworld/dean/mary, they will get a 404 NOT_FOUND
+since there will be no page there because mary is not an integer.  Finally, let's add the html file with the same
+name as the method dynamichHelloWorld.html but this time, let's insert $ {name}$ and $ {id}$ so we echo back
+what was entered into the url</p>
 
 <pre>
 <code>&lt;html&gt;
     &lt;head&gt;&lt;/head&gt;
     &lt;body&gt;
-        Hello ${name}$.  Your id is ${id}$
+        Hello $ {name}$.  Your id is $ {id}$
     &lt;/body&gt;
 &lt;/html&gt;</code>
 </pre>
@@ -93,4 +99,6 @@ http://localhost:8080/helloworld/dean/892 or http://localhost:8080/helloworld/ca
 
 <p>Congratulations on your first 'dynamic' webpieces page, next we will make our app a bit more persistent so
 that we save stuff to a database</p>
+
+<a class="btn btn-primary" href="@[QUICK_START3]@" role="button">Next Persistent Helloworld</a>
 
