@@ -181,20 +181,20 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 </html>]*</code>
 </pre>
 
-<p>Ok, so there is a lot going on here that we need to explain.  The first tag #{form}# will generate the form html
+<p>*[Ok, so there is a lot going on here that we need to explain.  The first tag #{form}# will generate the form html
 for you with the correct url.  Any params like class and style are converted as well into the final form html element.
 	The *{ }* is how you 'always' should comment in templates.  Rather than use html commenting style, using *{ }*
 	will prevent tags from running in your html.  An html comment will not do this.  Then there is a hidden input
 	which will have the id of the element if it is being edited.  This allows us to re-use the same html and java
 	controller code for adds and edits(quite nice).  Next, we have the #{field}# tags which do a ton of work under the
 	covers so you can style every field in every location of your application consistently with where the error for
-	that field goes, tooltip help and even i18n stuff.  Lastly, the #{field} tag also helps with not blowing away
+	that field goes, tooltip help and even i18n stuff.  Lastly, the #{field}# tag also helps with not blowing away
 	what the user typed in when the page refreshes due to errors so you don't do extra work for that either.
 	Now that this is all setup, as long as you did not stop your development server, go to
 	http://localhost:8080/car/new and you should see a small form on the page with
 	a save button that will not work and will return a 5XX when you click it.  If you stopped your development
 	server however, it will not startup since there is a route with a method that does not exist.  Either way,
-	we need to fix the POST of the Car so let's do that next.  Add the following method to the controller
+	we need to fix the POST of the Car so let's do that next.  Add the following method to the controller]*
 </p>
 
 <pre>
