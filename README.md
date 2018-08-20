@@ -6,6 +6,20 @@
 Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
 [![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
 
+This 23 minute video barely scratches the surface but demonstrates
+* Download zip and create first project
+* run test suite
+* start up the production server
+* importing into intellij
+* starting up the DevelopmentServer
+* CRUD operations, errors, persistence
+* development server only in-memory database GUI at http://localhost:8080/@db
+* development server only in-memory documentation at http://localhost:8080/@documentation
+
+[Webpieces YouTube QuickStart](https://youtu.be/4FtdAX_wKD0)
+
+One thing to note in the video is I was caught off guard by a minor bug(that is easily worked around) and had to restart the DevelopmentServer as for some reason, the hibernate rescan of entities and table creations did not work.  We may have that fixed by the time you watch the video(hopefully)
+
 #### A few key selling points( More advantages in another section below as well)
 * Contains a Backend Plugin which BackendPlugins plug into exposing new html pages, controllers, startup code all for that plugin
   * One example is the InstallCert plugin which allows you to manage the https cert and one click install
