@@ -18,6 +18,13 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
  * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$
+* add test for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation
+* add test for @[..]@ and add links from documentation
+* add test for %{..}% to set var and %{..}% to print var to verify it is there so groovy implant is working
+
+
+
 * implement https://vladmihalcea.com/how-to-bootstrap-hibernate-without-the-persistence-xml-file/ to get rid of hacks on gradle AND it's just better to control it
 * tie together BufferPool max size, http1.1 max size, http2 max local size, channelmanager backpressure (size*10 (and for ssl*1.2))
 * tests, tests, tests

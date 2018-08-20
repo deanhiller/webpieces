@@ -2,7 +2,358 @@
 #{set title:'Templates'/}#
 #{set tab:'management'/}#
 
-Hi there
+<ol>
+    <li><a href="#tokens">Tokens</a>
+        <ol>
+            <li><a href="#expressions">Expressions *[${...}$]*</a></li>
+            <li><a href="#tagToken">Tags and HtmlGen *[#{...}#]*</a></li>
+            <li><a href="#routes">Routes *[@[...]@ and @@[...]@@]*</a></li>
+            <li><a href="#comments">Comments *[*{...}*]*</a></li>
+            <li><a href="#escaping">Escaping *[*[...] *]*</a></li>
+            <li><a href="#scripts">Script *[%{...}%]*</a></li>
+            <li><a href="#fileverify">File Verify *[%[...]%]*</a></li>
+            <li><a href="#i18n">i18n *[&{...}&]*</a></li>
+        </ol>
+    </li>
+    <li><a href="#tags">Tags</a>
+        <ol>
+            <li><a href="#extends">Extends: *[#{extends/}# and #{get}# #{set}#]*</a></li>
+            <li><a href="#getset">Get/Set: *[#{get}# #{set}#]*</a></li>
+            <li><a href="#form">Form: *[#{form}#]*</a></li>
+            <li><a href="#stylesheet">Stylesheet: *[#{stylesheet}#]*</a></li>
+            <li><a href="#script">Script: *[#{script}#]*</a></li>
+            <li><a href="#bootstrapModal">Bootstrap Modal: *[#{bootstrapModal}#]*</a></li>
+            <li><a href="#field">Field: *[#{field}#]*</a></li>
+            <li><a href="#option">Option: *[#{option}#]*</a></li>
+            <li><a href="#renderTagArgs">RenderTagArgs: *[#{renderTagArgs}#]*</a></li>
+            <li><a href="#renderPageArgs">RenderPageArgs: *[#{renderPageArgs}#]*</a></li>
+            <li><a href="#jsAction">JsAction: *[#{jsAction}#]*</a></li>
+            <li><a href="#customTag">Your own Custom Tag</a></li>
+        </ol>
+    </li>
+    <li><a href="#htmlGen">HtmlGen</a>
+        <ol>
+            <li><a href="#if">If *[#{if}#]*</a></li>
+            <li><a href="#else">Else *[#{else}#]*</a></li>
+            <li><a href="#elseif">ElseIf *[#{elseif}#]*</a></li>
+            <li><a href="#list">List *[#{list}#]*</a></li>
+            <li><a href="#htmlEscape">HtmlEscapingOff *[#{htmlEscapingOff}#]*</a></li>
+            <li><a href="#tagGen">TagGen.java</a></li>
+        </ol>
+    </li>
+</ol>
 
+<h1>Templating</h1>
+
+<p>Webpieces has an efficient templating system which allows to dynamically generate HTML formatted document.
+    The template engine uses Groovy as an expression language. A tag system allows you to create reusable
+    pieces of a webpage.</p>
+
+<p>Templates are stored along-side their respective Controllers for rapid development and switching
+    between view and Controller.</p>
+
+<p>A template file is a text file, some parts of which have placeholders for dynamically generated content.
+    The template’s dynamic elements are written using the Groovy language. Groovy’s syntax is very close to Java’s.</p>
+
+<p>Dynamic elements are resolved during template execution. The rendered result is then sent as part of
+    the HTTP response.</p>
+
+<p>Let me give you a little more detail here though.  The process for template to *.class file is this</p>
+<ol>
+    <li>Parse template
+        <ol>
+            <li>Most content is a simple groovy out.println(htmlContent);</li>
+            <li>All the Template Tokens output 'special' groovy code</li>
+        </ol>
+    </li>
+    <li>Ok, we have an *.groovy script and every line has a comment with the html line number</li>
+    <li>Next, compile the groovy script into a java *.class file so we run FAST</li>
+    <li>In production, we run the *.class file</li>
+    <li>In development, we rerun the whole process so you always see the latest changes</li>
+</ol>
+
+<p>I purposely divide the templating document into tokens, tags, and then HtmlGen as that is how webpieces is designed
+giving you just a little insight into the design can be very powerful</p>
+
+<p>Lastly, we do something called <a href="https://blog.twitter.com/engineering/en_us/topics/insights/2017/the-testing-renaissance.html">
+Feature Testing</a> giving you example after example on a full server which is located in 
+<a href="https://github.com/deanhiller/webpieces/tree/master/webserver/http-webserver/src/test/java/org/webpieces/webserver">
+these Feature testing directories</a>.  Throughout this page, we will link to specific relevant examples in github</p>
+
+<h2 id="tokens">Tokens</h2>
+
+<p>The first phase of processing before groovy enters the picture is processing based on special tokens.  The complete
+Token list is found in a file called TemplateToken.java.  Don't be shy damnit, 
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-templating-dev/src/main/java/org/webpieces/templatingdev/impl/source/TemplateToken.java">
+check that shit out</a>.  Damn I am funny(and a bit buzzed while writing this).  Btw, for you guys who think
+documents should all be formal, get off your damn high horse!  Make shit fun man and make people smile.
+We have way way too much formal documentation in this world that is boring as hell to read</p>
+
+<h3 id="expressions">Expressions: *[${...}$]*</h3>
+
+<p>The simplest way to make a dynamic element is to declare an expression. The syntax
+    used here is *[${...}$]*. The result of evaluating the expression is inserted in place of the expression.</p>
+
+<p>For example:</p>
+
+<pre>
+<code>*[<h1>Client ${client.name}</h1>]*</code>
+</pre>
+
+<p>If you can’t be sure of client being null, there is a Groovy shortcut:</p>
+
+<pre>
+<code>*[<h1>Client ${client?.name}</h1>]*</code>
+</pre>
+
+<p>Which will only display the client name if the client is not null.  Well shucks, we only have tests
+indirectly testing this.  We need to add a basic feature test for just this.  Adding to the todo list.</p>
+
+<h3 id="tagToken">Tags and HtmlGen *[#{...}#]*</h3>
+
+<p>Webpieces comes with many built in Tags and many built in HtmlGenerators(HtmlGen.java) which are more complex 
+generators.  The built-in ones will be discussed in the <a href="#tags">Tags</a> and <a href="#htmlGen">HtmlGen</a>
+sections of this page.  See those sections to learn to use this token further with the tags that can be used.  Also,
+all the feature tests for different tags and html gen which use these tokens will be linked there</p>
+
+<h3 id="routes">Routes *[@[...]@ and @@[...]@@]*</h3>
+
+<p>Rather than typing something like this in your html in many many locations:</p>
+
+<pre>
+<code>*[<a href="/link/to/other/location/in/my/app">Basic Hello World</a>]*</code>
+</pre>
+
+<p>It is preferable to use the RouteID so the url above is located only in 1 single spot in your entire application.
+This allows you to change the url in one place and it changes everywhere that you write the following html in:</p>
+
+<pre>
+<code>*[<a href="@[SOME_ROUTE_ID]@">Basic Hello World</a>]*</code>
+</pre>
+
+<p>Some routes may have parameters in the RouteModule like /edit/car/{id} and in this case, the *[@[...]@]* template
+token can accept parameters like so</p>
+
+<pre>
+<code>*[<a href="@[EDIT_CAR_ROUTE_ID, id:entity.id]@">Edit Car with id=${entity.id}$</a>]*</code>
+</pre>
+
+<p>This template token is not restricted to links and can be used anywhere in the html such as javascript, forms
+and other locations</p>
+
+<p>Lastly, the *[@@[...]@@]* is reserved for now and eventually will reverse the route id to the absolute url
+instead of the relative url.  More on routes can be found in the 
+<a href="@[ROUTES]@">&{ 'Routes Reference', 'routesReference'}&</a>
+</p>
+
+<p>Feature test example code can be found here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/aHrefTag.html">Html File</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestAHrefTag.java">Test File</a></li>
+</ol>
+
+<h3 id="comments">Comments *[*{...}*]*</h3>
+
+<p>In the case of html commenting like this</p>
+
+<pre>
+<code>*[<!-- #{field something}# -->]*</code>
+</pre>
+
+<p>The field tag will run and if expensive, it would slow your page down.  Instead you can use the comment
+template tokens and any tags inside the comment will not run</p>
+
+<pre>
+<code>*[*{ This field will not run and all html is ignored too = #{field something}# }*]*</code>
+</pre>
+
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/htmlEscapingOffTag.html">The html fed into the test</a>
+and <a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestEscapeTypeTags.java">the test itself can be used to further understand</a>
+
+<h3 id="escaping">Escaping *[*[...] *]*</h3>
+
+<p>In some cases, you may want to create documentation using webpieces and you may even want to document
+how awesome webpieces is and copy/paste template code.  I don't know about you, but I don't want to be
+typing &gt; and &lt; and I also don't want my webpieces tags to actually run.  So, as an example, if
+I type this code up and pass in 'Dean' for the name variable:</p>
+
+<pre>
+<code>*[<html>
+    <head></head>
+    <body>
+        <h1>Hello ${name}$</h1>
+        
+        *[<h2>Some example with ${name}$</h2>]*]**[
+    </body>
+</html>]*</code>
+</pre>
+
+<p>The following html will be sent back to the browser:</p>
+
+<pre>
+<code>*[<html>
+    <head></head>
+    <body>
+        <h1>Hello Dean</h1>
+        
+        &lt;h2&gt;Some example with ${name}$&lt;/h2&gt;
+    </body>
+</html>]*</code>
+</pre>
+
+<p>So the end user instead of seeing an h2 title will see the html text snippet this way(and the webpieces one too) as:</p>
+
+<pre><code>*[<h2>Some example with ${name}$</h2>]*</code></pre>
+
+<p>There is one slight annoyance no one has fixed yet.  You can't print ]* in this escape sequence so instead the workaround is
+to split into two sets of escapes firstSetOfEscapes]*secondSetOfEscapes.  We do this above in this templates.html file to 
+display correctly the documentation</p>
+
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/htmlEscapingOffTag.html">The html fed into the test</a>
+and <a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestEscapeTypeTags.java">the test itself can be used to further understand</a>
+
+<h3 id="scripts">Script *[%{...}%]*</h3>
+
+<p>Okay, so, this is a LAST resort.  Let me repeat that for effect.  THIS IS A LAST RESORT!!  (ie. skip this section damnit!!!)
+Ok, so you are still here.  Oh well, curiosity killed the cat just so you know.  Please, please talk to your colleagues for
+other possible methods before using this one or hell, send me an email.  Ok, so a template is parsed and groovy code is 
+generated using certain logic depending on each template token.  This token is special as it literally just inserts whatever groovy code
+you type inline into the template.  Now, remember, groovy is serial(just like java) so you could add a script up top setting a variable and
+add a script down below reading that variable.  This is too powerful, never should really be used backdoor!  Why did I add
+this?  Well, I trust you to do the right thing and in some cases, well, we need a backdoor to quickly fix some customer butt-ass 
+issue.  This is that back door.  Ok, end of story and onto the next 'amaaaaaazing' template token, lol, I crack myself up.</p>
+
+<p>hmmm, I haven't cared enough to directly test this yet, but manually did.  Adding to my todo to add a feature test for this token</p>
+
+<h3 id="fileverify">File Verify *[%[...]%]*</h3>
+
+<p>Ok, so I find it very annoying when I add the following code to an html file and the build doesn't break:</p>
+
+<pre><code>*[<img src="/org/webpieces/plugins/documentation/resubmit_chrome.png"/>]*</code></pre>
+
+<p>Why you ask?  I am glad you asked because 1 year later I find out that some page is broken because that *.png
+file doesn't even exist.  So, we added a checker that will break your build if it doesn't exist.  Kick-ass you
+say....yeah, I thought so too so here it is</p>
+
+
+<pre><code>*[<img src="%[/org/webpieces/plugins/documentation/resubmit_chrome.png]%"/>]*</code></pre>
+
+<p>Now, if this png file doesn't exist anymore, your build breaks and you can actually fix your app instead
+of letting your customers experience crap.   Man, We're good.  Oh, wait, I forgot to mention, this also works
+inside the script tag(or other tags) as well like so</p>
+
+<pre><code>*[#{stylesheet href:'%[/assets/crud/css/blogpost.css]%', media:'screen'/}#]*</code></pre>
+
+<p>Oh wait, you haven't looked at the stylesheet tag yet.  Man you are missing out, speed up</p>
+
+<h3 id="i18n">i18n *[&{...}&]*</h3>
+
+<p>Creating an app in more than one language is a big pain no matter how you solve it.  In html, to create
+a label or text that can vary the language, you use this template token with the default text as well as
+a key that will be looked up for the language like so</p>
+
+<pre><code>*[&{ 'Basic Hello World', 'helloworld'}&]*</code></pre>
+
+<p>A full example can be found in our feature test which tests our entire server works end to end with i18n
+at <a href="https://github.com/deanhiller/webpieces/tree/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/i18n">
+The Full TestI18N Example
+</a>
+
+<h2 id="tags">Tags</h2>
+
+<p>Tags are looked up via a TagLookup.java class in webpieces.  Of course, every piece of webpieces is swappable so when you created your
+first project, we installed a module that overrides the default webpieces TagLookup.java class with 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/tags/TagLookupOverride.java">
+TagLookupOverride</a> which binds in 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/tags/MyHtmlTagLookup.java">MyHtmlTagLookup.java</a>
+so as you can see, you can add as many custom tags as you like in webpieces.  Of course, I really want the build to fail if you have files that 
+use a tag that doesn't exist so any tag you create, you must also modify the build file plugin to tell it about the 'customTags' in 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/build.gradle">build.gradle</a>.  Just search for 'customTags'
+and add to that array so that we can verify your templates are all good to release to production and your code is #beast.</p>
+
+<p>Now, instead of making you create huge amounts of tags, we created quite a few built in tags so let's dig deeper into them
+and into the examples</p>
+
+<h2 id="extends">Extends: *[#{extends/}# and #{get}# #{set}#]*</h2>
+
+<p>Decorators provide a clean solution to share a page layout (or design) across several templates.</p>
+
+<p>*[Use #{set} in the base template to set content into the layour and use #{get} to read that content in the
+    super-template to fetch the content]*</p>
+
+<p>Embedding a page in a decorator is the matter of a one liner along with setting the content
+with *[#{set}#]* tags.  You will have many files like the following one with different content</p>
+
+<pre>
+<code>*[#{extends 'simpledesign.html' /}
+
+#{set title:'A decorated page' /}
+#{set 'bigpiece'}
+    <h3>Large Content</h3>
+    <p>This content is set into bigpiece variable to be fetched with #{get 'bigpiece'}#</p>
+#{/set}
+
+
+<p>This content is automatically stored in 'body' so use #{get body/}# in supertemplate to fetch this</p>]*</code>
+</pre>
+
+<p></p>Then, you will generally have one layout template like so:</p>
+
+<pre>
+<code>*[<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>#{get 'title'/}#</title>
+    #{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}#
+</head>
+<body>
+<h1>#{get 'title' /}#</h1>
+#{get 'body'/}#
+<div class="footer">Built with the play! framework</div>
+#{get 'bigpiece'/}#
+</body>
+</html>]*</code>
+</pre>
+
+<p>A supertemplate can extend another supertemplate such that you can have a logged in template that then extends a
+logged out template for example where the logged in one has submenus. Some of the test files testing this feature are</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestExtends.java">TestExtends</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/extendsTag.html">Base html file</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/submain.html">SuperTemplate extending yet another Template</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/main.html">Top Level SuperTemplate</a></li>    
+</ol> 
+
+<h2 id="getset">Get/Set: *[#{get}# #{set}#]*</h2>
+
+<p>Get and Set tags deserve their own section and detail.  You may have a get tag that is optional so someone extending a template does not
+have to fill it in.  To make the get optional and fill in with a default, you can do this</p>
+
+<pre><code>*[#{get key:'notexistkey', failfast:false}#COOL#{/get}#]*</code></pre>
+
+<p>In this case, if notexistkey is not set, then 'COOL' will be displayed.  You may set html in a set method like so and it is escaped by default
+making life grand</p>
+
+<pre><code>*[#{set html:'<a href=""/>'/}# ]*</code></pre>
+
+<p>Or you may decide you do not want the html escaped</p>
+
+<pre><code>*[#{set html:'<h2>Title2</h2>', escaped:false/}#]*</code></pre>
+
+<p>The set body defaults the other way since it is generally what you want so this html is 'not' escapted</p>
+
+<pre><code>*[#{set 'htmlbody'}#<h1 class="">Some Header</h1>#{/set}#]*</code></pre>
+
+<p>So, if you happen to want to type html and want us to escape it for you, set the escaped attribute to true</p>
+
+<pre><code>*[#{set 'htmlbody2', escaped:true}#<h3 class="">Header3</h1>#{/set}#]*</code></pre>
+
+<p>These examples are simply copied from our get/set test here</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestGetSetTags.java">TestGetSetTags.java</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/getTag.html">Html File</a></li>
+</ol>
 
 

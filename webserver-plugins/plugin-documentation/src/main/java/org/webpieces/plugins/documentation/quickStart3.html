@@ -23,8 +23,6 @@ our first hibernate entity bean</p>
 <pre>
 <code>package org.webpieces.helloworld.myapp;
 
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -33,6 +31,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -46,7 +45,7 @@ import javax.persistence.Table;
 @NamedQueries({
 	//For more info on the query language, see the hibernate HQL (Hibernate Query Language)
 	//for details
-	@NamedQuery(name = "findAllCars", query = "select u from CarDbo as u"),
+	@NamedQuery(name = "findByName", query = "select u from CarDbo as u where u.name = :name"),
 })
 public class CarDbo {
 
@@ -60,10 +59,10 @@ public class CarDbo {
 	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="car_id_gen")
 	private Integer id; //You almost always want to use Integer over int and Long over long so it can be null so you can tell if it has been persisted
 
-	private String name;
-
 	//Use @Column to further define the column like forcing it to be unique
 	@Column(unique = true)
+	private String name;
+
 	private String style;
 
 	public Integer getId() {
@@ -90,18 +89,34 @@ public class CarDbo {
 	}
 
     //This method re-uses the @NamedQuery we defined above
-	@SuppressWarnings("unchecked")
-	public static List&lt;CarDbo&gt; findAll(EntityManager mgr) {
-		Query query = mgr.createNamedQuery("findAllCars");
-		return query.getResultList();
+	public static CarDbo findByName(EntityManager mgr, String name) {
+		Query query = mgr.createNamedQuery("findByName");
+		query.setParameter("name", name);
+		try {
+			return (CarDbo) query.getSingleResult();
+		} catch (NoResultException e) {
+			return null;
+		}
 	}
 }
 </code>
 </pre>
 
-<p>This is where we will put all the RouteIds for this package and for this RouteModule.  Notice that the enum must extend
-RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
-RouteModule called MyMainRoutes with a single route to our new webpage</p>
+<p>Next, let's add our RouteIds for displaying a page to create a car, displaying a page to edit a car and
+finally for actually posting a car to the database</p>
+
+<pre>
+<code>package org.webpieces.helloworld.myapp;
+
+import org.webpieces.router.api.routing.RouteId;
+
+public enum MyMainRouteId implements RouteId {
+	HELLO_WORLD, DYNAMIC_HELLO_WORLD,
+	GET_CREATE_CAR_PAGE, GET_EDIT_CAR_PAGE, POST_CAR
+}</code>
+</pre>
+
+<p>Then, let's add our new routes for the route ids we just added</p>
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
@@ -110,77 +125,135 @@ import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.AbstractRoutes;
 
 public class MyMainRoutes extends AbstractRoutes {
-    @Override
-    protected void configure() {
-        addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-    }
+	@Override
+	protected void configure() {
+		addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+		addRoute(HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+
+		//route to render the page of creating a new user
+		addRoute(HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
+		//route to render the page of editing an existing user
+		addRoute(HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
+		//route to save a new or existing user
+		addRoute(HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
+
+	}
 }</code>
 </pre>
 
-<p>Here, we are saying when the browser calls any of these urls that end up on our server, webpieces will invoke
-MyMainController.helloWorld</p>
-
-<ol>
-    <li>http://localhost:8080/helloworld</li>
-    <li>https://localhost:8080/helloworld</li>
-    <li>http://anydomain.com/helloworld  #As long as your DNS is setup properly and we receive the request</li>
-</ol>
-
-<p>Basically, domains are ignored by default though you can match on domain(see the Routes Reference for more info).
-Now that we defined a route and a Controller and method to invoke, we should create the Controller</p>
+<p>Notice that here we call carAddEdit for both creating a car and editing one.  If someone types in
+http://localhost:8080/car/new, then the name variable will equal null when calling carAddEdit method telling us it is
+a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>	public Action carAddEdit(String name) {
+		if(name == null) {
+			return Actions.renderThis("entity", new UserDbo());
+		}
 
-import javax.inject.Singleton;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-
-@Singleton
-public class MyMainController {
-    public Action helloWorld() {
-        return Actions.renderThis();
-    }
-}</code>
+		CarDbo car = CarDbo.findByName(Em.get(), name);
+		if(car == null)
+			throw new NotFoundException("car does not exist");
+		return Actions.renderThis("entity", car);
+	}</code>
 </pre>
 
-<p>Lastly, Actions.renderThis() informs webpieces to render the html file with the same name as the method helloWorld so
-next create a file called helloWorld.html in the same directory as the Controller</p>
+<p>and add a page called carAddEdit.html that will be rendered as well</p>
 
 <pre>
-<code>&lt;html&gt;
-    &lt;head&gt;&lt;/head&gt;
-    &lt;body&gt;
-        Hello World
-    &lt;/body&gt;
-&lt;/html&gt;</code>
+<code>*[<html>
+    <head></head>
+    <body>
+
+#{form action:@[POST_CAR]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
+	<h4 id="myModalLabel"> Car </h4>
+
+	*{optional in case this is the add operation and so this is used in case of edits only }*
+	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+	#{field 'entity.name',   label:'Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+   	#{field 'entity.style', label:'Style'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+
+   	<input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
+
+#{/form}#
+
+    </body>
+</html>]*</code>
 </pre>
 
-<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
-MyHelloWorldMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
-getRouteModules method should look like so</p>
+<p>Ok, so there is a lot going on here that we need to explain.  The first tag #{form}# will generate the form html
+for you with the correct url.  Any params like class and style are converted as well into the final form html element.
+	The *{ }* is how you 'always' should comment in templates.  Rather than use html commenting style, using *{ }*
+	will prevent tags from running in your html.  An html comment will not do this.  Then there is a hidden input
+	which will have the id of the element if it is being edited.  This allows us to re-use the same html and java
+	controller code for adds and edits(quite nice).  Next, we have the #{field}# tags which do a ton of work under the
+	covers so you can style every field in every location of your application consistently with where the error for
+	that field goes, tooltip help and even i18n stuff.  Lastly, the #{field} tag also helps with not blowing away
+	what the user typed in when the page refreshes due to errors so you don't do extra work for that either.
+	Now that this is all setup, as long as you did not stop your development server, go to
+	http://localhost:8080/car/new and you should see a small form on the page with
+	a save button that will not work and will return a 5XX when you click it.  If you stopped your development
+	server however, it will not startup since there is a route with a method that does not exist.  Either way,
+	we need to fix the POST of the Car so let's do that next.  Add the following method to the controller
+</p>
 
 <pre>
-<code>@Override
-public List&lt;Routes&gt; getRouteModules() {
-    return Lists.newArrayList(
-    new AppRoutes(),
-    new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
-    new CrudRoutes(),
-    new AjaxCrudRoutes(),
-    new JsonRoutes(),
-    new MyMainRoutes()
-    );
-}</code>
+<code>	public Redirect postSaveCar(CarDbo entity) {
+		if(entity.getName() == null) {
+			Current.validation().addError("entity.name", "name is required");
+		}
+
+		if(entity.getStyle() == null) {
+			Current.validation().addError("entity.style", "style is required");
+		}
+
+		//all errors are grouped and now if there are errors redirect AND fill in
+		//the form with what the user typed in along with errors
+		//we redirect so the back button always works
+		if(Current.validation().hasErrors()) {
+			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
+			redirect.setIdFieldAndValue("id", entity.getId());
+			return Actions.redirectFlashAll(
+					MyMainRouteId.GET_CREATE_CAR_PAGE, MyMainRouteId.GET_EDIT_CAR_PAGE, redirect);
+		}
+
+		Current.flash().setMessage("User successfully saved");
+		Current.flash().keep();
+
+		Em.get().merge(entity);
+        Em.get().flush();
+
+		return Actions.redirect(MyMainRouteId.HELLO_WORLD);
+	}</code>
 </pre>
 
-<p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
-they are all examples.  While LoginRoutes is an example as well, you most likely want a way to login so you would keep
-the LoginRoutes module</p>
+<p>We first validate each thing we need to and keep adding errors to each field that is wrong.  Then, we check if validation
+	hasErrors() and if it does, we redirect back to the edit or add page depending on if we are editing or adding the
+	entity.  If there are no errors, we process to call Em.get().merge(entity) will will save or update the CarDbo in
+	our database.  Em.get().flush() ensures all changes are persisted such that you can call persist, delete and then at
+	the end if you discover some sort of validation went wrong, don't flush and none of it will be saved.</p>
 
-<p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
-or go to https://localhost:8443/helloworld</p>
+<p>Follow these next steps exactly so we can demonstrate some real power of details.  To test out validation,
+type in http://localhost8080/car/new and do NOT type anything in and hit save.  Errors
+now popup.  Next, type in 's' and 't' in each field and save.  Different Errors popup. Next, enter 'ferrari' for the
+name, and enter 'junker' for the style and hit save and we end up on the Hello World page.
+Finally, hit the back button and look at your data and hit back button again and look at the s
+and t data.  Each step is saved because we force you to follow the PRG pattern.  The back button is never broken
+in webpieces.  You will never see this image for a webpieces app</p>
 
-<p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
+<img src="%[/org/webpieces/plugins/documentation/resubmit_chrome.png]%"/>
+
+<p>Next, let's use the @db plugin to view the in-memory database.  Go to http://localhost:8080/@db and click
+the Connect button.  Click on the 'CAR' table which inserts a select statement in the GUI and then click 'Run'.
+Now, all rows in the table are shown, which in this case is the single row with ferrari.</p>
+
+<p>Lastly, let's test out updating our ferrari so go to http://localhost:8080/car/edit/ferrari and you can then
+update your ferrari and re-query the database</p>
+
+<p>Next, try http://localhost:8080/car/edit/notexist and we will see that we get the Development only NotFound page.</p>
+
+<p>Now, this example was very crude(CRUDe?) so instead let's now give you a complete CRUD example with listing
+entities and everything and how little code is required in webpieces to do such a thing.  Not only that, this is
+the defacto pattern such that code generation can be added to a development plugin</p>
 
 <a class="btn btn-primary" href="@[QUICK_START4]@" role="button">Next Basic CRUD</a>

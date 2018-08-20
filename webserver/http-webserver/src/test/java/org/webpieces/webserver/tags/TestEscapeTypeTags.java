@@ -47,6 +47,9 @@ public class TestEscapeTypeTags extends AbstractWebpiecesTest {
 		//ensure maintain the newline
 		response.assertContains("%{...}%  %[...]% ${...}$ #{...}# #{/...}# #{.../}#\n&amp;{...}&amp;  @[...]@  @@[...]@@  *{...}* *[");
 		response.assertContains("&lt;a href=&quot;@[ACTION]@&quot;&gt;Link&lt;/a&gt;");
+		
+		//this was a comment in *{..}* that should not show up
+		response.assertNotContains("escapes html as well so you can easily type raw html");
 
 	}
 	

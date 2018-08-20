@@ -82,12 +82,12 @@ name as the method dynamichHelloWorld.html but this time, let's insert $ {name}$
 what was entered into the url</p>
 
 <pre>
-<code>&lt;html&gt;
-    &lt;head&gt;&lt;/head&gt;
-    &lt;body&gt;
-        Hello $ {name}$.  Your id is $ {id}$
-    &lt;/body&gt;
-&lt;/html&gt;</code>
+<code>*[<html>
+    <head></head>
+    <body>
+        Hello ${name}$.  Your id is ${id}$
+    </body>
+</html>]*</code>
 </pre>
 
 <p>NOTE: This can be a bit of a security hole since someone could put lots of html and javascript into the name variable

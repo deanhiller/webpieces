@@ -167,12 +167,12 @@ public class MyMainController {
 next create a file called helloWorld.html in the same directory as the Controller</p>
 
 <pre>
-<code>&lt;html&gt;
-    &lt;head&gt;&lt;/head&gt;
-    &lt;body&gt;
+<code>*[<html>
+    <head></head>
+    <body>
         Hello World
-    &lt;/body&gt;
-&lt;/html&gt;</code>
+    </body>
+</html>]*</code>
 </pre>
 
 <p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
@@ -180,17 +180,17 @@ MyHelloWorldMeta.java, modify it to add the RouteModule to the list of RouteModu
 getRouteModules method should look like so</p>
 
 <pre>
-<code>@Override
-public List&lt;Routes&gt; getRouteModules() {
+<code>*[@Override
+public List<Routes> getRouteModules() {
     return Lists.newArrayList(
-    new AppRoutes(),
-    new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
-    new CrudRoutes(),
-    new AjaxCrudRoutes(),
-    new JsonRoutes(),
-    new MyMainRoutes()
-    );
-}</code>
+        new AppRoutes(),
+        new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
+        new CrudRoutes(),
+        new AjaxCrudRoutes(),
+        new JsonRoutes(),
+        new MyMainRoutes()
+        );
+}]*</code>
 </pre>
 
 <p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
