@@ -10,9 +10,15 @@ This 23 minute video barely scratches the surface but demonstrates
 * Download zip and create first project
 * run test suite
 * start up the production server
+* view main default page of templated app
+* Visit the pluggable backend at http://localhost:8080/@backend
 * importing into intellij
 * starting up the DevelopmentServer
-* CRUD operations, errors, persistence
+* Adding Routes
+* Adding Controller
+* Adding Entity Bean
+* Adding CRUD operations, errors, persistence
+* Quick example of back button WORKING
 * development server only in-memory database GUI at http://localhost:8080/@db
 * development server only in-memory documentation at http://localhost:8080/@documentation
 
