@@ -275,7 +275,7 @@ and add to that array so that we can verify your templates are all good to relea
 <p>Now, instead of making you create huge amounts of tags, we created quite a few built in tags so let's dig deeper into them
 and into the examples</p>
 
-<h2 id="extends">Extends: *[#{extends/}# and #{get}# #{set}#]*</h2>
+<h3 id="extends">Extends: *[#{extends/}# and #{get}# #{set}#]*</h3>
 
 <p>Decorators provide a clean solution to share a page layout (or design) across several templates.</p>
 
@@ -325,7 +325,7 @@ logged out template for example where the logged in one has submenus. Some of th
     <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/main.html">Top Level SuperTemplate</a></li>    
 </ol> 
 
-<h2 id="getset">Get/Set: *[#{get}# #{set}#]*</h2>
+<h3 id="getset">Get/Set: *[#{get}# #{set}#]*</h3>
 
 <p>Get and Set tags deserve their own section and detail.  You may have a get tag that is optional so someone extending a template does not
 have to fill it in.  To make the get optional and fill in with a default, you can do this</p>
@@ -356,4 +356,93 @@ making life grand</p>
     <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/getTag.html">Html File</a></li>
 </ol>
 
+<h3 id="form">Form: *[#{form}#]*</h3>
+
+<p>In webpieces, you could simply use the html form element but the form tag adds a secure field that is checked on post.  This ensures that
+the post comes from who we rendered it too.  Other than that, the form tag does nothing additional for you.</p>
+
+<h3 id="stylesheet">Stylesheet: *[#{stylesheet}#]*</h3>
+
+<p>One of our best tags.  The stylesheet tag generates a url with a hash, so if a developer ever changes the stylesheet, it automatically
+changes the url the browser requests avoiding the previously cached version.  No more modifying urls every time you change *.css files.
+The following is an example of using the stylesheet tag(along with the file check token to ensure the *.css file exists before deploying
+your production server):</p>
+
+<pre><code>*[#{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}#]*</code></pre>
+
+<p>Please note that DevelopmentServer ignores this and forces the browser to never cache *.css files so you can edit to your hearts 
+content in development mode.</p>
+
+<h3 id="script">Script: *[#{script}#]*</h3>
+
+<p>Just like the stylesheet tag, this tag ensures a hash changes so you could always have your *.js file named jquery.js no matter
+what version it is.</p>
+
+<pre><code>*[#{script src:'%[/assets/crud/js/jquery/jquery.js]%'/}#]*</code></pre>
+
+<h3 id="bootstrapModal">Bootstrap Modal: *[#{bootstrapModal}#]*</h3>
+
+<p>This tag generates a ton of html/javascript code for AJAX list pages with edit and delete buttons.  For example, you
+typically use it like so:</p>
+
+<pre><code>*[<table class="table">
+    <thead>
+        <tr>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        #{list items:users, as:'entity'}#
+            <tr>
+                <td>${entity.firstName}$</td>
+                <td>${entity.lastName}$</td>
+                <td>${entity.email}$</td>
+                <td>
+                   <a href="#" data-toggle="modal" class="btn" id="editLink_${entity.id}$">Edit</a>
+                   #{bootstrapModal route:@[AJAX_EDIT_USER_FORM, id:'{id}']@, modalId:'addEditModal', linkId:'editLink_'+entity.id, id:entity.id/}#
+                        
+                   <a href="#" data-toggle="modal" class="btn" id="deletePattern_${entity.id}$"> Delete </a>
+                   #{bootstrapModal route:@[AJAX_CONFIRM_DELETE_USER, id:'{id}']@, modalId:'deleteModal', linkId:'deletePattern_'+entity.id, id:entity.id/}#
+                </td>
+            </tr>
+        #{/list}#
+        #{else}#
+        <tr>
+            <td colspan="4">
+            There are no users, Add one now please.
+            </td>
+        </tr>
+        #{/else}#
+    </tbody>
+</table>]*</code></pre>
+
+<p>The code it generates just for that AJAX_EDIT_USER_FORM route is jquery code like so:</p>
+
+
+<pre><code>*[<script type="text/javascript">
+      var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
+       $(document).ready(function() {   
+           $("#editLink_${entity.id}$").click(function(e){
+               $('#addEditModal').load(getEditRoute({id:${entity.id}$}),function(){
+                   $("#addEditModal").modal('show');    
+                });
+           });
+        });
+</script>]*</code></pre>
+
+<p>It actually does even more work then that handling redirects from the server as well.  This is our primary tag for ajax List/Create/Edit/Delete 
+flows in html and only works with twitter bootstrap.</p>
+
+<h3 id="field">Field: *[#{field}#]*</h3>
+
+
+
+<h3 id="option">Option: *[#{option}#]*</h3>
+<h3 id="renderTagArgs">RenderTagArgs: *[#{renderTagArgs}#]*</h3>
+<h3 id="renderPageArgs">RenderPageArgs: *[#{renderPageArgs}#]*</h3>
+<h3 id="jsAction">JsAction: *[#{jsAction}#]*</h3>
+<h3 id="customTag">Your own Custom Tag</h3>
 
