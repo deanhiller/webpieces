@@ -19,6 +19,9 @@ This 23 minute video barely scratches the surface but demonstrates
 * Adding Entity Bean
 * Adding CRUD operations, errors, persistence
 * Quick example of back button WORKING
+* Quick example of 'DevelopmentServer' not found page helping you debug faster
+* Quite a few examples where I screw up to show how good the errors are
+* Logging Error/Warn is done in RED, to help you not miss errors in your application
 * development server only in-memory database GUI at http://localhost:8080/@db
 * development server only in-memory documentation at http://localhost:8080/@documentation
 
