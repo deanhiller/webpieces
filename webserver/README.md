@@ -18,6 +18,7 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
  * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
 
 #### TODO:
+* In quickstart, adding CarDbo made me restart the webserver.  we need to debug why the hibernate scan did not kick in.
 * add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$
 * add test for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation
 * add test for @[..]@ and add links from documentation
