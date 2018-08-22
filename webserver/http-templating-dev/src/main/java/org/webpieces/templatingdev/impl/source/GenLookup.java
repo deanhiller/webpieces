@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.webpieces.templatingdev.api.HtmlGen;
+import org.webpieces.templatingdev.api.GroovyGen;
 import org.webpieces.templatingdev.impl.tags.ElseGen;
 import org.webpieces.templatingdev.impl.tags.ElseIfGen;
 import org.webpieces.templatingdev.impl.tags.IfGen;
@@ -14,7 +14,7 @@ import org.webpieces.templatingdev.impl.tags.VerbatimGen;
 
 public class GenLookup {
 
-	private Map<String, HtmlGen> generators = new HashMap<>();
+	private Map<String, GroovyGen> generators = new HashMap<>();
 	
 	@Inject
 	private ListGen listGen;
@@ -27,12 +27,12 @@ public class GenLookup {
 		put(listGen);
 	}
 
-	protected void put(HtmlGen generator) {
+	protected void put(GroovyGen generator) {
 		generators.put(generator.getName(), generator);
 	}
 
-	public HtmlGen lookup(String genName, TokenImpl token) {
-		HtmlGen gen = generators.get(genName);
+	public GroovyGen lookup(String genName, TokenImpl token) {
+		GroovyGen gen = generators.get(genName);
 		return gen;
 	}
 }

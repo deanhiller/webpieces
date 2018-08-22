@@ -19,10 +19,11 @@ Codecov.io / jacoco has two bugs (so we are actually way higher than this number
 
 #### TODO:
 * In quickstart, adding CarDbo made me restart the webserver.  we need to debug why the hibernate scan did not kick in.
-* add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$
-* add test for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation
-* add test for @[..]@ and add links from documentation
+* add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$ and for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation and test ${_variable}$ and escaping and such
 * add test for %{..}% to set var and %{..}% to print var to verify it is there so groovy implant is working
+* rewire redirects so port stuff is done OUTSIDE the router so we no longer need funky callbacks.  (ie. I made a mistake there that we can fix by providing all the info from the router to the webserver and webserver knows the ports)
+* add test for java enum and list select and multiselect
+* add test for java related entity select and multiselect
 
 
 

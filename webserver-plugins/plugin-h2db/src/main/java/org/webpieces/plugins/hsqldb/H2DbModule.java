@@ -3,10 +3,12 @@ package org.webpieces.plugins.hsqldb;
 import java.sql.SQLException;
 
 import org.h2.tools.Server;
+import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
 
 public class H2DbModule extends AbstractModule {
 
@@ -36,6 +38,9 @@ public class H2DbModule extends AbstractModule {
 	
 	@Override
 	protected void configure() {
+		Multibinder<BackendGuiDescriptor> backendBinder = Multibinder.newSetBinder(binder(), BackendGuiDescriptor.class);
+	    backendBinder.addBinding().to(H2DbGuiDescriptor.class);
+	    
 		bind(H2DbConfig.class).toInstance(config);
 		bind(ServerConfig.class).toInstance(svrConfig);
 	}

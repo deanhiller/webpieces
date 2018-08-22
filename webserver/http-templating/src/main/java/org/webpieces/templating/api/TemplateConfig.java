@@ -6,8 +6,6 @@ import java.nio.charset.StandardCharsets;
 public class TemplateConfig {
 
 	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
-	private String fieldTagTemplatePath = "/org/webpieces/templating/impl/field.tag";
-	private String arrayFieldTagTemplatePath = fieldTagTemplatePath;
 
 	public TemplateConfig() {
 	}
@@ -22,18 +20,6 @@ public class TemplateConfig {
 
 	public void setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
 		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
-	}
-
-	public void setFieldTagTemplatePath(String path) {
-		this.fieldTagTemplatePath = path;
-	}
-	
-	public String getFieldTagTemplatePath() {
-		return fieldTagTemplatePath;
-	}
-
-	public String getArrayFieldTagTemplatePath() {
-		return arrayFieldTagTemplatePath;
 	}
 
 }

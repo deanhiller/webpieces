@@ -6,7 +6,7 @@
     <li><a href="#tokens">Tokens</a>
         <ol>
             <li><a href="#expressions">Expressions *[${...}$]*</a></li>
-            <li><a href="#tagToken">Tags and HtmlGen *[#{...}#]*</a></li>
+            <li><a href="#tagToken">Tags and GroovyGen *[#{...}#]*</a></li>
             <li><a href="#routes">Routes *[@[...]@ and @@[...]@@]*</a></li>
             <li><a href="#comments">Comments *[*{...}*]*</a></li>
             <li><a href="#escaping">Escaping *[*[...] *]*</a></li>
@@ -29,9 +29,10 @@
             <li><a href="#renderPageArgs">RenderPageArgs: *[#{renderPageArgs}#]*</a></li>
             <li><a href="#jsAction">JsAction: *[#{jsAction}#]*</a></li>
             <li><a href="#customTag">Your own Custom Tag</a></li>
+            <li><a href="#advancedCustomTag">Your own Advanced Custom Tag</a></li>
         </ol>
     </li>
-    <li><a href="#htmlGen">HtmlGen</a>
+    <li><a href="#groovyGen">GroovyGen</a>
         <ol>
             <li><a href="#if">If *[#{if}#]*</a></li>
             <li><a href="#else">Else *[#{else}#]*</a></li>
@@ -72,7 +73,7 @@
     <li>In development, we rerun the whole process so you always see the latest changes</li>
 </ol>
 
-<p>I purposely divide the templating document into tokens, tags, and then HtmlGen as that is how webpieces is designed
+<p>I purposely divide the templating document into tokens, tags, and then GroovyGen as that is how webpieces is designed
 giving you just a little insight into the design can be very powerful</p>
 
 <p>Lastly, we do something called <a href="https://blog.twitter.com/engineering/en_us/topics/insights/2017/the-testing-renaissance.html">
@@ -97,22 +98,43 @@ We have way way too much formal documentation in this world that is boring as he
 <p>For example:</p>
 
 <pre>
-<code>*[<h1>Client ${client.name}</h1>]*</code>
+<code>*[<h1>Client ${client.name}$</h1>]*</code>
 </pre>
 
 <p>If you can’t be sure of client being null, there is a Groovy shortcut:</p>
 
 <pre>
-<code>*[<h1>Client ${client?.name}</h1>]*</code>
+<code>*[<h1>Client ${client?.name}$</h1>]*</code>
 </pre>
 
 <p>Which will only display the client name if the client is not null.  Well shucks, we only have tests
 indirectly testing this.  We need to add a basic feature test for just this.  Adding to the todo list.</p>
 
-<h3 id="tagToken">Tags and HtmlGen *[#{...}#]*</h3>
+<p>Next, you can prefix variables or tag arguments with '_' like *[${_body}$]* and that will not do any html 
+escaping.  This is useful when you want to pass the body of a custom tag in like so</p>
 
-<p>Webpieces comes with many built in Tags and many built in HtmlGenerators(HtmlGen.java) which are more complex 
-generators.  The built-in ones will be discussed in the <a href="#tags">Tags</a> and <a href="#htmlGen">HtmlGen</a>
+<pre>
+<code>*[#{somecustomtag}#<a href="">Some body with html</a>#{/somecustomtag}#]*</code>
+</pre>
+
+<p>Now, the html inside the custom tag is assigned to _body so that in your somecustomtag.tag file, you can then
+have:</p>
+
+<pre>
+<code>*[My link=${_body}$]*</code>
+</pre>
+
+<p>After all, it would be very annoying if the html went away and wasn't passed into your tag for you</p>
+
+<p>In the case of *[${somevar}$]*, if somevar is not assigned, we will fail fast on compiling the template to
+prevent mistakes.  This has saved us way too many times from deploying broken code.  There are times when you
+want to make it optional which is where you can do *[${optional(somevar)}$]* instead when you know it is 
+optional.</p>
+
+<h3 id="tagToken">Tags and GroovyGen *[#{...}#]*</h3>
+
+<p>Webpieces comes with many built in Tags and many built in Groovy Generators(GroovyGen.java) which are more complex 
+generators.  The built-in ones will be discussed in the <a href="#tags">Tags</a> and <a href="#groovyGen">GroovyGen</a>
 sections of this page.  See those sections to learn to use this token further with the tags that can be used.  Also,
 all the feature tests for different tags and html gen which use these tokens will be linked there</p>
 
@@ -146,7 +168,7 @@ instead of the relative url.  More on routes can be found in the
 <a href="@[ROUTES]@">&{ 'Routes Reference', 'routesReference'}&</a>
 </p>
 
-<p>Feature test example code can be found here:</p>
+<p>Feature test example code can be found here(or see the *[#{form}#]* tag which has tests for post as well):</p>
 
 <ol>
     <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/aHrefTag.html">Html File</a></li>
@@ -262,8 +284,9 @@ The Full TestI18N Example
 
 <h2 id="tags">Tags</h2>
 
-<p>Tags are looked up via a TagLookup.java class in webpieces.  Of course, every piece of webpieces is swappable so when you created your
-first project, we installed a module that overrides the default webpieces TagLookup.java class with 
+<p>Tags are looked up via a TagLookup.java class in webpieces and are called from the generated groovy code.  Tags 
+typically generate html and javascript code when invoked.  Of course, every piece of webpieces is swappable so
+when you created your first project, we installed a module that overrides the default webpieces TagLookup.java class with 
 <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/tags/TagLookupOverride.java">
 TagLookupOverride</a> which binds in 
 <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/tags/MyHtmlTagLookup.java">MyHtmlTagLookup.java</a>
@@ -359,7 +382,13 @@ making life grand</p>
 <h3 id="form">Form: *[#{form}#]*</h3>
 
 <p>In webpieces, you could simply use the html form element but the form tag adds a secure field that is checked on post.  This ensures that
-the post comes from who we rendered it too.  Other than that, the form tag does nothing additional for you.</p>
+the post comes from who we rendered it too.  Other than that, the form tag does nothing additional for you.  Test code can
+be found here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestFormTag.java">TestFormTag.java</</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/formTag.html">formTag.html</a></li>
+</ol>
 
 <h3 id="stylesheet">Stylesheet: *[#{stylesheet}#]*</h3>
 
@@ -371,7 +400,12 @@ your production server):</p>
 <pre><code>*[#{stylesheet href:'%[/assets/crud/css/bootstrap.css]%'/}#]*</code></pre>
 
 <p>Please note that DevelopmentServer ignores this and forces the browser to never cache *.css files so you can edit to your hearts 
-content in development mode.</p>
+content in development mode. Test code can be found here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestStylesheetScriptTags.java">TestStylesheetScriptTags.java</</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/stylesheetTag.html">stylesheetTag.html</a></li>
+</ol>
 
 <h3 id="script">Script: *[#{script}#]*</h3>
 
@@ -379,6 +413,13 @@ content in development mode.</p>
 what version it is.</p>
 
 <pre><code>*[#{script src:'%[/assets/crud/js/jquery/jquery.js]%'/}#]*</code></pre>
+
+<p>Test code can be found here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestStylesheetScriptTags.java">TestStylesheetScriptTags.java</</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/stylesheetTag.html">stylesheetTag.html</a></li>
+</ol>
 
 <h3 id="bootstrapModal">Bootstrap Modal: *[#{bootstrapModal}#]*</h3>
 
@@ -421,7 +462,6 @@ typically use it like so:</p>
 
 <p>The code it generates just for that AJAX_EDIT_USER_FORM route is jquery code like so:</p>
 
-
 <pre><code>*[<script type="text/javascript">
       var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
        $(document).ready(function() {   
@@ -434,15 +474,291 @@ typically use it like so:</p>
 </script>]*</code></pre>
 
 <p>It actually does even more work then that handling redirects from the server as well.  This is our primary tag for ajax List/Create/Edit/Delete 
-flows in html and only works with twitter bootstrap.</p>
+flows in html and only works with twitter bootstrap.  Test Code is found in these files</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestBootstrapTag.java">TestBootstrapTag.java</</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/app/bootstrapTag.html">bootstrapTag.html</a></li>
+</ol>
 
 <h3 id="field">Field: *[#{field}#]*</h3>
 
+<p>As a quick example, instead of writing this for 4 fields:</p>
 
+<pre><code>*[<p>
+  <label>&{'user.name'}</label>
+  <input type="text" id="user_name" name="user.name" value="${user?.name}" class="${errors.forKey('user.name') ? 'has_error' : ''}">
+  <span class="error">${errors.forKey('user.name')}</span>
+</p>]*</code></pre>
+
+<p>You can simply write this:</p>
+
+<pre><code>*[#{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#]*</code></pre>
+
+<p>You could even write less if you define a special *[#{textinputfield}# & #{passwordinputfield}# & #{textareafield}# & #{selectfield}#]* 
+along with using the constructor of
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-templating/src/main/java/org/webpieces/templating/impl/tags/FieldTag.java">FieldTag.java</a>
+if you desire and move all the *[<input> or <select>]* html into the field.tag file.  We left it simple to plug in any html input element into the tag.
+See the <a href="#option">Option: *[#{option}#]*</a> tag for a further example of field tag combined with select/option</p>
+
+<p>This is one of the most complex and advanced tags(and very very useful), the 
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-templating/src/main/java/org/webpieces/templating/impl/tags/FieldTag.java">FieldTag</a>
+can accept multiple *.tag files to create many versions so you can create a *[#{myfield}#]* tag in addition.  You can also override the default
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-templating/src/main/java/org/webpieces/templating/impl/field.tag">field.tag</a> 
+file as well in your project.  This tag works to save what the user typed in (in a scope called flash) as well as render tooltips and errors.  This
+one tag can make all your tooltip/label/input/errorMsg/i18n common across your whole app so you can change the styling of all forms in one place.  One
+example may be putting the error below the label/input for your whole app and then changing it so the error is on the same line as the label/input.
+See the userAddEdit.html file in your base.crud or base.crud.ajax packages in your project or look at 
+<a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/crud/ajax/userAddEdit.html">our userAddEdit from our example project</a></p>
+
+<p>Test code can be found here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestFieldTag.java">TestFieldTag.java</</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/field/customFieldTag.html">customFieldTag.html</a></li>
+</ol>
 
 <h3 id="option">Option: *[#{option}#]*</h3>
+
+<p>We prefer to use straight html when possible, but to flash what the user selects in a menu and then redisplay the same thing
+if his form has errors, we needed an option tag that basically render *[<option>]* html while looking stuff up in flash and
+having the correct values.  Here is an example of a list of java enums
+from <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/crud/userAddEdit.html">userAddEdit.html</a> in the example app:</p>
+
+<pre><code>*[#{field 'entity.levelOfEducation', label:'School Level'}#
+	<select size="1" name="${field.name}$" class="input-xlarge">
+	    #{list items:levels, as:'level'}#
+	        #{option value:level, selected:field.flashOrValue}#${level.guiLabel}$#{/option}#
+	    #{/list}#
+	</select>
+#{/field}#]*</code></pre>
+
+<p>In that same file, there is also an example of a list of hibernate entities RoleDbo that a User has showing all roles
+a user could have as well as which roles the user is currently in (multiselect):</p>
+
+<pre><code>*[#{field 'selectedRoles', label:'Role'}#
+	<select size="7" name="${field.name}$" class="input-xlarge" multiple>
+	    #{list items:roles, as:'role'}#
+	        #{option value:role, multiselected:field.flashOrValue}#${role.guiLabel}$#{/option}#
+	    #{/list}#
+	</select>
+#{/field}#]*</code></pre>
+
 <h3 id="renderTagArgs">RenderTagArgs: *[#{renderTagArgs}#]*</h3>
+
+<p>If you have a small snippet of a template you want to include, while you can create a whole tag just for that html with it's own name,
+another method is to use renderTagArgs like so:</p>
+
+<pre><code>*[#{renderTagArgs 'argsTemplate.html', tagarg:'cool', user:'override', user2:user/}#]*</code></pre>
+
+<p>Now, if you look at the controller, it also passes a 'user' variable.  The renderTag args however passes a user variable such that the
+tag argument is used rather than the controller argument.  If you want the controller args to pass through, then use the renderPageArgs tag.
+The test is shown here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestIncludeTypeTags.java">TestIncludeTypeTags.testRenderTagArgsTag</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/include/renderTagArgsTag.html">renderTagArgsTag.html</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/include/argsTemplate.html">argsTemplate.html</a></li> 
+</ol>
+
 <h3 id="renderPageArgs">RenderPageArgs: *[#{renderPageArgs}#]*</h3>
+
+<p>Like the renderTagArgs, this tag includes html but in this case uses the controller's variables that were passed in.  The usage looks 
+pretty much the same:</p>
+
+<pre><code>*[#{renderPageArgs 'argsTemplate.html', tagarg:'cool', user:'override', user2:user/}#]*</code></pre>
+
+<p>But, if you look at the test, the user variable comes from the controller not the tag argument.  The test is shown here:</p>
+
+<ol>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/TestIncludeTypeTags.java">TestIncludeTypeTags.testRenderPageArgsTag</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/include/renderPageArgsTag.html">renderPageArgsTag.html</a></li>
+    <li><a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/tags/include/argsTemplate.html">argsTemplate.html</a></li> 
+</ol>
+
 <h3 id="jsAction">JsAction: *[#{jsAction}#]*</h3>
+
+<p>Sometimes you want to make an AJAX call to your webserver and re-render just a piece of your page.  While *[bootstrapModal]* rocks for doing a 
+popup, you may want to re-render just some table or section.  In this case, you can get the correct remote call and then call it with code
+like the following:</p>
+
+<pre><code>*[<script type="text/javascript">
+	var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
+	 $(document).ready(function() { 
+	     $("#editLink_${entity.id}$").click(function(e){
+	         $('#addEditPatternModal').load(getEditRoute({id:${entity.id}$}),function(){
+	             $("#addEditPatternModal").modal('show');   
+	          });
+	     });
+    });
+</script>]*</code></pre>
+
+<p>The jsAction combined with the reverse routing *[@[AJAX_EDIT_USER_FORM, id:'{id}']@]* creates a function getEditRoute which is
+then invoked 3 lines later.  In this specific case, we are using jquery to 'load' and then telling a modal dialogue to show after
+it is done loading.  See jquery and javascript if you don't understand the rest of the code as all we do is create a getEditRoute
+function for you to call and fetch the html.  The server should just return 'partial' html from a template file that has just
+that piece of html that you wish to return.</p>
+
 <h3 id="customTag">Your own Custom Tag</h3>
 
+<p>To create your own custom tag, there is a few steps.  The first step is to create your tag file like so:</p> 
+
+<pre><code>*[TAG START
+<br/><br/>
+Inside, this custom tag, we can use any tag such as a link tag... <a href="@[ASYNC_ROUTE]@">Some Link Here</a>
+<br/><br/>
+Can put the body out ${_body}$
+<br/><br/>
+Or can print the args out ${someArgument}$
+<br/><br/>
+TagArgs from variable otherArgument=${otherArgument}$
+<br/>
+TAG END]*</code></pre>
+
+<p>Let's say the full class path of this file is /org/webpieces/tags/mytag.tag.  The next step is to add it to 
+customTags property in your build.gradle file like so(hint: this property already is in the template with examples):</p>
+
+<pre><code>*[compileTemplateSetting {
+  //Since the groovy plugin has no way of knowing about your custom tags, list them here or the compile will
+  //fail (This catches mispellings and such so you don't release a broken app to production)
+  customTags = [ "mytag", "anothertag", "id", "myfield" ]
+}]*</code></pre>
+
+<p>The next step is to modify the existing MyHtmlTagLookup.java and to have that class have a line that
+ adds in the CustomTag() like so:</p>
+
+<pre><code>*[package org.webpieces.base.tags;
+
+import javax.inject.Inject;
+
+import org.webpieces.templating.api.ConverterLookup;
+import org.webpieces.templating.api.HtmlTagLookup;
+import org.webpieces.templating.api.RouterLookup;
+import org.webpieces.templating.api.TemplateConfig;
+import org.webpieces.templating.impl.tags.CustomTag;
+
+public class MyHtmlTagLookup extends HtmlTagLookup {
+    @Inject
+    public MyHtmlTagLookup(TemplateConfig config, RouterLookup lookup, ConverterLookup converter) {
+        super(config, lookup, converter);
+        //add any custom tags you like here...
+        put(new CustomTag("/org/webpieces/tags/mytag.tag"));
+    }
+}]*</code></pre>
+
+<p>For completeness, just to explain, there is a TagLookupOverride guice module like below and this is passed in on server startup
+in Server.java to override the default HtmlTagLookup class:</p>
+
+<pre><code>*[public class TagLookupOverride implements Module {
+    @Override
+    public void configure(Binder binder) {
+        binder.bind(HtmlTagLookup.class).to(MyHtmlTagLookup.class).asEagerSingleton();;
+    }
+}]*</code></pre>
+
+<p>Like we have said in other parts of the documentation, you can swap pretty much any class in webpieces by binding a new subclass
+of the old version like this.</p>
+
+<h3 id="advancedCustomTag">Your own Advanced Custom Tag</h3>
+
+<p>To create a more advanced tag, you can simply create a class extending HtmlTag.java and then modify MyHtmlTagLookup.java to add
+the new tag you created in there.  In this case, there is no *.tag file and only an *.java file</p>
+
+<h2 id="groovyGen">GroovyGen</h2>
+
+<p>While, these take on the same format as Tags in webpieces, these ones actually generate groovy code so they are run
+long before tags are run.  GroovyGenerators(GroovyGen.java) run when you run your build, while tags run every
+time a page is rendered for a request.  Yes, the groovy code generated by the GroovyGen is also run every
+time a page is rendered for a request as well but it's the generated code from GroovyGen that runs.  From
+a user perspective however, we keep the syntax the same for ease of use of the platform</p>
+
+<h3 id="if">If *[#{if}#]*</h3>
+
+<p>A simple generator so that if the variable positive is true as in this example, the html will be rendered:</p>
+
+<pre><code>*[#{if positive}#
+     <br/>This should exist<br/>
+ #{/if}#]*</code></pre>
+
+<h3 id="else">Else *[#{else}#]*</h3>
+
+<p>Tack an else onto an *[#{if}# or an #{elseif}#]* to have a default if nothing else matches:</p>
+
+<pre><code>*[#{if negative}#
+     This should not exist4
+#{/if}#
+#{elseif negative2}#
+     This should not exist5
+#{/elseif}#
+#{else}#
+     Else3
+#{/else}#]*</code></pre>
+
+<h3 id="elseif">ElseIf *[#{elseif}#]*</h3>
+
+<p>A simple elseif tag if the if doesn't match:</p>
+
+<pre><code>*[#{if negative}#
+    This should not exist4
+#{/if}#
+#{elseif negative2}#
+    This should not exist5    
+#{/elseif}#]*</code></pre>
+
+
+<h3 id="list">List *[#{list}#]*</h3>
+
+<p>iterates over a java List of things and assigns each thing or bean to a variable of your choosing.  Here is an example:</p>
+
+<pre><code>*[#{list items:users, as:'entity'}#
+    <tr>
+        <td>${entity.firstName}$</td>
+        <td>${entity.lastName}$</td>
+        <td>${entity.email}$</td>
+        <td>
+            <a href="@[GET_EDIT_USER_FORM, id:entity.id]@" class="btn" id="editLink_${entity_index-1}$"> &{'Edit', 'link.edit'}& </a>
+            <a href="@[CONFIRM_DELETE_USER, id:entity.id]@" class="btn" id="eletePattern_${entity_index-1}$"> &{'Delete', 'link.delete'}& </a>
+        </td>
+    </tr>
+#{/list}#
+#{else}#
+    <tr>
+        <td colspan="4">
+        There are no users, Add one now please.
+        </td>
+    </tr>
+#{/else}#]*</code></pre>
+
+<p>Of note is the else statement.  If there is 0 elements in the list and you have an else statement, you can tell the user there are
+no users instead of just having a blank table.  The 'users' variable came from the controller and for each user in the list,
+it is assigned to the 'entity' variable which is then accessed like any other variable.  Also of note in this is the special
+entity_index variable which you can use for styling even rows gray and odd rows white or just to name the id attribute
+differently.</p>   
+
+<h3 id="htmlEscape">HtmlEscapingOff *[#{htmlEscapingOff}#]*</h3>
+
+<p>Earlier with the *[${...}$]* token, you learned variables prefixed with '_' are not escaped like *[${_body}$]*.  Another
+method of doing this is use the htmlEscapingOff tag like so:</p>
+
+<pre><code>*[#{htmlEscapingOff}#
+    This is not escaped ${verbatim}$ here
+#{/htmlEscapingOff}#]*</code></pre>
+
+<p>In this way, a controller can actually insert html code into the page BUT you should try to avoid doing that to be
+honest as then you end up with a controller having view code when only the view(*.html and *.tag files) should
+contain view code.  It is here though in case you really really really really need it</p>
+
+<h3 id="groovyGen">GroovyGen.java</h3>
+
+<p>Currently, users cannot create these but if there is enough demand,
+ we could provide a plugin point to plugin into the gradle plugin that generates the groovy source.  Until this time, 
+ just send me a pull request and I can add it directly into webpieces so everyone can use your Groovy Generator rather
+ than being selfish and keeping it to yourself ;).  </p>
+ 
+ <p>Remember the phases of compile, 
+ <a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-templating-dev/src/main/java/org/webpieces/templatingdev/impl/source/ScriptWriter.java">ScriptWriter.java</a> 
+ first takes your template and generates a bunch of groovy code and in this stage,
+ it uses GroovyGenerators to help.  Then, the groovy is compiled to a java *.class file.  Any tags that were part
+ of the template are invoked only when the class file is invoked to generate the html(along with invoking any code
+ generated from a GroovyGenerator as well).  In this fashion, tags can
+ only generate text/html and cannot generate groovy code like GroovyGenerators can. </p>

@@ -88,7 +88,11 @@
                     </li>
                     #{/if}#
             		#{else}#
-                    <li id="tab_login"><a class="btn-header" href="@[BACKEND_LOGIN]@">&{'Login', 'link.login'}&</a></li>
+                    <li id="tab_login">
+                        <div id="custom_logoutbtn">
+                        <a class="btn btn-primary" href="@[BACKEND_LOGIN]@" style="height: 18px;width: 110px">&{'Login', 'link.login'}&</a>
+                        </div>
+                    </li>
                     #{/else}#	
                 </ul>
             </div>

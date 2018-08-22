@@ -1,14 +1,14 @@
 package org.webpieces.templatingdev.impl.source;
 
-import org.webpieces.templatingdev.api.HtmlGen;
+import org.webpieces.templatingdev.api.GroovyGen;
 
 public class TagState {
 
 	private TokenImpl token;
-	private HtmlGen generator;
+	private GroovyGen generator;
 	private int uniqueId;
 
-	public TagState(TokenImpl token, HtmlGen generator, int uniqueId) {
+	public TagState(TokenImpl token, GroovyGen generator, int uniqueId) {
 		this.token = token;
 		this.generator = generator;
 		this.uniqueId = uniqueId;
@@ -18,7 +18,7 @@ public class TagState {
 		return token;
 	}
 
-	public HtmlGen getGenerator() {
+	public GroovyGen getGenerator() {
 		return generator;
 	}
 

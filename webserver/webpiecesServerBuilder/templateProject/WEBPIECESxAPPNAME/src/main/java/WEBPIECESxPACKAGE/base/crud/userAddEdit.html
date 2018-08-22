@@ -20,9 +20,10 @@
     	*{optional in case this is the add operation and so this is used in case of edits only }*
     	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
         
+        *{Generally, we only use field, but for purposes of demonstration, we use the myfield tag as an example of a custom 'field' tag you own in your project}*
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
-        #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
-        #{field 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{myfield 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/myfield}#
+        #{myfield 'entity.email', label:'Email'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/myfield}#
         #{field 'password', label:'Password'}#<input type="password" name="${field.name}$" value="${field.value}$" class="input-xlarge">#{/field}#
         
         #{field 'entity.levelOfEducation', label:'School Level'}#

@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.PortConfig;
@@ -178,6 +179,10 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		if(isValidating)
 			return urlPath;
 		
+		return createUrl(route, urlPath);
+	}
+
+	private String createUrl(Route route, String urlPath) {
 		RequestContext ctx = Current.getContext();
 		RouterRequest request = ctx.getRequest();
 		
@@ -204,5 +209,18 @@ public class ReverseRoutes implements ReverseRouteLookup {
 
 	public Collection<RouteMeta> getAllRouteMetas() {
 		return allRoutes;
+	}
+
+	@Override
+	public boolean isGetRequest(RouteId routeId) {
+		return get(routeId).getRoute().getHttpMethod() == HttpMethod.GET;
+	}
+
+	@Override
+	public String convertToUrl(RouteId routeId) {
+		RouteMeta routeMeta = get(routeId);
+		Route route = routeMeta.getRoute();
+		String urlPath = route.getFullPath();
+		return createUrl(route, urlPath);
 	}
 }

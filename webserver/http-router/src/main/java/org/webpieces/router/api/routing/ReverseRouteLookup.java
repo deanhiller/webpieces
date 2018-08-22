@@ -1,9 +1,10 @@
 package org.webpieces.router.api.routing;
 
-import org.webpieces.router.impl.RouteMeta;
-
 public interface ReverseRouteLookup {
 
-	RouteMeta get(RouteId routeId);
+	boolean isGetRequest(RouteId routeId);
+
+	//TODO: add a parameterized one(very easy to do)
+	String convertToUrl(RouteId routeId);
 
 }

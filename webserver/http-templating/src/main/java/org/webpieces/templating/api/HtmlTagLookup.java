@@ -41,18 +41,15 @@ public class HtmlTagLookup {
 		put(new StyleSheetTag(lookup));
 		put(new ScriptTag(lookup));
 		put(new BootstrapModalTag());
-		addFieldTag(config);
+		put(new FieldTag(converter, "/org/webpieces/templating/impl/field.tag"));		
 	}
-
-	protected void addFieldTag(TemplateConfig config) {
-		put(new FieldTag(converter, config.getFieldTagTemplatePath()));		
-	}
-
+	
 	protected void put(HtmlTag tag) {
 		HtmlTag htmlTag = tags.get(tag.getName());
 		if(htmlTag != null)
-			throw new IllegalArgumentException("Tag="+tag.getName()+" was already added to the tag map by class="+htmlTag.getClass()+" Your class="+tag.getClass());
-		log.info("adding tag="+tag.getName());
+			log.warn("You are overriding Tag="+tag.getName()+" from class="+htmlTag.getClass()+" to your class="+tag.getClass());
+		else
+			log.info("adding tag="+tag.getName());
 		tags.put(tag.getName(), tag);
 	}
 

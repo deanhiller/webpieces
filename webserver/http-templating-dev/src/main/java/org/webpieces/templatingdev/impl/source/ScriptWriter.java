@@ -8,8 +8,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.webpieces.templating.api.HtmlTag;
 import org.webpieces.templating.api.HtmlTagLookup;
-import org.webpieces.templatingdev.api.AbstractTag;
-import org.webpieces.templatingdev.api.HtmlGen;
+import org.webpieces.templatingdev.api.AbstractGroovyGen;
+import org.webpieces.templatingdev.api.GroovyGen;
 import org.webpieces.templatingdev.api.TemplateCompileConfig;
 import org.webpieces.templatingdev.impl.tags.RoutePathTranslator;
 import org.webpieces.templatingdev.impl.tags.TagGen;
@@ -200,7 +200,8 @@ public class ScriptWriter {
 		}
 
 		int id = uniqueIdGen.generateId();
-		HtmlGen generator = generatorLookup.lookup(tagName, token);
+		GroovyGen generator = generatorLookup.lookup(tagName, token);
+		//we only lookup htmltag to verify it's existence and fail fast
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
 			generator.generateStartAndEnd(sourceCode, token, id);
@@ -216,11 +217,11 @@ public class ScriptWriter {
 	public void printStartTag(TokenImpl token, TokenImpl previousToken, ScriptOutputImpl sourceCode) {
 		String tagName = token.getTagName();
 
-		HtmlGen generator = generatorLookup.lookup(tagName, token);
+		GroovyGen generator = generatorLookup.lookup(tagName, token);
 		HtmlTag htmltag = htmlTagLookup.lookup(tagName);
 		if(generator != null) {
-			if(generator instanceof AbstractTag) {
-				AbstractTag abstractTag = (AbstractTag) generator;
+			if(generator instanceof AbstractGroovyGen) {
+				AbstractGroovyGen abstractTag = (AbstractGroovyGen) generator;
 				//Things like #{else}# tag are given chance to validate that it is only after an #{if}# tag
 				abstractTag.validatePreviousSibling(token, previousToken);
 			}
@@ -247,7 +248,7 @@ public class ScriptWriter {
 			throw new IllegalArgumentException("Unmatched end tag #{/"+expr+"}# as the begin tag appears to be #{"+currentToken.getCleanValue()
 			+"}# which does not match.  end tag location="+token.getSourceLocation(false)+" begin tag location="+currentToken.getSourceLocation(false));
 
-		HtmlGen generator = currentState.getGenerator();
+		GroovyGen generator = currentState.getGenerator();
 		int uniqueId = currentState.getUniqueId();
 		generator.generateEnd(sourceCode, token, uniqueId);
 	}

@@ -43,7 +43,7 @@ dependencies {
     testCompile project(':webserver:http-webserver-test')
     testCompile project(':webserver:http-router-dev')
     testCompile project(':webserver-plugins:plugin-hibernate')
-    testCompile project(':webserver-plugins:plugin-h2db')
+    testCompile deps['h2db']
     testCompile project(':webserver-plugins:plugin-json-jackson')
 	
     testCompile deps['selenium']

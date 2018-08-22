@@ -13,7 +13,7 @@ sourceSets {
 
 dependencies {
     compile deps['h2db']
-    compile project(':webserver:http-router')
+    compile project(':webserver-plugins:plugin-backend')
 }
 
 //This allows the tests to use *_html.class templates since for some reason, I was having trouble

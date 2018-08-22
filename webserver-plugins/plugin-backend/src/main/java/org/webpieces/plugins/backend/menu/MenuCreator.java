@@ -1,7 +1,6 @@
 package org.webpieces.plugins.backend.menu;
 
 import java.util.ArrayList;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +10,10 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.plugins.backend.spi.BackendGuiDescriptor;
 import org.webpieces.plugins.backend.spi.MenuCategory;
 import org.webpieces.plugins.backend.spi.PageDescriptor;
 import org.webpieces.router.api.routing.ReverseRouteLookup;
-import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RoutingHolder;
 
 @Singleton
@@ -42,11 +39,11 @@ public class MenuCreator {
 				continue;
 			
 			List<SingleMenuItem> descriptors = secureMenuMap.getOrDefault(pageDesc.getMenuCategory(), new ArrayList<>());
-			RouteMeta meta = reverseRouteLookup.get(pageDesc.getRouteId());
-			if(meta.getRoute().getHttpMethod() != HttpMethod.GET)
+
+			if(!reverseRouteLookup.isGetRequest(pageDesc.getRouteId()))
 				throw new RuntimeException("Plugin "+desc.getPluginName()+" supplied an illegal route id that is not a GET request="+pageDesc.getRouteId());
 			
-			String url = meta.getRoute().getFullPath();
+			String url = reverseRouteLookup.convertToUrl(pageDesc.getRouteId());
 			
 			descriptors.add(new SingleMenuItem(pageDesc.getMenuTitle(), url));
 			secureMenuMap.putIfAbsent(pageDesc.getMenuCategory(), descriptors);
@@ -59,11 +56,10 @@ public class MenuCreator {
 				continue;
 			
 			List<SingleMenuItem> descriptors = publicMenuMap.getOrDefault(pageDesc.getMenuCategory(), new ArrayList<>());
-			RouteMeta meta = reverseRouteLookup.get(pageDesc.getRouteId());
-			if(meta.getRoute().getHttpMethod() != HttpMethod.GET)
+			if(!reverseRouteLookup.isGetRequest(pageDesc.getRouteId()))
 				throw new RuntimeException("Plugin "+desc.getPluginName()+" supplied an illegal route id that is not a GET request="+pageDesc.getRouteId());
-			
-			String url = meta.getRoute().getFullPath();
+					
+			String url = reverseRouteLookup.convertToUrl(pageDesc.getRouteId());
 			
 			descriptors.add(new SingleMenuItem(pageDesc.getMenuTitle(), url));
 			publicMenuMap.putIfAbsent(pageDesc.getMenuCategory(), descriptors);

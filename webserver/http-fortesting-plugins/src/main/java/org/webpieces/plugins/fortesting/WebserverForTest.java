@@ -22,7 +22,6 @@ import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.api.WebServerFactory;
 
 import com.google.inject.Module;
-import com.google.inject.util.Modules;
 
 public class WebserverForTest {
 	
@@ -62,16 +61,12 @@ public class WebserverForTest {
 		}
 		
 		Module platformOverrides = testConfig.getPlatformOverrides();
-		Module allOverrides = new TagLookupOverride();
-		if(platformOverrides != null) {
-			allOverrides = Modules.combine(platformOverrides, allOverrides);
-		}
 		
 		File baseWorkingDir = FileFactory.getBaseWorkingDir();
 
 		//3 pieces to the webserver so a configuration for each piece
 		WebServerConfig config = new WebServerConfig()
-				.setPlatformOverrides(allOverrides)
+				.setPlatformOverrides(platformOverrides)
 				.setHttpListenAddress(new InetSocketAddress(httpPort))
 				.setHttpsListenAddress(new InetSocketAddress(httpsPort))
 				.setSslEngineFactory(new SSLEngineFactoryWebServerTesting())
