@@ -19,7 +19,7 @@ import org.webpieces.router.impl.RoutingHolder;
 @Singleton
 public class MenuCreator {
 
-	private Menu menu;
+	private List<SingleMenu> menus;
 	private RoutingHolder routes;
 	private Set<BackendGuiDescriptor> descriptors;
 
@@ -30,14 +30,17 @@ public class MenuCreator {
 	}
 	
 	private SingleMenu convert(Entry<MenuCategory, List<SingleMenuItem>> entry) {
-		return new SingleMenu(entry.getKey(), entry.getValue());
+		boolean allSecure = true;
+		for(SingleMenuItem item : entry.getValue()) {
+			if(!item.isSecure())
+				allSecure = false;
+		}
+		
+		return new SingleMenu(entry.getKey(), entry.getValue(), allSecure);
 	}
 	
-	private void wireInSecurePages(ReverseRouteLookup reverseRouteLookup, Map<MenuCategory, List<SingleMenuItem>> secureMenuMap, BackendGuiDescriptor desc) {
+	private void wireInPages(ReverseRouteLookup reverseRouteLookup, Map<MenuCategory, List<SingleMenuItem>> secureMenuMap, BackendGuiDescriptor desc) {
 		for(PageDescriptor pageDesc : desc.getWireIntoGuiDescriptors()) {
-			if(!pageDesc.isSecure())
-				continue;
-			
 			List<SingleMenuItem> descriptors = secureMenuMap.getOrDefault(pageDesc.getMenuCategory(), new ArrayList<>());
 
 			if(!reverseRouteLookup.isGetRequest(pageDesc.getRouteId()))
@@ -45,44 +48,26 @@ public class MenuCreator {
 			
 			String url = reverseRouteLookup.convertToUrl(pageDesc.getRouteId());
 			
-			descriptors.add(new SingleMenuItem(pageDesc.getMenuTitle(), url));
+			descriptors.add(new SingleMenuItem(pageDesc.getMenuTitle(), url, pageDesc.isSecure()));
 			secureMenuMap.putIfAbsent(pageDesc.getMenuCategory(), descriptors);
 		}
 	}
-
-	private void wireInPublicPages(ReverseRouteLookup reverseRouteLookup, Map<MenuCategory, List<SingleMenuItem>> publicMenuMap, BackendGuiDescriptor desc) {
-		for(PageDescriptor pageDesc : desc.getWireIntoGuiDescriptors()) {
-			if(pageDesc.isSecure())
-				continue;
-			
-			List<SingleMenuItem> descriptors = publicMenuMap.getOrDefault(pageDesc.getMenuCategory(), new ArrayList<>());
-			if(!reverseRouteLookup.isGetRequest(pageDesc.getRouteId()))
-				throw new RuntimeException("Plugin "+desc.getPluginName()+" supplied an illegal route id that is not a GET request="+pageDesc.getRouteId());
-					
-			String url = reverseRouteLookup.convertToUrl(pageDesc.getRouteId());
-			
-			descriptors.add(new SingleMenuItem(pageDesc.getMenuTitle(), url));
-			publicMenuMap.putIfAbsent(pageDesc.getMenuCategory(), descriptors);
-		}
-	}
 	
-	public synchronized Menu getMenu() {
-		if(menu == null)
+	public synchronized List<SingleMenu> getMenu() {
+		if(menus == null)
 			createMenuOnce();
 		
-		return menu;
+		return menus;
 	}
 
 	private void createMenuOnce() {
-		Map<MenuCategory, List<SingleMenuItem>> secureMenuMap = new HashMap<>();
-		Map<MenuCategory, List<SingleMenuItem>> publicMenuMap = new HashMap<>();
+		Map<MenuCategory, List<SingleMenuItem>> menuMap = new HashMap<>();
 
 		for(BackendGuiDescriptor desc : descriptors) {
-			wireInSecurePages(routes.getReverseRouteLookup(), secureMenuMap, desc);
-			wireInPublicPages(routes.getReverseRouteLookup(), publicMenuMap, desc);
+			wireInPages(routes.getReverseRouteLookup(), menuMap, desc);
 		}
 		
-		menu = new Menu(create(secureMenuMap), create(publicMenuMap));
+		menus = create(menuMap);
 	}
 
 	private List<SingleMenu> create(Map<MenuCategory, List<SingleMenuItem>> secureMenuMap) {

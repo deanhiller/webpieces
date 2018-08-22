@@ -8,10 +8,12 @@ public class SingleMenu {
 
 	private MenuCategory menuCategory;
 	private List<SingleMenuItem> menuItems;
+	private boolean allSecure;
 
-	public SingleMenu(MenuCategory menuCategory, List<SingleMenuItem> menuItems) {
+	public SingleMenu(MenuCategory menuCategory, List<SingleMenuItem> menuItems, boolean allSecure) {
 		this.menuCategory = menuCategory;
 		this.menuItems = menuItems;
+		this.allSecure = allSecure;
 	}
 
 	public MenuCategory getMenuCategory() {
@@ -24,6 +26,10 @@ public class SingleMenu {
 
 	public List<SingleMenuItem> getMenuItems() {
 		return menuItems;
+	}
+
+	public boolean isAllSecure() {
+		return allSecure;
 	}
 
 }
