@@ -160,7 +160,8 @@ This project is essentially pieces that can be used to build any http related so
 * Tests now test for backwards compatibility so we(developers) do not accidentally break compatibility with your app except on major releases
 
 #### Downsides
-  Currently documentation is lacking but there is an example for pretty much everything in webpieces/webserver/http-webserver/src/test/java/* as we do something called feature testing(testing as user would use the system) for all paths of code.
+
+May have to Deal with Dean
 
 #### Some HTTP/2 features
  * better pipelining of requests fixing head of line blocking problem
@@ -169,6 +170,9 @@ This project is essentially pieces that can be used to build any http related so
  * Multiplexing multiple requests over TCP connection
 
 #### Pieces of Webpieces
+
+There is a jpeg of these pieces and relationships in the http://localhost:8080/@documentation pages (on DevelopmentServer only)
+
  * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer including netty!!!)
  * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers together)
  * http/http1_1-parser - An asynchronous http parser that can accept partial payloads (ie. nio payloads don't have full messages).  Can be used with ANY nio library.
@@ -179,38 +183,3 @@ This project is essentially pieces that can be used to build any http related so
  * http/http-frontend - An very thin http webserver.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end and adds it's own http-router and templating engine)
  * webserver/http-webserver - a webserver with http2 and http1.1 support and tons of overriddable pieces via guice
  * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
-
-#### Examples.....
-
-```
-${user.account.address}$
-*{ comment ${user.account.address}$ is not executed }*
-&{'This is account %1', 'i18nkey', user.account.name}&  // Default text, key, arguments
-%{  user = SomeLogic.getUser(); }%
-#{if user}#User does exist#{/if}#{elseif}#User does not exist#{/if}#
-@[ROUTE_ID, user:account.user.name, arg:'flag']@
-@@[ROUTE_ID, user:account.user.name, arg:'flag']@@
-```
-
-The last two are special and can be used between tag tokens and between i18n tokens like so...
-
-#### @documentation Notes:
-
-* Section on links to tests/html files as examples
-* Section on Generator Tags and RuntimeTags and html.tag files
-* Section on object to string and string to object bindings
-* Section on overriding platform
-* Section on overriding web application classes
-* Section on i18n (need to explain, do NOT define message.properties since there is a list of Locales and that would create a match on any language)
-* Section on escaping html and not escaping html (variable names with _xxx are not escaped) and the verbatim or noescape tag
-* Section on testing
-* Section on field tag and how to create more of these as your own
-* Section on variable scopes... tag arguments, template properties and page arguments (how template props are global)
-* Section on PRG pattern (point to flash/Validation)
-* Section on Arrays and array based forms
-* Section on tab state vs. session vs. flash (Validation, Flash)
-* Section on filters
-* don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
-* resource bundles are complex needing to provide one for some tags if there is a provider of tags
-* unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
-

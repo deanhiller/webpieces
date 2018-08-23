@@ -1,22 +1,5 @@
 # webpieces
 
-[![Build Status](https://travis-ci.org/deanhiller/webpieces.svg?branch=master)](https://travis-ci.org/deanhiller/webpieces)
-
-Codecov.io / jacoco has two bugs (so we are actually way higher than this number) documented at bottom of this page
-[![codecov](https://codecov.io/gh/deanhiller/webpieces/branch/master/graph/badge.svg)](https://codecov.io/gh/deanhiller/webpieces)
-
-#### Pieces of Webpieces
- * channelmanager - a very thin layer on nio for speed(used instead of netty but with it's very clean api, anyone could plugin in any nio layer including netty!!!)
- * asyncserver - a thin wrapper on channelmanager to create a one call tcp server (http-frontend sits on top of this and the http parsers together)
- * http/http1_1-parser - An asynchronous http parser that can accept partial payloads (ie. nio payloads don't have full messages).  Can be used with ANY nio library.
- * http/http1_1-client - http1.1 client
- * http/http2-parser - An asynchronous http2 parser with all the advantages of no "head of line blocking" issues and pre-emptively sending responses, etc. etc.
- * http/http2-client - http 2 client built on above core components because you know if you server supports http2 AND noy doing 1.1 keeps it simple!!!
- * http/http2to1_1-client - http1.1 client with an http2 interface SOOOOOO http2-client and http2to1_1-client are swappable as they implement the same api
- * http/http-frontend - An very thin http webserver.  call frontEndMgr.createHttpServer(svrChanConfig, serverListener) with a listener and it just fires incoming web http server requests to your listener(webserver/http-webserver uses this piece for the front end and adds it's own http-router and templating engine)
- * webserver/http-webserver - a webserver with http2 and http1.1 support and tons of overriddable pieces via guice
- * core/runtimecompiler - create a runtime compiler with a list of source paths and then just use this to call compiler.getClass(String className) and it will automatically recompile when it needs to.  this is only used in the dev servers and is not on any production classpaths (unlike play 1.4.x)
-
 #### TODO:
 * In quickstart, adding CarDbo made me restart the webserver.  we need to debug why the hibernate scan did not kick in.
 * add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$ and for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation and test ${_variable}$ and escaping and such
