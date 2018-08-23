@@ -25,6 +25,7 @@ This 23 minute video barely scratches the surface but demonstrates
 * development server only in-memory database GUI at http://localhost:8080/@db
 * development server only in-memory documentation at http://localhost:8080/@documentation
 
+#### BIG NOTE: There is 1 bug where I have to restart the DevelopmentServer in intellij(This does NOT happen in eclipse and I am trying to figure out how intellij is screwing things up) or it may be intellij's gradle plugin
 [Webpieces YouTube QuickStart](https://youtu.be/4FtdAX_wKD0)
 
 One thing to note in the video is I was caught off guard by a minor bug(that is easily worked around) and had to restart the DevelopmentServer as for some reason, the hibernate rescan of entities and table creations did not work.  We may have that fixed by the time you watch the video(hopefully)
