@@ -1,8 +1,6 @@
 package org.webpieces.router.api.dto;
 
-import org.webpieces.router.api.actions.Redirect;
-
-public class RedirectResponse implements Redirect {
+public class RedirectResponse {
 
 	public Boolean isHttps;
 	public String domain;

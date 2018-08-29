@@ -2,16 +2,8 @@
 #{set title:'Dynamic Hello World'/}#
 #{set tab:'management'/}#
 
-<ol>
-	<li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
-	<li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
-	<li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
-	<li><a href="@[QUICK_START3]@">&{ 'CRUD no ajax', 'crudNoAjax'}&</a>
-	<li><a href="@[QUICK_START4]@">&{ 'ajax CRUD', 'ajaxCrud'}&</a>
-	<li><a href="@[QUICK_START5]@">&{ 'Login', 'ajaxCrud'}&</a>
-	<li><a href="@[QUICK_START6]@">&{ 'Helloworld Test', 'helloworldTest'}&</a>
-	<li><a href="@[QUICK_START7]@">&{ 'Helloworld Tag', 'helloworldTag'}&</a>
-</ol>
+#{renderTagArgs 'docHome.html'/}#
+#{renderTagArgs 'quickStartList.html'/}#
 
 <h1>Dynamic Hello World</h1>
 

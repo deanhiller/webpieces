@@ -2,16 +2,8 @@
 #{set title:'Webpieces QuickStart'/}#
 #{set tab:'management'/}#
 
-<ol>
-    <li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
-    <li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'CRUD no ajax', 'crudNoAjax'}&</a>
-    <li><a href="@[QUICK_START4]@">&{ 'ajax CRUD', 'ajaxCrud'}&</a>
-    <li><a href="@[QUICK_START5]@">&{ 'Login', 'ajaxCrud'}&</a>
-    <li><a href="@[QUICK_START6]@">&{ 'Helloworld Test', 'helloworldTest'}&</a>
-    <li><a href="@[QUICK_START7]@">&{ 'Helloworld Tag', 'helloworldTag'}&</a>
-</ol>
+#{renderTagArgs 'docHome.html'/}#
+#{renderTagArgs 'quickStartList.html'/}#
 
 <h2>Your first Hibernate entity</h2>
 
@@ -148,7 +140,7 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 <pre>
 <code>	public Action carAddEdit(String name) {
 		if(name == null) {
-			return Actions.renderThis("entity", new UserDbo());
+			return Actions.renderThis("entity", new CarDbo());
 		}
 
 		CarDbo car = CarDbo.findByName(Em.get(), name);
@@ -192,7 +184,9 @@ for you with the correct url.  Any params like class and style are converted as 
 	what the user typed in when the page refreshes due to errors so you don't do extra work for that either.
 	Now that this is all setup, as long as you did not stop your development server, go to
 	http://localhost:8080/car/new and you should see a small form on the page with
-	a save button that will not work and will return a 5XX when you click it.  If you stopped your development
+	a save button that will not work and will return a 5XX when you click it.  Click the save button, and then
+	look at your logs and scroll up to the logs in red(YES YES!! errors and warnings are in red so they are damn
+	easy to find and are typically very detailed as to what is wrong!).  If you stopped your development
 	server however, it will not startup since there is a route with a method that does not exist.  Either way,
 	we need to fix the POST of the Car so let's do that next.  Add the following method to the controller]*
 </p>
@@ -201,10 +195,14 @@ for you with the correct url.  Any params like class and style are converted as 
 <code>	public Redirect postSaveCar(CarDbo entity) {
 		if(entity.getName() == null) {
 			Current.validation().addError("entity.name", "name is required");
+		} else if(entity.getName().length() < 3) {
+			Current.validation().addError("entity.name", "name not long enough");
 		}
 
 		if(entity.getStyle() == null) {
 			Current.validation().addError("entity.style", "style is required");
+		} else if(entity.getStyle().length() < 3) {
+			Current.validation().addError("entity.style", "style not long enough");
 		}
 
 		//all errors are grouped and now if there are errors redirect AND fill in
@@ -229,7 +227,7 @@ for you with the correct url.  Any params like class and style are converted as 
 
 <p>We first validate each thing we need to and keep adding errors to each field that is wrong.  Then, we check if validation
 	hasErrors() and if it does, we redirect back to the edit or add page depending on if we are editing or adding the
-	entity.  If there are no errors, we process to call Em.get().merge(entity) will will save or update the CarDbo in
+	entity.  If there are no errors, we process to call Em.get().merge(entity) will save or update the CarDbo in
 	our database.  Em.get().flush() ensures all changes are persisted such that you can call persist, delete and then at
 	the end if you discover some sort of validation went wrong, don't flush and none of it will be saved.</p>
 

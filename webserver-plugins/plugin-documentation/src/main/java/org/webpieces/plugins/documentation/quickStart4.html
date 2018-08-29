@@ -2,198 +2,485 @@
 #{set title:'Webpieces QuickStart'/}#
 #{set tab:'management'/}#
 
-<ol>
-    <li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
-    <li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'CRUD no ajax', 'crudNoAjax'}&</a>
-    <li><a href="@[QUICK_START4]@">&{ 'ajax CRUD', 'ajaxCrud'}&</a>
-    <li><a href="@[QUICK_START5]@">&{ 'Login', 'ajaxCrud'}&</a>
-    <li><a href="@[QUICK_START6]@">&{ 'Helloworld Test', 'helloworldTest'}&</a>
-    <li><a href="@[QUICK_START7]@">&{ 'Helloworld Tag', 'helloworldTag'}&</a>
-</ol>
+#{renderTagArgs 'docHome.html'/}#
+#{renderTagArgs 'quickStartList.html'/}#
 
-<h2>Your first Hibernate entity</h2>
+<h2>HTML CRUD</h2>
 
-<p>Ideally however in a dynamic web application, we would like to let people </p>
+<p>It's always best to start with basic html and keep things simple to start with when learning so this is the pure html, no javascript 
+version of list all my Accounts, create an account, edit an account, and delete an account.  The basic CRUD flow is so
+common, it deserves it's own example.  If you want the advanced AJAX version, skip to the next page</p>
 
+<p>First, let's create a new RouteId file called AccountRouteId like so</p>
 <pre>
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.router.api.routing.RouteId;
 
-public enum MyMainRouteId implements RouteId {
-    HELLO_WORLD
+public enum AccountRouteId implements RouteId {
+	//list
+	LIST_ACCOUNTS,
+	//add/edit
+	GET_ADD_ACCOUNT_FORM, GET_EDIT_ACCOUNT_FORM, POST_ACCOUNT_FORM,
+	//delete
+	CONFIRM_DELETE_ACCOUNT, POST_DELETE_ACCOUNT
 }</code>
 </pre>
 
-<p>This is where we will put all the RouteIds for this package and for this RouteModule.  Notice that the enum must extend
-RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
-RouteModule called MyMainRoutes with a single route to our new webpage</p>
+<dl>
+    <dt>LIST_ACCOUNTS</dt>
+    <dd>This is the route for GET request to return the list accounts page</dd>
+    <dt>GET_ADD_ACCOUNT_FORM</dt>
+    <dd>This is the route for GET request to return the form to fill in a new account</dd>
+    <dt>GET_EDIT_ACCOUNT_FORM</dt>
+    <dd>This is the route for GET request to return the form to edit an existing account and may or may not be the same html/template as the GET_ADD_ACCOUNT_FORM route</dd>
+    <dt>POST_ACCOUNT_FORM</dt>
+    <dd>This route is for when you post from 1 of the 2 forms above.  You could have 2 post routes, one for edit and one for create but we don't need to</dd>
+    <dt>CONFIRM_DELETE_ACCOUNT</dt>
+    <dd>When someone clicks delete, we render a 'are you sure page' to make sure they didn't accidentally click delete</dd>
+    <dt>POST_DELETE_ACCOUNT</dt>
+    <dd>When they click yes, on the 'are you sure' page, this is the POST route invoked</dd>
+</dl>
+
+<p>Next, there is a special method for a CRUD operation so let's add that at the end of the existing MyMainRoutes file
+like so:</p>
 
 <pre>
 <code>package org.webpieces.helloworld.myapp;
 
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routing.CrudRouteIds;
 
 public class MyMainRoutes extends AbstractRoutes {
-    @Override
-    protected void configure() {
-        addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-    }
+	@Override
+	protected void configure() {
+		addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
+		addRoute(HttpMethod.GET ,   "/helloworld/{name}/{id}", "MyMainController.dynamicHelloWorld", MyMainRouteId.DYNAMIC_HELLO_WORLD);
+
+		//route to render the page of creating a new user
+		addRoute(HttpMethod.GET ,   "/car/new",         "MyMainController.carAddEdit", MyMainRouteId.GET_CREATE_CAR_PAGE);
+		//route to render the page of editing an existing user
+		addRoute(HttpMethod.GET ,   "/car/edit/{name}", "MyMainController.carAddEdit", MyMainRouteId.GET_EDIT_CAR_PAGE);
+		//route to save a new or existing user
+		addRoute(HttpMethod.POST,   "/car/post",        "MyMainController.postSaveCar", MyMainRouteId.POST_CAR);
+
+		CrudRouteIds routeIds = new CrudRouteIds(
+				AccountRouteId.LIST_ACCOUNTS, AccountRouteId.GET_ADD_ACCOUNT_FORM,
+				AccountRouteId.GET_EDIT_ACCOUNT_FORM, AccountRouteId.POST_ACCOUNT_FORM,
+				AccountRouteId.CONFIRM_DELETE_ACCOUNT, AccountRouteId.POST_DELETE_ACCOUNT);
+		addCrud("account", "CrudAccountController", routeIds);
+	}
 }</code>
 </pre>
 
-<p>Here, we are saying when the browser calls any of these urls that end up on our server, webpieces will invoke
-MyMainController.helloWorld</p>
+<p>The "account" we pass in becomes part of the 'standard url pattern' we happen to use in this addCrud method but
+    feel free to create your own 'addCrud' method that your whole app can use to stay consistent.  This method
+adds all these routes for you but more importantly keeps your urls consistent for CRUD operations:</p>
 
 <ol>
-    <li>http://localhost:8080/helloworld</li>
-    <li>https://localhost:8080/helloworld</li>
-    <li>http://anydomain.com/helloworld  #As long as your DNS is setup properly and we receive the request</li>
+    <li>addRoute(GET ,   "/account/list",        "CrudAccountController.accountList", listRoute);</li>
+    <li>addRoute(GET ,   "/account/new",         "CrudAccountController.accountAddEdit", addRoute);</li>
+    <li>addRoute(GET ,   "/account/edit/{id}",   "CrudAccountController.accountAddEdit", editRoute);</li>
+    <li>addRoute(POST,   "/account/post",        "CrudAccountController.postSaveAccount", saveRoute);</li>
+    <li>addRoute(GET,    "/account/confirmdelete/{id}", "CrudAccountController.confirmDeleteAccount", confirmDelete);</li>
+    <li>addRoute(POST,   "/account/delete/{id}", "CrudAccountController.postDeleteAccount", deleteRoute);</li>
 </ol>
 
-<p>Basically, domains are ignored by default though you can match on domain(see the Routes Reference for more info).
-Now that we defined a route and a Controller and method to invoke, we should create the Controller</p>
+<p>Notice, that it names the url /account/*** and the methods accountList and accountAddEdit and all post methods
+    then start with postXXXX keeping consistency so every GET request invokes normal methods but POST methods always
+    start with postXXX keeping your app consistent.  Next, let's create the AccountDbo.java entity bean like so:</p>
 
 <pre>
-<code>package org.webpieces.helloworld.myapp;
+<code>*[package org.webpieces.helloworld.myapp;
+
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Query;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="ACCOUNT")
+@NamedQueries({
+	@NamedQuery(name = "findAllAccounts", query = "select u from AccountDbo u"),
+})
+public class AccountDbo {
+
+	@Id
+	@SequenceGenerator(name="account_id_gen",sequenceName="account_sequence" ,initialValue=1,allocationSize=10)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE,generator="account_id_gen")
+	private Integer id;
+
+	@Column(unique = true)
+	private String name;
+
+	private String contactsName;
+
+	private int priority;
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
+    public String getContactsName() {
+		return contactsName;
+	}
+
+	public void setContactsName(String contactsName) {
+		this.contactsName = contactsName;
+	}
+
+	public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<AccountDbo> findAll(EntityManager mgr) {
+		Query query = mgr.createNamedQuery("findAllAccounts");
+		return query.getResultList();
+	}
+}]*</code>
+</pre>
+
+<p>Then, we can now create CrudAccountController.java with our first method accountList like so:</p>
+
+<pre>
+<code>*[package org.webpieces.helloworld.myapp;
+
+import java.util.List;
 
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
+
+import org.webpieces.plugins.hibernate.Em;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 
 @Singleton
-public class MyMainController {
-    public Action helloWorld() {
-        return Actions.renderThis();
-    }
-}</code>
+public class CrudAccountController {
+
+	public Action accountList() {
+		EntityManager mgr = Em.get();
+		List<AccountDbo> accounts = AccountDbo.findAll(mgr);
+		return Actions.renderThis("accounts", accounts);
+	}
+}]*</code>
 </pre>
 
-<p>Lastly, Actions.renderThis() informs webpieces to render the html file with the same name as the method helloWorld so
-next create a file called helloWorld.html in the same directory as the Controller</p>
+<p>Then, of course, we need an html page called accountList.html since renderThis is being called:</p>
 
-<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
-MyHelloWorldMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
-getRouteModules method should look like so</p>
 
-<pre>
-<code>@Override
-public List&lt;Routes&gt; getRouteModules() {
-    return Lists.newArrayList(
-    new AppRoutes(),
-    new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
-    new CrudRoutes(),
-    new AjaxCrudRoutes(),
-    new JsonRoutes(),
-    new MyMainRoutes()
-    );
-}</code>
-</pre>
 
-<p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
-they are all examples.  While LoginRoutes is an example as well, you most likely want a way to login so you would keep
-the LoginRoutes module</p>
+<p>Now, we can go to http://localhost:8080/account/list</p>
 
 <p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
 or go to https://localhost:8443/helloworld</p>
 
 <p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
 
+<pre>
+<code>*[#{extends '../base/main.html'/}#
+#{set title:'Awesome CRUD'/}#
+#{set tab:'none'/}#
 
+<h4>Accounts</h4>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>Account Name</th>
+            <th>Contacts Name</th>
+            <th>Priority</th>
+        </tr>
+    </thead>
+    <tbody>
+        #{list items:accounts, as:'entity'}#
+            <tr>
+                <td>${entity.name}$</td>
+                <td>${entity.contactsName}$</td>
+                <td>${entity.priority}$</td>
+                <td>
+                	<a href="@[GET_EDIT_ACCOUNT_FORM, id:entity.id]@" class="btn" id="editLink_${entity_index-1}$"> &{'Edit', 'link.edit'}& </a>
+                	<a href="@[CONFIRM_DELETE_ACCOUNT, id:entity.id]@" class="btn" id="eletePattern_${entity_index-1}$"> &{'Delete', 'link.delete'}& </a>
+                </td>
+            </tr>
+        #{/list}#
+        #{else}#
+        <tr>
+            <td colspan="4">
+            There are no accounts, Add one now please.
+            </td>
+        </tr>
+        #{/else}#
+    </tbody>
+</table>
 
+<a href="@[GET_ADD_ACCOUNT_FORM]@" class="btn btn-primary" id="addLink">Add Account</a>
+]*</code>
+</pre>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*{
-
-<h2>A Walkthrough of the generated Server.java</h2>
-
-<p>When you start up DevelopmentServer.java, most changes to your web application will not require a restart.  Because
-webpieces is a library, however, changes to the 3 classes that startup webpieces would require a restart and they are</p>
-
-<ol>
-   <li>Server.java</li>
-   <li>ServerConfig.java</li>
-   <li>WebSSLFactory.java</li>
-</ol>
-
-<p>YOU own these classes now to modify to your heart's content.  Any changes to these classes or classes 
-that these depend on would require a development server restart to see the changes. Luckily, these
-classes pretty much do not really need to ever be touched.</p>
-
-<p>Looking closer at Server.java, you will notice 3 different configurations</p>
-
-<ol>
-   <li>WebServerConfig</li>
-   <li>RouterConfig</li>
-   <li>TemplateConfig</li>
-</ol>
-
-<p>Each config object configures that piece of the webserver making it easier to trace what different configurations do
-as well as keep each piece separate from each other.</p>  
-
-<p>We have a firm belief that nearly all properties should be in the database and not on the filesystem including 
-configuration properties.  We generate Server.java such that you could modify it and put any properties 
-you like on the filesystem but we advise against 99% of properties there as typically you want property file 
-changes to go through your test team rather than someone getting on a production server and tweaking a property.
-Of course, the 1 property that must be a command line argument or a property is the database connection such that
-your server can exist in multiple environments like development, staging, and production with different database
-connections.</p>  
-
-<p>To make it simpler for all components/plugins to read/write properties into a database, an interface SimpleStorage.java
-is provided.  The generated application implements this interface connecting it to hibernate but you could change it
-to connect to some noSQL database or whatever else you would like.</p>
-
-<p><b>NOTE: In the future, we want to add a bean plugin that exposes MBeans to a web gui for you and also 
-saves changes to the database thereby eliminating the need for property files for basically everything. It would
-do the following for you...</b></p>
+<p>We can now go over this template piece by piece:</p>
 
 <ol>
-   <li>expose a web page dynamically to modify those properties(for one node or for all machines)</li>
-   <li>read in the properties from SimpleStorage on startup to set them back to what they were</li>
-   <li>write changes from the web page into the database so they are persisted</li>
+    <li>*[#{extends '../base/main.html'/}#]* is extending a template which uses _body and title and tab variables</li>
+    <li>*[#{set title:'Awesome CRUD'/}#]* is simply setting a title that main.html requires and will be
+        displayed in the browser title</li>
+    <li>*[#{set tab:'none'/}#]* We are not really using this one but if you look at main.html, it
+        uses tab to set special css on the matching tab name in the list at the top of the page</li>
+    <li>Next, we see a basic html table with some templating logic mixed in</li>
+    <li>*[#{list items:accounts, as:'entity'}#]* This basically loops over each account storing it in the entity variable so
+    that html in between the begin and end list tag will be generated</li>
+    <li>*[<a href="@[GET_EDIT_ACCOUNT_FORM, id:entity.id]@" class="btn" id="editLink_${entity_index-1}$"> &{'Edit', 'link.edit'}& </a>]*
+    This defines a reverse url lookup using the account's id (entity.id).  The id of the a element is simply the index for css purposes if desired</li>
+    <li>*[#{else}#]* If there is no accounts, whatever html is in the else will be displayed</li>
 </ol>
 
-<p>This automatically managed way of doing properties is preferred over using property files</p>
+<p>Now, go to http://localhost:8080/account/list to view your work of art.  You will notice you have no
+accounts so next it might be a good idea to create the controller and the form for creating one.  Let's start
+    with the controller:
+</p>
 
-<h2>A walkthrough of Meta & Modules & Plugins</h2>
+<pre>
+<code>*[public Action accountAddEdit(Integer id) {
+		if(id == null) {
+			return Actions.renderThis("entity", new AccountDbo());
+		}
 
-<p>The main bootstrap file that webpieces webserver reads in is {yourproject}-all/{yourproject}/src/main/resources/appmeta.txt
-for production mode and {yourproject}-all/{yourproject}/src/main/resources/appmeta-dev.txt for Development mode.  This
-file boostraps your web application by telling us your meta file.</p>  
+		AccountDbo account = Em.get().find(AccountDbo.class, id);
+		if(account == null)
+			throw new NotFoundException("Account is not found");
+		return Actions.renderThis("entity", account);
+}]*</code>
+</pre>
 
-<p>If you look closely, you will notice the appmeta-dev.txt contains DeveloperMeta.java and in that file, he just re-uses all
-the production meta stuff as well as adding 2 plugins that are only in the development server.  After all, we don't
-want to expose a SQL GUI nor webpieces documentation on our production website.</p>
+<p>This method accepts the id (or you can use some other unique identifier) and if it is null, then it
+assumes a create and supplies back an empty Account to render the html page with.  If however, there
+is an id, we look up the account and if it is not found, we throw NotFound which will in turn invoke
+our NotFound route to return a 404 and a nice looking page with the 404 to the browser.  If the
+account is found, we render the same create form with all the fields filled in with the account data.
+The html for this create or edit page is as follows:</p>
 
-<p>Next, looking at {yourproject}Meta.java file, you will notice it is broken down into 3 main components</p>
+<pre>
+<code>*[#{extends '../base/main.html'/}#
+#{set title:'Add/Edit'/}#
+#{set tab:'none'/}#
+
+#{form action:@[POST_ACCOUNT_FORM]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
+   <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+         <h4 id="myModalLabel"> Account </h4>
+    </div>
+    <div class="modal-body" style="max-height: 600px">
+
+    	*{optional in case this is the add operation and so this is used in case of edits only }*
+    	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+
+        #{field 'entity.name', label:'Account Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'entity.contactsand Name', label:"Contact''s Name"}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+        #{field 'entity.priority', label:'Priority'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
+
+   </div>
+    <div class="modal-footer">
+        <input type="submit" name="submit" value="&{'Save', 'link.save'}&" class="btn btn-primary" />
+        <a href="@[LIST_ACCOUNTS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
+    </div>
+#{/form}#]*</code>
+</pre>
+
+<p>The first 3 lines are the same as the accountList.html we wrote about above(hopefully you were
+    reading and not spaced out).  Then, we use the form tag along with the POST_ACCOUNT_FORM url
+    lookup.  Next, we have
+*[<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>]* which is the special
+html for saving if this is an edit or a creation.  If we are editing a value, entity.id on posting
+will be filled in and if we are creating an account, entity.id will be a 0 length string.</p>
+
+<p>Finally, we reach the real meat, and yes, I spent shit loads of time perfecting this tag to work
+with arrays, and all sorts of things that you may run into saving your ass.  You can thank me
+later(jk, but monetary donations accepted).  The field tag works with *[<input/> <select/>]*
+or all sorts of input type html.  It accepts the entity.name which is the groovy text identifying
+the bean's get/set methods to call in this case AccountDbo.getName and AccountDbo.setName.  The
+label is what shown in the gui unless i18n overrides it using 'entity.name' as the key for you
+    into the i18n properties.</p>
+
+#{renderTagArgs 'fieldTag.html'/}#
+
+<p>Next is the bottom of the page with the standard input element button for submitting in html.
+That is just standard html so nothing special there other than the i18n *[&{'Save', 'link.save'}&]*
+tokens to do translations.  Lastly, there is a simple cancel button which literally tells the
+browser to do a GET request on the LIST_ACCOUNTS url.  Cancel is simply asking to load a different
+page.</p>
+
+<p>Now, you can click the Add Account button and the page for creating an account will be shown.  Of
+course, we have not created the post method yet so you cannot save anything just yet.  So, next
+let's create our post method in our controller like so</p>
+
+<pre>
+<code>*[public Redirect postSaveAccount(AccountDbo entity) {
+		if(entity.getName() == null) {
+			Current.validation().addError("entity.name", "password is required");
+		} else if(entity.getName().length() < 3) {
+			Current.validation().addError("entity.name", "Value is too short");
+		}
+
+		if(entity.getContactsName() == null) {
+			Current.validation().addError("entity.contactsName", "First name is required");
+		} else if(entity.getContactsName().length() < 3) {
+			Current.validation().addError("entity.contactsName", "First name must be more than 2 characters");
+		}
+
+		//all errors are grouped and now if there are errors redirect AND fill in
+		//the form with what the user typed in along with errors
+		if(Current.validation().hasErrors()) {
+			FlashAndRedirect redirect = new FlashAndRedirect(Current.getContext(), "Errors in form below");
+			redirect.setIdFieldAndValue("id", entity.getId());
+			return Actions.redirectFlashAll(AccountRouteId.GET_ADD_ACCOUNT_FORM, AccountRouteId.GET_EDIT_ACCOUNT_FORM, redirect);
+		}
+
+		Current.flash().setMessage("Account successfully saved");
+		Current.flash().keep();
+
+		Em.get().merge(entity);
+        Em.get().flush();
+
+		return Actions.redirect(AccountRouteId.LIST_ACCOUNTS);
+}]*</code>
+</pre>
+
+<p>The first steps on a post method are to do your validation.  Each time, you add an error like
+	Current.validation().addError("entity.name", "my error") using the field tag name 'entity.name' from the html.  As
+it goes through validation, it accumulates all the user errors it can.  Then, you check if there were any using
+Current.validation.hasErrors().  At this point, you need to store everything in flash scope to follow the PRG pattern.
+Basically, on the GET request all the information is available from flash scope and blown away once we return a
+response to the GET request.  In this case, we need to redirect to the add account route or the get account route
+since this post call could be from either editing or creating an account.
+</p>
+
+<p>As noted in your first hibernate entity(previous tutorial), calling Em.get().flush() is critical are no persist/delete/merge(update)
+will modify the database.  This is a special 'very' nice feature of hibernate such that you can modify tons of entities
+and delay the decision of persisting them all or not until later</p>
+
+<p>If there were no errors in validation however, we set a global message that is rendered in main.html so no
+matter what page we land on, as long as that page extends main.html "Account successfully saved" will be rendered
+again using flash scope Current.flash().setMessage("Account successfully saved");  Flash scope is not always saved, so
+	we need to tell webpieces to keep the flash scope for after the redirect by calling Current.flash().keep();  Finally,
+	we redirect back to the list accounts page where your new account should show up.
+</p>
+
+<p>Now for a little awesome demonstraction of the kick-ass power of PRG: </p>
 
 <ol>
-   <li>list of Guice Modules</li>
-   <li>list of Route Modules</li>
-   <li>list of Plugins</li>
+	<li>Go to http://localhost:8080/account/list</li>
+	<li>Click on Add Account</li>
+	<li>Do NOT type anything in and hit save</li>
+	<li>Next, type in Account Name 's' and Contact Name 'd' and hit save</li>
+	<li>Next type in Account Name 'Cool' and Contact Name 'Dean' and priority 'asdf' and hit save</li>
+	<li>Finally correct the asdf to '5' so it is an integer and click save</li>
+	<li>Now, click the back button and see the previous stage</li>
+	<li>Click the back button again</li>
 </ol>
 
-<p>I won't go in depth on plugins at this point but just note that plugins can be another fully contained web
-application with it's own guice modules, route modules, controllers, and html pages.  This allows you to plugin
-full webapplications into your webapplication.  It's what we use for all the backend plugins that could be removed
-if you desire a really thin lightweight server</p>  
+<p>Notice that you are NEVER getting this image.  We don't allow you to break your customer experience on webpieces:</p>
 
-}*
+<img src="%[/org/webpieces/plugins/documentation/resubmit_chrome.png]%"/>
 
+<p>Next, go to http://localhost:8080/account/list and click edit on your Account and you will notice that you can
+already just edit your account and save it just fine.</p>
+
+<p>Now, the only one thing we have left is the delete which we don't have a page for yet.  Let's create the
+	confirmDeleteAccount() method that will render our html page</p>
+<pre>
+<code>*[public Render confirmDeleteAccount(int id) {
+	AccountDbo account = Em.get().find(AccountDbo.class, id);
+	return Actions.renderThis("entity", account);
+}]*</code>
+</pre>
+
+<p>Pretty simple in that we just lookup the entity and pass it to the html template which is also simple:</p>
+
+<pre>
+<code>*[#{extends '../base/main.html'/}#
+#{set title:'Confirm Delete'/}#
+#{set tab:'none'/}#
+
+#{form action:@[POST_DELETE_ACCOUNT, id:entity.id]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
+
+   <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+         <h4 id="myModalLabel"> Delete Account? </h4>
+    </div>
+
+    <div class="modal-body">
+
+        Are you sure you want to delete Account ${entity.name}$?
+
+   </div>
+    <div class="modal-footer">
+        <input type="submit" name="submit" value="&{'Delete', 'link.delete'}&" class="btn btn-primary" />
+        <a href="@[LIST_ACCOUNTS]@" class="btn">&{'Cancel', 'link.cancel'}&</a>
+    </div>
+#{/form}#]*</code>
+</pre>
+
+<p>This looks much like the POST for add/edit account except one minor difference in that we use
+the reverse route into url tokens with the entities id *[@[POST_DELETE_ACCOUNT, id:entity.id]@]* and
+pass the entity.id in there so the POST url ends up having the id.  We could have instead done a
+hidden field as well like the add/edit.  The choice is up to you.  We could use a GET request to
+delete an entity but we prefer to use POST for deletes/creates/modifications and use GET for
+read with no side-affects to the database.  There are definite exceptions to this like a
+confirmation email may contain a GET request link which would modify your database state of
+the email to be confirmed.  So while, some developers stay in the theoretical world, there
+always seem to be exceptions since you can't do a POST from an email which we can redirect to a GET.</p>
+
+<p>Now, if you really want, from an email, you can do a GET, then redirect to a POST and then
+	redirect back to a GET to stay compliant with GET requests are only reads, not writes.
+	Ideally, when you do a GET, it only reads but this type of GET/Redirect/POST/Redirect
+	will still be a link that tries modify the database a second time (to the same value
+	of course the second time)</p>
+
+<p>Next, let's create the post method in our controller to actually delete the entity</p>
+
+<pre>
+<code>*[public Redirect postDeleteAccount(int id) {
+		AccountDbo ref = Em.get().find(AccountDbo.class, id);
+
+		Em.get().remove(ref);
+		Em.get().flush();
+		Current.flash().setMessage("Account deleted");
+		Current.flash().keep();
+		return Actions.redirect(AccountRouteId.LIST_ACCOUNTS);
+}]*</code>
+</pre>
+
+<p>Now, go ahead and create and delete entities to your hearts content to see the flow of the
+standard CRUD code for webpieces.  We hope to have a plugin to generate all this on fly
+in the future for you.  Basically follow a wizard, type in your fields and we generate the list
+page, add/edit/delete pages, controllers, routes, etc. all in one tight little package.</p>
+
+<p>In the next tutorial let's do an ajax CRUD in webpieces which is the same amount of code
+ironically.  </p>
+
+<a class="btn btn-primary" href="@[QUICK_START5]@" role="button">Next Ajax CRUD</a>

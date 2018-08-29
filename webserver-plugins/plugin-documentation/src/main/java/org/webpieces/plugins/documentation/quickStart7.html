@@ -2,207 +2,165 @@
 #{set title:'Webpieces QuickStart'/}#
 #{set tab:'management'/}#
 
-<ol>
-    <li><a href="@[QUICK_START]@">&{ 'Basic Hello World', 'helloworld'}&</a>
-    <li><a href="@[QUICK_START2]@">&{ 'Dynamic Hello World', 'dynamichelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'Persistent Hello World', 'persistenthelloworld'}&</a>
-    <li><a href="@[QUICK_START3]@">&{ 'CRUD no ajax', 'crudNoAjax'}&</a>
-    <li><a href="@[QUICK_START4]@">&{ 'ajax CRUD', 'ajaxCrud'}&</a>
-    <li><a href="@[QUICK_START5]@">&{ 'Login', 'ajaxCrud'}&</a>
-    <li><a href="@[QUICK_START6]@">&{ 'Helloworld Test', 'helloworldTest'}&</a>
-    <li><a href="@[QUICK_START7]@">&{ 'Helloworld Tag', 'helloworldTag'}&</a>
-</ol>
+#{renderTagArgs 'docHome.html'/}#
+#{renderTagArgs 'quickStartList.html'/}#
 
-<h2>Your first Hibernate entity</h2>
+<h2>Your first Test or 4</h2>
 
-<p>Ideally however in a dynamic web application, we would like to let people </p>
-
-<pre>
-<code>package org.webpieces.helloworld.myapp;
-
-import org.webpieces.router.api.routing.RouteId;
-
-public enum MyMainRouteId implements RouteId {
-    HELLO_WORLD
-}</code>
-</pre>
-
-<p>This is where we will put all the RouteIds for this package and for this RouteModule.  Notice that the enum must extend
-RouteId as webpieces only knows about RouteId and not your specific enum.  Next, let's use the RouteId and create a
-RouteModule called MyMainRoutes with a single route to our new webpage</p>
-
-<pre>
-<code>package org.webpieces.helloworld.myapp;
-
-import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRoutes;
-
-public class MyMainRoutes extends AbstractRoutes {
-    @Override
-    protected void configure() {
-        addRoute(HttpMethod.GET ,   "/helloworld",        "MyMainController.helloWorld", MyMainRouteId.HELLO_WORLD);
-    }
-}</code>
-</pre>
-
-<p>Here, we are saying when the browser calls any of these urls that end up on our server, webpieces will invoke
-MyMainController.helloWorld</p>
+<p>First, if you haven't read the twitter blog
+<a href="https://blog.twitter.com/engineering/en_us/topics/insights/2017/the-testing-renaissance.html">Feature Testing</a>,
+we highly suggest reading that!  There are 4 types of testing with Webpieces</p>
 
 <ol>
-    <li>http://localhost:8080/helloworld</li>
-    <li>https://localhost:8080/helloworld</li>
-    <li>http://anydomain.com/helloworld  #As long as your DNS is setup properly and we receive the request</li>
+    <li>Feature Testing library mode</li>
+    <li>Feature Testing Remote Client mode</li>
+    <li>Feature Testing Selenium</li>
+    <li>Component/Unit Testing(which we support better than most platforms but warn you against doing so)</li>
 </ol>
 
-<p>Basically, domains are ignored by default though you can match on domain(see the Routes Reference for more info).
-Now that we defined a route and a Controller and method to invoke, we should create the Controller</p>
-
-<pre>
-<code>package org.webpieces.helloworld.myapp;
-
-import javax.inject.Singleton;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.actions.Actions;
-
-@Singleton
-public class MyMainController {
-    public Action helloWorld() {
-        return Actions.renderThis();
-    }
-}</code>
-</pre>
-
-<p>Lastly, Actions.renderThis() informs webpieces to render the html file with the same name as the method helloWorld so
-next create a file called helloWorld.html in the same directory as the Controller</p>
-
-<pre>
-<code>&lt;html&gt;
-    &lt;head&gt;&lt;/head&gt;
-    &lt;body&gt;
-        Hello World
-    &lt;/body&gt;
-&lt;/html&gt;</code>
-</pre>
-
-<p>Finally, the one last step is we need to tell webpieces about this RouteModule that we created.  Inside the class
-MyHelloWorldMeta.java, modify it to add the RouteModule to the list of RouteModules already defined.  Your new
-getRouteModules method should look like so</p>
-
-<pre>
-<code>@Override
-public List&lt;Routes&gt; getRouteModules() {
-    return Lists.newArrayList(
-    new AppRoutes(),
-    new LoginRoutes("/org/webpieces/helloworld/base/crud/login/AppLoginController", "/secure/.*"),
-    new CrudRoutes(),
-    new AjaxCrudRoutes(),
-    new JsonRoutes(),
-    new MyMainRoutes()
-    );
-}</code>
-</pre>
-
-<p>A big note is that all the modules here should be deleted except for LoginRoutes in your production application as
-they are all examples.  While LoginRoutes is an example as well, you most likely want a way to login so you would keep
-the LoginRoutes module</p>
-
-<p>Finally, boot up your DevelopmentServer.java main class and open a browser and go to http://localhost:8080/helloworld
-or go to https://localhost:8443/helloworld</p>
-
-<p>Congratulations on your first webpieces page, next we will make our html a bit more dynamic</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*{
-
-<h2>A Walkthrough of the generated Server.java</h2>
-
-<p>When you start up DevelopmentServer.java, most changes to your web application will not require a restart.  Because
-webpieces is a library, however, changes to the 3 classes that startup webpieces would require a restart and they are</p>
+<p>In all modes, we typically use an in-memory database to be able to test out writing with production
+code and then reading back with production code preventing integration issues that get missed when
+you test them in isolation.  We also have this all setup for you unless you are going to use noSQL
+in which case you will need to setup your own in-memory version of a noSQL database which is
+typically just a Map of Map of Maps and very easy to setup.  In the case of cassandra, like so</p>
 
 <ol>
-   <li>Server.java</li>
-   <li>ServerConfig.java</li>
-   <li>WebSSLFactory.java</li>
+    <li>First Map is tableName to 2nd Map</li>
+    <li>The second Map is row key to 3rd Map</li>
+    <li>The third Map is SortedMap of column name to column value</li>
 </ol>
 
-<p>YOU own these classes now to modify to your heart's content.  Any changes to these classes or classes 
-that these depend on would require a development server restart to see the changes. Luckily, these
-classes pretty much do not really need to ever be touched.</p>
+<p>BOOOM!!!! In-memory cassandra which we coded that on one project very quickly though you do
+need to use a SortedMap on the last map since columns are in-order!!!  I need to revive
+<a href="https://github.com/deanhiller/playorm">PlayOrm</a>and rename it as well to some sort
+of noSQL mapping layer name that is much like hibernate but scalable and more KISS keeping many
+features of hibernate out on purpose to keep ou complexity which keeps out bugs more.</p>
 
-<p>Looking closer at Server.java, you will notice 3 different configurations</p>
+<h4>Feature Testing Library Mode</h4>
 
-<ol>
-   <li>WebServerConfig</li>
-   <li>RouterConfig</li>
-   <li>TemplateConfig</li>
-</ol>
+<p>This is a great mode in that with a little swapping of things via guice bindings, we put your http
+client directly on top of the webserver router and templating engine.  This means you can step directly
+from test into the platform bypassing the socket layer unlike Feature Testing Remote Client mode which
+goes over a socket.
+</p>
 
-<p>Each config object configures that piece of the webserver making it easier to trace what different configurations do
-as well as keep each piece separate from each other.</p>  
+<p>We give you a great cheat in that you can copy TestLesson2Html.java so copy this file and
+edit it to remove all the tests and remote endpoints.  TestLesson2Html demonstrates how to swap
+out remote clients deep within your code with mocks to create a feature test with
+mock remote systems.  Here is our copied and modified file TestHelloWorld.java:</p>
 
-<p>We have a firm belief that nearly all properties should be in the database and not on the filesystem including 
-configuration properties.  We generate Server.java such that you could modify it and put any properties 
-you like on the filesystem but we advise against 99% of properties there as typically you want property file 
-changes to go through your test team rather than someone getting on a production server and tweaking a property.
-Of course, the 1 property that must be a command line argument or a property is the database connection such that
-your server can exist in multiple environments like development, staging, and production with different database
-connections.</p>  
+<pre><code>*[package org.webpieces.helloworld;
 
-<p>To make it simpler for all components/plugins to read/write properties into a database, an interface SimpleStorage.java
-is provided.  The generated application implements this interface connecting it to hibernate but you could change it
-to connect to some noSQL database or whatever else you would like.</p>
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
-<p><b>NOTE: In the future, we want to add a bean plugin that exposes MBeans to a web gui for you and also 
-saves changes to the database thereby eliminating the need for property files for basically everything. It would
-do the following for you...</b></p>
+import org.junit.Before;
+import org.junit.Test;
+import org.webpieces.ddl.api.JdbcApi;
+import org.webpieces.ddl.api.JdbcConstants;
+import org.webpieces.ddl.api.JdbcFactory;
+import org.webpieces.httpclient11.api.HttpFullRequest;
+import org.webpieces.httpclient11.api.HttpFullResponse;
+import org.webpieces.httpclient11.api.HttpSocket;
+import org.webpieces.httpparser.api.common.Header;
+import org.webpieces.httpparser.api.common.KnownHeaderName;
+import org.webpieces.httpparser.api.dto.HttpRequest;
+import org.webpieces.httpparser.api.dto.HttpRequestLine;
+import org.webpieces.httpparser.api.dto.HttpUri;
+import org.webpieces.httpparser.api.dto.KnownHttpMethod;
+import org.webpieces.httpparser.api.dto.KnownStatusCode;
+import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.webserver.test.AbstractWebpiecesTest;
+import org.webpieces.webserver.test.ResponseExtract;
+import org.webpieces.webserver.test.ResponseWrapper;
 
-<ol>
-   <li>expose a web page dynamically to modify those properties(for one node or for all machines)</li>
-   <li>read in the properties from SimpleStorage on startup to set them back to what they were</li>
-   <li>write changes from the web page into the database so they are persisted</li>
-</ol>
+public class TestHelloWorld extends AbstractWebpiecesTest {
 
-<p>This automatically managed way of doing properties is preferred over using property files</p>
+	private JdbcApi jdbc = JdbcFactory.create(JdbcConstants.jdbcUrl, JdbcConstants.jdbcUser, JdbcConstants.jdbcPassword);
 
-<h2>A walkthrough of Meta & Modules & Plugins</h2>
+	private HttpSocket http11Socket;
+	private static String pUnit = HibernatePlugin.PERSISTENCE_TEST_UNIT;
 
-<p>The main bootstrap file that webpieces webserver reads in is {yourproject}-all/{yourproject}/src/main/resources/appmeta.txt
-for production mode and {yourproject}-all/{yourproject}/src/main/resources/appmeta-dev.txt for Development mode.  This
-file boostraps your web application by telling us your meta file.</p>  
+	@Before
+	public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
+		//clear in-memory database
+		jdbc.dropAllTablesFromDatabase();
 
-<p>If you look closely, you will notice the appmeta-dev.txt contains DeveloperMeta.java and in that file, he just re-uses all
-the production meta stuff as well as adding 2 plugins that are only in the development server.  After all, we don't
-want to expose a SQL GUI nor webpieces documentation on our production website.</p>
+		Server webserver = new Server(getOverrides(false), null, new ServerConfig(pUnit, JavaCache.getCacheLocation()));
+		webserver.start();
+		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
+	}
 
-<p>Next, looking at {yourproject}Meta.java file, you will notice it is broken down into 3 main components</p>
+	@Test
+	public void testDynamicHelloWorld() {
+		HttpFullRequest req = createRequest("/helloworld/deano/555");
 
-<ol>
-   <li>list of Guice Modules</li>
-   <li>list of Route Modules</li>
-   <li>list of Plugins</li>
-</ol>
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
 
-<p>I won't go in depth on plugins at this point but just note that plugins can be another fully contained web
-application with it's own guice modules, route modules, controllers, and html pages.  This allows you to plugin
-full webapplications into your webapplication.  It's what we use for all the backend plugins that could be removed
-if you desire a really thin lightweight server</p>  
+		ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Hello deano.  Your id is 555");
+	}
 
-}*
+	public static HttpFullRequest createRequest(String uri) {
+		HttpRequestLine requestLine = new HttpRequestLine();
+        requestLine.setMethod(KnownHttpMethod.GET);
+		requestLine.setUri(new HttpUri(uri));
+		HttpRequest req = new HttpRequest();
+		req.setRequestLine(requestLine );
+		req.addHeader(new Header(KnownHeaderName.HOST, "yourdomain.com"));
 
+		HttpFullRequest fullReq = new HttpFullRequest(req, null);
+		return fullReq;
+	}
+
+}]*</code></pre>
+
+<p>The setup is quite simple, drop all tables, then create the production server with some certain
+platform overrides(this is where we swap stuff for testing).  We then call webserver.start and
+then create a simulated socket(it looks like a socket but isn't and sits on top of the webserver
+directly).   The setup is very simple.</p>
+
+<p>Next in the test, we simply create an http request object for a GET request to
+"/helloworld/deano/555" and then send it, get the response and verify it is 200 OK and
+that the html contains what we expected</p>
+
+<h4>Feature Testing Remote Client mode</h4>
+
+<p>You ready to be blow completely away!!!  Just modify the setup method changing both locations
+of 'false' into isRemoteClientMode and add boolean isRemoteClientMode = true; like so:</p>
+
+<pre><code>*[@Before
+public void setUp() throws InterruptedException, ClassNotFoundException, ExecutionException, TimeoutException {
+    //clear in-memory database
+    jdbc.dropAllTablesFromDatabase();
+
+    boolean isRemoteClientMode = true;
+
+    Server webserver = new Server(getOverrides(isRemoteClientMode), null, new ServerConfig(pUnit, JavaCache.getCacheLocation()));
+    webserver.start();
+    http11Socket = connectHttp(isRemoteClientMode, webserver.getUnderlyingHttpChannel().getLocalAddress());
+}]*</code></pre>
+
+<p>Under the covers, we bind to port 0 picking up the available port and then query for the http and https ports
+so we can connect the client to the same port allowing you to run many of these test in parallel even since
+they connect to different ports.</p>
+
+<li>Feature Testing Selenium</li>
+
+<p>Selenium can be a double edged sword but can work really really well in some cases.  There is already
+an example in TestLesson5WithSelenium.java where you can see how we get the ports the webserver bound
+to and feed those into the urls for selenium to test properly</p>
+
+<p>You may even be able to get selenium tests to run in parallel if it can open different windows for
+testing since we can run our webserver on multiple ports at the same time as well</p>
+
+<li>Component/Unit Testing(which we support better than most platforms but warn you against doing so)</li>
+
+<p>Ok, we do advise against this type of testing as it will limit your refactoring and keeping your
+design up to date.  We fine the more unit testing there is, the more people are afraid to refactor
+because they have to rewrite the test suite meaning "THERE WILL BE BUGS" they introduce.  The other
+form of testing doesn't necessarily catch everything but it catches way more in our experience.</p>
+
+<a class="btn btn-primary" href="@[QUICK_START8]@" role="button">Next Custom Tags</a>

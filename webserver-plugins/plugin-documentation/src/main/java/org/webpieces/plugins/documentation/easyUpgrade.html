@@ -1,0 +1,41 @@
+#{extends '../backend/main.html'/}#
+#{set title:'Random Features'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs 'docHome.html'/}#
+
+<h2>Upgrading Webpieces</h2>
+
+<p>Since webpieces webserver is a library first, upgrading is a simple matter of changing the version
+in TWO locations.  In your {project}-all/build.gradle file you will see these comments and version:</p>
+
+<pre><code>*[ext {
+
+    //Modify here AND gradle webieces plugin version in file
+    // webpiecesexample/build.gradle
+
+    //This version ACTUALLY works with what the git commit says it works with!!!
+    webpiecesVersion = '1.9.110']*</code></pre>
+    
+<p>Simply change the 1.9.110 to the new version which will grab all the new jars.  Next as the comment
+above says, change your {yourproject}-all/{yourproject}/build.gradle file in the buildscript section
+to the new version as well:</p>
+
+<pre><code>*[buildscript {
+    repositories {
+       mavenCentral()
+       //For testing and to be removed...
+       maven {
+         url uri('/tmp/myRepo/')
+       }
+    }
+    dependencies {
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.110'
+    }
+}]*</code></pre>
+
+<h2>Next, get help on Upgrading</h2>
+
+<p>We maintain a legacy example project <a href="https://github.com/deanhiller/webpiecesexample-all">Webpiecesexample-all</a>
+and in that project, for any upgrades, if we need to change code, all the examples are there and we tag it for which
+upgrade it was for.  This gives you an easy path forward of how to move forward if and when apis change</p>

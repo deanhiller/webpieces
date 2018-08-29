@@ -26,7 +26,7 @@ public class EmptyPluginModule implements Module {
 
 		Multibinder.newSetBinder(binder, BodyContentBinder.class);
 		
-		Multibinder.newSetBinder(binder, ObjectStringConverter.class);		
+		Multibinder.newSetBinder(binder, ObjectStringConverter.class);
 		
 		//special case so the notFound controller can inpsect and list all routes in a web page
 		//OR some client application can inject and introspect all web routes as well
@@ -35,7 +35,5 @@ public class EmptyPluginModule implements Module {
 		//Also, special case so the backend plugin can accept route ids and reverse lookup the URL on them
 		//or other things it the web application can
 		binder.bind(RoutingHolder.class).toInstance(routingHolder);
-		
 	}
-
 }

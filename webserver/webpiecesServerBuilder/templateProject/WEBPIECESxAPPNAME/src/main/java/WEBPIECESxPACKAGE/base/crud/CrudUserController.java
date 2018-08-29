@@ -83,7 +83,7 @@ public class CrudUserController {
 			redirect.setIdFieldAndValue("id", entity.getId());
 			return Actions.redirectFlashAll(GET_ADD_USER_FORM, GET_EDIT_USER_FORM, redirect);
 		}
-		
+
 		Current.flash().setMessage("User successfully saved");
 		Current.flash().keep();
 

@@ -73,22 +73,18 @@ public class Actions {
 		return redirect(routeId, args);
 	}
 	
-	public static Redirect redirectFlashAll2(RouteId routeId, RequestContext ctx, Object ... args) {
-		ctx.moveFormParamsToFlash(new HashSet<>());
-		ctx.getFlash().keep();
-		ctx.getValidation().keep();
-		return redirect(routeId, args);
-	}
-	
 	public static Redirect redirectToUrl(String url) {
 		RawRedirect redirect = new RawRedirect(url);
 		return redirect;
 	}
 
 	public static Redirect redirectFlashAll(RouteId addRoute, RouteId editRoute, FlashAndRedirect redirect) {
+		RequestContext ctx = redirect.getContext();
+		ctx.getFlash().setMessage(redirect.getGlobalMessage());
+
 		if(redirect.getIdValue() == null) {
 			//If id is null, this is an add(not an edit) so redirect back to add route
-			return redirectFlashAllSecure(addRoute, redirect.getContext(), redirect.getPageArgs(), redirect.getSecureFields());
+			return redirectFlashAllSecure(addRoute, ctx, redirect.getPageArgs(), redirect.getSecureFields());
 		} else {
 			//If id is not null, this is an edit(not an add) so redirect back to edit route
 			String[] args = redirect.getPageArgs();
@@ -97,7 +93,7 @@ public class Actions {
 			allArgs[1] = redirect.getIdValue();
 			System.arraycopy(args, 0, allArgs, 2, args.length);
 			
-			return redirectFlashAllSecure(editRoute, redirect.getContext(), allArgs, redirect.getSecureFields());
+			return redirectFlashAllSecure(editRoute, ctx, allArgs, redirect.getSecureFields());
 		}
 	}
 

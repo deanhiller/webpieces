@@ -2,6 +2,8 @@
 #{set title:'Templates'/}#
 #{set tab:'management'/}#
 
+#{renderTagArgs 'docHome.html'/}#
+
 <ol>
     <li><a href="#tokens">Tokens</a>
         <ol>
@@ -510,6 +512,8 @@ one tag can make all your tooltip/label/input/errorMsg/i18n common across your w
 example may be putting the error below the label/input for your whole app and then changing it so the error is on the same line as the label/input.
 See the userAddEdit.html file in your base.crud or base.crud.ajax packages in your project or look at 
 <a href="https://github.com/deanhiller/webpiecesexample-all/blob/master/webpiecesexample/src/main/java/org/webpieces/base/crud/ajax/userAddEdit.html">our userAddEdit from our example project</a></p>
+
+#{renderTagArgs 'fieldTag.html'/}#
 
 <p>Test code can be found here:</p>
 

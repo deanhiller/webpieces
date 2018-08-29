@@ -128,6 +128,8 @@ public class RouteLoader {
 			
 			//We wait for the storage load next as that has to be complete before the router startup is finished!!!!
 			//BUT notice we wait AFTER load of routes so all that is done in parallel
+			//YES, I could nit and make this async BUT KISS can be better sometimes and our startup is quit fast right
+			//no so let's not pre-optimize
 			storageLoadComplete.get(3, TimeUnit.SECONDS);
 			
 			return routerModule;

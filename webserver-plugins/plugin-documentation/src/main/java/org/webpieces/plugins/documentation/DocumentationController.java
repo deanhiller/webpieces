@@ -12,7 +12,6 @@ public class DocumentationController {
 
 	private MenuCreator menuCreator;
 
-
 	@Inject
 	public DocumentationController(MenuCreator menuCreator) {
 		this.menuCreator = menuCreator;
@@ -66,6 +65,22 @@ public class DocumentationController {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 
+	public Render quickStart8() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+
+	public Render quickStart9() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+
+	public Render easyUpgrade() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
+	public Render pluginPoints() {
+		return Actions.renderThis("menu", menuCreator.getMenu());
+	}
+	
 	public Render randomFeatures() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}

@@ -212,8 +212,10 @@ public class RouteInvoker {
 		} else if(controllerResponse instanceof RenderImpl) {
 			return processor.createRenderResponse((RenderImpl)controllerResponse);
 		} else if(controllerResponse instanceof RawRedirect) {
+			//redirects to a raw straight up url
 			return processor.createRawRedirect((RawRedirect)controllerResponse);
 		} else if(controllerResponse instanceof RenderContent) {
+			//Rendering stuff like json/protobuf/thrift or basically BodyContentBinder generated content
 			return processor.createContentResponse((RenderContent)controllerResponse);
 		} else {
 			throw new UnsupportedOperationException("Bug, a webpieces developer must have missed some code to write");

@@ -1,0 +1,18 @@
+<p>*[${field}$]* is a special variable setup by
+    <a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-templating/src/main/java/org/webpieces/templating/impl/tags/FieldTag.java">FieldTag.java</a>
+    which assigns things like so</p>
+
+<ol>
+    <li>*[${field.name}$]* is assigned the 'entity.name' </li>
+    <li>*[${field.id}$]* is assigned a valid html form of 'entity.name' which in this case is the same</li>
+    <li>*[${field.i18nKey}$]* is assigned the string 'entity.name' (may seem repetitive but for arrays, this differs from field.name)</li>
+    <li>*[${field.flash}$]* is assigned the value that flash scope has for variable 'entity.name'</li>
+    <li>*[${field.error}$]* is assigned the error value from validations flash for variable 'entity.name'</li>
+    <li>*[${field.errorClass}$]* is assigned the css class if there was an error in *[${field.error}$]*</li>
+    <li>*[${field.flashOrValue}$]* is assigned the flash first if exists and next the original value(ie. if you were editing)</li>
+    <li>*[${field.valueOrFlash}$]* is assigned the value first if exists and next the value from flash scope</li>
+</ol>
+
+<p>To make things easier for the developer, this field variable gets passed to the body of the field tag as
+well so you can also use the field variable not only in field.tag but in the body that is passed in to keep things
+very generic and cut/paste like for future fields.  cool, right?  well, I thought so</p>

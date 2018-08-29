@@ -2,7 +2,7 @@ package org.webpieces.router.api.actions;
 
 import org.webpieces.router.impl.compression.MimeTypes.MimeTypeResult;
 
-public class RenderContent implements Action {
+public class RenderContent implements Render {
 
 	private byte[] content;
 	private int statusCode;

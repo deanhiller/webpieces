@@ -27,7 +27,8 @@ public class ServerConfig {
 	}
 	
 	public ServerConfig(String persistenceUnit, File compressionCache) {
-		this(8080, 8443, persistenceUnit, compressionCache);
+		//For tests, we need to bind to port 0, then lookup the port after that...
+		this(0, 0, persistenceUnit, compressionCache);
 	}
 
 	//really for production use only...

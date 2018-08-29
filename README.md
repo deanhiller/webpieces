@@ -25,7 +25,7 @@ This 23 minute video barely scratches the surface but demonstrates
 * development server only in-memory database GUI at http://localhost:8080/@db
 * development server only in-memory documentation at http://localhost:8080/@documentation
 
-#### BIG NOTE: There is 1 bug where I have to restart the DevelopmentServer in intellij(This does NOT happen in eclipse and I am trying to figure out how intellij is screwing things up) or it may be intellij's gradle plugin
+#### BIG NOTE: There is 1 location in the video I had to restart the server ONLY because there are setting in intelij I forgot to setup
 [Webpieces YouTube QuickStart](https://youtu.be/4FtdAX_wKD0)
 
 One thing to note in the video is I was caught off guard by a minor bug(that is easily worked around) and had to restart the DevelopmentServer as for some reason, the hibernate rescan of entities and table creations did not work.  We may have that fixed by the time you watch the video(hopefully)
@@ -99,11 +99,12 @@ NOTE: last test out on Intellij 2017.2 with fixes(https://intellij-support.jetbr
    * expand 'Compiler', and click on 'Java Compiler'.  Add -parameters to the 'Additional Command Line Parameters'
    * Click Ok to close dialogue
    * Click Build menu and click Rebuild Project
-3. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
-4. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
-5. In a browser go to http://localhost:8080
-6. refactor your code like crazy and hit the website again(no restart needed)
-7. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
+3. Modify TWO auto-recompile settings documented here https://stackoverflow.com/questions/12744303/intellij-idea-java-classes-not-auto-compiling-on-save
+4. From the IDE, expand {yourapp-all}/{yourapp}-dev/src/main/java/{yourpackage}
+5. Run OR Debug the class named {YourApp}DevServer.java which compiles your code as it changes so you don't need to restart the webserver (even in debug mode)
+6. In a browser go to http://localhost:8080
+7. refactor your code like crazy and hit the website again(no restart needed)
+8. As you upgrade, we just started(7/20/17) to have a legacy project we run the webpieces build against.  This means we HAVE to make upgrades to it to see how it affects clients.  You can copy the upgrades needed(some are not necessarily needed but recommended) here https://github.com/deanhiller/webpiecesexample-all/commits/master (We are going to try to standardize the comments better as well.
 9. For Documentation go to http://localhost:8080/@documentation and you can access the references and tutorials
 
 #### To try modifying/contributing to the actual webserver

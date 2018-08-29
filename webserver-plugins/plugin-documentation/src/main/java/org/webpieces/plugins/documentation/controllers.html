@@ -2,7 +2,83 @@
 #{set title:'Controllers'/}#
 #{set tab:'management'/}#
 
-Hi there
+#{renderTagArgs 'docHome.html'/}#
 
+<ol>
+   <li><a href="#controller">Singleton Controller</a></li>
+   <li><a href="#actions">Actions</a></li>
+   <li><a href="#validation">Validation</a></li>
+   <li><a href="#sessionScope">Session Scope</a></li>
+   <li><a href="#flashScope">Flash Scope</a></li>   
+   <li><a href="#tabScope">Browser Tab Scope</a></li>
+   <li><a href="#requestCtx">Request Context</a></li>
+   <li><a href="#annotation">@UserQuery Annotation</a></li>
+   <li><a href="#routerRequest">RouterRequest</a></li>
+   <li><a href="#overrides">Overriding HttpResponse Headers</a></li>
+</ol>
 
+<h3 id="controller">Singleton Controller</h3>
+
+<p>You will notice very quickly if you have not already that webpieces forces all your Controllers to have the
+@Singleton annotation.  We believe in a stateless server meaning only one instance of the Controller is necessary
+plus it saves on performance so we don't have to construct it every time like J2EE sometimes does which is
+a pure waste of resources in a ton of cases where you are stateless anyways.</p>
+
+<h3 id="actions">Actions</h3>
+
+<p>Every Controller method returns some sort of Action where the type heirarchy looks like so</p>
+
+<ol>
+    <li>Action
+    <ol>
+        <li>AjaxRedirect</li>
+        <li>Redirect</li>
+        <li>Render</li>
+    </ol>
+    </li>
+</ol>
+
+<p>This means your Controller must return one of these types.  If you are a post method, then you must always return
+a Redirect and webpieces will complain to you if you don't.  All Actions are created via the Actions.java class.  A
+typical GET method in a controller looks like so:</p>
+
+<pre><code>*[public Render easyUpgrade() {
+    return Actions.renderThis("menu", menuCreator.getMenu());
+}]*</code></pre>
+
+<p>Notice that I could change the return type to Action if the GET method does a Redirect or a Render like so:</p>
+
+<pre><code>*[public Action easyUpgrade() {
+    if(something)
+        return Actions.redirect(MyRouteId.LOGIN);
+    return Actions.renderThis("menu", menuCreator.getMenu());
+}]*</code></pre>
+
+<p>A POST method which is forced into returning a redirect to be compliant with PRG may look like so:</p>
+
+<pre><code>*[public Redirect postDeleteUser(int id) {
+	UserDbo ref = Em.get().find(UserDbo.class, id);
+	Em.get().remove(ref);
+	Em.get().flush();
+	Current.flash().setMessage("User deleted");
+	Current.flash().keep();
+	return Actions.redirect(CrudUserRouteId.LIST_USERS);
+}]*</code></pre>
+
+<p>Now, AjaxRedirect created by Actions.ajaxRedirect is a special case.  Because you can't return http code 303 Redirect to
+javascript components as they will then redirect internally and load that html, they need to be told the server wants you 
+to redirect to some page.  This is where AjaxRedirect comes into play.  He is translated to a http 287 code so your javascript
+can check for this code and redirect on the javascript side. </p>
+
+<p>AjaxRedirect is wired into some common components already such that it will redirect when necessary</p>
+
+<h3 id="validation">Validation</h3>
+
+<h3 id="sessionScope">Session Scope</h3>
+<h3 id="flashScope">Flash Scope</h3>
+<h3 id="tabScope">Browser Tab Scope</h3>
+<h3 id="requestCtx">Request Context</h3>
+<h3 id="annotation">@UserQuery Annotation</h3>
+<h3 id="routerRequest">RouterRequest</h3>
+<h3 id="overrides">Overriding HttpResponse Headers</h3>
 
