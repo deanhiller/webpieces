@@ -74,8 +74,106 @@ can check for this code and redirect on the javascript side. </p>
 
 <h3 id="validation">Validation</h3>
 
+<p>In typical api development, you typically want to KISS and send errors back on the first issue you find with a request.
+In GUIs however, you want to give a phenomenal user experience and give as many correctable errors as you can in the
+first go.  For this reason there is a validation like so:</p>
+
+<pre><code>*[if(password == null) {
+    Current.validation().addError("password", "password is required");
+}
+
+if(entity.getFirstName() == null) {
+    Current.validation().addError("entity.firstName", "First name is required");
+}]*</code></pre>
+
+<p>Finally, once you have an added an error to each field, you can check if there are any errors to
+display a global message or global error:</p>
+
+<pre><code>*[if(Current.validation().hasErrors()) {
+	Current.flash().setMessage("You have errors below");
+	Current.flash().setError("You have errors below");
+}]*</code></pre>
+
+<p>But 'wait' you say, why in the world is there 2 ways of setting a message or error.  Good question!  
+Typically, you will have something like this in your template that is at the top of every page:</p>
+
+<pre><code>*[#{if _flash.message}#
+    <div class="row-fluid">
+        <div class="offset3 span6 alert alert-error">
+            ${_flash.message}$
+        </div>
+    </div>
+#{/if}#]*</code></pre>
+
+<p>This reads from the message and so if you are doing basic boring straight up html, you can use the 
+message inside the flash scope for any previous page to display a 1 time message like 'User Successfully Saved'
+or 'You have errors in your form below'.<p>
+
+<p>If however you are doing AJAX add/edit popup, the message is on the main page so instead in your ajax
+add/edit popup, you may have code like this to read the global error:</p>
+
+<pre><code>*[#{if _flash.error}#
+<div class="row-fluid">
+    <div class="offset3 span6 alert alert-error">
+        <h4>Oops....</h4>
+        ${_flash.error}$
+    </div>
+</div>
+#{/if}#]*</code></pre>
+
+<p>Now, let's look at adding an error to an entity.  In this next example, we are adding an error
+to 'entity.firstName':</p>
+
+<pre><code>*[Current.validation().addError("entity.firstName", "First name is required");]*</code></pre>
+
+<p>Now, in our page, we can access the error like so:</p>
+ 
+<pre><code>*[_ctx.validation.getError('entity.firstName')]*</code></pre>
+
+<p>Instead, however, we have created the field tag which is used like so:</p>
+
+<pre><code>*[#{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#]*</code></pre>
+
+<p>and thankfully FieldTag.java sets up a Map variable called 'field' so that the actual field.tag file can use
+a variable *[${field.error}$]*:</p>
+
+<pre><code>*[<span id="${field.id}$_errorMsg" class="help-block">${field.error}$</span>]*</code></pre> 
+
+<p>As a final note, the validation bean is a flash scoped cookie held by the browser.  When you set something
+on the validation bean, a cookie is sent to your browser with the redirect(remember we force posts to
+send a redirect) and then the browser sends a GET with your validation cookie, we render the page and
+then unless you call validation.keep(), we clear out the validation bean.  This is done after the html
+is rendered though so your html has time to use the error messages in the page.</p>
+
 <h3 id="sessionScope">Session Scope</h3>
+
+<p>You can access the session like so</p>
+
+<pre><code>*[Current.session().put("key", "something");
+Current.session().remove("key");
+Current.session().get("key");
+]*</code></pre>
+
+<p>Whatever you put in the session stays there until you remove it.  The session is secured with a message digest hash
+that is compared every time webpieces receives a request.  If it is invalid, we reject and clear their cookie completely
+assuming it is either a hacker or a bug.</p>
+
+<p>To access the session from the html, you can do something like this:</p>
+
+<pre><code>*[#{if _session.get('userId')}#
+    <li>
+        <div>Logged In User: ${_session.get('userId')}$</div>
+    </li>
+#{/if}#]*</code></pre>
+
+<p>However, let's say you are booking plane tickets in two different tabs.  Session is definitely not where
+you want to be saving the user experience.  For that situation, you would want to save it into some sort of
+tab state.  Of course, for some reason, the larger community has not created a spec for a tab cookie that
+only goes back and forth for one single tab in a browser :( so tab state has to be simulated within
+the url query params.</p> 
+
 <h3 id="flashScope">Flash Scope</h3>
+
 <h3 id="tabScope">Browser Tab Scope</h3>
 <h3 id="requestCtx">Request Context</h3>
 <h3 id="annotation">@UserQuery Annotation</h3>
