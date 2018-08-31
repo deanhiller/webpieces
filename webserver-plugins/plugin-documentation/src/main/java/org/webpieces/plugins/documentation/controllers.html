@@ -13,6 +13,7 @@
    <li><a href="#tabScope">Browser Tab Scope</a></li>
    <li><a href="#requestCtx">Request Context</a></li>
    <li><a href="#annotation">@UserQuery Annotation</a></li>
+   <li><a href="#routerRequest">Asynchronous Methods</a></li>
    <li><a href="#routerRequest">RouterRequest</a></li>
    <li><a href="#overrides">Overriding HttpResponse Headers</a></li>
 </ol>
@@ -174,9 +175,76 @@ the url query params.</p>
 
 <h3 id="flashScope">Flash Scope</h3>
 
+<p>Flash can be accessed like so in a java controller:</p>
+
+<pre><code>*[Current.flash().put("someKey", "someValue");
+Current.flash().setMessage("User successfully saved");
+Current.flash().keep();]*</code></pre>
+        
+<p>setMessage is a special method that just does the same thing as .put("_message", "User Successfully saved"); so 
+another words the _message key is reserved for him.  keep() must be called or none of the state will be saved.  Also,
+if you receive a flash data from a previous post and add more data and call keep() yet again, all the previous
+data from the previous flash will also be saved over yet again.</p>
+
+<p>In html, you can also access the flash with _flash variable like so:</p>
+
+<pre><code>*[#{if _flash.message}#
+    <div class="row-fluid">
+        <div class="offset3 span6 alert alert-error">
+            ${_flash.message}$
+        </div>
+    </div>
+#{/if}#]*</code></pre>
+
+<p>Or access a specific key like so:</p>
+
+<pre><code>*[${_flash.get('flashData')}$]*</code></pre>
+
 <h3 id="tabScope">Browser Tab Scope</h3>
+
+<b>Does not exist as of yet.  This is to be created</b>
+
+<p>Tab Scope exists so when you have a user that can book tickets in multiple tabs, session scope
+would be horrible and would conflict.  Instead Tab Scope exists for ease of developing these 
+types of applications</p>
+
+<p>To enable tab scope or from your controller, using something like Current.tabState().get("key")
+or from your html, using something like *[${_tab.get('key')}$]*, you need to define when a
+conversation name and when a conversation starts and ends</p>
+
+<p>When a conversation starts, we will tack on a conversation name and a tab id(tid) onto 
+the end of every url like http://somedomain.com/some/account?tid=conversation1-234.  We will 
+also write out a cookie with the conversationName-tid so that every time we receive a 
+request with a tid, we can lookup and setup the Current.tabState() for you such that you can use
+it</p>  
+
+<p>These cookies can be left dangling and add up so to prevent that, when creating a 
+conversation name and when it starts and ends, you also define a timeout for that conversation
+and where we will redirect the user when that specific conversationName times out which
+can allow them to start over on the conversation</p>
+
 <h3 id="requestCtx">Request Context</h3>
+
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+
 <h3 id="annotation">@UserQuery Annotation</h3>
+
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+
 <h3 id="routerRequest">RouterRequest</h3>
+
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+
 <h3 id="overrides">Overriding HttpResponse Headers</h3>
+
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+<pre><code>*[]*</code></pre>
+
 
