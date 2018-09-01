@@ -1,0 +1,25 @@
+#{extends '../../backend/main.html'/}#
+#{set title:'Controllers'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h3>Backend Plugin</h3>
+
+<p>Welcome to a pluggable plugin...lol.  Go figure.  Well, the reason is in testing, you generally 
+want to disable all plugins so the backend is a plugin in itself.  The Backend Plugin is targeted
+for production use so you can have a backend with an IT login such that you can manage the server
+with other backend plugins.  </p>
+
+<p>This plugin serves two purposes:</p>
+
+<ol>
+    <ul>To provide secure urls and a login page</ul>
+    <ul>To provide a plugin point for a menu system for all backend plugins</ul>
+</ol>
+
+<p>Now, some backend plugins are only plugged into the DevelopmentServer for development
+while others are for production use. The full list of plugins and their intentions is found
+here:</p>
+
+#{renderTagArgs 'listBackendPlugins.html'/}#

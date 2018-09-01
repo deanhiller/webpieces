@@ -1,0 +1,32 @@
+<h3 id="useQuery">@UseQuery Annotation</h3>
+
+<p>This really goes under the hibernate plugin as this annotation lives there and is only used with
+hibernate.  Let's say you are editing a car on an html form and have the method</p>
+
+<pre><code>*[public Action postEditedCar(CarDbo car)]*</code></pre>
+
+<p>By default, the hibernate plugin will lookup the CarDbo by it's id without joining or
+anything.  On top of that, if you use hibernate in it's KISS form, it tends to never break
+so here are the rules for KISS form in hibernate:</p>
+
+<ol>
+    <li>Make every *ToOne relationship lazy ALWAYS. JPA fucked that up while hibernate annotations did that</li>
+    <li>Never ever...ever use cascading persists</li>
+</ol>
+
+<p>The reasons for the first one is that it keeps hibernate KISS and you use HQL to eagerly fetch on a
+per use-case query.  Some queries may need eager fetches and some won't.  Don't default all queries to 
+eagerly fetch EVER</p>
+
+<p>On the second point, yes, you may need to persist stuff yourself more, but you will thank me later
+for a ton less bugs and complexity.  IMHO, hmmm, humble, fuck that, IMO, hibernate should delete
+all those feature and ignore the JPA eager default and never have eager.  The more KISS it is, the
+less bugs hibernate would have</p>
+
+<p>Now, back to UseQuery.  This identifies a JPA query that we will use to lookup the entity for you
+giving you a chance to do some joins of other tables that you want as well.  Since we install log4jdbc
+for you, you can inspect all the SQL being run to make sure there are no 1+N queries going on and 
+if there are, you can use the @UseQuery annotation to fix that.  So as an example, you can have this
+method naming a JPA named query:</p>
+
+<pre><code>*[public Action postEditedCar(@UseQuery("lookupCarWithJoin") CarDbo car)]*</code></pre>

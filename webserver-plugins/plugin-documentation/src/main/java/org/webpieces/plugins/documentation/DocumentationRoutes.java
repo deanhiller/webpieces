@@ -34,9 +34,19 @@ public class DocumentationRoutes extends ScopedRoutes {
 		addRoute(HttpMethod.GET, "/quickstart9", "DocumentationController.quickStart9", DocumentationRouteId.QUICK_START9);
 
 		addRoute(HttpMethod.GET, "/easyupgrade", "DocumentationController.easyUpgrade", DocumentationRouteId.EASY_UPGRADE);
-		addRoute(HttpMethod.GET, "/pluginPoints", "DocumentationController.pluginPoints", DocumentationRouteId.PLUGIN_POINTS);
+		addRoute(HttpMethod.GET, "/extensionPoints", "DocumentationController.extensionPoints", DocumentationRouteId.EXTENSION_POINTS);
 		addRoute(HttpMethod.GET, "/randomfeatures", "DocumentationController.randomFeatures", DocumentationRouteId.RANDOM_FEATURES);
-		
+
+		addRoute(HttpMethod.GET, "/plugins", "plugins/PluginController.plugins", DocumentationRouteId.PLUGINS);
+		addRoute(HttpMethod.GET, "/plugin/jackson", "plugins/PluginController.jacksonPlugin", DocumentationRouteId.JACKSON_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/hibernate", "plugins/PluginController.hibernatePlugin", DocumentationRouteId.HIBERNATE_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/backend", "plugins/PluginController.backendPlugin", DocumentationRouteId.BACKEND_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/h2", "plugins/PluginController.h2Plugin", DocumentationRouteId.H2_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/installSsl", "plugins/PluginController.installSslPlugin", DocumentationRouteId.INSTALL_SSL_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/documentation", "plugins/PluginController.documentationPlugin", DocumentationRouteId.DOCUMENTATION_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/properties", "plugins/PluginController.propertiesPlugin", DocumentationRouteId.PROPERTIES_PLUGIN);
+		addRoute(HttpMethod.GET, "/plugin/codeGeneration", "plugins/PluginController.codeGenPlugin", DocumentationRouteId.CODE_GEN_PLUGIN);
+
 		//Because the html hardcode the url path here, we must use baseRouter and avoid whatever path
 		//the user passed in :(
 		baseRouter.addStaticDir("/org/webpieces/plugins/documentation/", "/org/webpieces/plugins/documentation/", true);		

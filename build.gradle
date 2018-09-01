@@ -367,7 +367,7 @@ closeRepository.dependsOn('uploadArchives2')
 promoteRepository.dependsOn('closeRepository')
 promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
-  Thread.sleep(30000)
+  Thread.sleep(60000)
   println("done sleeping go promote repo now");
 }
 

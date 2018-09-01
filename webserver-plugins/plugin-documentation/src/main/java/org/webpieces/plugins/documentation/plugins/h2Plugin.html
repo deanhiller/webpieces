@@ -1,0 +1,14 @@
+#{extends '../../backend/main.html'/}#
+#{set title:'Controllers'/}#
+#{set tab:'management'/}#
+
+#{renderTagArgs '../docHome.html'/}#
+
+<h3>H2 Plugin</h3>
+
+<p>When first creating a webpieces template, we actually install this plugin in the production server
+so you can see webpieces in action right away.  We actually suggest you modify the build files to not
+bring it into the production server and then modify the {project}-dev build.gradle file to bring it
+into the development server instead.  Once you do that, you should get compiler errors in your
+XXXXXMeta.java file and you can copy that code to your DeveloperMeta.java file instead so the 
+plugin is brought into only your development server.</p>

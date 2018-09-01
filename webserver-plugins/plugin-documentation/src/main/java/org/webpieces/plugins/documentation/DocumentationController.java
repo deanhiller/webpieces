@@ -77,7 +77,7 @@ public class DocumentationController {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 	
-	public Render pluginPoints() {
+	public Render extensionPoints() {
 		return Actions.renderThis("menu", menuCreator.getMenu());
 	}
 	

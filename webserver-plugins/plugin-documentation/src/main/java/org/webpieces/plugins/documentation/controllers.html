@@ -12,9 +12,9 @@
    <li><a href="#flashScope">Flash Scope</a></li>   
    <li><a href="#tabScope">Browser Tab Scope</a></li>
    <li><a href="#requestCtx">Request Context</a></li>
-   <li><a href="#annotation">@UserQuery Annotation</a></li>
-   <li><a href="#routerRequest">Asynchronous Methods</a></li>
    <li><a href="#routerRequest">RouterRequest</a></li>
+   <li><a href="#useQuery">@UseQuery Annotation</a></li>
+   <li><a href="#asyncMethods">Asynchronous Methods</a></li>
    <li><a href="#overrides">Overriding HttpResponse Headers</a></li>
 </ol>
 
@@ -225,26 +225,96 @@ can allow them to start over on the conversation</p>
 
 <h3 id="requestCtx">Request Context</h3>
 
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
+<p>Up until now, Current.flash(), Current.session(), Current.validation() have all been shortcuts because all of
+those same instances are included in the RequestContext.  You can access the RequestContext
+like so:</p>
 
-<h3 id="annotation">@UserQuery Annotation</h3>
+<pre><code>*[RequestContext ctx = Current.getContext()]*</code></pre>
 
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
+<p>Then, the RequestContext contains all context surrounding the request.  It contains the 
+Session which spans all requests for that session.  It contains Flash which spans a few
+requests(the POST/GET cycle), and the RouterRequest itself which is just for this request
+and is independent of http protocol.  You will notice that the webpieces router has
+no compile-time dependencies on http2 nor http1 objects actually and therefore is
+a very independent webpiece.</p>
 
 <h3 id="routerRequest">RouterRequest</h3>
 
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
+<p>The RouterRequest can be accessed like so:</p>
+
+<pre><code>*[Current.request();]*</code></pre>
+
+<p>or like so:</p>
+
+<pre><code>*[Current.getContext().getRequest();]*</code></pre>
+
+<p>We heavily documented the 
+<a href="https://github.com/deanhiller/webpieces/blob/master/webserver/http-shared/src/main/java/org/webpieces/ctx/api/RouterRequest.java">RouterRequest</a> so please check out the comments and you can also 
+look who uses each variable as we tried to make things really easy to trace so we tried
+not to over encapsulate which is a frequent error of developers killing off trace-ability</p>
+
+<p>Our router depends on a core http-shared which has no http and only has RouterRequest.  Our
+templating engine depends on that same http-shared as it needed access to certain things.  This kept
+our dependencies light so http-router can easily be used to create a different webserver with a 
+different templating engine.  Or http-templating can be used as a templating engine to be used
+with a completely different router.  </p>
+
+#{renderTagArgs 'plugins/useQuery.html'/}#
+
+<h3 id="asyncMethods">Asynchronous Methods</h3>
+
+<p>Well, I have been using scala Futures for sometime now(3+ years).  Man, we really fucked up developer
+productivity.  Sure, we made it so a server doesn't have to hold up a thread which seemed pretty cool
+for my first 2 years of using it.  Having owned a business previously though and watching the cost
+sky rocket(and developer costs were way more than computers before anyways), I have come full circle
+and almost always prefer the synchronous environment.  I mean, I see bugs that used to take 5 minutes
+taking hours now.  3 hours/5 minutes = 36x the cost right there.  I am dead serious as the stack traces
+screamed the location of the issue immediately and you could jump in and fix in literally 5 minutes. 
+In today's world, this has caused much slower times</p>
+
+<p>Ok, OFF MY RANT.  Webpieces still supports asynchronous development so you can kill yourself if you
+like.  Just create a method like so and webpieces will know it is asynchronous: </p>
+
+<pre><code>*[public CompletableFuture[Action] postCar(CarDbo car)]*</code></pre>
+
+<p>or if you know the specific return value, you can make it more specific</p>
+
+<pre><code>*[public CompletableFuture[Render] renderCarPage()]*</code></pre>
+
+<p>Now, there is some tricks to keep this working regarding the RequestContext.  Java futures are not
+as good as the twitter scala ones that can thread some global state per request down all the
+thenApply and thenCompose methods(which is very annoying as I can't get the MDC of logback working
+for async methods in java like I can in scala).  Hit me up directly if you want more info on this and
+I can vent ;).  Soooo, if you are going to use thenApply and thenCompose on the future, you
+must manually call Current.getContext BEFORE those methods and pass in the context to the next
+function so that you can access the session, flash, validation, etc.</p>
 
 <h3 id="overrides">Overriding HttpResponse Headers</h3>
 
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
-<pre><code>*[]*</code></pre>
+<p>Ok, last but not least is overriding http headers.  We allow the registration of callbacks so if any
+plugins, or filters muck with headers, the last callback added(generally the controller) wins.  We
+are hoping filters add their callbacks on the request going down path and not the response coming back
+path.  In this way, the Controller can have last say to override headers when it really needs to.
+Here is an example adding some headers from a controller method</p>
 
+<pre><code>*[public Action postSomething() {
+    Current.getContext().addModifyResponse(resp -> addCacheHeaders(resp));
+}
 
+private Object addCacheHeaders(Object response) {
+    Http2Headers resp = (Http2Headers) response;
+    //http://stackoverflow.com/questions/49547/how-to-control-web-page-caching-across-all-browsers
+    //This forces the browser back button to re-request the page as it would never have the page
+    //and is good to use to hide banking information type pages
+    //resp.addHeader(new Header(KnownHeaderName.CACHE_CONTROL, "no-store")); 
+    resp.addHeader(new Http2Header(Http2HeaderName.CACHE_CONTROL, "no-cache, no-store, must-revalidate"));
+    resp.addHeader(new Http2Header(Http2HeaderName.PRAGMA, "no-cache"));
+    resp.addHeader(new Http2Header(Http2HeaderName.EXPIRES, "0"));
+    return resp;
+}]*</code></pre>
+
+<p>This is of course for webpieces webserver only.  If another webserver uses the Router, they may stuff a 
+netty http request in or whatever they like and you would need to know about that implementation.  Perhaps,
+in the future, we can have you set header names and values independent of which library is used so the 
+platform can translate for you instead of you depending on the http parser like this example.  For now though,
+this works and I decided KISS here in that at least the router jar doesn't depend on any http parser.</p>
