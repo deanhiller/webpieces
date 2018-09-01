@@ -7,16 +7,19 @@ public class LoginInfo {
 	private String tokenThatExistsIfLoggedIn;
 	private RouteId loginRouteId;
 	private String securePath;
+	private String[] secureFields;
 
-	public LoginInfo(String securePath, String tokenThatExistsIfLoggedIn, RouteId loginRouteId) {
+	public LoginInfo(String securePath, String tokenThatExistsIfLoggedIn, RouteId loginRouteId, String ... secureFields) {
 		this.securePath = securePath;
 		this.tokenThatExistsIfLoggedIn = tokenThatExistsIfLoggedIn;
 		this.loginRouteId = loginRouteId;
+		this.secureFields = secureFields;
 	}
 	
-	public LoginInfo(String tokenThatExistsIfLoggedIn, RouteId loginRouteId) {
+	public LoginInfo(String tokenThatExistsIfLoggedIn, RouteId loginRouteId, String ... secureFields) {
 		this.tokenThatExistsIfLoggedIn = tokenThatExistsIfLoggedIn;
 		this.loginRouteId = loginRouteId;
+		this.secureFields = secureFields;
 	}
 	
 	public String getSecurePath() {
@@ -32,4 +35,9 @@ public class LoginInfo {
 		return loginRouteId;
 	}
 	
+	public String[] getSecureFields() {
+		if(secureFields == null)
+			return new String[0];
+		return secureFields;
+	}
 }

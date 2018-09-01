@@ -1,6 +1,11 @@
 package org.webpieces.webserver.api.login;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.webpieces.ctx.api.Current;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
@@ -8,6 +13,12 @@ import org.webpieces.router.api.routing.RouteId;
 
 public abstract class AbstractLoginController {
 	
+	private String[] secureFields;
+	
+	public AbstractLoginController(String ... secureFields) {
+		this.secureFields = secureFields;
+	}
+
 	public Action logout() {
 		Current.session().remove(getLoginSessionKey());
 		return Actions.redirect(getRenderLoginRoute());
@@ -35,6 +46,10 @@ public abstract class AbstractLoginController {
 
 		String url = Current.flash().get("url");
 		if(url != null) {
+			RequestContext ctx = Current.getContext();
+			Set<String> mySet = new HashSet<>(Arrays.asList(secureFields));
+			ctx.moveFormParamsToFlash(mySet);
+			ctx.getFlash().keep();
 			return Actions.redirectToUrl(url); //page the user was trying to access before logging in
 		}
 		return Actions.redirect(getRenderAfterLoginHome()); //base page after login screen

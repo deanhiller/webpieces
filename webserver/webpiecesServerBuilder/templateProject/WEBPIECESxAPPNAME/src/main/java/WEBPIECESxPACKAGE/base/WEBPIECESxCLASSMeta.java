@@ -57,7 +57,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
     public List<Routes> getRouteModules() {
 		return Lists.newArrayList(
 				new AppRoutes(),
-				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController", "/secure/.*"),
+				new LoginRoutes("/WEBPIECESxPACKAGE/base/crud/login/AppLoginController", "/secure/.*", "password"),
 				new CrudRoutes(),
 				new AjaxCrudRoutes(),
 				new JsonRoutes()

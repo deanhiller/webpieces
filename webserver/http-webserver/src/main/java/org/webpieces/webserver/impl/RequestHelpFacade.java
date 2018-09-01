@@ -13,6 +13,7 @@ import org.webpieces.data.api.BufferPool;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.util.urlparse.UrlEncodedParser;
 import org.webpieces.webserver.api.WebServerConfig;
+import org.webpieces.webserver.impl.body.BodyParsers;
 
 public class RequestHelpFacade {
 
@@ -25,6 +26,8 @@ public class RequestHelpFacade {
 	private UrlEncodedParser urlEncodedParser;
 	@Inject
 	private BufferPool bufferPool;
+	@Inject
+	private BodyParsers bodyParsers;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
@@ -61,4 +64,9 @@ public class RequestHelpFacade {
 	public ProxyResponse createProxyResponse() {
 		return responseProvider.get();
 	}
+
+	public BodyParsers getBodyParsers() {
+		return bodyParsers;
+	}
+
 }

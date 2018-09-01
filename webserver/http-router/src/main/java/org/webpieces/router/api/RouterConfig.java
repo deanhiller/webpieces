@@ -46,8 +46,6 @@ public class RouterConfig {
 
 	private PortConfigCallback portConfigCallback = () -> new PortConfig(8080, 8443);
 
-	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
-
 	private File workingDirectory;
 
 	private NeedsSimpleStorage needsStorage;
@@ -167,15 +165,6 @@ public class RouterConfig {
 	}
 	public PortConfigCallback getPortConfigCallback() {
 		return portConfigCallback;
-	}
-	
-	public Charset getDefaultFormAcceptEncoding() {
-		return defaultFormAcceptEncoding;
-	}
-	
-	public RouterConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
-		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
-		return this;
 	}
 
 	public File getWorkingDirectory() {

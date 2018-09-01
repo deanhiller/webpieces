@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.body;
+package org.webpieces.webserver.impl.body;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +10,8 @@ public class BodyParsers {
 	private Map<String, BodyParser> typeToParser = new HashMap<>();
 	
 	@Inject
-	public BodyParsers(FormUrlEncodedParser formUrl) {
-		typeToParser.put("application/x-www-form-urlencoded", formUrl);
+	public BodyParsers(FormUrlEncodedParser formParser) {
+		typeToParser.put("application/x-www-form-urlencoded", formParser);
 	}
 	
 	public BodyParser lookup(String typeHeader) {

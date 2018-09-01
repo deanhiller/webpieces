@@ -13,7 +13,7 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 	 * @param securePath The path for the secure filter that ensures everyone under that path is secure
 	 */
 	public BackendLoginRoutes(String controller, String basePath, String securePath) {
-		super(controller, basePath, securePath);
+		super(controller, basePath, securePath, "password");
 	}
 	
 	@Override

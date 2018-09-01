@@ -1,4 +1,4 @@
-package org.webpieces.router.impl.body;
+package org.webpieces.webserver.impl.body;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -11,18 +11,21 @@ import javax.inject.Inject;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.data.api.DataWrapper;
 import org.webpieces.util.urlparse.UrlEncodedParser;
+import org.webpieces.webserver.api.WebServerConfig;
 
 public class FormUrlEncodedParser implements BodyParser {
 
 	private UrlEncodedParser parser;
+	private Charset encoding;
 
 	@Inject
-	public FormUrlEncodedParser(UrlEncodedParser parser) {
+	public FormUrlEncodedParser(UrlEncodedParser parser, WebServerConfig config) {
 		this.parser = parser;
+		this.encoding = config.getDefaultFormAcceptEncoding();
 	}
 	
 	@Override
-	public void parse(DataWrapper body, RouterRequest routerRequest, Charset encoding) {
+	public void parse(DataWrapper body, RouterRequest routerRequest) {
 		String multiPartData = body.createStringFrom(0, body.getReadableSize(), encoding);
 		Map<String, List<String>> keyToValues = new HashMap<>();
 		parser.parse(multiPartData, (key, val) -> addToMap(keyToValues, key, val));

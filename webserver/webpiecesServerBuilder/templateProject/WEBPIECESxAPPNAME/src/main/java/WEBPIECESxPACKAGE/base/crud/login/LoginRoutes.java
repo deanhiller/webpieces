@@ -18,8 +18,8 @@ public class LoginRoutes extends AbstractLoginRoutes {
 	 * @param securePath The path for the secure filter that ensures everyone under that path is secure
 	 * @param sessionToken
 	 */
-	public LoginRoutes(String controller, String securePath) {
-		super(controller, null, securePath);
+	public LoginRoutes(String controller, String securePath, String ... secureFields) {
+		super(controller, null, securePath, secureFields);
 	}
 	
 	@Override

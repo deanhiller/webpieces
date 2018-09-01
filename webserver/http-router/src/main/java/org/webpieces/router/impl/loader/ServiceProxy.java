@@ -2,13 +2,11 @@ package org.webpieces.router.impl.loader;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.data.api.DataWrapper;
 import org.webpieces.router.api.BodyContentBinder;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.actions.Action;
@@ -17,8 +15,6 @@ import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.BadRequestException;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.Route;
-import org.webpieces.router.impl.body.BodyParser;
-import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
@@ -29,12 +25,10 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 
 	private final static Logger log = LoggerFactory.getLogger(ServiceProxy.class);
 	private ParamToObjectTranslatorImpl translator;
-	private BodyParsers requestBodyParsers;
 	private RouterConfig config;
 	
-	public ServiceProxy(ParamToObjectTranslatorImpl translator, BodyParsers requestBodyParsers, RouterConfig config) {
+	public ServiceProxy(ParamToObjectTranslatorImpl translator, RouterConfig config) {
 		this.translator = translator;
-		this.requestBodyParsers = requestBodyParsers;
 		this.config = config;
 	}
 	
@@ -71,7 +65,7 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
-		parseBodyFromContentType(meta.getRoute(), meta.getCtx(), meta.getBodyContentBinder());
+		tokenCheck(meta.getRoute(), meta.getCtx(), meta.getBodyContentBinder());
 
 		Method m = meta.getMethod();
 		Object obj = meta.getControllerInstance();
@@ -99,28 +93,17 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 		}
 	}
 
-	private void parseBodyFromContentType(Route route, RequestContext ctx, BodyContentBinder bodyContentBinder) {
+	/**
+	 * This has to be above LoginFilter so LoginFilter can flash the multiPartParams so edits exist through
+	 * a login!!
+	 * 
+	 */
+	private void tokenCheck(Route route, RequestContext ctx, BodyContentBinder bodyContentBinder) {
 		RouterRequest req = ctx.getRequest();
-		if(bodyContentBinder != null)
-			return; //A route that defines the content gets to override the content type header so just return
-		if(req.contentLengthHeaderValue == null)
-			return;
-		
-		if(req.contentTypeHeaderValue == null) {
-			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
-			return;
-		}
-		
-		BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue);
-		if(parser == null) {
-			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req);
-			return;
-		}
 
-		DataWrapper body = req.body;
-		Charset encoding = config.getDefaultFormAcceptEncoding();
-		parser.parse(body, req, encoding);
-		
+		if(req.multiPartFields.size() == 0)
+			return;
+
 		if(config.isTokenCheckOn() && route.isCheckSecureToken()) {
 			String token = ctx.getSession().get(SessionImpl.SECURE_TOKEN_KEY);
 			List<String> formToken = req.multiPartFields.get(RequestContext.SECURE_TOKEN_FORM_NAME);

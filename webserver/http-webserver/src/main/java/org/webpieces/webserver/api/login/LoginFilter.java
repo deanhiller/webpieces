@@ -1,5 +1,8 @@
 package org.webpieces.webserver.api.login;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +29,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	private String token;
 	private RouteId loginRoute;
 	private Pattern patternToMatch;
+	private String[] secureFields;
 
 	@Inject
 	public LoginFilter() {
@@ -35,6 +39,7 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 	public void initialize(LoginInfo initialConfig) {
 		token = initialConfig.getTokenThatExistsIfLoggedIn();
 		loginRoute = initialConfig.getLoginRouteId();
+		secureFields = initialConfig.getSecureFields();
 		String securePath = initialConfig.getSecurePath();
 		if(securePath != null)
 			patternToMatch = Pattern.compile(initialConfig.getSecurePath());
@@ -75,6 +80,9 @@ public class LoginFilter extends RouteFilter<LoginInfo> {
 			else
 				Current.flash().put("url", request.relativePath);
 				
+			Set<String> mySet = new HashSet<>(Arrays.asList(secureFields));
+			Current.getContext().moveFormParamsToFlash(mySet);
+			
 			Current.flash().keep();
 		}
 		

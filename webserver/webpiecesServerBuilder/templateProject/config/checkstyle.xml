@@ -34,6 +34,34 @@ page at http://checkstyle.sourceforge.net/config.html -->
       <property name="ignoreComments" value="true"/>
     </module>
 
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(OneToMany)(.*fetch)"/>
+      <!-- Because as apps evolve you will want to add many queries, you do not want to lock yourself into EAGER EVER as you want the
+           option for new queries to do lazy or eager.  Therefore, always use fetch type lazy and IF you need eager in some query cases,
+           have those queries be written to eagerly fetch -->
+      <property name="message" value="Please don't set fetch for OneToMany, it defaults to false and prefer HQL to eagerly fetch.  It will cause hard to debug issues down the road."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(OneToMany|ManyToOne|OneToOne)(.*cascade)"/>
+      <!-- Because as apps evolve you will want to add many ways to save, it is bad to use cascade not to mention
+       you can get into complicated use cases and very buggy hard to understand situations.  To keep usage of
+       hiberante simple and easy to debug, avoid cascade -->
+      <property name="message" value="Please don't use cascade attribute on JPA annotation.  It will cause hard to debug issues down the road."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="@(OneToMany|ManyToOne|OneToOne)(.*orphanRemoval)"/>
+      <!-- This one is debatable but I am putting the check in anyways and it can be removed
+
+      It's better to KISS and code up removal of everything yourself rather than get into weird situations
+       so code your removals and have the right database constraints to catch your bugs-->
+      <property name="message" value="Please don't use orphanRemoval attribute on JPA annotation.  It will cause hard to debug issues down the road."/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+    
     <!-- shorter methods are easy to read forcing developers to create tables of contents in their methods -->
     <module name="MethodLength">
       <property name="tokens" value="METHOD_DEF"/>

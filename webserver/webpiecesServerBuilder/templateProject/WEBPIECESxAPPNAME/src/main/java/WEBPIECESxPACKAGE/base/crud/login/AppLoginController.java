@@ -1,5 +1,6 @@
 package WEBPIECESxPACKAGE.base.crud.login;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.webpieces.ctx.api.Current;
@@ -14,6 +15,11 @@ public class AppLoginController extends AbstractLoginController {
 
 	public static final String TOKEN = "userId";
 
+	@Inject
+	public AppLoginController() {
+		super("password");
+	}
+	
 	@Override
 	protected boolean isValidLogin(String username, String password) {
 		if(!"dean".equals(username)) {

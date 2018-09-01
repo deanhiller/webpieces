@@ -2,6 +2,8 @@ package org.webpieces.webserver.api;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -52,6 +54,8 @@ public class WebServerConfig {
 	private Http2Config http2Config = new Http2Config();
 	private BackpressureConfig backpressureConfig = new BackpressureConfig();
 	
+	private Charset defaultFormAcceptEncoding = StandardCharsets.UTF_8;
+
 	public int getNumFrontendServerThreads() {
 		return numFrontendServerThreads ;
 	}
@@ -166,6 +170,15 @@ public class WebServerConfig {
 
 	public WebServerConfig setBackpressureConfig(BackpressureConfig backpressureConfig) {
 		this.backpressureConfig = backpressureConfig;
+		return this;
+	}
+	
+	public Charset getDefaultFormAcceptEncoding() {
+		return defaultFormAcceptEncoding;
+	}
+	
+	public WebServerConfig setDefaultFormAcceptEncoding(Charset defaultFormAcceptEncoding) {
+		this.defaultFormAcceptEncoding = defaultFormAcceptEncoding;
 		return this;
 	}
 }

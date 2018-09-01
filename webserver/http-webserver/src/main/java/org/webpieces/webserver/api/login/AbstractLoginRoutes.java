@@ -13,11 +13,13 @@ public abstract class AbstractLoginRoutes extends AbstractRoutes {
 	private String controller;
 	private String securePath;
 	protected String basePath;
+	private String[] secureFields;
 
-	public AbstractLoginRoutes(String controller, String basePath, String securePath) {
+	public AbstractLoginRoutes(String controller, String basePath, String securePath, String ... secureFields) {
 		this.controller = controller;
 		this.basePath = basePath;
 		this.securePath = securePath;
+		this.secureFields = secureFields;
 	}
 	
 	@Override
@@ -29,10 +31,10 @@ public abstract class AbstractLoginRoutes extends AbstractRoutes {
 
 		addLoggedInHome(httpsRouter);
 		
-		addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute()), PortType.HTTPS_FILTER);
+		addFilter(securePath, LoginFilter.class, new LoginInfo(getSessionToken(), getRenderLoginRoute(), secureFields), PortType.HTTPS_FILTER);
 		//redirects all queries for non-existent pages to a login (then the clients don't know which urls exist and don't exist which is good)
 		//ie. you can only get not found AFTER logging in
-		addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute()), PortType.HTTPS_FILTER);
+		addNotFoundFilter(LoginFilter.class, new LoginInfo(securePath, getSessionToken(), getRenderLoginRoute(), secureFields), PortType.HTTPS_FILTER);
 	}
 
 	protected abstract void addLoggedInHome(Router httpsRouter);

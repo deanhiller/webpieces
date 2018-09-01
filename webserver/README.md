@@ -1,7 +1,6 @@
 # webpieces
 
 #### TODO:
-* type in form and in another tab logout, then save the form, login and it comes back to form and we ideally want all the same data still filled in !!!!!!  this must have broke at some point!!!
 * add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$ and for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation and test ${_variable}$ and escaping and such
 * MAN, revisit controller not passing in his thing EVEN if that thing is null!!!  perhaps capture the keys as strings at the very least!!  ie. my controller passed in ("user", account) instead of "account" and there was nothing to tell me anything went wrong so it takes longer to figure out(ick ick ick)
 * add test for %{..}% to set var and %{..}% to print var to verify it is there so groovy implant is working

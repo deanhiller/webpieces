@@ -21,6 +21,8 @@ import org.webpieces.frontend2.api.ResponseStream;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.webserver.impl.body.BodyParser;
+import org.webpieces.webserver.impl.body.BodyParsers;
 
 import com.webpieces.hpack.api.HpackParserFactory;
 import com.webpieces.hpack.api.dto.Http2Headers;
@@ -254,8 +256,35 @@ public class RequestStreamWriter implements StreamWriter {
 		if(typeHeader != null) {
 			routerRequest.contentTypeHeaderValue = typeHeader;
 		}
+		
+		parseBodyFromContentType(routerRequest);
 	}
 
+	/**
+	 * This has to be above LoginFilter so LoginFilter can flash the multiPartParams so edits exist through
+	 * a login!!  This moves body to the muliPartParams Map which LoginFilter uses
+	 */
+	private void parseBodyFromContentType(RouterRequest req) {
+		if(req.contentLengthHeaderValue == null)
+			return;
+		
+		if(req.contentTypeHeaderValue == null) {
+			log.info("Incoming content length was specified, but no contentType was(We will not parse the body).  req="+req);
+			return;
+		}
+		
+		BodyParsers requestBodyParsers = facade.getBodyParsers();
+		
+		BodyParser parser = requestBodyParsers.lookup(req.contentTypeHeaderValue);
+		if(parser == null) {
+			log.error("Incoming content length was specified but content type was not 'application/x-www-form-urlencoded'(We will not parse body).  req="+req);
+			return;
+		}
+
+		DataWrapper body = req.body;
+		parser.parse(body, req);
+	}
+	
 	public void setOutstandingRequest(CompletableFuture<Void> future) {
 		this.outstandingRequest = future;
 	}

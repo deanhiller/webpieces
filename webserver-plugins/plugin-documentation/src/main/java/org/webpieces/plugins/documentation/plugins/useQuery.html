@@ -16,7 +16,9 @@ so here are the rules for KISS form in hibernate:</p>
 
 <p>The reasons for the first one is that it keeps hibernate KISS and you use HQL to eagerly fetch on a
 per use-case query.  Some queries may need eager fetches and some won't.  Don't default all queries to 
-eagerly fetch EVER</p>
+eagerly fetch EVER.  <b>For this reason, we not only have installed checkstyle but added a rule
+in {yourproject}-all/config/checkstyle.xml so that we break the build if someone has an eagerly
+fetch on *ToOne relationship</b></p>
 
 <p>On the second point, yes, you may need to persist stuff yourself more, but you will thank me later
 for a ton less bugs and complexity.  IMHO, hmmm, humble, fuck that, IMO, hibernate should delete

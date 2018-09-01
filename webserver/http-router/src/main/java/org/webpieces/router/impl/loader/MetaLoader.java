@@ -24,7 +24,6 @@ import org.webpieces.router.api.routing.Param;
 import org.webpieces.router.api.routing.RouteFilter;
 import org.webpieces.router.impl.ChainFilters;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.body.BodyParsers;
 import org.webpieces.router.impl.params.ParamToObjectTranslatorImpl;
 import org.webpieces.util.filters.Service;
 
@@ -34,13 +33,11 @@ public class MetaLoader {
 	private ParamToObjectTranslatorImpl translator;
 	private Set<BodyContentBinder> bodyBinderPlugins;
 	private List<String> allBinderAnnotations = new ArrayList<>();
-	private BodyParsers requestBodyParsers;
 	private RouterConfig config;
 
 	@Inject
-	public MetaLoader(ParamToObjectTranslatorImpl translator, BodyParsers requestBodyParsers, RouterConfig config) {
+	public MetaLoader(ParamToObjectTranslatorImpl translator, RouterConfig config) {
 		this.translator = translator;
-		this.requestBodyParsers = requestBodyParsers;
 		this.config = config;
 	}
 	
@@ -187,7 +184,7 @@ public class MetaLoader {
 	}
 
 	public Service<MethodMeta, Action> loadFilters(List<RouteFilter<?>> filters) {
-		Service<MethodMeta, Action> svc = new ServiceProxy(translator, requestBodyParsers, config);
+		Service<MethodMeta, Action> svc = new ServiceProxy(translator, config);
 		for(RouteFilter<?> f : filters) {
 			svc = ChainFilters.addOnTop(svc, f);
 		}

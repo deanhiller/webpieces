@@ -5,13 +5,134 @@
 #{renderTagArgs 'docHome.html'/}#
 
 <ol>
+   <li><a href="#logback">Slf4j/Logback installed</a></li>
+   <li><a href="#log4jdbc">Log4Jdbc installed</a></li>
+   <li><a href="#codeCoverage">Test Code Coverage already installed</a></li>
+   <li><a href="#checkstyle">Checkstyle already installed</a></li>   
    <li><a href="#backpressure">Backpressure</a></li>
    <li><a href="#compression">Eager Compression</a></li>
    <li><a href="#caching">Force Browsers to cache miss</a></li>
    <li><a href="#overrides">Override any webpieces class</a></li>
 </ol>
 
+<h3 id="logback">SLF4J/Logback</h3>
 
+<p>Have you ever brought a 3rd party jar in that is logging to log4j and you are logging to the jdk or vice versa.  You
+probably never even checked what logging libraries your 3rd party jars use and so those logging statements
+including errors and warnings just go to the void.  To prevent this issue, SLF4J was created along with logback.
+logback is one implementation of SLF4J.</p>
 
+<p>To configure it correctly, we currently have not tested out the exclusions of log4j jar that need to be done
+and the inclusions of the log4j adapters but the 
+<a href="https://stackoverflow.com/questions/18952479/how-to-exclude-multiple-slf4j-bindings-to-log4j">exclusion is documented</a>
+and for the jars to include, you will want to follow the top left picture on the 
+<a href="https://www.slf4j.org/legacy.html">SLF4J legacy page</a></p>
 
+<p>If you manage to test it all out with a 3rd party that logs to log4j, let me know and I will update the template
+so it generates the gradle code to exclude and include the correct jars</p>
 
+<p>LASTLY and of big note, we have configured the logback.xml such that it logs in red for warnings/errors. </p>
+
+<p>Then on top of that to be really cool, we also log the class and line number  of where the log statement is
+defined for easy traceability</p>
+
+<p>The location of the production logback.xml file is in {yourproject}-all/{yourproject}/src/dist/config/logback.xml.
+This file is zipped up and ends up on the filesystem so you can tweak it on a running server and the server re-reads
+it in every 30 seconds.</p>
+
+<p>The location of the development server logback.xml file is in {yourproject}-all/{yourproject}-dev/src/main/resources/logback.xml</p>
+
+<h3 id="log4jdbc">log4jdbc</h3>
+
+<p>We also install log4jdbc so you can see every SQL statement being issues to your database.  This allows you 
+to see 1+N query issues and convert your query to a simple join so it only hits the database once 
+instead.  The logging levels are configured in logback.xml for this.  See the above section for the
+locatios of logback.xml for production and development if you want to tweak the log levels of
+log4jdbc</p>
+
+<h3 id="codeCoverage">Test Code Coverage</h3>
+
+<p>The generated template not only has gradle but already has checkstyle already installed for
+you.  This way, you can run your tests and click around to see what lines of code are not
+yet covered by tests.  No spending tons of time trying to set it up yourself.  We know you
+always want to and put it off so we did it for you.  Just run ./gradlew build to run
+all your tests.  Then you can open up 
+{yourproject}-all/{yourproject}/output/reports/jacoco/test/html/index.html to view your results.</p>
+
+<h3 id="checkstyle">Checkstyle</h3>
+
+<p>Checkstyle can be ANNOYING as F if you are true strict on the rules so please don't do that to your
+team.  Perfect is the enemy of good enough and yet I see developers strive for perfect.  If you want
+perfect, go build a formatter/fixer that fixes imports for me not one that breaks the build if I have
+unused imports.  That just wastes my time on something that is not important and slows down the 
+business as a whole because some developer has OCD and can't shake it.</p>
+
+<p>So, we install checkstyle rules that turn out to keep your code much cleaner like the following(though
+you can delete any rule you don't like):</p>
+
+<ol>
+    <li>Methods can't be more than 70 lines(yes, don't make huge methods)</li>
+    <li>Classes can't be more than 700 lines(stop creating HUGE classes)</li>
+    <li>Protect against anti arrow pattern.  nesting only allowed to level of 2(create another method instead)</li>
+    <li>Don't allow fetch=eager attribute on JPA(see my hibernate plugin for reasons why)</li>
+    <li>ensure if there is equals, there is also a hashcode</li>
+</ol>
+
+<p>Checkout checkstyle and add more rules if you like but I think the base set is a great starter.</p>
+
+<h3 id="backpressure">Backpressure</h3>
+
+<p>One of the most fun and hard to get right features.  Webpieces can perform like a beast from this feature.
+We literally stop reading from a socket if the upstream controllers are not completing enough features or
+methods.  calling future.completedValue(someValue) literally acts as an ack which will ack the http request
+then the next layer will ack the number of bytes for that message and then through the SSL layer, it will ack
+again the number of SSL bytes next.  Finally, if there are too many bytes outstanding, it not only stops 
+reading that socket (backpressuring that client), but it literally will wait until more bytes than usual is
+acked to prevent jitter of turning on/off the socket all the time.  It literally waits for the server
+to be ahead of the game and ready to go.</p>
+
+<p>This feature is wired through each layer.  This is really stolen from the audio world and voice over IP
+and the idea of a jitter buffer.  Basically, if you have a queue of 1000, you only start sending audio to
+the phone when we have 500 audio packets and then if we ever reach 0, we stop sending audio to phone
+until it hits 500 again.  Similarly, if we hit 1000, we are at the edge so to get rid of turning on/off
+all the time, we immediately drop 500 packets.</p>
+
+<p>In the case of webpieces, if we hit 0, we do nothing, but if we max out at 1000 so to speak, we turn
+off the socket until it is back down near 500 and the server is ready to crank again.</p>
+
+<p>It ended up this caused performance gains in the nio library itself which was quite interesting
+when we were playing around with performance testing.</p>
+
+<h3 id="compression">Eager Compression</h3>
+
+<p>Nowadays most browsers ask for the same list of compressions.  On server startup, we see if any static files
+have changed and if they have, we compress and add them to our compressed files cache.  Then, when we get requests
+for static files, we just send them the compressed version so we don't waste time compressing files when 
+requests come in.</p>
+
+<h3 id="caching">Force Browsers to cache mis</h3>
+
+<p>If you use the correct tags, we generate a query param on the url like ?hash=somelonghash.  If you change your
+*.js file or *.css file, then this hash changes and the browser will automatically cache miss when looking for
+this new js file.  Many webservers, you have to remember to change the url or version of the file name.  Instead
+we allow humans to not even care.  It just works so we set cache times to 1 year knowing any new or 
+edited file will be a cache miss and will get it from our webserver</p>
+
+<h3 id="overrides">Override any webpieces class</h3>
+
+<p>Webpieces is written statelessly such that every class of business logic is intended to be a Singleton.  There
+are a couple of exceptions to that.  When you start a webpieces server like so:</p>
+
+<pre><code>*[Server server = new Server(platformOverrides, null, new ServerConfig("production"));]*</code></pre>
+
+<p>The platformOverrides contains any binding to any class you want to override in the whole platform.  If you
+were ever frustrated about modifying a platform, putting in a quick hack to fix a bug, fear not as we just
+made that issue pretty much go away.  Swap in your class for an immediate fix rewriting even the private 
+methods that may have contained the bug</p>
+
+<p>Yes, this is customization to the extreme.  Did you expect anything less from me?  Have fun in this
+playground!</p>
+
+<p>Lastly, if you saw the webpieces design page, you can see how you can easily build your own webserver 
+replacing the webpieces router OR the templating engine OR the frontend.  Everything is basically a 
+self-contained piece meant to be re-used and had fun with.</p>
