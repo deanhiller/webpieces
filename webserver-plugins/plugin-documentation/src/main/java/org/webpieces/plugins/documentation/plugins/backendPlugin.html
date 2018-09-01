@@ -14,12 +14,25 @@ with other backend plugins.  </p>
 <p>This plugin serves two purposes:</p>
 
 <ol>
-    <ul>To provide secure urls and a login page</ul>
+    <ul>To provide secure urls and a login page for secure backend plugins</ul>
     <ul>To provide a plugin point for a menu system for all backend plugins</ul>
 </ol>
+
+<p>Some plugins are public and show up in the menu system without logging in.  Other plugins
+are secure and will require you to login before they show up in the menus</p>
 
 <p>Now, some backend plugins are only plugged into the DevelopmentServer for development
 while others are for production use. The full list of plugins and their intentions is found
 here:</p>
 
 #{renderTagArgs 'listBackendPlugins.html'/}#
+
+<p>This Backend Plugin creates yet another extension point that only exists if the backend plugin is 
+installed.  If so, yet again, just like webpieces extension points, you use a guice multibinder to 
+wire into this plugin like so:</p>
+
+<pre><code>*[Multibinder<BackendGuiDescriptor> backendBinder = Multibinder.newSetBinder(binder(), BackendGuiDescriptor.class);
+backendBinder.addBinding().to(InstallSslCertGuiDescriptor.class);]*</code></pre>
+
+<p>This gives this plugin just enough information to wire in the menu system which in this case adds the
+InstallSsl Plugin to the menus</p>
