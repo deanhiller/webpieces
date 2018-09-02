@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,6 +115,12 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         String[] pieces = fieldName.split("\\.");
         Object pageArgValue = null;
         Object obj = pageArgs.get(pieces[0]);
+        
+        @SuppressWarnings("unchecked")
+		Set<String> keys = (Set<String>) pageArgs.get("__keys");
+        if(!keys.contains(pieces[0]))
+        	throw new IllegalArgumentException("Controller did not pass a value(null is fine) for key='"+pieces[0]+"'");
+        
         if (pieces.length > 1) {
             try {
                 String path = fieldName.substring(fieldName.indexOf(".") + 1);
