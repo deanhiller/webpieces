@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.webpieces.ctx.api.Constants;
 import org.webpieces.router.api.actions.Render;
 
 public class RenderImpl implements Render {
@@ -26,7 +27,9 @@ public class RenderImpl implements Render {
 			}
 		}
 		
-		pageArgs.put("__keys", keys);
+		//A VERY special key for the FieldTag.java or other tags to use to verify a key existed from
+		//the controller
+		pageArgs.put(Constants.KEYS, keys);
 	}
 
 	public Map<String, Object> getPageArgs() {

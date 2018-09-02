@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.webpieces.ctx.api.Constants;
 import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.Flash;
 import org.webpieces.ctx.api.Validation;
@@ -117,7 +118,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         Object obj = pageArgs.get(pieces[0]);
         
         @SuppressWarnings("unchecked")
-		Set<String> keys = (Set<String>) pageArgs.get("__keys");
+		Set<String> keys = (Set<String>) pageArgs.get(Constants.KEYS);
         if(!keys.contains(pieces[0]))
         	throw new IllegalArgumentException("Controller did not pass a value(null is fine) for key='"+pieces[0]+"'");
         
