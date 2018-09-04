@@ -241,7 +241,9 @@ in webpieces.  You will never see this image for a webpieces app</p>
 
 <img src="%[/org/webpieces/plugins/documentation/resubmit_chrome.png]%"/>
 
-<p>Next, let's use the @db plugin to view the in-memory database.  Go to http://localhost:8080/@db and click
+<p>Next, let's use the @db plugin to view the in-memory database.  Go to http://localhost:8080/@db and for
+the JDBC URL, change it to 'jdbc:h2:mem:test' so it hits the in-memory database.  All other settings are
+fine.  Then click
 the Connect button.  Click on the 'CAR' table which inserts a select statement in the GUI and then click 'Run'.
 Now, all rows in the table are shown, which in this case is the single row with ferrari.</p>
 

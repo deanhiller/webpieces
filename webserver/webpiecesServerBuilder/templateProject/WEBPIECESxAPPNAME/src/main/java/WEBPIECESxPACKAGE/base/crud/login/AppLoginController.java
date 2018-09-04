@@ -33,7 +33,9 @@ public class AppLoginController extends AbstractLoginController {
 	
 	@Override
 	protected Action fetchGetLoginPageAction() {
-		return Actions.renderView("/WEBPIECESxPACKAGE/base/crud/login/login.html");
+		return Actions.renderView("/WEBPIECESxPACKAGE/base/crud/login/login.html",
+				"username", null,
+				"password", null);
 	}
 
 	public Render home() {

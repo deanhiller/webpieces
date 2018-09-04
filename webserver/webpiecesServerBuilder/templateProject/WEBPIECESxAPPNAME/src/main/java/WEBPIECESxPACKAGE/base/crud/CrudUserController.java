@@ -44,7 +44,9 @@ public class CrudUserController {
 			return Actions.renderThis(
 					"entity", new UserDbo(),
 					"levels", EducationEnum.values(),
-					"roles", RoleEnum.values());
+					"roles", RoleEnum.values(),
+					"selectedRoles", null,
+					"password", null);
 		}
 		
 		UserDbo user = UserDbo.findWithJoin(Em.get(), id);
@@ -54,7 +56,8 @@ public class CrudUserController {
 				"entity", user,
 				"levels", EducationEnum.values(),
 				"roles", RoleEnum.values(),
-				"selectedRoles", selectedRoles);
+				"selectedRoles", selectedRoles,
+				"password", null);
 	}
 
 	public Redirect postSaveUser(@UseQuery("findByIdWithRoleJoin") UserDbo entity, 

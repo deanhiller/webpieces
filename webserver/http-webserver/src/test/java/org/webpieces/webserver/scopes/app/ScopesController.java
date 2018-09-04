@@ -74,7 +74,7 @@ public class ScopesController {
 
 	public Action userAddEdit(Integer id) {
 		if(id == null) {
-			return Actions.renderThis("entity", new UserDto());
+			return Actions.renderThis("user", new UserDto());
 		}
 
 		//lookup from database typically not create user
@@ -82,7 +82,7 @@ public class ScopesController {
 		user.setId(555);
 		user.setFirstName("Dean");
 		user.setLastName("Hiller");
-		return Actions.renderThis("entity", user);
+		return Actions.renderThis("user", user);
 	}
 	
 	//very typical post for adding user to database

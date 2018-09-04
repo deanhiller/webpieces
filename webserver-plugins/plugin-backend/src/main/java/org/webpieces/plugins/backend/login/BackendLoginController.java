@@ -45,7 +45,10 @@ public class BackendLoginController extends AbstractLoginController {
 	
 	@Override
 	protected Action fetchGetLoginPageAction() {
-		return Actions.renderView("/org/webpieces/plugins/backend/login/login.html", "menu", menuCreator.getMenu());
+		return Actions.renderView("/org/webpieces/plugins/backend/login/login.html", 
+				"menu", menuCreator.getMenu(),
+				"username", null,
+				"password", null);
 	}
 
 	@Override

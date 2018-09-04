@@ -13,6 +13,7 @@
 		#{/if}#
     	
     	#{id 'entity.id'/}#
+        <input type="hidden" name="_showEditPopup" value="true"/>
         
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#

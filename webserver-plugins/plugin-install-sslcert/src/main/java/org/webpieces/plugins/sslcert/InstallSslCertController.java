@@ -76,7 +76,8 @@ public class InstallSslCertController {
 				return Actions.renderThis(
 						"menu", menuCreator.getMenu(), 
 						"agreement", info.getTermsOfServiceUri()+"", 
-						"website", info.getWebsite()
+						"website", info.getWebsite(),
+						"email", null
 						);
 			});
 		}
@@ -126,7 +127,8 @@ public class InstallSslCertController {
 		log.info("rendering step");
 		return Actions.renderThis(
 				"menu", menuCreator.getMenu(), 
-				"keyPair", keyPair);
+				"keyPair", keyPair,
+				"organization", null);
 	}
 
 	public CompletableFuture<Redirect> postStep2(String organization) {

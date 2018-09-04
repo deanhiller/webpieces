@@ -117,6 +117,7 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         Object pageArgValue = null;
         Object obj = pageArgs.get(pieces[0]);
         
+        //This breaks AJAX stuff...
         @SuppressWarnings("unchecked")
 		Set<String> keys = (Set<String>) pageArgs.get(Constants.KEYS);
         if(!keys.contains(pieces[0]))

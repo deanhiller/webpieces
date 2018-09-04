@@ -1,6 +1,7 @@
 # webpieces
 
 #### TODO:
+* add non-selenium test for AJAX CRUD POST form when logged out and then login and then render
 * add test for ${client.name}$ client=null and ${client?.name}$ client=null and ${optional(client).name}$ client null and ${optional(client)?.name}$ and for ${entity.user}$ token and ${entity?.user}$ AND add links from documentation and test ${_variable}$ and escaping and such
 * add test for %{..}% to set var and %{..}% to print var to verify it is there so groovy implant is working
 * rewire redirects so port stuff is done OUTSIDE the router so we no longer need funky callbacks.  (ie. I made a mistake there that we can fix by providing all the info from the router to the webserver and webserver knows the ports).  This is more complex than that!  

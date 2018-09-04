@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import org.webpieces.data.api.DataWrapper;
@@ -122,6 +123,31 @@ public class ResponseWrapper {
 		return header.getValue();
 	}
 
+	public Map<String, String> modifyCookieMap(Map<String, String> currentCookies) {
+		List<Header> headers = getResponse().getHeaderLookupStruct().getHeaders(KnownHeaderName.SET_COOKIE);
+
+		for(Header header : headers) {
+			String value = header.getValue();
+			if(value.contains(";")) {
+				String[] split = value.split(";");
+				value = split[0];
+			}
+
+			
+			int indexOf = value.indexOf("=");
+			String key = value.substring(0, indexOf);
+			String val = value.substring(indexOf+1);
+			
+			if(val.length() <= 0) {
+				currentCookies.remove(key);
+			} else {
+				currentCookies.put(key, val);
+			}
+		}
+		
+		return currentCookies;
+	}
+	
 	/**
 	 * Example request cookie from chrome
 	 * Cookie: webSession=1-gzvc03bKRP2YYvWySwgENREwFSg=:__ST=3a2fda5dad7547d3b15b1f61bd3d12f5; webFlash=1:_message=Invalid+values+below&user.address.zipCode=Text+instead+of+number&__secureToken=3a2fda5dad7547d3b15b1f61bd3d12f5&user.firstName=Dean+Hiller; webErrors=1:user.address.zipCode=Could+not+convert+value

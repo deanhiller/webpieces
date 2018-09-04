@@ -7,14 +7,28 @@
 *{ any changes to this modal 'if showPopup' would need to be retested in ALL browsers!!! }*
 <div id="addEditModal" class="modal hide #{if showPopup}#in#{/if}#" tabindex="-1" 
      role="dialog" data-backdrop="true" aria-labelledby="addEditModalLabel" 
-     aria-hidden="#{if showPopup}#false#{/if}##{else}#true#{/else}#"
-    #{if showPopup}#style="display: block;"#{/if}#>
+     aria-hidden="#{if showPopup}#false#{/if}##{else}#true#{/else}#">
+     
+     *{ Special case so if we POST and flash what the user typed in, when listing the entities
+        we re-popup the dialogue with errors in it.  Better yet, our flash data now survives 
+        login redirects as well and logging in so user doesn't lose what he typed out!!! }*
+        
     #{if showPopup}#
-        #{renderPageArgs 'userAddEdit.html'/}#
         <script type="text/javascript">
-           $(document).ready(function() { 
-               $("#addEditModal").modal('show');   
-           });
+        var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
+        var getAddRoute= #{jsAction @[AJAX_ADD_USER_FORM]@ /}#
+        $(document).ready(function(){
+	        #{if _flash.get('entity.id')}#
+	            $('#addEditModal').load(getEditRoute({id:${_flash.get('entity.id')}$}),function(){
+	                $("#addEditModal").modal('show');    
+	            });
+	        #{/if}#
+	        #{else}#
+		         $('#addEditModal').load(getAddRoute(),function(){
+		              $("#addEditModal").modal('show'); 
+		         });	        
+	        #{/else}#
+        });
         </script>
     #{/if}#
 </div>
@@ -60,8 +74,15 @@
 #{bootstrapModal route:@[AJAX_ADD_USER_FORM]@, linkId:'addLink', modalId:'addEditModal'/}#
 
 
-*{ 
-THE ONE LINE bootstrapModal tag for the EDIT button replaces the following...
+
+
+
+
+
+
+*{  This is one very long comment
+ 
+THE ONE LINE bootstrapModal tag for the EDIT button replaces ALL the following code...
 
   <script type="text/javascript">
       var getEditRoute= #{jsAction @[AJAX_EDIT_USER_FORM, id:'{id}']@ /}#
@@ -88,7 +109,8 @@ $(document).ready(function() {
 });
 </script>
 
-                   
+For completeness, this is the DELETE button....
+
 <script type="text/javascript">
  var getConfirmDeleteRoute = #{jsAction @[AJAX_CONFIRM_DELETE_USER, id:'{id}']@ /}#
  $(document).ready(function() {	

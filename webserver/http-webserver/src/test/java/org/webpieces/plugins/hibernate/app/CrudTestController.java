@@ -41,14 +41,16 @@ public class CrudTestController {
 		if(id == null) {
 			return Actions.renderThis("entity", new UserTestDbo(),
 					"levels", LevelEducation.values(),
-					"roles", Role.values());
+					"roles", Role.values(),
+					"password", null);
 		}
 		
 		UserTestDbo user = UserTestDbo.findWithJoin(Em.get(), id);
 		return Actions.renderThis(
 				"entity", user,
 				"levels", LevelEducation.values(),
-				"roles", Role.values());
+				"roles", Role.values(),
+				"password", null);
 	}
 	
 	public Redirect postSaveUser(UserTestDbo entity, String password) {
@@ -88,7 +90,8 @@ public class CrudTestController {
 				"entity", user,
 				"levels", LevelEducation.values(),
 				"roles", Role.values(),
-				"selectedRoles", selectedRoles);
+				"selectedRoles", selectedRoles,
+				"password", null);
 	}
 	
 	public Redirect postSaveUserForMultiSelect(UserTestDbo entity, List<Role> selectedRoles, String password) {

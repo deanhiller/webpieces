@@ -57,12 +57,13 @@ public class TestLesson3Errors extends AbstractWebpiecesTest {
 		//clear in-memory database
 		jdbc.dropAllTablesFromDatabase();
 		
+		boolean isRemote = false;
 		//you may want to create this server ONCE in a static method BUT if you do, also remember to clear out all your
 		//mocks after every test AND you can no longer run single threaded(tradeoffs, tradeoffs)
 		//This is however pretty fast to do in many systems...
-		Server webserver = new Server(getOverrides(false), new AppOverridesModule(), new ServerConfig(pUnit, JavaCache.getCacheLocation()));
+		Server webserver = new Server(getOverrides(isRemote), new AppOverridesModule(), new ServerConfig(pUnit, JavaCache.getCacheLocation()));
 		webserver.start();
-		http11Socket = connectHttp(false, webserver.getUnderlyingHttpChannel().getLocalAddress());
+		http11Socket = connectHttp(isRemote, webserver.getUnderlyingHttpChannel().getLocalAddress());
 	}
 	
 	/**

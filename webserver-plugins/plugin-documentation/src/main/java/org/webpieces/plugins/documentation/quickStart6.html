@@ -8,7 +8,9 @@
 <h2>Dealing with Login</h2>
 
 <p>First, let's discuss some requirements that frequently get missed when dealing with login that
-are super annoying to customers.</p>
+are super annoying to customers.  If you are going to use a new webserver or framework, you 
+should definitely walk through these use cases to make sure they all work for a great customer
+experience</p>
 
 <h4>Hit secure page directly</h4>
 
@@ -24,6 +26,21 @@ to the one I originally typed in you piece of crap app!!!!  ie. After login, we 
 users back to the original page they wanted.  We do this making your life easy and your customers
 very happy</p>
 
+<h4>Type into form and click save(while logged out)</h4>
+
+<p>In some cases, you may have timed out a user's session.  He may have left a form open and he
+comes back and starts to edit that form.  Then, he clicks save and 'should' be redirected
+to the login page.  After that, he logs in, and in many apps, all the data he typed in
+just got blown away.  For normal html CRUD, this is not true as we flash the data he
+typed in and after he logs in, all that data populated the form so he can then just click
+save again.  </p>
+
+<h4>Surviving reboots</h4>
+
+<p>Nothing is more annoying than you roll a whole cluster and all your customers are logged out
+of the application.  For this reason, login should survive a reboot and webpieces does
+just that because it is truely stateless.</p>
+
 <h4>Hit secure page then login error</h4>
 
 <p>This is nearly the same as above BUT let's say the user types in the wrong password the first time.
@@ -31,11 +48,12 @@ In this case, we will re-render login page with errors and he will then hopefull
 correct login.  At this point, we still want to redirect him to the original page he requested.
 Of course, webpieces works here too while other platforms fall flat</p>
 
-<h4>Hit login page directly</h4>
+<h4>Hit login page directly when logged in already</h4>
 
-<p>In this use case, most everyone works but we want to be complete.  For this use case,
-we naturally want a logged-in home web page that we redirect to after logging in perhaps
-even saying *['Welcome ${user.name}$']* just once.  </p>
+<p>In this use case, but I still run into webapps that let me hit the login page while I am logged in
+which is stupid as I am already logged in you stupid web app.  Most everyone else works though but
+we want to be complete.  For this use case, we naturally want a logged-in home web page that we
+redirect to after logging in perhaps even saying *['Welcome ${user.name}$']* just once.  </p>
 
 <h4>Hit secure page logged in</h4>
 
@@ -276,5 +294,7 @@ public List<Routes> getRouteModules() {
 in!  Go to https://localhost:8443/secure/account/list to see how it works (I am not sure if you
 are logged in or not so you may need to click logout)</p>
 
+<p>Then play with logging in and rebooting the server and notice how you are not logged out 
+unless you click logout.  Pretty slick, right?</p>
 
 <a class="btn btn-primary" href="@[QUICK_START7]@" role="button">Next Writing a Test</a>

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
+import org.webpieces.router.api.RouterConfig;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 
@@ -18,6 +19,7 @@ public class ServerConfig {
 	private Long staticFileCacheTimeSeconds = TimeUnit.SECONDS.convert(30, TimeUnit.DAYS);
 	private File compressionCacheDir;
 	private Map<String, String> webAppMetaProperties = new HashMap<>();
+	private boolean tokenCheckOn = true;
 
 	public ServerConfig(int httpPort, int httpsPort, String persistenceUnit, File compressionCache) {
 		webAppMetaProperties.put(HibernatePlugin.PERSISTENCE_UNIT_KEY, persistenceUnit);
@@ -29,6 +31,7 @@ public class ServerConfig {
 	public ServerConfig(String persistenceUnit, File compressionCache) {
 		//For tests, we need to bind to port 0, then lookup the port after that...
 		this(0, 0, persistenceUnit, compressionCache);
+		tokenCheckOn = false;
 	}
 
 	//really for production use only...
@@ -78,6 +81,14 @@ public class ServerConfig {
 
 	public void setCompressionCacheDir(File compressionCacheDir) {
 		this.compressionCacheDir = compressionCacheDir;
+	}
+
+	public boolean isTokenCheckOn() {
+		return tokenCheckOn;
+	}
+	public ServerConfig setTokenCheckOn(boolean tokenCheckOff) {
+		this.tokenCheckOn = tokenCheckOff;
+		return this;
 	}
 
 }

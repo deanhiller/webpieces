@@ -107,7 +107,8 @@ public class Server {
 											.setSecretKey(signingKey)
 											.setPortConfigCallback(() -> fetchPortsForRedirects())
 											.setCachedCompressedDirectory(svrConfig.getCompressionCacheDir())
-											.setNeedsSimpleStorage(webSSLFactory); 
+											.setNeedsSimpleStorage(webSSLFactory)
+											.setTokenCheckOn(svrConfig.isTokenCheckOn()); 
 				
 		WebServerConfig config = new WebServerConfig()
 										.setPlatformOverrides(allOverrides)
