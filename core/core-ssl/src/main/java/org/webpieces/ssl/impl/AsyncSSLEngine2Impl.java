@@ -214,7 +214,10 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		//2. have data in buffer
 		//3. have enough data in buffer(ie. not underflow)
 		int totalToAck = 0;
-		while(encryptedData.hasRemaining() && status != Status.BUFFER_UNDERFLOW && status != Status.CLOSED) {
+		while(encryptedData.hasRemaining() && 
+				status != Status.BUFFER_UNDERFLOW && 
+				status != Status.CLOSED 
+				) {
 			i++;
 			SSLEngineResult result;
 			
@@ -248,9 +251,10 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 
 			status = result.getStatus();
 			hsStatus = result.getHandshakeStatus();
-			if(hsStatus == HandshakeStatus.NEED_TASK) {
+			if(hsStatus == HandshakeStatus.NEED_TASK || hsStatus == HandshakeStatus.NEED_WRAP) {
 				//if status is need task, we need to break to run the task before other handshake
-				//messages?
+				//messages?  Also, need_wrap happened when firefox was connecting once and this fixed that so it would continue the
+				//handshake as well
 				break;
 			}
 			
@@ -290,12 +294,12 @@ public class AsyncSSLEngine2Impl implements AsyncSSLEngine {
 		log.trace(()->mem+"[sockToEngine] unwrap done pos="+data.position()+" lim="+
 					data.limit()+" status="+status+" hs="+hsStatus);
 		if(i > 1000) {
-			throw new RuntimeException(this+"Bug, stuck in loop, bufIn="+encryptedData+" bufOut="+outBuffer+
+			throw new RuntimeException(this+"Bug, stuck in loop, encryptedData="+encryptedData+" outBuffer="+outBuffer+
 					" hsStatus="+hsStatus+" status="+status);
 		} else if(status == Status.BUFFER_UNDERFLOW) {
 			final ByteBuffer data1 = encryptedData;
 			log.trace(()->"buffer underflow. data="+data1.remaining());
-		}		
+		}
 	}
 
 	private CompletableFuture<Void> cleanAndFire(HandshakeStatus hsStatus, Status status) {

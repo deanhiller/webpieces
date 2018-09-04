@@ -120,8 +120,12 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
         //This breaks AJAX stuff...
         @SuppressWarnings("unchecked")
 		Set<String> keys = (Set<String>) pageArgs.get(Constants.KEYS);
-        if(!keys.contains(pieces[0]))
-        	throw new IllegalArgumentException("Controller did not pass a value(null is fine) for key='"+pieces[0]+"'");
+        if(!flash.isShowEditPopup()) {
+        	//ONLY validate if not showing an ajax addEditPopup which ONLY uses flash so will have no entity passed in
+        	//from the controller.  It keeps all previous values in flash
+        	if(!keys.contains(pieces[0]))
+        		throw new IllegalArgumentException("Controller did not pass a value(null is fine) for key='"+pieces[0]+"'");
+        }
         
         if (pieces.length > 1) {
             try {

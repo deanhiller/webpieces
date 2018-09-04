@@ -31,12 +31,6 @@ public class AjaxCrudUserController {
 		@SuppressWarnings("unchecked")
 		List<UserDbo> users = query.getResultList();
 		boolean showEditPopup = Current.flash().isShowEditPopup();
-		
-		if(showEditPopup) {
-			Current.flash().keep();
-			Current.validation().keep();
-		}
-		
 		return Actions.renderThis(
 				"users", users,
 				"showPopup", showEditPopup);
@@ -46,12 +40,13 @@ public class AjaxCrudUserController {
 		if(id == null) {
 			return Actions.renderThis(
 					"entity", new UserDbo(),
-					"password", null
-					);
+					"password", null);
 		}
-
+		
 		UserDbo user = Em.get().find(UserDbo.class, id);
-		return Actions.renderThis("entity", user, "password", null);
+		return Actions.renderThis(
+				"entity", user,
+				"password", null);
 	}
 
 	public Redirect postSaveUser(UserDbo entity, String password) {

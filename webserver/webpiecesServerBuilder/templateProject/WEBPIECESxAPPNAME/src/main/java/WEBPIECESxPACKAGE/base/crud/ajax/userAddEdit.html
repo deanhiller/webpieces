@@ -4,16 +4,15 @@
          <h4 id="myModalLabel"> User </h4>
     </div>
     <div class="modal-body">
-		#{if _flash.error}#
-			<div class="row-fluid">
-				<div class="offset3 span6 alert alert-error">
-					${_flash.error}$
-				</div>
-			</div>
-		#{/if}#
-    	
-    	#{id 'entity.id'/}#
-        <input type="hidden" name="_showEditPopup" value="true"/>
+        #{if _flash.error}#
+            <div class="row-fluid">
+                <div class="offset3 span6 alert alert-error">
+                    ${_flash.error}$
+                </div>
+            </div>
+        #{/if}#
+        
+        #{id 'entity.id'/}#
         
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
@@ -25,7 +24,7 @@
         <div class="control-group ${field.errorClass}">
             <label class="control-label"><a href="#" rel="tooltip" title="&{field.name+'.help'}"><i class="icon-info-sign"></i></a>Status</label>
             <div class="controls">
-            	#{select field.name, items: EnumSet.allOf(models.EntityStatus.class), value: field.value, labelProperty:'guiLabel' /}
+                #{select field.name, items: EnumSet.allOf(models.EntityStatus.class), value: field.value, labelProperty:'guiLabel' /}
                 <span class="help-block">${field.error}</span>
             </div>
         </div>

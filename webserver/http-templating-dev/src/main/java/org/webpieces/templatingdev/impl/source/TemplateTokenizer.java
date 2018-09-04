@@ -39,8 +39,10 @@ public class TemplateTokenizer {
 						tokens.remove(i); //remove the actual token as well 
 					}
 					tokens.remove(i-1);
-					if(i >= tokens.size())
-						i--;
+					if(i >= tokens.size()) {
+						i = tokens.size()-1; //(only -1 as the loop will subtract 1 more)
+						//i--;
+					}
 				}
 			} else if(token.state == TemplateToken.PLAIN && "".equals(token.getValue())) {
 				//remove tokens that are just "" as we don't need to print empty string out
