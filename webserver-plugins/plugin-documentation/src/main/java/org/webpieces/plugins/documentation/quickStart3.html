@@ -160,8 +160,7 @@ a brand new car.  Next, let's add the carAddEdit method to our controller</p>
 #{form action:@[POST_CAR]@, class:'form-horizontal', style:'min-width:500px;max-width:800px;margin: 0 auto'}#
 	<h4 id="myModalLabel"> Car </h4>
 
-	*{optional in case this is the add operation and so this is used in case of edits only }*
-	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+	<input type="hidden" name="entity.id" value="${entity?.id}$"/>
 	#{field 'entity.name',   label:'Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
    	#{field 'entity.style', label:'Style'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
 

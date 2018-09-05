@@ -296,8 +296,7 @@ The html for this create or edit page is as follows:</p>
     </div>
     <div class="modal-body" style="max-height: 600px">
 
-    	*{optional in case this is the add operation and so this is used in case of edits only }*
-    	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+    	<input type="hidden" name="entity.id" value="${entity?.id}$"/>
 
         #{field 'entity.name', label:'Account Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.contactsand Name', label:"Contact''s Name"}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
@@ -314,7 +313,7 @@ The html for this create or edit page is as follows:</p>
 <p>The first 3 lines are the same as the accountList.html we wrote about above(hopefully you were
     reading and not spaced out).  Then, we use the form tag along with the POST_ACCOUNT_FORM url
     lookup.  Next, we have
-*[<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>]* which is the special
+*[<input type="hidden" name="entity.id" value="${entity?.id}$"/>]* which is the special
 html for saving if this is an edit or a creation.  If we are editing a value, entity.id on posting
 will be filled in and if we are creating an account, entity.id will be a 0 length string.</p>
 
