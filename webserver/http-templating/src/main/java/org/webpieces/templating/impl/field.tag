@@ -3,7 +3,7 @@
            *{ This is for tooltip popup }*
            <a href="#" rel="tooltip" title="&{'', field.i18nKey+'.help'}&"><i class="icon-info-sign"></i></a>
            *{i18n fields are default text then key so read the label if it exists or lookup by key name}*
-           &{optional('label'), field.i18nKey}&
+           &{label$, field.i18nKey}&
         </label>
         <div class="controls">
             ${_body}$

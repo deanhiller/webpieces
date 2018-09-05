@@ -128,10 +128,51 @@ have:</p>
 
 <p>After all, it would be very annoying if the html went away and wasn't passed into your tag for you</p>
 
-<p>In the case of *[${somevar}$]*, if somevar is not assigned, we will fail fast on compiling the template to
-prevent mistakes.  This has saved us way too many times from deploying broken code.  There are times when you
-want to make it optional which is where you can do *[${optional(somevar)}$]* instead when you know it is 
-optional.</p>
+<p>Next, let's look at a Controller like so and the following template snippet:</p>
+
+<pre>
+<code>*[public Action requiredNotExist() {
+    return Actions.renderThis();
+}
+
+<h1>Client ${client?.name}$</h1>
+]*</code>
+</pre>
+
+<p>In the case, the client variable is required but the controller did not set a client variable.  This is very frustrating
+to debug in some web frameworks but we require client to be defined in this case and will error out pointing you to
+the exact line in the html.  Let's say however you have multiple controller methods rendering this page and you want
+to make 'client' an optional variable.  You then can add a $ at the end of client.  You also will probably want a
+? after that signifying to return null if client is null like so:</p>
+
+<pre>
+<code>*[<h1>Client ${client$?.name}$</h1>]*</code>
+</pre>
+
+<p>Another example is a simple password field(notice, I no longer need a ?):</p>
+
+<pre>
+<code>*[<h1>My password is ${password$}$</h1>]*</code>
+</pre>
+
+<p>Sometimes, you have a tag file with content something like this:</p>
+
+<pre>
+<code>*[&{label, i18nKey}& is my label for i18n.  Printout value= ${label}$ ]*</code>
+</pre>
+
+<p>However, when you call the tag file, someone may not supply this label argument as part of the tag.
+In that case, you add the $ to the end of label like so such that clients can see label as an optional
+argument(if it is truly optional):</p>
+
+<pre>
+<code>*[&{label$, i18nKey}& is my label for i18n.  Printout value= ${label$}$ ]*</code>
+</pre>
+
+<p>So, by default, you should not need $ much, but it is there so you can make tag arguments and
+also make variables optional so the controller does not need to set them.  We suggest keeping 
+most things required and having the controller pass in the variable set to null if you like
+but always having the controller pass it in</p>
 
 <h3 id="tagToken">Tags and GroovyGen *[#{...}#]*</h3>
 
@@ -278,6 +319,16 @@ a label or text that can vary the language, you use this template token with the
 a key that will be looked up for the language like so</p>
 
 <pre><code>*[&{ 'Basic Hello World', 'helloworld'}&]*</code></pre>
+
+<p>Sometimes, you may pass a tag argument as the variable into the text like so:</p>
+
+<pre><code>*[&{ label, 'helloworld'}&]*</code></pre>
+
+<p>In this case, you could make label an optional argument so the client does not 'need' to supply the label
+but generally you will want the above instead so it fails fast and let's the developer know that he is
+missing a label.  Here is the example just in case you need it to be optional though:</p>
+
+<pre><code>*[&{ label, 'helloworld'}&]*</code></pre>
 
 <p>A full example can be found in our feature test which tests our entire server works end to end with i18n
 at <a href="https://github.com/deanhiller/webpieces/tree/master/webserver/http-webserver/src/test/java/org/webpieces/webserver/i18n">

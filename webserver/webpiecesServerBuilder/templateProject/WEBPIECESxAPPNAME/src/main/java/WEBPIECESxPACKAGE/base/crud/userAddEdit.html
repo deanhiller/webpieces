@@ -18,7 +18,7 @@
         #{/if}#
     	
     	*{optional in case this is the add operation and so this is used in case of edits only }*
-    	<input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+    	<input type="hidden" name="entity.id" value="${entity?.id}$"/>
         
         *{Generally, we only use field, but for purposes of demonstration, we use the myfield tag as an example of a custom 'field' tag you own in your project}*
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#

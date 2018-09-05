@@ -18,12 +18,9 @@ import org.webpieces.webserver.test.ResponseExtract;
 import org.webpieces.webserver.test.ResponseWrapper;
 import org.webpieces.webserver.test.http11.Requests;
 
-
 public class TestFieldTag extends AbstractWebpiecesTest {
-
 	
 	private HttpSocket http11Socket;
-	
 	
 	@Before
 	public void setUp() throws InterruptedException, ExecutionException, TimeoutException {

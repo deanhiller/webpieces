@@ -5,7 +5,7 @@
   
     #{form action:@[SAVE_USER]@, id:'form1'}#
     
-        <input type="hidden" name="entity.id" value="${optional('entity')?.id}$"/>
+        <input type="hidden" name="entity.id" value="${entity?.id}$"/>
 
         #{field 'entity.firstName', label:'First Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#
         #{field 'entity.lastName', label:'Last Name'}#<input type="text" name="${field.name}$" value="${field.flashOrValue}$" class="input-xlarge">#{/field}#

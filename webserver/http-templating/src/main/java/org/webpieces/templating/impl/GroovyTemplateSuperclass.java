@@ -114,14 +114,6 @@ public abstract class GroovyTemplateSuperclass extends Script {
 			throw new RuntimeException("Error fetching route='"+routeId+"' ("+e.getMessage()+").  "+srcLocation+"\nThe list of params fed from html file="+args, e);
 		}
 	}
-
-	public Object optional(String property) {
-		try {
-			return super.getProperty(property);
-		} catch(MissingPropertyException e) {
-			return null;
-		}
-	}
 	
 	@Override
 	public void setProperty(String property, Object value) {
@@ -131,9 +123,17 @@ public abstract class GroovyTemplateSuperclass extends Script {
     @Override
     public Object getProperty(String property) {
     	String srcLocation = modifySourceLocation2(sourceLocal.get());
+    	boolean isOptional = false;
+    	if(property.endsWith("$")) {
+    		isOptional = true;
+    		property = property.substring(0, property.length()-1);
+    	}
+    	
         try {
             return super.getProperty(property);
         } catch (MissingPropertyException e) {
+        	if(isOptional)
+        		return null;
         	throw new IllegalArgumentException("No such property '"+property+"' but perhaps you forgot quotes "
         			+ "around it or you forgot to pass it in from the controller's return value(with the RouteId) OR "
         			+ "lastly, if this is inside a custom tag, perhaps the tag did not pass in the correct arguments."+srcLocation, e);
