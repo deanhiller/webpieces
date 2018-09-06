@@ -17,8 +17,8 @@ public class RenderTagArgsTag extends TemplateLoaderTag implements HtmlTag {
 
 	@Override
 	protected Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs, Closure<?> body, String srcLocation) {
-		if(tagArgs.get("_body") != null)
-			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of '_body' as that is reserved for the actual body");
+		if(tagArgs.get("body") != null)
+			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of 'body' as that is reserved for the actual body");
 		Map<String, Object> copy = new HashMap<>();
 		Map<String, Object> closureProps = new HashMap<>();
 		for(Map.Entry<Object, Object> entry : tagArgs.entrySet()) {
@@ -34,7 +34,7 @@ public class RenderTagArgsTag extends TemplateLoaderTag implements HtmlTag {
 		if(body != null) {
 			bodyStr = ClosureUtil.toString(getName(), body, closureProps);
 		}
-		copy.put("_body", bodyStr);
+		copy.put("body", bodyStr);
 		
 		return copy;
 	}

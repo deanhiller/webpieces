@@ -10,7 +10,6 @@ public class TagRoutes extends AbstractRoutes {
 
 	@Override
 	public void configure() {
-		addRoute(GET , "/verbatim",          "TagController.htmlEscapingOffTag", TagsRouteId.VERBATIM_ROUTE_ID);
 
 		addRoute(GET , "/if",                "TagController.ifTag", TagsRouteId.IF_ROUTE_ID);
 		addRoute(GET , "/else",              "TagController.elseTag", TagsRouteId.ELSE_ROUTE_ID);

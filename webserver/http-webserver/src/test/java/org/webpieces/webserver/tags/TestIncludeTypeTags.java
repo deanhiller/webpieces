@@ -46,7 +46,7 @@ public class TestIncludeTypeTags extends AbstractWebpiecesTest {
         ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
 		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
 		response.assertContains("Page Using Custom Tag");
-		response.assertContains("This is a custom tag which can also use tags in itself <a href=`/verbatim`>Some Link Here</a>".replace('`', '"'));
+		response.assertContains("This is a custom tag which can also use tags in itself <a href=`/if`>Some Link Here</a>".replace('`', '"'));
 		response.assertContains("The user is override and Dean Hiller tag argument cool"); //using variable in custom tag
 		response.assertContains("After Custom Tag");
 		response.assertContains("supertemplate BEGIN");

@@ -11,10 +11,6 @@ import org.webpieces.router.api.actions.Redirect;
 
 @Singleton
 public class TagController {
-	public Action htmlEscapingOffTag() {
-		//The & html will be escaped so it shows up to the user as & (ie. in html it is &amp; unless verbatim is used .. 
-		return Actions.renderThis("escaped", "'''escaped by default &'''", "verbatim", "'''verbatim & so do not escape'''");
-	}
 	
 	public Action ifTag() {
 		return Actions.renderThis("positive", "ThisExists", "negative", false, "negative2", null);
