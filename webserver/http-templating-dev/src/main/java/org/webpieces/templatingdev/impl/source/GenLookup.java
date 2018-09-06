@@ -10,7 +10,6 @@ import org.webpieces.templatingdev.impl.tags.ElseGen;
 import org.webpieces.templatingdev.impl.tags.ElseIfGen;
 import org.webpieces.templatingdev.impl.tags.IfGen;
 import org.webpieces.templatingdev.impl.tags.ListGen;
-import org.webpieces.templatingdev.impl.tags.VerbatimGen;
 
 public class GenLookup {
 
@@ -20,7 +19,6 @@ public class GenLookup {
 	private ListGen listGen;
 	
 	protected void init() {
-		put(new VerbatimGen());
 		put(new IfGen());
 		put(new ElseIfGen());
 		put(new ElseGen());

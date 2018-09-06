@@ -2,13 +2,10 @@
   <head>
   </head>
   <body>
-    Html is escaped here=${escaped}$ but inside verbatim
+    Html is escaped here=${someHtml}$ by default
     <br/><br/>
     
-    #{htmlEscapingOff}#
-       This is not escaped ${verbatim}$ here
-    
-    #{/htmlEscapingOff}#
+    This is not escaped same variable ${escOff#someHtml}$ here
     
     <br/><br/>
     *{ escapes all platform tokens except ]* which never needs to be escaped }*

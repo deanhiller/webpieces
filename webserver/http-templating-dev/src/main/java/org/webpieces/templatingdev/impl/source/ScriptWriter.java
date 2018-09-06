@@ -132,11 +132,7 @@ public class ScriptWriter {
 			//in the page like escOff#body
 			String newExpr = expr.substring("escOff#".length());
 			sourceCode.println("       __out.print("+newExpr+");", token);
-		} else if(expr.startsWith("_"))
-			//deprecated and going away...
-			//variables starting with underscore do not get html escaped so they can return html to put in the page like _body
-			sourceCode.println("       __out.print("+expr+");", token);
-		else
+		} else
 			sourceCode.println("       __out.print(useFormatter("+expr+"));", token);
 		sourceCode.println("       exitExpression();", token);
 		sourceCode.println();

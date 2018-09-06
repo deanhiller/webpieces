@@ -13,7 +13,7 @@ buildscript {
 
         //We use an older version of our own html compiler to pre-build html tags for clients
         //of webpieces...
-        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.102'
+        classpath 'org.webpieces:gradle-plugin-htmlcompiler:1.9.124'
     }
 }
 
@@ -370,7 +370,7 @@ closeRepository.dependsOn('uploadArchives2')
 promoteRepository.dependsOn('closeRepository')
 promoteRepository.doFirst {
   println("sleeping after close repo and before promote or promote fails")
-  Thread.sleep(60000)
+  Thread.sleep(80000)
   println("done sleeping go promote repo now");
 }
 

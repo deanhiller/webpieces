@@ -24,7 +24,6 @@ public abstract class GroovyTemplateSuperclass extends Script {
 
 	public static String OUT_PROPERTY_NAME = "__out";
 	public static final EscapeHTMLFormatter ESCAPE_HTML_FORMATTER = new EscapeHTMLFormatter();
-	private static final NullFormatter NULL_FORMATTER = new NullFormatter();
 
 	private EscapeCharactersFormatter formatter;
 	private HtmlTagLookup tagLookup;
@@ -39,17 +38,6 @@ public abstract class GroovyTemplateSuperclass extends Script {
     	this.tagLookup = tagLookup;
     	this.setTagProperties = setTagProps;
     	this.urlLookup = urlLookup;
-    }
-
-    //TODO: Make formatter a ThreadLocal<Stack> such that if you nest verbatims with tags
-    //then uninstallNullFormatter only means pop the stack such that you are still in verbatim
-    //ie. this won't work well with nested verbatim right now
-    protected void installNullFormatter() {
-    	formatter = NULL_FORMATTER;
-    }
-    
-    protected void installHtmlFormatter() {
-    	formatter = ESCAPE_HTML_FORMATTER;
     }
 
     public String useFormatter(Object val) {

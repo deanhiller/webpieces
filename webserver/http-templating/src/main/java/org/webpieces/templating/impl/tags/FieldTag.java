@@ -60,8 +60,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 	
 	@Override
 	protected Map<String, Object> convertTagArgs(Map<Object, Object> tagArgs, Map<String, Object> pageArgs, Closure<?> body, String srcLocation) {
-		if(tagArgs.get("_body") != null)
-			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of '_body' as that is reserved and will be overwritten"+srcLocation);
+		if(tagArgs.get("body") != null)
+			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of 'body' as that is reserved and will be overwritten"+srcLocation);
 		else if(tagArgs.get("field") != null)
 			throw new IllegalArgumentException("tag "+getName()+" must not define an argument of 'field' as that is reserved and will be overwritten "+srcLocation);
 
@@ -86,8 +86,8 @@ public class FieldTag extends TemplateLoaderTag implements HtmlTag {
 			closureProps.put("field", field);
 			bodyStr = ClosureUtil.toString(getName(), body, closureProps);
 		}
-		//variables starting with _ will not be html escaped so the body html won't be converted like other variables
-		copyOfTagArgs.put("_body", bodyStr);
+		
+		copyOfTagArgs.put("body", bodyStr);
 		
 		return copyOfTagArgs;
 	}

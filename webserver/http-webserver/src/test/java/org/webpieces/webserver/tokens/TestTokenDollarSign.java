@@ -52,6 +52,17 @@ public class TestTokenDollarSign extends AbstractWebpiecesTest {
 	}
 	
 	@Test
+	public void testOptionalNotExist2() {
+		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/optionalNotExist2");
+		
+		CompletableFuture<HttpFullResponse> respFuture = http11Socket.send(req);
+		
+        ResponseWrapper response = ResponseExtract.waitResponseAndWrap(respFuture);
+		response.assertStatusCode(KnownStatusCode.HTTP_200_OK);
+		response.assertContains("Hi password=''");
+	}
+	
+	@Test
 	public void testOptionalAndNull() {
 		HttpFullRequest req = Requests.createRequest(KnownHttpMethod.GET, "/optionalAndNull");
 		

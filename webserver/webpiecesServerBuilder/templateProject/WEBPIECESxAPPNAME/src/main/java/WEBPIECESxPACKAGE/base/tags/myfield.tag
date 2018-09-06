@@ -8,7 +8,7 @@
            &{label, field.i18nKey}&
         </label>
         <div class="controls">
-            ${_body}$
+            ${escOff#body}$
             *{ I don't like the name 'help-block' as we use this for error messages but bootstrap calls it that
                ... someday, I may ask why on stackoverflow.  Users can override this whole template anyways }*
             <span id="${field.id}$_errorMsg" class="help-block">${field.error}$</span>

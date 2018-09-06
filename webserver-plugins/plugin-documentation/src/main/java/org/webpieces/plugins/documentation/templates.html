@@ -40,7 +40,6 @@
             <li><a href="#else">Else *[#{else}#]*</a></li>
             <li><a href="#elseif">ElseIf *[#{elseif}#]*</a></li>
             <li><a href="#list">List *[#{list}#]*</a></li>
-            <li><a href="#htmlEscape">HtmlEscapingOff *[#{htmlEscapingOff}#]*</a></li>
             <li><a href="#tagGen">TagGen.java</a></li>
         </ol>
     </li>
@@ -112,18 +111,18 @@ We have way way too much formal documentation in this world that is boring as he
 <p>Which will only display the client name if the client is not null.  Well shucks, we only have tests
 indirectly testing this.  We need to add a basic feature test for just this.  Adding to the todo list.</p>
 
-<p>Next, you can prefix variables or tag arguments with '_' like *[${_body}$]* and that will not do any html 
+<p>Next, you can prefix variables or tag arguments with 'escOff#' like *[${escOff#body}$]* and that will not do any html 
 escaping.  This is useful when you want to pass the body of a custom tag in like so</p>
 
 <pre>
 <code>*[#{somecustomtag}#<a href="">Some body with html</a>#{/somecustomtag}#]*</code>
 </pre>
 
-<p>Now, the html inside the custom tag is assigned to _body so that in your somecustomtag.tag file, you can then
+<p>Now, the html inside the custom tag is assigned to 'body' so that in your somecustomtag.tag file, you can then
 have:</p>
 
 <pre>
-<code>*[My link=${_body}$]*</code>
+<code>*[My link=${escOff#body}$]*</code>
 </pre>
 
 <p>After all, it would be very annoying if the html went away and wasn't passed into your tag for you</p>
@@ -662,7 +661,7 @@ that piece of html that you wish to return.</p>
 <br/><br/>
 Inside, this custom tag, we can use any tag such as a link tag... <a href="@[ASYNC_ROUTE]@">Some Link Here</a>
 <br/><br/>
-Can put the body out ${_body}$
+Can put the body out ${escOff#body}$
 <br/><br/>
 Or can print the args out ${someArgument}$
 <br/><br/>
@@ -789,19 +788,6 @@ no users instead of just having a blank table.  The 'users' variable came from t
 it is assigned to the 'entity' variable which is then accessed like any other variable.  Also of note in this is the special
 entity_index variable which you can use for styling even rows gray and odd rows white or just to name the id attribute
 differently.</p>   
-
-<h3 id="htmlEscape">HtmlEscapingOff *[#{htmlEscapingOff}#]*</h3>
-
-<p>Earlier with the *[${...}$]* token, you learned variables prefixed with '_' are not escaped like *[${_body}$]*.  Another
-method of doing this is use the htmlEscapingOff tag like so:</p>
-
-<pre><code>*[#{htmlEscapingOff}#
-    This is not escaped ${verbatim}$ here
-#{/htmlEscapingOff}#]*</code></pre>
-
-<p>In this way, a controller can actually insert html code into the page BUT you should try to avoid doing that to be
-honest as then you end up with a controller having view code when only the view(*.html and *.tag files) should
-contain view code.  It is here though in case you really really really really need it</p>
 
 <h3 id="groovyGen">GroovyGen.java</h3>
 

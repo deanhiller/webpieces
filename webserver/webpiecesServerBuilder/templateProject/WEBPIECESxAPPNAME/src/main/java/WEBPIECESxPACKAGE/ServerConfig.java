@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.webpieces.plugins.hibernate.HibernatePlugin;
-import org.webpieces.router.api.RouterConfig;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 

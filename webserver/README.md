@@ -1,12 +1,16 @@
 # webpieces
 
 #### TODO:
+* variable$ is reserved for making 'variable' truly optional when passed in from tag args or from controller such that you do NOT need to pass it in
+* variable?.name means you MUST pass it in even if null and if it is null, variable?.name will return null, otherwiser variable.name will require it to be non-null and will throw an exception
+* variable$?.name is a combination saying variable is not required and if it is not set OR it is null, then the whole statement will return null because of the ? here.
+
+* debug http client backpressure on downloading from website fun
 * add non-selenium test for AJAX CRUD POST form when logged out and then login and then render
 * add test for %{..}% to set var and %{..}% to print var to verify it is there so groovy implant is working
 * rewire redirects so port stuff is done OUTSIDE the router so we no longer need funky callbacks.  (ie. I made a mistake there that we can fix by providing all the info from the router to the webserver and webserver knows the ports).  This is more complex than that!  
 * add test for java enum and list select and multiselect
 * add test for java related entity select and multiselect
-
 
 
 * implement https://vladmihalcea.com/how-to-bootstrap-hibernate-without-the-persistence-xml-file/ to get rid of hacks on gradle AND it's just better to control it
