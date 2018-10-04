@@ -31,7 +31,9 @@ public class ClientStreamHandle implements StreamHandle {
 	
 	@Override
 	public CompletableFuture<StreamWriter> process(Http2Request request, ResponseHandler responseListener) {
-		if(request.getStreamId() != 0)
+		if(request == null)
+			throw new IllegalStateException("request cannot be null");
+		else if(request.getStreamId() != 0)
 			throw new IllegalStateException("Client MUST NOT set Http2Headers.streamId.  that is filled in by library");
 		else if(requestSent)
 			throw new IllegalStateException("Client can only send ONE request through a stream per http2 spec");

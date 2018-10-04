@@ -126,8 +126,13 @@ public class ScriptWriter {
 		String expr = token.getCleanValue();
 		sourceCode.println();
 		sourceCode.println("       enterExpression('"+token.getSourceLocation(false)+"');", token); //purely so we can add info to missing properties
-		
-		if(expr.startsWith("escOff#")) {
+
+		if(expr.startsWith("^")) {
+			//variables that get prefixed with ^ do not get html escaped so they can return html to put 
+			//in the page like escOff#body
+			String newExpr = expr.substring("^".length());
+			sourceCode.println("       __out.print("+newExpr+");", token);
+		} else if(expr.startsWith("escOff#")) {
 			//variables that get prefixed with escOff# do not get html escaped so they can return html to put 
 			//in the page like escOff#body
 			String newExpr = expr.substring("escOff#".length());

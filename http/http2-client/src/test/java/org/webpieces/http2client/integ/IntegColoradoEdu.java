@@ -15,6 +15,8 @@ import com.webpieces.http2engine.api.PushStreamHandle;
 import com.webpieces.http2engine.api.ResponseHandler;
 import com.webpieces.http2engine.api.StreamWriter;
 import com.webpieces.http2parser.api.dto.CancelReason;
+import com.webpieces.http2parser.api.dto.lib.Http2Header;
+import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
 public class IntegColoradoEdu {
 
@@ -97,6 +99,16 @@ public class IntegColoradoEdu {
 //		req.addHeader(new Header(KnownHeaderName.HOST, host));
 //		req.addHeader(new Header(KnownHeaderName.ACCEPT, "*/*"));
 //		req.addHeader(new Header(KnownHeaderName.USER_AGENT, "webpieces/0.9"));
-		return null;
+		
+		Http2Request req = new Http2Request();
+		req.addHeader(new Http2Header(Http2HeaderName.METHOD, "GET"));
+		req.addHeader(new Http2Header(Http2HeaderName.PATH, "GET"));
+		req.addHeader(new Http2Header(Http2HeaderName.SCHEME, "http"));
+		req.addHeader(new Http2Header(Http2HeaderName.AUTHORITY, "www.colorado.edu"));
+		
+		req.addHeader(new Http2Header(Http2HeaderName.USER_AGENT, "webpieces/0.9"));
+		req.addHeader(new Http2Header(Http2HeaderName.ACCEPT, "*/*"));
+		
+		return req;
 	}
 }
