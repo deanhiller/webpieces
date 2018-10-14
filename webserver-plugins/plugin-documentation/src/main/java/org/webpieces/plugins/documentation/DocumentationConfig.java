@@ -2,15 +2,18 @@ package org.webpieces.plugins.documentation;
 
 public class DocumentationConfig {
 
-	private String documentationPath;
+	private String pluginPath = "/@documentation";
 
-	public DocumentationConfig(String documentationPath) {
+	public DocumentationConfig() {
+	}
+	
+	public DocumentationConfig(String pluginPath) {
 		super();
-		this.documentationPath = documentationPath;
+		this.pluginPath = pluginPath;
 	}
 
-	public String getDocumentationPath() {
-		return documentationPath;
+	public String getPluginPath() {
+		return pluginPath;
 	}
 
 }

@@ -31,4 +31,14 @@ public class MockSimpleStorage implements SimpleStorage {
 		return null;
 	}
 
+	@Override
+	public CompletableFuture<Void> delete(String key) {
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<Void> delete(String key, String subKey) {
+		return null;
+	}
+
 }

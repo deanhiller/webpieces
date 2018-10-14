@@ -10,6 +10,8 @@ import org.webpieces.router.api.actions.Actions;
 
 import WEBPIECESxPACKAGE.base.libs.RemoteService;
 import WEBPIECESxPACKAGE.base.libs.SomeLibrary;
+import WEBPIECESxPACKAGE.base.mgmt.SomeBean;
+import WEBPIECESxPACKAGE.base.mgmt.SomeBeanWebpiecesManaged;
 
 @Singleton
 public class ExamplesController {
@@ -18,6 +20,11 @@ public class ExamplesController {
 	private RemoteService service;
 	@Inject
 	private SomeLibrary someLib;
+	
+	//This is injected to demonstrate the properties plugin so you can modify properties via a web page and changes are stored in database
+	//so changes will survive a restart.
+	@Inject
+	private SomeBean managed;
 
 	
 	public Action index() {
@@ -29,7 +36,7 @@ public class ExamplesController {
 	}
 	
 	public Action exampleList() {
-		return Actions.renderThis("user", "Dean Hiller");
+		return Actions.renderThis("user", "Dean Hiller", "count", managed.getCount());
 	}
 
 	public Action redirect(String id) {

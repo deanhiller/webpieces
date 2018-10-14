@@ -36,4 +36,17 @@ public class SimpleStorageInMemory implements SimpleStorage {
 		return CompletableFuture.completedFuture(props);
 	}
 
+	@Override
+	public CompletableFuture<Void> delete(String key) {
+		db.remove(key);
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public CompletableFuture<Void> delete(String key, String subKey) {
+		Map<String, String> subMap = getSubMap(key);
+		subMap.remove(subKey);
+		return CompletableFuture.completedFuture(null);
+	}
+
 }

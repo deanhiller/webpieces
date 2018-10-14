@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.webpieces.templating.api.HtmlTagLookup;
 import org.webpieces.templating.api.RouterLookup;
@@ -14,6 +15,7 @@ import org.webpieces.templating.api.TemplateResult;
 import org.webpieces.templating.api.TemplateService;
 import org.webpieces.templating.api.TemplateUtil;
 
+@Singleton
 public class ProdTemplateService implements TemplateService {
 
 	private HtmlTagLookup lookup;

@@ -181,7 +181,7 @@ public class RequestStreamWriter implements StreamWriter {
 
 		ProxyResponse streamer = facade.createProxyResponse();
 		try {
-			streamer.init(routerRequest, requestHeaders, stream, facade.getBufferPool());
+			streamer.init(routerRequest, requestHeaders, stream, facade.getMaxBodySize());
 
 			return facade.incomingCompleteRequest(routerRequest, streamer);
 		} catch (BadCookieException e) {

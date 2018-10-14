@@ -1,6 +1,7 @@
 # webpieces
 
 #### TODO:
+* Rewire SimpleStorage to be injected in Server.java class instead and passed to router to be bound so there is no weird callback anymore!!!
 * debug http client backpressure on downloading from website fun
 * add non-selenium test for AJAX CRUD POST form when logged out and then login and then render
 * add test for %{..}% to set var and %{..}% to print var to verify it is there so groovy implant is working
@@ -58,45 +59,13 @@
 * Management - Need to do more than just integrate with JMX but also tie it to a datastore interface that is pluggable such that as JMX properties are changed, they are written into the database so changes persist (ie. no need for property files anymore except for initial db connection)
 * google protobuf BodyContentBinder plugin
 * thrift BodyContentBinder plugin
-* plugin for localhost:8080/@documentation and install on the development server
-* dev server - when a 404 occurs, list the RouterModule scope found and then the all the routes in that scope since none of them matched
 * codecov.io - still reports incorrect coverage results (different from jacoco)
 * question out on jacoco code coverage for groovy files (code coverage works but linking to groovy files is not working for some reason)
 
-#### Examples.....
-
-```
-${user.account.address}$
-*{ comment ${user.account.address}$ is not executed }*
-&{'This is account %1', 'i18nkey', user.account.name}&  // Default text, key, arguments
-%{  user = SomeLogic.getUser(); }%
-#{if user}#User does exist#{/if}#{elseif}#User does not exist#{/if}#
-@[ROUTE_ID, user:account.user.name, arg:'flag']@
-@@[ROUTE_ID, user:account.user.name, arg:'flag']@@
-```
-
-The last two are special and can be used between tag tokens and between i18n tokens like so...
-
-#### @documentation Notes:
-
-* Section on links to tests/html files as examples
-* Section on Generator Tags and RuntimeTags and html.tag files
-* Section on object to string and string to object bindings
-* Section on overriding platform
-* Section on overriding web application classes
 * Section on i18n (need to explain, do NOT define message.properties since there is a list of Locales and that would create a match on any language)
-* Section on escaping html and not escaping html (variable names with _xxx are not escaped) and the verbatim or noescape tag
-* Section on testing
-* Section on field tag and how to create more of these as your own
-* Section on variable scopes... tag arguments, template properties and page arguments (how template props are global)
-* Section on PRG pattern (point to flash/Validation)
 * Section on Arrays and array based forms
 * Section on tab state vs. session vs. flash (Validation, Flash)
 * Section on filters
-* don't forget special things like optional('property') to make page args optional and _variable to escape being html escaped
-* resource bundles are complex needing to provide one for some tags if there is a provider of tags
-* unit test query param conflict with multipart, query param conflict with path param, and multipart param conflict with path param. specifically createTree stuff PAramNode, etc.
-
 
 #### Checklist of Release testing (This would be good to automate)
 * ./runAllTesting.sh

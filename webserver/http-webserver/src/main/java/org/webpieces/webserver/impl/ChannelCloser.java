@@ -1,8 +1,11 @@
 package org.webpieces.webserver.impl;
 
+import javax.inject.Singleton;
+
 import com.webpieces.hpack.api.dto.Http2Headers;
 import com.webpieces.http2parser.api.dto.lib.Http2HeaderName;
 
+@Singleton
 public class ChannelCloser {
 
 	public Void closeIfNeeded(Http2Headers request, ResponseOverrideSender channel) {

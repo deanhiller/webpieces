@@ -13,7 +13,7 @@ public class DocumentationRoutes extends ScopedRoutes {
 
 	public DocumentationRoutes(DocumentationConfig config) {
 		super();
-		path = config.getDocumentationPath();
+		path = config.getPluginPath();
 	}
 
     @Override

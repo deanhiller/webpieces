@@ -37,4 +37,5 @@ include 'webserver-plugins:plugin-json-jackson'
 include 'webserver-plugins:plugin-install-sslcert'
 include 'webserver-plugins:plugin-backend'
 include 'webserver-plugins:plugin-documentation'
+include 'webserver-plugins:plugin-properties'
 

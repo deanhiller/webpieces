@@ -41,8 +41,8 @@ public class DeveloperMeta implements WebAppMeta {
 		List<Plugin> devPlugins = Lists.newArrayList(
 				//This is only for the development server to expose a SQL GUI to use http://localhost:9000/@db
 				//so the in-memory H2 DB can be queried to debug issues with your application code
-				new H2DbPlugin(new H2DbConfig(0, "/@db")),
-				new WebpiecesDocumentationPlugin(new DocumentationConfig("/@documentation"))
+				new H2DbPlugin(new H2DbConfig()),
+				new WebpiecesDocumentationPlugin(new DocumentationConfig())
 				);
 
 		prodPlugins.addAll(devPlugins);

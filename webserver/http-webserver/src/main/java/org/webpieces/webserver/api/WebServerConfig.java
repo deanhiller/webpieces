@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.nio.api.BackpressureConfig;
 import org.webpieces.nio.api.SSLEngineFactory;
 import org.webpieces.nio.api.handlers.ConsumerFunc;
@@ -40,10 +39,6 @@ public class WebServerConfig {
 	
 	private ConsumerFunc<ServerSocketChannel> functionToConfigureServerSocket;
 	private Locale defaultLocale = Locale.getDefault();
-	//The max size of body for dynamic pages for Full responses and chunked responses.  This
-	//is used to determine send chunks instead of full response as well since it won't fit
-	//in full response sometimes
-	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 	
 	//On startup, we protect developers from breaking clients.  In http, all files that change
 	//must also change the hash url param automatically and the %%{ }%% tag generates those hashes so the
@@ -125,15 +120,6 @@ public class WebServerConfig {
 
 	public WebServerConfig setDefaultLocale(Locale defaultLocale) {
 		this.defaultLocale = defaultLocale;
-		return this;
-	}
-
-	public int getMaxBodySize() {
-		return maxBodySize;
-	}
-
-	public WebServerConfig setMaxBodySize(int fullResponseMaxSize) {
-		this.maxBodySize = fullResponseMaxSize;
 		return this;
 	}
 

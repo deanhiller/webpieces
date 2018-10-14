@@ -1,0 +1,23 @@
+#{extends '../backend/main.html'/}#
+#{set title:'Controllers'/}#
+#{set tab:'management'/}#
+
+<h2>Properties</h2>
+
+<ul>
+    #{list items:categories, as:'category'}#
+      <li id="tab_${category.name}$">${category.name}$
+        <ul>
+            #{list items:category.beanMetas, as:'beanMeta'}#
+            <li><a href="@[BEAN_ROUTE, category:category.name, name:beanMeta.name]@">${beanMeta.name}$.class</a></li>
+             #{/list}#
+             #{else}#
+             <li><a href="">Bug, please report as this should not be possible</a>
+             #{/else}#
+        </ul>
+      </li>
+    #{/list}#
+    #{else}#
+    <li id="tab_none"><a id="none" href="">No Managed Beans(No one implementing interface XXXXXX${suffix}$.java)</a></li>
+    #{/else}#
+</ul>

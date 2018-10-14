@@ -27,7 +27,6 @@ import org.webpieces.templating.api.TemplateUtil;
 import org.webpieces.templating.impl.tags.BootstrapModalTag;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
-import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.ResponseCreator.ResponseEncodingTuple;
 
 import com.webpieces.hpack.api.dto.Http2Request;
@@ -46,8 +45,6 @@ public class ProxyResponse implements ResponseStreamer {
 	@Inject
 	private TemplateService templatingService;
 	@Inject
-	private WebServerConfig config;
-	@Inject
 	private StaticFileReader reader;
 	@Inject
 	private CompressionLookup compressionLookup;
@@ -55,18 +52,21 @@ public class ProxyResponse implements ResponseStreamer {
 	private ResponseCreator responseCreator;
 	@Inject
 	private ChannelCloser channelCloser;
+	@Inject
+	private BufferPool pool;
 	
 	private ResponseOverrideSender stream;
 	//private HttpRequest request;
-	private BufferPool pool;
 	private RouterRequest routerRequest;
 	private Http2Request request;
 
-	public void init(RouterRequest req, Http2Request requestHeaders, ResponseStream responseSender, BufferPool pool) {
+	private int maxBodySize;
+
+	public void init(RouterRequest req, Http2Request requestHeaders, ResponseStream responseSender, int maxBodySize) {
 		this.routerRequest = req;
 		this.request = requestHeaders;
+		this.maxBodySize = maxBodySize;
 		this.stream = new ResponseOverrideSender(responseSender);
-		this.pool = pool;
 	}
 
 	public void sendRedirectAndClearCookie(RouterRequest req, String badCookieName) {
@@ -286,7 +286,7 @@ public class ProxyResponse implements ResponseStreamer {
 	}
 
 	private List<DataFrame> possiblyCompress(byte[] bytes, Compression usingCompression, boolean isCompressed) {
-		ChunkedStream chunkedStream = new ChunkedStream(config.getMaxBodySize(), isCompressed);
+		ChunkedStream chunkedStream = new ChunkedStream(maxBodySize, isCompressed);
 
 		try(OutputStream chainStream = usingCompression.createCompressionStream(chunkedStream)) {
 			//IF wrapped in compression above(ie. not NoCompression), sending the WHOLE byte[] in comes out in

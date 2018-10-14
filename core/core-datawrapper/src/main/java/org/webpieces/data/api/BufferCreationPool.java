@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author dhiller
  */
-public class BufferCreationPool implements BufferPool {
+public class BufferCreationPool implements BufferPool, BufferWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(BufferCreationPool.class);
 	public static final int DEFAULT_MAX_BUFFER_SIZE = 16921;
@@ -92,6 +92,21 @@ public class BufferCreationPool implements BufferPool {
 		}
 		buffer.clear();
 		freePackets.add(buffer);
+	}
+
+	@Override
+	public void setBufferPoolSize(int size) {
+		this.poolSize = size;
+	}
+
+	@Override
+	public int getBufferPoolSize() {
+		return poolSize;
+	}
+
+	@Override
+	public String getCategory() {
+		return "Webpieces Core";
 	}
 
 }

@@ -25,4 +25,16 @@ public class EmptyStorage implements SimpleStorage {
 		return CompletableFuture.completedFuture(new HashMap<>());
 	}
 
+	@Override
+	public CompletableFuture<Void> delete(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<Void> delete(String key, String subKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

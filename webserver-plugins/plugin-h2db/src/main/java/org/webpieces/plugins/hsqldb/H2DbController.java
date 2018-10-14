@@ -17,7 +17,7 @@ public class H2DbController {
 	@Inject
 	public H2DbController(ServerConfig config, H2DbConfig hdConfig) {
 		this.config = config;
-		this.path = hdConfig.getUrlPath();
+		this.path = hdConfig.getPluginPath();
 	}
 	
 	public Action databaseGui() {

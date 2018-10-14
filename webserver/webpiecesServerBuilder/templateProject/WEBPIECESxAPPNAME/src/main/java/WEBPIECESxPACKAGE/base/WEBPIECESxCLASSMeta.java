@@ -77,6 +77,7 @@ public class WEBPIECESxCLASSMeta implements WebAppMeta {
 				new HibernatePlugin(new HibernateConfig(persistenceUnit)),
 				new JacksonPlugin(new JacksonConfig("/json/.*", JsonCatchAllFilter.class)),
 				new BackendPlugin(new BackendConfig()),
+				//new PropertiesPlugin(new PropertiesConfig()), //use once released
 				new InstallSslCertPlugin(new InstallSslCertConfig("acme://letsencrypt.org/staging"))
 				);
 	}

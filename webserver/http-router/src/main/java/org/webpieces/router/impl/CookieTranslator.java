@@ -22,7 +22,7 @@ import org.webpieces.util.logging.LoggerFactory;
 import org.webpieces.util.security.SecretKeyInfo;
 import org.webpieces.util.security.Security;
 
-public class CookieTranslator {
+public class CookieTranslator implements CookieWebManaged {
 
 	private static final Logger log = LoggerFactory.getLogger(CookieTranslator.class);
 	private static String VERSION = "1";
@@ -30,6 +30,9 @@ public class CookieTranslator {
 	private RouterConfig config;
 	private Security security;
 	
+	private boolean isCookiesHttpOnly = true;
+	private boolean isCookiesSecure = false;
+
 	@Inject
 	public CookieTranslator(RouterConfig config, Security security) {
 		this.config = config;
@@ -97,8 +100,8 @@ public class CookieTranslator {
     	cookie.domain = null;
     	cookie.path = "/";
     	cookie.maxAgeSeconds = maxAge;
-		cookie.isHttpOnly = config.getIsCookiesHttpOnly();
-		cookie.isSecure = config.getIsCookiesSecure();
+		cookie.isHttpOnly = isCookiesHttpOnly;
+		cookie.isSecure = isCookiesSecure;
 		cookie.value = "";
 		return cookie;
 	}
@@ -182,6 +185,27 @@ public class CookieTranslator {
 		
 		data.setMapData(dataMap);
 		return data;
+	}
+	
+	public boolean isCookiesHttpOnly() {
+		return isCookiesHttpOnly;
+	}
+
+	public void setCookiesHttpOnly(boolean isCookiesHttpOnly) {
+		this.isCookiesHttpOnly = isCookiesHttpOnly;
+	}
+
+	public boolean isCookiesSecure() {
+		return isCookiesSecure;
+	}
+
+	public void setCookiesSecure(boolean isCookiesSecure) {
+		this.isCookiesSecure = isCookiesSecure;
+	}
+
+	@Override
+	public String getCategory() {
+		return "Webpieces Router";
 	}
 
 }

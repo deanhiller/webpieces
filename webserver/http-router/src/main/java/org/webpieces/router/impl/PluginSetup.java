@@ -40,7 +40,7 @@ public class PluginSetup {
 	 * we can't inject them :( 
 	 */
 	@SuppressWarnings("rawtypes")
-	public void wireInPluginPoints(Injector appInjector, Consumer<Injector> startupFunction) {
+	public void wireInPluginPoints(Injector appInjector) {
 
 		Key<Set<EntityLookup>> key = Key.get(new TypeLiteral<Set<EntityLookup>>(){});
 		Set<EntityLookup> lookupHooks = appInjector.getInstance(key);
@@ -55,11 +55,6 @@ public class PluginSetup {
 		Set<BodyContentBinder> bodyBinders = appInjector.getInstance(key2);
 		loader.install(bodyBinders);
 		
-		//wire in startup and start the startables.  This is a function since Dev and Production differ
-		//in that Development we have to make sure we don't run startup code twice as it is likely to
-		//blow up....or should we make this configurable?  ie. Dev may run on a recompile after starting up at
-		//a later time and we most likely don't want to run startup code multiple times
-		startupFunction.accept(appInjector);
 	}
 
 }

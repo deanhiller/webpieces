@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -21,6 +22,7 @@ import javax.persistence.UniqueConstraint;
 )
 @NamedQueries({
 	@NamedQuery(name = "findProperties", query = "select u from SimpleStorageDbo as u where u.pluginKey = :key"),
+	@NamedQuery(name = "findProperty", query = "select u from SimpleStorageDbo as u where u.pluginKey = :key AND u.mapKey = :subKey")
 })
 public class SimpleStorageDbo {
 
@@ -86,5 +88,16 @@ public class SimpleStorageDbo {
 		Query query = mgr.createNamedQuery("findProperties");
 		query.setParameter("key", key);
 		return query.getResultList();
+	}
+	
+	public static SimpleStorageDbo find(EntityManager mgr, String key, String subKey) {
+		Query query = mgr.createNamedQuery("findProperty");
+		query.setParameter("key", key);
+		query.setParameter("subKey", subKey);
+		try {
+			return (SimpleStorageDbo) query.getSingleResult();
+		} catch(NoResultException e) {
+			return null;
+		}
 	}
 }

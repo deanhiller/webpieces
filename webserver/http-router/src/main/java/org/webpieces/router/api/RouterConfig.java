@@ -27,9 +27,7 @@ public class RouterConfig {
 	 */
 	private Module webappOverrides;
 
-	private boolean isCookiesHttpOnly = true;
 
-	private boolean isCookiesSecure = false;
 
 	/**
 	 * Option to turn token checking off mainly for testing as it disables ALL token checking which usually
@@ -90,22 +88,6 @@ public class RouterConfig {
 	}
 	public RouterConfig setUrlEncoding(Charset urlEncoding) {
 		this.urlEncoding = urlEncoding;
-		return this;
-	}
-	
-	public boolean getIsCookiesHttpOnly() {
-		return isCookiesHttpOnly;
-	}
-	public RouterConfig setCookiesHttpOnly(boolean isCookiesHttpOnly) {
-		this.isCookiesHttpOnly = isCookiesHttpOnly;
-		return this;
-	}
-	
-	public boolean getIsCookiesSecure() {
-		return isCookiesSecure;
-	}
-	public RouterConfig setCookiesSecure(boolean isCookiesSecure) {
-		this.isCookiesSecure = isCookiesSecure;
 		return this;
 	}
 	

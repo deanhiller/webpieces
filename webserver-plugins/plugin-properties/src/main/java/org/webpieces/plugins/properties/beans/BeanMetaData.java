@@ -1,0 +1,184 @@
+package org.webpieces.plugins.properties.beans;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.webpieces.plugins.properties.PropertiesConfig;
+import org.webpieces.router.api.SimpleStorage;
+import org.webpieces.router.api.Startable;
+import org.webpieces.router.api.exceptions.NotFoundException;
+import org.webpieces.router.impl.mgmt.CachedBean;
+import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
+import org.webpieces.router.impl.params.ObjectTranslator;
+
+/**
+ * A proxy to get around the weird circular dependency order so the guice created controller can listen
+ * to all beans that are created with XXXXWebpiecesManaged interface(or however the user configures it)
+ */
+@Singleton
+public class BeanMetaData implements Startable {
+
+	//This is loaded during Guice construction and used AFTER all Guice is constructed within
+	//a Guice context
+	private List<CachedBean> cachedBeans = new ArrayList<>();
+	//Because we are initially outside guice, this business logic bean is given a Provider to invoke
+	//ONLY after full Guice construction is complete
+	private Provider<ObjectTranslator> objectTranslatorProvider;
+	private Provider<SimpleStorage> simpleStorageProvider;
+	private Provider<ManagedBeanMeta> webpiecesBeanMetaProvider;
+	
+	private Map<String, Map<String, BeanMeta>> meta = new HashMap<>();
+	private List<SingleCategory> categories;
+	private PropertiesConfig config;
+
+	public BeanMetaData(
+			PropertiesConfig config, 
+			Provider<ObjectTranslator> objectTranslator, 
+			Provider<SimpleStorage> simpleStorageProvider,
+			Provider<ManagedBeanMeta> webpiecesBeanMeta
+	) {
+		this.config = config;
+		this.objectTranslatorProvider = objectTranslator;
+		this.simpleStorageProvider = simpleStorageProvider;
+		this.webpiecesBeanMetaProvider = webpiecesBeanMeta;
+	}
+
+	//NOTE: This is executed while GUICE is setting up so we are not in GUICE at this point
+	public void afterInjection(Object injectee, Class<?> interfaze) {
+		cachedBeans.add(new CachedBean(injectee, interfaze));
+	}
+	
+	@Override
+	public void start() {
+		ManagedBeanMeta webpiecesBeans = webpiecesBeanMetaProvider.get();
+		cachedBeans.addAll(webpiecesBeans.getBeans());
+		
+		//We are NOW inside Guice and can call the provider
+		ObjectTranslator objectTranslator = objectTranslatorProvider.get();
+		
+		for(CachedBean bean : cachedBeans) {
+			loadBean(objectTranslator, bean.getInjectee(), bean.getInterfaze());
+		}
+		
+		SimpleStorage storage = simpleStorageProvider.get();
+		loadFromDbAndSetProperties(storage);
+	}
+	
+	public void loadBean(ObjectTranslator objectTranslator, Object injectee, Class<?> interfaze) {
+		String category = "No Category Defined";
+		try {
+			Method method = interfaze.getMethod(config.getCategoryMethod());
+			if(method.getReturnType() != String.class)
+				throw new RuntimeException("Method "+config.getCategoryMethod()+" must return String for bean="+injectee.getClass().getName());
+			category = (String) method.invoke(injectee);
+		} catch (NoSuchMethodException e) {
+			//continue on..
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+
+		Map<String, BeanMeta> list = meta.getOrDefault(category, new HashMap<>());
+		
+		String finalKey = injectee.getClass().getSimpleName();
+		if(list.get(finalKey) != null) {
+			finalKey = injectee.getClass().getName(); //use full name to prevent conflicts
+		}
+		
+		Method[] methods = interfaze.getMethods();
+		List<PropertyInfo> properties = create(objectTranslator, injectee, interfaze, methods);
+		
+		BeanMeta beanMeta = new BeanMeta(finalKey, interfaze, properties);
+
+		list.put(finalKey, beanMeta);
+		meta.put(category, list);
+	}
+
+	private List<PropertyInfo> create(ObjectTranslator objectTranslator, Object injectee, Class<?> interfaze, Method[] methods) {
+		List<PropertyInfo> props = new ArrayList<>();
+		for(Method m : methods) {
+			//getters take 0 arguments or we don't expose them
+			if(m.getParameterTypes().length == 0) {
+				if(m.getName().startsWith("get") && !m.getName().equals("getCategory")) {
+					props.add(create(objectTranslator, injectee, interfaze, m, 3));
+				} else if(m.getName().startsWith("is")) {
+					props.add(create(objectTranslator, injectee, interfaze, m, 2));
+				}
+			}
+		}
+		return props;
+	}
+
+	private PropertyInfo create(ObjectTranslator objectTranslator, Object injectee, Class<?> interfaze, Method getter, int i) {
+		String name = getter.getName();
+		String propertyName = name.substring(i, name.length());
+		Method setter = null;
+		
+		try {
+			//We can only do the setter methods IF there is a way to translate wired in by webpieces or their
+			//application added a translater
+			if(objectTranslator.getConverter(getter.getReturnType()) != null)
+				setter = interfaze.getMethod("set"+propertyName, getter.getReturnType());
+		} catch (NoSuchMethodException e) {
+			//setter not exist
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		}
+
+		return new PropertyInfo(propertyName, injectee, getter, setter);
+	}
+	
+	public List<SingleCategory> getCategories() {
+		if(categories == null) {
+			createCategoriesOnce();
+		}
+		
+		return categories;
+	}
+
+	private void createCategoriesOnce() {
+		categories = new ArrayList<>();
+
+		for(Entry<String, Map<String, BeanMeta>> entry : meta.entrySet()) {
+			Map<String, BeanMeta> beans = entry.getValue();
+			List<BeanMeta> list = createList(beans);
+			categories.add(new SingleCategory(entry.getKey(), list));
+		}
+	}
+
+	private List<BeanMeta> createList(Map<String, BeanMeta> beans) {
+		List<BeanMeta> beanMetas = new ArrayList<>();
+		for(Entry<String, BeanMeta> entry : beans.entrySet()) {
+			beanMetas.add(entry.getValue());
+		}
+		return beanMetas;
+	}
+
+	public void loadFromDbAndSetProperties(SimpleStorage storage) {
+	}
+
+	public BeanMeta getBeanMeta(String category, String name) {
+		Map<String, BeanMeta> map = meta.get(category);
+		if(map == null)
+			throw new NotFoundException("Category="+category+" not found");
+		BeanMeta beanMeta = map.get(name);
+		if(beanMeta == null)
+			throw new NotFoundException("Bean="+name+" not found");
+		
+		return beanMeta;
+	}
+
+}

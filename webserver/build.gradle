@@ -35,6 +35,7 @@ project('webpiecesServerBuilder:templateProject:WEBPIECESxAPPNAME') {
         compile project(':webserver-plugins:plugin-json-jackson')
         compile project(':webserver-plugins:plugin-backend')
         compile project(':webserver-plugins:plugin-install-sslcert')
+        compile project(':webserver-plugins:plugin-properties')
         compile deps['commons-lang'] //used in json escaping
 		
         testCompile project(':core:core-ddl')

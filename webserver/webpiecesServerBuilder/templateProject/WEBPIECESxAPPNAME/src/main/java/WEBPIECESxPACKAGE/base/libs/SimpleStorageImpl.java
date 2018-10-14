@@ -65,5 +65,37 @@ public class SimpleStorageImpl implements SimpleStorage {
 		
 		return CompletableFuture.completedFuture(properties);
 	}
-	
+
+	@Override
+	public CompletableFuture<Void> delete(String key) {
+		EntityManager mgr = factory.createEntityManager();
+		mgr.getTransaction().begin();
+
+		List<SimpleStorageDbo> rows = SimpleStorageDbo.findAll(mgr, key);
+		for(SimpleStorageDbo row: rows) {
+			mgr.remove(row);
+		}
+		
+		mgr.flush();
+		mgr.getTransaction().commit();
+		mgr.close();
+		
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public CompletableFuture<Void> delete(String key, String subKey) {
+		EntityManager mgr = factory.createEntityManager();
+		mgr.getTransaction().begin();
+
+		SimpleStorageDbo row = SimpleStorageDbo.find(mgr, key, subKey);
+		if(row != null)
+			mgr.remove(row);
+		
+		mgr.flush();
+		mgr.getTransaction().commit();
+		mgr.close();
+		
+		return CompletableFuture.completedFuture(null);
+	}
 }

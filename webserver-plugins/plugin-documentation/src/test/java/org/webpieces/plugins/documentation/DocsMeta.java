@@ -31,7 +31,7 @@ public class DocsMeta implements WebAppMeta {
 	public List<Plugin> getPlugins() {
 		return Lists.newArrayList(
 				new BackendPlugin(new BackendConfig()),
-				new WebpiecesDocumentationPlugin(new DocumentationConfig("/@documentation"))
+				new WebpiecesDocumentationPlugin(new DocumentationConfig())
 		);
 	}
 }

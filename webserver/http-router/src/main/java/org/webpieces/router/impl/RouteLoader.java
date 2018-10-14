@@ -30,6 +30,7 @@ import org.webpieces.router.impl.compression.CompressionCacheSetup;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
+import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
 import org.webpieces.router.impl.model.AbstractRouteBuilder;
 import org.webpieces.router.impl.model.L1AllRouting;
 import org.webpieces.router.impl.model.L3PrefixedRouting;
@@ -38,6 +39,7 @@ import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.model.R1RouterBuilder;
 import org.webpieces.router.impl.model.RouteModuleInfo;
 import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
@@ -59,6 +61,10 @@ public class RouteLoader {
 	protected R1RouterBuilder routerBuilder;
 
 	private PluginSetup pluginSetup;
+
+	private ManagedBeanMeta beanMeta;
+
+	private ObjectTranslator objectTranslator;
 	
 	@Inject
 	public RouteLoader(
@@ -66,13 +72,17 @@ public class RouteLoader {
 		RouteInvoker invoker,
 		ControllerLoader controllerFinder,
 		CompressionCacheSetup compressionCacheSetup,
-		PluginSetup pluginSetup
+		PluginSetup pluginSetup,
+		ManagedBeanMeta beanMeta,
+		ObjectTranslator objectTranslator
 	) {
 		this.config = config;
 		this.invoker = invoker;
 		this.controllerFinder = controllerFinder;
 		this.compressionCacheSetup = compressionCacheSetup;
 		this.pluginSetup = pluginSetup;
+		this.beanMeta = beanMeta;
+		this.objectTranslator = objectTranslator;
 	}
 	
 	public WebAppMeta load(ClassForName loader, Consumer<Injector> startupFunction) {
@@ -122,14 +132,20 @@ public class RouteLoader {
 
 			CompletableFuture<Void> storageLoadComplete = setupSimpleStorage(injector);
 			
-			pluginSetup.wireInPluginPoints(injector, startupFunction);
+			pluginSetup.wireInPluginPoints(injector);
 			
 			loadAllRoutes(routerModule, injector, routingHolder);
+			
+			//wire in startup and start the startables.  This is a function since Dev and Production differ
+			//in that Development we have to make sure we don't run startup code twice as it is likely to
+			//blow up....or should we make this configurable?  ie. Dev may run on a recompile after starting up at
+			//a later time and we most likely don't want to run startup code multiple times
+			startupFunction.accept(injector);
 			
 			//We wait for the storage load next as that has to be complete before the router startup is finished!!!!
 			//BUT notice we wait AFTER load of routes so all that is done in parallel
 			//YES, I could nit and make this async BUT KISS can be better sometimes and our startup is quit fast right
-			//no so let's not pre-optimize
+			//now so let's not pre-optimize
 			storageLoadComplete.get(3, TimeUnit.SECONDS);
 			
 			return routerModule;
@@ -158,7 +174,7 @@ public class RouteLoader {
 		if(guiceModules == null)
 			guiceModules = new ArrayList<>();
 		
-		guiceModules.add(new EmptyPluginModule(routingHolder));
+		guiceModules.add(new EmptyPluginModule(routingHolder, beanMeta, objectTranslator));
 		
 		Module module = Modules.combine(guiceModules);
 		

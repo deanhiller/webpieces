@@ -8,7 +8,7 @@ public class H2DbRoutes extends AbstractRoutes {
 	private String urlPath;
 
 	public H2DbRoutes(H2DbConfig config) {
-		urlPath = config.getUrlPath();
+		urlPath = config.getPluginPath();
 	}
 
 	@Override

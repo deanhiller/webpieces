@@ -9,13 +9,13 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.webpieces.ctx.api.RouterRequest;
-import org.webpieces.data.api.BufferPool;
+import org.webpieces.data.api.BufferCreationPool;
 import org.webpieces.router.api.RouterService;
 import org.webpieces.util.urlparse.UrlEncodedParser;
 import org.webpieces.webserver.api.WebServerConfig;
 import org.webpieces.webserver.impl.body.BodyParsers;
 
-public class RequestHelpFacade {
+public class RequestHelpFacade implements StreamsWebManaged {
 
 	
 	@Inject
@@ -25,14 +25,17 @@ public class RequestHelpFacade {
 	@Inject
 	private UrlEncodedParser urlEncodedParser;
 	@Inject
-	private BufferPool bufferPool;
-	@Inject
 	private BodyParsers bodyParsers;
 	
 	//I don't use javax.inject.Provider much as reflection creation is a tad slower but screw it......(it's fast enough)..AND
 	//it keeps the code a bit more simple.  We could fix this later
 	@Inject
 	private Provider<ProxyResponse> responseProvider;
+	
+	//The max size of body for dynamic pages for Full responses and chunked responses.  This
+	//is used to determine send chunks instead of full response as well since it won't fit
+	//in full response sometimes
+	private int maxBodySize = BufferCreationPool.DEFAULT_MAX_BUFFER_SIZE;
 	
 	public void urlEncodeParse(String postfix, RouterRequest routerRequest) {
 		urlEncodedParser.parse(postfix, (k, v) -> addToMap(k,v,routerRequest.queryParams));
@@ -49,10 +52,6 @@ public class RequestHelpFacade {
 		return null;
 	}
 
-	public BufferPool getBufferPool() {
-		return bufferPool;
-	}
-
 	public CompletableFuture<Void> incomingCompleteRequest(RouterRequest routerRequest, ProxyResponse streamer) {
 		return routingService.incomingCompleteRequest(routerRequest, streamer);
 	}
@@ -67,6 +66,21 @@ public class RequestHelpFacade {
 
 	public BodyParsers getBodyParsers() {
 		return bodyParsers;
+	}
+
+	@Override
+	public String getCategory() {
+		return "Webpieces Webserver";
+	}
+
+	@Override
+	public int getMaxBodySize() {
+		return maxBodySize;
+	}
+
+	@Override
+	public void setMaxBodySize(int maxBodySize) {
+		this.maxBodySize = maxBodySize;
 	}
 
 }
