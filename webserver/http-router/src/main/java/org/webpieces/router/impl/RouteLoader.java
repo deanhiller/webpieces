@@ -145,7 +145,8 @@ public class RouteLoader {
 			//We wait for the storage load next as that has to be complete before the router startup is finished!!!!
 			//BUT notice we wait AFTER load of routes so all that is done in parallel
 			//YES, I could nit and make this async BUT KISS can be better sometimes and our startup is quit fast right
-			//now so let's not pre-optimize
+			//now so let's not pre-optimize.  Also, the default implementation is synchronous anyways right now since
+			//default JDBC is synchronous
 			storageLoadComplete.get(3, TimeUnit.SECONDS);
 			
 			return routerModule;
@@ -162,6 +163,9 @@ public class RouteLoader {
 
 	private CompletableFuture<Void> setupSimpleStorage(Injector injector) {
 		SimpleStorage storage = injector.getInstance(SimpleStorage.class);
+		
+		
+		
 		NeedsSimpleStorage needsStorage = config.getNeedsStorage();
 		if(needsStorage != null)
 			return needsStorage.init(storage);
@@ -194,7 +198,7 @@ public class RouteLoader {
 		Injector injector = Guice.createInjector(module);
 		return injector;
 	}
-	
+
 	//protected abstract void verifyRoutes(Collection<Route> allRoutes);
 
 	public void loadAllRoutes(WebAppMeta rm, Injector injector, RoutingHolder routingHolder) {

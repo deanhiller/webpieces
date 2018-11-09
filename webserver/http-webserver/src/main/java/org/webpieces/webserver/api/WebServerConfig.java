@@ -25,10 +25,12 @@ public class WebServerConfig {
 	private int http2EngineThreadCount = 20;
 
 	/**
-	 * Generally not needed by clients but we use this to overide certain objects for a development
+	 * Not used in production but we use this to override certain objects for a development
 	 * server that is optimized for development but would run slower in production such that users
-	 * don't have to reboot the server and rather can make all the changes they want to code and it
-	 * gets recompiled by the eclipse compiler on-demand while the server stays running
+	 * don't have to reboot the server as they change code.  Rather, they can make all the changes they want and
+	 * it gets recompiled by the eclipse compiler on-demand while the server stays running.
+	 * 
+	 * The eclipse compiler is not on the production classpath and only on the DevelopmentServer classpath.
 	 */
 	private Module platformOverrides = null;
 
