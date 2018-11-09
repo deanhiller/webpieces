@@ -58,20 +58,28 @@ public class BeanMetaData implements Startable {
 	
 	@Override
 	public void start() {
+		//We are NOW inside Guice and can call the providers
 		ManagedBeanMeta webpiecesBeans = webpiecesBeanMetaProvider.get();
-		cachedBeans.addAll(webpiecesBeans.getBeans());
-		
-		//We are NOW inside Guice and can call the provider
 		ObjectTranslator objectTranslator = objectTranslatorProvider.get();
+		SimpleStorage storage = simpleStorageProvider.get();
+
+		//let's add any webpieces platform beans(we use our own stuff here)
+		cachedBeans.addAll(webpiecesBeans.getBeans());
 		
 		for(CachedBean bean : cachedBeans) {
 			loadBean(objectTranslator, bean.getInjectee(), bean.getInterfaze());
 		}
 		
-		SimpleStorage storage = simpleStorageProvider.get();
 		loadFromDbAndSetProperties(storage);
 	}
 	
+	private void loadFromDbAndSetProperties(SimpleStorage storage) {
+		//On startup, kick off the Runnable that re-applies any changes in the database
+		
+		//On startup, we need to set all properties.
+		
+	}
+
 	public void loadBean(ObjectTranslator objectTranslator, Object injectee, Class<?> interfaze) {
 		String category = "No Category Defined";
 		try {
@@ -165,9 +173,6 @@ public class BeanMetaData implements Startable {
 			beanMetas.add(entry.getValue());
 		}
 		return beanMetas;
-	}
-
-	public void loadFromDbAndSetProperties(SimpleStorage storage) {
 	}
 
 	public BeanMeta getBeanMeta(String category, String name) {

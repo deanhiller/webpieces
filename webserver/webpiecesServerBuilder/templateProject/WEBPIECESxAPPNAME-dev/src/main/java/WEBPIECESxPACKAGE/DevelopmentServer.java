@@ -27,6 +27,8 @@ public class DevelopmentServer {
 	//develop
 	public static void main(String[] args) throws InterruptedException {
 		try {
+			log.info("Starting Development Server");
+
 			new DevelopmentServer(false).start();
 			
 			//Since we typically use only 3rd party libraries with daemon threads, that means this

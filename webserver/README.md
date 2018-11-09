@@ -1,6 +1,8 @@
 # webpieces
 
 #### TODO:
+* @documentation, need threading section
+* @documentation, need section on injecting ScheduledExecutor (hmmmmmmmm, who provides this?)
 * Rewire SimpleStorage to be injected in Server.java class instead and passed to router to be bound so there is no weird callback anymore!!!
 * debug http client backpressure on downloading from website fun
 * add non-selenium test for AJAX CRUD POST form when logged out and then login and then render

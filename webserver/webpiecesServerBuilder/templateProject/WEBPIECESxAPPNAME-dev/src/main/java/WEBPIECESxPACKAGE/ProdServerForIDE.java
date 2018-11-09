@@ -31,6 +31,7 @@ public class ProdServerForIDE {
 	//webserver classes to put in a place a runtime compiler so we can compile your code as you
 	//develop
 	public static void main(String[] args) throws InterruptedException {
+		log.info("Starting Server");
 		new ProdServerForIDE(false).start();
 		
 		//Since we typically use only 3rd party libraries with daemon threads, that means this

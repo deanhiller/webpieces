@@ -4,6 +4,7 @@ public class PropertiesConfig {
 
 	private String interfaceSuffixMatch = "WebpiecesManaged";
 	private String categoryMethod = "getCategory";
+	private int pollIntervalSeconds = 60;
 	
 	public PropertiesConfig() {
 	}
@@ -26,6 +27,14 @@ public class PropertiesConfig {
 
 	public void setCategoryMethod(String categoryMethod) {
 		this.categoryMethod = categoryMethod;
+	}
+
+	public int getPollIntervalSeconds() {
+		return pollIntervalSeconds;
+	}
+
+	public void setPollIntervalSeconds(int pollIntervalSeconds) {
+		this.pollIntervalSeconds = pollIntervalSeconds;
 	}
 	
 }
