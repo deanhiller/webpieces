@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -14,15 +13,9 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.NeedsSimpleStorage;
-import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.SimpleStorage;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.routing.Plugin;
 import org.webpieces.router.api.routing.Routes;
 import org.webpieces.router.api.routing.WebAppMeta;
@@ -31,17 +24,14 @@ import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.hooks.ClassForName;
 import org.webpieces.router.impl.loader.ControllerLoader;
 import org.webpieces.router.impl.mgmt.ManagedBeanMeta;
-import org.webpieces.router.impl.model.AbstractRouteBuilder;
-import org.webpieces.router.impl.model.L1AllRouting;
-import org.webpieces.router.impl.model.L3PrefixedRouting;
 import org.webpieces.router.impl.model.LogicHolder;
-import org.webpieces.router.impl.model.MatchResult;
-import org.webpieces.router.impl.model.R1RouterBuilder;
 import org.webpieces.router.impl.model.RouteModuleInfo;
-import org.webpieces.router.impl.model.RouterInfo;
+import org.webpieces.router.impl.model.bldr.data.DomainRouter;
+import org.webpieces.router.impl.model.bldr.data.MasterRouter;
+import org.webpieces.router.impl.model.bldr.impl.CurrentPackage;
+import org.webpieces.router.impl.model.bldr.impl.DomainRouteBuilderImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -54,22 +44,24 @@ public class RouteLoader {
 	private static final Logger log = LoggerFactory.getLogger(RouteLoader.class);
 	
 	private final RouterConfig config;
-	private final RouteInvoker invoker;
 	private final ControllerLoader controllerFinder;
 	private CompressionCacheSetup compressionCacheSetup;
 	
-	protected R1RouterBuilder routerBuilder;
-
 	private PluginSetup pluginSetup;
 
 	private ManagedBeanMeta beanMeta;
 
 	private ObjectTranslator objectTranslator;
+
+	private RouteInvoker2 invoker2;
+
+	private MasterRouter masterRouter;
 	
 	@Inject
 	public RouteLoader(
 		RouterConfig config, 
-		RouteInvoker invoker,
+		RouteInvoker2 invoker2, 
+		MasterRouter masterRouter,
 		ControllerLoader controllerFinder,
 		CompressionCacheSetup compressionCacheSetup,
 		PluginSetup pluginSetup,
@@ -77,7 +69,8 @@ public class RouteLoader {
 		ObjectTranslator objectTranslator
 	) {
 		this.config = config;
-		this.invoker = invoker;
+		this.invoker2 = invoker2;
+		this.masterRouter = masterRouter;
 		this.controllerFinder = controllerFinder;
 		this.compressionCacheSetup = compressionCacheSetup;
 		this.pluginSetup = pluginSetup;
@@ -106,6 +99,7 @@ public class RouteLoader {
 		log.info(WebAppMeta.class.getSimpleName()+" class to load="+moduleName);
 		Class<?> clazz = loader.clazzForName(moduleName);
 		
+		//TODO: Move this into a Development class so it's not in production so people are 100% sure it's not used in production
 		//In development mode, the ClassLoader here will be the CompilingClassLoader so stuff it into the thread context
 		//just in case plugins will need it(most won't, hibernate will).  In production, this is really a no-op and does
 		//nothing.  I don't like dev code existing in production :( so perhaps we should abstract this out at some 
@@ -206,11 +200,11 @@ public class RouteLoader {
 		
 		ReverseRoutes reverseRoutes = new ReverseRoutes(config);
 		//routerBuilder = new RouterBuilder("", new AllRoutingInfo(), reverseRoutes, controllerFinder, config.getUrlEncoding());
-		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config);
-		routerBuilder = new R1RouterBuilder(new RouterInfo(null, ""), new L1AllRouting(), holder, false);
-		routingHolder.setRouterBuilder(routerBuilder);
+		LogicHolder holder = new LogicHolder(reverseRoutes, controllerFinder, injector, config, invoker2);
+		DomainRouteBuilderImpl routerBuilder = new DomainRouteBuilderImpl(holder);
+		
 		routingHolder.setReverseRouteLookup(reverseRoutes);
-		invoker.init(reverseRoutes);
+		invoker2.init(reverseRoutes);
 		
 		List<Routes> all = new ArrayList<>();
 		all.addAll(rm.getRouteModules()); //the core application routes
@@ -223,24 +217,20 @@ public class RouteLoader {
 		}
 		
 		for(Routes module : all) {
-			AbstractRouteBuilder.currentPackage.set(new RouteModuleInfo(module));
+			CurrentPackage.set(new RouteModuleInfo(module.getClass()));
 			module.configure(routerBuilder);
-			AbstractRouteBuilder.currentPackage.set(null);
+			CurrentPackage.set(null);
 		}
 		
 		log.info("added all routes to router.  Applying Filters");
 
 		reverseRoutes.finalSetup();
 		
-		routerBuilder.applyFilters(rm);
+		DomainRouter domainRouter = routerBuilder.build();
 		
-		Collection<RouteMeta> metas = reverseRoutes.getAllRouteMetas();
-		for(RouteMeta m : metas) {
-			controllerFinder.loadFiltersIntoMeta(m, m.getFilters(), true);
-		}
-		
-		routerBuilder.loadNotFoundAndErrorFilters();
-	
+		routingHolder.setDomainRouter(domainRouter);
+		masterRouter.setDomainRouter(domainRouter);
+
 		log.info("all filters applied");
 		
 		compressionCacheSetup.setupCache(routerBuilder.getStaticRoutes());
@@ -255,63 +245,54 @@ public class RouteLoader {
 			throw new IllegalArgumentException("Your clazz="+clazz.getSimpleName()+" could not be created", e);
 		}
 	}
-
-	public MatchResult fetchRoute(RouterRequest req) {
-		L1AllRouting allRoutingInfo = routerBuilder.getRouterInfo();
-		MatchResult meta = allRoutingInfo.fetchRoute(req, req.relativePath);
-		if(meta == null)
-			throw new IllegalStateException("missing exception on creation if we go this far");
-
-		return meta;
-	}
 	
-	public CompletableFuture<Void> invokeRoute(MatchResult result, RequestContext routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
-		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
-		return invoker.invoke(result, routerRequest, responseCb, errorRoutes);
-	}
-
-	public Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, Object meta) {
-		return invoker.processException(responseCb, requestCtx, e, errorRoutes, meta);
-	}
+//	public CompletableFuture<Void> invokeRoute(MatchResult result, RequestContext routerRequest, ResponseStreamer responseCb, ErrorRoutes errorRoutes) {
+//		//This class is purely the RouteLoader so delegate and encapsulate the invocation in RouteInvoker....
+//		return invoker.invoke(result, routerRequest, responseCb, errorRoutes);
+//	}
+//
+//	public Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e, ErrorRoutes errorRoutes, Object meta) {
+//		return invoker.processException(responseCb, requestCtx, e, errorRoutes, meta);
+//	}
 	
-	public RouteMeta fetchNotFoundRoute(String domain) {
-		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
-		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute(domain);
-		return notfoundRoute;
-	}
+//	public RouteMeta fetchNotFoundRoute(String domain) {
+//		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
+//		RouteMeta notfoundRoute = routerInfo.getPageNotfoundRoute(domain);
+//		return notfoundRoute;
+//	}
+//
+//	public RouteMeta fetchInternalErrorRoute(String domain) {
+//		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
+//		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute(domain);
+//		return internalErrorRoute;
+//	}
+//
+//	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
+//		List<FilterInfo<?>> filterInfos = routerBuilder.findNotFoundFilters(req.relativePath, req.isHttps);
+//		return controllerFinder.createNotFoundService(m, filterInfos);
+//	}
 
-	public RouteMeta fetchInternalErrorRoute(String domain) {
-		L1AllRouting routerInfo = routerBuilder.getRouterInfo();
-		RouteMeta internalErrorRoute = routerInfo.getInternalErrorRoute(domain);
-		return internalErrorRoute;
-	}
-
-	public  Service<MethodMeta, Action> createNotFoundService(RouteMeta m, RouterRequest req) {
-		List<FilterInfo<?>> filterInfos = routerBuilder.findNotFoundFilters(req.relativePath, req.isHttps);
-		return controllerFinder.createNotFoundService(m, filterInfos);
-	}
-
-	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
-		return invoker.convertToUrl(routeId, args, isValidating);
-	}
+//	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
+//		return invoker.convertToUrl(routeId, args, isValidating);
+//	}
 	
 	public FileMeta relativeUrlToHash(String urlPath) {
 		return compressionCacheSetup.relativeUrlToHash(urlPath);
 	}
 
 
-	public void printAllRoutes(Route route) {
-		if(!log.isDebugEnabled())
-			return;
-		else if(route.getRouteType() != RouteType.NOT_FOUND)
-			return;
-
-		L1AllRouting routingInfo = routerBuilder.getRouterInfo();
-		
-		//TODO: domain specific routes
-		//Collection<L2DomainRoutes> domains = routingInfo.getSpecificDomains();
-
-		L3PrefixedRouting mainRoutes = routingInfo.getMainRoutes().getRoutesForDomain();
-		mainRoutes.printRoutes(route.isHttpsRoute(), "");
-	}
+//	public void printAllRoutes(Route route) {
+//		if(!log.isDebugEnabled())
+//			return;
+//		else if(route.getRouteType() != RouteType.NOT_FOUND)
+//			return;
+//
+//		L1AllRouting routingInfo = routerBuilder.getRouterInfo();
+//		
+//		//TODO: domain specific routes
+//		//Collection<L2DomainRoutes> domains = routingInfo.getSpecificDomains();
+//
+//		L3PrefixedRouting mainRoutes = routingInfo.getMainRoutes().getRoutesForDomain();
+//		mainRoutes.printRoutes(route.getExposedPorts(), "");
+//	}
 }

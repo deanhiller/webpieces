@@ -1,9 +1,13 @@
 package org.webpieces.plugins.hsqldb;
 
-import org.webpieces.ctx.api.HttpMethod;
-import org.webpieces.router.api.routing.AbstractRoutes;
+import static org.webpieces.router.api.routing.Port.BOTH;
 
-public class H2DbRoutes extends AbstractRoutes {
+import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
+
+public class H2DbRoutes implements Routes {
 	
 	private String urlPath;
 
@@ -12,8 +16,9 @@ public class H2DbRoutes extends AbstractRoutes {
 	}
 
 	@Override
-	protected void configure() {
-		addRoute(HttpMethod.GET, urlPath, "H2DbController.databaseGui", H2DbRouteId.GET_DATABASE_PAGE);
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
+		router.addRoute(BOTH, HttpMethod.GET, urlPath, "H2DbController.databaseGui", H2DbRouteId.GET_DATABASE_PAGE);
 	}
 
 }

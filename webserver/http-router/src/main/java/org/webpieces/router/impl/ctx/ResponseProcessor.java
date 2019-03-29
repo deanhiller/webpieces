@@ -21,6 +21,7 @@ import org.webpieces.router.api.dto.RenderStaticResponse;
 import org.webpieces.router.api.dto.RouteType;
 import org.webpieces.router.api.dto.View;
 import org.webpieces.router.api.exceptions.IllegalReturnValueException;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.api.routing.RouteId;
 import org.webpieces.router.impl.ReverseRoutes;
 import org.webpieces.router.impl.Route;
@@ -108,13 +109,15 @@ public class ResponseProcessor {
 				throw new IllegalArgumentException("Method='"+method+"' returns a Redirect that is missing argument key="+name+" to form the url on the redirect");
 			path = path.replace("{"+name+"}", value);
 		}
+
+		boolean isHttpsOnly = route.getExposedPorts() == Port.HTTPS;
 		
 		//if the request is https, stay in https as everything is accessible on https
 		//if the request is http, then convert to https IF new route is secure
-		boolean isSecure = request.isHttps || route.isHttpsRoute();
+		boolean isSecure = request.isHttps || isHttpsOnly;
 		int port = request.port;
 		//if need to change port to https port, this is how we do it...
-		if(!request.isHttps && route.isHttpsRoute())
+		if(!request.isHttps && isHttpsOnly)
 			port = portConfig.getHttpsPort();
 		
 		RedirectResponse redirectResponse = new RedirectResponse(isAjaxRedirect, isSecure, request.domain, port, path);

@@ -8,7 +8,10 @@ import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_POST_DEL
 import static WEBPIECESxPACKAGE.base.crud.ajax.AjaxCrudUserRouteId.AJAX_POST_USER_FORM;
 
 import org.webpieces.router.api.routing.CrudRouteIds;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.api.routing.ScopedRoutes;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
 
 public class AjaxCrudRoutes extends ScopedRoutes {
 
@@ -18,12 +21,7 @@ public class AjaxCrudRoutes extends ScopedRoutes {
 	}
 	
 	@Override
-	protected boolean isHttpsOnlyRoutes() {
-		return true;
-	}
-	
-	@Override
-	protected void configure() {
+	protected void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter) {
 		//basic crud example(which just calls the same addRoute methods for you for Create/Read/Update/Delete and 
 		//the GET render page views as well)
 		//it adds all these routes
@@ -37,7 +35,7 @@ public class AjaxCrudRoutes extends ScopedRoutes {
 				AJAX_LIST_USERS, AJAX_ADD_USER_FORM, AJAX_EDIT_USER_FORM,
 				AJAX_POST_USER_FORM, AJAX_CONFIRM_DELETE_USER, AJAX_POST_DELETE_USER);
 		
-		addCrud("user", "AjaxCrudUserController", routeIds);
+		scopedRouter.addCrud(Port.HTTPS, "user", "AjaxCrudUserController", routeIds);
 	}
 
 }

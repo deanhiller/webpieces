@@ -1,5 +1,6 @@
 package org.webpieces.devrouter.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -11,13 +12,13 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.impl.Route;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.RoutingHolder;
-import org.webpieces.router.impl.model.L1AllRouting;
-import org.webpieces.router.impl.model.L2DomainRoutes;
-import org.webpieces.router.impl.model.L3PrefixedRouting;
-import org.webpieces.router.impl.model.R1RouterBuilder;
+import org.webpieces.router.impl.model.bldr.data.DomainRouter;
+import org.webpieces.router.impl.model.bldr.data.Router;
+import org.webpieces.router.impl.model.bldr.data.ScopedRouter;
 
 @Singleton
 public class NotFoundController {
@@ -36,22 +37,25 @@ public class NotFoundController {
 			url += "?webpiecesShowPage=true";
 		}
 		
-		R1RouterBuilder builder = routingHolder.getRouterBuilder();
-		L1AllRouting routingInfo = builder.getRouterInfo();
-		Collection<L2DomainRoutes> domains = routingInfo.getSpecificDomains();
-
-		L3PrefixedRouting mainRoutes = routingInfo.getMainRoutes().getRoutesForDomain();
-		//This is a pain but dynamically build up the html
-		String routeHtml = build(mainRoutes);
+		DomainRouter domainRouter = routingHolder.getDomainRouter();
+		Router router = domainRouter.getLeftOverDomains();
 		
-		return Actions.renderThis("domains", domains, "routeHtml", routeHtml, "error", error, "url", url);
+		Collection<Router> routers = new ArrayList<>();
+		for(Router oneRouter : domainRouter.getDomainToRouter().values()) {
+			routers.add(oneRouter);
+		}
+		
+		//This is a pain but dynamically build up the html
+		String routeHtml = build(router);
+		
+		return Actions.renderThis("domains", routers, "routeHtml", routeHtml, "error", error, "url", url);
 	}
 
-	private String build(L3PrefixedRouting mainRoutes) {
+	private String build(ScopedRouter mainRoutes) {
 		String html = "<ul>\n";
 		
-		Map<String, L3PrefixedRouting> scopedRoutes = mainRoutes.getScopedRoutes();
-		for(Map.Entry<String, L3PrefixedRouting> entry : scopedRoutes.entrySet()) {
+		Map<String, ScopedRouter> scopedRoutes = mainRoutes.getPathPrefixToNextRouter();
+		for(Map.Entry<String, ScopedRouter> entry : scopedRoutes.entrySet()) {
 			html += "<li>"+ "SCOPE:"+entry.getKey()+"</li>";
 			html += build(entry.getValue());
 		}
@@ -59,7 +63,8 @@ public class NotFoundController {
 		List<RouteMeta> routes = mainRoutes.getRoutes();
 		for(RouteMeta route: routes) {
 			Route rt = route.getRoute();
-			String http = rt.isHttpsRoute() ? "https" : "http";
+			boolean isHttpsOnly = rt.getExposedPorts() == Port.HTTPS;
+			String http = isHttpsOnly ? "https" : "http";
 			html += "<li>"+pad(rt.getMethod(), 5)+":"+pad(http, 5)+" : "+rt.getFullPath()+"</li>\n";
 		}
 		

@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.webpieces.router.api.ProdRouterModule;
 import org.webpieces.router.api.RouterConfig;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.impl.StaticRoute;
 import org.webpieces.router.impl.UrlPath;
 import org.webpieces.util.file.FileFactory;
@@ -67,7 +68,7 @@ public class TestCompressionCache {
 	private List<StaticRoute> runBasicServerOnce(File stagingDir) {
 		List<StaticRoute> routes = new ArrayList<>();
 		VirtualFile dir = VirtualFileFactory.newFile(stagingDir);
-		routes.add(new StaticRoute(new UrlPath("", "/public/"), dir, false, cacheDir));
+		routes.add(new StaticRoute(null, Port.BOTH, new UrlPath("", "/public/"), dir, false, cacheDir));
 		cache.setupCache(routes);
 		Assert.assertEquals(2, proxy.getReadFiles().size());
 		Assert.assertEquals(2, proxy.getCompressedFiles().size());
@@ -86,7 +87,7 @@ public class TestCompressionCache {
 		
 		List<StaticRoute> routes2 = new ArrayList<>();
 		VirtualFile dir = VirtualFileFactory.newFile(stagingDir);
-		routes2.add(new StaticRoute(new UrlPath("", "/public1.4/"), dir, false, cacheDir));
+		routes2.add(new StaticRoute(null, Port.BOTH, new UrlPath("", "/public1.4/"), dir, false, cacheDir));
 
 		//if server is just restarted(no file changes), we should skip reading files...
 		cache.setupCache(routes2);

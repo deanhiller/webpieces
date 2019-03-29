@@ -8,34 +8,38 @@ import static org.webpieces.plugins.hibernate.app.HibernateRouteId.DELETE_USER;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.EDIT_USER_PAGE;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.LIST_USERS;
 import static org.webpieces.plugins.hibernate.app.HibernateRouteId.SAVE_USER;
+import static org.webpieces.router.api.routing.Port.BOTH;
 
-import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.CrudRouteIds;
+import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
 
-public class HibernateTestRoutes extends AbstractRoutes {
+public class HibernateTestRoutes implements Routes {
 
 	@Override
-	protected void configure() {
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		CrudRouteIds routeIds = new CrudRouteIds(LIST_USERS, ADD_USER_PAGE, EDIT_USER_PAGE, SAVE_USER, CONFIRM_DELETE_USER, DELETE_USER);
-		addCrud("user", "CrudTestController", routeIds);
+		bldr.addCrud(BOTH, "user", "CrudTestController", routeIds);
 		
-		addRoute(GET , "/multiselect/{id}", "CrudTestController.multiSelect", HibernateRouteId.MULTISELECT);
-		addRoute(POST, "/multiselect", "CrudTestController.postSaveUserForMultiSelect", HibernateRouteId.POST_MULTISELECT);
+		bldr.addRoute(BOTH, GET , "/multiselect/{id}", "CrudTestController.multiSelect", HibernateRouteId.MULTISELECT);
+		bldr.addRoute(BOTH, POST, "/multiselect", "CrudTestController.postSaveUserForMultiSelect", HibernateRouteId.POST_MULTISELECT);
 		
-		addRoute(POST, "/save",          "HibernateController.save", HibernateRouteId.SAVE_ENTITY);
-		addRoute(GET , "/get/{id}",      "HibernateController.display", HibernateRouteId.DISPLAY_ENTITY);
-		addRoute(GET , "/dynamic/{id}",  "HibernateController.entityLoad", HibernateRouteId.ENTITY_LOAD);
+		bldr.addRoute(BOTH, POST, "/save",          "HibernateController.save", HibernateRouteId.SAVE_ENTITY);
+		bldr.addRoute(BOTH, GET , "/get/{id}",      "HibernateController.display", HibernateRouteId.DISPLAY_ENTITY);
+		bldr.addRoute(BOTH, GET , "/dynamic/{id}",  "HibernateController.entityLoad", HibernateRouteId.ENTITY_LOAD);
 		
-		addRoute(POST, "/testmerge",     "HibernateController.postMergeUserTest", HibernateRouteId.MERGE_ENTITY);
+		bldr.addRoute(BOTH, POST, "/testmerge",     "HibernateController.postMergeUserTest", HibernateRouteId.MERGE_ENTITY);
 		
-		addRoute(POST, "/async/save",        "HibernateAsyncController.save", HibernateRouteId.ASYNC_SAVE_ENTITY);
-		addRoute(GET , "/async/get/{id}",    "HibernateAsyncController.display", HibernateRouteId.ASYNC_DISPLAY_ENTITY);
-		addRoute(GET , "/async/dynamic/{id}","HibernateAsyncController.entityLoad", HibernateRouteId.ASYNC_ENTITY_LOAD);
+		bldr.addRoute(BOTH, POST, "/async/save",        "HibernateAsyncController.save", HibernateRouteId.ASYNC_SAVE_ENTITY);
+		bldr.addRoute(BOTH, GET , "/async/get/{id}",    "HibernateAsyncController.display", HibernateRouteId.ASYNC_DISPLAY_ENTITY);
+		bldr.addRoute(BOTH, GET , "/async/dynamic/{id}","HibernateAsyncController.entityLoad", HibernateRouteId.ASYNC_ENTITY_LOAD);
 
-		addRoute(GET , "/fail",          "HibernateController.saveThenFail", HibernateRouteId.ROLLBACK);
+		bldr.addRoute(BOTH, GET , "/fail",          "HibernateController.saveThenFail", HibernateRouteId.ROLLBACK);
 		
-		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
-		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
+		bldr.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		bldr.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

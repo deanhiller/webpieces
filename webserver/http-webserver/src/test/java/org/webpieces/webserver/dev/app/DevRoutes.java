@@ -1,26 +1,30 @@
 package org.webpieces.webserver.dev.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.router.api.routing.Port.BOTH;
 
-import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
+import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
 
-public class DevRoutes extends AbstractRoutes {
+public class DevRoutes implements Routes {
 
 	@Override
-	public void configure() {
-		addRoute(GET , "/home",               "DevController.home", DevRouteId.HOME);
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
+		router.addRoute(BOTH, GET , "/home",               "DevController.home", DevRouteId.HOME);
 		
-		addRoute(GET , "/causeError",         "DevController.causeError", DevRouteId.CAUSE_ERROR);
+		router.addRoute(BOTH, GET , "/causeError",         "DevController.causeError", DevRouteId.CAUSE_ERROR);
 
-		addRoute(GET , "/filter",             "DevController.filter", DevRouteId.FILTER_ROUTE);
+		router.addRoute(BOTH, GET , "/filter",             "DevController.filter", DevRouteId.FILTER_ROUTE);
 		
-		addFilter("/filter", MyFilter.class, null, PortType.ALL_FILTER);
+		router.addFilter("/filter", MyFilter.class, null, PortType.ALL_FILTER);
 		
-		addNotFoundFilter(NotFoundFilter.class, null, PortType.ALL_FILTER);
+		router.addNotFoundFilter(NotFoundFilter.class, null, PortType.ALL_FILTER);
 		
-		setPageNotFoundRoute("DevController.notFound");
-		setInternalErrorRoute("DevController.internalError");
+		router.setPageNotFoundRoute("DevController.notFound");
+		router.setInternalErrorRoute("DevController.internalError");
 	}
 
 }

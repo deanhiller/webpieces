@@ -65,7 +65,7 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	private CompletableFuture<Action> invokeMethod(MethodMeta meta) 
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
-		tokenCheck(meta.getRoute(), meta.getCtx(), meta.getBodyContentBinder());
+		tokenCheck(meta.getRoute(), meta.getCtx());
 
 		Method m = meta.getMethod();
 		Object obj = meta.getControllerInstance();
@@ -98,7 +98,7 @@ public class ServiceProxy implements Service<MethodMeta, Action> {
 	 * a login!!
 	 * 
 	 */
-	private void tokenCheck(Route route, RequestContext ctx, BodyContentBinder bodyContentBinder) {
+	private void tokenCheck(Route route, RequestContext ctx) {
 		RouterRequest req = ctx.getRequest();
 
 		if(req.multiPartFields.size() == 0)

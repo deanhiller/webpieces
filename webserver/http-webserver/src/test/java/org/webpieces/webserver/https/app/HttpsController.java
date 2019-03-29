@@ -6,7 +6,6 @@ import org.webpieces.ctx.api.Current;
 import org.webpieces.router.api.actions.Action;
 import org.webpieces.router.api.actions.Actions;
 import org.webpieces.router.api.actions.Redirect;
-import org.webpieces.webserver.api.login.LoginInfo;
 
 @Singleton
 public class HttpsController {

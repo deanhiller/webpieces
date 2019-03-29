@@ -2,7 +2,7 @@ package org.webpieces.plugins.backend;
 
 import org.webpieces.router.api.routing.ScopedRoutes;
 
-public class BackendRoutes extends ScopedRoutes {
+public abstract class BackendRoutes extends ScopedRoutes {
 	
 	public static final String BACKEND_ROUTE = "/@backend";
 	
@@ -11,13 +11,4 @@ public class BackendRoutes extends ScopedRoutes {
         return BACKEND_ROUTE;
     }
 
-    @Override
-    protected final boolean isHttpsOnlyRoutes() {
-        return true;
-    }
-
-    @Override
-    protected void configure() {
-
-    }
 }

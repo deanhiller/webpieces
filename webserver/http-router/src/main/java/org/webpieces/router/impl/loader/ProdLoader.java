@@ -41,8 +41,8 @@ public class ProdLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public void loadFiltersIntoMeta(RouteMeta m, List<FilterInfo<?>> filters, boolean isInitializingAllFilters) {
-		super.loadFiltersIntoMeta(m, filters);
+	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
+		super.loadFiltersIntoMeta(m);
 	}
 
 }

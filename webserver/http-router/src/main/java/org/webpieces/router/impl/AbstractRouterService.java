@@ -18,8 +18,6 @@ import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.ctx.FlashImpl;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
-import org.webpieces.router.impl.loader.HaveRouteException;
-import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
@@ -76,22 +74,18 @@ public abstract class AbstractRouterService implements RouterService {
 	}
 
 	private Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e) {
-		Object meta = "unknown RouteMeta"; 
-		//Damn them for wrapping in CompletionException making life really hard....(they should do it the scala way!!!!)
-		//that decision results in the below mess instead of clean code
-		if(e instanceof HaveRouteException) {
-			HaveRouteException exc = (HaveRouteException) e;
-			meta = exc.getResult().getMeta();
-		}
-		ErrorRoutes errorRoutes = getErrorRoutes(requestCtx);
-		routeLoader.processException(responseCb, requestCtx, e, errorRoutes, meta);
-		return null;
-	}
-	
-	protected MatchResult fetchRoute(RequestContext ctx) {
-		MatchResult result = routeLoader.fetchRoute(ctx.getRequest());
-		ctx.setPathParams(result.getPathParams());
-		return result;
+		throw new UnsupportedOperationException("not done yet");
+
+//		Object meta = "unknown RouteMeta"; 
+//		//Damn them for wrapping in CompletionException making life really hard....(they should do it the scala way!!!!)
+//		//that decision results in the below mess instead of clean code
+//		if(e instanceof HaveRouteException) {
+//			HaveRouteException exc = (HaveRouteException) e;
+//			meta = exc.getResult().getMeta();
+//		}
+//		ErrorRoutes errorRoutes = getErrorRoutes(requestCtx);
+//		routeLoader.processException(responseCb, requestCtx, e, errorRoutes, meta);
+//		return null;
 	}
 	
 	protected abstract ErrorRoutes getErrorRoutes(RequestContext ctx);
@@ -99,7 +93,8 @@ public abstract class AbstractRouterService implements RouterService {
 	
 	@Override
 	public String convertToUrl(String routeId, Map<String, String> args, boolean isValidating) {
-		return routeLoader.convertToUrl(routeId, args, isValidating);
+		throw new UnsupportedOperationException("not done yet");
+		//return routeLoader.convertToUrl(routeId, args, isValidating);
 	}
 	
 	@Override

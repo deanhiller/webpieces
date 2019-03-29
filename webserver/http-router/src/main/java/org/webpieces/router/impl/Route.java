@@ -1,11 +1,16 @@
 package org.webpieces.router.impl;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.routing.Port;
+import org.webpieces.router.impl.model.MatchResult;
 
 public interface Route {
 
@@ -25,9 +30,11 @@ public interface Route {
 
 	boolean isCheckSecureToken();
 
-	boolean isHttpsRoute();
+	Port getExposedPorts();
 
 	HttpMethod getHttpMethod();
 	
 	String getMethod();
+
+	CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb);
 }

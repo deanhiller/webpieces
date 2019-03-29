@@ -1,5 +1,6 @@
 package org.webpieces.router.impl.model;
 
+import org.webpieces.router.api.routing.BasicRoutes;
 import org.webpieces.router.api.routing.Routes;
 
 public class RouteModuleInfo {
@@ -7,9 +8,12 @@ public class RouteModuleInfo {
 	public String packageName;
 	public String i18nBundleName;
 
-	public RouteModuleInfo(Routes m) {
-		this.packageName = getPackage(m.getClass());
-		this.i18nBundleName = getI18nBundleName(m);
+	public RouteModuleInfo(Class<?> moduleClazz) {
+		if(!(Routes.class.isAssignableFrom(moduleClazz) &&
+				!BasicRoutes.class.isAssignableFrom(moduleClazz)))
+				throw new IllegalArgumentException("Must be of type Routes.class or BasicRoutes.class");
+		this.packageName = getPackage(moduleClazz);
+		this.i18nBundleName = getI18nBundleName(moduleClazz);
 	}
 	
 	public RouteModuleInfo(String packageName, String i18n) {
@@ -23,8 +27,7 @@ public class RouteModuleInfo {
 	 * locale or another messages file for another language
 	 * @param module 
 	 */
-	public String getI18nBundleName(Routes module) {
-		Class<? extends Routes> clazz = module.getClass();
+	public String getI18nBundleName(Class<?> clazz) {
 		String name = clazz.getName();
 		int lastIndexOf = name.lastIndexOf(".");
 		if(lastIndexOf < 0)

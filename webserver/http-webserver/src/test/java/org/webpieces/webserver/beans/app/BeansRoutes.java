@@ -2,34 +2,38 @@ package org.webpieces.webserver.beans.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
+import static org.webpieces.router.api.routing.Port.BOTH;
 
-import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
 
-public class BeansRoutes extends AbstractRoutes {
+public class BeansRoutes implements Routes {
 
 	@Override
-	public void configure() {
-		addRoute(GET , "/pageparam",         "BeansController.pageParam", BeansRouteId.PAGE_PARAM);
-		addRoute(GET , "/pageparam_async",   "BeansController.pageParamAsync", BeansRouteId.PAGE_PARAM_ASYNC);
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
+		router.addRoute(BOTH, GET , "/pageparam",         "BeansController.pageParam", BeansRouteId.PAGE_PARAM);
+		router.addRoute(BOTH, GET , "/pageparam_async",   "BeansController.pageParamAsync", BeansRouteId.PAGE_PARAM_ASYNC);
 
-		addRoute(GET , "/urlencoding/{user}","BeansController.urlEncoding", BeansRouteId.URLENCODE);
+		router.addRoute(BOTH, GET , "/urlencoding/{user}","BeansController.urlEncoding", BeansRouteId.URLENCODE);
 
-		addRoute(POST, "/postuser2",        "BeansController.postUser", BeansRouteId.POST_USER2_ROUTE, false); //insecure
-		addRoute(POST, "/postArray2",        "BeansController.postArray", BeansRouteId.POST_ARRAY2_ROUTE, false); //insecure
+		router.addRoute(BOTH, POST, "/postuser2",        "BeansController.postUser", BeansRouteId.POST_USER2_ROUTE, false); //insecure
+		router.addRoute(BOTH, POST, "/postArray2",        "BeansController.postArray", BeansRouteId.POST_ARRAY2_ROUTE, false); //insecure
 
-		addRoute(GET , "/adduser",           "BeansController.userForm", BeansRouteId.USER_FORM_ROUTE);
-		addRoute(POST, "/postuser",          "BeansController.postUser", BeansRouteId.POST_USER_ROUTE);
-		addRoute(GET , "/listusers",         "BeansController.listUsers", BeansRouteId.LIST_USERS_ROUTE);
+		router.addRoute(BOTH, GET , "/adduser",           "BeansController.userForm", BeansRouteId.USER_FORM_ROUTE);
+		router.addRoute(BOTH, POST, "/postuser",          "BeansController.postUser", BeansRouteId.POST_USER_ROUTE);
+		router.addRoute(BOTH, GET , "/listusers",         "BeansController.listUsers", BeansRouteId.LIST_USERS_ROUTE);
 
-		addRoute(POST, "/postusernullable",  "BeansController.postUserNullable", BeansRouteId.POST_USER_NULLABLE_ROUTE, false);
+		router.addRoute(BOTH, POST, "/postusernullable",  "BeansController.postUserNullable", BeansRouteId.POST_USER_NULLABLE_ROUTE, false);
 
-		addRoute(GET , "/getuser",           "BeansController.userParamGetRequest", BeansRouteId.USER_GET_ROUTE);
+		router.addRoute(BOTH, GET , "/getuser",           "BeansController.userParamGetRequest", BeansRouteId.USER_GET_ROUTE);
 
-		addRoute(GET , "/arrayForm",         "BeansController.arrayForm", BeansRouteId.ARRAY_FORM_ROUTE);
-		addRoute(POST, "/postArray",         "BeansController.postArray", BeansRouteId.POST_ARRAY_ROUTE);
+		router.addRoute(BOTH, GET , "/arrayForm",         "BeansController.arrayForm", BeansRouteId.ARRAY_FORM_ROUTE);
+		router.addRoute(BOTH, POST, "/postArray",         "BeansController.postArray", BeansRouteId.POST_ARRAY_ROUTE);
 		
-		setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
-		setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
+		router.setPageNotFoundRoute("/org/webpieces/webserver/basic/app/biz/BasicController.notFound");
+		router.setInternalErrorRoute("/org/webpieces/webserver/basic/app/biz/BasicController.internalError");
 	}
 
 }

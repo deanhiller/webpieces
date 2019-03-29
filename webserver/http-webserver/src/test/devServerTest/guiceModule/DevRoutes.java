@@ -2,18 +2,20 @@ package org.webpieces.webserver.dev.app;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 
-import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.api.routing.Routes;
+import static org.webpieces.router.api.routing.Port.BOTH;
 
-public class DevRoutes extends AbstractRoutes {
+public class DevRoutes implements Routes {
 
 	@Override
-	public void configure() {
-		addRoute(GET , "/home",               "DevController.home", DevRouteId.HOME);
+	public void configure(Router router) {
+		router.addRoute(BOTH, GET , "/home",               "DevController.home", DevRouteId.HOME);
 		
-		addRoute(GET , "/causeError",         "DevController.causeError", DevRouteId.CAUSE_ERROR);
+		router.addRoute(BOTH, GET , "/causeError",         "DevController.causeError", DevRouteId.CAUSE_ERROR);
 
-		setPageNotFoundRoute("DevController.notFound");
-		setInternalErrorRoute("DevController.internalError");
+		router.setPageNotFoundRoute("DevController.notFound");
+		router.setInternalErrorRoute("DevController.internalError");
 	}
 
 }

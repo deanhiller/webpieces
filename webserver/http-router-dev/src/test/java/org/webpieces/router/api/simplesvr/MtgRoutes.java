@@ -2,18 +2,21 @@ package org.webpieces.router.api.simplesvr;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
 import static org.webpieces.ctx.api.HttpMethod.POST;
+import static org.webpieces.router.api.routing.Port.BOTH;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.ASYNC_ROUTE;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.GET_SHOW_MTG;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.POST_MEETING;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.routing.Router;
 import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
 
 public class MtgRoutes implements Routes {
 	
 	@Override
-	public void configure(Router router) {
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 
 		//A typical CRUD list of routes is
 		//   1. GET list users or     GET  /listusers
@@ -32,16 +35,16 @@ public class MtgRoutes implements Routes {
 		//
 		//AND ON TOP of that, we have multi-part fields as well with keys and values for POSTs
 		
-		router.addRoute(GET,      "/something",    "MeetingController.someExample",     SOME_EXAMPLE);
-//		router.addRoute(GET,      "/listuser",     "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
-		router.addRoute(POST,     "/meeting",      "MeetingController.postMeeting", POST_MEETING, false); //insecure
-		router.addRoute(GET,      "/meeting/{id}", "MeetingController.getMeeting",    GET_SHOW_MTG);
-		router.addRoute(GET,      "/async",        "MeetingController.asyncMethod",     ASYNC_ROUTE);
+		bldr.addRoute(BOTH, GET,      "/something",    "MeetingController.someExample",     SOME_EXAMPLE);
+//		bldr.addRoute(BOTH, GET,      "/listuser",     "MeetingController.createUserForm",  GET_CREATE_USER_PAGE);
+		bldr.addRoute(BOTH, POST,     "/meeting",      "MeetingController.postMeeting", POST_MEETING, false); //insecure
+		bldr.addRoute(BOTH, GET,      "/meeting/{id}", "MeetingController.getMeeting",    GET_SHOW_MTG);
+		bldr.addRoute(BOTH, GET,      "/async",        "MeetingController.asyncMethod",     ASYNC_ROUTE);
 		
-		//router.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
+		//bldr.addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		router.setPageNotFoundRoute("MeetingController.notFound");
-		router.setInternalErrorRoute("MeetingController.internalError");
+		bldr.setPageNotFoundRoute("MeetingController.notFound");
+		bldr.setInternalErrorRoute("MeetingController.internalError");
 	}
 
 }

@@ -2,10 +2,12 @@ package org.webpieces.plugins.json;
 
 import java.util.regex.Pattern;
 
-import org.webpieces.router.api.routing.AbstractRoutes;
 import org.webpieces.router.api.routing.PortType;
+import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
 
-public class JacksonRoutes extends AbstractRoutes {
+public class JacksonRoutes implements Routes {
 
 	private String filterPattern;
 	private Class<? extends JacksonCatchAllFilter> filter;
@@ -16,11 +18,12 @@ public class JacksonRoutes extends AbstractRoutes {
 	}
 	
 	@Override
-	protected void configure() {
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder router = domainRouteBldr.getAllDomainsRouteBuilder();
 		Pattern pattern = Pattern.compile(filterPattern);
 		
-		addFilter(filterPattern, filter, new JsonConfig(pattern, false), PortType.ALL_FILTER);		
-		addNotFoundFilter(filter, new JsonConfig(pattern, true), PortType.ALL_FILTER);
+		router.addFilter(filterPattern, filter, new JsonConfig(pattern, false), PortType.ALL_FILTER);		
+		router.addNotFoundFilter(filter, new JsonConfig(pattern, true), PortType.ALL_FILTER);
 	}
 
 }

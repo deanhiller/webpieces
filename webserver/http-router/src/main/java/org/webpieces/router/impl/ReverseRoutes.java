@@ -20,6 +20,7 @@ import org.webpieces.router.api.PortConfig;
 import org.webpieces.router.api.PortConfigCallback;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.exceptions.RouteNotFoundException;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.api.routing.ReverseRouteLookup;
 import org.webpieces.router.api.routing.RouteId;
 
@@ -186,7 +187,8 @@ public class ReverseRoutes implements ReverseRouteLookup {
 		RequestContext ctx = Current.getContext();
 		RouterRequest request = ctx.getRequest();
 		
-		if(!route.isHttpsRoute() || request.isHttps)
+		boolean isHttpsOnly = route.getExposedPorts() == Port.HTTPS;
+		if(!isHttpsOnly || request.isHttps)
 			return urlPath;
 		
 		//we are rendering an http page with a link to https so need to do special magic

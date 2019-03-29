@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.impl.ReverseRoutes;
+import org.webpieces.router.impl.RouteInvoker2;
 import org.webpieces.router.impl.loader.ControllerLoader;
 
 import com.google.inject.Injector;
@@ -15,13 +16,15 @@ public class LogicHolder {
 	private ControllerLoader finder;
 	private Injector injector;
 	private RouterConfig config;
+	private RouteInvoker2 routeInvoker2;
 
 	public LogicHolder(ReverseRoutes reverseRoutes, 
-			ControllerLoader finder, Injector injector, RouterConfig config) {
+			ControllerLoader finder, Injector injector, RouterConfig config, RouteInvoker2 routeInvoker) {
 				this.reverseRoutes = reverseRoutes;
 				this.finder = finder;
 				this.injector = injector;
 				this.config = config;
+				routeInvoker2 = routeInvoker;
 	}
 
 	public ReverseRoutes getReverseRoutes() {
@@ -47,4 +50,9 @@ public class LogicHolder {
 	public RouterConfig getConfig() {
 		return config;
 	}
+
+	public RouteInvoker2 getRouteInvoker2() {
+		return routeInvoker2;
+	}
+
 }

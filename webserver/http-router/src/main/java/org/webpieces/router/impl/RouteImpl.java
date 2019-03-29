@@ -2,13 +2,18 @@ package org.webpieces.router.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.api.routing.RouteId;
+import org.webpieces.router.impl.model.MatchResult;
 
 public class RouteImpl implements Route {
 
@@ -16,30 +21,32 @@ public class RouteImpl implements Route {
 	private final Pattern patternToMatch;
 	private final HttpMethod method;
 	private final List<String> argNames;
-	private final boolean isHttpsRoute;
+	private final Port allowedPorts;
 	private final RouteType routeType;
 	private String controllerMethodString;
 	private boolean checkSecureToken;
+	private RouteInvoker2 routeInvoker;
 
-	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, RouteId routeId, boolean isSecure, boolean checkSecureToken) {
+	public RouteImpl(RouteInvoker2 routeInvoker, HttpMethod method, UrlPath path, String controllerMethod, RouteId routeId, Port port, boolean checkSecureToken) {
+		this.routeInvoker = routeInvoker;
 		this.path = path.getFullPath();
 		this.method = method;
 		RegExResult result = RegExUtil.parsePath(path.getSubPath());
 		this.patternToMatch = Pattern.compile(result.regExToMatch);
 		this.argNames = result.argNames;
-		this.isHttpsRoute = isSecure;
+		this.allowedPorts = port;
 		this.controllerMethodString = controllerMethod;
 		this.routeType = RouteType.HTML;
 		this.checkSecureToken = checkSecureToken;
 	}
 
-	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, boolean isSecure) {
+	public RouteImpl(HttpMethod method, UrlPath path, String controllerMethod, Port port) {
 		this.path = path.getFullPath();
 		this.method = method;
 		RegExResult result = RegExUtil.parsePath(path.getSubPath());
 		this.patternToMatch = Pattern.compile(result.regExToMatch);
 		this.argNames = result.argNames;
-		this.isHttpsRoute = isSecure;
+		this.allowedPorts = port;
 		this.controllerMethodString = controllerMethod;
 		this.routeType = RouteType.CONTENT;
 		this.checkSecureToken = false;
@@ -51,7 +58,7 @@ public class RouteImpl implements Route {
 		this.patternToMatch = null;
 		this.method = null;
 		this.argNames = new ArrayList<String>();
-		this.isHttpsRoute = false;
+		this.allowedPorts = Port.BOTH;
 		this.controllerMethodString = controllerMethod;
 	}
 
@@ -63,7 +70,7 @@ public class RouteImpl implements Route {
 	}
 	
 	public Matcher matches(RouterRequest request, String path) {
-		if(isHttpsRoute && !request.isHttps) {
+		if(allowedPorts == Port.HTTPS && !request.isHttps) {
 			//NOTE: we cannot do if isHttpsRoute != request.isHttps as every http route is 
 			//allowed over https as well by default.  so 
 			//isHttpsRoute=false and request.isHttps=true is allowed
@@ -99,7 +106,7 @@ public class RouteImpl implements Route {
 	@Override
 	public String toString() {
 		return "RouteImpl [\n      path=" + path + ", \n      patternToMatch=" + patternToMatch + ", \n      method=" + method + ", \n      argNames="
-				+ argNames + ", \n      isSecure=" + isHttpsRoute + ", \n      routeType="+routeType+"\n      controllerMethodString=" + controllerMethodString + "]";
+				+ argNames + ", \n      isSecure=" + allowedPorts + ", \n      routeType="+routeType+"\n      controllerMethodString=" + controllerMethodString + "]";
 	}
 
 	@Override
@@ -113,8 +120,8 @@ public class RouteImpl implements Route {
 	}
 
 	@Override
-	public boolean isHttpsRoute() {
-		return isHttpsRoute;
+	public Port getExposedPorts() {
+		return allowedPorts;
 	}
 
 	@Override
@@ -125,6 +132,11 @@ public class RouteImpl implements Route {
 	@Override
 	public HttpMethod getHttpMethod() {
 		return method;
+	}
+
+	@Override
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
+		return routeInvoker.invokeController(result, ctx, responseCb);
 	}
 	
 }

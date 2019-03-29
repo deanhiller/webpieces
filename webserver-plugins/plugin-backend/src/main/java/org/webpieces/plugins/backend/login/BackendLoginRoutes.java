@@ -1,8 +1,10 @@
 package org.webpieces.plugins.backend.login;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.router.api.routing.Port;
 import org.webpieces.router.api.routing.RouteId;
-import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
 import org.webpieces.webserver.api.login.AbstractLoginRoutes;
 
 public class BackendLoginRoutes extends AbstractLoginRoutes {
@@ -37,12 +39,12 @@ public class BackendLoginRoutes extends AbstractLoginRoutes {
 	}
 
 	@Override
-	protected void addLoggedInHome(Router httpsRouter) {
-		Router scopedRouter = httpsRouter.getScopedRouter("/secure", true);
-		scopedRouter.addRoute(HttpMethod.GET ,   "/loggedinhome",        "org.webpieces.plugins.backend.BackendController.home", BackendLoginRouteId.BACKEND_LOGGED_IN_HOME);
+	protected void addLoggedInHome(RouteBuilder baseRouter, ScopedRouteBuilder scope1Router) {
+		ScopedRouteBuilder scopedRouter = scope1Router.getScopedRouteBuilder("/secure");
+		scopedRouter.addRoute(Port.HTTPS, HttpMethod.GET ,   "/loggedinhome",        "org.webpieces.plugins.backend.BackendController.home", BackendLoginRouteId.BACKEND_LOGGED_IN_HOME);
 		
-		Router scoped2 = router.getScopedRouter(basePath, false);
-		scoped2.addRoute(HttpMethod.GET,  "", "org.webpieces.plugins.backend.BackendController.redirectToLogin", BackendLoginRouteId.LOGGED_OUT_LANDING);
+		ScopedRouteBuilder scoped2 = baseRouter.getScopedRouteBuilder(basePath);
+		scoped2.addRoute(Port.BOTH, HttpMethod.GET,  "", "org.webpieces.plugins.backend.BackendController.redirectToLogin", BackendLoginRouteId.LOGGED_OUT_LANDING);
 	}
 
 }

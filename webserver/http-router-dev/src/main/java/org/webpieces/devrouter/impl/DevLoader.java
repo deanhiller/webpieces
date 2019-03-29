@@ -1,10 +1,7 @@
 package org.webpieces.devrouter.impl;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
-import org.webpieces.router.impl.FilterInfo;
 import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.hooks.MetaLoaderProxy;
 import org.webpieces.router.impl.loader.AbstractLoader;
@@ -38,10 +35,10 @@ public class DevLoader extends AbstractLoader implements MetaLoaderProxy {
 	}
 
 	@Override
-	public void loadFiltersIntoMeta(RouteMeta m, List<FilterInfo<?>> filters, boolean isInitializingAllFilters) {
+	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
 		if(isInitializingAllFilters)
 			return; //skip on startup
 		
-		super.loadFiltersIntoMeta(m, filters);
+		super.loadFiltersIntoMeta(m);
 	}
 }

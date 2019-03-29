@@ -1,17 +1,20 @@
 package org.webpieces.plugins.properties;
 
+import static org.webpieces.router.api.routing.Port.HTTPS;
+
 import org.webpieces.ctx.api.HttpMethod;
 import org.webpieces.plugins.backend.BackendRoutes;
-import org.webpieces.router.api.routing.Router;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
 
 public class PropertiesRoutes extends BackendRoutes {
 	
 	@Override
-	protected void configure() {
-		Router https = getScopedRouter("/secure", true);
-		https.addRoute(HttpMethod.GET,  "/properties", "PropertiesController.main", PropertiesRouteId.MAIN_PROPERTIES);
-		https.addRoute(HttpMethod.GET, "/bean/{category}/{name}", "PropertiesController.bean", PropertiesRouteId.BEAN_ROUTE);
-		https.addRoute(HttpMethod.POST, "/bean/{category}/{name}", "PropertiesController.postBean", PropertiesRouteId.POST_BEAN_CHANGES);
+	public void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter1) {
+		ScopedRouteBuilder scopedRouter = scopedRouter1.getScopedRouteBuilder("/secure");
+		scopedRouter.addRoute(HTTPS, HttpMethod.GET,  "/properties", "PropertiesController.main", PropertiesRouteId.MAIN_PROPERTIES);
+		scopedRouter.addRoute(HTTPS, HttpMethod.GET, "/bean/{category}/{name}", "PropertiesController.bean", PropertiesRouteId.BEAN_ROUTE);
+		scopedRouter.addRoute(HTTPS, HttpMethod.POST, "/bean/{category}/{name}", "PropertiesController.postBean", PropertiesRouteId.POST_BEAN_CHANGES);
     }
 
 }

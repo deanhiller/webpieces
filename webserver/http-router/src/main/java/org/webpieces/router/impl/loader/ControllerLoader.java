@@ -39,11 +39,11 @@ public class ControllerLoader {
 		loader.loadControllerIntoMeta(meta, method, isInitializingAllControllers);
 	}
 
-	public void loadFiltersIntoMeta(RouteMeta m, List<FilterInfo<?>> filters, boolean isInitializingAllFilters) {
-		loader.loadFiltersIntoMeta(m, filters, isInitializingAllFilters);
+	public void loadFiltersIntoMeta(RouteMeta m, boolean isInitializingAllFilters) {
+		loader.loadFiltersIntoMeta(m, isInitializingAllFilters);
 	}
 
-	public Service<MethodMeta, Action> createNotFoundService(RouteMeta m, List<FilterInfo<?>> filterInfos) {
-		return loader.createServiceFromFilters(m, filterInfos);
-	}
+//	public Service<MethodMeta, Action> createNotFoundService(RouteMeta m, List<FilterInfo<?>> filterInfos) {
+//		return loader.createServiceFromFilters(m, filterInfos);
+//	}
 }

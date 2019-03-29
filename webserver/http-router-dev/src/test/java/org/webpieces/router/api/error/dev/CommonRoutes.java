@@ -1,25 +1,29 @@
 package org.webpieces.router.api.error.dev;
 
 import static org.webpieces.ctx.api.HttpMethod.GET;
+import static org.webpieces.router.api.routing.Port.BOTH;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.ARGS_MISMATCH;
 import static org.webpieces.router.api.simplesvr.MtgRouteId.SOME_EXAMPLE;
 
-import org.webpieces.router.api.routing.AbstractRoutes;
+import org.webpieces.router.api.routing.Routes;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
 
-public class CommonRoutes extends AbstractRoutes {
+public class CommonRoutes implements Routes {
 
 	@Override
-	public void configure() {
+	public void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder bldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		//We cannot do this or the compiler in dev router will compile it too early for testing
 		//String controllerName = SomeController.class.getName();
 
-		addRoute(GET, "/user/{id}",  "org.webpieces.devrouter.api.CommonController.badRedirect", SOME_EXAMPLE);
-		addRoute(GET, "/something",  "org.webpieces.devrouter.api.CommonController.argsMismatch", ARGS_MISMATCH);
+		bldr.addRoute(BOTH, GET, "/user/{id}",  "org.webpieces.devrouter.api.CommonController.badRedirect", SOME_EXAMPLE);
+		bldr.addRoute(BOTH, GET, "/something",  "org.webpieces.devrouter.api.CommonController.argsMismatch", ARGS_MISMATCH);
 		
-		//addRoute(POST,     "/{controller}/{action}", "{controller}.post{action}", null);
+		//bldr.addRoute(BOTH, POST,     "/{controller}/{action}", "{controller}.post{action}", null);
 		
-		setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
-		setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
+		bldr.setPageNotFoundRoute("org.webpieces.devrouter.api.CommonController.notFound");
+		bldr.setInternalErrorRoute("org.webpieces.devrouter.api.CommonController.internalError");
 	}
 
 }

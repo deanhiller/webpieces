@@ -4,12 +4,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.webpieces.ctx.api.HttpMethod;
+import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.ctx.api.RouterRequest;
+import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.dto.RouteType;
+import org.webpieces.router.api.routing.Port;
+import org.webpieces.router.impl.model.MatchResult;
 import org.webpieces.util.file.FileFactory;
 import org.webpieces.util.file.VirtualFile;
 import org.webpieces.util.logging.Logger;
@@ -29,9 +34,15 @@ public class StaticRoute implements Route {
 	private File targetCacheLocation;
 	private Properties hashMeta;
 
-	public StaticRoute(UrlPath url, VirtualFile file, boolean isOnClassPath, File cachedCompressedDirectory) {
+	private Port exposedOnPorts;
+
+	private RouteInvoker2 routeInvoker;
+
+	public StaticRoute(RouteInvoker2 routeInvoker, Port port, UrlPath url, VirtualFile file, boolean isOnClassPath, File cachedCompressedDirectory) {
+		this.routeInvoker = routeInvoker;
 		this.fileSystemPath = file;
 		this.isOnClassPath = isOnClassPath;
+		this.exposedOnPorts = port;
 		
 		String urlSubPath = url.getSubPath();
 		this.urlPath = url.getFullPath();
@@ -157,8 +168,8 @@ public class StaticRoute implements Route {
 	}
 
 	@Override
-	public boolean isHttpsRoute() {
-		throw new UnsupportedOperationException("This method is not necessary as there are no filters for static routes at this time");
+	public Port getExposedPorts() {
+		return exposedOnPorts;
 	}
 
 	public void setHashMeta(Properties hashMeta) {
@@ -173,6 +184,11 @@ public class StaticRoute implements Route {
 	@Override
 	public HttpMethod getHttpMethod() {
 		return HttpMethod.GET;
+	}
+
+	@Override
+	public CompletableFuture<Void> invokeImpl(MatchResult result, RequestContext ctx, ResponseStreamer responseCb) {
+		return routeInvoker.invokeStatic(result, ctx, responseCb);
 	}
 
 }

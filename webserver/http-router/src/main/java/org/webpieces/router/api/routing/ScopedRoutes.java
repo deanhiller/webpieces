@@ -1,20 +1,17 @@
 package org.webpieces.router.api.routing;
 
-public abstract class ScopedRoutes extends AbstractRoutes {
-	
-	//ROOT router for adding routes at route to escape out of scoped router
-	protected Router baseRouter;
+import org.webpieces.router.impl.model.bldr.DomainRouteBuilder;
+import org.webpieces.router.impl.model.bldr.RouteBuilder;
+import org.webpieces.router.impl.model.bldr.ScopedRouteBuilder;
 
+public abstract class ScopedRoutes implements Routes {
+	
 	@Override
-	public final void configure(Router router) {
+	public final void configure(DomainRouteBuilder domainRouteBldr) {
+		RouteBuilder routeBldr = domainRouteBldr.getAllDomainsRouteBuilder();
 		String scope = getScope();
-		this.baseRouter = router; //allow the module to reset all the way to root if needed
-		if((scope != null && scope.length() > 0) || isHttpsOnlyRoutes()) {
-			this.router = router.getScopedRouter(scope, isHttpsOnlyRoutes());
-		} else {
-			this.router = router;
-		}
-		configure();
+		ScopedRouteBuilder scopedRouter = routeBldr.getScopedRouteBuilder(scope);
+		configure(routeBldr, scopedRouter);
 	}
 	
 	/**
@@ -24,9 +21,6 @@ public abstract class ScopedRoutes extends AbstractRoutes {
 	 */
 	protected abstract String getScope();
 
-	protected abstract boolean isHttpsOnlyRoutes();
-
-	@Override
-	protected abstract void configure();
+	protected abstract void configure(RouteBuilder baseRouter, ScopedRouteBuilder scopedRouter);
 
 }

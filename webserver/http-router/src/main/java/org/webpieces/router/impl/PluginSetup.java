@@ -1,7 +1,6 @@
 package org.webpieces.router.impl;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

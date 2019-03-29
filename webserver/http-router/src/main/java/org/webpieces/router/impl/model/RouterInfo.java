@@ -29,7 +29,7 @@ public class RouterInfo {
 		String host = "<xxxhost>";
 		if(domain != null)
 			host = domain;
-		return "http(s)://"+host+path;
+		return host+path;
 	}
 	
 }

@@ -1,35 +1,23 @@
 package org.webpieces.devrouter.impl;
 
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.api.RouterConfig;
 import org.webpieces.router.api.RouterService;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
-import org.webpieces.router.api.dto.RouteType;
-import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.api.routing.WebAppMeta;
 import org.webpieces.router.impl.AbstractRouterService;
 import org.webpieces.router.impl.CookieTranslator;
 import org.webpieces.router.impl.ErrorRoutes;
-import org.webpieces.router.impl.NotFoundInfo;
-import org.webpieces.router.impl.RouteImpl;
 import org.webpieces.router.impl.RouteLoader;
-import org.webpieces.router.impl.RouteMeta;
 import org.webpieces.router.impl.loader.ControllerLoader;
-import org.webpieces.router.impl.loader.HaveRouteException;
-import org.webpieces.router.impl.model.MatchResult;
-import org.webpieces.router.impl.model.RouteModuleInfo;
+import org.webpieces.router.impl.model.bldr.data.MasterRouter;
 import org.webpieces.router.impl.params.ObjectTranslator;
 import org.webpieces.util.file.VirtualFile;
-import org.webpieces.util.filters.Service;
 import org.webpieces.util.logging.Logger;
 import org.webpieces.util.logging.LoggerFactory;
 
@@ -47,11 +35,13 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 	private RouterConfig config;
 	private ControllerLoader finder;
 	private ServiceCreator serviceCreator;
+	private MasterRouter router;
 
 	@Inject
 	public DevRoutingService(
 			RouteLoader routeConfig, 
 			RouterConfig config, 
+			MasterRouter router, 
 			DevClassForName loader, 
 			ControllerLoader finder,
 			CookieTranslator cookieTranslator,
@@ -61,6 +51,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		super(routeConfig, cookieTranslator, objTranslator);
 		this.routeLoader = routeConfig;
 		this.config = config;
+		this.router = router;
 		this.classLoader = loader;
 		this.finder = finder;
 		this.serviceCreator = serviceCreator;
@@ -87,94 +78,83 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		MatchResult result = fetchRoute(ctx);
-
 		CompletableFuture<Void> future;
 		try {
-			RouteMeta meta = result.getMeta();
-			if(meta.getRoute().getRouteType() == RouteType.STATIC) {
-				//RESET the encodings to known so we don't try to go the compressed cache which doesn't
-				//exist in dev server since we want the latest files always
-				ctx.getRequest().encodings = new ArrayList<>();
-			} else if(meta.getControllerInstance() == null) {
-				finder.loadControllerIntoMetaObject(meta, false);
-				finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
-			}
-	
-			future = routeLoader.invokeRoute(result, ctx, responseCb, new DevErrorRoutes(ctx.getRequest()));
+			future = router.invoke(ctx, responseCb, null);
 		} catch(Throwable e) {
 			future = new CompletableFuture<Void>();
 			future.completeExceptionally(e);
 		}
-		return future.exceptionally( t -> { throw new HaveRouteException(result, t); });
+		
+		return future;
 	}
 	
-	private class DevErrorRoutes implements ErrorRoutes {
-		private RouterRequest req;
-		public DevErrorRoutes(RouterRequest req) {
-			this.req = req;
-		}
-
-		@Override
-		public NotFoundInfo fetchNotfoundRoute(NotFoundException e) {
-			return fetchNotFoundRoute(e, req);
-		}
-
-		@Override
-		public RouteMeta fetchInternalServerErrorRoute() {
-			return fetchInternalErrorRoute(req);
-		}
-		
-	}
+//	private class DevErrorRoutes implements ErrorRoutes {
+//		private RouterRequest req;
+//		public DevErrorRoutes(RouterRequest req) {
+//			this.req = req;
+//		}
+//
+//		@Override
+//		public NotFoundInfo fetchNotfoundRoute(NotFoundException e) {
+//			return fetchNotFoundRoute(e, req);
+//		}
+//
+//		@Override
+//		public RouteMeta fetchInternalServerErrorRoute() {
+//			return fetchInternalErrorRoute(req);
+//		}
+//		
+//	}
 	
-	public NotFoundInfo fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
-		//Production app's notFound route TBD and used in iframe later
-		RouteMeta origMeta = routeLoader.fetchNotFoundRoute(req.domain);
-
-		if(req.queryParams.containsKey("webpiecesShowPage")) {
-			//This is actually a callback from the below code's iframe!!!
-			if(origMeta.getControllerInstance() == null) {
-				finder.loadControllerIntoMetaObject(origMeta, false);
-				finder.loadFiltersIntoMeta(origMeta, origMeta.getFilters(), false);
-			}
-
-			Service<MethodMeta, Action> svc = origMeta.getService222();
-			return new NotFoundInfo(origMeta, svc, req);
-		}
-
-		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
-				+ " something needs a'fixin.  req="+req, e);
-		
-		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
-		RouteModuleInfo info = new RouteModuleInfo("", null);
-		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
-		
-		if(meta.getControllerInstance() == null) {
-			finder.loadControllerIntoMetaObject(meta, false);
-			meta.setService(serviceCreator.create());
-		}
-		
-		String reason = "Your route was not found in routes table";
-		if(e != null)
-			reason = e.getMessage();
-		
-		RouterRequest newRequest = new RouterRequest();
-		newRequest.putMultipart("webpiecesError", "Exception message="+reason);
-		newRequest.putMultipart("url", req.relativePath);
-		
-		return new NotFoundInfo(meta, meta.getService222(), newRequest);
-	}
-
-	public RouteMeta fetchInternalErrorRoute(RouterRequest req) {
-		RouteMeta meta = routeLoader.fetchInternalErrorRoute(req.domain);
-		
-		if(meta.getControllerInstance() == null) {
-			finder.loadControllerIntoMetaObject(meta, false);
-			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
-		}
-		
-		return meta;
-	}
+//	public NotFoundInfo fetchNotFoundRoute(NotFoundException e, RouterRequest req) {
+//		//Production app's notFound route TBD and used in iframe later
+//		RouteMeta origMeta = routeLoader.fetchNotFoundRoute(req.domain);
+//
+//		if(req.queryParams.containsKey("webpiecesShowPage")) {
+//			//This is actually a callback from the below code's iframe!!!
+//			if(origMeta.getControllerInstance() == null) {
+//				finder.loadControllerIntoMetaObject(origMeta, false);
+//				finder.loadFiltersIntoMeta(origMeta, origMeta.getFilters(), false);
+//			}
+//
+//			Service<MethodMeta, Action> svc = origMeta.getService222();
+//			return new NotFoundInfo(origMeta, svc, req);
+//		}
+//
+//		log.error("(Development only log message) Route not found!!! Either you(developer) typed the wrong url OR you have a bad route.  Either way,\n"
+//				+ " something needs a'fixin.  req="+req, e);
+//		
+//		RouteImpl r = new RouteImpl("/org/webpieces/devrouter/impl/NotFoundController.notFound", RouteType.NOT_FOUND);
+//		RouteModuleInfo info = new RouteModuleInfo("", null);
+//		RouteMeta meta = new RouteMeta(r, origMeta.getInjector(), info, config.getUrlEncoding());
+//		
+//		if(meta.getControllerInstance() == null) {
+//			finder.loadControllerIntoMetaObject(meta, false);
+//			meta.setService(serviceCreator.create());
+//		}
+//		
+//		String reason = "Your route was not found in routes table";
+//		if(e != null)
+//			reason = e.getMessage();
+//		
+//		RouterRequest newRequest = new RouterRequest();
+//		newRequest.putMultipart("webpiecesError", "Exception message="+reason);
+//		newRequest.putMultipart("url", req.relativePath);
+//		
+//		return new NotFoundInfo(meta, meta.getService222(), newRequest);
+//	}
+//
+//	public RouteMeta fetchInternalErrorRoute(RouterRequest req) {
+//		RouteMeta meta = routeLoader.fetchInternalErrorRoute(req.domain);
+//		
+//		if(meta.getControllerInstance() == null) {
+//			finder.loadControllerIntoMetaObject(meta, false);
+//			finder.loadFiltersIntoMeta(meta, meta.getFilters(), false);
+//		}
+//		
+//		return meta;
+//	}
 	/**
 	 * Only used with DevRouterConfig which is not on classpath in prod mode
 	 * 
@@ -212,6 +192,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 
 	@Override
 	protected ErrorRoutes getErrorRoutes(RequestContext ctx) {
-		return new DevErrorRoutes(ctx.getRequest());
+		//return new DevErrorRoutes(ctx.getRequest());
+		return null;
 	}
 }
