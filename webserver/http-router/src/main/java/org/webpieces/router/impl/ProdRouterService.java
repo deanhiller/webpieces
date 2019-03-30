@@ -57,15 +57,8 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 		if(log.isDebugEnabled())
 			router.printAllRoutes();
 	
-		CompletableFuture<Void> future;
-		try {
-			//ProdErrorRoutes errorRoutes = new ProdErrorRoutes(ctx.getRequest(), routeLoader);
-			future = router.invoke(ctx, responseCb, null);
-		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
-			future.completeExceptionally(e);
-		}
-		return future;
+		return router.invoke(ctx, responseCb, null);
+
 	}
 
 //	//This only exists so dev mode can swap it out and load error routes dynamically as code changes..
@@ -92,11 +85,5 @@ public class ProdRouterService extends AbstractRouterService implements RouterSe
 //			return routeLoader.fetchInternalErrorRoute(req.domain);
 //		}
 //	}
-
-	@Override
-	protected ErrorRoutes getErrorRoutes(RequestContext ctx) {
-		//return new ProdErrorRoutes(ctx.getRequest(), routeLoader);
-		return null;
-	}
 
 }

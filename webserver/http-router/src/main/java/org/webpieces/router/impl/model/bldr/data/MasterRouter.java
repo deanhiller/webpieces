@@ -8,8 +8,6 @@ import javax.inject.Singleton;
 import org.webpieces.ctx.api.RequestContext;
 import org.webpieces.router.api.ResponseStreamer;
 import org.webpieces.router.impl.ErrorRoutes;
-import org.webpieces.util.logging.Logger;
-import org.webpieces.util.logging.LoggerFactory;
 
 @Singleton
 public class MasterRouter {

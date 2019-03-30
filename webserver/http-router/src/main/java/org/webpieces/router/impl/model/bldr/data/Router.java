@@ -1,35 +1,53 @@
 package org.webpieces.router.impl.model.bldr.data;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import org.webpieces.ctx.api.FlashSub;
 import org.webpieces.ctx.api.RequestContext;
-import org.webpieces.ctx.api.RouterRequest;
 import org.webpieces.router.api.ResponseStreamer;
-import org.webpieces.router.api.actions.Action;
-import org.webpieces.router.api.dto.MethodMeta;
 import org.webpieces.router.api.exceptions.NotFoundException;
 import org.webpieces.router.impl.ErrorRoutes;
-import org.webpieces.router.impl.NotFoundInfo;
-import org.webpieces.router.impl.RouteInvoker2;
 import org.webpieces.router.impl.RouteMeta;
-import org.webpieces.router.impl.model.MatchResult;
+import org.webpieces.router.impl.loader.HaveRouteException;
 import org.webpieces.router.impl.model.RouterInfo;
-import org.webpieces.util.filters.Service;
+import org.webpieces.util.logging.Logger;
+import org.webpieces.util.logging.LoggerFactory;
+import org.webpieces.util.logging.SupressedExceptionLog;
 
 public class Router extends ScopedRouter {
 
-	private RouteInvoker2 routeInvoker;
+	private static final Logger log = LoggerFactory.getLogger(Router.class);
 
-	public Router(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<RouteMeta> routes, RouteInvoker2 routeInvoker) {
+	private RouteMeta pageNotFoundRoute;
+	private RouteMeta internalSvrErrorRoute;
+
+	public Router(RouterInfo routerInfo, Map<String, ScopedRouter> pathPrefixToNextRouter, List<RouteMeta> routes, RouteMeta pageNotFoundRoute, RouteMeta internalSvrErrorRoute) {
 		super(routerInfo, pathPrefixToNextRouter, routes);
-		this.routeInvoker = routeInvoker;
+		this.pageNotFoundRoute = pageNotFoundRoute;
+		this.internalSvrErrorRoute = internalSvrErrorRoute;
 	}
-	
+
 	public CompletableFuture<Void> invokeRoute(RequestContext ctx, ResponseStreamer responseCb, ErrorRoutes errorRoutes,
+			String subPath) {
+		return invokeRouteCatchNotFound(ctx, responseCb, errorRoutes, subPath).handle((r, t) -> {
+			if(t != null) {
+				String failedRoute = "<Unknown Route>";
+				if(t instanceof HaveRouteException)
+					failedRoute = ((HaveRouteException) t).getResult().getMeta()+"";
+				
+				return internalServerError(t, ctx, responseCb, failedRoute);
+			}
+			return CompletableFuture.completedFuture(r); 
+		}).thenCompose(Function.identity());
+	}
+	/**
+	 * NOTE: We have to catch any exception from the method processNotFound so we can't catch and call internalServerError in this
+	 * method without nesting even more!!! UGH, more nesting sucks
+	 */
+	private CompletableFuture<Void> invokeRouteCatchNotFound(RequestContext ctx, ResponseStreamer responseCb, ErrorRoutes errorRoutes,
 			String subPath) {
 		CompletableFuture<Void> future;
 		try{
@@ -41,38 +59,53 @@ public class Router extends ScopedRouter {
 		
 		return future.handle((r, t) -> {
 			if(t instanceof NotFoundException)
-				return processNotFound(responseCb, ctx, (NotFoundException) t, errorRoutes, null);
+				return notFound((NotFoundException)t, ctx, responseCb);
 			else if(t != null) {
-				CompletableFuture<Void> failFuture = new CompletableFuture<>();
-				failFuture.completeExceptionally(t);
-				return failFuture;
+				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
+				future1.completeExceptionally(t);
+				return future1;
 			}
 			
 			return CompletableFuture.completedFuture(r); 
 		}).thenCompose(Function.identity());
-		
 	}
 
-	/**
-	 * NEED to rescue this into calling webapps internal failure THEN rescue that into webpieces internal failure default(the catch-all)
-	 *  
-	 * @return
-	 */
-	public CompletableFuture<Void> processNotFound(ResponseStreamer responseCb, RequestContext requestCtx, NotFoundException e, ErrorRoutes errorRoutes, Object meta) {		
-		NotFoundException exc = (NotFoundException) e;
-		NotFoundInfo notFoundInfo = errorRoutes.fetchNotfoundRoute(exc);
-		RouteMeta notFoundResult = notFoundInfo.getResult();
-		RouterRequest overridenRequest = notFoundInfo.getReq();
-		RequestContext overridenCtx = new RequestContext(requestCtx.getValidation(), (FlashSub) requestCtx.getFlash(), requestCtx.getSession(), overridenRequest);
-		
-		//http 404...(unless an exception happens in calling this code and that then goes to 500)
-		return notFound(notFoundResult, notFoundInfo.getService(), exc, overridenCtx, responseCb);
+	private CompletableFuture<Void> internalServerError(
+			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
+		//This method is simply to translate the exception to InternalErrorRouteFailedException so higher levels
+		//can determine if it was our bug or the web applications bug in it's Controller for InternalErrors
+		return internalServerErrorImpl(exc, requestCtx, responseCb, failedRoute).handle((r, t) -> {
+			if(t != null) {
+				CompletableFuture<Void> future1 = new CompletableFuture<Void>();
+				future1.completeExceptionally(new InternalErrorRouteFailedException(t, failedRoute));
+				return future1;
+			}
+			
+			return CompletableFuture.completedFuture(r); 
+		}).thenCompose(Function.identity());
 	}
 	
-	private CompletableFuture<Void> notFound(RouteMeta notFoundResult, Service<MethodMeta, Action> service, NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
+	private CompletableFuture<Void> internalServerErrorImpl(
+			Throwable exc, RequestContext requestCtx, ResponseStreamer responseCb, Object failedRoute) {
 		try {
-			MatchResult notFoundRes = new MatchResult(notFoundResult);
-			return routeInvoker.invokeController(notFoundRes, requestCtx, responseCb);
+			log.error("There is three parts to this error message... request, route found, and the exception "
+					+ "message.  You should\nread the exception message below  as well as the RouterRequest and RouteMeta.\n\n"
+					+requestCtx.getRequest()+"\n\n"+failedRoute+".  \n\nNext, server will try to render apps 5xx page\n\n", exc);
+			SupressedExceptionLog.log(exc);
+			
+			return internalSvrErrorRoute.invoke(requestCtx, responseCb, new HashMap<>());
+		} catch(Throwable e) {
+			//http 500...
+			//return a completed future with the exception inside...
+			CompletableFuture<Void> futExc = new CompletableFuture<Void>();
+			futExc.completeExceptionally(e);
+			return futExc;			
+		}
+	}
+	
+	private CompletableFuture<Void> notFound(NotFoundException exc, RequestContext requestCtx, ResponseStreamer responseCb) {
+		try {
+			return pageNotFoundRoute.invoke(requestCtx, responseCb, new HashMap<>());
 		} catch(Throwable e) {
 			//http 500...
 			//return a completed future with the exception inside...

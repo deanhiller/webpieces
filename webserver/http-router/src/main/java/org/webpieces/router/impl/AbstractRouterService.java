@@ -16,6 +16,7 @@ import org.webpieces.router.api.Startable;
 import org.webpieces.router.api.exceptions.BadCookieException;
 import org.webpieces.router.impl.compression.FileMeta;
 import org.webpieces.router.impl.ctx.FlashImpl;
+import org.webpieces.router.impl.ctx.ResponseFailureProcessor;
 import org.webpieces.router.impl.ctx.SessionImpl;
 import org.webpieces.router.impl.ctx.ValidationImpl;
 import org.webpieces.router.impl.params.ObjectTranslator;
@@ -73,6 +74,12 @@ public abstract class AbstractRouterService implements RouterService {
 		return future;
 	}
 
+	public Void finalFailure(ResponseStreamer responseCb, Throwable e, RequestContext requestCtx) {
+		log.error("This is a final(secondary failure) trying to render the Internal Server Error Route", e);
+		ResponseFailureProcessor processor = new ResponseFailureProcessor(requestCtx, responseCb);
+		processor.failureRenderingInternalServerErrorPage(e);
+		return null;
+	}
 	private Void processException(ResponseStreamer responseCb, RequestContext requestCtx, Throwable e) {
 		throw new UnsupportedOperationException("not done yet");
 
@@ -88,7 +95,6 @@ public abstract class AbstractRouterService implements RouterService {
 //		return null;
 	}
 	
-	protected abstract ErrorRoutes getErrorRoutes(RequestContext ctx);
 	protected abstract CompletableFuture<Void> incomingRequestImpl(RequestContext req, ResponseStreamer responseCb);
 	
 	@Override

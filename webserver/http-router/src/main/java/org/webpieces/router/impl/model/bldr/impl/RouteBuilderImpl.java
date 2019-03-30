@@ -106,7 +106,7 @@ public class RouteBuilderImpl extends ScopedRouteBuilderImpl implements RouteBui
 		holder.getFinder().loadFiltersIntoMeta(pageNotFoundRoute, true);
 		holder.getFinder().loadFiltersIntoMeta(internalSvrErrorRoute, true);
 		
-		return new Router(routerInfo, pathToRouter, routes, holder.getRouteInvoker2());
+		return new Router(routerInfo, pathToRouter, routes, pageNotFoundRoute, internalSvrErrorRoute, holder.getRouteInvoker2());
 	}
 
 }

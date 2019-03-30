@@ -40,8 +40,9 @@ public class ErrorCommonTest {
 	@Parameterized.Parameters
 	public static Collection bothServers() {
 		return Arrays.asList(new Object[][] {
-	         { true, true },
-	         { false, true }
+	         { true, true }
+	         //,
+	         //{ false, true }
 	      });
 	}
 	

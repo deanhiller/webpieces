@@ -78,15 +78,7 @@ public class DevRoutingService extends AbstractRouterService implements RouterSe
 		if(!reloaded)
 			reloadIfClassFilesChanged();
 		
-		CompletableFuture<Void> future;
-		try {
-			future = router.invoke(ctx, responseCb, null);
-		} catch(Throwable e) {
-			future = new CompletableFuture<Void>();
-			future.completeExceptionally(e);
-		}
-		
-		return future;
+		return router.invoke(ctx, responseCb, null);
 	}
 	
 //	private class DevErrorRoutes implements ErrorRoutes {
